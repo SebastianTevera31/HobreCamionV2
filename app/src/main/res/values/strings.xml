@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">GasMonSoft</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_recuperar_contraseña">RecuperarContraseñaActivity</string>
+    <string name="title_activity_otp">OtpActivity</string>
+    <string name="title_activity_nueva_contrasenia">NuevaContraseniaActivity</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_home_dactivity">HomeDActivity</string>
+    <string name="title_activity_detail_ticket">DetailTicketActivity</string>
+    <string name="title_user">Usuario</string>
+    <string name="title_contraseña">Contraseña</string>
+    <string name="title_bienvenida">Bienvenido</string>
+    <string name="title_forget">¿Has olvidado tu contraseña?</string>
+    <string name="title_ingresar">Ingresar</string>
+    <string name="content_description_logo">Imglogo</string>
+    <string name="content_description_icon_password">Mostrar password</string>
+    <string name="content_description_pane">Open Pane</string>
+    <string name="title_restablecer_password">Restablecer contraseña</string>
+    <string name="title_new_password">Nueva contraseña</string>
+    <string name="title_confirmarcontraseña">Confirmar contraseña</string>
+    <string name="content_description_back_arrow">back_arrow</string>
+    <string name="title_newpassword">Crear nueva contraseña</string>
+    <string name="title_subtitlepassword">Su nueva contraseña debe ser única de las utilizadas anteriormente</string>
+    <string name="title_rembember_password">"Recordaste la contraseña? "</string>
+    <string name="title_sendcode">Enviar código</string>
+    <string name="title_enter_email">Ingrese su  email</string>
+    <string name="title_recover">¡No te preocupes!. Por favor ingrese la dirección de correo electrónico vinculada con su cuenta.</string>
+    <string name="title_buttoninicio">Inicio</string>
+    <string name="title_buttonfin">Fin</string>
+    <string name="subtitle_home">Comienzo de carga</string>
+    <string name="content_description_home_close">homeclose</string>
+    <string name="title_vehicle">Vehiculo</string>
+    <string name="title_content_description">Bus</string>
+    <string name="title_sensor"># Sensor</string>
+    <string name="title_Gasolinera">Gasolinera</string>
+    <string name="title_contentdescription">eva:pin-fill</string>
+    <string name="title_gasolinerasautorizadas">Gasolineras autorizadas</string>
+
+</resources>
