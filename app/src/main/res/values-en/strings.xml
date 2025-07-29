@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">App Flotal</string>
+    <string name="internet_connection_required">Internet connection required</string>
+    <string name="welcome">Welcome, %1$s</string>
+    <string name="brands">Brands</string>
+    <string name="original_design">Original Design</string>
+    <string name="tire_sizes">Tire Sizes</string>
+    <string name="products">Products</string>
+    <string name="tire_register">Tire Register</string>
+    <string name="vehicle_register">Vehicle Register</string>
+    <string name="tire_change">Tire Change</string>
+    <string name="copyright">© %1$d Flotal Control</string>
+
+
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_recuperar_contraseña">RecuperarContraseñaActivity</string>
+    <string name="title_activity_otp">OtpActivity</string>
+    <string name="title_activity_nueva_contrasenia">NuevaContraseniaActivity</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_home_dactivity">HomeDActivity</string>
+    <string name="title_user">User</string>
+    <string name="error_invalid_email">Enter a valid email</string>
+    <string name="title_contraseña">Password</string>
+    <string name="title_bienvenida">Welcome</string>
+    <string name="error_empty_email">Email is required</string>
+    <string name="title_forget">Forgot your password?</string>
+    <string name="title_ingresar">Login</string>
+    <string name="title_inicio">Home</string>
+    <string name="content_description_logo">Imglogo</string>
+    <string name="content_description_icon_password">Show password</string>
+    <string name="content_description_pane">Open pane</string>
+    <string name="title_restablecer_password">Reset password</string>
+    <string name="title_new_password">New password</string>
+    <string name="title_confirmarcontraseña">Confirm password</string>
+    <string name="content_description_back_arrow">Back arrow</string>
+    <string name="title_newpassword">Create new password</string>
+    <string name="title_subtitlepassword">Your new password must be different from previously used ones</string>
+    <string name="title_rembember_password">"Remembered your password?"</string>
+    <string name="title_sendcode">Send code</string>
+    <string name="title_enter_email">Enter email</string>
+    <string name="title_recover">Don’t worry! Please enter the email address associated with your account.</string>
+    <string name="title_buttoninicio">Home</string>
+    <string name="title_enviar">Send</string>
+    <string name="content_description_home_close">homeclose</string>
+    <string name="title_contentdescription">eva:pin-fill</string>
+    <string name="title_gasolinerasautorizadas">Authorized gas stations</string>
+    <string name="title_activity_inicio">InicioActivity</string>
+    <string name="title_activity_change_data">ChangeDataActivity</string>
+    <string name="title_otp">OTP Verification</string>
+    <string name="title_otpdispositov">Device Verification</string>
+    <string name="title_bodydispositivo">Enter the verification code we sent to your email to authorize this login.</string>
+    <string name="title_verificar">Verify</string>
+    <string name="title_subtitle_verificar">Enter the verification code we just sent to your email address</string>
+    <string name="title_activity_verify_code">VerifyCodeActivity</string>
+    <string name="title_activity_veriy_code_device">VeriyCodeDeviceActivity</string>
+
+    <string name="operator">Operator</string>
+    <string name="logout">Logout</string>
+    <string name="profile">Profile</string>
+    <string name="logo_description">Flotal logo</string>
+    <string name="only_languages_allowed">Only \'es\' and \'en\' are allowed.</string>
+</resources>

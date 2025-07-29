@@ -1,17 +1,35 @@
 <resources>
-    <string name="app_name">GasMonSoft</string>
+    <string name="app_name">App Flotal</string>
+    <string name="internet_connection_required" translatable="false">Se necesita conexión a Internet</string>
+
+    <string name="welcome" translatable="false">Bienvenido, %1$s</string>
+    <string name="brands" translatable="false">Marcas</string>
+    <string name="original_design" translatable="false">Diseño Original</string>
+    <string name="tire_sizes" translatable="false">Medidas Llantas</string>
+    <string name="products" translatable="false">Productos</string>
+    <string name="tire_register" translatable="false">Registro Llantas</string>
+    <string name="vehicle_register" translatable="false">Registro Vehículos</string>
+    <string name="tire_change" translatable="false">Montaje/Desmontaje</string>
+    <string name="copyright" translatable="false">© %1$d Flotal Control</string>
+
+
+
+
+
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_recuperar_contraseña">RecuperarContraseñaActivity</string>
     <string name="title_activity_otp">OtpActivity</string>
     <string name="title_activity_nueva_contrasenia">NuevaContraseniaActivity</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_activity_home_dactivity">HomeDActivity</string>
-    <string name="title_activity_detail_ticket">DetailTicketActivity</string>
     <string name="title_user">Usuario</string>
+    <string name="error_invalid_email"> Ingrese un correo válido</string>
     <string name="title_contraseña">Contraseña</string>
     <string name="title_bienvenida">Bienvenido</string>
+    <string name="error_empty_email">Es necesario ingresar email</string>
     <string name="title_forget">¿Has olvidado tu contraseña?</string>
     <string name="title_ingresar">Ingresar</string>
+    <string name="title_inicio">Inicio</string>
     <string name="content_description_logo">Imglogo</string>
     <string name="content_description_icon_password">Mostrar password</string>
     <string name="content_description_pane">Open Pane</string>
@@ -23,17 +41,27 @@
     <string name="title_subtitlepassword">Su nueva contraseña debe ser única de las utilizadas anteriormente</string>
     <string name="title_rembember_password">"Recordaste la contraseña? "</string>
     <string name="title_sendcode">Enviar código</string>
-    <string name="title_enter_email">Ingrese su  email</string>
+    <string name="title_enter_email">Ingrese email</string>
     <string name="title_recover">¡No te preocupes!. Por favor ingrese la dirección de correo electrónico vinculada con su cuenta.</string>
     <string name="title_buttoninicio">Inicio</string>
-    <string name="title_buttonfin">Fin</string>
-    <string name="subtitle_home">Comienzo de carga</string>
+
+    <string name="title_enviar">Enviar</string>
     <string name="content_description_home_close">homeclose</string>
-    <string name="title_vehicle">Vehiculo</string>
-    <string name="title_content_description">Bus</string>
-    <string name="title_sensor"># Sensor</string>
-    <string name="title_Gasolinera">Gasolinera</string>
+
     <string name="title_contentdescription">eva:pin-fill</string>
     <string name="title_gasolinerasautorizadas">Gasolineras autorizadas</string>
-
+    <string name="title_activity_inicio">InicioActivity</string>
+    <string name="title_activity_change_data">ChangeDataActivity</string>
+    <string name="title_otp">OTP Verificación</string>
+    <string name="title_otpdispositov">Verificación de Dispositivo</string>
+    <string name="title_bodydispositivo"> Ingresa el codígo de verificación que te enviamos por correo electrónico para autorizar este inicio de sesión.</string>
+    <string name="title_verificar">Verificar</string>
+    <string name="title_subtitle_verificar">Ingrese el código de verificación que acabamos de enviar a su dirección de correo electrónico</string>
+    <string name="title_activity_verify_code">VerifyCodeActivity</string>
+    <string name="title_activity_veriy_code_device">VeriyCodeDeviceActivity</string>
+    <string name="operator">Operador</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="profile">Perfil</string>
+    <string name="logo_description">Logo Flotal</string>
+    <string name="only_languages_allowed">Solo se permiten \'es\' y \'en\'.</string>
 </resources>
