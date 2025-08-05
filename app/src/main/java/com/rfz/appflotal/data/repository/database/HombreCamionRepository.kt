@@ -1,4 +1,4 @@
-package com.rfz.appflotal.data.repository
+package com.rfz.appflotal.data.repository.database
 
 
 import android.content.Context
@@ -7,9 +7,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.rfz.appflotal.data.dao.AppFlotalDao
-import com.rfz.appflotal.data.model.flotalSoft.AppFlotalEntity
-import com.rfz.appflotal.data.model.login.response.LoginResponse
+import com.rfz.appflotal.data.dao.AppHCDao
+import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 
 import kotlinx.coroutines.flow.Flow
@@ -23,19 +22,21 @@ import javax.inject.Singleton
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 @Singleton
-class FscSoftRepository @Inject constructor(private val flotalDao: AppFlotalDao, @ApplicationContext private val context: Context) {
-
-     suspend fun clearUserData() {
-         flotalDao.deleteAllFlotalSoft()
+class HombreCamionRepository @Inject constructor(
+    private val flotalDao: AppHCDao,
+    @ApplicationContext private val context: Context
+) {
+    suspend fun clearUserData() {
+        flotalDao.deleteAllFlotalSoft()
     }
 
-
-     suspend fun getUserData(): AppFlotalEntity? {
+    suspend fun getUserData(): AppHCEntity? {
         return flotalDao.getData().firstOrNull()?.firstOrNull()
     }
-        val tasks: Flow<List<AppFlotalEntity>> = flotalDao.getData().map { items ->
+
+    val tasks: Flow<List<AppHCEntity>> = flotalDao.getData().map { items ->
         items.map {
-            AppFlotalEntity(
+            AppHCEntity(
                 it.id,
                 it.id_user,
                 it.fld_name,
@@ -44,7 +45,7 @@ class FscSoftRepository @Inject constructor(private val flotalDao: AppFlotalDao,
                 it.fld_token,
                 it.fecha,
 
-            )
+                )
         }
     }
 
@@ -68,22 +69,15 @@ class FscSoftRepository @Inject constructor(private val flotalDao: AppFlotalDao,
         val LANGUAGE = stringPreferencesKey("app_language")
     }
 
-    suspend fun getTasks(): Flow<List<AppFlotalEntity>> {
+    suspend fun getTasks(): Flow<List<AppHCEntity>> {
         return flotalDao.getData()
     }
 
-    suspend  fun addTask(task: AppFlotalEntity) {
+    suspend fun addTask(task: AppHCEntity) {
         flotalDao.addFlotalSoft(task)
     }
 
-    suspend  fun deleteAllTasks() {
+    suspend fun deleteAllTasks() {
         flotalDao.deleteAllFlotalSoft()
     }
-
-
-
-
-
-
-
 }

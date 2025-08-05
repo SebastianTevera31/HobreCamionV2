@@ -6,6 +6,7 @@ import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.data.repository.login.LoginRepository
 import javax.inject.Inject
+
 class LoginUseCase @Inject constructor(
     private val repository: LoginRepository
 ) {
@@ -31,8 +32,7 @@ class LoginUseCase @Inject constructor(
                 Result.Failure(Exception(parsedError))
             }
         } catch (e: Exception) {
-           Result.Failure(e)
+            Result.Failure(e)
         }
     }
 }
-

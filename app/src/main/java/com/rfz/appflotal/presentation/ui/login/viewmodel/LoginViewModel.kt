@@ -1,43 +1,30 @@
 package com.rfz.appflotal.presentation.ui.login.viewmodel
 
+
 import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Color
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import cn.pedant.SweetAlert.SweetAlertDialog
-import com.rfz.appflotal.core.network.NetworkConfig
-import  com.rfz.appflotal.data.model.login.response.Result
-
-
-import com.rfz.appflotal.core.network.NetworkConfig.imei
 import com.rfz.appflotal.core.util.LBEncryptionUtils
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
-
 import com.rfz.appflotal.data.model.login.response.LoginState
+import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.domain.database.AddTaskUseCase
-
 import com.rfz.appflotal.domain.login.LoginUseCase
-
-
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
@@ -126,14 +113,14 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private suspend fun handleLoginResponse(loginResponse: LoginResponse) {
-        when {
-            loginResponse.id == 200 -> {
+    private fun handleLoginResponse(loginResponse: LoginResponse) {
+        when (loginResponse.id) {
+            200 -> {
                 onTaskCreated(loginResponse)
                 _navigateToHome.value = true
                 _loginState.value = LoginState.Success(loginResponse)
             }
-            loginResponse.id == -100 -> {
+            -100 -> {
                 _loginMessage.value = "Credenciales incorrectas"
                 _isLoginEnable.value = true
                 _loginState.value = LoginState.Error("Credenciales incorrectas")
@@ -162,7 +149,4 @@ class LoginViewModel @Inject constructor(
     fun onNavigateToVerificodeloginComplete() {
         _navigateverifycodeloginScreen.value = false
     }
-
-
-
 }

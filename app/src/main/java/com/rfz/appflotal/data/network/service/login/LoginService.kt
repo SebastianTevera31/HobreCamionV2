@@ -7,11 +7,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import javax.inject.Inject
+import kotlin.math.log
 
 class LoginService @Inject constructor(private val loginClient: LoginClient) {
 
     suspend fun doLogin(requestBody: LoginDto): Response<List<LoginResponse>> {
-        return withContext(Dispatchers.IO) { loginClient.doLogin(requestBody)
+        return withContext(Dispatchers.IO) {
+            val responseLogin = loginClient.loginTest()
+            val loginBody = responseLogin.body()
+            val authData = loginBody?.string()?.split(":")
+            loginClient.doLogin(LoginDto(authData?.get(1) ?: "", authData?.get(0) ?: ""))
         }
     }
 }

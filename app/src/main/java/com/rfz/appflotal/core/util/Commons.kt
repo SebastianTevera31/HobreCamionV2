@@ -6,6 +6,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 object Commons {
     private const val TAG = "CameraXCompose"
@@ -27,4 +32,15 @@ object Commons {
             ContextCompat.checkSelfPermission(ctx, it) ==
                     PackageManager.PERMISSION_GRANTED
         }
+
+    fun validateBluetoothConnectivity(quality: BluetoothSignalQuality): Boolean {
+        return quality in listOf(BluetoothSignalQuality.Excelente, BluetoothSignalQuality.Aceptable)
+    }
+
+
+    fun getCurrentDate(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+        sdf.timeZone = TimeZone.getTimeZone("UTC")
+        return sdf.format(Date())
+    }
 }

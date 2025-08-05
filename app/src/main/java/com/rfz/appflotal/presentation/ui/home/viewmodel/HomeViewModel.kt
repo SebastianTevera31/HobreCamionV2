@@ -6,9 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.AppLocale
-import com.rfz.appflotal.data.model.flotalSoft.AppFlotalEntity
+import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
 import com.rfz.appflotal.data.model.languaje.LanguageResponse
-import com.rfz.appflotal.data.repository.FscSoftRepository
+import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val fscSoftRepository: FscSoftRepository,
+    private val hombreCamionRepository: HombreCamionRepository,
     private val languageUseCase: LanguajeUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -35,7 +35,7 @@ class HomeViewModel @Inject constructor(
     val homeCheckInMessage: LiveData<String> = _homeCheckInMessage
 
     suspend fun logout() {
-        fscSoftRepository.clearUserData()
+        hombreCamionRepository.clearUserData()
     }
 
     fun loadInitialData() {
@@ -43,8 +43,8 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val deferredUserData = async { fscSoftRepository.getUserData() }
-                val deferredLanguage = async { fscSoftRepository.getSavedLanguage() ?: "en" }
+                val deferredUserData = async { hombreCamionRepository.getUserData() }
+                val deferredLanguage = async { hombreCamionRepository.getSavedLanguage() ?: "en" }
 
                 _uiState.update {
                     it.copy(
@@ -70,7 +70,7 @@ class HomeViewModel @Inject constructor(
                 } ?: throw Exception("User data not available")
 
                 if (result.isSuccess) {
-                    fscSoftRepository.saveSelectedLanguage(newLanguage)
+                    hombreCamionRepository.saveSelectedLanguage(newLanguage)
                     _uiState.update { it.copy(selectedLanguage = newLanguage, isLoading = false) }
 
                     // Actualiza el Locale global y guarda en SharedPreferences
@@ -93,7 +93,7 @@ class HomeViewModel @Inject constructor(
     }
 
     data class HomeUiState(
-        val userData: AppFlotalEntity? = null,
+        val userData: AppHCEntity? = null,
         val selectedLanguage: String = "en",
         val isLoading: Boolean = false
     )

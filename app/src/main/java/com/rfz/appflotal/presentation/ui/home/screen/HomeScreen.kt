@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.home.screen
 
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.widget.Toast
@@ -9,7 +8,18 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -18,9 +28,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,13 +65,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
+import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.util.*
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,14 +118,48 @@ fun HomeScreen(
     }
 
     val menuItems = listOf(
-        MenuItem(stringResource(R.string.brands), "marcas_screen", R.drawable.ic_brand),
-        MenuItem(stringResource(R.string.original_design), "diseno_original_screen", R.drawable.ic_tire_design),
-        MenuItem(stringResource(R.string.tire_sizes), "medidasLlantasScreen", R.drawable.ic_tire_size),
-        MenuItem(stringResource(R.string.products), "productoScreen", R.drawable.ic_products),
-        MenuItem(stringResource(R.string.tire_register), "registroLlantasScreen", R.drawable.ic_tire_register),
-        MenuItem(stringResource(R.string.vehicle_register), "registroVehiculoScreen", R.drawable.ic_truck),
-        MenuItem(stringResource(R.string.tire_change), "montajeDesmontajeScreen", R.drawable.ic_tire_change)
+        MenuItem(
+            stringResource(R.string.brands),
+            HombreCamionScreens.MARCAS.name,
+            R.drawable.ic_brand
+        ),
+        MenuItem(
+            stringResource(R.string.original_design),
+            HombreCamionScreens.DISENIO_ORIGINAL.name,
+            R.drawable.ic_tire_design
+        ),
+        MenuItem(
+            stringResource(R.string.tire_sizes),
+            HombreCamionScreens.DIMENSIONES.name,
+            R.drawable.ic_tire_size
+        ),
+        MenuItem(
+            stringResource(R.string.products),
+            HombreCamionScreens.PRODUCTOS.name,
+            R.drawable.ic_products
+        ),
+        MenuItem(
+            stringResource(R.string.tire_register),
+            HombreCamionScreens.LLANTAS.name,
+            R.drawable.ic_tire_register
+        ),
+        MenuItem(
+            stringResource(R.string.vehicle_register),
+            HombreCamionScreens.VEHICULOS.name,
+            R.drawable.ic_truck
+        ),
+        MenuItem(
+            stringResource(R.string.tire_change),
+            HombreCamionScreens.MONTAJE.name,
+            R.drawable.ic_tire_change
+        ),
+        MenuItem(
+            title = "Monitoreo",
+            route = HombreCamionScreens.MONITOR.name,
+            iconRes = R.drawable.monitor
+        )
     )
+
     val scope = rememberCoroutineScope()
 
     val primaryColor = Color(0xFF4A3DAD)
@@ -154,7 +213,8 @@ fun HomeScreen(
                                             scope.launch {
                                                 homeViewModel.changeLanguage(code)
                                             }
-                                        }   .background(
+                                        }
+                                        .background(
                                             if (uiState.selectedLanguage == code)
                                                 Color.White.copy(alpha = 0.3f)
                                             else

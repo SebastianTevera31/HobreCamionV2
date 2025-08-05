@@ -40,16 +40,24 @@ import com.rfz.appflotal.data.network.client.tire.TireGetClient
 import com.rfz.appflotal.data.network.client.tire.TireListClient
 import com.rfz.appflotal.data.network.client.tire.TireSizeClient
 import com.rfz.appflotal.data.network.client.tire.TireSizeCrudClient
+import com.rfz.appflotal.data.network.client.tpms.ApiTpmsClient
 import com.rfz.appflotal.data.network.client.utilization.UtilizationClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleByIdClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleCrudClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleListClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleTypeClient
 import com.rfz.appflotal.data.network.client.waster.WasteReportListClient
+import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepository
+import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepositoryImp
+import com.rfz.appflotal.data.repository.wifi.WifiRepository
+import com.rfz.appflotal.data.repository.wifi.WifiRepositoryImp
+import com.rfz.appflotal.domain.database.GetTasksUseCase
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -59,15 +67,13 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class NetworkModule {
-
     @Singleton
     @Provides
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(tokenProvider: GetTasksUseCase): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
-
             .build()
     }
 
@@ -154,6 +160,7 @@ class NetworkModule {
     fun provideAcquisitionTypeClient(retrofit: Retrofit): AcquisitionTypeClient {
         return retrofit.create(AcquisitionTypeClient::class.java)
     }
+
     @Singleton
     @Provides
     fun provideBrandCrudClient(retrofit: Retrofit): BrandCrudClient {
@@ -214,13 +221,11 @@ class NetworkModule {
     }
 
 
-
     @Singleton
     @Provides
     fun provideDiagramClient(retrofit: Retrofit): DiagramClient {
         return retrofit.create(DiagramClient::class.java)
     }
-
 
 
     @Singleton
@@ -278,13 +283,11 @@ class NetworkModule {
     }
 
 
-
     @Singleton
     @Provides
     fun provideRetreadDesignCrudClient(retrofit: Retrofit): RetreadDesignCrudClient {
         return retrofit.create(RetreadDesignCrudClient::class.java)
     }
-
 
 
     @Singleton
@@ -312,14 +315,11 @@ class NetworkModule {
         return retrofit.create(DisassemblyTireCrudClient::class.java)
     }
 
-
-
     @Singleton
     @Provides
     fun provideInspectionTireCrudClient(retrofit: Retrofit): InspectionTireCrudClient {
         return retrofit.create(InspectionTireCrudClient::class.java)
     }
-
 
     @Singleton
     @Provides
@@ -327,21 +327,17 @@ class NetworkModule {
         return retrofit.create(TireCrudClient::class.java)
     }
 
-
     @Singleton
     @Provides
     fun provideTireGetClient(retrofit: Retrofit): TireGetClient {
         return retrofit.create(TireGetClient::class.java)
     }
 
-
-
     @Singleton
     @Provides
     fun provideVehicleByIdClient(retrofit: Retrofit): VehicleByIdClient {
         return retrofit.create(VehicleByIdClient::class.java)
     }
-
 
     @Singleton
     @Provides
@@ -355,14 +351,11 @@ class NetworkModule {
         return retrofit.create(VehicleListClient::class.java)
     }
 
-
-
     @Singleton
     @Provides
     fun provideVehicleTypeClient(retrofit: Retrofit): VehicleTypeClient {
         return retrofit.create(VehicleTypeClient::class.java)
     }
-
 
     @Singleton
     @Provides
@@ -371,8 +364,27 @@ class NetworkModule {
     }
 
 
+    @Singleton
+    @Provides
+    fun provideTpmsClient(retrofit: Retrofit): ApiTpmsClient {
+        return retrofit.create(ApiTpmsClient::class.java)
+    }
+}
 
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class BluetoothModule() {
 
+    @Binds
+    @Singleton
+    abstract fun provideBluetoothModule(impl: BluetoothRepositoryImp): BluetoothRepository
+}
 
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class WifiModule {
 
+    @Binds
+    @Singleton
+    abstract fun bindWifiModule(impl: WifiRepositoryImp): WifiRepository
 }

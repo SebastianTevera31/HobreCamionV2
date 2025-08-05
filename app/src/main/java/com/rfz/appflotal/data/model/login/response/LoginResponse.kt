@@ -1,7 +1,7 @@
 package com.rfz.appflotal.data.model.login.response
 
 import com.google.gson.annotations.SerializedName
-import com.rfz.appflotal.data.model.flotalSoft.AppFlotalEntity
+import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,13 +12,17 @@ sealed class LoginState {
     data class Success(val userData: LoginResponse) : LoginState()
     data class Error(val message: String) : LoginState()
 }
+
 data class LoginResponse(
     @SerializedName("id_user") val id_user: Int,
     @SerializedName("fld_name") val fld_name: String,
     @SerializedName("fld_username") val fld_username: String,
     @SerializedName("fld_email") val fld_email: String,
+    @SerializedName("fld_password") val fld_password: String,
     @SerializedName("fld_token") val fld_token: String,
     @SerializedName("id") val id: Int,
+    @SerializedName("id_monitor") val id_monitor: Int,
+    @SerializedName("id_configuration") val id_configuracion: Int,
     var fecha: String? = null
 )
 
@@ -46,11 +50,10 @@ data class ErrorMessage(
 )
 
 
-
 @Singleton
 class AppFlotalMapper @Inject constructor() {
-    fun fromLoginResponseToEntity(response: LoginResponse): AppFlotalEntity {
-        return AppFlotalEntity(
+    fun fromLoginResponseToEntity(response: LoginResponse): AppHCEntity {
+        return AppHCEntity(
             id = 0,
             id_user = response.id_user,
             fld_name = response.fld_name ?: "",
