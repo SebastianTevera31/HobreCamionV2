@@ -208,7 +208,6 @@ class HombreCamionService : Service() {
             }
 
             apiTpmsUseCase.doPostSensorData(
-                token = user.second!!,
                 fldFrame = dataFrame,
                 monitorId = 3,
                 fldDateData = timestamp

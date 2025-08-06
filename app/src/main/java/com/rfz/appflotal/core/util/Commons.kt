@@ -15,7 +15,7 @@ import java.util.TimeZone
 object Commons {
     private const val TAG = "CameraXCompose"
     fun showLog(log: String) {
-        Log.d(com.rfz.appflotal.core.util.Commons.TAG, log)
+        Log.d(TAG, log)
     }
 
     val REQUIRED_PERMISSIONS =
@@ -28,7 +28,7 @@ object Commons {
         }.toTypedArray()
 
     fun allPermissionsGranted(ctx: Context) =
-        com.rfz.appflotal.core.util.Commons.REQUIRED_PERMISSIONS.all {
+        REQUIRED_PERMISSIONS.all {
             ContextCompat.checkSelfPermission(ctx, it) ==
                     PackageManager.PERMISSION_GRANTED
         }
@@ -40,7 +40,6 @@ object Commons {
 
     fun getCurrentDate(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-        sdf.timeZone = TimeZone.getTimeZone("UTC")
         return sdf.format(Date())
     }
 }

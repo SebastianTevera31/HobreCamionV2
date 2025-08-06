@@ -43,9 +43,10 @@ class HombreCamionRepository @Inject constructor(
 
                 it.fld_email,
                 it.fld_token,
+                it.id_monitor,
+                it.id_configuration,
                 it.fecha,
-
-                )
+            )
         }
     }
 

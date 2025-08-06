@@ -9,7 +9,7 @@ import com.rfz.appflotal.data.model.flotalSoft.SensorTpmsEntity
 
 @Database(
     entities = [AppHCEntity::class, SensorTpmsEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {

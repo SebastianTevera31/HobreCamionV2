@@ -12,6 +12,8 @@ data class AppHCEntity(
     val fld_name: String,
     val fld_email: String,
     val fld_token: String,
+    val id_monitor: Int = 0,
+    val id_configuration: Int = 0,
     val fecha: String
 )
 

@@ -1,9 +1,12 @@
 package com.rfz.appflotal.data.network.service.tpms
 
 import android.util.Log
+import com.rfz.appflotal.data.model.tpms.ConfigurationByIdMonitorResponse
+import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.SensorRequest
 import com.rfz.appflotal.data.network.client.tpms.ApiTpmsClient
 import com.rfz.appflotal.data.network.requestHelper
+import com.rfz.appflotal.data.network.service.ResultApi
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -14,19 +17,20 @@ class ApiTpmsService @Inject constructor(
 ) {
     suspend fun postSensorData(sensorRequest: SensorRequest) {
         requestHelper("PostSensorData") {
-            apiTpmsClient.sendSensorData(sensorRequest)
+            val token = getTasksUseCase().first()[0].fld_token
+            apiTpmsClient.sendSensorData("bearer $token", sensorRequest)
         }
     }
 
-    suspend fun getDiagramMonitor(idMonitor: Int) {
-        requestHelper("getDiagramMonitor") {
+    suspend fun getDiagramMonitor(idMonitor: Int): ResultApi<List<DiagramMonitorResponse>?> {
+        return requestHelper("getDiagramMonitor") {
             val token = getTasksUseCase().first()[0].fld_token
             apiTpmsClient.getDiagramMonitor("bearer $token", idMonitor)
         }
     }
 
-    suspend fun getConfigurationByIdMonitor(idMonitor: Int) {
-        requestHelper {
+    suspend fun getConfigurationByIdMonitor(idMonitor: Int): ResultApi<List<ConfigurationByIdMonitorResponse>?> {
+        return requestHelper {
             val token = getTasksUseCase().first()[0].fld_token
             apiTpmsClient.getConfigurationByIdMonitor("bearer $token", idMonitor)
         }

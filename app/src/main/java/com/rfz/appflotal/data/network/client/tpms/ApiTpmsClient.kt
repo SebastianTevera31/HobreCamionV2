@@ -17,6 +17,7 @@ import retrofit2.http.Query
 interface ApiTpmsClient {
     @POST("api/Tpms/MonitorData")
     suspend fun sendSensorData(
+        @Header("Authorization") token: String,
         @Body request: SensorRequest,
     ): Response<List<TpmsResponse>>
 
