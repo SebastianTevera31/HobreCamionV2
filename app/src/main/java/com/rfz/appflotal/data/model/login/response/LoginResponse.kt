@@ -22,7 +22,9 @@ data class LoginResponse(
     @SerializedName("fld_token") val fld_token: String,
     @SerializedName("id") val id: Int,
     @SerializedName("id_monitor") val id_monitor: Int,
+    @SerializedName("fld_mac") val fldMac: String,
     @SerializedName("id_configuration") val id_configuracion: Int,
+    @SerializedName("paymentPlan") val paymentPlan: String,
     var fecha: String? = null
 )
 
@@ -61,6 +63,8 @@ class AppFlotalMapper @Inject constructor() {
             fld_token = response.fld_token ?: "",
             id_monitor = response.id_monitor,
             id_configuration = response.id_configuracion,
+            monitorMac = response.fldMac,
+            paymentPlan = response.paymentPlan,
             fecha = response.fecha ?: ""
         )
     }

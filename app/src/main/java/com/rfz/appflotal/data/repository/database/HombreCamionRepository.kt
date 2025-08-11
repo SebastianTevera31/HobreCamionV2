@@ -40,11 +40,12 @@ class HombreCamionRepository @Inject constructor(
                 it.id,
                 it.id_user,
                 it.fld_name,
-
                 it.fld_email,
                 it.fld_token,
                 it.id_monitor,
                 it.id_configuration,
+                it.monitorMac,
+                it.paymentPlan,
                 it.fecha,
             )
         }

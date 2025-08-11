@@ -14,6 +14,8 @@ data class AppHCEntity(
     val fld_token: String,
     val id_monitor: Int = 0,
     val id_configuration: Int = 0,
+    val monitorMac: String,
+    val paymentPlan: String,
     val fecha: String
 )
 

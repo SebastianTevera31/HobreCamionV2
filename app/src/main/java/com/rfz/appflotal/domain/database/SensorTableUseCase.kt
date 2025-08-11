@@ -10,8 +10,8 @@ class SensorTableUseCase @Inject constructor(private val sensorTableRepository: 
     ) = sensorTableRepository.insert(sensorTpmsEntity)
 
     suspend fun doGetUnsentRecords(
-        userId: Int,
-    ) = sensorTableRepository.getUnsentRecords(userId)
+        monitorId: Int,
+    ) = sensorTableRepository.getUnsentRecords(monitorId)
 
     suspend fun doGetLastRecord(userId: Int): SensorTpmsEntity? {
         return sensorTableRepository.getLastRecord(userId)

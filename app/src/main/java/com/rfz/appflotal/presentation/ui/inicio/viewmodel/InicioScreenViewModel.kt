@@ -1,5 +1,8 @@
 package com.rfz.appflotal.presentation.ui.inicio.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -23,6 +26,8 @@ class InicioScreenViewModel @Inject constructor(
 
     private val _userData = MutableLiveData<AppHCEntity?>()
     val userData: LiveData<AppHCEntity?> = _userData
+
+    var blePermissionGranted by mutableStateOf(false)
 
     init {
         checkUserSession()
@@ -49,5 +54,9 @@ class InicioScreenViewModel @Inject constructor(
 
             }
         }
+    }
+
+    fun updateBlePermissions(hasPermission: Boolean) {
+        blePermissionGranted = hasPermission
     }
 }

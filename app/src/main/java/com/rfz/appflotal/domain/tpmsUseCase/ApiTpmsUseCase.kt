@@ -3,6 +3,7 @@ package com.rfz.appflotal.domain.tpmsUseCase
 import com.rfz.appflotal.data.model.tpms.ConfigurationByIdMonitorResponse
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.SensorRequest
+import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.service.ResultApi
 import com.rfz.appflotal.data.repository.tpms.ApiTpmsRepository
 import javax.inject.Inject
@@ -12,8 +13,8 @@ class ApiTpmsUseCase @Inject constructor(private val apiTpmsRepository: ApiTpmsR
         fldFrame: String,
         monitorId: Int,
         fldDateData: String
-    ) {
-        apiTpmsRepository.doPostSensorData(SensorRequest(fldFrame, monitorId, fldDateData))
+    ): ResultApi<List<TpmsResponse>?> {
+        return apiTpmsRepository.doPostSensorData(SensorRequest(fldFrame, monitorId, fldDateData))
     }
 
     suspend fun doGetDiagramMonitor(monitorId: Int): ResultApi<List<DiagramMonitorResponse>?> {

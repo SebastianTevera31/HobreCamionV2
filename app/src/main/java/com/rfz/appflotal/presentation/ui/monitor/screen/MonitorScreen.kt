@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,13 +37,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import coil.compose.AsyncImage
+import com.rfz.appflotal.data.network.service.HombreCamionService
+import com.rfz.appflotal.data.network.service.HombreCamionWorker
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
@@ -51,6 +60,7 @@ import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
 import com.rfz.appflotal.presentation.theme.ProyectoFscSoftTheme
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun MonitorScreen(
@@ -310,7 +320,6 @@ fun CeldaAlerta(wheel: String, alertMessage: String, modifier: Modifier = Modifi
             .fillMaxWidth()
     )
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

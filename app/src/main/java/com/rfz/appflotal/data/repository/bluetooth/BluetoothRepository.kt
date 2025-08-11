@@ -136,7 +136,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun connect(macAddress: String) {
         val device = bluetoothAdapter?.getRemoteDevice(macAddress)
-        bluetoothGatt = device?.connectGatt(context, false, gattCallback)
+        bluetoothGatt = device?.connectGatt(context, true, gattCallback)
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)

@@ -1,5 +1,6 @@
 package com.rfz.appflotal.domain.database
 
+import android.util.Log
 import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import kotlinx.coroutines.flow.Flow

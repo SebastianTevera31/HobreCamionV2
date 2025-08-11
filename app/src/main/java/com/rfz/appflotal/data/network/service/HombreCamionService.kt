@@ -1,19 +1,17 @@
 package com.rfz.appflotal.data.network.service
 
 import android.Manifest
-import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.app.ServiceCompat.startForeground
 import androidx.core.content.PermissionChecker
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
@@ -31,6 +29,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -53,9 +52,13 @@ class HombreCamionService : Service() {
     @Inject
     lateinit var getUserUseCase: GetTasksUseCase
 
+    lateinit var notificationManager: NotificationManager
+
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private var oldestTimestamp: String? = null
+
+    private var isStaterd = false
 
     override fun onBind(p0: Intent?): IBinder? = null
 
@@ -63,12 +66,16 @@ class HombreCamionService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+    }
 
-        coroutineScope.launch {
-            getUserUseCase().collect { data ->
-                user = Pair(data.first().id_user, data.first().fld_token)
-            }
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        val restartIntent = Intent("android.intent.action.SERVICE_RESTARTED")
+            .setPackage(packageName)
+        sendBroadcast(restartIntent)
+        isStaterd = false
+        coroutineScope.cancel()
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -76,7 +83,14 @@ class HombreCamionService : Service() {
         super.onStartCommand(intent, flags, startId)
 
         // Configurar e iniciar del servicio
-        startForegroundService()
+        if (!isStaterd) {
+            startForegroundService()
+            isStaterd = true
+        }
+
+        // Reiniciando servicio
+        Log.d("HombreCamionService", "Servicio iniciado")
+
 
         // Habilitar observador WiFi
         wifiUseCase.doConnect()
@@ -86,15 +100,13 @@ class HombreCamionService : Service() {
 
         readDataFromMonitor()
 
-        // Reiniciando servicio
-        Log.d("HombreCamionService", "Servicio iniciado")
-
         return START_STICKY
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun startForegroundService() {
-
+        // Movier a la seccion de invocacion
+        // Verificar si se aceptaron permisos de Bluetooth.
         val bluetoothPermission =
             PermissionChecker.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
         if (bluetoothPermission != PermissionChecker.PERMISSION_GRANTED) {
@@ -102,98 +114,79 @@ class HombreCamionService : Service() {
             return
         }
 
-        try {
-            val notification = createNotification()
+        createServiceNotificationChannel()
 
-            if (Build.VERSION.SDK_INT >= 34) {
-                startForeground(
-                    /* service = */ this,
-                    /* id = */ 100, // Cannot be 0
-                    /* notification = */ notification,
-                    /* foregroundServiceType = */
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-                )
-            } else {
-                startForeground(100, notification)
-            }
-        } catch (e: Exception) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-                && e is ForegroundServiceStartNotAllowedException
-            ) {
-                Log.e("HombreCamionService", "${e.message}")
-            }
-        }
-    }
-
-    private fun createNotification(): Notification {
-        val channelId = "bt_channel_id"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Bluetooth Service Channel",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setShowBadge(false)
-            }
-
-            getSystemService(NotificationManager::class.java)
-                .createNotificationChannel(channel)
-        }
-
-        return NotificationCompat.Builder(this, channelId)
+        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Servicio HombreCamion")
             .setContentText("Recibiendo datos del monitor")
             .setSmallIcon(R.drawable.truckdriver)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
+
+        startForeground(ONGOING_NOTIFICATION_ID, notification)
+    }
+
+    private fun createServiceNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Foreground Service Channel",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            setShowBadge(true)
+        }
+
+        notificationManager.createNotificationChannel(channel)
     }
 
     private fun initBluetoothConnection() {
         coroutineScope.launch {
+            val dataUser = getUserUseCase().first()[0]
             Log.d("HombreCamionService", "Iniciando Bluetooth...")
-            bluetoothUseCase.doConnect("80:F5:B5:70:5C:8F")
+            bluetoothUseCase.doConnect(dataUser.monitorMac)
             bluetoothUseCase.doStartRssiMonitoring()
         }
     }
 
     private fun readDataFromMonitor() {
         coroutineScope.launch {
-            val currentUserId = getUserUseCase().first()[0].id_user
-            if (user.first != null) {
-                bluetoothUseCase()
-                    .distinctUntilChangedBy { it.timestamp }
-                    .collect { data ->
-                        val bluetoothSignalQuality = data.bluetoothSignalQuality
+            val dataUser = getUserUseCase().first()[0]
+            val currentMonitorId = dataUser.id_monitor
+            bluetoothUseCase()
+                .distinctUntilChangedBy { it.timestamp }
+                .collect { data ->
+                    val bluetoothSignalQuality = data.bluetoothSignalQuality
 
-                        val dataFrame = data.dataFrame
-                        Log.d("HombreCamionService", "Dataframe: $dataFrame, ")
-                        if (validateBluetoothConnectivity(bluetoothSignalQuality) && dataFrame != null) {
+                    val dataFrame = data.dataFrame
+                    Log.d("HombreCamionService", "Dataframe: $dataFrame, ")
+                    if (validateBluetoothConnectivity(bluetoothSignalQuality) && dataFrame != null) {
 
-                            // Cambiar: Debe almancenarse el ID del Monitor
-                            val monitorId = currentUserId
-                            Log.d("HombreCamionService", "UserId: $monitorId")
-                            val timestamp = getCurrentDate()
+                        // Cambiar: Debe almancenarse el ID del Monitor
+                        val monitorId = currentMonitorId
+                        Log.d("HombreCamionService", "UserId: $monitorId")
+                        val timestamp = getCurrentDate()
 
-                            val sensorId = decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
+                        val sensorId =
+                            decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
 
-                            sensorTableUseCase.doInsert(
-                                SensorTpmsEntity(
-                                    monitorId = 3,
-                                    sensorId = sensorId,
-                                    dataFrame = dataFrame,
-                                    timestamp = timestamp,
-                                    sent = false
-                                )
+                        sensorTableUseCase.doInsert(
+                            SensorTpmsEntity(
+                                monitorId = 3,
+                                sensorId = sensorId,
+                                dataFrame = dataFrame,
+                                timestamp = timestamp,
+                                sent = false
                             )
+                        )
 
-                            // Enviar datos a API
-                            sendDataToApi(dataFrame, timestamp, monitorId)
-                        }
+                        // Enviar datos a API
+                        sendDataToApi(dataFrame, timestamp, monitorId)
                     }
-            }
+                }
         }
     }
 
@@ -201,6 +194,7 @@ class HombreCamionService : Service() {
         val wifiStatus = wifiUseCase()
         Log.d("HombreCamionService", "WifiStatus: $wifiStatus")
         if (wifiStatus.value == NetworkStatus.Connected) {
+
             val localOldestTimestamp = oldestTimestamp
             if (localOldestTimestamp != null) {
                 getUnsentRecords(userId)
@@ -224,15 +218,42 @@ class HombreCamionService : Service() {
         }
     }
 
-    private suspend fun getUnsentRecords(userId: Int) {
+    private suspend fun getUnsentRecords(monitorId: Int) {
         val records = sensorTableUseCase.doGetUnsentRecords(
-            userId = userId,
+            monitorId = monitorId,
         )
 
         records.forEach {
             if (it != null) {
-//                assemblyUseCase.doSendMonitorData()
+                val result = apiTpmsUseCase.doPostSensorData(
+                    it.dataFrame, it.monitorId, it.timestamp
+                )
+
+                when (result) {
+                    is ResultApi.Success -> {
+                        sensorTableUseCase.doSetRecordStatus(it.monitorId, it.timestamp, true)
+                    }
+
+                    is ResultApi.Error -> {
+                        Log.d(
+                            "HombreCamionServicio",
+                            "Error al enviar datos almacenados al servidor."
+                        )
+                    }
+                }
+
             }
+        }
+    }
+
+    companion object {
+        const val CHANNEL_ID = "1003"
+        const val ONGOING_NOTIFICATION_ID = 103
+
+        fun startService(context: Context) {
+            val intent = Intent(context, HombreCamionService::class.java)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) context.startService(intent)
+            else context.startForegroundService(intent)
         }
     }
 }

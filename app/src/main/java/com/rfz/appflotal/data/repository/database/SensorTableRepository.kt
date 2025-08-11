@@ -18,7 +18,6 @@ class SensorTableRepository @Inject constructor(
         }
     }
 
-
     suspend fun deleteOldRecords(vehicleId: Int) = sensorDao.deleteOldRecords(vehicleId)
 
     suspend fun getUnsentRecords(

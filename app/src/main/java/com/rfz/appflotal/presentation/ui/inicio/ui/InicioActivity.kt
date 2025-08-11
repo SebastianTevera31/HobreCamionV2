@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.inicio.ui
 
 import android.Manifest
+import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
@@ -10,6 +11,7 @@ import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +20,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -31,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
+import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.base.BaseUseCase
 import com.rfz.appflotal.domain.brand.BrandCrudUseCase
@@ -57,8 +61,6 @@ import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.theme.ProyectoFscSoftTheme
 import com.rfz.appflotal.presentation.ui.brand.MarcasScreen
-
-
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
@@ -70,23 +72,18 @@ import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import com.rfz.appflotal.presentation.ui.medidasllantasscreen.MedidasLlantasScreen
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
-
 import com.rfz.appflotal.presentation.ui.montajedesmontajescreen.MontajeDesmontajeScreen
 import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.NuevoRenovadoScreen
 import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.RenovadosScreen
 import com.rfz.appflotal.presentation.ui.originaldesign.OriginalScreen
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
-
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlantasScreen
-
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
-
 import dagger.hilt.android.AndroidEntryPoint
-import java.net.URLDecoder
-import javax.inject.Inject
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class InicioActivity : ComponentActivity() {
@@ -102,7 +99,6 @@ class InicioActivity : ComponentActivity() {
 
     @Inject
     lateinit var providerListUseCase: ProviderListUseCase
-
 
     @Inject
     lateinit var tireCrudUseCase: TireCrudUseCase
@@ -177,19 +173,20 @@ class InicioActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         setContent {
             val context = LocalContext.current
 
-            val permisoBluetoothConnect = Manifest.permission.BLUETOOTH_CONNECT
-
-            val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.RequestPermission()
+            val permissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestMultiplePermissions()
             ) { isGranted ->
-                if (isGranted) {
-                    // Si quieres, puedes inicializar tu servicio Bluetooth desde aquí
-                    monitorViewModel.initService(context)
+                val todosConcedidos = isGranted.values.all { it }
+                if (todosConcedidos) {
+                    if (isServiceRunning(context, HombreCamionService::class.java)) {
+                        HombreCamionService.startService(this@InicioActivity)
+                    }
                 } else {
                     Log.d("Permiso", "Permiso BLUETOOTH_CONNECT denegado")
                 }
@@ -203,12 +200,11 @@ class InicioActivity : ComponentActivity() {
                     ) {
                         val navController = rememberNavController()
 
-
                         NetworkConfig.imei = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
                         } else {
                             val tel =
-                                getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                                getSystemService(TELEPHONY_SERVICE) as TelephonyManager
                             tel.imei
                         }
 
@@ -216,7 +212,6 @@ class InicioActivity : ComponentActivity() {
                             false
                         )
                         val userData by inicioScreenViewModel.userData.observeAsState()
-
 
                         LaunchedEffect(hasInitialValidation, userData) {
                             if (hasInitialValidation) {
@@ -233,9 +228,27 @@ class InicioActivity : ComponentActivity() {
                                             ChronoUnit.HOURS.between(fechaUsuario, fechaActual)
 
                                         if (diferenciaHoras < 24) {
-                                            navController.navigate(NetworkConfig.HOME) {
-                                                popUpTo(NetworkConfig.LOADING) { inclusive = true }
+                                            val paymentPlan = when (data.paymentPlan) {
+                                                PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
+                                                PaymentPlanType.OnlyTpms.planName -> PaymentPlanType.OnlyTpms
+                                                else -> PaymentPlanType.None
                                             }
+
+                                            if (paymentPlan == PaymentPlanType.Complete) {
+                                                navController.navigate(NetworkConfig.HOME) {
+                                                    popUpTo(NetworkConfig.LOADING) {
+                                                        inclusive = true
+                                                    }
+                                                }
+                                            } else {
+                                                navController.navigate(HombreCamionScreens.MONITOR.name) {
+                                                    popUpTo(NetworkConfig.LOADING) {
+                                                        inclusive = true
+                                                    }
+                                                }
+                                            }
+
+
                                         } else {
                                             inicioScreenViewModel.deleteUserData()
                                             navController.navigate(NetworkConfig.LOGIN) {
@@ -251,21 +264,37 @@ class InicioActivity : ComponentActivity() {
                             }
                         }
 
-
                         loginViewModel.navigateToHome.observe(this) { shouldNavigate ->
-                            if (shouldNavigate) {
-                                navController.navigate(NetworkConfig.HOME) {
-                                    popUpTo(NetworkConfig.LOGIN) { inclusive = true }
+                            if (shouldNavigate.first) {
+                                if (shouldNavigate.second == PaymentPlanType.Complete) {
+                                    navController.navigate(NetworkConfig.HOME) {
+                                        popUpTo(NetworkConfig.LOGIN) { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate(HombreCamionScreens.MONITOR.name) {
+                                        popUpTo(NetworkConfig.LOGIN) { inclusive = true }
+                                    }
                                 }
                                 loginViewModel.onNavigateToHomeComplete()
                             }
                         }
 
-
                         NavHost(
                             navController = navController,
                             startDestination = NetworkConfig.LOADING
                         ) {
+                            composable(NetworkConfig.HOME) {
+                                ThrowServicePermission(
+                                    context = context,
+                                    launcher = permissionLauncher
+                                )
+
+                                HomeScreen(
+                                    navController = navController,
+                                    homeViewModel = homeViewModel,
+                                    colors = MaterialTheme.colorScheme,
+                                )
+                            }
                             composable(NetworkConfig.LOADING) { LoadingScreen() }
                             composable(NetworkConfig.LOGIN) {
                                 LoginScreen(
@@ -379,35 +408,60 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             composable(HombreCamionScreens.MONITOR.name) {
-                                LaunchedEffect(Unit) {
-                                    val granted = ContextCompat.checkSelfPermission(
-                                        context,
-                                        permisoBluetoothConnect
-                                    ) == PackageManager.PERMISSION_GRANTED
-
-                                    if (!granted) {
-                                        bluetoothPermissionLauncher.launch(permisoBluetoothConnect)
-                                    } else {
-                                        monitorViewModel.initService(context)
-                                    }
-                                }
+                                ThrowServicePermission(
+                                    context = this@InicioActivity,
+                                    launcher = permissionLauncher
+                                )
 
                                 MonitorScreen(
                                     monitorViewModel = monitorViewModel
-                                )
-                            }
-
-                            composable(NetworkConfig.HOME) {
-                                HomeScreen(
-                                    navController = navController,
-                                    homeViewModel = homeViewModel,
-                                    colors = MaterialTheme.colorScheme
                                 )
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    fun ThrowServicePermission(
+        context: Context,
+        launcher: ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
+    ) {
+        val servicePermissions =
+            arrayOf(
+                Manifest.permission.POST_NOTIFICATIONS,
+                Manifest.permission.BLUETOOTH_CONNECT
+            )
+        LaunchedEffect(Unit) {
+            var permissionsGranted = false
+            servicePermissions.forEach {
+                permissionsGranted = ContextCompat.checkSelfPermission(
+                    context,
+                    it
+                ) == PackageManager.PERMISSION_GRANTED
+            }
+
+            if (!permissionsGranted) {
+                launcher.launch(servicePermissions)
+            } else {
+                if (!isServiceRunning(context, HombreCamionService::class.java)) {
+                    HombreCamionService.startService(context)
+                }
+            }
+        }
+    }
+
+    fun Context.tienePermisos(vararg permisos: String) =
+        permisos.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
+
+    fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
+        val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        return manager.getRunningServices(Int.MAX_VALUE).any {
+            it.service.className == serviceClass.name
         }
     }
 }

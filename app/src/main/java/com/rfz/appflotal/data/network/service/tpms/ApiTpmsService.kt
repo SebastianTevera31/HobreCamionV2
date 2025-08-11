@@ -4,6 +4,7 @@ import android.util.Log
 import com.rfz.appflotal.data.model.tpms.ConfigurationByIdMonitorResponse
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.SensorRequest
+import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.client.tpms.ApiTpmsClient
 import com.rfz.appflotal.data.network.requestHelper
 import com.rfz.appflotal.data.network.service.ResultApi
@@ -15,8 +16,8 @@ class ApiTpmsService @Inject constructor(
     private val apiTpmsClient: ApiTpmsClient,
     private val getTasksUseCase: GetTasksUseCase
 ) {
-    suspend fun postSensorData(sensorRequest: SensorRequest) {
-        requestHelper("PostSensorData") {
+    suspend fun postSensorData(sensorRequest: SensorRequest): ResultApi<List<TpmsResponse>?> {
+        return requestHelper("PostSensorData") {
             val token = getTasksUseCase().first()[0].fld_token
             apiTpmsClient.sendSensorData("bearer $token", sensorRequest)
         }
@@ -30,8 +31,8 @@ class ApiTpmsService @Inject constructor(
     }
 
     suspend fun getConfigurationByIdMonitor(idMonitor: Int): ResultApi<List<ConfigurationByIdMonitorResponse>?> {
-        return requestHelper {
-            val token = getTasksUseCase().first()[0].fld_token
+        return requestHelper("getConfigurationByIdMonitor") {
+            val token =  getTasksUseCase().first()[0].fld_token
             apiTpmsClient.getConfigurationByIdMonitor("bearer $token", idMonitor)
         }
     }

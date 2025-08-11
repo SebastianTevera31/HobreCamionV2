@@ -16,6 +16,7 @@ import com.rfz.appflotal.data.model.login.response.LoginState
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.log
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -32,8 +34,8 @@ class LoginViewModel @Inject constructor(
     private val mapper: AppFlotalMapper
 ) : ViewModel() {
 
-    private val _navigateToHome = MutableLiveData<Boolean>()
-    val navigateToHome: LiveData<Boolean> = _navigateToHome
+    private val _navigateToHome = MutableLiveData<Pair<Boolean, PaymentPlanType>>()
+    val navigateToHome: LiveData<Pair<Boolean, PaymentPlanType>> = _navigateToHome
 
     private val _navigateverifycodeloginScreen = MutableLiveData<Boolean>()
     val navigateverifycodeloginScreen: LiveData<Boolean> = _navigateverifycodeloginScreen
@@ -94,12 +96,12 @@ class LoginViewModel @Inject constructor(
 
                 when (val result = loginUseCase(user, pass)) {
                     is Result.Success -> {
-                        result.data.let { response ->
-                            handleLoginResponse(response)
-                        }
+                        handleLoginResponse(result.data)
                     }
+
                     is Result.Failure -> {
-                        _loginState.value = LoginState.Error(result.exception.message ?: "Unknown error")
+                        _loginState.value =
+                            LoginState.Error(result.exception.message ?: "Unknown error")
                         _loginMessage.value = result.exception.message ?: "Authentication error"
                     }
                 }
@@ -116,15 +118,23 @@ class LoginViewModel @Inject constructor(
     private fun handleLoginResponse(loginResponse: LoginResponse) {
         when (loginResponse.id) {
             200 -> {
+                val paymentPlan = when (loginResponse.paymentPlan) {
+                    PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
+                    PaymentPlanType.OnlyTpms.planName -> PaymentPlanType.OnlyTpms
+                    else -> PaymentPlanType.None
+                }
                 onTaskCreated(loginResponse)
-                _navigateToHome.value = true
+                _navigateToHome.value =
+                    Pair(true, paymentPlan)
                 _loginState.value = LoginState.Success(loginResponse)
             }
+
             -100 -> {
                 _loginMessage.value = "Credenciales incorrectas"
                 _isLoginEnable.value = true
                 _loginState.value = LoginState.Error("Credenciales incorrectas")
             }
+
             else -> {
                 _loginMessage.value = "Error en el servidor: ${loginResponse.id}"
                 _loginState.value = LoginState.Error("Error en el servidor")
@@ -143,7 +153,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onNavigateToHomeComplete() {
-        _navigateToHome.value = false
+        _navigateToHome.value = Pair(false, PaymentPlanType.None)
     }
 
     fun onNavigateToVerificodeloginComplete() {

@@ -71,13 +71,15 @@ import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.Connected
+import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.data.model.login.response.LoginState
 import com.rfz.appflotal.presentation.theme.brandColor
 import com.rfz.appflotal.presentation.theme.darkerGray
 import com.rfz.appflotal.presentation.theme.darkerPurple
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
-
+import kotlin.math.log
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -89,16 +91,24 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
         color = Color.White
     ) {
         val loginState by loginViewModel.loginState.collectAsState()
+        val navigateToHome by loginViewModel.navigateToHome.observeAsState()
         val context = LocalContext.current
         val isProgressVisible by loginViewModel.isProgressVisible.collectAsState()
 
         LaunchedEffect(loginState) {
             when (val state = loginState) {
                 is LoginState.Success -> {
-                    navController.navigate(NetworkConfig.HOME) {
-                        popUpTo(NetworkConfig.LOGIN) { inclusive = true }
+                    if (navigateToHome?.second == PaymentPlanType.Complete) {
+                        navController.navigate(NetworkConfig.HOME) {
+                            popUpTo(NetworkConfig.LOGIN) { inclusive = true }
+                        }
+                    } else if (navigateToHome?.second == PaymentPlanType.OnlyTpms) {
+                        navController.navigate(HombreCamionScreens.MONITOR.name) {
+                            popUpTo(NetworkConfig.LOGIN) { inclusive = true }
+                        }
                     }
                 }
+
                 else -> {}
             }
         }
@@ -162,7 +172,7 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
                     },
                 contentAlignment = Alignment.BottomCenter
             ) {
-                LogoImage(modifier = Modifier.offset(y =105.dp))
+                LogoImage(modifier = Modifier.offset(y = 105.dp))
             }
 
 
@@ -183,7 +193,7 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
                     isLoading = isLoading,
                     onLoginClick = {
                         if (Connected.isConnected(context)) {
-                            loginViewModel.onLoginSelected( navController)
+                            loginViewModel.onLoginSelected(navController)
                         } else {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
@@ -279,7 +289,7 @@ private fun LoginForm(
         Text(
             text = loginMessage,
             color = Color.Red,
-            style = TextStyle(fontSize = 14.sp,   fontWeight = FontWeight.Bold,  ),
+            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )

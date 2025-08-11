@@ -3,15 +3,12 @@ package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
-import android.content.Intent
 import android.util.Log
-import androidx.core.content.ContextCompat.startForegroundService
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
-import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.data.network.service.ResultApi
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothData
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
@@ -53,8 +50,8 @@ class MonitorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val monitorId = getTasksUseCase().first()[0].id_monitor
-            val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(3)
+            val userData = getTasksUseCase().first()[0]
+            val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(userData.id_monitor)
             when (configInfo) {
                 is ResultApi.Success -> {
                     val data = configInfo.data
@@ -63,7 +60,7 @@ class MonitorViewModel @Inject constructor(
                         if (config.isDigitsOnly()) {
                             _monitorUiState.update { currentUiState ->
                                 currentUiState.copy(
-                                    monitorId = monitorId,
+                                    monitorId = userData.id_monitor,
                                     numWheels = config.toInt(),
                                     chassisImageUrl = data[0].fldUrlImage
                                 )
@@ -74,19 +71,10 @@ class MonitorViewModel @Inject constructor(
 
                 is ResultApi.Error -> {}
             }
-
-
         }
-    }
 
-    fun initService(ctx: Context) {
         collectSensorData()
         readBluetoothData()
-
-        if (!isServiceRunning(ctx, HombreCamionService::class.java)) {
-            val intent = Intent(ctx, HombreCamionService::class.java)
-            startForegroundService(ctx, intent)
-        }
     }
 
     private fun readBluetoothData() {
@@ -108,7 +96,7 @@ class MonitorViewModel @Inject constructor(
                 var dataFrame = data.dataFrame
 
                 if (!validateBluetoothConnectivity(bluetoothSignalQuality) || dataFrame == null) {
-                    val monitorId = 3
+                    val monitorId = monitorUiState.value.monitorId
 
                     // Se agrega la funcion Let como seguridad, sin embargo el Id debe existir en esta parte
                     dataFrame = monitorId.let { sensorTableUseCase.doGetLastRecord(it)?.dataFrame }
@@ -177,8 +165,7 @@ class MonitorViewModel @Inject constructor(
 
     fun getSensorDataByWheel(wheelPosition: String) {
         viewModelScope.launch {
-            val sensorData = apiTpmsUseCase.doGetDiagramMonitor(3)
-            apiTpmsUseCase.doPostSensorData("aaa1410e6302479752001c500ca7", 3, getCurrentDate())
+            val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
             when (sensorData) {
                 is ResultApi.Success -> {
                     if (!sensorData.data.isNullOrEmpty()) {
@@ -215,7 +202,7 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
-    private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
+    fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
         val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
         return manager.getRunningServices(Int.MAX_VALUE).any {
             it.service.className == serviceClass.name
