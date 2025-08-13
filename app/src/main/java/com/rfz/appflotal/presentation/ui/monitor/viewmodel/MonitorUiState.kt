@@ -16,4 +16,5 @@ data class MonitorUiState(
     ),
     val numWheels: Int = 0,
     val chassisImageUrl: String = "",
+    val wheelsWithAlert: Map<String, Boolean> = emptyMap()
 )

@@ -62,6 +62,7 @@ data class DiagramMonitorResponse(
     @SerializedName("configuration_id") val configId: Int,
     @SerializedName("configuration_description") val configDescription: String,
     @SerializedName("psi") val psi: Float,
+    @SerializedName("tireNumber") val tireNumber: String = "",
     @SerializedName("temperature") val temperature: Float,
     @SerializedName("highTemperature") val highTemperature: Boolean,
     @SerializedName("lowPressure") val lowPressure: Boolean,

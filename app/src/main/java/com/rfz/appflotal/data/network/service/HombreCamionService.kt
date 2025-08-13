@@ -30,6 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -137,7 +138,7 @@ class HombreCamionService : Service() {
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            setShowBadge(true)
+            setShowBadge(false)
         }
 
         notificationManager.createNotificationChannel(channel)
@@ -240,6 +241,8 @@ class HombreCamionService : Service() {
                             "Error al enviar datos almacenados al servidor."
                         )
                     }
+
+                    ResultApi.Loading -> {}
                 }
 
             }
@@ -254,6 +257,11 @@ class HombreCamionService : Service() {
             val intent = Intent(context, HombreCamionService::class.java)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) context.startService(intent)
             else context.startForegroundService(intent)
+        }
+
+        fun stopService(context: Context) {
+            val intent = Intent(context, HombreCamionService::class.java)
+            context.stopService(intent)
         }
     }
 }

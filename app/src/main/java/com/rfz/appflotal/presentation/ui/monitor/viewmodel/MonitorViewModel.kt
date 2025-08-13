@@ -7,10 +7,11 @@ import android.util.Log
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
+import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.network.service.ResultApi
-import com.rfz.appflotal.data.repository.bluetooth.BluetoothData
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
@@ -20,20 +21,20 @@ import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.database.SensorTableUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 
 enum class SensorAlerts(val message: String = "") {
     HighPressure("Persion alta"), LowPressure("Presion baja"), HighTemperature("Temperatura alta"), NoData
 }
+
 
 @HiltViewModel
 class MonitorViewModel @Inject constructor(
@@ -42,11 +43,16 @@ class MonitorViewModel @Inject constructor(
     private val sensorTableUseCase: SensorTableUseCase,
     private val getTasksUseCase: GetTasksUseCase
 ) : ViewModel() {
-    private var _bluetoothData: MutableStateFlow<BluetoothData> = MutableStateFlow(BluetoothData())
-    val bluetoothData = _bluetoothData.asStateFlow()
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
         MutableStateFlow(MonitorUiState())
     val monitorUiState = _monitorUiState.asStateFlow()
+
+    private val _positionsUiState =
+        MutableStateFlow<ResultApi<List<DiagramMonitorResponse>?>>(ResultApi.Loading)
+
+    val positionsUiState = _positionsUiState.asStateFlow()
+
+    var shouldReadManually = true
 
     init {
         viewModelScope.launch {
@@ -58,11 +64,17 @@ class MonitorViewModel @Inject constructor(
                     if (!data.isNullOrEmpty()) {
                         val config = data[0].fldDescription.replace("BASE", "").trim()
                         if (config.isDigitsOnly()) {
+
+                            val wheelsWithAlert =
+                                (1..config.toInt()).associate { it -> "P$it" to false }
+                                    .toMap()
+
                             _monitorUiState.update { currentUiState ->
                                 currentUiState.copy(
                                     monitorId = userData.id_monitor,
                                     numWheels = config.toInt(),
-                                    chassisImageUrl = data[0].fldUrlImage
+                                    chassisImageUrl = data[0].fldUrlImage,
+                                    wheelsWithAlert = wheelsWithAlert
                                 )
                             }
                         }
@@ -70,46 +82,44 @@ class MonitorViewModel @Inject constructor(
                 }
 
                 is ResultApi.Error -> {}
+                is ResultApi.Loading -> {}
             }
         }
 
-        collectSensorData()
+        // Recibe datos Bluetooth
         readBluetoothData()
     }
 
     private fun readBluetoothData() {
         viewModelScope.launch {
             bluetoothUseCase().collect { data ->
-                _bluetoothData.update { data }
-            }
-        }
-    }
+                if (shouldReadManually) {
+                    Log.d("MonitorViewModel", "$data")
+                    val rssi = data.rssi
+                    val bluetoothSignalQuality = data.bluetoothSignalQuality
 
-    private fun collectSensorData() {
-        viewModelScope.launch {
+                    var dataFrame = data.dataFrame
 
-            bluetoothData.collect { data ->
-                Log.d("MonitorViewModel", "$data")
-                val rssi = data.rssi
-                val bluetoothSignalQuality = data.bluetoothSignalQuality
+                    if (!validateBluetoothConnectivity(bluetoothSignalQuality) || dataFrame == null) {
+                        val monitorId = monitorUiState.value.monitorId
 
-                var dataFrame = data.dataFrame
+                        // Se agrega la funcion Let como seguridad, sin embargo el Id debe existir en esta parte
+                        dataFrame =
+                            monitorId.let { sensorTableUseCase.doGetLastRecord(it)?.dataFrame }
+                    }
 
-                if (!validateBluetoothConnectivity(bluetoothSignalQuality) || dataFrame == null) {
-                    val monitorId = monitorUiState.value.monitorId
+                    if (dataFrame != null) updateSensorData(dataFrame)
 
-                    // Se agrega la funcion Let como seguridad, sin embargo el Id debe existir en esta parte
-                    dataFrame = monitorId.let { sensorTableUseCase.doGetLastRecord(it)?.dataFrame }
-                }
-
-                if (dataFrame != null) updateSensorData(dataFrame)
-
-                _monitorUiState.update { currentUiState ->
-                    currentUiState.copy(
-                        signalIntensity = Pair(
-                            bluetoothSignalQuality, if (rssi != null) "$rssi dBm" else "N/A"
-                        ),
-                    )
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            signalIntensity = Pair(
+                                bluetoothSignalQuality, if (rssi != null) "$rssi dBm" else "N/A"
+                            ),
+                        )
+                    }
+                } else {
+                    delay(30000)
+                    shouldReadManually = true
                 }
             }
         }
@@ -117,53 +127,53 @@ class MonitorViewModel @Inject constructor(
 
     private fun updateSensorData(dataFrame: String) {
         _monitorUiState.update { currentUiState ->
+            val wheel = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
+
             val pressionValue = decodeDataFrame(dataFrame, MonitorDataFrame.PRESSION)
-            val pressionStatus =
+
+            val pressureStatus = SensorAlerts.valueOf(
                 decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
+            )
+
             val temperatureValue =
                 decodeDataFrame(dataFrame, MonitorDataFrame.TEMPERATURE)
-            val temperatureStatus =
-                decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
 
-            val pression = if (pressionValue.isDigitsOnly()) pressionValue.toFloat() else 0f
-            val temperature = if (temperatureValue.isDigitsOnly()) pressionValue.toFloat() else 0f
+            val temperatureStatus = SensorAlerts.valueOf(
+                decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
+            )
+
+            val pression = (pressionValue.toFloat() * 100).roundToInt() / 100f
+            val temperature =
+                if (temperatureValue.isDigitsOnly()) temperatureValue.toFloat() else 0f
+
+
+            val inAlert =
+                temperatureStatus != SensorAlerts.NoData || pressureStatus != SensorAlerts.NoData
+
+            val newMap =
+                currentUiState.wheelsWithAlert.toMutableMap().apply {
+                    this["P${wheel}"] = inAlert
+                }
 
             currentUiState.copy(
-                wheel = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL),
+                wheel = "P${wheel}",
                 battery = decodeAlertDataFrame(
                     dataFrame,
                     SensorAlertDataFrame.LOW_BATTERY
                 ),
-                pression = Pair(pression, SensorAlerts.valueOf(pressionStatus)),
-                temperature = Pair(temperature, SensorAlerts.valueOf(temperatureStatus)),
-                timestamp = getCurrentDate()
+                pression = Pair(pression, pressureStatus),
+                temperature = Pair(
+                    temperature,
+                    temperatureStatus
+                ),
+                timestamp = getCurrentDate("dd/MM/yyyy HH:mm:ss"),
+                wheelsWithAlert = newMap
             )
         }
     }
 
-    fun getCurrentRecordDate(): String? {
-        return try {
-            val fecha = monitorUiState.value.timestamp
-            if (fecha.isNotEmpty()) {
-                val inputFormat =
-                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                inputFormat.timeZone = TimeZone.getDefault()
-
-                val date = inputFormat.parse(monitorUiState.value.timestamp)
-
-                val outputFormat = SimpleDateFormat(
-                    "dd/MMMM/yyyy HH:mm:ss",
-                    Locale.getDefault()
-                )
-                outputFormat.format(date!!)
-            } else null
-        } catch (e: Exception) {
-            Log.e("MonitorViewModel", "$e")
-            "Fecha inválida"
-        }
-    }
-
     fun getSensorDataByWheel(wheelPosition: String) {
+        shouldReadManually = false
         viewModelScope.launch {
             val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
             when (sensorData) {
@@ -172,6 +182,7 @@ class MonitorViewModel @Inject constructor(
                         sensorData.data.filter { data -> data.sensorPosition == wheelPosition }[0]
                             .let {
                                 if (it.sensorPosition.contains("P")) {
+
                                     val tempAlert = when (it.highTemperature) {
                                         true -> SensorAlerts.HighTemperature
                                         false -> SensorAlerts.NoData
@@ -183,11 +194,21 @@ class MonitorViewModel @Inject constructor(
                                         else SensorAlerts.NoData
 
                                     _monitorUiState.update { currentUiState ->
+
+                                        val inAlert =
+                                            tempAlert != SensorAlerts.NoData || pressureAlert != SensorAlerts.NoData
+
+                                        val newMap =
+                                            currentUiState.wheelsWithAlert.toMutableMap().apply {
+                                                this[it.sensorPosition] = inAlert
+                                            }
+
                                         currentUiState.copy(
                                             wheel = it.sensorPosition,
                                             temperature = Pair(it.temperature, tempAlert),
                                             pression = Pair(it.psi, pressureAlert),
-                                            timestamp = it.ultimalectura
+                                            timestamp = convertDate(it.ultimalectura),
+                                            wheelsWithAlert = newMap
                                         )
                                     }
                                 }
@@ -195,10 +216,16 @@ class MonitorViewModel @Inject constructor(
                     }
                 }
 
-                is ResultApi.Error -> {
-
-                }
+                is ResultApi.Error -> {}
+                ResultApi.Loading -> {}
             }
+        }
+    }
+
+    fun getListSensorData() {
+        viewModelScope.launch {
+            val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
+            _positionsUiState.update { sensorData }
         }
     }
 

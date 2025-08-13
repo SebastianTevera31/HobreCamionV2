@@ -66,6 +66,7 @@ import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
+import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -120,37 +121,37 @@ fun HomeScreen(
     val menuItems = listOf(
         MenuItem(
             stringResource(R.string.brands),
-            HombreCamionScreens.MARCAS.name,
+            NetworkConfig.MARCAS,
             R.drawable.ic_brand
         ),
         MenuItem(
             stringResource(R.string.original_design),
-            HombreCamionScreens.DISENIO_ORIGINAL.name,
+            NetworkConfig.ORIGINAL,
             R.drawable.ic_tire_design
         ),
         MenuItem(
             stringResource(R.string.tire_sizes),
-            HombreCamionScreens.DIMENSIONES.name,
+            NetworkConfig.MEDIDAS_LLANTAS,
             R.drawable.ic_tire_size
         ),
         MenuItem(
             stringResource(R.string.products),
-            HombreCamionScreens.PRODUCTOS.name,
+            NetworkConfig.PRODUCTOS,
             R.drawable.ic_products
         ),
         MenuItem(
             stringResource(R.string.tire_register),
-            HombreCamionScreens.LLANTAS.name,
+            NetworkConfig.REGISTRO_LLANTAS,
             R.drawable.ic_tire_register
         ),
         MenuItem(
             stringResource(R.string.vehicle_register),
-            HombreCamionScreens.VEHICULOS.name,
+            NetworkConfig.REGISTRO_VEHICULOS,
             R.drawable.ic_truck
         ),
         MenuItem(
             stringResource(R.string.tire_change),
-            HombreCamionScreens.MONTAJE.name,
+            NetworkConfig.MONTAJE_DESMONTAJE,
             R.drawable.ic_tire_change
         ),
         MenuItem(
@@ -239,6 +240,7 @@ fun HomeScreen(
                     IconButton(
                         onClick = {
                             CoroutineScope(Dispatchers.IO).launch {
+                                HombreCamionService.stopService(context)
                                 homeViewModel.logout()
                                 withContext(Dispatchers.Main) {
                                     navController.navigate(NetworkConfig.LOGIN) {

@@ -3,6 +3,7 @@ package com.rfz.appflotal.core.util
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.icu.text.TimeZoneFormat
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -38,8 +39,15 @@ object Commons {
     }
 
 
-    fun getCurrentDate(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+    fun getCurrentDate(pattern: String = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"): String {
+        val sdf = SimpleDateFormat(pattern, Locale.getDefault())
         return sdf.format(Date())
+    }
+
+    fun convertDate(date: String): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val date = sdf.parse(date)!!
+        val outDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+        return outDate.format(date)
     }
 }

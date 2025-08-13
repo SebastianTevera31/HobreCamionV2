@@ -25,7 +25,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -59,7 +58,7 @@ import com.rfz.appflotal.domain.vehicle.VehicleByIdUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleCrudUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
-import com.rfz.appflotal.presentation.theme.ProyectoFscSoftTheme
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.brand.MarcasScreen
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
@@ -177,14 +176,12 @@ class InicioActivity : ComponentActivity() {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         setContent {
-            val context = LocalContext.current
-
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
             ) { isGranted ->
                 val todosConcedidos = isGranted.values.all { it }
                 if (todosConcedidos) {
-                    if (isServiceRunning(context, HombreCamionService::class.java)) {
+                    if (isServiceRunning(this@InicioActivity, HombreCamionService::class.java)) {
                         HombreCamionService.startService(this@InicioActivity)
                     }
                 } else {
@@ -192,7 +189,7 @@ class InicioActivity : ComponentActivity() {
                 }
             }
 
-            ProyectoFscSoftTheme {
+            HombreCamionTheme {
                 LocalizedApp {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
@@ -213,6 +210,7 @@ class InicioActivity : ComponentActivity() {
                         )
                         val userData by inicioScreenViewModel.userData.observeAsState()
 
+                        // Control de traslado de pantalla cuando se inicia la aplicacion
                         LaunchedEffect(hasInitialValidation, userData) {
                             if (hasInitialValidation) {
                                 userData?.let { data ->
@@ -264,8 +262,11 @@ class InicioActivity : ComponentActivity() {
                             }
                         }
 
+
                         loginViewModel.navigateToHome.observe(this) { shouldNavigate ->
                             if (shouldNavigate.first) {
+
+                                // Se verifica el plan de pago
                                 if (shouldNavigate.second == PaymentPlanType.Complete) {
                                     navController.navigate(NetworkConfig.HOME) {
                                         popUpTo(NetworkConfig.LOGIN) { inclusive = true }
@@ -285,7 +286,7 @@ class InicioActivity : ComponentActivity() {
                         ) {
                             composable(NetworkConfig.HOME) {
                                 ThrowServicePermission(
-                                    context = context,
+                                    context = this@InicioActivity,
                                     launcher = permissionLauncher
                                 )
 
@@ -295,6 +296,20 @@ class InicioActivity : ComponentActivity() {
                                     colors = MaterialTheme.colorScheme,
                                 )
                             }
+
+                            composable(HombreCamionScreens.MONITOR.name) {
+
+                                ThrowServicePermission(
+                                    context = this@InicioActivity,
+                                    launcher = permissionLauncher
+                                )
+
+                                MonitorScreen(
+                                    monitorViewModel = monitorViewModel,
+                                    navController = navController
+                                )
+                            }
+
                             composable(NetworkConfig.LOADING) { LoadingScreen() }
                             composable(NetworkConfig.LOGIN) {
                                 LoginScreen(
@@ -406,17 +421,6 @@ class InicioActivity : ComponentActivity() {
                                 val brandId = backStackEntry.arguments?.getInt("brandId") ?: 0
                                 val description = backStackEntry.arguments?.getString("desc")
                             }
-
-                            composable(HombreCamionScreens.MONITOR.name) {
-                                ThrowServicePermission(
-                                    context = this@InicioActivity,
-                                    launcher = permissionLauncher
-                                )
-
-                                MonitorScreen(
-                                    monitorViewModel = monitorViewModel
-                                )
-                            }
                         }
                     }
                 }
@@ -452,11 +456,6 @@ class InicioActivity : ComponentActivity() {
             }
         }
     }
-
-    fun Context.tienePermisos(vararg permisos: String) =
-        permisos.all {
-            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-        }
 
     fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
         val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
