@@ -17,10 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -48,18 +51,20 @@ fun PositionMonitorScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Position",
+                        text = pluralStringResource(R.plurals.posicion_tag, 1),
                         style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(2f)
                     )
                     Text(
-                        text = "Llanta", style = MaterialTheme.typography.titleSmall,
+                        text = pluralStringResource(R.plurals.llanta_tag, 1, ""),
+                        style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(2f)
                     )
                     Text(
-                        text = "Fecha", style = MaterialTheme.typography.titleSmall,
+                        text = stringResource(R.string.fecha),
+                        style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(2f)
                     )
@@ -69,7 +74,8 @@ fun PositionMonitorScreen(
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        text = "Temperatura", style = MaterialTheme.typography.titleSmall,
+                        text = stringResource(R.string.temperatura),
+                        style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp,
                         modifier = Modifier.weight(2f)

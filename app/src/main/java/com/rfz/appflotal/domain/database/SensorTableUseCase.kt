@@ -1,7 +1,9 @@
 package com.rfz.appflotal.domain.database
 
+import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.flotalSoft.SensorTpmsEntity
 import com.rfz.appflotal.data.repository.database.SensorTableRepository
+import java.util.Calendar
 import javax.inject.Inject
 
 class SensorTableUseCase @Inject constructor(private val sensorTableRepository: SensorTableRepository) {
@@ -13,7 +15,7 @@ class SensorTableUseCase @Inject constructor(private val sensorTableRepository: 
         monitorId: Int,
     ) = sensorTableRepository.getUnsentRecords(monitorId)
 
-    suspend fun doGetLastRecord(userId: Int): SensorTpmsEntity? {
+    suspend fun doGetLastRecord(userId: Int): List<SensorTpmsEntity?> {
         return sensorTableRepository.getLastRecord(userId)
     }
 

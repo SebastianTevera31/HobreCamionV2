@@ -34,6 +34,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,8 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import coil.compose.AsyncImage
-import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
-import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 
@@ -109,7 +110,7 @@ fun PanelLlantas(
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
-                text = "Llantas",
+                text = pluralStringResource(R.plurals.llanta_tag, 2),
                 color = Color("#2E3192".toColorInt()),
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium,
@@ -211,14 +212,17 @@ fun PanelSensor(
                     .padding(8.dp),
             ) {
                 Text(
-                    text = "Llanta $wheel",
+                    text = pluralStringResource(R.plurals.llanta_tag, 1, wheel),
                     color = Color("#2E3192".toColorInt()),
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = if (!timestamp.isNullOrEmpty()) "Actualizado: \n${timestamp}" else "N/A",
+                    text = if (!timestamp.isNullOrEmpty()) stringResource(
+                        R.string.actualizado,
+                        timestamp
+                    ) else "N/A",
                     fontSize = 12.sp,
                     lineHeight = 16.sp,
                     modifier = Modifier
@@ -235,8 +239,14 @@ fun PanelSensor(
                         .weight(1f, fill = false)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    CeldaDatosSensor(title = "Temperatura", value = "$temperature C")
-                    CeldaDatosSensor(title = "Presion", value = "$pressure PSI")
+                    CeldaDatosSensor(
+                        title = stringResource(R.string.temperatura),
+                        value = "$temperature ℃"
+                    )
+                    CeldaDatosSensor(
+                        title = stringResource(R.string.presion),
+                        value = "$pressure PSI"
+                    )
 //                    CeldaDatosSensor(title = "Profundidad", value = "12mm")
                 }
             }
@@ -256,7 +266,7 @@ fun PanelSensor(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Alertas activas",
+                    text = stringResource(R.string.alertas_activas),
                     color = Color("#2E3192".toColorInt()),
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
@@ -267,11 +277,11 @@ fun PanelSensor(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
                     if (temperatureStatus == SensorAlerts.HighTemperature) {
-                        CeldaAlerta(wheel, temperatureStatus.message)
+                        CeldaAlerta(wheel, stringResource(temperatureStatus.message))
                     }
 
                     if (pressureStatus != SensorAlerts.NoData) {
-                        CeldaAlerta(wheel, pressureStatus.message)
+                        CeldaAlerta(wheel, stringResource(pressureStatus.message))
                     }
                 }
             }
@@ -282,6 +292,29 @@ fun PanelSensor(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DiagramMonitorScreenPreview() {
+    val data = "aaa1410e630147e85e00124f08f4"
+    HombreCamionTheme {
+        DiagramaMonitorScreen(
+            wheel = "P1",
+            pressure = 0.0f,
+            pressionStatus = SensorAlerts.LowPressure,
+            temperature = 29f,
+            temperatureStatus = SensorAlerts.HighTemperature,
+            timestamp = "21/07/2025 14:20:00",
+            imageUrl = "TODO()",
+            numWheels = 12,
+            getSensorData = {},
+            wheelsWithAlert = emptyMap(),
+            modifier = Modifier
+                .fillMaxSize()
+                .safeDrawingPadding(),
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true, locale = "en")
+@Composable
+fun DiagramMonitorScreenEnglishPreview() {
     val data = "aaa1410e630147e85e00124f08f4"
     HombreCamionTheme {
         DiagramaMonitorScreen(

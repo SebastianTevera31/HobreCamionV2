@@ -21,8 +21,10 @@ interface SensorDao {
     @Query("SELECT * FROM sensorTpms WHERE monitor_id = :monitorId AND sendStatus = 0")
     suspend fun getUnsentRecords(monitorId: Int): List<SensorTpmsEntity?>
 
-    @Query("SELECT * FROM sensorTpms WHERE monitor_id = :monitorId ORDER BY rowid DESC LIMIT 1")
-    suspend fun getLastRecord(monitorId: Int): SensorTpmsEntity?
+    @Query("SELECT * FROM sensorTpms AS st1 WHERE monitor_id = :monitorId " +
+            "AND timestamp = (SELECT MAX(st2.timestamp) FROM sensorTpms AS st2 " +
+            "WHERE st1.sensor_id = st2.sensor_id) ORDER BY st1.timestamp DESC")
+    suspend fun getLastRecords(monitorId: Int): List<SensorTpmsEntity?>
 
     @Query("SELECT EXISTS (SELECT 1 FROM sensorTpms WHERE sensor_id = :sensorId)")
     suspend fun exist(sensorId: String): Boolean

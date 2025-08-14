@@ -12,10 +12,6 @@
     <string name="tire_change" translatable="false">Montaje/Desmontaje</string>
     <string name="copyright" translatable="false">© %1$d Flotal Control</string>
 
-
-
-
-
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_recuperar_contraseña">RecuperarContraseñaActivity</string>
     <string name="title_activity_otp">OtpActivity</string>
@@ -64,4 +60,25 @@
     <string name="profile">Perfil</string>
     <string name="logo_description">Logo Flotal</string>
     <string name="only_languages_allowed">Solo se permiten \'es\' y \'en\'.</string>
+    <string name="diagrama">Diagrama</string>
+    <plurals name="posicion_tag">
+        <item quantity="one">Posicion</item>
+        <item quantity="other">Posiciones</item>
+    </plurals>
+
+    <string name="monitoreo">Monitoreo</string>
+    <plurals name="llanta_tag">
+        <item quantity="one">Wheel %1$s</item>
+        <item quantity="other">Llantas</item>
+    </plurals>
+    <string name="temperatura">Temperatura</string>
+    <string name="presion">Presion</string>
+    <string name="actualizado">Actualizado: \n%1$s</string>
+    <string name="llantas">Llantas</string>
+    <string name="alertas_activas">Alertas activas</string>
+    <string name="presion_alta">Presion alta</string>
+    <string name="presion_baja">Presion baja</string>
+    <string name="temperatura_alta">Temperatura alta</string>
+    <string name="sin_datos">Sin datos</string>
+    <string name="fecha">Fecha</string>
 </resources>

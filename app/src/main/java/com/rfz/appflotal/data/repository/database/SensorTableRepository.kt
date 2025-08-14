@@ -11,11 +11,7 @@ class SensorTableRepository @Inject constructor(
     private val sensorDao: SensorDao,
 ) {
     suspend fun insert(sensorTpmsEntity: SensorTpmsEntity) {
-        if (sensorTpmsEntity.monitorId != null) {
-            sensorDao.insert(sensorTpmsEntity)
-        } else {
-            Log.d("SensorTable", "Registro no guardado")
-        }
+        sensorDao.insert(sensorTpmsEntity)
     }
 
     suspend fun deleteOldRecords(vehicleId: Int) = sensorDao.deleteOldRecords(vehicleId)
@@ -24,8 +20,8 @@ class SensorTableRepository @Inject constructor(
         vehicleId: Int,
     ) = sensorDao.getUnsentRecords(vehicleId)
 
-    suspend fun getLastRecord(vehicleId: Int): SensorTpmsEntity? =
-        sensorDao.getLastRecord(vehicleId)
+    suspend fun getLastRecord(userId: Int): List<SensorTpmsEntity?> =
+        sensorDao.getLastRecords(userId)
 
     suspend fun exist(sensorId: String): Boolean = sensorDao.exist(sensorId)
 

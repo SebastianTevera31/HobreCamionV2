@@ -4,9 +4,11 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
@@ -31,8 +33,11 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 
-enum class SensorAlerts(val message: String = "") {
-    HighPressure("Persion alta"), LowPressure("Presion baja"), HighTemperature("Temperatura alta"), NoData
+enum class SensorAlerts(@StringRes val message: Int) {
+    HighPressure(R.string.presion_alta),
+    LowPressure(R.string.presion_baja),
+    HighTemperature(R.string.temperatura_alta),
+    NoData(R.string.sin_datos)
 }
 
 
@@ -77,6 +82,9 @@ class MonitorViewModel @Inject constructor(
                                     wheelsWithAlert = wheelsWithAlert
                                 )
                             }
+
+                            // Recibe datos Bluetooth
+                            readBluetoothData()
                         }
                     }
                 }
@@ -85,9 +93,6 @@ class MonitorViewModel @Inject constructor(
                 is ResultApi.Loading -> {}
             }
         }
-
-        // Recibe datos Bluetooth
-        readBluetoothData()
     }
 
     private fun readBluetoothData() {
@@ -98,17 +103,18 @@ class MonitorViewModel @Inject constructor(
                     val rssi = data.rssi
                     val bluetoothSignalQuality = data.bluetoothSignalQuality
 
-                    var dataFrame = data.dataFrame
+                    val dataFrame = data.dataFrame
 
                     if (!validateBluetoothConnectivity(bluetoothSignalQuality) || dataFrame == null) {
                         val monitorId = monitorUiState.value.monitorId
-
+                        Log.d("MonitorViewModel", "Monitor ID $monitorId")
                         // Se agrega la funcion Let como seguridad, sin embargo el Id debe existir en esta parte
-                        dataFrame =
-                            monitorId.let { sensorTableUseCase.doGetLastRecord(it)?.dataFrame }
-                    }
-
-                    if (dataFrame != null) updateSensorData(dataFrame)
+                        monitorId.let {
+                            sensorTableUseCase.doGetLastRecord(it).forEach { data ->
+                                if (data != null) updateSensorData(data.dataFrame)
+                            }
+                        }
+                    } else updateSensorData(dataFrame)
 
                     _monitorUiState.update { currentUiState ->
                         currentUiState.copy(
@@ -166,7 +172,7 @@ class MonitorViewModel @Inject constructor(
                     temperature,
                     temperatureStatus
                 ),
-                timestamp = getCurrentDate("dd/MM/yyyy HH:mm:ss"),
+                timestamp = getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss"),
                 wheelsWithAlert = newMap
             )
         }

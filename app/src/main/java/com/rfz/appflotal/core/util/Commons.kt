@@ -39,9 +39,12 @@ object Commons {
     }
 
 
-    fun getCurrentDate(pattern: String = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"): String {
+    fun getCurrentDate(
+        date: Date = Date(),
+        pattern: String = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+    ): String {
         val sdf = SimpleDateFormat(pattern, Locale.getDefault())
-        return sdf.format(Date())
+        return sdf.format(date)
     }
 
     fun convertDate(date: String): String {
