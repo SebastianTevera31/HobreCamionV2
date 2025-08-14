@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,6 +37,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -163,7 +163,7 @@ fun HomeScreen(
 
     val scope = rememberCoroutineScope()
 
-    val primaryColor = Color(0xFF4A3DAD)
+    val primaryColor = MaterialTheme.colorScheme.primary
     val primaryLight = Color(0xFF6A5DD9)
     val secondaryColor = Color(0xFF5C4EC9)
     val accentColor = Color(0xFF7D6BFF)
@@ -173,13 +173,13 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.titleLarge
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = stringResource(R.string.logo_description),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.height(54.dp)
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -221,7 +221,7 @@ fun HomeScreen(
                                             else
                                                 Color.Transparent
                                         )
-                                        .padding(6.dp)
+                                        .padding(horizontal = 4.dp)
                                 ) {
                                     Text(
                                         text = display,
@@ -279,7 +279,7 @@ fun HomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(80.dp)
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(primaryColor, primaryLight),
@@ -303,19 +303,10 @@ fun HomeScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp),
+                        .padding(8.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.logo),
-                        contentDescription = stringResource(R.string.logo_description),
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .height(80.dp)
-                            .padding(bottom = 8.dp)
-                    )
-
                     Text(
                         text = stringResource(R.string.welcome, userName),
                         color = Color.White,
