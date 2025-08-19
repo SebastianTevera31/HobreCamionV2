@@ -68,7 +68,7 @@
 
     <string name="monitoreo">Monitoreo</string>
     <plurals name="llanta_tag">
-        <item quantity="one">Wheel %1$s</item>
+        <item quantity="one">Llanta %1$s</item>
         <item quantity="other">Llantas</item>
     </plurals>
     <string name="temperatura">Temperatura</string>
@@ -81,4 +81,9 @@
     <string name="temperatura_alta">Temperatura alta</string>
     <string name="sin_datos">Sin datos</string>
     <string name="fecha">Fecha</string>
+    <string name="buscar_registros">Buscar registros</string>
+    <string name="buscar">Buscar</string>
+    <string name="recientes">Recientes</string>
+    <string name="no_resultados">No se encontraron resultados</string>
+    <string name="consultar">Consultar</string>
 </resources>

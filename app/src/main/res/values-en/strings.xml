@@ -65,8 +65,8 @@
         <item quantity="other">Positions</item>
     </plurals>
     <plurals name="llanta_tag">
-        <item quantity="one">Wheel %1$s</item>
-        <item quantity="other">Wheels</item>
+        <item quantity="one">Tire %1$s</item>
+        <item quantity="other">Tires</item>
     </plurals>
     <string name="monitoreo">Monitoring</string>
     <string name="temperatura">Temperature</string>
@@ -79,4 +79,9 @@
     <string name="temperatura_alta">High temperature</string>
     <string name="sin_datos">No Data</string>
     <string name="fecha">Date</string>
+    <string name="buscar_registros">Search records</string>
+    <string name="buscar">Search</string>
+    <string name="recientes">Recent</string>
+    <string name="no_resultados">Results no found</string>
+    <string name="consultar">Search</string>
 </resources>

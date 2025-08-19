@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,73 +25,79 @@ import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
-import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import com.rfz.appflotal.presentation.theme.textColor
 
 @Composable
-fun PositionMonitorScreen(
-    sensorDataList: List<DiagramMonitorResponse>?,
+fun CurrentPositionDataView(
+    sensorDataList: List<MonitorTireByDateResponse>?,
+    isOnSearch: Boolean,
     modifier: Modifier = Modifier
 ) {
     Surface(
         shape = RoundedCornerShape(8.dp),
         shadowElevation = 16.dp,
-        modifier = modifier
+        modifier = modifier,
+        color = Color.White
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            //Cabecera
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(32.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = pluralStringResource(R.plurals.posicion_tag, 1),
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(2f)
-                    )
-                    Text(
-                        text = pluralStringResource(R.plurals.llanta_tag, 1, ""),
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(2f)
-                    )
-                    Text(
-                        text = stringResource(R.string.fecha),
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(2f)
-                    )
-                    Text(
-                        text = "PSI", style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = stringResource(R.string.temperatura),
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        modifier = Modifier.weight(2f)
-                    )
+        if (sensorDataList != null) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                //Cabecera
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(32.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = pluralStringResource(R.plurals.posicion_tag, 1),
+                            style = MaterialTheme.typography.titleSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(2f)
+                        )
+                        Text(
+                            text = pluralStringResource(R.plurals.llanta_tag, 1, ""),
+                            style = MaterialTheme.typography.titleSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(2f)
+                        )
+                        Text(
+                            text = stringResource(R.string.fecha),
+                            style = MaterialTheme.typography.titleSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(2f)
+                        )
+                        Text(
+                            text = "PSI", style = MaterialTheme.typography.titleSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = stringResource(R.string.temperatura),
+                            style = MaterialTheme.typography.titleSmall,
+                            textAlign = TextAlign.Center,
+                            fontSize = 12.sp,
+                            modifier = Modifier.weight(2f)
+                        )
+                    }
                 }
-            }
 
-            if (sensorDataList != null) {
                 if (sensorDataList.isNotEmpty()) {
                     itemsIndexed(
-                        items = sensorDataList, key = { _, it -> it.idDiagramaMonitor }
+                        items = sensorDataList
                     ) { index, data ->
                         val color = if (index % 2 == 0) Color(0x402E3192) else Color.White
                         SensorDataRow(
-                            position = data.sensorPosition,
+                            position = data.tirePosition,
                             llanta = data.tireNumber,
-                            fecha = data.ultimalectura,
+                            fecha = if (isOnSearch) convertDate(
+                                date = data.sensorDate,
+                                convertFormat = "HH:mm:ss"
+                            ) else convertDate(data.sensorDate),
                             psi = data.psi,
                             temperatura = data.temperature,
                             color = color
@@ -101,9 +106,9 @@ fun PositionMonitorScreen(
                 } else {
                     item { NoPositionDataView() }
                 }
-            } else {
-                item { NoPositionDataView() }
             }
+        } else {
+            NoPositionDataView()
         }
     }
 }
@@ -113,8 +118,8 @@ fun SensorDataRow(
     position: String,
     llanta: String,
     fecha: String,
-    psi: Float,
-    temperatura: Float,
+    psi: Int,
+    temperatura: Int,
     color: Color,
     modifier: Modifier = Modifier
 ) {
@@ -137,7 +142,7 @@ fun SensorDataRow(
             modifier = Modifier.weight(2f)
         )
         Text(
-            text = convertDate(fecha), style = MaterialTheme.typography.titleSmall,
+            text = fecha, style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(2f)
         )
@@ -156,8 +161,12 @@ fun SensorDataRow(
 
 @Composable
 fun NoPositionDataView(modifier: Modifier = Modifier) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text(text = "No se han registrado datos", modifier.fillMaxSize())
+    Box(modifier = modifier.fillMaxSize()) {
+        Text(
+            text = stringResource(R.string.no_resultados),
+            modifier = Modifier.align(Alignment.Center),
+            color = textColor.copy(alpha = 0.6f)
+        )
     }
 }
 
@@ -167,10 +176,24 @@ fun NoPositionDataView(modifier: Modifier = Modifier) {
 fun PreviewPositionMonitorScreen() {
     val mockSensorDataList = listOf(
         DiagramMonitorResponse(
-            1, 101, "AA:BB:CC:DD:EE:01", 1, "Eje delantero",
-            "Izquierda", "Lado izquierdo", 501, "Sensor A",
-            1001, "Config estándar", 32.5f, "RR01", 28.0f,
-            false, lowPressure = false, highPressure = false, ultimalectura = "2025-08-12'T'10:30:00"
+            1,
+            101,
+            "AA:BB:CC:DD:EE:01",
+            1,
+            "Eje delantero",
+            "P1",
+            "Lado izquierdo",
+            501,
+            "Sensor A",
+            1001,
+            "Config estándar",
+            32.5f,
+            "RR01",
+            28.0f,
+            false,
+            lowPressure = false,
+            highPressure = false,
+            ultimalectura = "2025-08-12'T'10:30:00"
         ),
         DiagramMonitorResponse(
             2,
@@ -213,7 +236,4 @@ fun PreviewPositionMonitorScreen() {
             ultimalectura = "2025-08-12'T'10:40:00"
         )
     )
-    HombreCamionTheme {
-        PositionMonitorScreen(mockSensorDataList, modifier = Modifier.safeContentPadding())
-    }
 }

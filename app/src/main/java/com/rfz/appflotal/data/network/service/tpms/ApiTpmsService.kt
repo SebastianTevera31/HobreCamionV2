@@ -3,6 +3,8 @@ package com.rfz.appflotal.data.network.service.tpms
 import android.util.Log
 import com.rfz.appflotal.data.model.tpms.ConfigurationByIdMonitorResponse
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
+import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.model.tpms.SensorRequest
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.client.tpms.ApiTpmsClient
@@ -32,8 +34,28 @@ class ApiTpmsService @Inject constructor(
 
     suspend fun getConfigurationByIdMonitor(idMonitor: Int): ResultApi<List<ConfigurationByIdMonitorResponse>?> {
         return requestHelper("getConfigurationByIdMonitor") {
-            val token =  getTasksUseCase().first()[0].fld_token
+            val token = getTasksUseCase().first()[0].fld_token
             apiTpmsClient.getConfigurationByIdMonitor("bearer $token", idMonitor)
+        }
+    }
+
+    suspend fun getMonitorTireByDate(
+        monitorId: Int,
+        position: String,
+        fldDate: String
+    ): ResultApi<List<MonitorTireByDateResponse>?> {
+        return requestHelper("getMonitorTireByDate") {
+            val token = getTasksUseCase().first()[0].fld_token
+            apiTpmsClient.getMonitorTireByDate("bearer $token", monitorId, fldDate, position)
+        }
+    }
+
+    suspend fun getPositionCoordinates(
+        monitorId: Int
+    ): ResultApi<List<PositionCoordinatesResponse>?> {
+        return requestHelper("getPositionCoordinates") {
+            val token = getTasksUseCase().first()[0].fld_token
+            apiTpmsClient.getPositionCoordinates("bearer $token", monitorId)
         }
     }
 

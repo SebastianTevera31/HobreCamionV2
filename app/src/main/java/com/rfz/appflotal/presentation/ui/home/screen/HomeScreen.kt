@@ -68,6 +68,9 @@ import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,6 +84,8 @@ import java.util.Locale
 fun HomeScreen(
     navController: NavController,
     homeViewModel: HomeViewModel,
+    monitorViewModel: MonitorViewModel,
+    paymentPlan: PaymentPlanType,
     colors: ColorScheme
 ) {
     val context = LocalContext.current
@@ -285,10 +290,6 @@ fun HomeScreen(
                             colors = listOf(primaryColor, primaryLight),
                             startY = 0f,
                             endY = 500f
-                        ),
-                        shape = RoundedCornerShape(
-                            bottomStart = 77.dp,
-                            bottomEnd = 77.dp
                         )
                     )
                     .shadow(
@@ -323,56 +324,64 @@ fun HomeScreen(
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
-                    .background(surfaceColor)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 32.dp,
-                            topEnd = 32.dp
-                        )
-                    )
-            ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(menuItems) { item ->
-                        ElegantMenuCard(
-                            title = item.title,
-                            iconRes = item.iconRes,
-                            onClick = { navController.navigate(item.route) },
-                            primaryColor = primaryColor,
-                            secondaryColor = secondaryColor,
-                            cardBackground = cardBackground
-                        )
-                    }
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                primaryColor.copy(alpha = 0.9f),
-                                secondaryColor.copy(alpha = 0.9f)
+            if (paymentPlan == PaymentPlanType.Complete) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                        .background(surfaceColor)
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 32.dp,
+                                topEnd = 32.dp
                             )
                         )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.copyright, LocalDate.now().year),
-                    color = Color.White.copy(alpha = 0.95f),
-                    style = MaterialTheme.typography.labelMedium
+                ) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(menuItems) { item ->
+                            ElegantMenuCard(
+                                title = item.title,
+                                iconRes = item.iconRes,
+                                onClick = { navController.navigate(item.route) },
+                                primaryColor = primaryColor,
+                                secondaryColor = secondaryColor,
+                                cardBackground = cardBackground
+                            )
+                        }
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    primaryColor.copy(alpha = 0.9f),
+                                    secondaryColor.copy(alpha = 0.9f)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.copyright, LocalDate.now().year),
+                        color = Color.White.copy(alpha = 0.95f),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            } else {
+                MonitorScreen(
+                    monitorViewModel = monitorViewModel,
+                    navController = navController,
+                    paymentPlan = paymentPlan
                 )
             }
         }

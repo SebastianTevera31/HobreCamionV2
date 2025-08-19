@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -47,10 +48,21 @@ object Commons {
         return sdf.format(date)
     }
 
-    fun convertDate(date: String): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+    fun convertDate(
+        date: String,
+        initialFormat: String = "yyyy-MM-dd'T'HH:mm:ss",
+        convertFormat: String = "dd/MM/yyyy HH:mm:ss"
+    ): String {
+        val sdf = SimpleDateFormat(initialFormat, Locale.getDefault())
         val date = sdf.parse(date)!!
-        val outDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+        val outDate = SimpleDateFormat(convertFormat, Locale.getDefault())
         return outDate.format(date)
+    }
+
+    fun addOneDay(date: Date): Date {
+        val cal = Calendar.getInstance()
+        cal.time = date
+        cal.add(Calendar.DAY_OF_MONTH, 1)
+        return cal.time
     }
 }

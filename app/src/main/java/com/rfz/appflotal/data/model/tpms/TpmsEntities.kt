@@ -1,7 +1,6 @@
 package com.rfz.appflotal.data.model.tpms
 
 import com.google.gson.annotations.SerializedName
-import kotlinx.serialization.SerialName
 
 // api/Tpms/SensorData
 data class SensorRequest(
@@ -20,14 +19,12 @@ data class CrudDiagramMonitorRequest(
 
 data class TpmsResponse(val id: Int, val message: String)
 
-data class MonitorDataByDateResponse(
-    @SerializedName("fld_lowBits") val fldLowBits: String,
-    @SerializedName("fld_mac") val fldMac: String,
-    @SerializedName("fld_dateData") val fldDateData: String,
-    @SerializedName("fld_temperature") val fldTemperature: Float,
-    @SerializedName("fld_sensorId") val fldSensorId: String,
-    @SerializedName("fld_position") val fldPosition: String,
-    @SerializedName("fld_psi") val fldPsi: Float
+data class MonitorTireByDateResponse(
+    @SerializedName("tirePosition") val tirePosition: String,
+    @SerializedName("tireNumber") val tireNumber: String,
+    @SerializedName("sensorDate") val sensorDate: String,
+    @SerializedName("psi") val psi: Int,
+    @SerializedName("temperature") val temperature: Int,
 )
 
 data class MonitorAlertsHistoryResponse(
@@ -68,4 +65,13 @@ data class DiagramMonitorResponse(
     @SerializedName("lowPressure") val lowPressure: Boolean,
     @SerializedName("highPressure") val highPressure: Boolean,
     @SerializedName("ultimalectura") val ultimalectura: String,
+)
+
+data class PositionCoordinatesResponse(
+    @SerializedName("id_positionCoordinates") val positionCoordinatesId: Int,
+    @SerializedName("id_monitor") val monitorId: Int,
+    @SerializedName("fld_positionx") val fldPositionX: Int,
+    @SerializedName("id_positiony") val fldPositionY: Int,
+    @SerializedName("id_sensor") val sensorId: Int,
+    @SerializedName("position") val position: Int,
 )

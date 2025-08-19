@@ -4,7 +4,8 @@ import com.rfz.appflotal.data.model.tpms.ConfigurationByIdMonitorResponse
 import com.rfz.appflotal.data.model.tpms.CrudDiagramMonitorRequest
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorAlertsHistoryResponse
-import com.rfz.appflotal.data.model.tpms.MonitorDataByDateResponse
+import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.model.tpms.SensorRequest
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import retrofit2.Response
@@ -26,12 +27,13 @@ interface ApiTpmsClient {
         @Body request: CrudDiagramMonitorRequest
     )
 
-    @GET("api/Tpms/MonitorDataByDate")
-    suspend fun getMonitorDataByDate(
-
-        @Query("id_monitor") idMonitor: Int,
-        @Query("fld_date") fldDate: String
-    ): Response<List<MonitorDataByDateResponse>>
+    @GET("api/DiagramMonitor/MonitorTireByDate")
+    suspend fun getMonitorTireByDate(
+        @Header("Authorization") token: String,
+        @Query("id_monitor") monitorId: Int,
+        @Query("fld_date") fldDate: String,
+        @Query("position") position: String
+    ): Response<List<MonitorTireByDateResponse>?>
 
     @GET("api/Tpms/MonitorAlertsHistory")
     suspend fun getMonitorAlertsHistory(
@@ -52,4 +54,10 @@ interface ApiTpmsClient {
 
     @GET("api/show_claims")
     suspend fun checkLogin(): Response<Unit>
+
+    @GET("api/positionCoordinates/getPositionCoordinates")
+    suspend fun getPositionCoordinates(
+        @Header("Authorization") token: String,
+        @Query("id_monitor") idMonitor: Int
+    ): Response<List<PositionCoordinatesResponse>>
 }

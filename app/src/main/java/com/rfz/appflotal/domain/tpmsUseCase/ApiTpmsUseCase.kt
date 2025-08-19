@@ -2,6 +2,8 @@ package com.rfz.appflotal.domain.tpmsUseCase
 
 import com.rfz.appflotal.data.model.tpms.ConfigurationByIdMonitorResponse
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
+import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.model.tpms.SensorRequest
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.service.ResultApi
@@ -25,4 +27,15 @@ class ApiTpmsUseCase @Inject constructor(private val apiTpmsRepository: ApiTpmsR
         return apiTpmsRepository.doGetConfigurationById(monitorId)
     }
 
+    suspend fun doGetPositionCoordinates(monitorId: Int): ResultApi<List<PositionCoordinatesResponse>?> {
+        return apiTpmsRepository.doGetPositionCoordinates(monitorId)
+    }
+
+    suspend fun doGetMonitorTireByDate(
+        monitorId: Int,
+        position: String,
+        date: String
+    ): ResultApi<List<MonitorTireByDateResponse>?> {
+        return apiTpmsRepository.doGetMonitorTireByDate(monitorId, position, date)
+    }
 }

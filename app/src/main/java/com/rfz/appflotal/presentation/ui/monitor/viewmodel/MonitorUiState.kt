@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
+import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
+import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 
 data class MonitorUiState(
@@ -18,3 +20,13 @@ data class MonitorUiState(
     val chassisImageUrl: String = "",
     val wheelsWithAlert: Map<String, Boolean> = emptyMap()
 )
+
+fun DiagramMonitorResponse.toTireData(): MonitorTireByDateResponse {
+    return MonitorTireByDateResponse(
+        tirePosition = sensorPosition,
+        tireNumber = tireNumber,
+        sensorDate = ultimalectura,
+        psi = psi.toInt(),
+        temperature = temperature.toInt()
+    )
+}

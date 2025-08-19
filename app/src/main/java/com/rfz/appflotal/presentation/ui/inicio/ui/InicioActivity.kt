@@ -225,28 +225,20 @@ class InicioActivity : ComponentActivity() {
                                         val diferenciaHoras =
                                             ChronoUnit.HOURS.between(fechaUsuario, fechaActual)
 
+                                        val paymentPlan = when (data.paymentPlan) {
+                                            PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
+                                            PaymentPlanType.OnlyTpms.planName -> PaymentPlanType.OnlyTpms
+                                            else -> PaymentPlanType.None
+                                        }
+
                                         if (diferenciaHoras < 24) {
-                                            val paymentPlan = when (data.paymentPlan) {
-                                                PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
-                                                PaymentPlanType.OnlyTpms.planName -> PaymentPlanType.OnlyTpms
-                                                else -> PaymentPlanType.None
-                                            }
-
-                                            if (paymentPlan == PaymentPlanType.Complete) {
-                                                navController.navigate(NetworkConfig.HOME) {
-                                                    popUpTo(NetworkConfig.LOADING) {
-                                                        inclusive = true
-                                                    }
-                                                }
-                                            } else {
-                                                navController.navigate(HombreCamionScreens.MONITOR.name) {
-                                                    popUpTo(NetworkConfig.LOADING) {
-                                                        inclusive = true
-                                                    }
+                                            navController.navigate(
+                                                "${NetworkConfig.HOME}/$paymentPlan"
+                                            ) {
+                                                popUpTo(NetworkConfig.LOADING) {
+                                                    inclusive = true
                                                 }
                                             }
-
-
                                         } else {
                                             inicioScreenViewModel.deleteUserData()
                                             navController.navigate(NetworkConfig.LOGIN) {
@@ -265,16 +257,8 @@ class InicioActivity : ComponentActivity() {
 
                         loginViewModel.navigateToHome.observe(this) { shouldNavigate ->
                             if (shouldNavigate.first) {
-
-                                // Se verifica el plan de pago
-                                if (shouldNavigate.second == PaymentPlanType.Complete) {
-                                    navController.navigate(NetworkConfig.HOME) {
-                                        popUpTo(NetworkConfig.LOGIN) { inclusive = true }
-                                    }
-                                } else {
-                                    navController.navigate(HombreCamionScreens.MONITOR.name) {
-                                        popUpTo(NetworkConfig.LOGIN) { inclusive = true }
-                                    }
+                                navController.navigate("${NetworkConfig.HOME}/${shouldNavigate.second.name}") {
+                                    popUpTo(NetworkConfig.LOGIN) { inclusive = true }
                                 }
                                 loginViewModel.onNavigateToHomeComplete()
                             }
@@ -284,15 +268,26 @@ class InicioActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = NetworkConfig.LOADING
                         ) {
-                            composable(NetworkConfig.HOME) {
+                            composable(
+                                "${NetworkConfig.HOME}/{paymentPlan}",
+                                arguments = listOf(navArgument("paymentPlan") {
+                                    type = NavType.StringType
+                                })
+                            ) { backStackEntry ->
+                                val paymentPlan = backStackEntry.arguments?.getString("paymentPlan")
+                                    ?: PaymentPlanType.Complete.name
+
+                                val paymentSelected = PaymentPlanType.valueOf(paymentPlan)
+
                                 ThrowServicePermission(
                                     context = this@InicioActivity,
                                     launcher = permissionLauncher
                                 )
-
                                 HomeScreen(
                                     navController = navController,
                                     homeViewModel = homeViewModel,
+                                    monitorViewModel = monitorViewModel,
+                                    paymentPlan = paymentSelected,
                                     colors = MaterialTheme.colorScheme,
                                 )
                             }
@@ -306,7 +301,8 @@ class InicioActivity : ComponentActivity() {
 
                                 MonitorScreen(
                                     monitorViewModel = monitorViewModel,
-                                    navController = navController
+                                    navController = navController,
+                                    paymentPlan = PaymentPlanType.Complete
                                 )
                             }
 

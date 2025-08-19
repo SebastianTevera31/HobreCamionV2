@@ -38,10 +38,9 @@ data class BluetoothData(
 )
 
 enum class BluetoothSignalQuality {
-    Excelente, Aceptable, Pobre, Desconocida
+    Excelente, Aceptable, Pobre, Desconocida, Conectando
 }
 
-@RequiresApi(Build.VERSION_CODES.M)
 class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     BluetoothRepository {
 
@@ -135,8 +134,13 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun connect(macAddress: String) {
-        val device = bluetoothAdapter?.getRemoteDevice(macAddress)
-        bluetoothGatt = device?.connectGatt(context, true, gattCallback)
+        val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}\$")
+        if (regex.matches(macAddress)) {
+            val device = bluetoothAdapter?.getRemoteDevice(macAddress)
+            bluetoothGatt = device?.connectGatt(context, true, gattCallback)
+        } else {
+            Log.e("BluetoothRepository", "Bluetooth Address is not valid")
+        }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)

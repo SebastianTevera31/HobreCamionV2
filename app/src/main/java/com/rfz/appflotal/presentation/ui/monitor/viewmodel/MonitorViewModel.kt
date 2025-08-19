@@ -13,6 +13,8 @@ import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
+import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.network.service.ResultApi
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
@@ -40,7 +42,6 @@ enum class SensorAlerts(@StringRes val message: Int) {
     NoData(R.string.sin_datos)
 }
 
-
 @HiltViewModel
 class MonitorViewModel @Inject constructor(
     private val apiTpmsUseCase: ApiTpmsUseCase,
@@ -56,6 +57,10 @@ class MonitorViewModel @Inject constructor(
         MutableStateFlow<ResultApi<List<DiagramMonitorResponse>?>>(ResultApi.Loading)
 
     val positionsUiState = _positionsUiState.asStateFlow()
+
+    private val _monitorTireUiState =
+        MutableStateFlow<ResultApi<List<MonitorTireByDateResponse>?>>(ResultApi.Success(emptyList()))
+    val monitorTireUiState = _monitorTireUiState.asStateFlow()
 
     var shouldReadManually = true
 
@@ -178,6 +183,13 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
+
+    fun getPositionCoordinates(monitorId: Int) {
+        viewModelScope.launch {
+            apiTpmsUseCase.doGetPositionCoordinates(monitorUiState.value.monitorId)
+        }
+    }
+
     fun getSensorDataByWheel(wheelPosition: String) {
         shouldReadManually = false
         viewModelScope.launch {
@@ -234,6 +246,33 @@ class MonitorViewModel @Inject constructor(
             _positionsUiState.update { sensorData }
         }
     }
+
+    fun getTireDataByDate(
+        position: String,
+        date: String
+    ) {
+        viewModelScope.launch {
+            _monitorTireUiState.update { ResultApi.Loading }
+
+            val tireData = apiTpmsUseCase.doGetMonitorTireByDate(
+                monitorUiState.value.monitorId,
+                position,
+                date
+            )
+
+            when (tireData) {
+                is ResultApi.Success -> {
+                    _monitorTireUiState.update { tireData }
+                }
+
+                is ResultApi.Error -> {}
+                ResultApi.Loading -> {}
+            }
+        }
+    }
+
+    fun convertToTireData(diagramData: List<DiagramMonitorResponse>?): List<MonitorTireByDateResponse> =
+        diagramData?.map { it.toTireData() } ?: emptyList()
 
     fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
         val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager

@@ -25,15 +25,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
@@ -61,36 +68,50 @@ fun DiagramaMonitorScreen(
     getSensorData: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isLoading by remember { mutableStateOf(true) }
+
     Column(modifier = modifier) {
         Box {
             AsyncImage(
-                model = imageUrl,
+                model = ImageRequest
+                    .Builder(LocalContext.current)
+                    .data(imageUrl)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
                     .height(200.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                onSuccess = { isLoading = false },
+                onError = { isLoading = false }
             )
         }
 
-        // Datos Sensor
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(top = 8.dp)
-        ) {
-            PanelSensor(
-                wheel = wheel,
-                temperature = temperature,
-                pressure = pressure,
-                timestamp = timestamp,
-                temperatureStatus = temperatureStatus,
-                pressureStatus = pressionStatus,
-                modifier = Modifier.weight(1f)
-            )
-            PanelLlantas(
-                numWheels = numWheels, wheelsWithAlert = wheelsWithAlert, Modifier.weight(1f)
-            ) { sensorId ->
-                getSensorData(sensorId)
+        if (isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            // Datos Sensor
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                PanelSensor(
+                    wheel = wheel,
+                    temperature = temperature,
+                    pressure = pressure,
+                    timestamp = timestamp,
+                    temperatureStatus = temperatureStatus,
+                    pressureStatus = pressionStatus,
+                    modifier = Modifier.weight(1f)
+                )
+                PanelLlantas(
+                    numWheels = numWheels, wheelsWithAlert = wheelsWithAlert, Modifier.weight(1f)
+                ) { sensorId ->
+                    getSensorData(sensorId)
+                }
             }
         }
     }

@@ -30,7 +30,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -62,8 +61,6 @@ class HombreCamionService : Service() {
     private var isStaterd = false
 
     override fun onBind(p0: Intent?): IBinder? = null
-
-    private var user: Pair<Int?, String?> = Pair(null, null)
 
     override fun onCreate() {
         super.onCreate()
@@ -121,6 +118,7 @@ class HombreCamionService : Service() {
             .setContentTitle("Servicio HombreCamion")
             .setContentText("Recibiendo datos del monitor")
             .setSmallIcon(R.drawable.truckdriver)
+            .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
