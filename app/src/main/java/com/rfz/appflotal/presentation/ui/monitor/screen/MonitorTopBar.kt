@@ -11,6 +11,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.rfz.appflotal.presentation.theme.primaryLight
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -18,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 fun MonitorTopBar(modifier: Modifier = Modifier, popBackStack: () -> Unit) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(0xFF2E3192), // Color de fondo
+            containerColor = primaryLight, // Color de fondo
             titleContentColor = Color.White // Color del título
         ), title = { Text("Monitor") }, navigationIcon = {
             IconButton(onClick = { popBackStack() }) {
@@ -28,6 +29,7 @@ fun MonitorTopBar(modifier: Modifier = Modifier, popBackStack: () -> Unit) {
                     tint = Color.White
                 )
             }
-        }
+        },
+        modifier = modifier
     )
 }

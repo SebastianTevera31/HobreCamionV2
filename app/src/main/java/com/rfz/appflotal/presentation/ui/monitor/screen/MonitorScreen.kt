@@ -35,6 +35,8 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ResultApi
+import com.rfz.appflotal.presentation.theme.primaryLight
+import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 
@@ -63,7 +65,7 @@ fun MonitorScreen(
                 // Navegacion entre Diagrama y Posiciones
                 TabRow(
                     selectedTabIndex = if (selectedTab == R.string.diagrama) 0 else 1,
-                    containerColor = Color(0xFF3F51B5), contentColor = Color.White,
+                    containerColor = secondaryLight, contentColor = Color.White,
                 ) {
                     Tab(
                         selected = selectedTab == R.string.diagrama,

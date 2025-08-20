@@ -73,9 +73,8 @@ import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.data.model.login.response.LoginState
-import com.rfz.appflotal.presentation.theme.brandColor
-import com.rfz.appflotal.presentation.theme.darkerGray
-import com.rfz.appflotal.presentation.theme.darkerPurple
+import com.rfz.appflotal.presentation.theme.primaryLight
+import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
@@ -164,7 +163,7 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
                         drawPath(
                             path = path,
                             brush = Brush.verticalGradient(
-                                colors = listOf(brandColor, darkerPurple),
+                                colors = listOf(primaryLight, secondaryLight),
                                 startY = 0f,
                                 endY = size.height
                             )
@@ -188,8 +187,8 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
                 Spacer(modifier = Modifier.height(32.dp))
                 LoginForm(
                     loginViewModel = loginViewModel,
-                    brandColor = brandColor,
-                    darkerGray = darkerGray,
+                    brandColor = primaryLight,
+                    darkerGray = secondaryLight,
                     isLoading = isLoading,
                     onLoginClick = {
                         if (Connected.isConnected(context)) {

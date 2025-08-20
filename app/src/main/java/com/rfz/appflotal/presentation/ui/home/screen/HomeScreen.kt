@@ -67,6 +67,12 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
+import com.rfz.appflotal.presentation.theme.backgroundLight
+import com.rfz.appflotal.presentation.theme.onBackgroundLight
+import com.rfz.appflotal.presentation.theme.onPrimaryLight
+import com.rfz.appflotal.presentation.theme.primaryLight
+import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.theme.surfaceLight
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
@@ -86,7 +92,6 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
     monitorViewModel: MonitorViewModel,
     paymentPlan: PaymentPlanType,
-    colors: ColorScheme
 ) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
@@ -168,13 +173,12 @@ fun HomeScreen(
 
     val scope = rememberCoroutineScope()
 
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val primaryLight = Color(0xFF6A5DD9)
-    val secondaryColor = Color(0xFF5C4EC9)
-    val accentColor = Color(0xFF7D6BFF)
-    val lightBackground = Color(0xFFF9F8FF)
-    val cardBackground = Color.White
-    val surfaceColor = Color(0xFFF1EFFF)
+    val primaryColor = primaryLight
+    val primaryLight = primaryLight
+    val secondaryColor = secondaryLight
+    val lightBackground = backgroundLight
+    val cardBackground = backgroundLight
+    val surfaceColor = surfaceLight
 
     Scaffold(
         topBar = {
@@ -393,12 +397,11 @@ private fun ElegantMenuCard(
     title: String,
     iconRes: Int,
     onClick: () -> Unit,
-    primaryColor: Color = Color(0xFF5B4B8A),
-    secondaryColor: Color = Color(0xFF9B87FF),
+    primaryColor: Color = primaryLight,
+    secondaryColor: Color = secondaryLight,
     cardBackground: Color = Color.White
 ) {
-    val highlightColor = Color(0xFFEDE7FF)
-    val accentColor = Color(0xFFD1C4FF)
+    val highlightColor = onPrimaryLight
 
     Card(
         modifier = Modifier

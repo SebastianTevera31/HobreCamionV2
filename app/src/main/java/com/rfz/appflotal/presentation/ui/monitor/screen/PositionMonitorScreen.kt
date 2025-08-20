@@ -26,7 +26,9 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
-import com.rfz.appflotal.presentation.theme.textColor
+import com.rfz.appflotal.presentation.theme.onPrimaryContainerLight
+import com.rfz.appflotal.presentation.theme.onPrimaryLight
+import com.rfz.appflotal.presentation.theme.primaryLight
 
 @Composable
 fun CurrentPositionDataView(
@@ -165,7 +167,7 @@ fun NoPositionDataView(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.no_resultados),
             modifier = Modifier.align(Alignment.Center),
-            color = textColor.copy(alpha = 0.6f)
+            color = primaryLight
         )
     }
 }

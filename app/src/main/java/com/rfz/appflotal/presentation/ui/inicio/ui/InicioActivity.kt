@@ -59,6 +59,7 @@ import com.rfz.appflotal.domain.vehicle.VehicleCrudUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.ui.brand.MarcasScreen
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
@@ -173,7 +174,7 @@ class InicioActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
         setContent {
             val permissionLauncher = rememberLauncherForActivityResult(
@@ -193,7 +194,7 @@ class InicioActivity : ComponentActivity() {
                 LocalizedApp {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.background
+                        color = backgroundLight
                     ) {
                         val navController = rememberNavController()
 
@@ -288,7 +289,6 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel = homeViewModel,
                                     monitorViewModel = monitorViewModel,
                                     paymentPlan = paymentSelected,
-                                    colors = MaterialTheme.colorScheme,
                                 )
                             }
 
