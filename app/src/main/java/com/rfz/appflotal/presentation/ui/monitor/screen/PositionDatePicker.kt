@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.monitor.utils
+package com.rfz.appflotal.presentation.ui.monitor.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

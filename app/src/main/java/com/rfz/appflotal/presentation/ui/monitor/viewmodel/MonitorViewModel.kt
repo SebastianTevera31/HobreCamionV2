@@ -1,8 +1,5 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
-import android.app.ActivityManager
-import android.content.Context
-import android.content.Context.ACTIVITY_SERVICE
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.core.text.isDigitsOnly
@@ -14,7 +11,6 @@ import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
-import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.network.service.ResultApi
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
@@ -33,7 +29,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.roundToInt
-
 
 enum class SensorAlerts(@StringRes val message: Int) {
     HighPressure(R.string.presion_alta),
@@ -68,34 +63,28 @@ class MonitorViewModel @Inject constructor(
         viewModelScope.launch {
             val userData = getTasksUseCase().first()[0]
             val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(userData.id_monitor)
-            when (configInfo) {
-                is ResultApi.Success -> {
-                    val data = configInfo.data
-                    if (!data.isNullOrEmpty()) {
-                        val config = data[0].fldDescription.replace("BASE", "").trim()
-                        if (config.isDigitsOnly()) {
+            monitorResponseHelper(response = configInfo) { data ->
+                if (!data.isNullOrEmpty()) {
+                    val config = data[0].fldDescription.replace("BASE", "").trim()
+                    if (config.isDigitsOnly()) {
 
-                            val wheelsWithAlert =
-                                (1..config.toInt()).associate { it -> "P$it" to false }
-                                    .toMap()
+                        val wheelsWithAlert =
+                            (1..config.toInt()).associate { it -> "P$it" to false }
+                                .toMap()
 
-                            _monitorUiState.update { currentUiState ->
-                                currentUiState.copy(
-                                    monitorId = userData.id_monitor,
-                                    numWheels = config.toInt(),
-                                    chassisImageUrl = data[0].fldUrlImage,
-                                    wheelsWithAlert = wheelsWithAlert
-                                )
-                            }
-
-                            // Recibe datos Bluetooth
-                            readBluetoothData()
+                        _monitorUiState.update { currentUiState ->
+                            currentUiState.copy(
+                                monitorId = userData.id_monitor,
+                                numWheels = config.toInt(),
+                                chassisImageUrl = data[0].fldUrlImage,
+                                wheelsWithAlert = wheelsWithAlert
+                            )
                         }
+
+                        // Recibe datos Bluetooth
+                        readBluetoothData()
                     }
                 }
-
-                is ResultApi.Error -> {}
-                is ResultApi.Loading -> {}
             }
         }
     }
@@ -129,7 +118,7 @@ class MonitorViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    delay(30000)
+                    delay(60000)
                     shouldReadManually = true
                 }
             }
@@ -183,10 +172,18 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
-
-    fun getPositionCoordinates(monitorId: Int) {
+    fun getDiagramCoordinates() {
         viewModelScope.launch {
-            apiTpmsUseCase.doGetPositionCoordinates(monitorUiState.value.monitorId)
+            val coordinates =
+                apiTpmsUseCase.doGetPositionCoordinates(monitorUiState.value.monitorId)
+
+            monitorResponseHelper(response = coordinates) { response ->
+                _monitorUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        coordinateList = response
+                    )
+                }
+            }
         }
     }
 
@@ -194,48 +191,44 @@ class MonitorViewModel @Inject constructor(
         shouldReadManually = false
         viewModelScope.launch {
             val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
-            when (sensorData) {
-                is ResultApi.Success -> {
-                    if (!sensorData.data.isNullOrEmpty()) {
-                        sensorData.data.filter { data -> data.sensorPosition == wheelPosition }[0]
-                            .let {
-                                if (it.sensorPosition.contains("P")) {
 
-                                    val tempAlert = when (it.highTemperature) {
-                                        true -> SensorAlerts.HighTemperature
-                                        false -> SensorAlerts.NoData
-                                    }
+            monitorResponseHelper(response = sensorData) { data ->
+                if (!data.isNullOrEmpty()) {
+                    data.filter { data -> data.sensorPosition == wheelPosition }[0]
+                        .let {
+                            if (it.sensorPosition.contains("P")) {
 
-                                    val pressureAlert =
-                                        if (it.lowPressure) SensorAlerts.LowPressure
-                                        else if (it.highPressure) SensorAlerts.HighPressure
-                                        else SensorAlerts.NoData
+                                val tempAlert = when (it.highTemperature) {
+                                    true -> SensorAlerts.HighTemperature
+                                    false -> SensorAlerts.NoData
+                                }
 
-                                    _monitorUiState.update { currentUiState ->
+                                val pressureAlert =
+                                    if (it.lowPressure) SensorAlerts.LowPressure
+                                    else if (it.highPressure) SensorAlerts.HighPressure
+                                    else SensorAlerts.NoData
 
-                                        val inAlert =
-                                            tempAlert != SensorAlerts.NoData || pressureAlert != SensorAlerts.NoData
+                                _monitorUiState.update { currentUiState ->
 
-                                        val newMap =
-                                            currentUiState.wheelsWithAlert.toMutableMap().apply {
-                                                this[it.sensorPosition] = inAlert
-                                            }
+                                    val inAlert =
+                                        tempAlert != SensorAlerts.NoData || pressureAlert != SensorAlerts.NoData
 
-                                        currentUiState.copy(
-                                            wheel = it.sensorPosition,
-                                            temperature = Pair(it.temperature, tempAlert),
-                                            pression = Pair(it.psi, pressureAlert),
-                                            timestamp = convertDate(it.ultimalectura),
-                                            wheelsWithAlert = newMap
-                                        )
-                                    }
+                                    val newMap =
+                                        currentUiState.wheelsWithAlert.toMutableMap().apply {
+                                            this[it.sensorPosition] = inAlert
+                                        }
+
+                                    currentUiState.copy(
+                                        wheel = it.sensorPosition,
+                                        temperature = Pair(it.temperature, tempAlert),
+                                        pression = Pair(it.psi, pressureAlert),
+                                        timestamp = convertDate(it.ultimalectura),
+                                        wheelsWithAlert = newMap
+                                    )
                                 }
                             }
-                    }
+                        }
                 }
-
-                is ResultApi.Error -> {}
-                ResultApi.Loading -> {}
             }
         }
     }
@@ -274,10 +267,16 @@ class MonitorViewModel @Inject constructor(
     fun convertToTireData(diagramData: List<DiagramMonitorResponse>?): List<MonitorTireByDateResponse> =
         diagramData?.map { it.toTireData() } ?: emptyList()
 
-    fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
-        val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        return manager.getRunningServices(Int.MAX_VALUE).any {
-            it.service.className == serviceClass.name
+    private fun <T> monitorResponseHelper(response: ResultApi<T>, operation: (data: T) -> Unit) {
+        when (response) {
+            is ResultApi.Success -> {
+                operation(response.data)
+            }
+
+            is ResultApi.Error -> {
+            }
+
+            ResultApi.Loading -> {}
         }
     }
 }

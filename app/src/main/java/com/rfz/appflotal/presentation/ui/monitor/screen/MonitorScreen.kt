@@ -36,7 +36,6 @@ import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ResultApi
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
-import com.rfz.appflotal.presentation.ui.monitor.utils.PositionFilterView
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 
 @Composable
@@ -84,7 +83,11 @@ fun MonitorScreen(
                     }
                 }
 
+
                 if (selectedTab == R.string.diagrama) {
+                    // Obtener coordenadas del diagrama
+                    monitorViewModel.getDiagramCoordinates()
+
                     DiagramaMonitorScreen(
                         imageUrl = monitorUiState.value.chassisImageUrl,
                         wheel = monitorUiState.value.wheel,
@@ -94,8 +97,9 @@ fun MonitorScreen(
                         temperatureStatus = monitorUiState.value.temperature.second,
                         pressionStatus = monitorUiState.value.pression.second,
                         numWheels = monitorUiState.value.numWheels,
-                        wheelsWithAlert = monitorUiState.value.wheelsWithAlert,
+                        alertTires = monitorUiState.value.wheelsWithAlert,
                         getSensorData = { sensorId -> monitorViewModel.getSensorDataByWheel(sensorId) },
+                        coordinates = monitorUiState.value.coordinateList,
                         modifier = Modifier.padding(8.dp)
                     )
                 } else {

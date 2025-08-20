@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,20 +39,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import coil.compose.AsyncImage
+import coil.ImageLoader
 import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.rfz.appflotal.R
-import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 
 @Composable
@@ -64,28 +64,31 @@ fun DiagramaMonitorScreen(
     temperatureStatus: SensorAlerts,
     pressionStatus: SensorAlerts,
     numWheels: Int,
-    wheelsWithAlert: Map<String, Boolean>,
+    alertTires: Map<String, Boolean>,
     getSensorData: (String) -> Unit,
+    coordinates: List<PositionCoordinatesResponse>?,
     modifier: Modifier = Modifier
 ) {
     var isLoading by remember { mutableStateOf(true) }
+    var tireSelected by remember { mutableStateOf("") }
+    var shouldReadManually by remember { mutableStateOf(true) }
+
+    // Actualizar rueda
+    tireSelected = wheel
 
     Column(modifier = modifier) {
         Box {
-            AsyncImage(
-                model = ImageRequest
-                    .Builder(LocalContext.current)
-                    .data(imageUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier
-                    .height(200.dp)
-                    .fillMaxWidth(),
-                onSuccess = { isLoading = false },
-                onError = { isLoading = false }
-            )
+            val bitmap = loadBitmapFromUrl(imageUrl)
+
+            if (bitmap != null && coordinates != null) {
+                DiagramImage(
+                    coordinates = coordinates,
+                    image = bitmap,
+                    alertTires = alertTires,
+                    tireSelected = tireSelected
+                )
+                isLoading = false
+            }
         }
 
         if (isLoading) {
@@ -108,8 +111,9 @@ fun DiagramaMonitorScreen(
                     modifier = Modifier.weight(1f)
                 )
                 PanelLlantas(
-                    numWheels = numWheels, wheelsWithAlert = wheelsWithAlert, Modifier.weight(1f)
+                    numWheels = numWheels, wheelsWithAlert = alertTires, Modifier.weight(1f)
                 ) { sensorId ->
+                    tireSelected = sensorId
                     getSensorData(sensorId)
                 }
             }
@@ -310,48 +314,20 @@ fun PanelSensor(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun DiagramMonitorScreenPreview() {
-    val data = "aaa1410e630147e85e00124f08f4"
-    HombreCamionTheme {
-        DiagramaMonitorScreen(
-            wheel = "P1",
-            pressure = 0.0f,
-            pressionStatus = SensorAlerts.LowPressure,
-            temperature = 29f,
-            temperatureStatus = SensorAlerts.HighTemperature,
-            timestamp = "21/07/2025 14:20:00",
-            imageUrl = "TODO()",
-            numWheels = 12,
-            getSensorData = {},
-            wheelsWithAlert = emptyMap(),
-            modifier = Modifier
-                .fillMaxSize()
-                .safeDrawingPadding(),
-        )
-    }
-}
+fun loadBitmapFromUrl(imageUrl: String): Bitmap? {
+    val context = LocalContext.current
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-@Preview(showBackground = true, showSystemUi = true, locale = "en")
-@Composable
-fun DiagramMonitorScreenEnglishPreview() {
-    val data = "aaa1410e630147e85e00124f08f4"
-    HombreCamionTheme {
-        DiagramaMonitorScreen(
-            wheel = "P1",
-            pressure = 0.0f,
-            pressionStatus = SensorAlerts.LowPressure,
-            temperature = 29f,
-            temperatureStatus = SensorAlerts.HighTemperature,
-            timestamp = "21/07/2025 14:20:00",
-            imageUrl = "TODO()",
-            numWheels = 12,
-            getSensorData = {},
-            wheelsWithAlert = emptyMap(),
-            modifier = Modifier
-                .fillMaxSize()
-                .safeDrawingPadding(),
-        )
+    LaunchedEffect(imageUrl) {
+        val loader = ImageLoader(context)
+        val request = ImageRequest.Builder(context)
+            .data(imageUrl)
+            .build()
+
+        val result = (loader.execute(request) as? SuccessResult)?.drawable
+        bitmap = (result as? android.graphics.drawable.BitmapDrawable)?.bitmap
     }
+
+    return bitmap
 }

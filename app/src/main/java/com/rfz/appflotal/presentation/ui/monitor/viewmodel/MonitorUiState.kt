@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 
 data class MonitorUiState(
@@ -18,7 +19,8 @@ data class MonitorUiState(
     ),
     val numWheels: Int = 0,
     val chassisImageUrl: String = "",
-    val wheelsWithAlert: Map<String, Boolean> = emptyMap()
+    val wheelsWithAlert: Map<String, Boolean> = emptyMap(),
+    val coordinateList: List<PositionCoordinatesResponse>? = emptyList()
 )
 
 fun DiagramMonitorResponse.toTireData(): MonitorTireByDateResponse {
