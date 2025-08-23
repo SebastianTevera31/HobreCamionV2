@@ -129,41 +129,41 @@ fun HomeScreen(
     }
 
     val menuItems = listOf(
-//        MenuItem(
-//            stringResource(R.string.brands),
-//            NetworkConfig.MARCAS,
-//            R.drawable.ic_brand
-//        ),
-//        MenuItem(
-//            stringResource(R.string.original_design),
-//            NetworkConfig.ORIGINAL,
-//            R.drawable.ic_tire_design
-//        ),
-//        MenuItem(
-//            stringResource(R.string.tire_sizes),
-//            NetworkConfig.MEDIDAS_LLANTAS,
-//            R.drawable.ic_tire_size
-//        ),
-//        MenuItem(
-//            stringResource(R.string.products),
-//            NetworkConfig.PRODUCTOS,
-//            R.drawable.ic_products
-//        ),
-//        MenuItem(
-//            stringResource(R.string.tire_register),
-//            NetworkConfig.REGISTRO_LLANTAS,
-//            R.drawable.ic_tire_register
-//        ),
-//        MenuItem(
-//            stringResource(R.string.vehicle_register),
-//            NetworkConfig.REGISTRO_VEHICULOS,
-//            R.drawable.ic_truck
-//        ),
-//        MenuItem(
-//            stringResource(R.string.tire_change),
-//            NetworkConfig.MONTAJE_DESMONTAJE,
-//            R.drawable.ic_tire_change
-//        ),
+        MenuItem(
+            stringResource(R.string.brands),
+            NetworkConfig.MARCAS,
+            R.drawable.ic_brand
+        ),
+        MenuItem(
+            stringResource(R.string.original_design),
+            NetworkConfig.ORIGINAL,
+            R.drawable.ic_tire_design
+        ),
+        MenuItem(
+            stringResource(R.string.tire_sizes),
+            NetworkConfig.MEDIDAS_LLANTAS,
+            R.drawable.ic_tire_size
+        ),
+        MenuItem(
+            stringResource(R.string.products),
+            NetworkConfig.PRODUCTOS,
+            R.drawable.ic_products
+        ),
+        MenuItem(
+            stringResource(R.string.tire_register),
+            NetworkConfig.REGISTRO_LLANTAS,
+            R.drawable.ic_tire_register
+        ),
+        MenuItem(
+            stringResource(R.string.vehicle_register),
+            NetworkConfig.REGISTRO_VEHICULOS,
+            R.drawable.ic_truck
+        ),
+        MenuItem(
+            stringResource(R.string.tire_change),
+            NetworkConfig.MONTAJE_DESMONTAJE,
+            R.drawable.ic_tire_change
+        ),
         MenuItem(
             title = stringResource(R.string.monitoreo),
             route = HombreCamionScreens.MONITOR.name,

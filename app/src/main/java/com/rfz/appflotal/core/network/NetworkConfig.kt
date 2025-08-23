@@ -25,5 +25,5 @@ object NetworkConfig {
  const val MONTAJE_DESMONTAJE = "montajeDesmontajeScreen"
  const val INICIO = "inicioScreen"
 
-
+ const val RECUPERAR_CONTRASENIA = "recuperarcontrasenia"
 }

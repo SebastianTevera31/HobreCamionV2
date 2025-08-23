@@ -84,4 +84,11 @@
     <string name="recientes">Recent</string>
     <string name="no_resultados">Results no found</string>
     <string name="consultar">Search</string>
+    <string name="truckdriver">Truck Driver</string>
+    <string name="seleccionar_fecha">Select date</string>
+    <string name="confirmar">OK</string>
+    <string name="cancelar">Cancel</string>
+    <string name="registrarse">Sign Up</string>
+    <string name="siguiente">Next</string>
+    <string name="regresar">Back</string>
 </resources>

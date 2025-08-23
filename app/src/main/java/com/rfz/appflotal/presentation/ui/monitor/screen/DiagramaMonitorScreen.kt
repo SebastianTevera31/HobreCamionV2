@@ -71,7 +71,6 @@ fun DiagramaMonitorScreen(
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
-    var shouldReadManually by remember { mutableStateOf(true) }
 
     // Actualizar rueda
     tireSelected = wheel

@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
+import com.rfz.appflotal.core.network.NetworkConfig.RECUPERAR_CONTRASENIA
 import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.data.model.login.response.LoginState
@@ -203,7 +204,7 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
                         }
                     },
                     onForgotPasswordClick = {
-                        navController.navigate("recuperarcontrasenia")
+                        navController.navigate(RECUPERAR_CONTRASENIA)
                     }
                 )
             }

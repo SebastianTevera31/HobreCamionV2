@@ -4,14 +4,17 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -23,6 +26,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
@@ -72,94 +76,109 @@ fun ImageWithHotspots(
     modifier: Modifier = Modifier,
 ) {
     val textMeasurer = rememberTextMeasurer()
+    val scrollState = rememberScrollState()
+    val density = LocalDensity.current
 
     // Guardamos los bounds de cada burbuja para detectar taps
     val bubbleBounds = remember { mutableStateMapOf<String, Rect>() }
 
+    val imageHeightDp = 200.dp
+    val scalePxPerImgPx = with(density) { imageHeightDp.toPx() } / img.height.toFloat()
+    val imageWidthDp = with(density) { (img.width * scalePxPerImgPx).toDp() }
+
     Box(
         modifier = modifier
-            .aspectRatio(img.width.toFloat() / img.height) // mantiene relación
             .pointerInput(hotspots) {
                 detectTapGestures { tap ->
                     // Checamos de arriba hacia abajo (último dibujado arriba)
                     bubbleBounds.entries.reversed().firstOrNull { (_, rect) ->
                         rect.contains(tap)
                     }?.let { (id, _) ->
-
+                        // onHotspotClick(id)
                     }
                 }
             }
-            .height(200.dp)
+            .height(imageHeightDp)
             .fillMaxWidth()
+            .horizontalScroll(scrollState),
+        contentAlignment = Alignment.Center
     ) {
-        // Capa 1: Imagen (FillBounds para evitar letterboxing)
-        Image(
-            bitmap = img,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
+        Box(
+            Modifier
+                .height(imageHeightDp)
+                .width(imageWidthDp)
+        ) {
+            // Capa 1: Imagen (FillBounds para evitar letterboxing)
+            Image(
+                bitmap = img,
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.fillMaxSize()
+            )
 
-        // Capa 2: Canvas con burbujas
-        Canvas(Modifier.fillMaxSize()) {
-            bubbleBounds.clear()
+            // Capa 2: Canvas con burbujas
+            Canvas(Modifier.fillMaxSize()) {
+                bubbleBounds.clear()
 
-            hotspots.forEach { h ->
-                val colorStatus = if (alertTires[h.id] == true) Pair(Color.Red, Color.White)
-                else Pair(h.bubbleBg, Color.Black)
-                // Posición del centro en pixeles del canvas
-                val cx = h.center01.x * size.width
-                val cy = h.center01.y * size.height
+                hotspots.forEach { h ->
+                    val colorStatus = if (alertTires[h.id] == true) Pair(Color.Red, Color.White)
+                    else Pair(h.bubbleBg, Color.Black)
+                    // Posición del centro en pixeles del canvas
+                    val cx = h.center01.x * size.width
+                    val cy = h.center01.y * size.height
 
-                // Medimos el texto
-                val layout = textMeasurer.measure(buildAnnotatedString { append(h.label) })
-                val lbw = 0f
-                val lbh = 0f
+                    // Medimos el texto
+                    val layout = textMeasurer.measure(buildAnnotatedString { append(h.label) })
+                    val lbw = 0f
+                    val lbh = 0f
 
-                // Padding de la burbuja (en px) = Tamanio del componente
-                val padH = 22.dp.toPx()
-                val padV = 10.dp.toPx()
+                    // Padding de la burbuja (en px) = Tamanio del componente
+                    val padH = 22.dp.toPx()
+                    val padV = 10.dp.toPx()
 
-                val bw = lbw + padH * 2f
-                val bh = lbh + padV * 2f
+                    val bw = lbw + padH * 2f
+                    val bh = lbh + padV * 2f
 
-                // Ancla: centramos la burbuja sobre el punto (puedes ajustar anclaY = 1.0f para ponerla encima)
-                val anchorX = 0.5f
-                val anchorY = 0.5f
-                val left = cx - bw * anchorX
-                val top = cy - bh * anchorY
-                val rect = Rect(left, top, left + bw, top + bh)
+                    // Ancla: centramos la burbuja sobre el punto (puedes ajustar anclaY = 1.0f para ponerla encima)
+                    val anchorX = 0.5f
+                    val anchorY = 0.5f
+                    val left = cx - bw * anchorX
+                    val top = cy - bh * anchorY
+                    val rect = Rect(left, top, left + bw, top + bh)
 
-                // Fondo redondeado
-                val radius = max(12.dp.toPx(), bh * 0.4f)
-                drawRoundRect(
-                    color = colorStatus.first,
-                    topLeft = Offset(rect.left, rect.top),
-                    size = Size(rect.width, rect.height),
-                    cornerRadius = CornerRadius(radius, radius)
-                )
+                    // Fondo redondeado
+                    val radius = max(12.dp.toPx(), bh * 0.4f)
+                    drawRoundRect(
+                        color = colorStatus.first,
+                        topLeft = Offset(rect.left, rect.top),
+                        size = Size(rect.width, rect.height),
+                        cornerRadius = CornerRadius(radius, radius)
+                    )
 
-                // Trazo suave opcional
-                drawRoundRect(
-                    color = if (tireSelected == h.id) Color.Green else h.bubbleStroke,
-                    topLeft = Offset(rect.left, rect.top),
-                    size = Size(rect.width, rect.height),
-                    cornerRadius = CornerRadius(radius, radius),
-                    style = if (tireSelected == h.id) Stroke(width = 4.dp.toPx()) else Stroke(width = 1.dp.toPx())
-                )
+                    // Trazo suave opcional
+                    drawRoundRect(
+                        color = if (tireSelected == h.id) Color.Green else h.bubbleStroke,
+                        topLeft = Offset(rect.left, rect.top),
+                        size = Size(rect.width, rect.height),
+                        cornerRadius = CornerRadius(radius, radius),
+                        style = if (tireSelected == h.id) Stroke(width = 4.dp.toPx()) else Stroke(
+                            width = 1.dp.toPx()
+                        )
+                    )
 
-                // Texto centrado
-                val textX = rect.left + (rect.width - layout.size.width) / 2f
-                val textY = rect.top + (rect.height - layout.size.height) / 2f
+                    // Texto centrado
+                    val textX = rect.left + (rect.width - layout.size.width) / 2f
+                    val textY = rect.top + (rect.height - layout.size.height) / 2f
 
-                drawText(
-                    textLayoutResult = layout,
-                    topLeft = Offset(textX, textY),
-                    color = h.bubbleText
-                )
+                    drawText(
+                        textLayoutResult = layout,
+                        topLeft = Offset(textX, textY),
+                        color = h.bubbleText
+                    )
 
-                // Guardamos bounds para taps
-                bubbleBounds[h.id] = rect
+                    // Guardamos bounds para taps
+                    bubbleBounds[h.id] = rect
+                }
             }
         }
     }

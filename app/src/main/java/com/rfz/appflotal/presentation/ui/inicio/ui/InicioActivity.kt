@@ -76,6 +76,8 @@ import com.rfz.appflotal.presentation.ui.montajedesmontajescreen.MontajeDesmonta
 import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.NuevoRenovadoScreen
 import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.RenovadosScreen
 import com.rfz.appflotal.presentation.ui.originaldesign.OriginalScreen
+import com.rfz.appflotal.presentation.ui.password.screen.PasswordScreen
+import com.rfz.appflotal.presentation.ui.password.viewmodel.PasswordViewModel
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlantasScreen
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
@@ -91,7 +93,7 @@ class InicioActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private val inicioScreenViewModel: InicioScreenViewModel by viewModels()
     private val homeViewModel: HomeViewModel by viewModels()
-
+    private val passwordViewModel: PasswordViewModel by viewModels()
     private val monitorViewModel: MonitorViewModel by viewModels()
 
     @Inject
@@ -228,7 +230,8 @@ class InicioActivity : ComponentActivity() {
 
                                         val paymentPlan = when (data.paymentPlan) {
                                             PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
-                                            PaymentPlanType.OnlyTpms.planName -> PaymentPlanType.OnlyTpms
+                                            PaymentPlanType.OnlyTpms.planName, PaymentPlanType.Free.planName
+                                                -> PaymentPlanType.OnlyTpms
                                             else -> PaymentPlanType.None
                                         }
 
@@ -304,6 +307,10 @@ class InicioActivity : ComponentActivity() {
                                     navController = navController,
                                     paymentPlan = PaymentPlanType.Complete
                                 )
+                            }
+
+                            composable(NetworkConfig.RECUPERAR_CONTRASENIA) {
+                                PasswordScreen(passwordViewModel)
                             }
 
                             composable(NetworkConfig.LOADING) { LoadingScreen() }

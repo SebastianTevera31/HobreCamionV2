@@ -247,6 +247,14 @@ class HombreCamionService : Service() {
         }
     }
 
+//    private fun updateNotification(contentText: String) {
+//        val notificationManager = getSystemService(NotificationManager::class.java)
+//        notificationManager.notify(
+//            ONGOING_NOTIFICATION_ID,
+//            createNotification(contentText)
+//        )
+//    }
+
     companion object {
         const val CHANNEL_ID = "1003"
         const val ONGOING_NOTIFICATION_ID = 103

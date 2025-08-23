@@ -109,6 +109,7 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
         val date = addOneDay(Date(millis))
         startDate = getCurrentDate(date, "dd/MM/yyyy")
     }
+
     Column(modifier = modifier) {
         Text(text = stringResource(R.string.fecha))
         Row(
@@ -121,7 +122,7 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
         ) {
             Icon(
                 imageVector = Icons.Default.CalendarMonth,
-                contentDescription = "Seleccionar fecha",
+                contentDescription = stringResource(R.string.seleccionar_fecha),
                 modifier = Modifier.padding(start = 8.dp)
             )
             Text(
@@ -144,10 +145,10 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
                             )
                         )
                         showDialog = false
-                    }) { Text(text = "Confirmar") }
+                    }) { Text(text = stringResource(R.string.confirmar)) }
                 },
                 dismissButton = {
-                    Button(onClick = { showDialog = false }) { Text(text = "Cancelar") }
+                    Button(onClick = { showDialog = false }) { Text(text = stringResource(R.string.cancelar)) }
                 }
             ) { DatePicker(state = state) }
         }
@@ -165,6 +166,7 @@ fun WheelSpinner(
     var isExpanded by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
         Text(text = pluralStringResource(R.plurals.llanta_tag, 1, ""))
+
         Row(
             modifier = Modifier
                 .height(60.dp)
@@ -187,12 +189,12 @@ fun WheelSpinner(
             onDismissRequest = { isExpanded = false },
             modifier = Modifier.background(Color.White)
         ) {
-            listOfWheels.forEach { wheel ->
+            listOfWheels.forEach { tire ->
                 DropdownMenuItem(
-                    text = { Text(text = wheel) },
+                    text = { Text(text = tire) },
                     onClick = {
-                        onSelectWheel(wheel.lowercase(Locale.getDefault()))
-                        selectedText = wheel
+                        onSelectWheel(tire.lowercase(Locale.getDefault()))
+                        selectedText = tire
                         isExpanded = false
                     }
                 )
