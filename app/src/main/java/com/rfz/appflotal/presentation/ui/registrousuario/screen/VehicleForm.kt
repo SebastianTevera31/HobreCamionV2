@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.registrousuario
+package com.rfz.appflotal.presentation.ui.registrousuario.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,12 +25,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpUiState
 
 @Composable
-fun RegistrarVehiculo(modifier: Modifier = Modifier, onBack: () -> Unit, onRegister: () -> Unit, ) {
-    var tipoVehiculo by remember { mutableStateOf("") }
-    var placas by remember { mutableStateOf("") }
-    var sector by remember { mutableStateOf("") }
+fun VehicleForm(
+    signUpUiState: SignUpUiState,
+    modifier: Modifier = Modifier,
+    onBack: (vehicleType: String, plates: String) -> Unit,
+    onRegister: (vehicleType: String, plates: String) -> Unit,
+) {
+    var vehicleType by remember { mutableStateOf("") }
+    var plates by remember { mutableStateOf("") }
+
+
+    LaunchedEffect(Unit) {
+        vehicleType = signUpUiState.vehicleType
+        plates = signUpUiState.plates
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -37,22 +49,22 @@ fun RegistrarVehiculo(modifier: Modifier = Modifier, onBack: () -> Unit, onRegis
         modifier = modifier
     ) {
         Text(
-            "Registrar Vehiculo",
+            stringResource(R.string.registrar_vehiculo),
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.Start)
         )
 
         TextField(
-            value = tipoVehiculo,
-            onValueChange = { tipoVehiculo = it },
-            label = { Text("Tipo vehiculo") },
+            value = vehicleType,
+            onValueChange = { vehicleType = it },
+            label = { Text(stringResource(R.string.tipo_vehiculo)) },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
-            value = placas,
-            onValueChange = { placas = it },
-            label = { Text("Placas") },
+            value = plates,
+            onValueChange = { plates = it },
+            label = { Text(stringResource(R.string.placas)) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -61,14 +73,14 @@ fun RegistrarVehiculo(modifier: Modifier = Modifier, onBack: () -> Unit, onRegis
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = onBack,
+                onClick = { onBack(vehicleType, plates) },
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.weight(1f)
             ) { Text(text = stringResource(R.string.regresar)) }
 
             Button(
-                onClick = onRegister,
+                onClick = { onRegister(vehicleType, plates) },
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.weight(1f)
             ) { Text(text = stringResource(R.string.registrarse)) }
@@ -80,11 +92,13 @@ fun RegistrarVehiculo(modifier: Modifier = Modifier, onBack: () -> Unit, onRegis
 @Preview(showSystemUi = true, showBackground = true)
 fun RegistrarDatosVehiculoPreview() {
     HombreCamionTheme {
-        RegistrarVehiculo(
-            onBack = {},
+        VehicleForm(
+            signUpUiState = SignUpUiState(),
             modifier = Modifier
                 .safeContentPadding()
-                .fillMaxSize()
-        ) {}
+                .fillMaxSize(),
+            onBack = { _, _ -> },
+            { _, _ -> },
+        )
     }
 }

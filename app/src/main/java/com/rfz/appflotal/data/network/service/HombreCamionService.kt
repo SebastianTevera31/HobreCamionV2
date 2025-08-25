@@ -229,18 +229,18 @@ class HombreCamionService : Service() {
                 )
 
                 when (result) {
-                    is ResultApi.Success -> {
+                    is ApiResult.Success -> {
                         sensorTableUseCase.doSetRecordStatus(it.monitorId, it.timestamp, true)
                     }
 
-                    is ResultApi.Error -> {
+                    is ApiResult.Error -> {
                         Log.d(
                             "HombreCamionServicio",
                             "Error al enviar datos almacenados al servidor."
                         )
                     }
 
-                    ResultApi.Loading -> {}
+                    ApiResult.Loading -> {}
                 }
 
             }

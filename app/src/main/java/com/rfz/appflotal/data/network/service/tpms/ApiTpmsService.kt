@@ -9,7 +9,7 @@ import com.rfz.appflotal.data.model.tpms.SensorRequest
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.client.tpms.ApiTpmsClient
 import com.rfz.appflotal.data.network.requestHelper
-import com.rfz.appflotal.data.network.service.ResultApi
+import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -18,21 +18,21 @@ class ApiTpmsService @Inject constructor(
     private val apiTpmsClient: ApiTpmsClient,
     private val getTasksUseCase: GetTasksUseCase
 ) {
-    suspend fun postSensorData(sensorRequest: SensorRequest): ResultApi<List<TpmsResponse>?> {
+    suspend fun postSensorData(sensorRequest: SensorRequest): ApiResult<List<TpmsResponse>?> {
         return requestHelper("PostSensorData") {
             val token = getTasksUseCase().first()[0].fld_token
             apiTpmsClient.sendSensorData("bearer $token", sensorRequest)
         }
     }
 
-    suspend fun getDiagramMonitor(idMonitor: Int): ResultApi<List<DiagramMonitorResponse>?> {
+    suspend fun getDiagramMonitor(idMonitor: Int): ApiResult<List<DiagramMonitorResponse>?> {
         return requestHelper("getDiagramMonitor") {
             val token = getTasksUseCase().first()[0].fld_token
             apiTpmsClient.getDiagramMonitor("bearer $token", idMonitor)
         }
     }
 
-    suspend fun getConfigurationByIdMonitor(idMonitor: Int): ResultApi<List<ConfigurationByIdMonitorResponse>?> {
+    suspend fun getConfigurationByIdMonitor(idMonitor: Int): ApiResult<List<ConfigurationByIdMonitorResponse>?> {
         return requestHelper("getConfigurationByIdMonitor") {
             val token = getTasksUseCase().first()[0].fld_token
             apiTpmsClient.getConfigurationByIdMonitor("bearer $token", idMonitor)
@@ -43,7 +43,7 @@ class ApiTpmsService @Inject constructor(
         monitorId: Int,
         position: String,
         fldDate: String
-    ): ResultApi<List<MonitorTireByDateResponse>?> {
+    ): ApiResult<List<MonitorTireByDateResponse>?> {
         return requestHelper("getMonitorTireByDate") {
             val token = getTasksUseCase().first()[0].fld_token
             apiTpmsClient.getMonitorTireByDate("bearer $token", monitorId, fldDate, position)
@@ -52,7 +52,7 @@ class ApiTpmsService @Inject constructor(
 
     suspend fun getPositionCoordinates(
         monitorId: Int
-    ): ResultApi<List<PositionCoordinatesResponse>?> {
+    ): ApiResult<List<PositionCoordinatesResponse>?> {
         return requestHelper("getPositionCoordinates") {
             val token = getTasksUseCase().first()[0].fld_token
             apiTpmsClient.getPositionCoordinates("bearer $token", monitorId)

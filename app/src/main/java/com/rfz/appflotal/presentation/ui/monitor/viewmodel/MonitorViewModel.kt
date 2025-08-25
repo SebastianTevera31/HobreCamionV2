@@ -11,7 +11,7 @@ import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
-import com.rfz.appflotal.data.network.service.ResultApi
+import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
@@ -49,12 +49,12 @@ class MonitorViewModel @Inject constructor(
     val monitorUiState = _monitorUiState.asStateFlow()
 
     private val _positionsUiState =
-        MutableStateFlow<ResultApi<List<DiagramMonitorResponse>?>>(ResultApi.Loading)
+        MutableStateFlow<ApiResult<List<DiagramMonitorResponse>?>>(ApiResult.Loading)
 
     val positionsUiState = _positionsUiState.asStateFlow()
 
     private val _monitorTireUiState =
-        MutableStateFlow<ResultApi<List<MonitorTireByDateResponse>?>>(ResultApi.Success(emptyList()))
+        MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Success(emptyList()))
     val monitorTireUiState = _monitorTireUiState.asStateFlow()
 
     var shouldReadManually = true
@@ -245,7 +245,7 @@ class MonitorViewModel @Inject constructor(
         date: String
     ) {
         viewModelScope.launch {
-            _monitorTireUiState.update { ResultApi.Loading }
+            _monitorTireUiState.update { ApiResult.Loading }
 
             val tireData = apiTpmsUseCase.doGetMonitorTireByDate(
                 monitorUiState.value.monitorId,
@@ -254,12 +254,12 @@ class MonitorViewModel @Inject constructor(
             )
 
             when (tireData) {
-                is ResultApi.Success -> {
+                is ApiResult.Success -> {
                     _monitorTireUiState.update { tireData }
                 }
 
-                is ResultApi.Error -> {}
-                ResultApi.Loading -> {}
+                is ApiResult.Error -> {}
+                ApiResult.Loading -> {}
             }
         }
     }
@@ -267,16 +267,16 @@ class MonitorViewModel @Inject constructor(
     fun convertToTireData(diagramData: List<DiagramMonitorResponse>?): List<MonitorTireByDateResponse> =
         diagramData?.map { it.toTireData() } ?: emptyList()
 
-    private fun <T> monitorResponseHelper(response: ResultApi<T>, operation: (data: T) -> Unit) {
+    private fun <T> monitorResponseHelper(response: ApiResult<T>, operation: (data: T) -> Unit) {
         when (response) {
-            is ResultApi.Success -> {
+            is ApiResult.Success -> {
                 operation(response.data)
             }
 
-            is ResultApi.Error -> {
+            is ApiResult.Error -> {
             }
 
-            ResultApi.Loading -> {}
+            ApiResult.Loading -> {}
         }
     }
 }

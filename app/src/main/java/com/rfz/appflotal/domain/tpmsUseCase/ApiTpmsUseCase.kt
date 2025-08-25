@@ -6,7 +6,7 @@ import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.model.tpms.SensorRequest
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
-import com.rfz.appflotal.data.network.service.ResultApi
+import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.tpms.ApiTpmsRepository
 import javax.inject.Inject
 
@@ -15,19 +15,19 @@ class ApiTpmsUseCase @Inject constructor(private val apiTpmsRepository: ApiTpmsR
         fldFrame: String,
         monitorId: Int,
         fldDateData: String
-    ): ResultApi<List<TpmsResponse>?> {
+    ): ApiResult<List<TpmsResponse>?> {
         return apiTpmsRepository.doPostSensorData(SensorRequest(fldFrame, monitorId, fldDateData))
     }
 
-    suspend fun doGetDiagramMonitor(monitorId: Int): ResultApi<List<DiagramMonitorResponse>?> {
+    suspend fun doGetDiagramMonitor(monitorId: Int): ApiResult<List<DiagramMonitorResponse>?> {
         return apiTpmsRepository.doGetDiagramMonitor(monitorId)
     }
 
-    suspend fun doGetConfigurationMonitorById(monitorId: Int): ResultApi<List<ConfigurationByIdMonitorResponse>?> {
+    suspend fun doGetConfigurationMonitorById(monitorId: Int): ApiResult<List<ConfigurationByIdMonitorResponse>?> {
         return apiTpmsRepository.doGetConfigurationById(monitorId)
     }
 
-    suspend fun doGetPositionCoordinates(monitorId: Int): ResultApi<List<PositionCoordinatesResponse>?> {
+    suspend fun doGetPositionCoordinates(monitorId: Int): ApiResult<List<PositionCoordinatesResponse>?> {
         return apiTpmsRepository.doGetPositionCoordinates(monitorId)
     }
 
@@ -35,7 +35,7 @@ class ApiTpmsUseCase @Inject constructor(private val apiTpmsRepository: ApiTpmsR
         monitorId: Int,
         position: String,
         date: String
-    ): ResultApi<List<MonitorTireByDateResponse>?> {
+    ): ApiResult<List<MonitorTireByDateResponse>?> {
         return apiTpmsRepository.doGetMonitorTireByDate(monitorId, position, date)
     }
 }

@@ -91,4 +91,16 @@
     <string name="registrarse">Sign Up</string>
     <string name="siguiente">Next</string>
     <string name="regresar">Back</string>
+    <string name="no_tienes_cuenta_registrate">Don’t have an account? Sign up</string>
+    <string name="error_conexion_internet">Internet connection required</string>
+    <string name="nombre">Name</string>
+    <string name="correo_electr_nico">Email</string>
+    <string name="contrase_a">Password</string>
+    <string name="pa_s">Country</string>
+    <string name="sector">Industry</string>
+    <string name="seleccionar">Select %1$s</string>
+    <string name="registrar_vehiculo">Register Vehicle</string>
+    <string name="tipo_vehiculo">Vehicle Type</string>
+    <string name="placas">License Plate</string>
+    <string name="registro">Sing Up</string>
 </resources>

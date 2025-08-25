@@ -51,6 +51,17 @@ data class ErrorMessage(
     @SerializedName("searchedLocation") val searchedLocation: String
 )
 
+data class RegisterBody(
+    @SerializedName("fld_name") val fldName: String,
+    @SerializedName("fld_username") val fldUsername: String,
+    @SerializedName("fld_email") val fldEmail: String,
+    @SerializedName("fld_password") val fldPassword: String,
+    @SerializedName("id_country") val idCountry: Int,
+    @SerializedName("id_sector") val idSector: Int,
+    @SerializedName("typeVehicle") val typeVehicle: String,
+    @SerializedName("plates") val plates: String,
+)
+
 
 @Singleton
 class AppFlotalMapper @Inject constructor() {

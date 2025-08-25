@@ -34,8 +34,7 @@ import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
-import com.rfz.appflotal.data.network.service.ResultApi
-import com.rfz.appflotal.presentation.theme.primaryLight
+import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
@@ -43,7 +42,7 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 @Composable
 fun MonitorScreen(
     monitorViewModel: MonitorViewModel,
-    navController: NavController,
+    navigateUp: () -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
 ) {
@@ -51,7 +50,7 @@ fun MonitorScreen(
     val positionsUiState = monitorViewModel.positionsUiState.collectAsState()
     val monitorTireUiState = monitorViewModel.monitorTireUiState.collectAsState()
 
-    Scaffold(topBar = { if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar { navController.popBackStack() } }) { innerPadding ->
+    Scaffold(topBar = { if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar { navigateUp() } }) { innerPadding ->
         var selectedTab by remember { mutableIntStateOf(R.string.diagrama) }
 
         Surface {
@@ -128,7 +127,7 @@ fun MonitorScreen(
                         if (positionOptionSelected == R.string.recientes) {
                             val positionData = positionsUiState.value
                             when (positionData) {
-                                is ResultApi.Success -> {
+                                is ApiResult.Success -> {
                                     val data: List<DiagramMonitorResponse>? = positionData.data
                                     CurrentPositionDataView(
                                         sensorDataList = monitorViewModel.convertToTireData(data),
@@ -136,8 +135,8 @@ fun MonitorScreen(
                                     )
                                 }
 
-                                is ResultApi.Error -> {}
-                                is ResultApi.Loading -> {
+                                is ApiResult.Error -> {}
+                                is ApiResult.Loading -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center
@@ -149,7 +148,7 @@ fun MonitorScreen(
                         } else {
                             val monitorTireData = monitorTireUiState.value
                             when (monitorTireData) {
-                                is ResultApi.Success -> {
+                                is ApiResult.Success -> {
                                     val data: List<MonitorTireByDateResponse>? =
                                         monitorTireData.data
                                     CurrentPositionDataView(
@@ -158,8 +157,8 @@ fun MonitorScreen(
                                     )
                                 }
 
-                                is ResultApi.Error -> {}
-                                is ResultApi.Loading -> {
+                                is ApiResult.Error -> {}
+                                is ApiResult.Loading -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center

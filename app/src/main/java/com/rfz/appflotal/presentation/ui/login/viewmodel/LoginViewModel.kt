@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
-import kotlin.math.log
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -81,7 +80,7 @@ class LoginViewModel @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("HardwareIds")
-    fun onLoginSelected(navController: NavController) {
+    fun onLoginSelected() {
         _isLoginEnable.value = false
         _loginMessage.value = ""
 
@@ -94,7 +93,7 @@ class LoginViewModel @Inject constructor(
                 val user = LBEncryptionUtils.encrypt(usuario.value!!)
                 val pass = LBEncryptionUtils.encrypt(password.value!!)
 
-                when (val result = loginUseCase(user, pass)) {
+                when (val result = loginUseCase.doLogin(user, pass)) {
                     is Result.Success -> {
                         handleLoginResponse(result.data)
                     }
@@ -152,7 +151,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onNavigateToHomeComplete() {
+    fun onNavigateToHomeCompleted() {
         _navigateToHome.value = Pair(false, PaymentPlanType.None)
     }
 

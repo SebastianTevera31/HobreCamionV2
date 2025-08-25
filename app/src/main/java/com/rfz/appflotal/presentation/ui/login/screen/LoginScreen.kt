@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.login.screen
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -30,7 +31,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -51,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -65,21 +64,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.network.NetworkConfig
-import com.rfz.appflotal.core.network.NetworkConfig.RECUPERAR_CONTRASENIA
+import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.core.util.NavScreens.RECUPERAR_CONTRASENIA
 import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.HombreCamionScreens
+import com.rfz.appflotal.core.util.NavScreens.REGISTRAR_USUARIO
+import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginState
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -99,12 +102,12 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
             when (val state = loginState) {
                 is LoginState.Success -> {
                     if (navigateToHome?.second == PaymentPlanType.Complete) {
-                        navController.navigate(NetworkConfig.HOME) {
-                            popUpTo(NetworkConfig.LOGIN) { inclusive = true }
+                        navController.navigate(NavScreens.HOME) {
+                            popUpTo(NavScreens.LOGIN) { inclusive = true }
                         }
                     } else if (navigateToHome?.second == PaymentPlanType.OnlyTpms) {
                         navController.navigate(HombreCamionScreens.MONITOR.name) {
-                            popUpTo(NetworkConfig.LOGIN) { inclusive = true }
+                            popUpTo(NavScreens.LOGIN) { inclusive = true }
                         }
                     }
                 }
@@ -193,7 +196,7 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
                     isLoading = isLoading,
                     onLoginClick = {
                         if (Connected.isConnected(context)) {
-                            loginViewModel.onLoginSelected(navController)
+                            loginViewModel.onLoginSelected()
                         } else {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
@@ -203,6 +206,7 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
                             }
                         }
                     },
+                    onRegisterClick = { navController.navigate(REGISTRAR_USUARIO) },
                     onForgotPasswordClick = {
                         navController.navigate(RECUPERAR_CONTRASENIA)
                     }
@@ -278,6 +282,7 @@ private fun LoginForm(
     darkerGray: Color,
     isLoading: Boolean,
     onLoginClick: () -> Unit,
+    onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
     val usuario: String by loginViewModel.usuario.observeAsState(initial = "")
@@ -315,18 +320,32 @@ private fun LoginForm(
     Spacer(modifier = Modifier.height(8.dp))
 
     Text(
-        text = stringResource(R.string.title_forget),
+        text = stringResource(R.string.no_tienes_cuenta_registrate),
         color = brandColor,
         style = TextStyle(
-            fontSize = 15.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onForgotPasswordClick)
+            .clickable(onClick = onRegisterClick)
             .padding(vertical = 8.dp),
-        textAlign = TextAlign.End
+        textAlign = TextAlign.Start
     )
+
+    //    Text(
+//        text = stringResource(R.string.title_forget),
+//        color = brandColor,
+//        style = TextStyle(
+//            fontSize = 15.sp,
+//            fontWeight = FontWeight.Bold
+//        ),
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .clickable(onClick = onForgotPasswordClick)
+//            .padding(vertical = 8.dp),
+//        textAlign = TextAlign.End
+//    )
 
     Spacer(modifier = Modifier.height(24.dp))
 

@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,11 +63,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.network.NetworkConfig
+import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.theme.backgroundLight
-import com.rfz.appflotal.presentation.theme.onBackgroundLight
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
@@ -131,37 +129,37 @@ fun HomeScreen(
     val menuItems = listOf(
         MenuItem(
             stringResource(R.string.brands),
-            NetworkConfig.MARCAS,
+            NavScreens.MARCAS,
             R.drawable.ic_brand
         ),
         MenuItem(
             stringResource(R.string.original_design),
-            NetworkConfig.ORIGINAL,
+            NavScreens.ORIGINAL,
             R.drawable.ic_tire_design
         ),
         MenuItem(
             stringResource(R.string.tire_sizes),
-            NetworkConfig.MEDIDAS_LLANTAS,
+            NavScreens.MEDIDAS_LLANTAS,
             R.drawable.ic_tire_size
         ),
         MenuItem(
             stringResource(R.string.products),
-            NetworkConfig.PRODUCTOS,
+            NavScreens.PRODUCTOS,
             R.drawable.ic_products
         ),
         MenuItem(
             stringResource(R.string.tire_register),
-            NetworkConfig.REGISTRO_LLANTAS,
+            NavScreens.REGISTRO_LLANTAS,
             R.drawable.ic_tire_register
         ),
         MenuItem(
             stringResource(R.string.vehicle_register),
-            NetworkConfig.REGISTRO_VEHICULOS,
+            NavScreens.REGISTRO_VEHICULOS,
             R.drawable.ic_truck
         ),
         MenuItem(
             stringResource(R.string.tire_change),
-            NetworkConfig.MONTAJE_DESMONTAJE,
+            NavScreens.MONTAJE_DESMONTAJE,
             R.drawable.ic_tire_change
         ),
         MenuItem(
@@ -252,7 +250,7 @@ fun HomeScreen(
                                 HombreCamionService.stopService(context)
                                 homeViewModel.logout()
                                 withContext(Dispatchers.Main) {
-                                    navController.navigate(NetworkConfig.LOGIN) {
+                                    navController.navigate(NavScreens.LOGIN) {
                                         popUpTo(0)
                                     }
                                 }
@@ -384,7 +382,7 @@ fun HomeScreen(
             } else {
                 MonitorScreen(
                     monitorViewModel = monitorViewModel,
-                    navController = navController,
+                    navigateUp = { navController.navigateUp() },
                     paymentPlan = paymentPlan
                 )
             }

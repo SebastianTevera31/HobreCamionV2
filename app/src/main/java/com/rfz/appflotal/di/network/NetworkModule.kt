@@ -3,12 +3,8 @@ package com.rfz.appflotal.di.network
 
 import android.app.Application
 import android.content.Context
-import coil.ImageLoader
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.disk.DiskCache
-import coil.memory.MemoryCache
 import com.rfz.appflotal.core.network.NetworkConfig
+import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.network.client.login.LoginClient
 import com.rfz.appflotal.data.network.client.acquisitiontype.AcquisitionTypeClient
 import com.rfz.appflotal.data.network.client.airPressureRating.AirPressureRatingClient
@@ -56,14 +52,12 @@ import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepository
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepositoryImp
 import com.rfz.appflotal.data.repository.wifi.WifiRepository
 import com.rfz.appflotal.data.repository.wifi.WifiRepositoryImp
-import com.rfz.appflotal.domain.database.GetTasksUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.flow.first
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

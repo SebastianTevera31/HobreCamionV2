@@ -18,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +30,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
@@ -80,6 +80,8 @@ import com.rfz.appflotal.presentation.ui.password.screen.PasswordScreen
 import com.rfz.appflotal.presentation.ui.password.viewmodel.PasswordViewModel
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlantasScreen
+import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
+import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDateTime
@@ -95,6 +97,7 @@ class InicioActivity : ComponentActivity() {
     private val homeViewModel: HomeViewModel by viewModels()
     private val passwordViewModel: PasswordViewModel by viewModels()
     private val monitorViewModel: MonitorViewModel by viewModels()
+    private val signUpViewModel: SignUpViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -232,27 +235,28 @@ class InicioActivity : ComponentActivity() {
                                             PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
                                             PaymentPlanType.OnlyTpms.planName, PaymentPlanType.Free.planName
                                                 -> PaymentPlanType.OnlyTpms
+
                                             else -> PaymentPlanType.None
                                         }
 
                                         if (diferenciaHoras < 24) {
                                             navController.navigate(
-                                                "${NetworkConfig.HOME}/$paymentPlan"
+                                                "${NavScreens.HOME}/$paymentPlan"
                                             ) {
-                                                popUpTo(NetworkConfig.LOADING) {
+                                                popUpTo(NavScreens.LOADING) {
                                                     inclusive = true
                                                 }
                                             }
                                         } else {
                                             inicioScreenViewModel.deleteUserData()
-                                            navController.navigate(NetworkConfig.LOGIN) {
-                                                popUpTo(NetworkConfig.LOADING) { inclusive = true }
+                                            navController.navigate(NavScreens.LOGIN) {
+                                                popUpTo(NavScreens.LOADING) { inclusive = true }
                                             }
                                         }
                                     }
                                 } ?: run {
-                                    navController.navigate(NetworkConfig.LOGIN) {
-                                        popUpTo(NetworkConfig.LOADING) { inclusive = true }
+                                    navController.navigate(NavScreens.LOGIN) {
+                                        popUpTo(NavScreens.LOADING) { inclusive = true }
                                     }
                                 }
                             }
@@ -261,19 +265,19 @@ class InicioActivity : ComponentActivity() {
 
                         loginViewModel.navigateToHome.observe(this) { shouldNavigate ->
                             if (shouldNavigate.first) {
-                                navController.navigate("${NetworkConfig.HOME}/${shouldNavigate.second.name}") {
-                                    popUpTo(NetworkConfig.LOGIN) { inclusive = true }
+                                navController.navigate("${NavScreens.HOME}/${shouldNavigate.second.name}") {
+                                    popUpTo(NavScreens.LOGIN) { inclusive = true }
                                 }
-                                loginViewModel.onNavigateToHomeComplete()
+                                loginViewModel.onNavigateToHomeCompleted()
                             }
                         }
 
                         NavHost(
                             navController = navController,
-                            startDestination = NetworkConfig.LOADING
+                            startDestination = NavScreens.LOADING
                         ) {
                             composable(
-                                "${NetworkConfig.HOME}/{paymentPlan}",
+                                "${NavScreens.HOME}/{paymentPlan}",
                                 arguments = listOf(navArgument("paymentPlan") {
                                     type = NavType.StringType
                                 })
@@ -304,23 +308,23 @@ class InicioActivity : ComponentActivity() {
 
                                 MonitorScreen(
                                     monitorViewModel = monitorViewModel,
-                                    navController = navController,
+                                    navigateUp = { navController.navigateUp() },
                                     paymentPlan = PaymentPlanType.Complete
                                 )
                             }
 
-                            composable(NetworkConfig.RECUPERAR_CONTRASENIA) {
+                            composable(NavScreens.RECUPERAR_CONTRASENIA) {
                                 PasswordScreen(passwordViewModel)
                             }
 
-                            composable(NetworkConfig.LOADING) { LoadingScreen() }
-                            composable(NetworkConfig.LOGIN) {
+                            composable(NavScreens.LOADING) { LoadingScreen() }
+                            composable(NavScreens.LOGIN) {
                                 LoginScreen(
                                     loginViewModel,
                                     navController
                                 )
                             }
-                            composable(NetworkConfig.MARCAS) {
+                            composable(NavScreens.MARCAS) {
                                 MarcasScreen(
                                     navController = navController,
                                     brandListUseCase = brandListUseCase,
@@ -328,7 +332,7 @@ class InicioActivity : ComponentActivity() {
                                     brandCrudUseCase = brandCrudUseCase
                                 )
                             }
-                            composable(NetworkConfig.ORIGINAL) {
+                            composable(NavScreens.ORIGINAL) {
                                 OriginalScreen(
                                     navController,
                                     originalDesignUseCase = originalDesignUseCase,
@@ -339,13 +343,13 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
-                            composable(NetworkConfig.RENOVADOS) { RenovadosScreen(navController) }
-                            composable(NetworkConfig.NUEVO_RENOVADO) {
+                            composable(NavScreens.RENOVADOS) { RenovadosScreen(navController) }
+                            composable(NavScreens.NUEVO_RENOVADO) {
                                 NuevoRenovadoScreen(
                                     navController
                                 )
                             }
-                            composable(NetworkConfig.MEDIDAS_LLANTAS) {
+                            composable(NavScreens.MEDIDAS_LLANTAS) {
                                 MedidasLlantasScreen(
                                     navController,
                                     tireSizeUseCase,
@@ -353,7 +357,7 @@ class InicioActivity : ComponentActivity() {
                                     tireSizeCrudUseCase
                                 )
                             }
-                            composable(NetworkConfig.PRODUCTOS) {
+                            composable(NavScreens.PRODUCTOS) {
                                 NuevoProductoScreen(
                                     navController,
                                     productListUseCase,
@@ -365,7 +369,7 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
-                            composable(NetworkConfig.NUEVO_PRODUCTO) {
+                            composable(NavScreens.NUEVO_PRODUCTO) {
                                 NuevoProductoScreen(
                                     navController,
                                     productListUseCase,
@@ -377,7 +381,7 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
-                            composable(NetworkConfig.REGISTRO_LLANTAS) {
+                            composable(NavScreens.REGISTRO_LLANTAS) {
                                 NuevoRegistroLlantasScreen(
                                     navController,
                                     acquisitionTypeUseCase,
@@ -390,7 +394,7 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
-                            composable(NetworkConfig.REGISTRO_VEHICULOS) {
+                            composable(NavScreens.REGISTRO_VEHICULOS) {
                                 NuevoRegistroVehiculoScreen(
                                     navController,
                                     vehicleListUseCase,
@@ -403,15 +407,15 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
-                            composable(NetworkConfig.MONTAJE_DESMONTAJE) {
+                            composable(NavScreens.MONTAJE_DESMONTAJE) {
                                 MontajeDesmontajeScreen(
                                     navController
                                 )
                             }
-                            composable(NetworkConfig.INICIO) { InicioScreen(navController) }
+                            composable(NavScreens.INICIO) { InicioScreen(navController) }
 
                             composable(
-                                route = "${NetworkConfig.NUEVA_MARCA}/{brandId}?desc={desc}",
+                                route = "${NavScreens.NUEVA_MARCA}/{brandId}?desc={desc}",
                                 arguments = listOf(
                                     navArgument("brandId") { type = NavType.IntType },
                                     navArgument("desc") {
@@ -423,6 +427,16 @@ class InicioActivity : ComponentActivity() {
                             ) { backStackEntry ->
                                 val brandId = backStackEntry.arguments?.getInt("brandId") ?: 0
                                 val description = backStackEntry.arguments?.getString("desc")
+                            }
+
+                            composable(route = NavScreens.REGISTRAR_USUARIO) {
+                                SignUpScreen(
+                                    navigateUp = { navController.navigateUp() },
+                                    signUpViewModel = signUpViewModel
+                                ) { username, password ->
+                                    loginViewModel.onLoginChanged(username, password)
+                                    loginViewModel.onLoginSelected()
+                                }
                             }
                         }
                     }
