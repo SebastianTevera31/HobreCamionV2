@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.login.screen
 
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -9,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,14 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -64,26 +60,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.core.util.NavScreens.RECUPERAR_CONTRASENIA
-import com.rfz.appflotal.core.util.Connected
-import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens.REGISTRAR_USUARIO
-import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginState
-import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.ui.components.ProgressDialog
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -103,10 +94,6 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
                 is LoginState.Success -> {
                     if (navigateToHome?.second == PaymentPlanType.Complete) {
                         navController.navigate(NavScreens.HOME) {
-                            popUpTo(NavScreens.LOGIN) { inclusive = true }
-                        }
-                    } else if (navigateToHome?.second == PaymentPlanType.OnlyTpms) {
-                        navController.navigate(HombreCamionScreens.MONITOR.name) {
                             popUpTo(NavScreens.LOGIN) { inclusive = true }
                         }
                     }
@@ -196,11 +183,11 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
                     isLoading = isLoading,
                     onLoginClick = {
                         if (Connected.isConnected(context)) {
-                            loginViewModel.onLoginSelected()
+                            loginViewModel.onLoginSelected(context)
                         } else {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Se necesita conexión a Internet",
+                                    message = context.getString(R.string.error_conexion_internet),
                                     actionLabel = "OK"
                                 )
                             }
@@ -216,32 +203,6 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
     }
 }
 
-@Composable
-fun ProgressDialog() {
-    AlertDialog(
-        onDismissRequest = { },
-        title = {
-            Text(
-                text = "Espere un momento...",
-                fontSize = 14.sp
-            )
-        },
-        text = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CircularProgressIndicator(
-                    color = Color(0xFF5B2034),
-                    modifier = Modifier.size(32.dp),
-                    strokeWidth = 4.dp
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text("Enviando información", fontWeight = FontWeight.Medium)
-            }
-        },
-        confirmButton = {},
-        shape = RoundedCornerShape(16.dp),
-        containerColor = Color.White
-    )
-}
 
 @Composable
 private fun LogoImage(modifier: Modifier = Modifier) {
@@ -400,13 +361,13 @@ private fun UsernameField(
         modifier = Modifier.fillMaxWidth(),
         label = {
             Text(
-                stringResource(R.string.title_user),
+                stringResource(R.string.correo_electr_nico),
                 color = darkerGray.copy(alpha = 0.8f)
             )
         },
         placeholder = {
             Text(
-                stringResource(R.string.title_user),
+                stringResource(R.string.correo_electr_nico),
                 color = darkerGray.copy(alpha = 0.6f)
             )
         },

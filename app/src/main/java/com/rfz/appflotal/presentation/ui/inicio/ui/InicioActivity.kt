@@ -433,9 +433,10 @@ class InicioActivity : ComponentActivity() {
                                 SignUpScreen(
                                     navigateUp = { navController.navigateUp() },
                                     signUpViewModel = signUpViewModel
-                                ) { username, password ->
-                                    loginViewModel.onLoginChanged(username, password)
-                                    loginViewModel.onLoginSelected()
+                                ) { paymentPlanType ->
+                                    navController.navigate("${NavScreens.HOME}/$paymentPlanType") {
+                                        popUpTo(NavScreens.LOGIN) { inclusive = true }
+                                    }
                                 }
                             }
                         }

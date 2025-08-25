@@ -6,11 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,13 +31,14 @@ import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpUiState
 @Composable
 fun VehicleForm(
     signUpUiState: SignUpUiState,
+    enableRegisterButton: Boolean,
     modifier: Modifier = Modifier,
     onBack: (vehicleType: String, plates: String) -> Unit,
     onRegister: (vehicleType: String, plates: String) -> Unit,
 ) {
     var vehicleType by remember { mutableStateOf("") }
     var plates by remember { mutableStateOf("") }
-
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         vehicleType = signUpUiState.vehicleType
@@ -46,7 +48,7 @@ fun VehicleForm(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        modifier = modifier
+        modifier = modifier.verticalScroll(scrollState)
     ) {
         Text(
             stringResource(R.string.registrar_vehiculo),
@@ -55,18 +57,12 @@ fun VehicleForm(
             modifier = Modifier.align(Alignment.Start)
         )
 
-        TextField(
+        FormTextField(
+            title = R.string.tipo_vehiculo,
             value = vehicleType,
-            onValueChange = { vehicleType = it },
-            label = { Text(stringResource(R.string.tipo_vehiculo)) },
-            modifier = Modifier.fillMaxWidth()
-        )
-        TextField(
-            value = plates,
-            onValueChange = { plates = it },
-            label = { Text(stringResource(R.string.placas)) },
-            modifier = Modifier.fillMaxWidth()
-        )
+            onValueChange = { vehicleType = it })
+
+        FormTextField(title = R.string.placas, value = plates, onValueChange = { plates = it })
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -74,7 +70,7 @@ fun VehicleForm(
         ) {
             Button(
                 onClick = { onBack(vehicleType, plates) },
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.tertiary),
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.weight(1f)
             ) { Text(text = stringResource(R.string.regresar)) }
@@ -82,6 +78,7 @@ fun VehicleForm(
             Button(
                 onClick = { onRegister(vehicleType, plates) },
                 shape = MaterialTheme.shapes.medium,
+                enabled = enableRegisterButton,
                 modifier = Modifier.weight(1f)
             ) { Text(text = stringResource(R.string.registrarse)) }
         }
@@ -94,6 +91,7 @@ fun RegistrarDatosVehiculoPreview() {
     HombreCamionTheme {
         VehicleForm(
             signUpUiState = SignUpUiState(),
+            enableRegisterButton = true,
             modifier = Modifier
                 .safeContentPadding()
                 .fillMaxSize(),

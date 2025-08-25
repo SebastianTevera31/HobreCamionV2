@@ -13,6 +13,7 @@ import com.rfz.appflotal.data.network.client.airPressureRating.UpdateAirPressure
 import com.rfz.appflotal.data.network.client.base.BaseClient
 import com.rfz.appflotal.data.network.client.brand.BrandCrudClient
 import com.rfz.appflotal.data.network.client.brand.BrandListClient
+import com.rfz.appflotal.data.network.client.catalog.CatalogClient
 import com.rfz.appflotal.data.network.client.controltype.ControlTypeClient
 import com.rfz.appflotal.data.network.client.defaultparameter.DefaultParameterClient
 import com.rfz.appflotal.data.network.client.destination.DestinationClient
@@ -373,6 +374,12 @@ class NetworkModule {
     @Provides
     fun provideTpmsClient(retrofit: Retrofit): ApiTpmsClient {
         return retrofit.create(ApiTpmsClient::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCatalogClient(retrofit: Retrofit): CatalogClient {
+        return retrofit.create(CatalogClient::class.java)
     }
 }
 

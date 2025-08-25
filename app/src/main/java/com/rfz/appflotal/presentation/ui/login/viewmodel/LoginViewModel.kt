@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.login.viewmodel
 
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
@@ -9,10 +10,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.LBEncryptionUtils
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.LoginState
+import com.rfz.appflotal.data.model.login.response.LoginState.*
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
@@ -21,6 +24,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.Connection
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,7 +58,7 @@ class LoginViewModel @Inject constructor(
     private val _loginMessage = MutableLiveData<String>()
     val loginMessage: LiveData<String> = _loginMessage
 
-    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
+    private val _loginState = MutableStateFlow<LoginState>(Idle)
     val loginState: StateFlow<LoginState> = _loginState
 
     private val _isProgressVisible = MutableStateFlow(false)
@@ -80,32 +84,37 @@ class LoginViewModel @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("HardwareIds")
-    fun onLoginSelected() {
+    fun onLoginSelected(ctx: Context) {
         _isLoginEnable.value = false
         _loginMessage.value = ""
 
         viewModelScope.launch {
             showProgressDialog()
             _isLoading.value = true
-            _loginState.value = LoginState.Loading
+            _loginState.value = Loading
 
             try {
-                val user = LBEncryptionUtils.encrypt(usuario.value!!)
-                val pass = LBEncryptionUtils.encrypt(password.value!!)
+                val user = usuario.value!!
+                val pass = password.value!!
 
                 when (val result = loginUseCase.doLogin(user, pass)) {
                     is Result.Success -> {
-                        handleLoginResponse(result.data)
+                        handleLoginResponse(
+                            result.data,
+                            ctx = ctx
+                        )
                     }
 
                     is Result.Failure -> {
                         _loginState.value =
-                            LoginState.Error(result.exception.message ?: "Unknown error")
+                            Error(result.exception.message ?: "Unknown error")
                         _loginMessage.value = result.exception.message ?: "Authentication error"
                     }
+
+                    Result.Loading -> {}
                 }
             } catch (e: Exception) {
-                _loginState.value = LoginState.Error(e.message ?: "Unexpected error")
+                _loginState.value = Error(e.message ?: "Unexpected error")
                 _loginMessage.value = e.message ?: "Connection error"
             } finally {
                 _isLoading.value = false
@@ -114,7 +123,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun handleLoginResponse(loginResponse: LoginResponse) {
+    private fun handleLoginResponse(loginResponse: LoginResponse, ctx: Context) {
         when (loginResponse.id) {
             200 -> {
                 val paymentPlan = when (loginResponse.paymentPlan) {
@@ -125,18 +134,20 @@ class LoginViewModel @Inject constructor(
                 onTaskCreated(loginResponse)
                 _navigateToHome.value =
                     Pair(true, paymentPlan)
-                _loginState.value = LoginState.Success(loginResponse)
+                _loginState.value = Success(loginResponse)
             }
 
             -100 -> {
-                _loginMessage.value = "Credenciales incorrectas"
+                _loginMessage.value = ctx.getString(R.string.credenciales_incorrectas)
                 _isLoginEnable.value = true
-                _loginState.value = LoginState.Error("Credenciales incorrectas")
+                _loginState.value =
+                    Error(ctx.getString(R.string.credenciales_incorrectas))
             }
 
             else -> {
-                _loginMessage.value = "Error en el servidor: ${loginResponse.id}"
-                _loginState.value = LoginState.Error("Error en el servidor")
+                _loginMessage.value =
+                    ctx.getString(R.string.error_en_el_servidor, loginResponse.id)
+                _loginState.value = Error(ctx.getString(R.string.error_en_el_servidor_only))
             }
         }
     }

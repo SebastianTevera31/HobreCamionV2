@@ -56,7 +56,7 @@ data class RegisterBody(
     @SerializedName("fld_username") val fldUsername: String,
     @SerializedName("fld_email") val fldEmail: String,
     @SerializedName("fld_password") val fldPassword: String,
-    @SerializedName("id_country") val idCountry: Int,
+    @SerializedName("id_contry") val idCountry: Int,
     @SerializedName("id_sector") val idSector: Int,
     @SerializedName("typeVehicle") val typeVehicle: String,
     @SerializedName("plates") val plates: String,

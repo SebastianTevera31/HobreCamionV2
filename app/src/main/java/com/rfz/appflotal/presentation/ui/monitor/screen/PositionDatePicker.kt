@@ -148,7 +148,9 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
                     }) { Text(text = stringResource(R.string.confirmar)) }
                 },
                 dismissButton = {
-                    Button(onClick = { showDialog = false }) { Text(text = stringResource(R.string.cancelar)) }
+                    Button(onClick = {
+                        showDialog = false
+                    }) { Text(text = stringResource(R.string.cancelar)) }
                 }
             ) { DatePicker(state = state) }
         }

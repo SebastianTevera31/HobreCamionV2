@@ -105,4 +105,18 @@
     <string name="tipo_vehiculo">Tipo vehiculo</string>
     <string name="placas">Placas</string>
     <string name="registro">Registro</string>
+    <string name="signup_name_alert">Introduzca su nombre</string>
+    <string name="signup_email_alert">Introduzca un correo valido</string>
+    <string name="signup_password_alert">Introduzca una contraseña de minimo 8 caracteres</string>
+    <string name="signup_country_alert">Seleccione un país</string>
+    <string name="signup_industry_alert">Seleccione un sector</string>
+    <string name="signup_typevehicle_alert">Especifique el tipo de vehiculo</string>
+    <string name="signup_plates_alert">Introduzca las placas del vehiculo</string>
+    <string name="signup_successfull">Usuario registrado exitosamente</string>
+    <string name="signup_network_alert">Ocurrió un error al tratar de realizar el registro</string>
+    <string name="espere_un_momento">Espere un momento...</string>
+    <string name="credenciales_incorrectas">Credenciales incorrectas</string>
+    <string name="error_en_el_servidor">Error en el servidor: %1$d</string>
+    <string name="error_en_el_servidor_only">Error en el servidor</string>
+    <string name="buscar_valor">Buscar país...</string>
 </resources>

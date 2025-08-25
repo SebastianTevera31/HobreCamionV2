@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.registrousuario.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,13 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -28,16 +31,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.theme.primaryLight
+import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpUiState
 
 @Composable
@@ -56,6 +62,7 @@ fun UserForm(
     var country by remember { mutableStateOf<Pair<Int, String>?>(null) }
     var sector by remember { mutableStateOf<Pair<Int, String>?>(null) }
     var email by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         name = signUpUiState.name
@@ -68,7 +75,7 @@ fun UserForm(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        modifier = modifier
+        modifier = modifier.verticalScroll(scrollState)
     ) {
         Text(
             stringResource(R.string.registro),
@@ -77,23 +84,20 @@ fun UserForm(
             modifier = Modifier.align(Alignment.Start)
         )
 
-        TextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text(stringResource(R.string.nombre)) },
-            modifier = Modifier.fillMaxWidth()
-        )
-        TextField(
+        FormTextField(title = R.string.nombre, value = name, onValueChange = { name = it })
+
+        FormTextField(
+            title = R.string.correo_electr_nico,
             value = email,
             onValueChange = { email = it },
-            label = { Text(stringResource(R.string.correo_electr_nico)) },
-            modifier = Modifier.fillMaxWidth()
+            keyboardType = KeyboardType.Email
         )
-        TextField(
+
+        FormTextField(
+            title = R.string.contrase_a,
             value = password,
             onValueChange = { password = it },
-            label = { Text(stringResource(R.string.contrase_a)) },
-            modifier = Modifier.fillMaxWidth()
+            keyboardType = KeyboardType.Password
         )
 
         SignUpDropDownMenu(
@@ -129,10 +133,15 @@ fun SignUpDropDownMenu(
     var title by remember { mutableStateOf(text) }
     var showList by remember { mutableStateOf(false) }
     var parentSize by remember { mutableStateOf(IntSize.Zero) }
-
+    var query by remember { mutableStateOf("") }
+    val filteredValues = values.filter {
+        it.value.contains(query, ignoreCase = true)
+    }
 
     Column(
         modifier = Modifier
+            .border(width = 1.dp, color = primaryLight, RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
             .onGloballyPositioned { coordinates ->
                 parentSize = coordinates.size
             }
@@ -140,14 +149,16 @@ fun SignUpDropDownMenu(
         Row(
             modifier = modifier
                 .height(60.dp)
-                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                title, textAlign = TextAlign.Start, modifier = Modifier.weight(1f)
+                title,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.weight(1f),
+                color = secondaryLight
             )
             Icon(
                 painter = painterResource(R.drawable.drop_down_arrow),
@@ -155,19 +166,45 @@ fun SignUpDropDownMenu(
             )
         }
 
-        DropdownMenu(
-            expanded = showList,
-            onDismissRequest = { showList = false },
-            modifier = Modifier.width(with(LocalDensity.current) { parentSize.width.toDp() })
-        ) {
-            values.forEach { value ->
-                DropdownMenuItem(
-                    text = { Text(text = value.value) },
-                    onClick = {
-                        title = value.value
-                        onSelectedValue(Pair(value.key, value.value))
+        if (showList) {
+            Dialog(onDismissRequest = { showList = false }) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    tonalElevation = 8.dp
+                ) {
+                    Column {
+                        TextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            placeholder = {
+                                Text(
+                                    stringResource(
+                                        R.string.buscar_valor,
+                                        text.lowercase()
+                                    )
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        LazyColumn(
+                            modifier = Modifier.height(400.dp)
+                        ) {
+                            items(filteredValues.toList()) { value ->
+                                Text(
+                                    text = value.second,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            title = value.second
+                                            onSelectedValue(value)
+                                            showList = false
+                                        }
+                                        .padding(16.dp)
+                                )
+                            }
+                        }
                     }
-                )
+                }
             }
         }
     }

@@ -21,7 +21,7 @@ class LoginService @Inject constructor(private val loginClient: LoginClient) {
     }
 
     suspend fun doRegisterUser(requestBody: RegisterBody): ApiResult<List<MessageResponse>?> {
-        return requestHelper (endpointName = "RegisterUser") {
+        return requestHelper(endpointName = "RegisterUser") {
             loginClient.registerUser(requestBody)
         }
     }

@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.registrousuario.screen
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
@@ -34,11 +35,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.HombreCamionScreens
+import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.data.model.login.response.LoginResponse
+import com.rfz.appflotal.data.model.login.response.Result
+import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.ui.components.ProgressDialog
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.AuthFlow
+import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
+import kotlin.math.log
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,13 +58,18 @@ fun SignUpScreen(
     navigateUp: () -> Unit,
     signUpViewModel: SignUpViewModel,
     modifier: Modifier = Modifier,
-    navigateToMenu: (username: String, password: String) -> Unit
+    navigateToMenu: (PaymentPlanType) -> Unit
 ) {
     val ctx = LocalContext.current
     var isNextScreen by remember { mutableStateOf(false) }
+
     val signUpUiState = signUpViewModel.signUpUiState.collectAsState()
     val signUpRequestStatus = signUpViewModel.signUpRequestStatus
+    val loginRequestStatus = signUpViewModel.loginRequestStatus
+
     val snackbarHostState = remember { SnackbarHostState() }
+    var enableRegisterButton by remember { mutableStateOf(true) }
+    var authFlow by remember { mutableStateOf<AuthFlow>(AuthFlow.None) }
 
     Scaffold(topBar = {
         SignUpTopBar(
@@ -106,8 +122,8 @@ fun SignUpScreen(
                         modifier = Modifier
                             .padding(top = 80.dp)
                             .padding(horizontal = 40.dp),
-                        countries = emptyMap(),
-                        sectors = emptyMap()
+                        countries = signUpUiState.value.countries,
+                        sectors = signUpUiState.value.sectors
                     ) { name, password, email, country, sector ->
                         val message = signUpViewModel.chargeUserData(
                             name = name,
@@ -115,13 +131,15 @@ fun SignUpScreen(
                             email = email,
                             password = password
                         )
-                        if (message == null) isNextScreen = true
-                        else Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+                        if (message == SignUpAlerts.Registrado) isNextScreen = true
+                        else Toast.makeText(ctx, ctx.getString(message.message), Toast.LENGTH_SHORT)
+                            .show()
                     }
                 } else {
                     VehicleForm(
                         signUpUiState = signUpUiState.value,
                         modifier = Modifier.padding(horizontal = 40.dp),
+                        enableRegisterButton = enableRegisterButton,
                         onBack = { vehicleType, plates ->
                             signUpViewModel.chargeVehicleData(
                                 typeVehicle = vehicleType,
@@ -135,43 +153,99 @@ fun SignUpScreen(
                             plates = plates
                         )
 
-                        if (message == null) {
-
+                        if (message == SignUpAlerts.Registrado) {
+                            enableRegisterButton = false
+                            authFlow = AuthFlow.SignUp
                             signUpViewModel.signUpUser(ctx) {
                                 snackbarHostState.showSnackbar(
                                     message = ctx.getString(R.string.error_conexion_internet),
                                     actionLabel = "OK"
                                 )
                             }
-
-                            when (signUpRequestStatus) {
-                                is ApiResult.Success -> {
-                                    navigateToMenu(
-                                        signUpUiState.value.username,
-                                        signUpUiState.value.password
-                                    )
-
-                                    signUpViewModel.cleanSignUpData()
-                                }
-
-                                is ApiResult.Error -> {
-                                    Toast.makeText(
-                                        ctx,
-                                        "Ocurrió un error al tratar de realizar el registro",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    Log.e("SingUpScreen", "${signUpRequestStatus.message}")
-                                }
-
-                                ApiResult.Loading -> {}
-                            }
-
                         } else {
-                            Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(ctx, ctx.getString(message.message), Toast.LENGTH_SHORT)
+                                .show()
                         }
+                    }
+
+                    when (authFlow) {
+                        AuthFlow.SignUp -> {
+                            SignUpStatus(
+                                ctx = ctx,
+                                onEnableButton = { enableRegisterButton = true },
+                                signUpRequestStatus = signUpRequestStatus
+                            ) {
+                                authFlow = AuthFlow.Login
+                                signUpViewModel.onLogin()
+                            }
+                        }
+
+                        AuthFlow.Login -> {
+                            LoginStatus(
+                                ctx = ctx,
+                                loginRequestStatus = loginRequestStatus
+                            ) {
+                                navigateToMenu(signUpUiState.value.paymentPlan)
+                                authFlow = AuthFlow.None
+                            }
+                        }
+
+                        AuthFlow.None -> {}
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun SignUpStatus(
+    ctx: Context,
+    onEnableButton: () -> Unit,
+    signUpRequestStatus: ApiResult<List<MessageResponse>?>,
+    onLogin: () -> Unit
+) {
+    when (signUpRequestStatus) {
+        is ApiResult.Success -> {
+            onLogin()
+        }
+
+        is ApiResult.Error -> {
+            onEnableButton()
+            Toast.makeText(
+                ctx,
+                ctx.getString(R.string.signup_network_alert),
+                Toast.LENGTH_SHORT
+            ).show()
+            Log.e("SingUpScreen", "${signUpRequestStatus.message}")
+        }
+
+        ApiResult.Loading -> {}
+    }
+}
+
+@Composable
+fun LoginStatus(
+    ctx: Context,
+    loginRequestStatus: Result<LoginResponse>,
+    onNavigate: () -> Unit
+) {
+    when (loginRequestStatus) {
+        is Result.Success -> {
+            onNavigate()
+        }
+
+        is Result.Failure -> {
+            Toast.makeText(
+                ctx,
+                ctx.getString(R.string.signup_network_alert),
+                Toast.LENGTH_SHORT
+            ).show()
+            Log.e("SingUpScreen", "${loginRequestStatus.exception.message}")
+        }
+
+        Result.Loading -> {
+            ProgressDialog()
         }
     }
 }

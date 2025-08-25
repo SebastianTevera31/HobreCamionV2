@@ -20,6 +20,7 @@ import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.database.SensorTableUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
+import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,7 +64,7 @@ class MonitorViewModel @Inject constructor(
         viewModelScope.launch {
             val userData = getTasksUseCase().first()[0]
             val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(userData.id_monitor)
-            monitorResponseHelper(response = configInfo) { data ->
+            responseHelper(response = configInfo) { data ->
                 if (!data.isNullOrEmpty()) {
                     val config = data[0].fldDescription.replace("BASE", "").trim()
                     if (config.isDigitsOnly()) {
@@ -177,7 +178,7 @@ class MonitorViewModel @Inject constructor(
             val coordinates =
                 apiTpmsUseCase.doGetPositionCoordinates(monitorUiState.value.monitorId)
 
-            monitorResponseHelper(response = coordinates) { response ->
+            responseHelper(response = coordinates) { response ->
                 _monitorUiState.update { currentUiState ->
                     currentUiState.copy(
                         coordinateList = response
@@ -192,7 +193,7 @@ class MonitorViewModel @Inject constructor(
         viewModelScope.launch {
             val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
 
-            monitorResponseHelper(response = sensorData) { data ->
+            responseHelper(response = sensorData) { data ->
                 if (!data.isNullOrEmpty()) {
                     data.filter { data -> data.sensorPosition == wheelPosition }[0]
                         .let {
@@ -266,17 +267,4 @@ class MonitorViewModel @Inject constructor(
 
     fun convertToTireData(diagramData: List<DiagramMonitorResponse>?): List<MonitorTireByDateResponse> =
         diagramData?.map { it.toTireData() } ?: emptyList()
-
-    private fun <T> monitorResponseHelper(response: ApiResult<T>, operation: (data: T) -> Unit) {
-        when (response) {
-            is ApiResult.Success -> {
-                operation(response.data)
-            }
-
-            is ApiResult.Error -> {
-            }
-
-            ApiResult.Loading -> {}
-        }
-    }
 }

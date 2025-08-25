@@ -102,5 +102,19 @@
     <string name="registrar_vehiculo">Register Vehicle</string>
     <string name="tipo_vehiculo">Vehicle Type</string>
     <string name="placas">License Plate</string>
-    <string name="registro">Sing Up</string>
+    <string name="registro">Sign Up</string>
+    <string name="signup_name_alert">Enter your name</string>
+    <string name="signup_email_alert">Enter a valid email</string>
+    <string name="signup_password_alert">Enter a password with at least 8 characters</string>
+    <string name="signup_country_alert">Select a country</string>
+    <string name="signup_industry_alert">Select an industry</string>
+    <string name="signup_typevehicle_alert">Specify the vehicle type</string>
+    <string name="signup_plates_alert">Enter the vehicle’s license plate</string>
+    <string name="signup_successfull">Account created successfully</string>
+    <string name="signup_network_alert">Something went wrong while signing up</string>
+    <string name="espere_un_momento">Please wait...</string>
+    <string name="credenciales_incorrectas">Invalid credentials</string>
+    <string name="error_en_el_servidor">Server error: %1$d</string>
+    <string name="error_en_el_servidor_only">Server error</string>
+    <string name="buscar_valor">Search %1$s...</string>
 </resources>
