@@ -118,5 +118,10 @@
     <string name="credenciales_incorrectas">Credenciales incorrectas</string>
     <string name="error_en_el_servidor">Error en el servidor: %1$d</string>
     <string name="error_en_el_servidor_only">Error en el servidor</string>
-    <string name="buscar_valor">Buscar país...</string>
+    <string name="buscar_valor">Buscar %1$s...</string>
+    <string name="error_desconocido_del_servidor">Error desconocido del servidor</string>
+    <string name="cuerpo_de_la_respuesta_vac_o">Cuerpo de la respuesta vacío</string>
+    <string name="direcci_n_mac">Dirección MAC</string>
+    <string name="configuraci_n">Configuración</string>
+    <string name="monitor">Monitor</string>
 </resources>

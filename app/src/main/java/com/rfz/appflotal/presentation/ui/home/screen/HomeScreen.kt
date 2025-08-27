@@ -73,6 +73,7 @@ import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.theme.surfaceLight
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorRegisterDialog
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -326,6 +327,7 @@ fun HomeScreen(
                 }
             }
 
+            // PANTALLAS
             if (paymentPlan == PaymentPlanType.Complete) {
                 Box(
                     modifier = Modifier

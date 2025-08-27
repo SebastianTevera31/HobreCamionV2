@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Connected
+import com.rfz.appflotal.core.util.LBEncryptionUtils
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
@@ -53,7 +54,7 @@ class SignUpViewModel @Inject constructor(
     )
         private set
 
-    init {
+    fun populateListMenus() {
         viewModelScope.launch {
             val countriesResponse = catalogUseCase.onGetCountries()
             val sectorsResponse = catalogUseCase.onGetSectors()
@@ -104,8 +105,8 @@ class SignUpViewModel @Inject constructor(
         username: String,
         email: String,
         password: String,
-        country: Pair<Int, String>? = Pair(116, "USA"),
-        sector: Pair<Int, String>? = Pair(1, "DEVELOPMENT"),
+        country: Pair<Int, String>?,
+        sector: Pair<Int, String>?,
     ): SignUpAlerts {
         _signUpUiState.update { currentUiState ->
             currentUiState.copy(
@@ -169,13 +170,16 @@ class SignUpViewModel @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("HardwareIds")
-    fun onLogin() {
+    fun onLogin(ctx: Context) {
         viewModelScope.launch {
             loginRequestStatus = Result.Loading
             try {
+                val email = signUpUiState.value.email
+                val password = signUpUiState.value.password
                 when (val result = loginUseCase.doLogin(
-                    signUpUiState.value.email,
-                    signUpUiState.value.password
+                    LBEncryptionUtils.encrypt(email),
+                    LBEncryptionUtils.encrypt(password),
+                    ctx
                 )) {
                     is Result.Success -> {
                         handleLoginResponse(result.data)

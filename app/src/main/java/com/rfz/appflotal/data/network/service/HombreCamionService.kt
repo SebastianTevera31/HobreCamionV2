@@ -146,8 +146,10 @@ class HombreCamionService : Service() {
         coroutineScope.launch {
             val dataUser = getUserUseCase().first()[0]
             Log.d("HombreCamionService", "Iniciando Bluetooth...")
-            bluetoothUseCase.doConnect(dataUser.monitorMac)
-            bluetoothUseCase.doStartRssiMonitoring()
+            if (dataUser.id_monitor != 0) {
+                bluetoothUseCase.doConnect(dataUser.monitorMac)
+                bluetoothUseCase.doStartRssiMonitoring()
+            }
         }
     }
 

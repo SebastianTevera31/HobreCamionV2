@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,11 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
-import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
@@ -38,6 +39,7 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorMessage
 
 @Composable
 fun MonitorScreen(
@@ -49,6 +51,26 @@ fun MonitorScreen(
     val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
     val positionsUiState = monitorViewModel.positionsUiState.collectAsState()
     val monitorTireUiState = monitorViewModel.monitorTireUiState.collectAsState()
+    val configurationsUiState = monitorViewModel.configurationList.collectAsState()
+    val monitorRegisterStatus = monitorViewModel.monitorRegisterState.collectAsState()
+
+    var showRegisterMonitorDialog by remember { mutableStateOf(false) }
+
+    showRegisterMonitorDialog = monitorUiState.value.monitorId == 0
+
+    if (showRegisterMonitorDialog) {
+        monitorViewModel.loadConfigurations()
+
+        MonitorRegisterDialog(
+            monitors = configurationsUiState.value,
+            onDismissRequest = { showRegisterMonitorDialog = false },
+        ) { mac, configuration ->
+            monitorViewModel.registerMonitor(mac, configuration)
+            if (RegisterMonitorMessage.REGISTERED == monitorRegisterStatus.value) {
+                showRegisterMonitorDialog = false
+            }
+        }
+    }
 
     Scaffold(topBar = { if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar { navigateUp() } }) { innerPadding ->
         var selectedTab by remember { mutableIntStateOf(R.string.diagrama) }
@@ -69,7 +91,10 @@ fun MonitorScreen(
                     Tab(
                         selected = selectedTab == R.string.diagrama,
                         onClick = { selectedTab = R.string.diagrama }) {
-                        Text(stringResource(R.string.diagrama), modifier = Modifier.padding(16.dp))
+                        Text(
+                            stringResource(R.string.diagrama),
+                            modifier = Modifier.padding(16.dp)
+                        )
                     }
                     Tab(
                         selected = selectedTab == R.plurals.posicion_tag,
@@ -99,7 +124,11 @@ fun MonitorScreen(
                         pressionStatus = monitorUiState.value.pression.second,
                         numWheels = monitorUiState.value.numWheels,
                         alertTires = monitorUiState.value.wheelsWithAlert,
-                        getSensorData = { sensorId -> monitorViewModel.getSensorDataByWheel(sensorId) },
+                        getSensorData = { sensorId ->
+                            monitorViewModel.getSensorDataByWheel(
+                                sensorId
+                            )
+                        },
                         coordinates = monitorUiState.value.coordinateList,
                         modifier = Modifier.padding(8.dp)
                     )

@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.components.FormTextField
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpUiState
 
 @Composable

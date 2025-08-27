@@ -34,19 +34,25 @@ class HombreCamionRepository @Inject constructor(
         return flotalDao.getData().firstOrNull()?.firstOrNull()
     }
 
+    suspend fun updateIdMonitor(idMonitor: Int, idUser: Int) {
+        flotalDao.updateMonitorId(idMonitor, idUser)
+    }
+
     val tasks: Flow<List<AppHCEntity>> = flotalDao.getData().map { items ->
         items.map {
             AppHCEntity(
-                it.id,
-                it.id_user,
-                it.fld_name,
-                it.fld_email,
-                it.fld_token,
-                it.id_monitor,
-                it.id_configuration,
-                it.monitorMac,
-                it.paymentPlan,
-                it.fecha,
+                id = it.id,
+                id_user = it.id_user,
+                fld_name = it.fld_name,
+                fld_email = it.fld_email,
+                fld_token = it.fld_token,
+                id_monitor = it.id_monitor,
+                monitorMac = it.monitorMac,
+                baseConfiguration = it.baseConfiguration,
+                idVehicle = it.idVehicle,
+                vehiclePlates = it.vehiclePlates,
+                paymentPlan = it.paymentPlan,
+                fecha = it.fecha
             )
         }
     }

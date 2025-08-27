@@ -9,13 +9,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.LBEncryptionUtils
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.LoginState
-import com.rfz.appflotal.data.model.login.response.LoginState.*
+import com.rfz.appflotal.data.model.login.response.LoginState.Error
+import com.rfz.appflotal.data.model.login.response.LoginState.Idle
+import com.rfz.appflotal.data.model.login.response.LoginState.Loading
+import com.rfz.appflotal.data.model.login.response.LoginState.Success
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
@@ -24,7 +26,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.Connection
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -82,6 +83,11 @@ class LoginViewModel @Inject constructor(
         return usuario.isNotEmpty() && password.isNotEmpty()
     }
 
+    fun cleanLoginData(){
+        _usuario.value = ""
+        _password.value = ""
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("HardwareIds")
     fun onLoginSelected(ctx: Context) {
@@ -94,10 +100,10 @@ class LoginViewModel @Inject constructor(
             _loginState.value = Loading
 
             try {
-                val user = usuario.value!!
-                val pass = password.value!!
+                val user = LBEncryptionUtils.encrypt(usuario.value!!)
+                val pass = LBEncryptionUtils.encrypt(password.value!!)
 
-                when (val result = loginUseCase.doLogin(user, pass)) {
+                when (val result = loginUseCase.doLogin(user, pass, ctx)) {
                     is Result.Success -> {
                         handleLoginResponse(
                             result.data,

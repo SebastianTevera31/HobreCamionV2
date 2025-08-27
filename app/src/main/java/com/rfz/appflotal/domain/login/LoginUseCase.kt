@@ -1,7 +1,9 @@
 package com.rfz.appflotal.domain.login
 
+import android.content.Context
 import android.util.Patterns
 import com.google.gson.Gson
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.login.response.LoginErrorResponse
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
@@ -17,20 +19,21 @@ class LoginUseCase @Inject constructor(
 
     suspend fun doLogin(
         usuario: String,
-        password: String
+        password: String,
+        ctx: Context,
     ): Result<LoginResponse> {
         return try {
             val response = repository.doLogin(usuario, password)
             if (response.isSuccessful) {
                 response.body()?.firstOrNull()?.let { loginResponse ->
                     Result.Success(loginResponse)
-                } ?: Result.Failure(Exception("Cuerpo de la respuesta vacío"))
+                } ?: Result.Failure(Exception(ctx.getString(R.string.cuerpo_de_la_respuesta_vac_o)))
             } else {
                 val errorMsg = response.errorBody()?.string()
                 val parsedError = try {
                     gson.fromJson(errorMsg, LoginErrorResponse::class.java).message.errorValue
                 } catch (e: Exception) {
-                    "Error desconocido del servidor"
+                    ctx.getString(R.string.error_desconocido_del_servidor)
                 }
                 Result.Failure(Exception(parsedError))
             }

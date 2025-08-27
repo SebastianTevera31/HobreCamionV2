@@ -35,8 +35,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.HombreCamionScreens
-import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.data.model.message.response.MessageResponse
@@ -49,7 +47,6 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.AuthFlow
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
-import kotlin.math.log
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +67,8 @@ fun SignUpScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var enableRegisterButton by remember { mutableStateOf(true) }
     var authFlow by remember { mutableStateOf<AuthFlow>(AuthFlow.None) }
+
+    signUpViewModel.populateListMenus()
 
     Scaffold(topBar = {
         SignUpTopBar(
@@ -129,7 +128,9 @@ fun SignUpScreen(
                             name = name,
                             username = email,
                             email = email,
-                            password = password
+                            password = password,
+                            country = country,
+                            sector = sector
                         )
                         if (message == SignUpAlerts.Registrado) isNextScreen = true
                         else Toast.makeText(ctx, ctx.getString(message.message), Toast.LENGTH_SHORT)
@@ -176,7 +177,7 @@ fun SignUpScreen(
                                 signUpRequestStatus = signUpRequestStatus
                             ) {
                                 authFlow = AuthFlow.Login
-                                signUpViewModel.onLogin()
+                                signUpViewModel.onLogin(ctx)
                             }
                         }
 

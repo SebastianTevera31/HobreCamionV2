@@ -12,5 +12,9 @@ class GetTasksUseCase @Inject constructor(
     suspend operator fun invoke(): Flow<List<AppHCEntity>> {
         return repository.getTasks()
     }
+
+    suspend fun updateMonitor(idMonitor: Int, idUser: Int) {
+        repository.updateIdMonitor(idMonitor, idUser)
+    }
 }
 

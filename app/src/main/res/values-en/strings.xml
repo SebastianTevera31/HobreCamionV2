@@ -117,4 +117,9 @@
     <string name="error_en_el_servidor">Server error: %1$d</string>
     <string name="error_en_el_servidor_only">Server error</string>
     <string name="buscar_valor">Search %1$s...</string>
+    <string name="error_desconocido_del_servidor">Unknown server error</string>
+    <string name="cuerpo_de_la_respuesta_vac_o">Empty response body</string>
+    <string name="direcci_n_mac">Dirección MAC</string>
+    <string name="configuraci_n">Configuration</string>
+    <string name="monitor">Monitor</string>
 </resources>

@@ -44,6 +44,7 @@ import com.rfz.appflotal.core.util.Commons.addOneDay
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import java.util.Date
 import java.util.Locale
 
@@ -54,7 +55,7 @@ fun PositionFilterView(
     modifier: Modifier = Modifier,
     onGetSensorData: (String, String) -> Unit
 ) {
-    val numWheels = Array(numWheels) { it -> "P${it + 1}" }
+    val numTires = Array(numWheels) { it -> "P${it + 1}" }
     var wheelSelected by remember { mutableStateOf("") }
     var dateSelected by remember { mutableStateOf(getCurrentDate(pattern = "yyyy-MM-dd")) }
 
@@ -76,7 +77,7 @@ fun PositionFilterView(
             PositionDatePicker(modifier = Modifier.weight(2f)) {
                 dateSelected = it
             }
-            WheelSpinner(listOfWheels = numWheels, modifier = Modifier.weight(1f)) {
+            TireSpinner(listOfTires = numTires, modifier = Modifier.weight(1f)) {
                 wheelSelected = it
             }
             Button(
@@ -136,21 +137,25 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
             DatePickerDialog(
                 onDismissRequest = { showDialog = false },
                 confirmButton = {
-                    Button(onClick = {
-                        onSelectDate(
-                            convertDate(
-                                date = startDate,
-                                initialFormat = "dd/MM/yyyy",
-                                convertFormat = "yyyy-MM-dd"
+                    LocalizedApp {
+                        Button(onClick = {
+                            onSelectDate(
+                                convertDate(
+                                    date = startDate,
+                                    initialFormat = "dd/MM/yyyy",
+                                    convertFormat = "yyyy-MM-dd"
+                                )
                             )
-                        )
-                        showDialog = false
-                    }) { Text(text = stringResource(R.string.confirmar)) }
+                            showDialog = false
+                        }) { Text(text = stringResource(R.string.confirmar)) }
+                    }
                 },
                 dismissButton = {
-                    Button(onClick = {
-                        showDialog = false
-                    }) { Text(text = stringResource(R.string.cancelar)) }
+                    LocalizedApp {
+                        Button(onClick = {
+                            showDialog = false
+                        }) { Text(text = stringResource(R.string.cancelar)) }
+                    }
                 }
             ) { DatePicker(state = state) }
         }
@@ -159,8 +164,8 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
 }
 
 @Composable
-fun WheelSpinner(
-    listOfWheels: Array<String>,
+fun TireSpinner(
+    listOfTires: Array<String>,
     modifier: Modifier = Modifier,
     onSelectWheel: (String) -> Unit
 ) {
@@ -191,7 +196,7 @@ fun WheelSpinner(
             onDismissRequest = { isExpanded = false },
             modifier = Modifier.background(Color.White)
         ) {
-            listOfWheels.forEach { tire ->
+            listOfTires.forEach { tire ->
                 DropdownMenuItem(
                     text = { Text(text = tire) },
                     onClick = {

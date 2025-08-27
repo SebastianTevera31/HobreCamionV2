@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 
 @Composable
 fun ProgressDialog() {
@@ -23,14 +24,16 @@ fun ProgressDialog() {
         onDismissRequest = { },
         title = {},
         text = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CircularProgressIndicator(
-                    color = Color(0xFF5B2034),
-                    modifier = Modifier.size(32.dp),
-                    strokeWidth = 4.dp
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(stringResource(R.string.espere_un_momento), fontWeight = FontWeight.Medium)
+            LocalizedApp {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(
+                        color = Color(0xFF5B2034),
+                        modifier = Modifier.size(32.dp),
+                        strokeWidth = 4.dp
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(stringResource(R.string.espere_un_momento), fontWeight = FontWeight.Medium)
+                }
             }
         },
         confirmButton = {},

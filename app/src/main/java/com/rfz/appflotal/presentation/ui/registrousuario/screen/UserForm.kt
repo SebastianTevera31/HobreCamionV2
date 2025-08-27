@@ -30,20 +30,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.ui.components.FormTextField
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpUiState
 
 @Composable
@@ -100,15 +100,19 @@ fun UserForm(
             keyboardType = KeyboardType.Password
         )
 
+        val countryText = country?.second ?: stringResource(R.string.pa_s)
         SignUpDropDownMenu(
-            text = stringResource(R.string.pa_s),
+            title = stringResource(R.string.pa_s),
+            text = countryText,
             onSelectedValue = { country = it },
             values = countries,
             modifier = Modifier.fillMaxWidth()
         )
 
+        val sectorText = sector?.second ?: stringResource(R.string.sector)
         SignUpDropDownMenu(
-            text = stringResource(R.string.sector),
+            title = stringResource(R.string.sector),
+            text = sectorText,
             onSelectedValue = { sector = it },
             values = sectors,
             modifier = Modifier.fillMaxWidth()
@@ -125,26 +129,25 @@ fun UserForm(
 
 @Composable
 fun SignUpDropDownMenu(
+    title: String,
     text: String,
     onSelectedValue: (Pair<Int, String>) -> Unit,
     values: Map<Int, String>,
     modifier: Modifier = Modifier
 ) {
-    var title by remember { mutableStateOf(text) }
+    var searchText by remember { mutableStateOf(text) }
     var showList by remember { mutableStateOf(false) }
-    var parentSize by remember { mutableStateOf(IntSize.Zero) }
     var query by remember { mutableStateOf("") }
     val filteredValues = values.filter {
         it.value.contains(query, ignoreCase = true)
     }
 
+    searchText = text
+
     Column(
         modifier = Modifier
             .border(width = 1.dp, color = primaryLight, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
-            .onGloballyPositioned { coordinates ->
-                parentSize = coordinates.size
-            }
             .clickable { showList = true }) {
         Row(
             modifier = modifier
@@ -155,14 +158,14 @@ fun SignUpDropDownMenu(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                title,
+                text = searchText,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.weight(1f),
                 color = secondaryLight
             )
             Icon(
                 painter = painterResource(R.drawable.drop_down_arrow),
-                contentDescription = stringResource(R.string.seleccionar, text),
+                contentDescription = stringResource(R.string.seleccionar, title),
             )
         }
 
@@ -172,38 +175,41 @@ fun SignUpDropDownMenu(
                     shape = RoundedCornerShape(12.dp),
                     tonalElevation = 8.dp
                 ) {
-                    Column {
-                        TextField(
-                            value = query,
-                            onValueChange = { query = it },
-                            placeholder = {
-                                Text(
-                                    stringResource(
-                                        R.string.buscar_valor,
-                                        text.lowercase()
+                    LocalizedApp {
+                        Column {
+                            TextField(
+                                value = query,
+                                onValueChange = { query = it },
+                                placeholder = {
+                                    Text(
+                                        stringResource(
+                                            R.string.buscar_valor,
+                                            title.lowercase()
+                                        )
                                     )
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        LazyColumn(
-                            modifier = Modifier.height(400.dp)
-                        ) {
-                            items(filteredValues.toList()) { value ->
-                                Text(
-                                    text = value.second,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            title = value.second
-                                            onSelectedValue(value)
-                                            showList = false
-                                        }
-                                        .padding(16.dp)
-                                )
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            LazyColumn(
+                                modifier = Modifier.height(400.dp)
+                            ) {
+                                items(filteredValues.toList()) { value ->
+                                    Text(
+                                        text = value.second,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                searchText = value.second
+                                                onSelectedValue(value)
+                                                showList = false
+                                            }
+                                            .padding(16.dp)
+                                    )
+                                }
                             }
                         }
                     }
+
                 }
             }
         }

@@ -21,9 +21,11 @@ data class LoginResponse(
     @SerializedName("fld_password") val fld_password: String,
     @SerializedName("fld_token") val fld_token: String,
     @SerializedName("id") val id: Int,
-    @SerializedName("id_monitor") val id_monitor: Int,
+    @SerializedName("id_monitor") val idMonitor: Int,
     @SerializedName("fld_mac") val fldMac: String,
-    @SerializedName("id_configuration") val id_configuracion: Int,
+    @SerializedName("baseConfiguration") val baseConfiguration: String,
+    @SerializedName("id_vehicle") val idVehicle: Int,
+    @SerializedName("vehicle_plates") val vehiclePlates: String,
     @SerializedName("paymentPlan") val paymentPlan: String,
     var fecha: String? = null
 )
@@ -72,11 +74,13 @@ class AppFlotalMapper @Inject constructor() {
             fld_name = response.fld_name ?: "",
             fld_email = response.fld_email ?: "",
             fld_token = response.fld_token ?: "",
-            id_monitor = response.id_monitor,
-            id_configuration = response.id_configuracion,
+            id_monitor = response.idMonitor,
+            baseConfiguration = response.baseConfiguration,
             monitorMac = response.fldMac,
             paymentPlan = response.paymentPlan,
-            fecha = response.fecha ?: ""
+            fecha = response.fecha ?: "",
+            idVehicle = response.idVehicle,
+            vehiclePlates = response.vehiclePlates
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.registrousuario.screen
+package com.rfz.appflotal.presentation.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth

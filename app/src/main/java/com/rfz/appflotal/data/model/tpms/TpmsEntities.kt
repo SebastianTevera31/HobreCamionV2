@@ -17,6 +17,14 @@ data class CrudDiagramMonitorRequest(
     @SerializedName("sensor_id") val sensorId: Int,
 )
 
+data class CrudMonitor(
+    @SerializedName("id_monitor") val idMonitor: Int,
+    @SerializedName("fld_mac") val fldMac: String,
+    @SerializedName("fld_date") val fldDate: String,
+    @SerializedName("id_vehicle_fk_2") val idVehicle: Int,
+    @SerializedName("id_configuration_fk_3") val idConfiguration: Int,
+)
+
 data class TpmsResponse(val id: Int, val message: String)
 
 data class MonitorTireByDateResponse(
@@ -37,6 +45,13 @@ data class MonitorAlertsHistoryResponse(
     @SerializedName("fld_highPressure") val fldHighPressure: Int,
     @SerializedName("fld_nodataReceivedIn60min") val fldNoData: Int,
     @SerializedName("fld_lowSensorBattery") val fldLowSensorBattery: Int,
+)
+
+data class GetConfigurationsResponse(
+    @SerializedName("id_configuration") val idConfiguration: Int,
+    @SerializedName("fld_description") val fldDescription: String,
+    @SerializedName("fld_svg") val fldSvg: String,
+    @SerializedName("fld_UrlImage") val fldUrlImage: String,
 )
 
 data class ConfigurationByIdMonitorResponse(

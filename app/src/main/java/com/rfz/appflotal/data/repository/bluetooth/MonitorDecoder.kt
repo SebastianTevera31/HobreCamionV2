@@ -1,6 +1,5 @@
 package com.rfz.appflotal.data.repository.bluetooth
 
-import android.util.Log
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import java.math.RoundingMode
 
@@ -65,9 +64,9 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
                 val lowPressureSignal = binaryLowPressure.substring(3, 4) == "0"
                 val highPressureSignal = binaryHighPressure.substring(0, 1) == "0"
 
-                return if (lowPressureSignal && !highPressureSignal) SensorAlerts.LowPressure.name
-                else if (!lowPressureSignal && highPressureSignal) SensorAlerts.HighPressure.name
-                else SensorAlerts.NoData.name
+                return if (lowPressureSignal && !highPressureSignal) SensorAlerts.LOW_PRESSURE.name
+                else if (!lowPressureSignal && highPressureSignal) SensorAlerts.HIGH_PRESSURE.name
+                else SensorAlerts.NO_DATA.name
             }
 
             SensorAlertDataFrame.HIGH_TEMPERATURE -> {
@@ -78,11 +77,11 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
                         2,
                         3
                     ) == "0"
-                ) SensorAlerts.HighPressure.name else SensorAlerts.NoData.name
+                ) SensorAlerts.HIGH_PRESSURE.name else SensorAlerts.NO_DATA.name
             }
         }
     }
-    return SensorAlerts.NoData.name
+    return SensorAlerts.NO_DATA.name
 }
 
 fun verifyTemperature(dataFrame: String?): Boolean {

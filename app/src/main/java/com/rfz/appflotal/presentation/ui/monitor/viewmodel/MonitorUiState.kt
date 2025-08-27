@@ -9,8 +9,8 @@ data class MonitorUiState(
     val monitorId: Int = 0,
     val wheel: String = "N/A",
     val battery: String = "N/A",
-    val pression: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NoData),
-    val temperature: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NoData),
+    val pression: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
+    val temperature: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
     val depth: Float = 0f,
     val timestamp: String = "",
     val signalIntensity: Pair<BluetoothSignalQuality, String> = Pair(

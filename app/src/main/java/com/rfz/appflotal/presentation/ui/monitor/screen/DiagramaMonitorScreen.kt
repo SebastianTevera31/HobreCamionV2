@@ -300,11 +300,11 @@ fun PanelSensor(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    if (temperatureStatus == SensorAlerts.HighTemperature) {
+                    if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
                         CeldaAlerta(wheel, stringResource(temperatureStatus.message))
                     }
 
-                    if (pressureStatus != SensorAlerts.NoData) {
+                    if (pressureStatus != SensorAlerts.NO_DATA) {
                         CeldaAlerta(wheel, stringResource(pressureStatus.message))
                     }
                 }

@@ -79,7 +79,6 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.White
@@ -232,7 +231,8 @@ private fun WelcomeMessage() {
             fontWeight = FontWeight.Bold,
             color = Color(0xff566a7f)
         ),
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(top = 20.dp)
     )
 }
 
@@ -250,6 +250,10 @@ private fun LoginForm(
     val password: String by loginViewModel.password.observeAsState(initial = "")
     val isLoginEnabled: Boolean by loginViewModel.isLoginEnable.observeAsState(initial = false)
     val loginMessage: String by loginViewModel.loginMessage.observeAsState(initial = "")
+
+    LaunchedEffect(Unit) {
+        loginViewModel.cleanLoginData()
+    }
 
     if (loginMessage.isNotEmpty()) {
         Text(
@@ -361,13 +365,13 @@ private fun UsernameField(
         modifier = Modifier.fillMaxWidth(),
         label = {
             Text(
-                stringResource(R.string.correo_electr_nico),
+                stringResource(R.string.title_user),
                 color = darkerGray.copy(alpha = 0.8f)
             )
         },
         placeholder = {
             Text(
-                stringResource(R.string.correo_electr_nico),
+                stringResource(R.string.title_user),
                 color = darkerGray.copy(alpha = 0.6f)
             )
         },
