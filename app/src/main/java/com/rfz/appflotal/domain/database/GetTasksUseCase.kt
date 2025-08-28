@@ -13,8 +13,8 @@ class GetTasksUseCase @Inject constructor(
         return repository.getTasks()
     }
 
-    suspend fun updateMonitor(idMonitor: Int, idUser: Int) {
-        repository.updateIdMonitor(idMonitor, idUser)
+    suspend fun updateMonitor(idMonitor: Int, mac: String, baseConfiguration: String, idUser: Int) {
+        repository.updateIdMonitor(idMonitor, mac, baseConfiguration, idUser)
     }
 }
 

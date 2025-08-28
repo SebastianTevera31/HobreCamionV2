@@ -20,7 +20,8 @@ data class MonitorUiState(
     val numWheels: Int = 0,
     val chassisImageUrl: String = "",
     val wheelsWithAlert: Map<String, Boolean> = emptyMap(),
-    val coordinateList: List<PositionCoordinatesResponse>? = emptyList()
+    val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
+    val showDialog: Boolean = false
 )
 
 fun DiagramMonitorResponse.toTireData(): MonitorTireByDateResponse {

@@ -50,15 +50,14 @@ import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 
 @Composable
 fun MonitorRegisterDialog(
-    monitors: Map<Int, String>,
-    onDismissRequest: () -> Unit,
+    configurations: Map<Int, String>,
     modifier: Modifier = Modifier,
-    onContinueBotton: (mac: String, configuration: Pair<Int, String>?) -> Unit
+    onContinueBotton: (String, Pair<Int, String>?) -> Unit
 ) {
     var macAddress by remember { mutableStateOf("") }
     var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
 
-    Dialog(onDismissRequest = onDismissRequest) {
+    Dialog(onDismissRequest = {}) {
         Card(
             modifier = modifier
                 .fillMaxWidth()
@@ -80,9 +79,10 @@ fun MonitorRegisterDialog(
                     fontWeight = FontWeight.Bold
                 )
 
+                val configurations = configurations
                 DropDownConfigurationMenu(
                     title = R.string.monitor,
-                    values = monitors
+                    values = configurations
                 ) {
                     configurationSelected = it
                 }
@@ -177,8 +177,7 @@ fun DropDownConfigurationMenu(
 fun MonitorRegisterDialogPreview() {
     HombreCamionTheme {
         MonitorRegisterDialog(
-            monitors = emptyMap(),
-            onDismissRequest = {},
-            onContinueBotton = { _, _ -> })
+            configurations = emptyMap(),
+            onContinueBotton = { _, _ -> false })
     }
 }

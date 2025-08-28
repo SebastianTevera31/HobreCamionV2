@@ -38,14 +38,6 @@ enum class SensorAlerts(@StringRes val message: Int) {
     NO_DATA(R.string.sin_datos)
 }
 
-enum class RegisterMonitorMessage(val message: String) {
-    EMPTY_MONITOR("Ingrese la MAC del monitor"),
-    EMPTY_CONFIGURATION("Seleccione el tipo de monitor"),
-    REGISTERED("Monitor registrado correctamente"),
-    UNKNOWN_ERROR("Error desconocido"),
-    NO_DATA("Sin datos")
-}
-
 @HiltViewModel
 class MonitorViewModel @Inject constructor(
     private val apiTpmsUseCase: ApiTpmsUseCase,
@@ -66,41 +58,48 @@ class MonitorViewModel @Inject constructor(
         MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Success(emptyList()))
     val monitorTireUiState = _monitorTireUiState.asStateFlow()
 
-    private var _configurationsList = MutableStateFlow<Map<Int, String>>(emptyMap())
-    val configurationList = _configurationsList.asStateFlow()
-
-
-    private var _monitorRegisterState = MutableStateFlow(RegisterMonitorMessage.NO_DATA)
-    val monitorRegisterState = _monitorRegisterState.asStateFlow()
-
     var shouldReadManually = true
 
-    init {
+    fun initMonitorData() {
         viewModelScope.launch {
-            val userData = getTasksUseCase().first()[0]
-            val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(userData.id_monitor)
-            responseHelper(response = configInfo) { data ->
-                if (!data.isNullOrEmpty()) {
-                    val config = data[0].fldDescription.replace("BASE", "").trim()
-                    if (config.isDigitsOnly()) {
+            val userData = getTasksUseCase().first()
+            if (userData.isNotEmpty()) {
+                val user = userData[0]
+                val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(user.id_monitor)
+                responseHelper(response = configInfo) { data ->
+                    if (!data.isNullOrEmpty()) {
+                        val config = data[0].fldDescription.replace("BASE", "").trim()
 
-                        val wheelsWithAlert =
-                            (1..config.toInt()).associate { it -> "P$it" to false }
-                                .toMap()
+                        if (config.isDigitsOnly()) {
 
-                        _monitorUiState.update { currentUiState ->
-                            currentUiState.copy(
-                                monitorId = userData.id_monitor,
-                                numWheels = config.toInt(),
-                                chassisImageUrl = data[0].fldUrlImage,
-                                wheelsWithAlert = wheelsWithAlert
-                            )
+                            val wheelsWithAlert =
+                                (1..config.toInt()).associate { it -> "P$it" to false }
+                                    .toMap()
+
+                            _monitorUiState.update { currentUiState ->
+                                currentUiState.copy(
+                                    monitorId = user.id_monitor,
+                                    numWheels = config.toInt(),
+                                    chassisImageUrl = data[0].fldUrlImage,
+                                    wheelsWithAlert = wheelsWithAlert,
+                                    showDialog = user.id_monitor == 0
+                                )
+                            }
+
+                            // Recibe datos Bluetooth
+                            readBluetoothData()
                         }
-
-                        // Recibe datos Bluetooth
-                        readBluetoothData()
                     }
                 }
+
+                if (user.id_monitor == 0) {
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            showDialog = true
+                        )
+                    }
+                }
+
             }
         }
     }
@@ -280,74 +279,11 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
-    fun loadConfigurations() {
-        viewModelScope.launch {
-            val response = apiTpmsUseCase.doGetConfigurations()
-            responseHelper(response = response) { result ->
-                if (result != null) {
-                    _configurationsList.value = result
-                        .filterNot { it.idConfiguration == 2 }
-                        .associate {
-                            it.idConfiguration to it.fldDescription.replace("BASE", "TALON")
-                        }
-                }
-            }
-        }
+    fun clearMonitorData() {
+        _monitorUiState.value = MonitorUiState()
+        _positionsUiState.value = ApiResult.Loading
+        _monitorTireUiState.value = ApiResult.Success(emptyList())
     }
-
-    fun registerMonitor(mac: String, configurationSelected: Pair<Int, String>?) {
-        if (configurationSelected == null) {
-            _monitorRegisterState.value = RegisterMonitorMessage.EMPTY_CONFIGURATION
-            return
-        }
-
-        if (mac.isEmpty()) {
-            _monitorRegisterState.value = RegisterMonitorMessage.EMPTY_MONITOR
-            return
-        }
-
-        viewModelScope.launch {
-            val userData = getTasksUseCase().first()[0]
-            val response = apiTpmsUseCase.doPostCrudMonitor(
-                idMonitor = 0,
-                fldMac = mac,
-                fldDate = getCurrentDate(),
-                idVehicle = userData.idVehicle,
-                idConfiguration = configurationSelected.first
-            )
-
-            val status = responseHelper(response = response) { result ->
-                if (!result.isNullOrEmpty()) {
-                    val fields = result[0].message.split(":")
-                    if (fields.size == 2) {
-                        val idMonitor = fields[1].trim().toIntOrNull()
-                        if (idMonitor != null) {
-                            updateMonitorDataDB(idMonitor, userData.id_user)
-                            _monitorUiState.update { currentUiState ->
-                                currentUiState.copy(
-                                    monitorId = idMonitor
-                                )
-                            }
-                            _monitorRegisterState.value = RegisterMonitorMessage.REGISTERED
-                        }
-                    }
-                } else {
-                    _monitorRegisterState.value = RegisterMonitorMessage.UNKNOWN_ERROR
-                }
-            }
-            if (status != null) {
-                _monitorRegisterState.value = RegisterMonitorMessage.UNKNOWN_ERROR
-            }
-        }
-    }
-
-
-    fun updateMonitorDataDB(idMonitor: Int, idUser: Int) {
-        viewModelScope.launch {
-            getTasksUseCase.updateMonitor(idMonitor, idUser)
-        }
-    }
-
 
     fun convertToTireData(diagramData: List<DiagramMonitorResponse>?): List<MonitorTireByDateResponse> =
         diagramData?.map { it.toTireData() } ?: emptyList()

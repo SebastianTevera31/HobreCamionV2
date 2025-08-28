@@ -76,6 +76,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorRegisterDialog
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -89,6 +90,7 @@ import java.util.Locale
 fun HomeScreen(
     navController: NavController,
     homeViewModel: HomeViewModel,
+    registeredModel: RegisterMonitorViewModel,
     monitorViewModel: MonitorViewModel,
     paymentPlan: PaymentPlanType,
 ) {
@@ -248,11 +250,20 @@ fun HomeScreen(
                     IconButton(
                         onClick = {
                             CoroutineScope(Dispatchers.IO).launch {
+
                                 HombreCamionService.stopService(context)
+
                                 homeViewModel.logout()
+
+                                monitorViewModel.clearMonitorData()
+
                                 withContext(Dispatchers.Main) {
+                                    // navController.clearBackStack(NavScreens.LOGIN)
+
                                     navController.navigate(NavScreens.LOGIN) {
-                                        popUpTo(0)
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            inclusive = true
+                                        }
                                     }
                                 }
                             }
@@ -384,6 +395,7 @@ fun HomeScreen(
             } else {
                 MonitorScreen(
                     monitorViewModel = monitorViewModel,
+                    registerMonitorViewModel = registeredModel,
                     navigateUp = { navController.navigateUp() },
                     paymentPlan = paymentPlan
                 )

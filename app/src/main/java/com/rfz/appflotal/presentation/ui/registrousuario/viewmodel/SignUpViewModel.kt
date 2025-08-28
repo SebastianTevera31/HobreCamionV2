@@ -176,6 +176,10 @@ class SignUpViewModel @Inject constructor(
             try {
                 val email = signUpUiState.value.email
                 val password = signUpUiState.value.password
+
+                // Vaciar estado
+                cleanSignUpData()
+
                 when (val result = loginUseCase.doLogin(
                     LBEncryptionUtils.encrypt(email),
                     LBEncryptionUtils.encrypt(password),

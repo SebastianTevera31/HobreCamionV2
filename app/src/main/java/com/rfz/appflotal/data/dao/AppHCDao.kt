@@ -13,8 +13,8 @@ interface AppHCDao {
     @Query("SELECT * from AppHCEntity")
     fun getData(): Flow<List<AppHCEntity>>
 
-    @Query("UPDATE AppHCEntity SET id_monitor =:idMonitor WHERE id_user =:idUser")
-    suspend fun updateMonitorId(idMonitor: Int, idUser: Int)
+    @Query("UPDATE AppHCEntity SET id_monitor =:idMonitor, monitorMac =:mac, baseConfiguration =:baseConfiguration WHERE id_user =:idUser")
+    suspend fun updateMonitorId(idMonitor: Int, mac: String, baseConfiguration: String, idUser: Int)
 
     @Query("DELETE FROM AppHCEntity")
     suspend fun deleteAllFlotalSoft()

@@ -72,6 +72,7 @@ import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import com.rfz.appflotal.presentation.ui.medidasllantasscreen.MedidasLlantasScreen
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.montajedesmontajescreen.MontajeDesmontajeScreen
 import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.NuevoRenovadoScreen
 import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.RenovadosScreen
@@ -98,6 +99,7 @@ class InicioActivity : ComponentActivity() {
     private val passwordViewModel: PasswordViewModel by viewModels()
     private val monitorViewModel: MonitorViewModel by viewModels()
     private val signUpViewModel: SignUpViewModel by viewModels()
+    private val registerMonitorViewModel: RegisterMonitorViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -294,6 +296,7 @@ class InicioActivity : ComponentActivity() {
                                 HomeScreen(
                                     navController = navController,
                                     homeViewModel = homeViewModel,
+                                    registeredModel = registerMonitorViewModel,
                                     monitorViewModel = monitorViewModel,
                                     paymentPlan = paymentSelected,
                                 )
@@ -308,6 +311,7 @@ class InicioActivity : ComponentActivity() {
 
                                 MonitorScreen(
                                     monitorViewModel = monitorViewModel,
+                                    registerMonitorViewModel = registerMonitorViewModel,
                                     navigateUp = { navController.navigateUp() },
                                     paymentPlan = PaymentPlanType.Complete
                                 )

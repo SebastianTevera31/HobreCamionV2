@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +17,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -39,36 +39,52 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorMessage
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 
 @Composable
 fun MonitorScreen(
     monitorViewModel: MonitorViewModel,
+    registerMonitorViewModel: RegisterMonitorViewModel,
     navigateUp: () -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+
     val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
     val positionsUiState = monitorViewModel.positionsUiState.collectAsState()
     val monitorTireUiState = monitorViewModel.monitorTireUiState.collectAsState()
-    val configurationsUiState = monitorViewModel.configurationList.collectAsState()
-    val monitorRegisterStatus = monitorViewModel.monitorRegisterState.collectAsState()
 
-    var showRegisterMonitorDialog by remember { mutableStateOf(false) }
+    val configurationsUiState = registerMonitorViewModel.configurationList.collectAsState()
+    val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
 
-    showRegisterMonitorDialog = monitorUiState.value.monitorId == 0
+    // Carga la pantalla, vacia o no
+    monitorViewModel.initMonitorData()
 
-    if (showRegisterMonitorDialog) {
-        monitorViewModel.loadConfigurations()
+    if (monitorUiState.value.showDialog) {
+       // registerMonitorViewModel.loadConfigurations()
 
         MonitorRegisterDialog(
-            monitors = configurationsUiState.value,
-            onDismissRequest = { showRegisterMonitorDialog = false },
+            configurationsUiState.value,
         ) { mac, configuration ->
-            monitorViewModel.registerMonitor(mac, configuration)
-            if (RegisterMonitorMessage.REGISTERED == monitorRegisterStatus.value) {
-                showRegisterMonitorDialog = false
-            }
+            registerMonitorViewModel.registerMonitor(
+                mac = mac,
+                configurationSelected = configuration,
+                context = context
+            )
+
+        }
+    } else {
+        monitorViewModel.getDiagramCoordinates()
+    }
+
+    when (val state = registerMonitorStatus.value) {
+        is ApiResult.Error -> {}
+        ApiResult.Loading -> {}
+        is ApiResult.Success -> {
+            // Actualiza la vista si estaba vacia
+            monitorViewModel.initMonitorData()
+            registerMonitorViewModel.cleanMonitorRegistrationData()
         }
     }
 
@@ -111,8 +127,6 @@ fun MonitorScreen(
 
 
                 if (selectedTab == R.string.diagrama) {
-                    // Obtener coordenadas del diagrama
-                    monitorViewModel.getDiagramCoordinates()
 
                     DiagramaMonitorScreen(
                         imageUrl = monitorUiState.value.chassisImageUrl,
