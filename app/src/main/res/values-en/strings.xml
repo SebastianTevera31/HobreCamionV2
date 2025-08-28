@@ -122,4 +122,6 @@
     <string name="direcci_n_mac">Dirección MAC</string>
     <string name="configuraci_n">Configuration</string>
     <string name="monitor">Monitor</string>
+    <string name="save">Save</string>
+    <string name="cerrar">Cerrar</string>
 </resources>

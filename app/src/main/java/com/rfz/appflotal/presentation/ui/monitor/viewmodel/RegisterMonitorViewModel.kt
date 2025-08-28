@@ -1,7 +1,9 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
@@ -12,7 +14,9 @@ import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +27,11 @@ enum class RegisterMonitorMessage(val message: String) {
     UNKNOWN_ERROR("Error desconocido"),
     NO_DATA("Sin datos")
 }
+
+data class MonitorConfigurationUiState(
+    val mac: String = "",
+    val configurationSelected: Pair<Int, String>? = null
+)
 
 @HiltViewModel
 class RegisterMonitorViewModel @Inject constructor(
@@ -36,6 +45,9 @@ class RegisterMonitorViewModel @Inject constructor(
 
     private var _registeredMonitorState = MutableStateFlow<ApiResult<Int>>(ApiResult.Loading)
     val registeredMonitorState = _registeredMonitorState.asStateFlow()
+
+    private var _monitorConfigUiState = MutableStateFlow(MonitorConfigurationUiState())
+    val monitorConfigUiState = _monitorConfigUiState.asStateFlow()
 
     init {
         loadConfigurations()
@@ -58,7 +70,12 @@ class RegisterMonitorViewModel @Inject constructor(
         }
     }
 
-    fun registerMonitor(mac: String, configurationSelected: Pair<Int, String>?, context: Context) {
+    fun registerMonitor(
+        idMonitor: Int = 0,
+        mac: String,
+        configurationSelected: Pair<Int, String>?,
+        context: Context
+    ) {
         _registeredMonitorState.value = ApiResult.Loading
 
         if (configurationSelected == null) {
@@ -75,7 +92,7 @@ class RegisterMonitorViewModel @Inject constructor(
             val userData = getTasksUseCase().first()[0]
 
             val response = apiTpmsUseCase.doPostCrudMonitor(
-                idMonitor = 0,
+                idMonitor = idMonitor,
                 fldMac = mac,
                 fldDate = getCurrentDate(),
                 idVehicle = userData.idVehicle,
@@ -93,7 +110,8 @@ class RegisterMonitorViewModel @Inject constructor(
                             updateMonitorDataDB(
                                 idMonitor,
                                 mac,
-                                "BASE ${configurationSelected.first}", userData.id_user
+                                "BASE ${configurationSelected.second.split(" ")[1]}",
+                                userData.id_user
                             )
                             showAlert(context, RegisterMonitorMessage.REGISTERED.message)
                             _registeredMonitorState.value = ApiResult.Success(data = idMonitor)
@@ -104,6 +122,26 @@ class RegisterMonitorViewModel @Inject constructor(
 
                 } else {
                     showAlert(context, RegisterMonitorMessage.UNKNOWN_ERROR.message)
+                }
+            }
+        }
+    }
+
+    fun getMonitorConfiguration() {
+        viewModelScope.launch {
+            val result = getTasksUseCase().first()
+            if (result.isNotEmpty()) {
+                val values = result[0]
+                val monitorType = values.baseConfiguration.replace("BASE", "TALON")
+                val configSelected = configurationList.value.filterValues { it == monitorType }
+                    .map { Pair(it.key, it.value) }
+                if (configSelected.isNotEmpty()) {
+                    _monitorConfigUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            mac = values.monitorMac,
+                            configurationSelected = configSelected[0]
+                        )
+                    }
                 }
             }
         }

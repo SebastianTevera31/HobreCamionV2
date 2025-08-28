@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -23,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,10 +54,17 @@ import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 fun MonitorRegisterDialog(
     configurations: Map<Int, String>,
     modifier: Modifier = Modifier,
-    onContinueBotton: (String, Pair<Int, String>?) -> Unit
+    showCloseButton: Boolean = false,
+    monitorSelected: Pair<Int, String>? = null,
+    macValue: String = "",
+    onCloseButton: () -> Unit = {},
+    onContinueButton: (String, Pair<Int, String>?) -> Unit
 ) {
     var macAddress by remember { mutableStateOf("") }
     var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
+
+    macAddress = macValue
+    configurationSelected = monitorSelected
 
     Dialog(onDismissRequest = {}) {
         Card(
@@ -82,27 +91,49 @@ fun MonitorRegisterDialog(
                 val configurations = configurations
                 DropDownConfigurationMenu(
                     title = R.string.monitor,
-                    values = configurations
+                    values = configurations,
+                    defaultOption = configurationSelected?.second ?: ""
                 ) {
                     configurationSelected = it
                 }
-
                 FormTextField(
                     title = R.string.direcci_n_mac,
                     value = macAddress,
                     onValueChange = { macAddress = it }
                 )
 
-                Button(
-                    onClick = {
-                        onContinueBotton(macAddress, configurationSelected)
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.width(120.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "Continuar"
-                    )
+                    if (showCloseButton) {
+                        Button(
+                            onClick = onCloseButton,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .width(120.dp)
+                                .weight(1f),
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.cerrar)
+                            )
+                        }
+                    }
+                    Button(
+                        onClick = {
+                            onContinueButton(macAddress, configurationSelected)
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .width(120.dp)
+                            .weight(1f)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.save)
+                        )
+                    }
                 }
             }
         }
@@ -114,11 +145,14 @@ fun DropDownConfigurationMenu(
     @StringRes title: Int,
     values: Map<Int, String>,
     modifier: Modifier = Modifier,
+    defaultOption: String = "",
     selectedOption: (Pair<Int, String>) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var parentSize by remember { mutableStateOf(Size.Zero) }
     var selectedValue by remember { mutableStateOf("") }
+
+    selectedValue = defaultOption
 
     Box(
         modifier = modifier
@@ -178,6 +212,7 @@ fun MonitorRegisterDialogPreview() {
     HombreCamionTheme {
         MonitorRegisterDialog(
             configurations = emptyMap(),
-            onContinueBotton = { _, _ -> false })
+            onCloseButton = {},
+            onContinueButton = { _, _ -> false })
     }
 }

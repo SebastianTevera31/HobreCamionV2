@@ -54,6 +54,10 @@ class SignUpViewModel @Inject constructor(
     )
         private set
 
+    init {
+        populateListMenus()
+    }
+
     fun populateListMenus() {
         viewModelScope.launch {
             val countriesResponse = catalogUseCase.onGetCountries()
@@ -117,10 +121,10 @@ class SignUpViewModel @Inject constructor(
             )
         }
 
-        if (name.isEmpty()) return SignUpAlerts.Nombre
+        if (name.isEmpty()) return SignUpAlerts.NAME_ALERT
 
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches())
-            return SignUpAlerts.Correo
+            return SignUpAlerts.EMAIL_ALERT
         else {
             _signUpUiState.update { currentUiState ->
                 currentUiState.copy(
@@ -131,7 +135,7 @@ class SignUpViewModel @Inject constructor(
         }
 
         if (password.isEmpty() || password.length < 8)
-            return SignUpAlerts.Contrasenia
+            return SignUpAlerts.PASSWORD_ALERT
         else {
             _signUpUiState.update { currentUiState ->
                 currentUiState.copy(
@@ -140,11 +144,11 @@ class SignUpViewModel @Inject constructor(
             }
         }
 
-        if (country == null) return SignUpAlerts.Pais
+        if (country == null) return SignUpAlerts.COUNTRY_ALERT
 
-        if (sector == null) return SignUpAlerts.Sector
+        if (sector == null) return SignUpAlerts.INDUSTRY_ALERT
 
-        return SignUpAlerts.Registrado
+        return SignUpAlerts.SIGNUP_ALERT
     }
 
     fun chargeVehicleData(typeVehicle: String, plates: String): SignUpAlerts {
@@ -156,12 +160,12 @@ class SignUpViewModel @Inject constructor(
         }
 
         if (typeVehicle.isEmpty())
-            return SignUpAlerts.TypeVehicle
+            return SignUpAlerts.VEHICLE_ALERT
 
         if (plates.isEmpty())
-            return SignUpAlerts.Plates
+            return SignUpAlerts.PLATES_ALERT
 
-        return SignUpAlerts.Registrado
+        return SignUpAlerts.SIGNUP_ALERT
     }
 
     fun cleanSignUpData() {

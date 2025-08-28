@@ -296,7 +296,7 @@ class InicioActivity : ComponentActivity() {
                                 HomeScreen(
                                     navController = navController,
                                     homeViewModel = homeViewModel,
-                                    registeredModel = registerMonitorViewModel,
+                                    registerMonitorViewModel = registerMonitorViewModel,
                                     monitorViewModel = monitorViewModel,
                                     paymentPlan = paymentSelected,
                                 )

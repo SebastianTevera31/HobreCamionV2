@@ -43,7 +43,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,8 +66,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.core.util.HombreCamionScreens
+import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
@@ -90,7 +94,7 @@ import java.util.Locale
 fun HomeScreen(
     navController: NavController,
     homeViewModel: HomeViewModel,
-    registeredModel: RegisterMonitorViewModel,
+    registerMonitorViewModel: RegisterMonitorViewModel,
     monitorViewModel: MonitorViewModel,
     paymentPlan: PaymentPlanType,
 ) {
@@ -104,6 +108,44 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         homeViewModel.loadInitialData()
     }
+
+    var showMonitorDialog by remember { mutableStateOf(false) }
+    val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
+
+    when (val state = registerMonitorStatus.value) {
+        is ApiResult.Error -> {}
+        ApiResult.Loading -> {}
+        is ApiResult.Success -> {
+            // Actualiza la vista si estaba vacia
+            monitorViewModel.initMonitorData()
+            registerMonitorViewModel.cleanMonitorRegistrationData()
+            showMonitorDialog = false
+        }
+    }
+
+    if (showMonitorDialog) {
+        val configurations = registerMonitorViewModel.configurationList.collectAsState()
+        val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
+        val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
+
+        registerMonitorViewModel.getMonitorConfiguration()
+
+        MonitorRegisterDialog(
+            macValue = monitorConfigUiState.value.mac,
+            monitorSelected = monitorConfigUiState.value.configurationSelected,
+            configurations = configurations.value,
+            onCloseButton = { showMonitorDialog = false },
+            showCloseButton = true
+        ) { mac, configuration ->
+            registerMonitorViewModel.registerMonitor(
+                idMonitor = monitorUiState.value.monitorId,
+                mac = mac,
+                configurationSelected = configuration,
+                context = context
+            )
+        }
+    }
+
 
     val onlyLanguagesAllowedText = stringResource(R.string.only_languages_allowed)
     val languages = listOf("es" to "ES", "en" to "EN")
@@ -185,12 +227,21 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Image(
-                        painter = painterResource(id = R.drawable.logo),
-                        contentDescription = stringResource(R.string.logo_description),
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.height(54.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .height(120.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.logo),
+                            contentDescription = stringResource(R.string.logo_description),
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .height(54.dp)
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = primaryColor,
@@ -315,26 +366,8 @@ fun HomeScreen(
                         spotColor = primaryColor.copy(alpha = 0.3f)
                     )
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(R.string.welcome, userName),
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-
-                    Text(
-                        text = LocalDate.now().toString(),
-                        color = Color.White.copy(alpha = 0.9f),
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                UserHeader(paymentPlan = paymentPlan, userName = userName) {
+                    showMonitorDialog = true
                 }
             }
 
@@ -395,7 +428,7 @@ fun HomeScreen(
             } else {
                 MonitorScreen(
                     monitorViewModel = monitorViewModel,
-                    registerMonitorViewModel = registeredModel,
+                    registerMonitorViewModel = registerMonitorViewModel,
                     navigateUp = { navController.navigateUp() },
                     paymentPlan = paymentPlan
                 )

@@ -68,7 +68,7 @@ fun SignUpScreen(
     var enableRegisterButton by remember { mutableStateOf(true) }
     var authFlow by remember { mutableStateOf<AuthFlow>(AuthFlow.None) }
 
-    signUpViewModel.populateListMenus()
+    //signUpViewModel.populateListMenus()
 
     Scaffold(topBar = {
         SignUpTopBar(
@@ -132,7 +132,7 @@ fun SignUpScreen(
                             country = country,
                             sector = sector
                         )
-                        if (message == SignUpAlerts.Registrado) isNextScreen = true
+                        if (message == SignUpAlerts.SIGNUP_ALERT) isNextScreen = true
                         else Toast.makeText(ctx, ctx.getString(message.message), Toast.LENGTH_SHORT)
                             .show()
                     }
@@ -154,7 +154,7 @@ fun SignUpScreen(
                             plates = plates
                         )
 
-                        if (message == SignUpAlerts.Registrado) {
+                        if (message == SignUpAlerts.SIGNUP_ALERT) {
                             enableRegisterButton = false
                             authFlow = AuthFlow.SignUp
                             signUpViewModel.signUpUser(ctx) {
@@ -208,7 +208,17 @@ fun SignUpStatus(
 ) {
     when (signUpRequestStatus) {
         is ApiResult.Success -> {
-            onLogin()
+            onEnableButton()
+            val result = signUpRequestStatus
+            if (result.data != null) {
+                if (result.data[0].id != 200) {
+                    Toast.makeText(ctx, result.data[0].message, Toast.LENGTH_SHORT).show()
+                } else onLogin()
+            } else Toast.makeText(
+                ctx,
+                ctx.getString(SignUpAlerts.UNKNOWN.message),
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         is ApiResult.Error -> {

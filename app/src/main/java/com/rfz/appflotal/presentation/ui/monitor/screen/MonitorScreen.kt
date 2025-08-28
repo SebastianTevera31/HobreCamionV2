@@ -72,7 +72,6 @@ fun MonitorScreen(
                 configurationSelected = configuration,
                 context = context
             )
-
         }
     } else {
         monitorViewModel.getDiagramCoordinates()

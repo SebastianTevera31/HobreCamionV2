@@ -25,12 +25,13 @@ sealed class AuthFlow {
 }
 
 enum class SignUpAlerts(@StringRes val message: Int = -1) {
-    Nombre(R.string.signup_name_alert),
-    Correo(R.string.signup_email_alert),
-    Contrasenia(R.string.signup_password_alert),
-    Pais(R.string.signup_country_alert),
-    Sector(R.string.signup_industry_alert),
-    TypeVehicle(R.string.signup_typevehicle_alert),
-    Plates(R.string.signup_plates_alert),
-    Registrado(R.string.signup_successfull)
+    NAME_ALERT(R.string.signup_name_alert),
+    EMAIL_ALERT(R.string.signup_email_alert),
+    PASSWORD_ALERT(R.string.signup_password_alert),
+    COUNTRY_ALERT(R.string.signup_country_alert),
+    INDUSTRY_ALERT(R.string.signup_industry_alert),
+    VEHICLE_ALERT(R.string.signup_typevehicle_alert),
+    PLATES_ALERT(R.string.signup_plates_alert),
+    SIGNUP_ALERT(R.string.signup_successfull),
+    UNKNOWN(R.string.no_resultados)
 }
