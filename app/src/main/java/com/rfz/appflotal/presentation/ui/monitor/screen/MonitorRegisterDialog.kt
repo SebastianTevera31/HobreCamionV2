@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +46,7 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.theme.tertiaryLight
 import com.rfz.appflotal.presentation.ui.components.FormTextField
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 
@@ -57,13 +57,16 @@ fun MonitorRegisterDialog(
     showCloseButton: Boolean = false,
     monitorSelected: Pair<Int, String>? = null,
     macValue: String = "",
+    onScan: () -> Unit,
     onCloseButton: () -> Unit = {},
     onContinueButton: (String, Pair<Int, String>?) -> Unit
 ) {
     var macAddress by remember { mutableStateOf("") }
     var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
 
-    macAddress = macValue
+    macAddress = macValue.ifEmpty { stringResource(R.string.escaneando) }
+    val enableScannerButton = macValue.isEmpty()
+
     configurationSelected = monitorSelected
 
     Dialog(onDismissRequest = {}) {
@@ -83,7 +86,7 @@ fun MonitorRegisterDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Ingrese datos del monitor",
+                    text = stringResource(R.string.ingresar_datos_monitor),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -96,11 +99,25 @@ fun MonitorRegisterDialog(
                 ) {
                     configurationSelected = it
                 }
+
                 FormTextField(
                     title = R.string.direcci_n_mac,
                     value = macAddress,
+                    enable = enableScannerButton,
                     onValueChange = { macAddress = it }
                 )
+
+                Button(
+                    onClick = {
+                        onScan()
+                        macAddress = ""
+                    },
+                    colors = ButtonDefaults.buttonColors(tertiaryLight),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Escanear")
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -212,6 +229,7 @@ fun MonitorRegisterDialogPreview() {
     HombreCamionTheme {
         MonitorRegisterDialog(
             configurations = emptyMap(),
+            onScan = {},
             onCloseButton = {},
             onContinueButton = { _, _ -> false })
     }

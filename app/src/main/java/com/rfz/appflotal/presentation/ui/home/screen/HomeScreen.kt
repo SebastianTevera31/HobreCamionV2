@@ -118,7 +118,7 @@ fun HomeScreen(
         is ApiResult.Success -> {
             // Actualiza la vista si estaba vacia
             monitorViewModel.initMonitorData()
-            registerMonitorViewModel.cleanMonitorRegistrationData()
+            registerMonitorViewModel.clearMonitorRegistrationData()
             showMonitorDialog = false
         }
     }
@@ -134,7 +134,11 @@ fun HomeScreen(
             macValue = monitorConfigUiState.value.mac,
             monitorSelected = monitorConfigUiState.value.configurationSelected,
             configurations = configurations.value,
-            onCloseButton = { showMonitorDialog = false },
+            onScan = { registerMonitorViewModel.startScan() },
+            onCloseButton = {
+                registerMonitorViewModel.stopScan()
+                showMonitorDialog = false
+            },
             showCloseButton = true
         ) { mac, configuration ->
             registerMonitorViewModel.registerMonitor(
@@ -307,6 +311,8 @@ fun HomeScreen(
                                 homeViewModel.logout()
 
                                 monitorViewModel.clearMonitorData()
+
+                                registerMonitorViewModel.clearMonitorConfiguration()
 
                                 withContext(Dispatchers.Main) {
                                     // navController.clearBackStack(NavScreens.LOGIN)

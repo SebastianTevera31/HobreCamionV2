@@ -1,31 +1,30 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.collectAsState
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class RegisterMonitorMessage(val message: String) {
-    EMPTY_MONITOR("Ingrese la MAC del monitor"),
-    EMPTY_CONFIGURATION("Seleccione el tipo de monitor"),
-    REGISTERED("Monitor registrado correctamente"),
-    UNKNOWN_ERROR("Error desconocido"),
-    NO_DATA("Sin datos")
+enum class RegisterMonitorMessage(@StringRes val message: Int) {
+    EMPTY_MONITOR(R.string.ingrese_la_mac_del_monitor),
+    EMPTY_CONFIGURATION(R.string.seleccione_tipo_monitor),
+    REGISTERED(R.string.monitor_registrado_correctamente),
+    UNKNOWN_ERROR(R.string.error_desconocido),
 }
 
 data class MonitorConfigurationUiState(
@@ -36,7 +35,8 @@ data class MonitorConfigurationUiState(
 @HiltViewModel
 class RegisterMonitorViewModel @Inject constructor(
     private val apiTpmsUseCase: ApiTpmsUseCase,
-    private val getTasksUseCase: GetTasksUseCase
+    private val getTasksUseCase: GetTasksUseCase,
+    private val bluetoothUseCase: BluetoothUseCase
 ) : ViewModel() {
 
     private var _configurationsList =
@@ -50,10 +50,6 @@ class RegisterMonitorViewModel @Inject constructor(
     val monitorConfigUiState = _monitorConfigUiState.asStateFlow()
 
     init {
-        loadConfigurations()
-    }
-
-    fun loadConfigurations() {
         viewModelScope.launch {
             val response = apiTpmsUseCase.doGetConfigurations()
             responseHelper(response = response) { result ->
@@ -70,6 +66,21 @@ class RegisterMonitorViewModel @Inject constructor(
         }
     }
 
+    private fun readBleScanData() {
+        viewModelScope.launch {
+            bluetoothUseCase.scannedDevices().collect { data ->
+                if (data != null) {
+                    _monitorConfigUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            mac = data.address
+                        )
+                    }
+                    stopScan()
+                }
+            }
+        }
+    }
+
     fun registerMonitor(
         idMonitor: Int = 0,
         mac: String,
@@ -79,12 +90,12 @@ class RegisterMonitorViewModel @Inject constructor(
         _registeredMonitorState.value = ApiResult.Loading
 
         if (configurationSelected == null) {
-            showAlert(context, RegisterMonitorMessage.EMPTY_CONFIGURATION.message)
+            showAlert(context, message = RegisterMonitorMessage.EMPTY_CONFIGURATION.message)
             return
         }
 
         if (mac.isEmpty()) {
-            showAlert(context, RegisterMonitorMessage.EMPTY_MONITOR.message)
+            showAlert(context, message = RegisterMonitorMessage.EMPTY_MONITOR.message)
             return
         }
 
@@ -113,19 +124,26 @@ class RegisterMonitorViewModel @Inject constructor(
                                 "BASE ${configurationSelected.second.split(" ")[1]}",
                                 userData.id_user
                             )
-                            showAlert(context, RegisterMonitorMessage.REGISTERED.message)
+                            showAlert(context, message = RegisterMonitorMessage.REGISTERED.message)
                             _registeredMonitorState.value = ApiResult.Success(data = idMonitor)
                         }
                     } else {
-                        showAlert(context, result[0].message)
+                        showAlert(context, strMessage = result[0].message)
                     }
 
                 } else {
-                    showAlert(context, RegisterMonitorMessage.UNKNOWN_ERROR.message)
+                    showAlert(context, message = RegisterMonitorMessage.UNKNOWN_ERROR.message)
                 }
             }
         }
     }
+
+    fun startScan() {
+        bluetoothUseCase.startScan()
+        readBleScanData()
+    }
+
+    fun stopScan() = bluetoothUseCase.stopScan()
 
     fun getMonitorConfiguration() {
         viewModelScope.launch {
@@ -147,8 +165,12 @@ class RegisterMonitorViewModel @Inject constructor(
         }
     }
 
-    fun cleanMonitorRegistrationData() {
+    fun clearMonitorRegistrationData() {
         _registeredMonitorState.value = ApiResult.Loading
+    }
+
+    fun clearMonitorConfiguration() = {
+        _monitorConfigUiState.value = MonitorConfigurationUiState()
     }
 
     private fun updateMonitorDataDB(
@@ -162,7 +184,13 @@ class RegisterMonitorViewModel @Inject constructor(
         }
     }
 
-    private fun showAlert(ctx: Context, message: String) {
-        Toast.makeText(ctx, message, Toast.LENGTH_LONG).show()
+    private fun showAlert(ctx: Context, message: Int? = null, strMessage: String? = null) {
+        if (message != null) {
+            Toast.makeText(ctx, ctx.getString(message), Toast.LENGTH_LONG).show()
+        }
+
+        if (strMessage != null) {
+            Toast.makeText(ctx, strMessage, Toast.LENGTH_LONG).show()
+        }
     }
 }

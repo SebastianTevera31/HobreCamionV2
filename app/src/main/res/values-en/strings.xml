@@ -119,9 +119,16 @@
     <string name="buscar_valor">Search %1$s...</string>
     <string name="error_desconocido_del_servidor">Unknown server error</string>
     <string name="cuerpo_de_la_respuesta_vac_o">Empty response body</string>
-    <string name="direcci_n_mac">Dirección MAC</string>
+    <string name="direcci_n_mac">MAC Address</string>
     <string name="configuraci_n">Configuration</string>
     <string name="monitor">Monitor</string>
     <string name="save">Save</string>
-    <string name="cerrar">Cerrar</string>
+    <string name="cerrar">Close</string>
+    <string name="ingresar_datos_monitor">Enter monitor information</string>
+    <string name="escaneando">Scanning...</string>
+    <string name="ingrese_la_mac_del_monitor">Enter the monitor MAC address</string>
+    <string name="seleccione_tipo_monitor">Select the monitor type</string>
+    <string name="monitor_registrado_correctamente">Monitor successfully registered</string>
+    <string name="error_desconocido">Unknown error</string>
+    <string name="connection_error">Connection error</string>
 </resources>

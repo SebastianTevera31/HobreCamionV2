@@ -126,4 +126,11 @@
     <string name="monitor">Monitor</string>
     <string name="save">Guardar</string>
     <string name="cerrar">Cerrar</string>
+    <string name="ingresar_datos_monitor">Ingrese datos del monitor</string>
+    <string name="escaneando">Escaneando...</string>
+    <string name="ingrese_la_mac_del_monitor">Ingrese la MAC del monitor</string>
+    <string name="seleccione_tipo_monitor">Seleccione el tipo de monitor</string>
+    <string name="monitor_registrado_correctamente">Monitor registrado correctamente</string>
+    <string name="error_desconocido">Error desconocido</string>
+    <string name="connection_error">Error de conexion</string>
 </resources>

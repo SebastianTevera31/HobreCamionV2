@@ -17,7 +17,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -62,10 +61,16 @@ fun MonitorScreen(
     monitorViewModel.initMonitorData()
 
     if (monitorUiState.value.showDialog) {
-       // registerMonitorViewModel.loadConfigurations()
+        // registerMonitorViewModel.loadConfigurations()
+        registerMonitorViewModel.startScan()
+        registerMonitorViewModel.clearMonitorConfiguration()
+        val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
 
         MonitorRegisterDialog(
-            configurationsUiState.value,
+            macValue = monitorConfigUiState.value.mac,
+            monitorSelected = null,
+            onScan = { registerMonitorViewModel.startScan() },
+            configurations = configurationsUiState.value,
         ) { mac, configuration ->
             registerMonitorViewModel.registerMonitor(
                 mac = mac,
@@ -83,7 +88,7 @@ fun MonitorScreen(
         is ApiResult.Success -> {
             // Actualiza la vista si estaba vacia
             monitorViewModel.initMonitorData()
-            registerMonitorViewModel.cleanMonitorRegistrationData()
+            registerMonitorViewModel.clearMonitorRegistrationData()
         }
     }
 

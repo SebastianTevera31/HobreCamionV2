@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.LBEncryptionUtils
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
@@ -53,10 +54,6 @@ class SignUpViewModel @Inject constructor(
         Result.Loading
     )
         private set
-
-    init {
-        populateListMenus()
-    }
 
     fun populateListMenus() {
         viewModelScope.launch {
@@ -202,7 +199,7 @@ class SignUpViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("SignUpViewModel", "${e.message}")
-                loginRequestStatus = Result.Failure(Exception("Connection error"))
+                loginRequestStatus = Result.Failure(Exception("Error de conexion"))
             }
         }
     }

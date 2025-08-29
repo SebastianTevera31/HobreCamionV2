@@ -455,11 +455,18 @@ class InicioActivity : ComponentActivity() {
         context: Context,
         launcher: ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
     ) {
-        val servicePermissions =
-            arrayOf(
-                Manifest.permission.POST_NOTIFICATIONS,
+        val required = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.BLUETOOTH_CONNECT
             )
+
+            else -> arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION // Compat <= 11
+            )
+        }
+
+        val servicePermissions = required
         LaunchedEffect(Unit) {
             var permissionsGranted = false
             servicePermissions.forEach {

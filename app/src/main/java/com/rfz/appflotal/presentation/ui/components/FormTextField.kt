@@ -35,6 +35,7 @@ fun FormTextField(
     @StringRes title: Int,
     value: String,
     onValueChange: (String) -> Unit,
+    enable: Boolean = true,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
     brandColor: Color = primaryLight,
@@ -85,6 +86,7 @@ fun FormTextField(
             cursorColor = brandColor,
             focusedTextColor = Color.DarkGray,
             unfocusedTextColor = Color.DarkGray
-        )
+        ),
+        enabled = enable
     )
 }

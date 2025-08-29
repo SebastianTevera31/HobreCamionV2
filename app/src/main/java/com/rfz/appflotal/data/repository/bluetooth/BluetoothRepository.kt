@@ -8,9 +8,7 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import kotlinx.coroutines.coroutineScope
@@ -25,8 +23,14 @@ import javax.inject.Inject
 
 interface BluetoothRepository {
     var sensorData: StateFlow<BluetoothData>
+
+    val scannedDevices: StateFlow<ScanItem?>
     fun connect(macAddress: String)
     fun disconnect()
+
+    fun startScan()
+
+    fun stopScan()
     suspend fun startRSSIMonitoring()
 }
 
@@ -38,7 +42,7 @@ data class BluetoothData(
 )
 
 enum class BluetoothSignalQuality {
-    Excelente, Aceptable, Pobre, Desconocida, Conectando
+    Excelente, Aceptable, Pobre, Desconocida
 }
 
 class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
@@ -57,7 +61,13 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
         bluetoothManager?.adapter
     }
 
+    private val bluetoothScanner by lazy {
+        BluetoothScannerImp(bluetoothAdapter?.bluetoothLeScanner)
+    }
+
     private var isConnected = false
+
+    override val scannedDevices: StateFlow<ScanItem?> = bluetoothScanner.resultScanDevices
 
     private val gattCallback = object : BluetoothGattCallback() {
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -134,7 +144,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun connect(macAddress: String) {
-        val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}\$")
+        val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
         if (regex.matches(macAddress)) {
             val device = bluetoothAdapter?.getRemoteDevice(macAddress)
             bluetoothGatt = device?.connectGatt(context, true, gattCallback)
@@ -148,6 +158,16 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
         bluetoothGatt?.disconnect()
         bluetoothGatt?.close()
         bluetoothGatt = null
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
+    override fun startScan() {
+        bluetoothScanner.scanDevices()
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
+    override fun stopScan() {
+        bluetoothScanner.stopScan()
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)

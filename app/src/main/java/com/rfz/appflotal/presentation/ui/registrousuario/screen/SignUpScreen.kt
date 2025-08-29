@@ -68,7 +68,7 @@ fun SignUpScreen(
     var enableRegisterButton by remember { mutableStateOf(true) }
     var authFlow by remember { mutableStateOf<AuthFlow>(AuthFlow.None) }
 
-    //signUpViewModel.populateListMenus()
+    signUpViewModel.populateListMenus()
 
     Scaffold(topBar = {
         SignUpTopBar(
@@ -169,6 +169,10 @@ fun SignUpScreen(
                         }
                     }
 
+                    if (authFlow == AuthFlow.SignUp || authFlow == AuthFlow.Login) {
+                        ProgressDialog()
+                    }
+
                     when (authFlow) {
                         AuthFlow.SignUp -> {
                             SignUpStatus(
@@ -255,9 +259,7 @@ fun LoginStatus(
             Log.e("SingUpScreen", "${loginRequestStatus.exception.message}")
         }
 
-        Result.Loading -> {
-            ProgressDialog()
-        }
+        Result.Loading -> {}
     }
 }
 
@@ -285,7 +287,7 @@ fun SignUpTopBar(showNavigateUp: Boolean, onNavigateUp: () -> Unit, modifier: Mo
 
 @Composable
 @Preview(showSystemUi = true, showBackground = true)
-fun RegistrarUsuarioPreview() {
+fun SignUpTopBarPreview() {
     HombreCamionTheme {
         SignUpTopBar(
             modifier = Modifier,
