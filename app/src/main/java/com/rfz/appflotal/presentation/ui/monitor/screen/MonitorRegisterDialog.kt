@@ -47,7 +47,7 @@ import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.theme.tertiaryLight
-import com.rfz.appflotal.presentation.ui.components.FormTextField
+import com.rfz.appflotal.presentation.ui.components.MacTextField
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 
 @Composable
@@ -61,11 +61,16 @@ fun MonitorRegisterDialog(
     onCloseButton: () -> Unit = {},
     onContinueButton: (String, Pair<Int, String>?) -> Unit
 ) {
+
     var macAddress by remember { mutableStateOf("") }
     var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    var isScanEnable by remember { mutableStateOf(false) }
 
-    macAddress = macValue.ifEmpty { stringResource(R.string.escaneando) }
-    val enableScannerButton = macValue.isEmpty()
+    macAddress = macValue
+
+    macAddress = macAddress.ifEmpty { stringResource(R.string.escaneando) }
+
+    isScanEnable = macAddress !== stringResource(R.string.escaneando)
 
     configurationSelected = monitorSelected
 
@@ -78,78 +83,79 @@ fun MonitorRegisterDialog(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = onPrimaryLight)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 16.dp, horizontal = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.ingresar_datos_monitor),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                val configurations = configurations
-                DropDownConfigurationMenu(
-                    title = R.string.monitor,
-                    values = configurations,
-                    defaultOption = configurationSelected?.second ?: ""
+            LocalizedApp {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 16.dp, horizontal = 28.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    configurationSelected = it
-                }
+                    Text(
+                        text = stringResource(R.string.ingresar_datos_monitor),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
 
-                FormTextField(
-                    title = R.string.direcci_n_mac,
-                    value = macAddress,
-                    enable = enableScannerButton,
-                    onValueChange = { macAddress = it }
-                )
+                    val configurations = configurations
+                    DropDownConfigurationMenu(
+                        title = R.string.monitor,
+                        values = configurations,
+                        defaultOption = configurationSelected?.second ?: ""
+                    ) {
+                        configurationSelected = it
+                    }
 
-                Button(
-                    onClick = {
-                        onScan()
-                        macAddress = ""
-                    },
-                    colors = ButtonDefaults.buttonColors(tertiaryLight),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Escanear")
-                }
+                    MacTextField(
+                        title = R.string.direcci_n_mac,
+                        value = macAddress,
+                    )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (showCloseButton) {
+                    Button(
+                        onClick = {
+                            macAddress = ""
+                            onScan()
+                        },
+                        colors = ButtonDefaults.buttonColors(tertiaryLight),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = isScanEnable
+                    ) {
+                        Text("Escanear")
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (showCloseButton) {
+                            Button(
+                                onClick = onCloseButton,
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .width(120.dp)
+                                    .weight(1f),
+                                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.cerrar)
+                                )
+                            }
+                        }
                         Button(
-                            onClick = onCloseButton,
+                            onClick = {
+                                onContinueButton(macAddress, configurationSelected)
+                            },
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .width(120.dp)
-                                .weight(1f),
-                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+                                .weight(1f)
                         ) {
                             Text(
-                                text = stringResource(R.string.cerrar)
+                                text = stringResource(R.string.save)
                             )
                         }
-                    }
-                    Button(
-                        onClick = {
-                            onContinueButton(macAddress, configurationSelected)
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .width(120.dp)
-                            .weight(1f)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.save)
-                        )
                     }
                 }
             }
@@ -177,7 +183,7 @@ fun DropDownConfigurationMenu(
             .height(60.dp)
             .border(width = 1.dp, color = primaryLight, RoundedCornerShape(12.dp))
             .clickable { expanded = true }
-            .onGloballyPositioned { coordinates -> // 👈 medir el Box directamente
+            .onGloballyPositioned { coordinates ->
                 parentSize = coordinates.size.toSize()
             }
     ) {
