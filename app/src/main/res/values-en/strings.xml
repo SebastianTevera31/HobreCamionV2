@@ -133,4 +133,5 @@
     <string name="connection_error">Connection error</string>
     <string name="mac_no_disponible">MAC not found</string>
     <string name="escanear">Scan</string>
+    <string name="vehiculo">Vehicle</string>
 </resources>

@@ -27,7 +27,6 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
-import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -65,6 +64,7 @@ fun UserHeader(
                 text = "Plan: ${paymentPlan.name}",
                 color = Color.White.copy(alpha = 0.9f),
                 style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 4.dp)
             )
 
@@ -74,6 +74,7 @@ fun UserHeader(
                 text = plateText,
                 color = Color.White.copy(alpha = 0.9f),
                 style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }

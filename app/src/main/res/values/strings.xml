@@ -135,4 +135,5 @@
     <string name="connection_error">Error de conexion</string>
     <string name="mac_no_disponible">MAC No encontrada</string>
     <string name="escanear">Escanear</string>
+    <string name="vehiculo">Vehiculo</string>
 </resources>

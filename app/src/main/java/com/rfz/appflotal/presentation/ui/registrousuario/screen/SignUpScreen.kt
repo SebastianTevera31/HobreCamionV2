@@ -43,6 +43,7 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.ProgressDialog
+import com.rfz.appflotal.presentation.ui.components.UserInfoTopBar
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.AuthFlow
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
@@ -71,7 +72,7 @@ fun SignUpScreen(
     signUpViewModel.populateListMenus()
 
     Scaffold(topBar = {
-        SignUpTopBar(
+        UserInfoTopBar(
             showNavigateUp = !isNextScreen,
             onNavigateUp = {
                 signUpViewModel.cleanSignUpData()
@@ -263,33 +264,11 @@ fun LoginStatus(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SignUpTopBar(showNavigateUp: Boolean, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
-    CenterAlignedTopAppBar(
-        title = {},
-        navigationIcon = {
-            if (showNavigateUp) {
-                IconButton(onClick = onNavigateUp) {
-                    Icon(
-                        painter = painterResource(R.drawable.back_arrow),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = primaryLight),
-        modifier = modifier
-    )
-}
-
 @Composable
 @Preview(showSystemUi = true, showBackground = true)
 fun SignUpTopBarPreview() {
     HombreCamionTheme {
-        SignUpTopBar(
+        UserInfoTopBar(
             modifier = Modifier,
             showNavigateUp = true,
             onNavigateUp = {}
