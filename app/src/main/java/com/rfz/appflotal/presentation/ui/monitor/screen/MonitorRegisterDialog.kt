@@ -53,6 +53,7 @@ import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 @Composable
 fun MonitorRegisterDialog(
     configurations: Map<Int, String>,
+    isScanning: Boolean,
     modifier: Modifier = Modifier,
     showCloseButton: Boolean = false,
     monitorSelected: Pair<Int, String>? = null,
@@ -61,16 +62,17 @@ fun MonitorRegisterDialog(
     onCloseButton: () -> Unit = {},
     onContinueButton: (String, Pair<Int, String>?) -> Unit
 ) {
-
     var macAddress by remember { mutableStateOf("") }
     var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
-    var isScanEnable by remember { mutableStateOf(false) }
 
-    macAddress = macValue
-
-    macAddress = macAddress.ifEmpty { stringResource(R.string.escaneando) }
-
-    isScanEnable = macAddress !== stringResource(R.string.escaneando)
+    macAddress = if (isScanning) stringResource(R.string.escaneando) else {
+        macAddress = macValue
+        macAddress.ifEmpty {
+            stringResource(
+                R.string.mac_no_disponible
+            )
+        }
+    }
 
     configurationSelected = monitorSelected
 
@@ -108,7 +110,7 @@ fun MonitorRegisterDialog(
 
                     MacTextField(
                         title = R.string.direcci_n_mac,
-                        value = macAddress,
+                        value = macAddress
                     )
 
                     Button(
@@ -119,9 +121,9 @@ fun MonitorRegisterDialog(
                         colors = ButtonDefaults.buttonColors(tertiaryLight),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = isScanEnable
+                        enabled = !isScanning
                     ) {
-                        Text("Escanear")
+                        Text(stringResource(R.string.escanear))
                     }
 
                     Row(
@@ -143,10 +145,12 @@ fun MonitorRegisterDialog(
                                 )
                             }
                         }
+
                         Button(
                             onClick = {
                                 onContinueButton(macAddress, configurationSelected)
                             },
+                            enabled = !isScanning,
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .width(120.dp)
@@ -234,6 +238,7 @@ fun DropDownConfigurationMenu(
 fun MonitorRegisterDialogPreview() {
     HombreCamionTheme {
         MonitorRegisterDialog(
+            isScanning = false,
             configurations = emptyMap(),
             onScan = {},
             onCloseButton = {},

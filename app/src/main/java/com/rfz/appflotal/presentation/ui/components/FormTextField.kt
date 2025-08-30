@@ -3,6 +3,7 @@ package com.rfz.appflotal.presentation.ui.components
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -104,7 +105,7 @@ fun MacTextField(
     value: String,
     modifier: Modifier = Modifier,
 ) {
-    Column {
+    Column(modifier = modifier) {
         Text(
             text = stringResource(title),
             color = primaryLight,
@@ -112,7 +113,7 @@ fun MacTextField(
             style = MaterialTheme.typography.titleSmall
         )
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
                 .border(1.dp, color = primaryLight, RoundedCornerShape(12.dp))

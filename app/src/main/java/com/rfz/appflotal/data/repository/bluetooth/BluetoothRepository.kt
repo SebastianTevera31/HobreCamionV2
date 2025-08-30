@@ -62,7 +62,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     }
 
     private val bluetoothScanner by lazy {
-        BluetoothScannerImp(bluetoothAdapter?.bluetoothLeScanner)
+        BluetoothScannerImp(bluetoothAdapter)
     }
 
     private var isConnected = false

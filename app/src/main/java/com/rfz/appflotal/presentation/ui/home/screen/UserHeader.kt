@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -33,6 +34,7 @@ import java.time.LocalDate
 fun UserHeader(
     paymentPlan: PaymentPlanType,
     userName: String,
+    plates: String?,
     modifier: Modifier = Modifier,
     showDialog: () -> Unit
 ) {
@@ -48,7 +50,7 @@ fun UserHeader(
             Alignment.CenterHorizontally else Alignment.Start
 
         Column(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = horizontalOrientation
         ) {
@@ -60,9 +62,18 @@ fun UserHeader(
             )
 
             Text(
-                text = LocalDate.now().toString(),
+                text = "Plan: ${paymentPlan.name}",
                 color = Color.White.copy(alpha = 0.9f),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            val plateText =
+                if (plates != null) "${stringResource(R.string.placas)}: $plates" else ""
+            Text(
+                text = plateText,
+                color = Color.White.copy(alpha = 0.9f),
+                style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
@@ -87,6 +98,6 @@ fun UserHeader(
 @Preview()
 fun UserTitlePreview() {
     HombreCamionTheme {
-        UserHeader(paymentPlan = PaymentPlanType.OnlyTpms, userName = "FK") {}
+        UserHeader(paymentPlan = PaymentPlanType.OnlyTpms, userName = "FK", plates = "KFKFFK") {}
     }
 }

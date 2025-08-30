@@ -29,7 +29,8 @@ enum class RegisterMonitorMessage(@StringRes val message: Int) {
 
 data class MonitorConfigurationUiState(
     val mac: String = "",
-    val configurationSelected: Pair<Int, String>? = null
+    val configurationSelected: Pair<Int, String>? = null,
+    val isScanning: Boolean = false
 )
 
 @HiltViewModel
@@ -72,7 +73,8 @@ class RegisterMonitorViewModel @Inject constructor(
                 if (data != null) {
                     _monitorConfigUiState.update { currentUiState ->
                         currentUiState.copy(
-                            mac = data.address
+                            mac = data.address,
+                            isScanning = false
                         )
                     }
                     stopScan()
@@ -139,11 +141,23 @@ class RegisterMonitorViewModel @Inject constructor(
     }
 
     fun startScan() {
+        _monitorConfigUiState.update { currentUiState ->
+            currentUiState.copy(
+                isScanning = true
+            )
+        }
         bluetoothUseCase.startScan()
         readBleScanData()
     }
 
-    fun stopScan() = bluetoothUseCase.stopScan()
+    fun stopScan() {
+        _monitorConfigUiState.update { currentUiState ->
+            currentUiState.copy(
+                isScanning = false
+            )
+        }
+        bluetoothUseCase.stopScan()
+    }
 
     fun getMonitorConfiguration() {
         viewModelScope.launch {

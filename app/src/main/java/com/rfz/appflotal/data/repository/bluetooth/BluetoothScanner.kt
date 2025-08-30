@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.repository.bluetooth
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
@@ -29,11 +30,13 @@ data class ScanItem(
     val rssi: Int? = null
 )
 
-class BluetoothScannerImp(private val bluetoothScanner: BluetoothLeScanner?) :
+class BluetoothScannerImp(private val bluetoothAdapter: BluetoothAdapter?) :
     BluetoothScanner {
-
+    private val bluetoothScanner = bluetoothAdapter?.bluetoothLeScanner
     private var _resultScanDevices = MutableStateFlow<ScanItem?>(null)
     val resultScanDevices = _resultScanDevices.asStateFlow()
+
+    private fun isBleReady(): Boolean = bluetoothAdapter?.isEnabled == true
 
     private val seen = mutableSetOf<String>()
     private val scanCallback: ScanCallback = object : ScanCallback() {
@@ -81,6 +84,8 @@ class BluetoothScannerImp(private val bluetoothScanner: BluetoothLeScanner?) :
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     override fun scanDevices(serviceUUID: UUID?, lowLatency: Boolean) {
         if (scanning) return
+        if (!isBleReady()) return
+
         val scanner = bluetoothScanner ?: return
         val filters = mutableListOf<ScanFilter>()
 
@@ -95,6 +100,9 @@ class BluetoothScannerImp(private val bluetoothScanner: BluetoothLeScanner?) :
             if (lowLatency) ScanSettings.SCAN_MODE_LOW_LATENCY
             else ScanSettings.SCAN_MODE_BALANCED
         ).build()
+
+        _resultScanDevices.value = null
+        seen.clear()
 
         scanner.startScan(null, settings, scanCallback)
         scanning = true

@@ -107,6 +107,7 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         homeViewModel.loadInitialData()
+        registerMonitorViewModel.stopScan()
     }
 
     var showMonitorDialog by remember { mutableStateOf(false) }
@@ -128,11 +129,14 @@ fun HomeScreen(
         val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
         val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
 
-        registerMonitorViewModel.getMonitorConfiguration()
+        LaunchedEffect(Unit) {
+            registerMonitorViewModel.getMonitorConfiguration()
+        }
 
         MonitorRegisterDialog(
             macValue = monitorConfigUiState.value.mac,
             monitorSelected = monitorConfigUiState.value.configurationSelected,
+            isScanning = monitorConfigUiState.value.isScanning,
             configurations = configurations.value,
             onScan = { registerMonitorViewModel.startScan() },
             onCloseButton = {
@@ -154,6 +158,7 @@ fun HomeScreen(
     val onlyLanguagesAllowedText = stringResource(R.string.only_languages_allowed)
     val languages = listOf("es" to "ES", "en" to "EN")
     val userName = uiState.userData?.fld_name ?: stringResource(R.string.operator)
+    val plates = uiState.userData?.vehiclePlates
 
     LaunchedEffect(uiState.selectedLanguage) {
         if (uiState.selectedLanguage == "es" || uiState.selectedLanguage == "en") {
@@ -314,6 +319,8 @@ fun HomeScreen(
 
                                 registerMonitorViewModel.clearMonitorConfiguration()
 
+                                registerMonitorViewModel.stopScan()
+
                                 withContext(Dispatchers.Main) {
                                     // navController.clearBackStack(NavScreens.LOGIN)
 
@@ -372,7 +379,7 @@ fun HomeScreen(
                         spotColor = primaryColor.copy(alpha = 0.3f)
                     )
             ) {
-                UserHeader(paymentPlan = paymentPlan, userName = userName) {
+                UserHeader(paymentPlan = paymentPlan, userName = userName, plates = plates) {
                     showMonitorDialog = true
                 }
             }

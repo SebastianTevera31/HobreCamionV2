@@ -131,4 +131,6 @@
     <string name="monitor_registrado_correctamente">Monitor successfully registered</string>
     <string name="error_desconocido">Unknown error</string>
     <string name="connection_error">Connection error</string>
+    <string name="mac_no_disponible">MAC not found</string>
+    <string name="escanear">Scan</string>
 </resources>
