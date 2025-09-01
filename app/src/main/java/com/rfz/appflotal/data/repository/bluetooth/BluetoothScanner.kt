@@ -2,15 +2,16 @@ package com.rfz.appflotal.data.repository.bluetooth
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import androidx.core.app.ActivityCompat
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothScannerImp.Companion.SERVICE
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

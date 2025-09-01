@@ -8,7 +8,9 @@ import com.rfz.appflotal.data.model.message.response.MessageResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 interface LoginClient {
 
@@ -21,6 +23,9 @@ interface LoginClient {
     @POST("api/RegisterUser")
     suspend fun registerUser(@Body requestBody: RegisterBody): Response<List<MessageResponse>>
 
-    @POST("api/UpdateUser")
-    suspend fun updateUser(@Body requestBody: RegisterBody): Response<List<MessageResponse>>
+    @PUT("api/UpdateUser")
+    suspend fun updateUser(
+        @Header("Authorization") token: String,
+        @Body requestBody: RegisterBody
+    ): Response<List<MessageResponse>>
 }

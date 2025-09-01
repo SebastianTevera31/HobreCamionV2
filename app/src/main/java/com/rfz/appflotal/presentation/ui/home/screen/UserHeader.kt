@@ -49,7 +49,9 @@ fun UserHeader(
             Alignment.CenterHorizontally else Alignment.Start
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = horizontalOrientation
         ) {
@@ -99,6 +101,6 @@ fun UserHeader(
 @Preview()
 fun UserTitlePreview() {
     HombreCamionTheme {
-        UserHeader(paymentPlan = PaymentPlanType.OnlyTpms, userName = "FK", plates = "KFKFFK") {}
+        UserHeader(paymentPlan = PaymentPlanType.Free, userName = "FK", plates = "KFKFFK") {}
     }
 }

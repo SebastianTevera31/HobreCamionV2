@@ -8,26 +8,34 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.UserInfoTopBar
+import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserUiState
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
+import kotlinx.coroutines.launch
 
 enum class UpdateUserDataViews() {
     Chofer,
@@ -41,19 +49,40 @@ fun UpdateUserScreen(
     navigateUp: () -> Unit,
 ) {
     val updateUserUiState = updateUserViewModel.updateUserUiState.collectAsState()
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val updateUserStaus = updateUserViewModel.updateUserStatus
 
-    var screenSelected by remember { mutableStateOf(UpdateUserDataViews.Chofer) }
+    LaunchedEffect(updateUserStaus) {
+        when (updateUserStaus) {
+            is ApiResult.Error -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(context.getString(R.string.error_actualizar_datos))
+                }
+            }
+
+            ApiResult.Loading -> {}
+            is ApiResult.Success -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(context.getString(R.string.datos_actualizados_correctamente))
+                    navigateUp()
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
             UserInfoTopBar(
-                text = "Info. de Usuario",
+                text = stringResource(R.string.info_de_usuario),
                 showNavigateUp = true,
                 onNavigateUp = {
                     navigateUp()
                 }
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = modifier
     ) { innerPadding ->
         Surface(
@@ -63,72 +92,100 @@ fun UpdateUserScreen(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.large_dimen)),
-                modifier = Modifier.fillMaxSize()
+                verticalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = dimensionResource(R.dimen.huge_dimen))
             ) {
-                TabRow(
-                    selectedTabIndex = when (screenSelected) {
-                        UpdateUserDataViews.Chofer -> 0
-                        UpdateUserDataViews.Vehiculo -> 1
+                UpdateUserView(
+                    updateUserUiState = updateUserUiState.value,
+                    updateUserData = { name, password, email, country, sector ->
+                        updateUserViewModel.updateUserData(
+                            name = name,
+                            email = email,
+                            password = password,
+                            country = country,
+                            industry = sector
+                        )
                     },
-                    contentColor = secondaryLight,
-                    containerColor = Color.White,
-                    modifier = Modifier,
-                ) {
-                    Tab(
-                        selected = screenSelected == UpdateUserDataViews.Chofer,
-                        onClick = { screenSelected = UpdateUserDataViews.Chofer },
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(text = stringResource(R.string.chofer))
-                    }
-                    Tab(
-                        selected = screenSelected == UpdateUserDataViews.Vehiculo,
-                        onClick = { screenSelected = UpdateUserDataViews.Vehiculo },
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(text = stringResource(R.string.vehiculo))
-                    }
-                }
-
-                when (screenSelected) {
-                    UpdateUserDataViews.Chofer -> {
-                        UpdateDriverScreen(
-                            title = R.string.chofer,
-                            userData = updateUserUiState.value.newData,
-                            countries = updateUserUiState.value.countries,
-                            industries = updateUserUiState.value.industries,
-                            modifier = Modifier.padding(horizontal = 40.dp)
-                        ) { name, password, email, country, sector ->
-                            updateUserViewModel.updateUserData(
-                                name = name,
-                                username = password,
-                                email = email,
-                                password = password,
-                                country = country,
-                                industry = sector
-                            )
-                        }
-                    }
-
-                    UpdateUserDataViews.Vehiculo -> {
-                        UpdateVehicleScreen(
-                            title = R.string.vehiculo, userData = updateUserUiState.value.newData,
-                            modifier = Modifier.padding(horizontal = 40.dp)
-                        ) { typeVehicle, plates ->
-                            updateUserViewModel.updateVehicleData(typeVehicle, plates)
-                        }
-                    }
-                }
-
+                    updateVehicleData = { typeVehicle, plates ->
+                        updateUserViewModel.updateVehicleData(typeVehicle, plates)
+                    })
                 Button(
-                    onClick = { updateUserViewModel.saveUserData() },
+                    onClick = {
+                        if (updateUserStaus != ApiResult.Error()) {
+                            updateUserViewModel.saveUserData()
+                        }
+                    },
+                    enabled = updateUserUiState.value.isNewData,
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .width(160.dp)
-                        .align(Alignment.End)
+                    modifier = Modifier.width(160.dp)
                 ) {
                     Text(text = stringResource(R.string.save))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun UpdateUserView(
+    updateUserUiState: UpdateUserUiState,
+    updateUserData: (
+        name: String, password: String, email: String,
+        country: Pair<Int, String>?, sector: Pair<Int, String>?
+    ) -> Unit,
+    updateVehicleData: (vehicleType: String, plates: String) -> Unit
+) {
+    var screenSelected by remember { mutableStateOf(UpdateUserDataViews.Chofer) }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.large_dimen)),
+    ) {
+        TabRow(
+            selectedTabIndex = when (screenSelected) {
+                UpdateUserDataViews.Chofer -> 0
+                UpdateUserDataViews.Vehiculo -> 1
+            },
+            contentColor = secondaryLight,
+            containerColor = Color.White,
+            modifier = Modifier,
+        ) {
+            Tab(
+                selected = screenSelected == UpdateUserDataViews.Chofer,
+                onClick = { screenSelected = UpdateUserDataViews.Chofer },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = stringResource(R.string.chofer))
+            }
+            Tab(
+                selected = screenSelected == UpdateUserDataViews.Vehiculo,
+                onClick = { screenSelected = UpdateUserDataViews.Vehiculo },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = stringResource(R.string.vehiculo))
+            }
+        }
+
+        when (screenSelected) {
+            UpdateUserDataViews.Chofer -> {
+                UpdateDriverScreen(
+                    title = R.string.chofer,
+                    userData = updateUserUiState.newData,
+                    countries = updateUserUiState.countries,
+                    industries = updateUserUiState.industries,
+                    modifier = Modifier.padding(horizontal = 40.dp)
+                ) { name, password, email, country, sector ->
+                    updateUserData(name, password, email, country, sector)
+                }
+            }
+
+            UpdateUserDataViews.Vehiculo -> {
+                UpdateVehicleScreen(
+                    title = R.string.vehiculo, userData = updateUserUiState.newData,
+                    modifier = Modifier.padding(horizontal = 40.dp)
+                ) { typeVehicle, plates ->
+                    updateVehicleData(typeVehicle, plates)
                 }
             }
         }

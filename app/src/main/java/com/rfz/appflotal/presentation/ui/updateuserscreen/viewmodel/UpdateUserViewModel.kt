@@ -1,10 +1,18 @@
 package com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel
 
+import android.util.Patterns
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
+import com.rfz.appflotal.domain.login.LoginUseCase
+import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UpdateUserViewModel @Inject constructor(
     private val catalogUseCase: CatalogUseCase,
+    private val loginUseCase: LoginUseCase,
     private val addTaskUseCase: AddTaskUseCase,
     private val getTasksUseCase: GetTasksUseCase
 ) : ViewModel() {
@@ -24,8 +33,19 @@ class UpdateUserViewModel @Inject constructor(
     private var _updateUserUiState = MutableStateFlow(UpdateUserUiState())
     val updateUserUiState = _updateUserUiState.asStateFlow()
 
+    var updateUserStatus: ApiResult<List<MessageResponse>?> by mutableStateOf(ApiResult.Loading)
+        private set
+
     fun fetchUserData() {
         viewModelScope.launch {
+            val driverData = getTasksUseCase().first()[0]
+            _updateUserUiState.update { currentUiState ->
+                currentUiState.copy(
+                    userData = driverData.toUserData(),
+                    newData = driverData.toUserData()
+                )
+            }
+
             val countriesResponse = catalogUseCase.onGetCountries()
             val sectorsResponse = catalogUseCase.onGetSectors()
             responseHelper(response = countriesResponse) { response ->
@@ -47,19 +67,12 @@ class UpdateUserViewModel @Inject constructor(
                     }
                 }
             }
-            val driverData = getTasksUseCase().first()[0]
-            _updateUserUiState.update { currentUiState ->
-                currentUiState.copy(
-                    userData = driverData.toUserData(),
-                    newData = driverData.toUserData()
-                )
-            }
         }
     }
 
     fun updateUserData(
         name: String,
-        username: String,
+        username: String = "",
         email: String,
         password: String,
         country: Pair<Int, String>?,
@@ -67,32 +80,84 @@ class UpdateUserViewModel @Inject constructor(
     ) {
         _updateUserUiState.update { currentUiState ->
             currentUiState.copy(
-                newData = currentUiState.userData.copy(
-                    name = name,
+                newData = currentUiState.newData.copy(
+                    name = name.trim(),
                     username = username,
-                    email = email,
-                    password = password,
+                    email = email.trim(),
+                    password = password.trim(),
                     country = country,
                     industry = industry
                 )
             )
         }
+        verifyIsNewData()
+
+        if (name.isEmpty()) "SignUpAlerts.PLATES_ALERT"
+
+        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches())
+            "SignUpAlerts.PLATES_ALERT"
+
+        if (password.isEmpty() || password.length < 8)
+            "SignUpAlerts.PLATES_ALERT"
     }
 
     fun updateVehicleData(typeVehicle: String, plates: String) {
         _updateUserUiState.update { currentUiState ->
             currentUiState.copy(
-                newData = currentUiState.userData.copy(
-                    typeVehicle = typeVehicle,
-                    plates = plates
+                newData = currentUiState.newData.copy(
+                    typeVehicle = typeVehicle.trim(),
+                    plates = plates.trim()
                 )
+            )
+        }
+        if (typeVehicle.isEmpty())
+            "SignUpAlerts.PLATES_ALERT"
+
+        if (plates.isEmpty())
+            "SignUpAlerts.PLATES_ALERT"
+
+        verifyIsNewData()
+    }
+
+    fun verifyIsNewData() {
+        val newData = _updateUserUiState.value.newData
+        val currentData = _updateUserUiState.value.userData
+        _updateUserUiState.update { currentUiState ->
+            currentUiState.copy(
+                isNewData = newData != currentData
             )
         }
     }
 
     fun saveUserData() {
+        updateUserStatus = ApiResult.Loading
+        viewModelScope.launch {
+            val response = loginUseCase.doUpdateUser(
+                name = _updateUserUiState.value.newData.name,
+                username = _updateUserUiState.value.newData.username,
+                email = _updateUserUiState.value.newData.email,
+                password = _updateUserUiState.value.newData.password,
+                idCountry = _updateUserUiState.value.newData.country!!.first,
+                idSector = _updateUserUiState.value.newData.industry!!.first,
+                typeVehicle = _updateUserUiState.value.newData.typeVehicle,
+                plates = _updateUserUiState.value.newData.plates
+            )
 
-        _updateUserUiState.value = UpdateUserUiState()
+            responseHelper(response = response) { data ->
+                updateUserStatus = ApiResult.Success(data)
+            }
+
+            if (updateUserStatus != ApiResult.Loading || updateUserStatus != ApiResult.Error()) {
+                addTaskUseCase.updateUserData(
+                    idUser = _updateUserUiState.value.newData.idUser,
+                    fldName = _updateUserUiState.value.newData.name,
+                    fldEmail = _updateUserUiState.value.newData.email,
+                    vehiclePlates = _updateUserUiState.value.newData.plates,
+                    country = _updateUserUiState.value.newData.country!!.first,
+                    industry = _updateUserUiState.value.newData.industry!!.first,
+                    vehicleType = _updateUserUiState.value.newData.typeVehicle
+                )
+            }
+        }
     }
-
 }

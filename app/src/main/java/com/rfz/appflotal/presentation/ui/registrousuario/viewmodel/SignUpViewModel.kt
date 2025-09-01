@@ -125,6 +125,7 @@ class SignUpViewModel @Inject constructor(
 
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches())
             return SignUpAlerts.EMAIL_ALERT
+
         else {
             _signUpUiState.update { currentUiState ->
                 currentUiState.copy(
@@ -138,6 +139,7 @@ class SignUpViewModel @Inject constructor(
 
         if (password.isEmpty() || password.length < 8)
             return SignUpAlerts.PASSWORD_ALERT
+
         else {
             _signUpUiState.update { currentUiState ->
                 currentUiState.copy(

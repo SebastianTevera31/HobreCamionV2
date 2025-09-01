@@ -77,7 +77,6 @@ class RegisterMonitorViewModel @Inject constructor(
                             isScanning = false
                         )
                     }
-                    stopScan()
                 }
             }
         }

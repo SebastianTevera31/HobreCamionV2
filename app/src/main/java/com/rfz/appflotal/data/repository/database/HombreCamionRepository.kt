@@ -43,6 +43,24 @@ class HombreCamionRepository @Inject constructor(
         flotalDao.updateMonitorId(idMonitor, mac, baseConfiguration, idUser)
     }
 
+    suspend fun updateUserData(
+        idUser: Int,
+        fldName: String,
+        fldEmail: String,
+        country: Int,
+        industry: Int,
+        vehiclePlates: String,
+        vehicleType: String
+    ) = flotalDao.updateUserData(
+        idUser = idUser,
+        fldName = fldName,
+        fldEmail = fldEmail,
+        vehiclePlates = vehiclePlates,
+        industry = industry,
+        country = country,
+        vehicleType = vehicleType
+    )
+
     val tasks: Flow<List<AppHCEntity>> = flotalDao.getData().map { items ->
         items.map {
             AppHCEntity(
@@ -58,7 +76,10 @@ class HombreCamionRepository @Inject constructor(
                 idVehicle = it.idVehicle,
                 vehiclePlates = it.vehiclePlates,
                 paymentPlan = it.paymentPlan,
-                fecha = it.fecha
+                fecha = it.fecha,
+                country = it.country,
+                industry = it.industry,
+                vehicleType = it.vehicleType
             )
         }
     }

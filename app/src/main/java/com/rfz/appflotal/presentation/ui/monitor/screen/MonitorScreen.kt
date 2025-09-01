@@ -68,7 +68,12 @@ fun MonitorScreen(
         }
 
         registerMonitorViewModel.clearMonitorConfiguration()
+
         val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
+
+        if (!monitorConfigUiState.value.isScanning) {
+            registerMonitorViewModel.stopScan()
+        }
 
         MonitorRegisterDialog(
             macValue = monitorConfigUiState.value.mac,

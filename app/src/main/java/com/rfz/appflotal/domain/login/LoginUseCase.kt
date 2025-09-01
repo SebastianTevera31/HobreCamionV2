@@ -69,5 +69,27 @@ class LoginUseCase @Inject constructor(
             plates
         )
     }
+
+    suspend fun doUpdateUser(
+        name: String,
+        username: String,
+        email: String,
+        password: String,
+        idCountry: Int,
+        idSector: Int,
+        typeVehicle: String,
+        plates: String
+    ): ApiResult<List<MessageResponse>?> {
+        return repository.doUpdateUser(
+            name,
+            username,
+            email,
+            password,
+            idCountry,
+            idSector,
+            typeVehicle,
+            plates
+        )
+    }
 }
 

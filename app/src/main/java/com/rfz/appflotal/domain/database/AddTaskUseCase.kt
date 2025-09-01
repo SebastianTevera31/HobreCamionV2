@@ -8,4 +8,24 @@ class AddTaskUseCase @Inject constructor(private val appFlotalRepository: Hombre
     suspend operator fun invoke(appFlotalEntity: AppHCEntity) {
         appFlotalRepository.addTask(appFlotalEntity)
     }
+
+    suspend fun updateUserData(
+        idUser: Int,
+        fldName: String,
+        fldEmail: String,
+        country: Int,
+        industry: Int,
+        vehiclePlates: String,
+        vehicleType: String
+    ) {
+        appFlotalRepository.updateUserData(
+            idUser = idUser,
+            fldName = fldName,
+            fldEmail = fldEmail,
+            vehiclePlates = vehiclePlates,
+            country = country,
+            industry = industry,
+            vehicleType = vehicleType
+        )
+    }
 }

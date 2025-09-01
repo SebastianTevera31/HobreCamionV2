@@ -138,4 +138,7 @@
     <string name="vehiculo">Vehiculo</string>
     <string name="perfil">Perfil</string>
     <string name="chofer">Chofer</string>
+    <string name="info_de_usuario">Info. de Usuario</string>
+    <string name="error_actualizar_datos">No se pudo actualizar los datos</string>
+    <string name="datos_actualizados_correctamente">Datos actualizados correctamente</string>
 </resources>

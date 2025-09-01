@@ -136,4 +136,7 @@
     <string name="vehiculo">Vehicle</string>
     <string name="perfil">Profile</string>
     <string name="chofer">Driver</string>
+    <string name="info_de_usuario">User Info</string>
+    <string name="error_actualizar_datos">Failed to update data</string>
+    <string name="datos_actualizados_correctamente">Data updated successfully</string>
 </resources>

@@ -38,4 +38,28 @@ class LoginRepository @Inject constructor(private val loginService: LoginService
             )
         )
     }
+
+    suspend fun doUpdateUser(
+        name: String,
+        username: String,
+        email: String,
+        password: String,
+        idCountry: Int,
+        idSector: Int,
+        typeVehicle: String,
+        plates: String
+    ): ApiResult<List<MessageResponse>?> {
+        return loginService.doUpdateUser(
+            RegisterBody(
+                fldName = name,
+                fldUsername = username,
+                fldEmail = email,
+                fldPassword = password,
+                idCountry = idCountry,
+                idSector = idSector,
+                typeVehicle = typeVehicle,
+                plates = plates
+            )
+        )
+    }
 }

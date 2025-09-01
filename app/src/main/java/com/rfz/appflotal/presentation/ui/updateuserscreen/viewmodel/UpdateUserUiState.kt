@@ -12,6 +12,7 @@ data class UpdateUserUiState(
 )
 
 data class UserData(
+    val idUser: Int = -1,
     val name: String = "",
     val username: String = "",
     val email: String = "",
@@ -24,9 +25,11 @@ data class UserData(
 
 fun AppHCEntity.toUserData(): UserData {
     return UserData(
+        idUser = id_user,
         name = fld_name,
         username = fld_username,
         email = fld_email,
-        plates = vehiclePlates
+        plates = vehiclePlates,
+        typeVehicle = vehicleType
     )
 }
