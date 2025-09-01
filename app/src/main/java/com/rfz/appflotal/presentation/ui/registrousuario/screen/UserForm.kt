@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.registrousuario.screen
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,16 +41,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.forms.ProfileFormModel
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.FormTextField
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
-import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpUiState
 
 @Composable
 fun UserForm(
-    signUpUiState: SignUpUiState,
+    @StringRes title: Int,
+    profileData: ProfileFormModel,
     countries: Map<Int, String>,
     sectors: Map<Int, String>,
     modifier: Modifier = Modifier,
@@ -61,16 +63,16 @@ fun UserForm(
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var country by remember { mutableStateOf<Pair<Int, String>?>(null) }
-    var sector by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    var industry by remember { mutableStateOf<Pair<Int, String>?>(null) }
     var email by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
-        name = signUpUiState.name
-        password = signUpUiState.password
-        country = signUpUiState.country
-        sector = signUpUiState.sector
-        email = signUpUiState.email
+        name = profileData.name
+        password = profileData.password
+        country = profileData.country
+        industry = profileData.industry
+        email = profileData.email
     }
 
     Column(
@@ -79,7 +81,7 @@ fun UserForm(
         modifier = modifier.verticalScroll(scrollState)
     ) {
         Text(
-            stringResource(R.string.registro),
+            stringResource(title),
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.Start)
@@ -110,17 +112,17 @@ fun UserForm(
             modifier = Modifier.fillMaxWidth()
         )
 
-        val sectorText = sector?.second ?: stringResource(R.string.sector)
+        val sectorText = industry?.second ?: stringResource(R.string.sector)
         SignUpDropDownMenu(
             title = stringResource(R.string.sector),
             text = sectorText,
-            onSelectedValue = { sector = it },
+            onSelectedValue = { industry = it },
             values = sectors,
             modifier = Modifier.fillMaxWidth()
         )
 
         Button(
-            onClick = { onNextButton(name, password, email, country, sector) },
+            onClick = { onNextButton(name, password, email, country, industry) },
             shape = MaterialTheme.shapes.medium,
             modifier = Modifier.align(Alignment.End)
         ) { Text(text = stringResource(R.string.siguiente)) }
@@ -224,7 +226,8 @@ fun SignUpDropDownMenu(
 fun UserFormPreview() {
     HombreCamionTheme {
         UserForm(
-            signUpUiState = SignUpUiState(),
+            title = R.string.registro,
+            profileData = ProfileFormModel(),
             modifier = Modifier.safeContentPadding(),
             countries = mapOf(1 to "Mexico", 2 to "USA"),
             sectors = mapOf()

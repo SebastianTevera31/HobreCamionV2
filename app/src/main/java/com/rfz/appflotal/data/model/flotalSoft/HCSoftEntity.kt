@@ -10,6 +10,7 @@ data class AppHCEntity(
     val id: Int = 0,
     val id_user: Int,
     val fld_name: String,
+    val fld_username: String,
     val fld_email: String,
     val fld_token: String,
     val id_monitor: Int = 0,

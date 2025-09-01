@@ -72,6 +72,7 @@ class AppFlotalMapper @Inject constructor() {
             id = 0,
             id_user = response.id_user,
             fld_name = response.fld_name ?: "",
+            fld_username = response.fld_username,
             fld_email = response.fld_email ?: "",
             fld_token = response.fld_token ?: "",
             id_monitor = response.idMonitor,

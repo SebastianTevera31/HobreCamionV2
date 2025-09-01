@@ -136,4 +136,6 @@
     <string name="mac_no_disponible">MAC No encontrada</string>
     <string name="escanear">Escanear</string>
     <string name="vehiculo">Vehiculo</string>
+    <string name="perfil">Perfil</string>
+    <string name="chofer">Chofer</string>
 </resources>

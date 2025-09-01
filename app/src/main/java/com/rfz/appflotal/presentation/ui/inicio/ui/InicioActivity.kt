@@ -84,6 +84,10 @@ import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlan
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
+import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateDriverScreen
+import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserDataViews
+import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
+import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -100,6 +104,7 @@ class InicioActivity : ComponentActivity() {
     private val monitorViewModel: MonitorViewModel by viewModels()
     private val signUpViewModel: SignUpViewModel by viewModels()
     private val registerMonitorViewModel: RegisterMonitorViewModel by viewModels()
+    private val updateUserViewModel: UpdateUserViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -293,6 +298,11 @@ class InicioActivity : ComponentActivity() {
                                     context = this@InicioActivity,
                                     launcher = permissionLauncher
                                 )
+
+                                LaunchedEffect(Unit) {
+                                    updateUserViewModel.fetchUserData()
+                                }
+
                                 HomeScreen(
                                     navController = navController,
                                     homeViewModel = homeViewModel,
@@ -441,6 +451,12 @@ class InicioActivity : ComponentActivity() {
                                     navController.navigate("${NavScreens.HOME}/$paymentPlanType") {
                                         popUpTo(NavScreens.LOGIN) { inclusive = true }
                                     }
+                                }
+                            }
+
+                            composable(route = NavScreens.INFORMACION_USUARIO) {
+                                UpdateUserScreen(updateUserViewModel) {
+                                    navController.popBackStack()
                                 }
                             }
                         }

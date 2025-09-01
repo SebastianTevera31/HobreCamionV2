@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.registrousuario.screen
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,13 +26,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.forms.VehicleFormModel
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.FormTextField
-import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpUiState
 
 @Composable
 fun VehicleForm(
-    signUpUiState: SignUpUiState,
+    @StringRes title: Int,
+    vehicleData: VehicleFormModel,
     enableRegisterButton: Boolean,
     modifier: Modifier = Modifier,
     onBack: (vehicleType: String, plates: String) -> Unit,
@@ -42,8 +44,8 @@ fun VehicleForm(
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
-        vehicleType = signUpUiState.vehicleType
-        plates = signUpUiState.plates
+        vehicleType = vehicleData.vehicleType
+        plates = vehicleData.plates
     }
 
     Column(
@@ -52,7 +54,7 @@ fun VehicleForm(
         modifier = modifier.verticalScroll(scrollState)
     ) {
         Text(
-            stringResource(R.string.registrar_vehiculo),
+            stringResource(title),
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.Start)
@@ -91,7 +93,8 @@ fun VehicleForm(
 fun RegistrarDatosVehiculoPreview() {
     HombreCamionTheme {
         VehicleForm(
-            signUpUiState = SignUpUiState(),
+            title = R.string.registrar_vehiculo,
+            vehicleData = VehicleFormModel(),
             enableRegisterButton = true,
             modifier = Modifier
                 .safeContentPadding()

@@ -134,4 +134,6 @@
     <string name="mac_no_disponible">MAC not found</string>
     <string name="escanear">Scan</string>
     <string name="vehiculo">Vehicle</string>
+    <string name="perfil">Profile</string>
+    <string name="chofer">Driver</string>
 </resources>

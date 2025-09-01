@@ -341,7 +341,7 @@ fun HomeScreen(
                     }
 
                     IconButton(
-                        onClick = { /* Acción perfil */ }
+                        onClick = { navController.navigate(NavScreens.INFORMACION_USUARIO) }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.AccountCircle,

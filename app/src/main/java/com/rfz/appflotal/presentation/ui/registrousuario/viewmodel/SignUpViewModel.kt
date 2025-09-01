@@ -11,9 +11,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.LBEncryptionUtils
+import com.rfz.appflotal.data.model.forms.ProfileFormModel
+import com.rfz.appflotal.data.model.forms.VehicleFormModel
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
@@ -87,14 +88,14 @@ class SignUpViewModel @Inject constructor(
             if (Connected.isConnected(ctx)) {
                 signUpRequestStatus = ApiResult.Loading
                 signUpRequestStatus = loginUseCase.doRegisterUser(
-                    name = _signUpUiState.value.name,
+                    name = _signUpUiState.value.profileData.name,
                     username = _signUpUiState.value.username,
-                    email = _signUpUiState.value.email,
-                    password = _signUpUiState.value.password,
-                    idCountry = _signUpUiState.value.country!!.first,
-                    idSector = _signUpUiState.value.sector!!.first,
-                    typeVehicle = _signUpUiState.value.vehicleType,
-                    plates = _signUpUiState.value.plates
+                    email = _signUpUiState.value.profileData.email,
+                    password = _signUpUiState.value.profileData.password,
+                    idCountry = _signUpUiState.value.profileData.country!!.first,
+                    idSector = _signUpUiState.value.profileData.industry!!.first,
+                    typeVehicle = _signUpUiState.value.vehicleData.vehicleType,
+                    plates = _signUpUiState.value.vehicleData.plates
                 )
             } else networkAlert()
         }
@@ -111,10 +112,12 @@ class SignUpViewModel @Inject constructor(
     ): SignUpAlerts {
         _signUpUiState.update { currentUiState ->
             currentUiState.copy(
-                name = name.trim(),
-                username = username.trim(),
-                country = country,
-                sector = sector
+                profileData = currentUiState.profileData.copy(
+                    name = name.trim(),
+                    country = country,
+                    industry = sector
+                ),
+                username = username.trim()
             )
         }
 
@@ -125,8 +128,10 @@ class SignUpViewModel @Inject constructor(
         else {
             _signUpUiState.update { currentUiState ->
                 currentUiState.copy(
+                    profileData = currentUiState.profileData.copy(
+                        email = email.trim()
+                    ),
                     username = getUsername(email.trim()),
-                    email = email.trim(),
                 )
             }
         }
@@ -136,7 +141,9 @@ class SignUpViewModel @Inject constructor(
         else {
             _signUpUiState.update { currentUiState ->
                 currentUiState.copy(
-                    password = password.trim(),
+                    profileData = currentUiState.profileData.copy(
+                        password = password.trim(),
+                    ),
                 )
             }
         }
@@ -151,8 +158,10 @@ class SignUpViewModel @Inject constructor(
     fun chargeVehicleData(typeVehicle: String, plates: String): SignUpAlerts {
         _signUpUiState.update { currentUiState ->
             currentUiState.copy(
-                vehicleType = typeVehicle.trim(),
-                plates = plates.trim()
+                vehicleData = VehicleFormModel(
+                    vehicleType = typeVehicle.trim(),
+                    plates = plates.trim()
+                )
             )
         }
 
@@ -175,8 +184,8 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             loginRequestStatus = Result.Loading
             try {
-                val email = signUpUiState.value.email
-                val password = signUpUiState.value.password
+                val email = signUpUiState.value.profileData.email
+                val password = signUpUiState.value.profileData.password
 
                 // Vaciar estado
                 cleanSignUpData()

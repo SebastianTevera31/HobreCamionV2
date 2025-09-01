@@ -10,15 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,7 +26,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
@@ -118,7 +112,8 @@ fun SignUpScreen(
             ) {
                 if (!isNextScreen) {
                     UserForm(
-                        signUpUiState = signUpUiState.value,
+                        title = R.string.registro,
+                        profileData = signUpUiState.value.profileData,
                         modifier = Modifier
                             .padding(top = 80.dp)
                             .padding(horizontal = 40.dp),
@@ -139,7 +134,8 @@ fun SignUpScreen(
                     }
                 } else {
                     VehicleForm(
-                        signUpUiState = signUpUiState.value,
+                        title = R.string.registrar_vehiculo,
+                        vehicleData = signUpUiState.value.vehicleData,
                         modifier = Modifier.padding(horizontal = 40.dp),
                         enableRegisterButton = enableRegisterButton,
                         onBack = { vehicleType, plates ->

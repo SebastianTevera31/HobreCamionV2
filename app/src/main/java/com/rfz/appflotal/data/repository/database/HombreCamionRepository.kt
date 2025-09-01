@@ -50,6 +50,7 @@ class HombreCamionRepository @Inject constructor(
                 id_user = it.id_user,
                 fld_name = it.fld_name,
                 fld_email = it.fld_email,
+                fld_username = it.fld_username,
                 fld_token = it.fld_token,
                 id_monitor = it.id_monitor,
                 monitorMac = it.monitorMac,
