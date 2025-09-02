@@ -86,6 +86,10 @@ class MonitorViewModel @Inject constructor(
                                 )
                             }
 
+                            if (_monitorUiState.value.chassisImageUrl.isNotEmpty()) {
+                                getDiagramCoordinates()
+                            }
+
                             // Recibe datos Bluetooth
                             readBluetoothData()
                         }
@@ -187,7 +191,7 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
-    fun getDiagramCoordinates() {
+    private fun getDiagramCoordinates() {
         viewModelScope.launch {
             val coordinates =
                 apiTpmsUseCase.doGetPositionCoordinates(monitorUiState.value.monitorId)

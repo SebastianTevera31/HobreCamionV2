@@ -91,8 +91,6 @@ fun MonitorScreen(
                 context = context
             )
         }
-    } else {
-        monitorViewModel.getDiagramCoordinates()
     }
 
     when (val state = registerMonitorStatus.value) {

@@ -184,7 +184,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
     private fun verifyDataFrame(dataFrame: ByteArray): String? {
         val dataFrameToHex = dataFrame.toHexString()
-
+        Log.d("BLE", "Current dataframe $dataFrame")
         // Verificación de longitud
         if (dataFrameToHex.length == 28) {
             val calculatedDataFrame =

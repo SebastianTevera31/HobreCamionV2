@@ -175,7 +175,8 @@ fun SignUpScreen(
                             SignUpStatus(
                                 ctx = ctx,
                                 onEnableButton = { enableRegisterButton = true },
-                                signUpRequestStatus = signUpRequestStatus
+                                signUpRequestStatus = signUpRequestStatus,
+                                onFailure = { authFlow = AuthFlow.None }
                             ) {
                                 authFlow = AuthFlow.Login
                                 signUpViewModel.onLogin(ctx)
@@ -185,7 +186,8 @@ fun SignUpScreen(
                         AuthFlow.Login -> {
                             LoginStatus(
                                 ctx = ctx,
-                                loginRequestStatus = loginRequestStatus
+                                loginRequestStatus = loginRequestStatus,
+                                onFailure = { authFlow = AuthFlow.None }
                             ) {
                                 navigateToMenu(signUpUiState.value.paymentPlan)
                                 authFlow = AuthFlow.None
@@ -205,6 +207,7 @@ fun SignUpStatus(
     ctx: Context,
     onEnableButton: () -> Unit,
     signUpRequestStatus: ApiResult<List<MessageResponse>?>,
+    onFailure: () -> Unit,
     onLogin: () -> Unit
 ) {
     when (signUpRequestStatus) {
@@ -214,6 +217,7 @@ fun SignUpStatus(
             if (result.data != null) {
                 if (result.data[0].id != 200) {
                     Toast.makeText(ctx, result.data[0].message, Toast.LENGTH_SHORT).show()
+                    onFailure()
                 } else onLogin()
             } else Toast.makeText(
                 ctx,
@@ -229,6 +233,7 @@ fun SignUpStatus(
                 ctx.getString(R.string.signup_network_alert),
                 Toast.LENGTH_SHORT
             ).show()
+            onFailure()
             Log.e("SingUpScreen", "${signUpRequestStatus.message}")
         }
 
@@ -240,6 +245,7 @@ fun SignUpStatus(
 fun LoginStatus(
     ctx: Context,
     loginRequestStatus: Result<LoginResponse>,
+    onFailure: () -> Unit,
     onNavigate: () -> Unit
 ) {
     when (loginRequestStatus) {
@@ -253,6 +259,7 @@ fun LoginStatus(
                 ctx.getString(R.string.signup_network_alert),
                 Toast.LENGTH_SHORT
             ).show()
+            onFailure()
             Log.e("SingUpScreen", "${loginRequestStatus.exception.message}")
         }
 
