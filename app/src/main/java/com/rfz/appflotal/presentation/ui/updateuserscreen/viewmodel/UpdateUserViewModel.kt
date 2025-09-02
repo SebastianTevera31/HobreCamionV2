@@ -1,6 +1,8 @@
 package com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel
 
+import android.content.Context
 import android.util.Patterns
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -39,15 +41,21 @@ class UpdateUserViewModel @Inject constructor(
     fun fetchUserData() {
         viewModelScope.launch {
             val driverData = getTasksUseCase().first()[0]
+
             _updateUserUiState.update { currentUiState ->
                 currentUiState.copy(
                     userData = driverData.toUserData(),
-                    newData = driverData.toUserData()
+                    newData = driverData.toUserData(),
+                    isNewData = false
                 )
             }
 
             val countriesResponse = catalogUseCase.onGetCountries()
             val sectorsResponse = catalogUseCase.onGetSectors()
+
+            val idCountry = driverData.country
+            val idIndustry = driverData.industry
+
             responseHelper(response = countriesResponse) { response ->
                 if (response != null) {
                     _updateUserUiState.update { currentUiState ->
@@ -62,9 +70,52 @@ class UpdateUserViewModel @Inject constructor(
                 if (response != null) {
                     _updateUserUiState.update { currentUiState ->
                         currentUiState.copy(
-                            industries = response.associate { it.idCountry to it.fldSector }
+                            industries = response.associate { it.idCountry to it.fldSector },
                         )
                     }
+                }
+            }
+
+            getDefaultCountry(idCountry)
+            getDefaultIndustry(idIndustry)
+        }
+    }
+
+    fun getDefaultCountry(idCountry: Int) {
+        val countries = _updateUserUiState.value.countries
+        if (countries.isNotEmpty()) {
+            val currentCountry = countries.filterKeys { idCountry == it }
+                .map { Pair(it.key, it.value) }
+            if (currentCountry.isNotEmpty()) {
+                _updateUserUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        userData = currentUiState.userData.copy(
+                            country = currentCountry[0],
+                        ),
+                        newData = currentUiState.newData.copy(
+                            country = currentCountry[0]
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun getDefaultIndustry(idIndustry: Int) {
+        val industries = _updateUserUiState.value.industries
+        if (industries.isNotEmpty()) {
+            val currentIndustry = industries.filterKeys { idIndustry == it }
+                .map { Pair(it.key, it.value) }
+            if (currentIndustry.isNotEmpty()) {
+                _updateUserUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        userData = currentUiState.userData.copy(
+                            industry = currentIndustry[0],
+                        ),
+                        newData = currentUiState.newData.copy(
+                            industry = currentIndustry[0]
+                        )
+                    )
                 }
             }
         }
@@ -76,7 +127,8 @@ class UpdateUserViewModel @Inject constructor(
         email: String,
         password: String,
         country: Pair<Int, String>?,
-        industry: Pair<Int, String>?
+        industry: Pair<Int, String>?,
+        context: Context
     ) {
         _updateUserUiState.update { currentUiState ->
             currentUiState.copy(
@@ -92,16 +144,16 @@ class UpdateUserViewModel @Inject constructor(
         }
         verifyIsNewData()
 
-        if (name.isEmpty()) "SignUpAlerts.PLATES_ALERT"
+        if (name.isEmpty()) showMessage(context, SignUpAlerts.NAME_ALERT.message)
 
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches())
-            "SignUpAlerts.PLATES_ALERT"
+            showMessage(context, SignUpAlerts.EMAIL_ALERT.message)
 
-        if (password.isEmpty() || password.length < 8)
-            "SignUpAlerts.PLATES_ALERT"
+//        if (password.isEmpty() || password.length < 8)
+//            showMessage(context, SignUpAlerts.PASSWORD_ALERT.message)
     }
 
-    fun updateVehicleData(typeVehicle: String, plates: String) {
+    fun updateVehicleData(typeVehicle: String, plates: String, context: Context) {
         _updateUserUiState.update { currentUiState ->
             currentUiState.copy(
                 newData = currentUiState.newData.copy(
@@ -111,10 +163,10 @@ class UpdateUserViewModel @Inject constructor(
             )
         }
         if (typeVehicle.isEmpty())
-            "SignUpAlerts.PLATES_ALERT"
+            showMessage(context, SignUpAlerts.VEHICLE_ALERT.message)
 
         if (plates.isEmpty())
-            "SignUpAlerts.PLATES_ALERT"
+            showMessage(context, SignUpAlerts.PLATES_ALERT.message)
 
         verifyIsNewData()
     }
@@ -137,14 +189,19 @@ class UpdateUserViewModel @Inject constructor(
                 username = _updateUserUiState.value.newData.username,
                 email = _updateUserUiState.value.newData.email,
                 password = _updateUserUiState.value.newData.password,
-                idCountry = _updateUserUiState.value.newData.country!!.first,
-                idSector = _updateUserUiState.value.newData.industry!!.first,
+                idCountry = _updateUserUiState.value.newData.country?.first ?: 0,
+                idSector = _updateUserUiState.value.newData.industry?.first ?: 0,
                 typeVehicle = _updateUserUiState.value.newData.typeVehicle,
                 plates = _updateUserUiState.value.newData.plates
             )
 
             responseHelper(response = response) { data ->
                 updateUserStatus = ApiResult.Success(data)
+                _updateUserUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        isNewData = false
+                    )
+                }
             }
 
             if (updateUserStatus != ApiResult.Loading || updateUserStatus != ApiResult.Error()) {
@@ -153,11 +210,19 @@ class UpdateUserViewModel @Inject constructor(
                     fldName = _updateUserUiState.value.newData.name,
                     fldEmail = _updateUserUiState.value.newData.email,
                     vehiclePlates = _updateUserUiState.value.newData.plates,
-                    country = _updateUserUiState.value.newData.country!!.first,
-                    industry = _updateUserUiState.value.newData.industry!!.first,
+                    country = _updateUserUiState.value.newData.country?.first ?: 0,
+                    industry = _updateUserUiState.value.newData.industry?.first ?: 0,
                     vehicleType = _updateUserUiState.value.newData.typeVehicle
                 )
             }
         }
+    }
+
+    fun cleanUpdateUserStatus() {
+        updateUserStatus = ApiResult.Loading
+    }
+
+    private fun showMessage(context: Context, message: Int) {
+        Toast.makeText(context, context.getString(message), Toast.LENGTH_SHORT).show()
     }
 }

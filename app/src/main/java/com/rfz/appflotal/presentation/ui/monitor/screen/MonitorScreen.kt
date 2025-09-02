@@ -59,7 +59,9 @@ fun MonitorScreen(
     val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
 
     // Carga la pantalla, vacia o no
-    monitorViewModel.initMonitorData()
+    LaunchedEffect(Unit) {
+        monitorViewModel.initMonitorData()
+    }
 
     if (monitorUiState.value.showDialog) {
         // registerMonitorViewModel.loadConfigurations()
@@ -69,7 +71,8 @@ fun MonitorScreen(
 
         registerMonitorViewModel.clearMonitorConfiguration()
 
-        val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
+        val monitorConfigUiState =
+            registerMonitorViewModel.monitorConfigUiState.collectAsState()
 
         if (!monitorConfigUiState.value.isScanning) {
             registerMonitorViewModel.stopScan()

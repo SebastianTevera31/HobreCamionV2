@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.updateuserscreen.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,8 +9,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -20,7 +19,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +33,6 @@ import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.UserInfoTopBar
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserUiState
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
-import kotlinx.coroutines.launch
 
 enum class UpdateUserDataViews() {
     Chofer,
@@ -49,25 +46,28 @@ fun UpdateUserScreen(
     navigateUp: () -> Unit,
 ) {
     val updateUserUiState = updateUserViewModel.updateUserUiState.collectAsState()
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
     val updateUserStaus = updateUserViewModel.updateUserStatus
 
     LaunchedEffect(updateUserStaus) {
         when (updateUserStaus) {
             is ApiResult.Error -> {
-                scope.launch {
-                    snackbarHostState.showSnackbar(context.getString(R.string.error_actualizar_datos))
-                }
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.error_actualizar_datos),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             ApiResult.Loading -> {}
             is ApiResult.Success -> {
-                scope.launch {
-                    snackbarHostState.showSnackbar(context.getString(R.string.datos_actualizados_correctamente))
-                    navigateUp()
-                }
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.datos_actualizados_correctamente),
+                    Toast.LENGTH_SHORT
+                ).show()
+                updateUserViewModel.cleanUpdateUserStatus()
+                navigateUp()
             }
         }
     }
@@ -82,7 +82,6 @@ fun UpdateUserScreen(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = modifier
     ) { innerPadding ->
         Surface(
@@ -105,11 +104,12 @@ fun UpdateUserScreen(
                             email = email,
                             password = password,
                             country = country,
-                            industry = sector
+                            industry = sector,
+                            context = context
                         )
                     },
                     updateVehicleData = { typeVehicle, plates ->
-                        updateUserViewModel.updateVehicleData(typeVehicle, plates)
+                        updateUserViewModel.updateVehicleData(typeVehicle, plates, context)
                     })
                 Button(
                     onClick = {
