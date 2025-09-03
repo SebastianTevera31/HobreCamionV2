@@ -96,7 +96,6 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
     registerMonitorViewModel: RegisterMonitorViewModel,
     monitorViewModel: MonitorViewModel,
-    paymentPlan: PaymentPlanType,
 ) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
@@ -158,7 +157,9 @@ fun HomeScreen(
     val onlyLanguagesAllowedText = stringResource(R.string.only_languages_allowed)
     val languages = listOf("es" to "ES", "en" to "EN")
     val userName = uiState.userData?.fld_name ?: stringResource(R.string.operator)
-    val plates = uiState.userData?.vehiclePlates
+    val paymentPlan =
+        PaymentPlanType.valueOf(uiState.userData?.paymentPlan?.replace(" ", "") ?: "None")
+    val plates = uiState.userData?.vehiclePlates ?: ""
 
     LaunchedEffect(uiState.selectedLanguage) {
         if (uiState.selectedLanguage == "es" || uiState.selectedLanguage == "en") {
@@ -379,7 +380,11 @@ fun HomeScreen(
                         spotColor = primaryColor.copy(alpha = 0.3f)
                     )
             ) {
-                UserHeader(paymentPlan = paymentPlan, userName = userName, plates = plates) {
+                UserHeader(
+                    paymentPlan = paymentPlan,
+                    userName = userName,
+                    plates = plates
+                ) {
                     showMonitorDialog = true
                 }
             }

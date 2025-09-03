@@ -23,9 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
@@ -87,8 +84,6 @@ import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlan
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
-import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateDriverScreen
-import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserDataViews
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -189,7 +184,7 @@ class InicioActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         setContent {
             val permissionLauncher = rememberLauncherForActivityResult(
@@ -243,8 +238,8 @@ class InicioActivity : ComponentActivity() {
 
                                         val paymentPlan = when (data.paymentPlan) {
                                             PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
-                                            PaymentPlanType.OnlyTpms.planName, PaymentPlanType.Free.planName
-                                                -> PaymentPlanType.OnlyTpms
+                                            PaymentPlanType.OnlyTPMS.planName, PaymentPlanType.Free.planName
+                                                -> PaymentPlanType.OnlyTPMS
 
                                             else -> PaymentPlanType.None
                                         }
@@ -310,8 +305,7 @@ class InicioActivity : ComponentActivity() {
                                     navController = navController,
                                     homeViewModel = homeViewModel,
                                     registerMonitorViewModel = registerMonitorViewModel,
-                                    monitorViewModel = monitorViewModel,
-                                    paymentPlan = paymentSelected,
+                                    monitorViewModel = monitorViewModel
                                 )
                             }
 
@@ -338,6 +332,7 @@ class InicioActivity : ComponentActivity() {
                             composable(NavScreens.LOGIN) {
                                 LoginScreen(
                                     loginViewModel,
+                                    homeViewModel,
                                     navController
                                 )
                             }

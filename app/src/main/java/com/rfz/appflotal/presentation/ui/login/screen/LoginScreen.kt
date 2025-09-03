@@ -4,10 +4,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,10 +26,12 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -34,6 +39,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -72,13 +79,19 @@ import com.rfz.appflotal.data.model.login.response.LoginState
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.ProgressDialog
+import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
+fun LoginScreen(
+    loginViewModel: LoginViewModel,
+    homeViewModel: HomeViewModel,
+    navController: NavController
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.White
@@ -106,19 +119,24 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
             ProgressDialog()
         }
 
-        LoginContent(loginViewModel, navController)
+        LoginContent(loginViewModel, homeViewModel, navController)
     }
-
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun LoginContent(loginViewModel: LoginViewModel, navController: NavController) {
+private fun LoginContent(
+    loginViewModel: LoginViewModel,
+    homeViewModel: HomeViewModel,
+    navController: NavController
+) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val isLoading: Boolean by loginViewModel.isLoading.observeAsState(initial = false)
     val context = LocalContext.current
 
+    val languages = listOf("es" to "ES", "en" to "EN")
+    val uiState by homeViewModel.uiState.collectAsState()
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -129,41 +147,101 @@ private fun LoginContent(loginViewModel: LoginViewModel, navController: NavContr
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            Box {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(230.dp)
+                        .drawWithContent {
+                            drawContent()
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(230.dp)
-                    .drawWithContent {
-                        drawContent()
+                            val path = Path().apply {
+                                moveTo(0f, 0f)
+                                lineTo(size.width, 0f)
+                                lineTo(size.width, size.height * 0.7f)
+                                quadraticBezierTo(
+                                    size.width / 2,
+                                    size.height * 1.1f,
+                                    0f,
+                                    size.height * 0.7f
+                                )
+                                close()
+                            }
 
-                        val path = Path().apply {
-                            moveTo(0f, 0f)
-                            lineTo(size.width, 0f)
-                            lineTo(size.width, size.height * 0.7f)
-                            quadraticBezierTo(
-                                size.width / 2,
-                                size.height * 1.1f,
-                                0f,
-                                size.height * 0.7f
+                            drawPath(
+                                path = path,
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(primaryLight, secondaryLight),
+                                    startY = 0f,
+                                    endY = size.height
+                                )
                             )
-                            close()
+                        },
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    LogoImage(modifier = Modifier.offset(y = 105.dp))
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            end = dimensionResource(R.dimen.medium_dimen),
+                            top = dimensionResource(R.dimen.medium_dimen)
+                        ),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(40.dp)
+                            .padding(end = 8.dp, top = 8.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color.White.copy(alpha = 0.2f))
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(20.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        ) {
+                            languages.forEach { (code, display) ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            scope.launch {
+                                                homeViewModel.changeLanguage(code)
+                                            }
+                                        }
+                                        .background(
+                                            if (uiState.selectedLanguage == code)
+                                                Color.White.copy(alpha = 0.3f)
+                                            else
+                                                Color.Transparent
+                                        )
+                                        .padding(horizontal = 4.dp)
+                                ) {
+                                    Text(
+                                        text = display,
+                                        color = Color.White,
+                                        fontSize = 14.sp,
+                                        fontWeight = if (uiState.selectedLanguage == code) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                                if (code != languages.last().first) {
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                }
+                            }
                         }
-
-                        drawPath(
-                            path = path,
-                            brush = Brush.verticalGradient(
-                                colors = listOf(primaryLight, secondaryLight),
-                                startY = 0f,
-                                endY = size.height
-                            )
-                        )
-                    },
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                LogoImage(modifier = Modifier.offset(y = 105.dp))
+                    }
+                }
             }
-
 
             Column(
                 modifier = Modifier

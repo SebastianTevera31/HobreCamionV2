@@ -134,7 +134,7 @@ class LoginViewModel @Inject constructor(
             200 -> {
                 val paymentPlan = when (loginResponse.paymentPlan) {
                     PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
-                    PaymentPlanType.OnlyTpms.planName -> PaymentPlanType.OnlyTpms
+                    PaymentPlanType.OnlyTPMS.planName -> PaymentPlanType.OnlyTPMS
                     else -> PaymentPlanType.None
                 }
                 onTaskCreated(loginResponse)

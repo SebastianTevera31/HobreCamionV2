@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
@@ -44,6 +47,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -52,6 +56,7 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 
 @Composable
@@ -71,6 +76,7 @@ fun DiagramaMonitorScreen(
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     // Actualizar rueda
     tireSelected = wheel
@@ -90,30 +96,39 @@ fun DiagramaMonitorScreen(
             }
         }
 
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            // Datos Sensor
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                PanelSensor(
-                    wheel = wheel,
-                    temperature = temperature,
-                    pressure = pressure,
-                    timestamp = timestamp,
-                    temperatureStatus = temperatureStatus,
-                    pressureStatus = pressionStatus,
-                    modifier = Modifier.weight(1f)
-                )
-                PanelLlantas(
-                    numWheels = numWheels, wheelsWithAlert = alertTires, Modifier.weight(1f)
-                ) { sensorId ->
-                    tireSelected = sensorId
-                    getSensorData(sensorId)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (isLoading) {
+                Box(modifier = Modifier.size(520.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                // Datos Sensor
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    PanelSensor(
+                        wheel = wheel,
+                        temperature = temperature,
+                        pressure = pressure,
+                        timestamp = timestamp,
+                        temperatureStatus = temperatureStatus,
+                        pressureStatus = pressionStatus,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(400.dp)
+                    )
+                    PanelLlantas(
+                        numWheels = numWheels, wheelsWithAlert = alertTires, Modifier.weight(1f)
+                    ) { sensorId ->
+                        tireSelected = sensorId
+                        getSensorData(sensorId)
+                    }
                 }
             }
         }
@@ -129,7 +144,7 @@ fun PanelLlantas(
 ) {
     Card(
         colors = CardDefaults.cardColors(Color.White),
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.height(200.dp),
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -325,8 +340,29 @@ fun loadBitmapFromUrl(imageUrl: String): Bitmap? {
             .build()
 
         val result = (loader.execute(request) as? SuccessResult)?.drawable
-        bitmap = (result as? android.graphics.drawable.BitmapDrawable)?.bitmap
+        bitmap = (result as? BitmapDrawable)?.bitmap
     }
 
     return bitmap
+}
+
+@Composable
+@Preview(showBackground = true, showSystemUi = true)
+fun DiagramaMonitorScreenPreview() {
+    HombreCamionTheme {
+        DiagramaMonitorScreen(
+            imageUrl = "https://truckdriverapi.azurewebsites.net/Base32.png",
+            wheel = "7",
+            temperature = 54.0f,
+            pressure = 39f,
+            timestamp = "",
+            temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
+            pressionStatus = SensorAlerts.HIGH_PRESSURE,
+            numWheels = 7,
+            alertTires = emptyMap(),
+            getSensorData = { },
+            coordinates = emptyList(),
+            modifier = Modifier.safeContentPadding()
+        )
+    }
 }

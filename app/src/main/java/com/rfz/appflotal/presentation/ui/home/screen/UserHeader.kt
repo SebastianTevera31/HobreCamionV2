@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -41,7 +42,7 @@ fun UserHeader(
         modifier = modifier
             .background(primaryLight)
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -58,7 +59,7 @@ fun UserHeader(
             Text(
                 text = stringResource(R.string.welcome, userName),
                 color = Color.White,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium
             )
 
@@ -67,17 +68,17 @@ fun UserHeader(
                 color = Color.White.copy(alpha = 0.9f),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 1.dp)
             )
 
             val plateText =
-                if (plates != null) "${stringResource(R.string.placas)}: $plates" else ""
+                if (plates != null) "${stringResource(R.string.placas)}: $plates" else "Placas"
             Text(
                 text = plateText,
                 color = Color.White.copy(alpha = 0.9f),
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 1.dp)
             )
         }
 

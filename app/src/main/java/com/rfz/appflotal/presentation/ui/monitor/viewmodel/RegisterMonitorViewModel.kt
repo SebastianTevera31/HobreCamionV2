@@ -111,9 +111,7 @@ class RegisterMonitorViewModel @Inject constructor(
                 idConfiguration = configurationSelected.first
             )
 
-            responseHelper(
-                response = response
-            ) { result ->
+            responseHelper(response = response) { result ->
                 if (!result.isNullOrEmpty()) {
                     val fields = result[0].message.split(":")
                     if (fields.size == 2) {

@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.LBEncryptionUtils
-import com.rfz.appflotal.data.model.forms.ProfileFormModel
 import com.rfz.appflotal.data.model.forms.VehicleFormModel
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
@@ -220,7 +219,7 @@ class SignUpViewModel @Inject constructor(
             200 -> {
                 val paymentPlan = when (loginResponse.paymentPlan) {
                     PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
-                    PaymentPlanType.OnlyTpms.planName -> PaymentPlanType.OnlyTpms
+                    PaymentPlanType.OnlyTPMS.planName -> PaymentPlanType.OnlyTPMS
                     PaymentPlanType.Free.planName -> PaymentPlanType.Free
                     else -> PaymentPlanType.None
                 }

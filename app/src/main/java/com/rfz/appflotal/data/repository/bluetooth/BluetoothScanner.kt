@@ -1,11 +1,12 @@
 package com.rfz.appflotal.data.repository.bluetooth
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.ParcelUuid
@@ -31,16 +32,21 @@ data class ScanItem(
     val rssi: Int? = null
 )
 
-class BluetoothScannerImp(private val bluetoothAdapter: BluetoothAdapter?) :
+class BluetoothScannerImp(
+    private val bluetoothAdapter: BluetoothAdapter?,
+) :
     BluetoothScanner {
     private val bluetoothScanner = bluetoothAdapter?.bluetoothLeScanner
+
     private var _resultScanDevices = MutableStateFlow<ScanItem?>(null)
+    private val seen = mutableSetOf<String>()
+
     val resultScanDevices = _resultScanDevices.asStateFlow()
 
     private fun isBleReady(): Boolean = bluetoothAdapter?.isEnabled == true
 
-    private val seen = mutableSetOf<String>()
     private val scanCallback: ScanCallback = object : ScanCallback() {
+        @SuppressLint("MissingPermission")
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
@@ -50,8 +56,6 @@ class BluetoothScannerImp(private val bluetoothAdapter: BluetoothAdapter?) :
             Log.i("BluetoothScanner", "Address detected: $addr")
 
             if (seen.add(addr) && matchesTarget(result)) {
-                scanning = false
-
                 val item = ScanItem(
                     name = result.device.name,
                     address = result.device.address,
@@ -59,6 +63,15 @@ class BluetoothScannerImp(private val bluetoothAdapter: BluetoothAdapter?) :
                 )
 
                 _resultScanDevices.update { item }
+
+                scanning = false
+
+                // Desactivar escaneo
+
+            }
+
+            if (_resultScanDevices.value != null){
+                bluetoothScanner?.stopScan(this)
             }
         }
 
@@ -86,16 +99,7 @@ class BluetoothScannerImp(private val bluetoothAdapter: BluetoothAdapter?) :
     override fun scanDevices(serviceUUID: UUID?, lowLatency: Boolean) {
         if (scanning) return
         if (!isBleReady()) return
-
         val scanner = bluetoothScanner ?: return
-        val filters = mutableListOf<ScanFilter>()
-
-        serviceUUID?.let {
-            filters += ScanFilter.Builder()
-                .setServiceUuid(ParcelUuid(UUID.fromString("00001000-0000-1000-8000-00805f9b34fb")))
-                .setServiceUuid(ParcelUuid(SERVICE))
-                .build()
-        }
 
         val settings = ScanSettings.Builder().setScanMode(
             if (lowLatency) ScanSettings.SCAN_MODE_LOW_LATENCY
@@ -105,15 +109,19 @@ class BluetoothScannerImp(private val bluetoothAdapter: BluetoothAdapter?) :
         _resultScanDevices.value = null
         seen.clear()
 
-        scanner.startScan(null, settings, scanCallback)
         scanning = true
+
+        scanner.startScan(null, settings, scanCallback)
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
+    @SuppressLint("MissingPermission")
     override fun stopScan() {
         if (!scanning) return
+
         bluetoothScanner?.stopScan(scanCallback)
+
         scanning = false
+
         Log.i("BluetoothScanner", "Scanner close")
     }
 
