@@ -136,7 +136,7 @@ private fun LoginContent(
     val context = LocalContext.current
 
     val languages = listOf("es" to "ES", "en" to "EN")
-    val uiState by homeViewModel.uiState.collectAsState()
+    val uiState = homeViewModel.uiState.collectAsState()
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -180,66 +180,6 @@ private fun LoginContent(
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     LogoImage(modifier = Modifier.offset(y = 105.dp))
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            end = dimensionResource(R.dimen.medium_dimen),
-                            top = dimensionResource(R.dimen.medium_dimen)
-                        ),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(80.dp)
-                            .height(40.dp)
-                            .padding(end = 8.dp, top = 8.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color.White.copy(alpha = 0.2f))
-                            .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(20.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(horizontal = 4.dp)
-                        ) {
-                            languages.forEach { (code, display) ->
-                                Box(
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable {
-                                            scope.launch {
-                                                homeViewModel.changeLanguage(code)
-                                            }
-                                        }
-                                        .background(
-                                            if (uiState.selectedLanguage == code)
-                                                Color.White.copy(alpha = 0.3f)
-                                            else
-                                                Color.Transparent
-                                        )
-                                        .padding(horizontal = 4.dp)
-                                ) {
-                                    Text(
-                                        text = display,
-                                        color = Color.White,
-                                        fontSize = 14.sp,
-                                        fontWeight = if (uiState.selectedLanguage == code) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                }
-                                if (code != languages.last().first) {
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                }
-                            }
-                        }
-                    }
                 }
             }
 

@@ -62,7 +62,7 @@ fun DiagramImage(
         hotspots = coordinatesMapped,
         alertTires = alertTires,
         tireSelected = tireSelected,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().height(170.dp),
     )
 }
 

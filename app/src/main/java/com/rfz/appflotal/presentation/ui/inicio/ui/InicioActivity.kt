@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -30,9 +31,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
+import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.base.BaseUseCase
@@ -287,24 +288,23 @@ class InicioActivity : ComponentActivity() {
                                     type = NavType.StringType
                                 })
                             ) { backStackEntry ->
-                                val paymentPlan = backStackEntry.arguments?.getString("paymentPlan")
-                                    ?: PaymentPlanType.Complete.name
-
-                                val paymentSelected = PaymentPlanType.valueOf(paymentPlan)
+//                                val paymentPlan = backStackEntry.arguments?.getString("paymentPlan")
+//                                    ?: PaymentPlanType.Complete.name
 
                                 ThrowServicePermission(
                                     context = this@InicioActivity,
                                     launcher = permissionLauncher
                                 )
 
-                                LaunchedEffect(Unit) {
-                                    updateUserViewModel.fetchUserData()
-                                }
-
                                 HomeScreen(
                                     navController = navController,
                                     homeViewModel = homeViewModel,
                                     registerMonitorViewModel = registerMonitorViewModel,
+                                    updateUserData = { selectedLanguage ->
+                                        updateUserViewModel.fetchUserData(
+                                            selectedLanguage
+                                        )
+                                    },
                                     monitorViewModel = monitorViewModel
                                 )
                             }
@@ -442,8 +442,10 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             composable(route = NavScreens.REGISTRAR_USUARIO) {
+                                val uiState = homeViewModel.uiState.collectAsState()
                                 SignUpScreen(
                                     navigateUp = { navController.navigateUp() },
+                                    languageSelected = uiState.value.selectedLanguage,
                                     signUpViewModel = signUpViewModel
                                 ) { paymentPlanType ->
                                     navController.navigate("${NavScreens.HOME}/$paymentPlanType") {
@@ -453,7 +455,10 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             composable(route = NavScreens.INFORMACION_USUARIO) {
-                                UpdateUserScreen(updateUserViewModel) {
+                                val uiState = homeViewModel.uiState.collectAsState()
+                                UpdateUserScreen(
+                                    updateUserViewModel = updateUserViewModel,
+                                ) {
                                     navController.popBackStack()
                                 }
                             }

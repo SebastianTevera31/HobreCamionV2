@@ -48,6 +48,7 @@ import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewMod
 @Composable
 fun SignUpScreen(
     navigateUp: () -> Unit,
+    languageSelected: String,
     signUpViewModel: SignUpViewModel,
     modifier: Modifier = Modifier,
     navigateToMenu: (PaymentPlanType) -> Unit
@@ -63,7 +64,7 @@ fun SignUpScreen(
     var enableRegisterButton by remember { mutableStateOf(true) }
     var authFlow by remember { mutableStateOf<AuthFlow>(AuthFlow.None) }
 
-    signUpViewModel.populateListMenus()
+    signUpViewModel.populateListMenus(languageSelected)
 
     Scaffold(topBar = {
         UserInfoTopBar(

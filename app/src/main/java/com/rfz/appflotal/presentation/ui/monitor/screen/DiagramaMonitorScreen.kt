@@ -110,7 +110,7 @@ fun DiagramaMonitorScreen(
                 // Datos Sensor
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(vertical = 8.dp)
                 ) {
                     PanelSensor(
                         wheel = wheel,
@@ -120,8 +120,8 @@ fun DiagramaMonitorScreen(
                         temperatureStatus = temperatureStatus,
                         pressureStatus = pressionStatus,
                         modifier = Modifier
+                            .height(320.dp)
                             .weight(1f)
-                            .height(400.dp)
                     )
                     PanelLlantas(
                         numWheels = numWheels, wheelsWithAlert = alertTires, Modifier.weight(1f)
@@ -144,7 +144,7 @@ fun PanelLlantas(
 ) {
     Card(
         colors = CardDefaults.cardColors(Color.White),
-        modifier = modifier.height(200.dp),
+        modifier = modifier.height(320.dp),
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {

@@ -95,6 +95,7 @@ fun HomeScreen(
     navController: NavController,
     homeViewModel: HomeViewModel,
     registerMonitorViewModel: RegisterMonitorViewModel,
+    updateUserData: (String) -> Unit,
     monitorViewModel: MonitorViewModel,
 ) {
     val context = LocalContext.current
@@ -342,7 +343,10 @@ fun HomeScreen(
                     }
 
                     IconButton(
-                        onClick = { navController.navigate(NavScreens.INFORMACION_USUARIO) }
+                        onClick = {
+                            updateUserData(uiState.selectedLanguage)
+                            navController.navigate(NavScreens.INFORMACION_USUARIO)
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.AccountCircle,

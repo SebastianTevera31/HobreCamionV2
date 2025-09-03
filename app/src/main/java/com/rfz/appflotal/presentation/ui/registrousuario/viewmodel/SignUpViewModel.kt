@@ -55,7 +55,7 @@ class SignUpViewModel @Inject constructor(
     )
         private set
 
-    fun populateListMenus() {
+    fun populateListMenus(languageSelected: String) {
         viewModelScope.launch {
             val countriesResponse = catalogUseCase.onGetCountries()
             val sectorsResponse = catalogUseCase.onGetSectors()
@@ -63,7 +63,7 @@ class SignUpViewModel @Inject constructor(
                 if (response != null) {
                     _signUpUiState.update { currentUiState ->
                         currentUiState.copy(
-                            countries = response.associate { it.idCountry to it.fldNameEN }
+                            countries = response.associate { it.idCountry to if (languageSelected == "es") it.fldNameEs else it.fldNameEN }
                         )
                     }
                 }
@@ -124,7 +124,6 @@ class SignUpViewModel @Inject constructor(
 
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches())
             return SignUpAlerts.EMAIL_ALERT
-
         else {
             _signUpUiState.update { currentUiState ->
                 currentUiState.copy(
@@ -138,7 +137,6 @@ class SignUpViewModel @Inject constructor(
 
         if (password.isEmpty() || password.length < 8)
             return SignUpAlerts.PASSWORD_ALERT
-
         else {
             _signUpUiState.update { currentUiState ->
                 currentUiState.copy(

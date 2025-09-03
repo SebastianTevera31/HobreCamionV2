@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.intellij.lang.annotations.Language
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,7 +39,7 @@ class UpdateUserViewModel @Inject constructor(
     var updateUserStatus: ApiResult<List<MessageResponse>?> by mutableStateOf(ApiResult.Loading)
         private set
 
-    fun fetchUserData() {
+    fun fetchUserData(selectedLanguage: String) {
         viewModelScope.launch {
             val driverData = getTasksUseCase().first()[0]
 
@@ -60,7 +61,7 @@ class UpdateUserViewModel @Inject constructor(
                 if (response != null) {
                     _updateUserUiState.update { currentUiState ->
                         currentUiState.copy(
-                            countries = response.associate { it.idCountry to it.fldNameEN }
+                            countries = response.associate { it.idCountry to if (selectedLanguage == "en") it.fldNameEN else it.fldNameEs }
                         )
                     }
                 }
