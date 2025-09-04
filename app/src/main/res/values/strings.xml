@@ -141,4 +141,7 @@
     <string name="error_actualizar_datos">No se pudo actualizar los datos</string>
     <string name="datos_actualizados_correctamente">Datos actualizados correctamente</string>
     <string name="credenciales_incorrectas">Usuario o contraseña incorrecto</string>
+    <string name="permiso_bluetooth_notificaciones">Permiso de Bluetooth y Notificaciones</string>
+    <string name="conceder_permisos_btn">Conceder permisos</string>
+    <string name="texto_permisos_app">Se requiere de acceso a Bluetooth y Notificaciones para conectarse con tu monitor HawksHead TPMS.</string>
 </resources>

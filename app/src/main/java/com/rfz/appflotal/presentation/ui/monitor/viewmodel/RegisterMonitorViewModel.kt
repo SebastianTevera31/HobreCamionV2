@@ -114,7 +114,7 @@ class RegisterMonitorViewModel @Inject constructor(
             responseHelper(response = response) { result ->
                 if (!result.isNullOrEmpty()) {
                     val fields = result[0].message.split(":")
-                    if (fields.size == 2) {
+                    if (fields.size == 2 && !fields.contains("error")) {
                         val idMonitor = fields[1].trim().toIntOrNull()
                         if (idMonitor != null) {
                             updateMonitorDataDB(
@@ -129,7 +129,6 @@ class RegisterMonitorViewModel @Inject constructor(
                     } else {
                         showAlert(context, strMessage = result[0].message)
                     }
-
                 } else {
                     showAlert(context, message = RegisterMonitorMessage.UNKNOWN_ERROR.message)
                 }

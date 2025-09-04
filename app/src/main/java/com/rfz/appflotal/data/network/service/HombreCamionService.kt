@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -25,6 +26,7 @@ import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.database.SensorTableUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
+import com.rfz.appflotal.presentation.ui.inicio.ui.InicioActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -89,7 +91,6 @@ class HombreCamionService : Service() {
         // Reiniciando servicio
         Log.d("HombreCamionService", "Servicio iniciado")
 
-
         // Habilitar observador WiFi
         wifiUseCase.doConnect()
 
@@ -103,6 +104,17 @@ class HombreCamionService : Service() {
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun startForegroundService() {
+        val notificationIntent = Intent(this, InicioActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         // Movier a la seccion de invocacion
         // Verificar si se aceptaron permisos de Bluetooth.
         val bluetoothPermission =
@@ -118,6 +130,7 @@ class HombreCamionService : Service() {
             .setContentTitle("Servicio HombreCamion")
             .setContentText("Recibiendo datos del monitor")
             .setSmallIcon(R.drawable.logo)
+            .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
@@ -144,11 +157,13 @@ class HombreCamionService : Service() {
 
     private fun initBluetoothConnection() {
         coroutineScope.launch {
-            val dataUser = getUserUseCase().first()[0]
-            Log.d("HombreCamionService", "Iniciando Bluetooth...")
-            if (dataUser.id_monitor != 0) {
-                bluetoothUseCase.doConnect(dataUser.monitorMac)
-                bluetoothUseCase.doStartRssiMonitoring()
+            getUserUseCase().distinctUntilChangedBy { it.first().monitorMac }.collect { record ->
+                val dataUser = record.first()
+                Log.d("HombreCamionService", "Iniciando Bluetooth...")
+                if (dataUser.id_monitor != 0) {
+                    bluetoothUseCase.doConnect(dataUser.monitorMac)
+                    bluetoothUseCase.doStartRssiMonitoring()
+                }
             }
         }
     }

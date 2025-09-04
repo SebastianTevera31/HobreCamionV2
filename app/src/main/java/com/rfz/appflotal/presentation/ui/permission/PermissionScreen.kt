@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,21 +77,25 @@ fun PermissionScreen(
             modifier = Modifier.clip(CircleShape)
         )
         Text(
-            "Permiso de Bluetooth y Notificaciones",
+            stringResource(R.string.permiso_bluetooth_notificaciones),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 
         Text(
-            "Se requiere de acceso a Bluetooth y Notificaciones para conectarse con tu monitor TPMS Hawkhead.",
+            stringResource(R.string.texto_permisos_app),
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen)))
-        Button(onClick = {
-            launcher.launch(permissions)
-        }) {
-            Text("Conceder permisos")
+        Button(
+            onClick = {
+                launcher.launch(permissions)
+            },
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.height(60.dp)
+        ) {
+            Text(stringResource(R.string.conceder_permisos_btn))
         }
     }
 }
@@ -105,7 +112,7 @@ fun PermissionScreenPreview() {
             if (todosConcedidos) {
                 true
             } else {
-                Log.d("Permiso", "❌ Permiso denegado")
+                Log.d("Permiso", "Permiso denegado")
             }
         }
         PermissionScreen(

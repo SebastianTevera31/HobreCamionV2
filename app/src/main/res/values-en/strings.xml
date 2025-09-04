@@ -139,4 +139,7 @@
     <string name="error_actualizar_datos">Failed to update data</string>
     <string name="datos_actualizados_correctamente">Data updated successfully</string>
     <string name="credenciales_incorrectas">Incorrect username or password</string>
+    <string name="permiso_bluetooth_notificaciones">Bluetooth and Notifications Permission</string>
+    <string name="conceder_permisos_btn">Grant permissions</string>
+    <string name="texto_permisos_app">Bluetooth and Notifications access are required to connect to your HawksHead TPMS monitor.</string>
 </resources>

@@ -146,6 +146,10 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     override fun connect(macAddress: String) {
         val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
         if (regex.matches(macAddress)) {
+
+            // Verificamos si exista una instancia previa
+            if (bluetoothGatt != null) disconnect()
+
             val device = bluetoothAdapter?.getRemoteDevice(macAddress)
             bluetoothGatt = device?.connectGatt(context, true, gattCallback)
         } else {
