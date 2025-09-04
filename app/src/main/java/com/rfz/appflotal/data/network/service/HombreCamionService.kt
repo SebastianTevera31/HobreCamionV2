@@ -117,7 +117,7 @@ class HombreCamionService : Service() {
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Servicio HombreCamion")
             .setContentText("Recibiendo datos del monitor")
-            .setSmallIcon(R.drawable.truckdriver)
+            .setSmallIcon(R.drawable.logo)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)

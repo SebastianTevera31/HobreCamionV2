@@ -558,65 +558,6 @@ fun arePermissionsGranted(context: Context, permissions: Array<String>): Boolean
     }
 }
 
-
-@Composable
-fun PermissionHandler(
-    context: Context,
-    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
-    onGranted: () -> Unit
-) {
-    val permissions = remember { getRequiredPermissions() }
-
-    LaunchedEffect(Unit) {
-        if (arePermissionsGranted(context, permissions)) {
-            // ✅ Ya están concedidos → arrancar servicio
-            if (!isServiceRunning(context, HombreCamionService::class.java)) {
-                HombreCamionService.startService(context)
-            }
-            onGranted()
-        } else {
-            // ❌ Faltan permisos → solicitarlos
-            launcher.launch(permissions)
-        }
-    }
-}
-
-@Composable
-fun ThrowServicePermission(
-    context: Context,
-    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
-) {
-    val required = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> arrayOf(
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT
-        )
-
-        else -> arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION // Compat <= 11
-        )
-    }
-
-    val servicePermissions = required
-    LaunchedEffect(Unit) {
-        var permissionsGranted = false
-        servicePermissions.forEach {
-            permissionsGranted = ContextCompat.checkSelfPermission(
-                context,
-                it
-            ) == PackageManager.PERMISSION_GRANTED
-        }
-
-        if (!permissionsGranted) {
-            launcher.launch(servicePermissions)
-        } else {
-            if (!isServiceRunning(context, HombreCamionService::class.java)) {
-                HombreCamionService.startService(context)
-            }
-        }
-    }
-}
-
 fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
     val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
     return manager.getRunningServices(Int.MAX_VALUE).any {
