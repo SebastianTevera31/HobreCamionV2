@@ -3,6 +3,7 @@ package com.rfz.appflotal.presentation.ui.inicio.ui
 import android.Manifest
 import android.app.ActivityManager
 import android.content.Context
+import android.content.Context.ACTIVITY_SERVICE
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -10,6 +11,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,7 +26,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -80,6 +86,7 @@ import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.RenovadosScreen
 import com.rfz.appflotal.presentation.ui.originaldesign.OriginalScreen
 import com.rfz.appflotal.presentation.ui.password.screen.PasswordScreen
 import com.rfz.appflotal.presentation.ui.password.viewmodel.PasswordViewModel
+import com.rfz.appflotal.presentation.ui.permission.PermissionScreen
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlantasScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
@@ -188,16 +195,20 @@ class InicioActivity : ComponentActivity() {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         setContent {
+            var allGranted by remember { mutableStateOf(false) }
+
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
-            ) { isGranted ->
-                val todosConcedidos = isGranted.values.all { it }
+            ) { result ->
+                val todosConcedidos = result.values.all { it }
                 if (todosConcedidos) {
-                    if (isServiceRunning(this@InicioActivity, HombreCamionService::class.java)) {
+                    allGranted = true
+                    if (!isServiceRunning(this@InicioActivity, HombreCamionService::class.java)) {
                         HombreCamionService.startService(this@InicioActivity)
                     }
                 } else {
-                    Log.d("Permiso", "Permiso BLUETOOTH_CONNECT denegado")
+                    allGranted = false
+                    Log.d("Permiso", "❌ Permiso denegado")
                 }
             }
 
@@ -246,13 +257,23 @@ class InicioActivity : ComponentActivity() {
                                         }
 
                                         if (diferenciaHoras < 24) {
-                                            navController.navigate(
-                                                "${NavScreens.HOME}/$paymentPlan"
+
+                                            if (!arePermissionsGranted(
+                                                    this@InicioActivity,
+                                                    getRequiredPermissions()
+                                                )
                                             ) {
-                                                popUpTo(NavScreens.LOADING) {
-                                                    inclusive = true
+                                                navController.navigate(NavScreens.PERMISOS) {
+                                                    popUpTo(NavScreens.LOADING) { inclusive = true }
+                                                }
+                                            } else {
+                                                navController.navigate(NavScreens.HOME) {
+                                                    popUpTo(NavScreens.LOADING) {
+                                                        inclusive = true
+                                                    }
                                                 }
                                             }
+
                                         } else {
                                             inicioScreenViewModel.deleteUserData()
                                             navController.navigate(NavScreens.LOGIN) {
@@ -271,9 +292,21 @@ class InicioActivity : ComponentActivity() {
 
                         loginViewModel.navigateToHome.observe(this) { shouldNavigate ->
                             if (shouldNavigate.first) {
-                                navController.navigate("${NavScreens.HOME}/${shouldNavigate.second.name}") {
-                                    popUpTo(NavScreens.LOGIN) { inclusive = true }
+
+                                if (!arePermissionsGranted(
+                                        this@InicioActivity,
+                                        getRequiredPermissions()
+                                    )
+                                ) {
+                                    navController.navigate(NavScreens.PERMISOS) {
+                                        popUpTo(NavScreens.LOGIN) { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate(NavScreens.HOME) {
+                                        popUpTo(NavScreens.LOGIN) { inclusive = true }
+                                    }
                                 }
+
                                 loginViewModel.onNavigateToHomeCompleted()
                             }
                         }
@@ -282,19 +315,24 @@ class InicioActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = NavScreens.LOADING
                         ) {
-                            composable(
-                                "${NavScreens.HOME}/{paymentPlan}",
-                                arguments = listOf(navArgument("paymentPlan") {
-                                    type = NavType.StringType
-                                })
-                            ) { backStackEntry ->
-//                                val paymentPlan = backStackEntry.arguments?.getString("paymentPlan")
-//                                    ?: PaymentPlanType.Complete.name
+                            composable(NavScreens.HOME) { backStackEntry ->
 
-                                ThrowServicePermission(
-                                    context = this@InicioActivity,
-                                    launcher = permissionLauncher
-                                )
+                                // Efecto: si ya están concedidos, arrancar servicio automáticamente
+                                LaunchedEffect(Unit) {
+                                    if (arePermissionsGranted(
+                                            this@InicioActivity,
+                                            getRequiredPermissions()
+                                        )
+                                    ) {
+                                        if (!isServiceRunning(
+                                                this@InicioActivity,
+                                                HombreCamionService::class.java
+                                            )
+                                        ) {
+                                            HombreCamionService.startService(this@InicioActivity)
+                                        }
+                                    }
+                                }
 
                                 HomeScreen(
                                     navController = navController,
@@ -311,10 +349,22 @@ class InicioActivity : ComponentActivity() {
 
                             composable(HombreCamionScreens.MONITOR.name) {
 
-                                ThrowServicePermission(
-                                    context = this@InicioActivity,
-                                    launcher = permissionLauncher
-                                )
+                                // Efecto: si ya están concedidos, arrancar servicio automáticamente
+                                LaunchedEffect(Unit) {
+                                    if (arePermissionsGranted(
+                                            this@InicioActivity,
+                                            getRequiredPermissions()
+                                        )
+                                    ) {
+                                        if (!isServiceRunning(
+                                                this@InicioActivity,
+                                                HombreCamionService::class.java
+                                            )
+                                        ) {
+                                            HombreCamionService.startService(this@InicioActivity)
+                                        }
+                                    }
+                                }
 
                                 MonitorScreen(
                                     monitorViewModel = monitorViewModel,
@@ -455,12 +505,24 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             composable(route = NavScreens.INFORMACION_USUARIO) {
-                                val uiState = homeViewModel.uiState.collectAsState()
                                 UpdateUserScreen(
                                     updateUserViewModel = updateUserViewModel,
                                 ) {
                                     navController.popBackStack()
                                 }
+                            }
+
+                            composable(route = NavScreens.PERMISOS) {
+                                PermissionScreen(
+                                    context = this@InicioActivity,
+                                    allGranted = allGranted,
+                                    launcher = permissionLauncher,
+                                    onGranted = {
+                                        navController.navigate(NavScreens.HOME) {
+                                            popUpTo(NavScreens.PERMISOS) { inclusive = true }
+                                        }
+                                    }
+                                )
                             }
                         }
                     }
@@ -468,47 +530,96 @@ class InicioActivity : ComponentActivity() {
             }
         }
     }
+}
 
-    @Composable
-    fun ThrowServicePermission(
-        context: Context,
-        launcher: ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
-    ) {
-        val required = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> arrayOf(
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_CONNECT
-            )
+fun getRequiredPermissions(): Array<String> {
+    val permissions = mutableListOf<String>()
 
-            else -> arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION // Compat <= 11
-            )
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        // Android 12+
+        permissions.add(Manifest.permission.BLUETOOTH_SCAN)
+        permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+    } else {
+        // Android 11 o menor
+        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        // Android 13+
+        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    return permissions.toTypedArray()
+}
+
+fun arePermissionsGranted(context: Context, permissions: Array<String>): Boolean {
+    return permissions.all { perm ->
+        ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
+    }
+}
+
+
+@Composable
+fun PermissionHandler(
+    context: Context,
+    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
+    onGranted: () -> Unit
+) {
+    val permissions = remember { getRequiredPermissions() }
+
+    LaunchedEffect(Unit) {
+        if (arePermissionsGranted(context, permissions)) {
+            // ✅ Ya están concedidos → arrancar servicio
+            if (!isServiceRunning(context, HombreCamionService::class.java)) {
+                HombreCamionService.startService(context)
+            }
+            onGranted()
+        } else {
+            // ❌ Faltan permisos → solicitarlos
+            launcher.launch(permissions)
+        }
+    }
+}
+
+@Composable
+fun ThrowServicePermission(
+    context: Context,
+    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
+) {
+    val required = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT
+        )
+
+        else -> arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION // Compat <= 11
+        )
+    }
+
+    val servicePermissions = required
+    LaunchedEffect(Unit) {
+        var permissionsGranted = false
+        servicePermissions.forEach {
+            permissionsGranted = ContextCompat.checkSelfPermission(
+                context,
+                it
+            ) == PackageManager.PERMISSION_GRANTED
         }
 
-        val servicePermissions = required
-        LaunchedEffect(Unit) {
-            var permissionsGranted = false
-            servicePermissions.forEach {
-                permissionsGranted = ContextCompat.checkSelfPermission(
-                    context,
-                    it
-                ) == PackageManager.PERMISSION_GRANTED
-            }
-
-            if (!permissionsGranted) {
-                launcher.launch(servicePermissions)
-            } else {
-                if (!isServiceRunning(context, HombreCamionService::class.java)) {
-                    HombreCamionService.startService(context)
-                }
+        if (!permissionsGranted) {
+            launcher.launch(servicePermissions)
+        } else {
+            if (!isServiceRunning(context, HombreCamionService::class.java)) {
+                HombreCamionService.startService(context)
             }
         }
     }
+}
 
-    fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
-        val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        return manager.getRunningServices(Int.MAX_VALUE).any {
-            it.service.className == serviceClass.name
-        }
+fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
+    val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+    return manager.getRunningServices(Int.MAX_VALUE).any {
+        it.service.className == serviceClass.name
     }
 }

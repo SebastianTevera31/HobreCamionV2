@@ -135,9 +135,6 @@ private fun LoginContent(
     val isLoading: Boolean by loginViewModel.isLoading.observeAsState(initial = false)
     val context = LocalContext.current
 
-    val languages = listOf("es" to "ES", "en" to "EN")
-    val uiState = homeViewModel.uiState.collectAsState()
-
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Color.Transparent

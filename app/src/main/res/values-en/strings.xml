@@ -113,7 +113,6 @@
     <string name="signup_successfull">Account created successfully</string>
     <string name="signup_network_alert">Something went wrong while signing up</string>
     <string name="espere_un_momento">Please wait...</string>
-    <string name="credenciales_incorrectas">Invalid credentials</string>
     <string name="error_en_el_servidor">Server error: %1$d</string>
     <string name="error_en_el_servidor_only">Server error</string>
     <string name="buscar_valor">Search %1$s...</string>
@@ -139,4 +138,5 @@
     <string name="info_de_usuario">User Info</string>
     <string name="error_actualizar_datos">Failed to update data</string>
     <string name="datos_actualizados_correctamente">Data updated successfully</string>
+    <string name="credenciales_incorrectas">Incorrect username or password</string>
 </resources>

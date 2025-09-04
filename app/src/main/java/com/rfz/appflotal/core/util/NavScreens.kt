@@ -20,4 +20,5 @@ object NavScreens {
     const val RECUPERAR_CONTRASENIA = "recuperarcontrasenia"
     const val REGISTRAR_USUARIO = "registrarusuario"
     const val INFORMACION_USUARIO = "informacionusuario"
+    const val PERMISOS = "permisos"
 }

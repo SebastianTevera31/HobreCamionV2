@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Patterns
 import com.google.gson.Gson
 import com.rfz.appflotal.R
-import com.rfz.appflotal.data.model.login.response.LoginErrorResponse
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.data.model.message.response.MessageResponse
@@ -29,9 +28,9 @@ class LoginUseCase @Inject constructor(
                     Result.Success(loginResponse)
                 } ?: Result.Failure(Exception(ctx.getString(R.string.cuerpo_de_la_respuesta_vac_o)))
             } else {
-                val errorMsg = response.errorBody()?.string()
+                val errorMessage = response.message()
                 val parsedError = try {
-                    gson.fromJson(errorMsg, LoginErrorResponse::class.java).message.errorValue
+                    if (errorMessage == "Unauthorized") ctx.getString(R.string.credenciales_incorrectas) else errorMessage
                 } catch (e: Exception) {
                     ctx.getString(R.string.error_desconocido_del_servidor)
                 }
