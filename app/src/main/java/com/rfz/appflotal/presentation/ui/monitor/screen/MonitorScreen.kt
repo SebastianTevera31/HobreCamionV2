@@ -1,16 +1,13 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -84,25 +81,20 @@ fun MonitorScreen(
         MonitorRegisterDialog(
             macValue = monitorConfigUiState.value.mac,
             monitorSelected = null,
+            registerMonitorStatus = registerMonitorStatus.value,
             isScanning = monitorConfigUiState.value.isScanning,
             onScan = { registerMonitorViewModel.startScan() },
             configurations = configurationsUiState.value,
+            onSuccessRegister = {
+                monitorViewModel.initMonitorData()
+                registerMonitorViewModel.clearMonitorRegistrationData()
+            }
         ) { mac, configuration ->
             registerMonitorViewModel.registerMonitor(
                 mac = mac,
                 configurationSelected = configuration,
                 context = context
             )
-        }
-    }
-
-    when (val state = registerMonitorStatus.value) {
-        is ApiResult.Error -> {}
-        ApiResult.Loading -> {}
-        is ApiResult.Success -> {
-            // Actualiza la vista si estaba vacia
-            monitorViewModel.initMonitorData()
-            registerMonitorViewModel.clearMonitorRegistrationData()
         }
     }
 
@@ -148,7 +140,7 @@ fun MonitorScreen(
 
                     DiagramaMonitorScreen(
                         imageUrl = monitorUiState.value.chassisImageUrl,
-                        wheel = monitorUiState.value.wheel,
+                        currentWheel = monitorUiState.value.currentTire,
                         temperature = monitorUiState.value.temperature.first,
                         pressure = monitorUiState.value.pression.first,
                         timestamp = monitorUiState.value.timestamp,
@@ -274,14 +266,14 @@ fun NavPositionMonitorScreen(
 
                 Button(
                     onClick = {
-                        onPositionOptionSelected(R.string.buscar)
+                        onPositionOptionSelected(R.string.filtrar)
                         showSearchRecords = true
                     },
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color("#2E3192".toColorInt())),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = stringResource(R.string.buscar))
+                    Text(text = stringResource(R.string.filtrar))
                 }
             }
 

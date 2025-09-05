@@ -125,12 +125,17 @@ class RegisterMonitorViewModel @Inject constructor(
                             )
                             showAlert(context, message = RegisterMonitorMessage.REGISTERED.message)
                             _registeredMonitorState.value = ApiResult.Success(data = idMonitor)
+                        } else {
+                            _registeredMonitorState.value = ApiResult.Error(message = context.getString(
+                                R.string.no_se_ha_asignado_ningun_monitor
+                            ))
                         }
                     } else {
-                        showAlert(context, strMessage = result[0].message)
+                        _registeredMonitorState.value = ApiResult.Error(message = result[0].message)
                     }
                 } else {
-                    showAlert(context, message = RegisterMonitorMessage.UNKNOWN_ERROR.message)
+                    _registeredMonitorState.value =
+                        ApiResult.Error(message = context.getString(RegisterMonitorMessage.UNKNOWN_ERROR.message))
                 }
             }
         }

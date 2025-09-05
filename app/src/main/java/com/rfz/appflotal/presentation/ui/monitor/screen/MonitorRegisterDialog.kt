@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Dialog
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
@@ -54,14 +55,17 @@ import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 fun MonitorRegisterDialog(
     configurations: Map<Int, String>,
     isScanning: Boolean,
+    registerMonitorStatus: ApiResult<Int>,
+    onSuccessRegister: () -> Unit,
     modifier: Modifier = Modifier,
     showCloseButton: Boolean = false,
     monitorSelected: Pair<Int, String>? = null,
     macValue: String = "",
     onScan: () -> Unit,
     onCloseButton: () -> Unit = {},
-    onContinueButton: (String, Pair<Int, String>?) -> Unit
-) {
+    onContinueButton: (String, Pair<Int, String>?) -> Unit,
+
+    ) {
     var macAddress by remember { mutableStateOf("") }
     var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
 
@@ -71,6 +75,15 @@ fun MonitorRegisterDialog(
             stringResource(
                 R.string.mac_no_disponible
             )
+        }
+    }
+
+    when (val state = registerMonitorStatus) {
+        is ApiResult.Error -> {}
+        ApiResult.Loading -> {}
+        is ApiResult.Success -> {
+            // Actualiza la vista si estaba vacia
+            onSuccessRegister()
         }
     }
 
@@ -238,10 +251,12 @@ fun DropDownConfigurationMenu(
 fun MonitorRegisterDialogPreview() {
     HombreCamionTheme {
         MonitorRegisterDialog(
-            isScanning = false,
             configurations = emptyMap(),
+            isScanning = false,
+            registerMonitorStatus = ApiResult.Loading,
             onScan = {},
-            onCloseButton = {},
-            onContinueButton = { _, _ -> false })
+            onSuccessRegister = {},
+            onContinueButton = { _, _ -> false },
+        )
     }
 }

@@ -12,8 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -26,8 +31,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -62,11 +67,12 @@ fun DiagramImage(
         hotspots = coordinatesMapped,
         alertTires = alertTires,
         tireSelected = tireSelected,
-        modifier = modifier.fillMaxWidth().height(170.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(170.dp)
     )
 }
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun ImageWithHotspots(
     img: ImageBitmap,
@@ -86,6 +92,23 @@ fun ImageWithHotspots(
     val scalePxPerImgPx = with(density) { imageHeightDp.toPx() } / img.height.toFloat()
     val imageWidthDp = with(density) { (img.width * scalePxPerImgPx).toDp() }
 
+    var targetContentX by remember { mutableStateOf<Int?>(null) }
+    var viewportWidthPx by remember { mutableIntStateOf(0) }
+    var contentWidthPx by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(targetContentX, contentWidthPx, viewportWidthPx) {
+        val x = targetContentX ?: return@LaunchedEffect
+        if (contentWidthPx == 0 || viewportWidthPx == 0) return@LaunchedEffect
+
+        // Calcula el desplazamiento deseado
+        var desired = x - viewportWidthPx / 2
+        // Limita a los bordes
+        val maxScroll = (contentWidthPx - viewportWidthPx).coerceAtLeast(0)
+        desired = desired.coerceIn(0, maxScroll)
+
+        scrollState.animateScrollTo(desired)
+    }
+
     Box(
         modifier = modifier
             .pointerInput(hotspots) {
@@ -93,13 +116,14 @@ fun ImageWithHotspots(
                     // Checamos de arriba hacia abajo (último dibujado arriba)
                     bubbleBounds.entries.reversed().firstOrNull { (_, rect) ->
                         rect.contains(tap)
-                    }?.let { (id, _) ->
+                    }?.let { (_, _) -> // id, _
                         // onHotspotClick(id)
                     }
                 }
             }
             .height(imageHeightDp)
             .fillMaxWidth()
+            .onSizeChanged { viewportWidthPx = it.width }
             .horizontalScroll(scrollState),
         contentAlignment = Alignment.Center
     ) {
@@ -113,7 +137,9 @@ fun ImageWithHotspots(
                 bitmap = img,
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { contentWidthPx = it.width }
             )
 
             // Capa 2: Canvas con burbujas
@@ -121,8 +147,10 @@ fun ImageWithHotspots(
                 bubbleBounds.clear()
 
                 hotspots.forEach { h ->
-                    val colorStatus = if (alertTires[h.id] == true) Pair(Color.Red, Color.White)
+                    val colorStatus = if (alertTires[h.id] == true)
+                        Pair(Color.Red, Color.White)
                     else Pair(h.bubbleBg, Color.Black)
+
                     // Posición del centro en pixeles del canvas
                     val cx = h.center01.x * size.width
                     val cy = h.center01.y * size.height
@@ -167,8 +195,14 @@ fun ImageWithHotspots(
                     )
 
                     // Texto centrado
-                    val textX = rect.left + (rect.width - layout.size.width) / 2f
-                    val textY = rect.top + (rect.height - layout.size.height) / 2f
+                    val textX =
+                        rect.left + (rect.width - layout.size.width) / 2f // Centrado en X
+                    val textY =
+                        rect.top + (rect.height - layout.size.height) / 2f // Centrado en Y
+
+                    if (tireSelected == h.id) {
+                        targetContentX = textX.toInt()
+                    }
 
                     drawText(
                         textLayoutResult = layout,

@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.monitor.screen
 
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +63,7 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 @Composable
 fun DiagramaMonitorScreen(
     imageUrl: String,
-    wheel: String,
+    currentWheel: String,
     temperature: Float,
     pressure: Float,
     timestamp: String?,
@@ -79,7 +80,7 @@ fun DiagramaMonitorScreen(
     val scrollState = rememberScrollState()
 
     // Actualizar rueda
-    tireSelected = wheel
+    tireSelected = currentWheel
 
     Column(modifier = modifier) {
         Box {
@@ -113,7 +114,7 @@ fun DiagramaMonitorScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 ) {
                     PanelSensor(
-                        wheel = wheel,
+                        wheel = currentWheel,
                         temperature = temperature,
                         pressure = pressure,
                         timestamp = timestamp,
@@ -124,7 +125,10 @@ fun DiagramaMonitorScreen(
                             .weight(1f)
                     )
                     PanelLlantas(
-                        numWheels = numWheels, wheelsWithAlert = alertTires, Modifier.weight(1f)
+                        numWheels = numWheels,
+                        wheelsWithAlert = alertTires,
+                        tireSelected = tireSelected,
+                        Modifier.weight(1f)
                     ) { sensorId ->
                         tireSelected = sensorId
                         getSensorData(sensorId)
@@ -139,6 +143,7 @@ fun DiagramaMonitorScreen(
 fun PanelLlantas(
     numWheels: Int,
     wheelsWithAlert: Map<String, Boolean>,
+    tireSelected: String,
     modifier: Modifier = Modifier,
     getSensorData: (String) -> Unit
 ) {
@@ -166,10 +171,15 @@ fun PanelLlantas(
                         if (wheelsWithAlert["P${it + 1}"] == true) Pair(Color.Red, Color.White)
                         else Pair(Color(0x402E3192), Color.Black)
 
+                    val border = if (tireSelected == "P${it + 1}") {
+                        BorderStroke(width = 4.dp, color = MaterialTheme.colorScheme.primary)
+                    } else null
+
                     Button(
                         onClick = { getSensorData("P${it + 1}") },
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(colorStatus.first),
+                        border = border,
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
                     ) {
                         Text(
@@ -352,7 +362,7 @@ fun DiagramaMonitorScreenPreview() {
     HombreCamionTheme {
         DiagramaMonitorScreen(
             imageUrl = "https://truckdriverapi.azurewebsites.net/Base32.png",
-            wheel = "7",
+            currentWheel = "7",
             temperature = 54.0f,
             pressure = 39f,
             timestamp = "",

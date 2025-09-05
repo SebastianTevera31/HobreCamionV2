@@ -175,7 +175,7 @@ class MonitorViewModel @Inject constructor(
                 }
 
             currentUiState.copy(
-                wheel = "P${wheel}",
+                currentTire = "P${wheel}",
                 battery = decodeAlertDataFrame(
                     dataFrame,
                     SensorAlertDataFrame.LOW_BATTERY
@@ -206,15 +206,16 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
-    fun getSensorDataByWheel(wheelPosition: String) {
+    fun getSensorDataByWheel(tireSelected: String) {
         shouldReadManually = false
         viewModelScope.launch {
             val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
 
             responseHelper(response = sensorData) { data ->
                 if (!data.isNullOrEmpty()) {
-                    data.filter { data -> data.sensorPosition == wheelPosition }[0]
-                        .let {
+                    val result = data.filter { data -> data.sensorPosition == tireSelected }
+                    if (!result.isEmpty()) {
+                        result[0].let {
                             if (it.sensorPosition.contains("P")) {
 
                                 val tempAlert = when (it.highTemperature) {
@@ -238,7 +239,6 @@ class MonitorViewModel @Inject constructor(
                                         }
 
                                     currentUiState.copy(
-                                        wheel = it.sensorPosition,
                                         temperature = Pair(it.temperature, tempAlert),
                                         pression = Pair(it.psi, pressureAlert),
                                         timestamp = convertDate(it.ultimalectura),
@@ -247,7 +247,14 @@ class MonitorViewModel @Inject constructor(
                                 }
                             }
                         }
+                    }
                 }
+            }
+
+            _monitorUiState.update { currentUiState ->
+                currentUiState.copy(
+                    currentTire = tireSelected
+                )
             }
         }
     }

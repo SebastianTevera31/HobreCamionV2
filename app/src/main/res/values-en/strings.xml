@@ -80,7 +80,7 @@
     <string name="sin_datos">No Data</string>
     <string name="fecha">Date</string>
     <string name="buscar_registros">Search records</string>
-    <string name="buscar">Search</string>
+    <string name="filtrar">Filter</string>
     <string name="recientes">Recent</string>
     <string name="no_resultados">Results no found</string>
     <string name="consultar">Search</string>
@@ -142,4 +142,5 @@
     <string name="permiso_bluetooth_notificaciones">Bluetooth and Notifications Permission</string>
     <string name="conceder_permisos_btn">Grant permissions</string>
     <string name="texto_permisos_app">Bluetooth and Notifications access are required to connect to your HawksHead TPMS monitor.</string>
+    <string name="no_se_ha_asignado_ningun_monitor">No monitor has been assigned</string>
 </resources>

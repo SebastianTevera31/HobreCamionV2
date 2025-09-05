@@ -113,17 +113,6 @@ fun HomeScreen(
     var showMonitorDialog by remember { mutableStateOf(false) }
     val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
 
-    when (val state = registerMonitorStatus.value) {
-        is ApiResult.Error -> {}
-        ApiResult.Loading -> {}
-        is ApiResult.Success -> {
-            // Actualiza la vista si estaba vacia
-            monitorViewModel.initMonitorData()
-            registerMonitorViewModel.clearMonitorRegistrationData()
-            showMonitorDialog = false
-        }
-    }
-
     if (showMonitorDialog) {
         val configurations = registerMonitorViewModel.configurationList.collectAsState()
         val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
@@ -134,24 +123,31 @@ fun HomeScreen(
         }
 
         MonitorRegisterDialog(
-            macValue = monitorConfigUiState.value.mac,
-            monitorSelected = monitorConfigUiState.value.configurationSelected,
-            isScanning = monitorConfigUiState.value.isScanning,
             configurations = configurations.value,
+            isScanning = monitorConfigUiState.value.isScanning,
+            showCloseButton = true,
+            monitorSelected = monitorConfigUiState.value.configurationSelected,
+            macValue = monitorConfigUiState.value.mac,
             onScan = { registerMonitorViewModel.startScan() },
             onCloseButton = {
                 registerMonitorViewModel.stopScan()
                 showMonitorDialog = false
             },
-            showCloseButton = true
-        ) { mac, configuration ->
-            registerMonitorViewModel.registerMonitor(
-                idMonitor = monitorUiState.value.monitorId,
-                mac = mac,
-                configurationSelected = configuration,
-                context = context
-            )
-        }
+            onContinueButton = { mac, configuration ->
+                registerMonitorViewModel.registerMonitor(
+                    idMonitor = monitorUiState.value.monitorId,
+                    mac = mac,
+                    configurationSelected = configuration,
+                    context = context
+                )
+            },
+            registerMonitorStatus = registerMonitorStatus.value,
+            onSuccessRegister = {
+                showMonitorDialog = false
+                monitorViewModel.initMonitorData()
+                registerMonitorViewModel.clearMonitorRegistrationData()
+            },
+        )
     }
 
 
