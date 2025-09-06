@@ -19,6 +19,7 @@ import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.flotalSoft.SensorTpmsEntity
+import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
@@ -63,6 +64,12 @@ class HombreCamionService : Service() {
     private var isStaterd = false
 
     override fun onBind(p0: Intent?): IBinder? = null
+
+    private lateinit var notificationBuilder: Notification
+
+    private lateinit var notificationCompactBuilder: NotificationCompat.Builder
+
+    private val notificationStyle = NotificationCompat.InboxStyle()
 
     override fun onCreate() {
         super.onCreate()
@@ -126,7 +133,7 @@ class HombreCamionService : Service() {
 
         createServiceNotificationChannel()
 
-        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        notificationCompactBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Servicio HombreCamion")
             .setContentText("Recibiendo datos del monitor")
             .setSmallIcon(R.drawable.logo)
@@ -135,9 +142,8 @@ class HombreCamionService : Service() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .build()
 
-        startForeground(ONGOING_NOTIFICATION_ID, notification)
+        startForeground(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
     }
 
     private fun createServiceNotificationChannel() {
@@ -164,6 +170,25 @@ class HombreCamionService : Service() {
                     bluetoothUseCase.doConnect(dataUser.monitorMac)
                     bluetoothUseCase.doStartRssiMonitoring()
                 }
+            }
+        }
+    }
+
+    private fun readBluetoothStatus() {
+        coroutineScope.launch {
+            bluetoothUseCase().collect { data ->
+                val quality = data.bluetoothSignalQuality
+                val message = when (quality) {
+                    BluetoothSignalQuality.Excelente -> {
+                        "TPMS Conectado: $quality"
+                    }
+
+                    BluetoothSignalQuality.Aceptable -> TODO()
+                    BluetoothSignalQuality.Pobre -> TODO()
+                    BluetoothSignalQuality.Desconocida -> "Conexión perdida con el monitor"
+                }
+
+                // updateNotification()
             }
         }
     }
@@ -264,13 +289,11 @@ class HombreCamionService : Service() {
         }
     }
 
-//    private fun updateNotification(contentText: String) {
-//        val notificationManager = getSystemService(NotificationManager::class.java)
-//        notificationManager.notify(
-//            ONGOING_NOTIFICATION_ID,
-//            createNotification(contentText)
-//        )
-//    }
+    private fun updateNotification(message: String) {
+        notificationCompactBuilder.setContentText(message)
+        notificationManager.notify(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
+    }
+
 
     companion object {
         const val CHANNEL_ID = "1003"

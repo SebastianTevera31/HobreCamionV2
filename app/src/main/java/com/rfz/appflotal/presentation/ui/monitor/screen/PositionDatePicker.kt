@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -178,40 +179,42 @@ fun TireSpinner(
     var isExpanded by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
         Text(text = pluralStringResource(R.plurals.llanta_tag, 1, ""))
-
-        Row(
-            modifier = Modifier
-                .height(60.dp)
-                .width(80.dp)
-                .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(16.dp))
-                .clickable { isExpanded = true },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = selectedText,
+        Box {
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-        }
-
-        DropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false },
-            modifier = Modifier
-                .background(Color.White)
-                .height(280.dp)
-        ) {
-            listOfTires.forEach { tire ->
-                DropdownMenuItem(
-                    text = { Text(text = tire) },
-                    onClick = {
-                        onSelectWheel(tire.lowercase(Locale.getDefault()))
-                        selectedText = tire
-                        isExpanded = false
-                    }
+                    .height(60.dp)
+                    .width(80.dp)
+                    .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(16.dp))
+                    .clickable { isExpanded = true },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = selectedText,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 )
+            }
+
+            DropdownMenu(
+                expanded = isExpanded,
+                onDismissRequest = { isExpanded = false },
+                modifier = Modifier
+                    .background(Color.White)
+                    .width(100.dp)
+                    .height(240.dp)
+            ) {
+                listOfTires.forEach { tire ->
+                    DropdownMenuItem(
+                        text = { Text(text = tire) },
+                        onClick = {
+                            onSelectWheel(tire.lowercase(Locale.getDefault()))
+                            selectedText = tire
+                            isExpanded = false
+                        }
+                    )
+                }
             }
         }
     }
