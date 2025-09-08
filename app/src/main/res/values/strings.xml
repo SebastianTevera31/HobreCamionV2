@@ -86,7 +86,7 @@
     <string name="recientes">Recientes</string>
     <string name="no_resultados">No se encontraron resultados</string>
     <string name="consultar">Consultar</string>
-    <string name="truckdriver">Truck Driver</string>
+    <string name="truckdriver">TruckDriver</string>
     <string name="seleccionar_fecha">Seleccionar fecha</string>
     <string name="confirmar">Confirmar</string>
     <string name="cancelar">Cancelar</string>
@@ -145,4 +145,11 @@
     <string name="conceder_permisos_btn">Conceder permisos</string>
     <string name="texto_permisos_app">Se requiere de acceso a Bluetooth y Notificaciones para conectarse con tu monitor HawksHead TPMS.</string>
     <string name="no_se_ha_asignado_ningun_monitor">No se ha asignado ningun monitor</string>
+    <string name="hombrecamion_conexion_tpms">TruckDriver - Conexion TPMS</string>
+    <string name="recibiendo_datos_monitor">Recibiendo datos del monitor</string>
+    <string name="excelente">Excelente</string>
+    <string name="aceptable">Aceptable</string>
+    <string name="pobre">Pobre</string>
+    <string name="conexion_status"><br/>Conexión: %1$s</string>
+    <string name="conexion_perdidad_monitor">Sin Conexión con el monitor.</string>
 </resources>

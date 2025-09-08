@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.monitor.screen
 
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -44,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -198,19 +200,24 @@ fun PanelLlantas(
 }
 
 @Composable
-fun CeldaDatosSensor(title: String, value: String, modifier: Modifier = Modifier) {
+fun CeldaDatosSensor(
+    title: String,
+    @DrawableRes img: Int,
+    value: String,
+    modifier: Modifier = Modifier
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(Color(0x402E3192))
-            .padding(4.dp)
+            .padding(4.dp).height(44.dp)
     ) {
         Image(
-            Icons.Filled.Sensors,
+            painter = painterResource(img),
             colorFilter = ColorFilter.tint(color = Color("#2E3192".toColorInt())),
             contentDescription = null,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f).size(28.dp)
         )
         Column(
             modifier = Modifier.weight(2f)
@@ -252,7 +259,7 @@ fun PanelSensor(
             colors = CardDefaults.cardColors(Color.White),
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(3f),
+                .weight(3.1f),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(
@@ -290,10 +297,12 @@ fun PanelSensor(
                 ) {
                     CeldaDatosSensor(
                         title = stringResource(R.string.temperatura),
+                        img = R.drawable.temperature__1_,
                         value = "$temperature ℃"
                     )
                     CeldaDatosSensor(
                         title = stringResource(R.string.presion),
+                        img = R.drawable.tire_pressure,
                         value = "$pressure PSI"
                     )
 //                    CeldaDatosSensor(title = "Profundidad", value = "12mm")

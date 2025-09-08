@@ -104,7 +104,11 @@ class HombreCamionService : Service() {
         // Iniciar conexión Bluetooth
         initBluetoothConnection()
 
+        // Tarea de lectura de datos TPMS
         readDataFromMonitor()
+
+        // Tarea de lectura de estado de conexion
+        readBluetoothStatus()
 
         return START_STICKY
     }
@@ -134,8 +138,7 @@ class HombreCamionService : Service() {
         createServiceNotificationChannel()
 
         notificationCompactBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Servicio HombreCamion")
-            .setContentText("Recibiendo datos del monitor")
+            .setContentTitle(getString(R.string.hombrecamion_conexion_tpms))
             .setSmallIcon(R.drawable.logo)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -152,7 +155,7 @@ class HombreCamionService : Service() {
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Foreground Service Channel",
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_LOW
         ).apply {
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             setShowBadge(false)
@@ -176,20 +179,38 @@ class HombreCamionService : Service() {
 
     private fun readBluetoothStatus() {
         coroutineScope.launch {
-            bluetoothUseCase().collect { data ->
-                val quality = data.bluetoothSignalQuality
-                val message = when (quality) {
-                    BluetoothSignalQuality.Excelente -> {
-                        "TPMS Conectado: $quality"
+            bluetoothUseCase().distinctUntilChangedBy { it.bluetoothSignalQuality }
+                .collect { data ->
+                    val defaultMessage = getString(R.string.recibiendo_datos_monitor)
+                    val quality = data.bluetoothSignalQuality
+                    val message = when (quality) {
+                        BluetoothSignalQuality.Excelente -> {
+                            val msg = getString(
+                                R.string.conexion_status,
+                                getString(BluetoothSignalQuality.Excelente.signalText!!)
+                            )
+                            "$defaultMessage. \n$msg "
+                        }
+
+                        BluetoothSignalQuality.Aceptable -> {
+                            val msg = getString(
+                                R.string.conexion_status,
+                                getString(BluetoothSignalQuality.Aceptable.signalText!!)
+                            )
+                            "$defaultMessage. \n$msg "
+                        }
+
+                        BluetoothSignalQuality.Pobre -> {
+                            val msg = getString(
+                                R.string.conexion_status,
+                                getString(BluetoothSignalQuality.Pobre.signalText!!)
+                            )
+                            "$defaultMessage. \n$msg"
+                        }
+                        BluetoothSignalQuality.Desconocida -> getString(R.string.conexion_perdidad_monitor)
                     }
-
-                    BluetoothSignalQuality.Aceptable -> TODO()
-                    BluetoothSignalQuality.Pobre -> TODO()
-                    BluetoothSignalQuality.Desconocida -> "Conexión perdida con el monitor"
+                    updateNotification(message)
                 }
-
-                // updateNotification()
-            }
         }
     }
 

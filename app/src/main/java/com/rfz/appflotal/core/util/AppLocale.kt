@@ -23,10 +23,7 @@ object AppLocale {
 
     private fun getSystemLocale(): Locale {
         val systemLang = Locale.getDefault().language
-        return when (systemLang) {
-            "es" -> Locale("es") // español
-            "en" -> Locale("en") // inglés
-            else -> Locale("en") // fallback a inglés
-        }
+        return if (systemLang.contains("es")) Locale("es")
+        else Locale("en")
     }
 }

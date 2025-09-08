@@ -33,17 +33,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.addOneDay
@@ -140,30 +136,32 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
         }
 
         if (showDialog) {
-            DatePickerDialog(
-                onDismissRequest = { showDialog = false },
-                confirmButton = {
-                    LocalizedApp {
-                        Button(onClick = {
-                            onSelectDate(
-                                convertDate(
-                                    date = startDate,
-                                    initialFormat = "dd/MM/yyyy",
-                                    convertFormat = "yyyy-MM-dd"
+            LocalizedApp {
+                DatePickerDialog(
+                    onDismissRequest = { showDialog = false },
+                    confirmButton = {
+                        LocalizedApp {
+                            Button(onClick = {
+                                onSelectDate(
+                                    convertDate(
+                                        date = startDate,
+                                        initialFormat = "dd/MM/yyyy",
+                                        convertFormat = "yyyy-MM-dd"
+                                    )
                                 )
-                            )
-                            showDialog = false
-                        }) { Text(text = stringResource(R.string.confirmar)) }
+                                showDialog = false
+                            }) { Text(text = stringResource(R.string.confirmar)) }
+                        }
+                    },
+                    dismissButton = {
+                        LocalizedApp {
+                            Button(onClick = {
+                                showDialog = false
+                            }) { Text(text = stringResource(R.string.cancelar)) }
+                        }
                     }
-                },
-                dismissButton = {
-                    LocalizedApp {
-                        Button(onClick = {
-                            showDialog = false
-                        }) { Text(text = stringResource(R.string.cancelar)) }
-                    }
-                }
-            ) { DatePicker(state = state) }
+                ) { DatePicker(state = state) }
+            }
         }
     }
 
@@ -203,7 +201,7 @@ fun TireSpinner(
                 modifier = Modifier
                     .background(Color.White)
                     .width(100.dp)
-                    .height(240.dp)
+                    .height(230.dp)
             ) {
                 listOfTires.forEach { tire ->
                     DropdownMenuItem(

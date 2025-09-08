@@ -10,6 +10,8 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import androidx.annotation.StringRes
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -41,8 +43,8 @@ data class BluetoothData(
     val timestamp: String? = null
 )
 
-enum class BluetoothSignalQuality {
-    Excelente, Aceptable, Pobre, Desconocida
+enum class BluetoothSignalQuality(@StringRes val signalText: Int? = null) {
+    Excelente(R.string.excelente), Aceptable(R.string.aceptable), Pobre(R.string.pobre), Desconocida
 }
 
 class BluetoothRepositoryImp @Inject constructor(private val context: Context) :

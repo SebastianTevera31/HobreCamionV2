@@ -84,7 +84,7 @@
     <string name="recientes">Recent</string>
     <string name="no_resultados">Results no found</string>
     <string name="consultar">Search</string>
-    <string name="truckdriver">Truck Driver</string>
+    <string name="truckdriver">TruckDriver</string>
     <string name="seleccionar_fecha">Select date</string>
     <string name="confirmar">OK</string>
     <string name="cancelar">Cancel</string>
@@ -143,4 +143,11 @@
     <string name="conceder_permisos_btn">Grant permissions</string>
     <string name="texto_permisos_app">Bluetooth and Notifications access are required to connect to your HawksHead TPMS monitor.</string>
     <string name="no_se_ha_asignado_ningun_monitor">No monitor has been assigned</string>
+    <string name="hombrecamion_conexion_tpms">TruckDriver - TPMS Connection</string>
+    <string name="recibiendo_datos_monitor">Receiving TPMS data</string>
+    <string name="excelente">Excellent</string>
+    <string name="aceptable">Fair</string>
+    <string name="pobre">Poor</string>
+    <string name="conexion_status">Connection: %1$s</string>
+    <string name="conexion_perdidad_monitor">No connection with monitor</string>
 </resources>
