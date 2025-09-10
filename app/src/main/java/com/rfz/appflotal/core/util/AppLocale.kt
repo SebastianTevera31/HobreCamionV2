@@ -17,7 +17,8 @@ object AppLocale {
 
     fun loadSavedLocale(context: Context) {
         val prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
-        val lang = prefs.getString("app_language", "en") ?: "en"
+        val lang = prefs.getString("app_language", Locale.getDefault().language)
+            ?: Locale.getDefault().language
         _currentLocale.value = Locale(lang)
     }
 

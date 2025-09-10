@@ -69,7 +69,7 @@
         <item quantity="other">Tires</item>
     </plurals>
     <string name="monitoreo">Monitoring</string>
-    <string name="temperatura">Temperature</string>
+    <string name="temperatura">Temp.</string>
     <string name="presion">Pressure</string>
     <string name="actualizado">Last updated: \n%1$s</string>
     <string name="llantas">Wheels</string>
@@ -83,7 +83,7 @@
     <string name="filtrar">Filter</string>
     <string name="recientes">Recent</string>
     <string name="no_resultados">Results no found</string>
-    <string name="consultar">Search</string>
+    <string name="buscar">Search</string>
     <string name="truckdriver">TruckDriver</string>
     <string name="seleccionar_fecha">Select date</string>
     <string name="confirmar">OK</string>

@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -41,6 +43,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MonitorScreen(
     monitorViewModel: MonitorViewModel,
@@ -104,8 +107,7 @@ fun MonitorScreen(
         Surface {
             Column(
                 modifier = modifier
-                    .background(Color("#EDF0F8".toColorInt()))
-                    .padding(innerPadding),
+                    .background(Color("#EDF0F8".toColorInt())),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
 
@@ -258,7 +260,11 @@ fun NavPositionMonitorScreen(
                         showSearchRecords = false
                     },
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color("#2E3192".toColorInt())),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (!showSearchRecords) MaterialTheme.colorScheme.tertiary else Color(
+                            "#2E3192".toColorInt()
+                        )
+                    ),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(text = stringResource(R.string.recientes))
@@ -270,7 +276,11 @@ fun NavPositionMonitorScreen(
                         showSearchRecords = true
                     },
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color("#2E3192".toColorInt())),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (showSearchRecords) MaterialTheme.colorScheme.tertiary else Color(
+                            "#2E3192".toColorInt()
+                        )
+                    ),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(text = stringResource(R.string.filtrar))

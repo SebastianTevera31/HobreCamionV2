@@ -24,8 +24,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -79,7 +77,6 @@ fun DiagramaMonitorScreen(
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
-    val scrollState = rememberScrollState()
 
     // Actualizar rueda
     tireSelected = currentWheel
@@ -99,12 +96,7 @@ fun DiagramaMonitorScreen(
             }
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.Center
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             if (isLoading) {
                 Box(modifier = Modifier.size(520.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -130,7 +122,9 @@ fun DiagramaMonitorScreen(
                         numWheels = numWheels,
                         wheelsWithAlert = alertTires,
                         tireSelected = tireSelected,
-                        Modifier.weight(1f)
+                        Modifier
+                            .height(320.dp)
+                            .weight(1f)
                     ) { sensorId ->
                         tireSelected = sensorId
                         getSensorData(sensorId)
@@ -151,7 +145,7 @@ fun PanelLlantas(
 ) {
     Card(
         colors = CardDefaults.cardColors(Color.White),
-        modifier = modifier.height(320.dp),
+        modifier = modifier,
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -211,13 +205,16 @@ fun CeldaDatosSensor(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(Color(0x402E3192))
-            .padding(4.dp).height(44.dp)
+            .padding(4.dp)
+            .height(44.dp)
     ) {
         Image(
             painter = painterResource(img),
             colorFilter = ColorFilter.tint(color = Color("#2E3192".toColorInt())),
             contentDescription = null,
-            modifier = Modifier.weight(1f).size(28.dp)
+            modifier = Modifier
+                .weight(1f)
+                .size(28.dp)
         )
         Column(
             modifier = Modifier.weight(2f)
@@ -291,19 +288,18 @@ fun PanelSensor(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
-                        .fillMaxHeight()
                         .weight(1f, fill = false)
                         .verticalScroll(rememberScrollState())
                 ) {
                     CeldaDatosSensor(
                         title = stringResource(R.string.temperatura),
                         img = R.drawable.temperature__1_,
-                        value = "$temperature ℃"
+                        value = "${temperature.toInt()} ℃"
                     )
                     CeldaDatosSensor(
                         title = stringResource(R.string.presion),
                         img = R.drawable.tire_pressure,
-                        value = "$pressure PSI"
+                        value = "${pressure.toInt()} PSI"
                     )
 //                    CeldaDatosSensor(title = "Profundidad", value = "12mm")
                 }

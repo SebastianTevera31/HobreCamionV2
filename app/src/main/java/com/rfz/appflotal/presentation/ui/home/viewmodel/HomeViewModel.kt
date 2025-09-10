@@ -47,7 +47,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val deferredUserData = async { hombreCamionRepository.getUserData() }
-                val deferredLanguage = async { hombreCamionRepository.getSavedLanguage() ?: "en" }
+                val deferredLanguage = async {
+                    hombreCamionRepository.getSavedLanguage()
+                        ?: AppLocale.currentLocale.value.language
+                }
 
                 _uiState.update {
                     it.copy(

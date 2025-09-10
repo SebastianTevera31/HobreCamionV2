@@ -297,5 +297,6 @@ class MonitorViewModel @Inject constructor(
     }
 
     fun convertToTireData(diagramData: List<DiagramMonitorResponse>?): List<MonitorTireByDateResponse> =
-        diagramData?.map { it.toTireData() } ?: emptyList()
+        diagramData?.map { it.toTireData() }?.sortedBy { it.tirePosition.replace("P", "").toInt() }
+            ?: emptyList()
 }

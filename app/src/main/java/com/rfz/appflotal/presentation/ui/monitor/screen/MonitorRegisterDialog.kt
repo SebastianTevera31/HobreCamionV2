@@ -78,7 +78,7 @@ fun MonitorRegisterDialog(
         }
     }
 
-    when (val state = registerMonitorStatus) {
+    when (registerMonitorStatus) {
         is ApiResult.Error -> {}
         ApiResult.Loading -> {}
         is ApiResult.Success -> {

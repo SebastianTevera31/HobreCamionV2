@@ -26,8 +26,6 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
-import com.rfz.appflotal.presentation.theme.onPrimaryContainerLight
-import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 
 @Composable
@@ -65,7 +63,7 @@ fun CurrentPositionDataView(
                             text = pluralStringResource(R.plurals.llanta_tag, 1, ""),
                             style = MaterialTheme.typography.titleSmall,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(2f)
+                            modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = stringResource(R.string.fecha),
@@ -83,7 +81,7 @@ fun CurrentPositionDataView(
                             style = MaterialTheme.typography.titleSmall,
                             textAlign = TextAlign.Center,
                             fontSize = 12.sp,
-                            modifier = Modifier.weight(2f)
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -141,7 +139,7 @@ fun SensorDataRow(
         Text(
             text = llanta, style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center,
-            modifier = Modifier.weight(2f)
+            modifier = Modifier.weight(1f)
         )
         Text(
             text = fecha, style = MaterialTheme.typography.titleSmall,
@@ -156,7 +154,7 @@ fun SensorDataRow(
         Text(
             text = "$temperatura", style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center,
-            modifier = Modifier.weight(2f)
+            modifier = Modifier.weight(1f)
         )
     }
 }

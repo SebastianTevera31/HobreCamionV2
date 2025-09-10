@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import android.content.res.Configuration
+import android.os.LocaleList
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +20,8 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerColors
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -27,6 +31,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,14 +40,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.Commons.addOneDay
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
@@ -65,36 +75,33 @@ fun PositionFilterView(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        Text(
-            text = stringResource(R.string.buscar_registros),
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
-
         Row(
             modifier = Modifier.background(Color.White),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            PositionDatePicker(modifier = Modifier.weight(2f)) {
-                dateSelected = it
-            }
             TireSpinner(listOfTires = numTires, modifier = Modifier.weight(1f)) {
                 wheelSelected = it
             }
+
+            PositionDatePicker(modifier = Modifier.weight(2f)) {
+                dateSelected = it
+            }
+
             Button(
                 onClick = {
                     if (wheelSelected.isNotEmpty() && dateSelected.isNotEmpty()) {
                         onGetSensorData(wheelSelected, dateSelected)
                     }
                 },
+                enabled = wheelSelected.isNotEmpty(),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color("#2E3192".toColorInt())),
                 modifier = Modifier
                     .weight(2f)
                     .padding(top = 20.dp)
             ) {
-                Text(text = stringResource(R.string.consultar))
+                Text(text = stringResource(R.string.buscar))
             }
         }
     }
@@ -105,6 +112,13 @@ fun PositionFilterView(
 fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> Unit) {
     var startDate = getCurrentDate(pattern = "dd/MM/yyyy")
     var showDialog by remember { mutableStateOf(false) }
+    val localeState = AppLocale.currentLocale.collectAsState()
+    val locale = localeState.value
+
+    val preferredLocales = LocaleList.forLanguageTags(locale.language)
+    val config = Configuration()
+    config.setLocales(preferredLocales)
+    val newContext = LocalContext.current.createConfigurationContext(config)
     val state = rememberDatePickerState()
 
     val millis = state.selectedDateMillis
@@ -115,6 +129,7 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
 
     Column(modifier = modifier) {
         Text(text = stringResource(R.string.fecha))
+
         Row(
             modifier = Modifier
                 .height(60.dp)
@@ -134,37 +149,48 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
 
-        if (showDialog) {
-            LocalizedApp {
-                DatePickerDialog(
-                    onDismissRequest = { showDialog = false },
-                    confirmButton = {
-                        LocalizedApp {
-                            Button(onClick = {
-                                onSelectDate(
-                                    convertDate(
-                                        date = startDate,
-                                        initialFormat = "dd/MM/yyyy",
-                                        convertFormat = "yyyy-MM-dd"
-                                    )
-                                )
-                                showDialog = false
-                            }) { Text(text = stringResource(R.string.confirmar)) }
-                        }
-                    },
-                    dismissButton = {
-                        LocalizedApp {
-                            Button(onClick = {
-                                showDialog = false
-                            }) { Text(text = stringResource(R.string.cancelar)) }
-                        }
-                    }
-                ) { DatePicker(state = state) }
+
+    if (showDialog) {
+        DatePickerDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                LocalizedApp {
+                    Button(onClick = {
+                        onSelectDate(
+                            convertDate(
+                                date = startDate,
+                                initialFormat = "dd/MM/yyyy",
+                                convertFormat = "yyyy-MM-dd"
+                            )
+                        )
+                        showDialog = false
+                    }) { Text(text = stringResource(android.R.string.ok)) }
+                }
+            },
+            dismissButton = {
+                LocalizedApp {
+                    Button(onClick = {
+                        showDialog = false
+                    }) { Text(text = stringResource(R.string.cancelar)) }
+                }
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            colors = DatePickerDefaults.colors(MaterialTheme.colorScheme.surfaceDim)
+        ) {
+            CompositionLocalProvider(
+                LocalContext provides newContext,
+                LocalConfiguration provides config
+            ) {
+                DatePicker(
+                    state = state,
+                    showModeToggle = false,
+                    colors = DatePickerDefaults.colors(MaterialTheme.colorScheme.surfaceDim)
+                )
             }
         }
     }
-
 }
 
 @Composable
@@ -221,7 +247,7 @@ fun TireSpinner(
 
 @Preview(showBackground = true)
 @Composable
-fun DatePickerScreenPreview() {
+fun PositionFilterViewPreview() {
     HombreCamionTheme {
         PositionFilterView(
             numWheels = 10,

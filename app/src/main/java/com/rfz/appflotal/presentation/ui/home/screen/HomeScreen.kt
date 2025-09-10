@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Card
@@ -68,7 +69,6 @@ import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens
-import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
@@ -153,6 +153,7 @@ fun HomeScreen(
 
     val onlyLanguagesAllowedText = stringResource(R.string.only_languages_allowed)
     val languages = listOf("es" to "ES", "en" to "EN")
+
     val userName = uiState.userData?.fld_name ?: stringResource(R.string.operator)
     val paymentPlan =
         PaymentPlanType.valueOf(uiState.userData?.paymentPlan?.replace(" ", "") ?: "None")
@@ -332,7 +333,7 @@ fun HomeScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.ExitToApp,
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = stringResource(R.string.logout),
                             tint = Color.White
                         )
@@ -448,7 +449,8 @@ fun HomeScreen(
                     monitorViewModel = monitorViewModel,
                     registerMonitorViewModel = registerMonitorViewModel,
                     navigateUp = { navController.navigateUp() },
-                    paymentPlan = paymentPlan
+                    paymentPlan = paymentPlan,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
