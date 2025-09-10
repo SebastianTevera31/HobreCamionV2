@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Dialog
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.Commons.isValidMacAddress
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
@@ -69,14 +70,18 @@ fun MonitorRegisterDialog(
     var macAddress by remember { mutableStateOf("") }
     var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
 
+
     macAddress = if (isScanning) stringResource(R.string.escaneando) else {
-        macAddress = macValue
-        macAddress.ifEmpty {
-            stringResource(
-                R.string.mac_no_disponible
-            )
-        }
+        macValue
     }
+
+    macAddress = macAddress.ifEmpty {
+        stringResource(
+            R.string.mac_no_disponible
+        )
+    }
+
+    val isMacAddress = isValidMacAddress(macAddress)
 
     when (registerMonitorStatus) {
         is ApiResult.Error -> {}
@@ -163,7 +168,7 @@ fun MonitorRegisterDialog(
                             onClick = {
                                 onContinueButton(macAddress, configurationSelected)
                             },
-                            enabled = !isScanning,
+                            enabled = !isScanning && isMacAddress,
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .width(120.dp)

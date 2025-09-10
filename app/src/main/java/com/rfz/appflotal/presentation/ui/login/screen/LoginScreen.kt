@@ -39,6 +39,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -119,7 +120,7 @@ fun LoginScreen(
             ProgressDialog()
         }
 
-        LoginContent(loginViewModel, homeViewModel, navController)
+        LoginContent(loginViewModel, navController)
     }
 }
 
@@ -127,7 +128,6 @@ fun LoginScreen(
 @Composable
 private fun LoginContent(
     loginViewModel: LoginViewModel,
-    homeViewModel: HomeViewModel,
     navController: NavController
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -137,54 +137,28 @@ private fun LoginContent(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color.Transparent
+        containerColor = Color.Transparent,
+        modifier = Modifier.background(
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFF213DF3), // Blue
+                    Color(0xFF4CAF50)  // Green
+                )
+            )
+        )
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Box {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(230.dp)
-                        .drawWithContent {
-                            drawContent()
-
-                            val path = Path().apply {
-                                moveTo(0f, 0f)
-                                lineTo(size.width, 0f)
-                                lineTo(size.width, size.height * 0.7f)
-                                quadraticBezierTo(
-                                    size.width / 2,
-                                    size.height * 1.1f,
-                                    0f,
-                                    size.height * 0.7f
-                                )
-                                close()
-                            }
-
-                            drawPath(
-                                path = path,
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(primaryLight, secondaryLight),
-                                    startY = 0f,
-                                    endY = size.height
-                                )
-                            )
-                        },
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    LogoImage(modifier = Modifier.offset(y = 105.dp))
-                }
-            }
-
+            LogoImage(modifier = Modifier.size(240.dp))
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
-                    .weight(1f),
+                    .padding(horizontal = 32.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -223,13 +197,11 @@ private fun LogoImage(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(120.dp)
-            .clip(CircleShape)
-            .background(Color.White, CircleShape)
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logo),
+            painter = painterResource(id = R.drawable.flotal),
             contentDescription = stringResource(R.string.content_description_logo),
             contentScale = ContentScale.Fit,
             modifier = Modifier.fillMaxSize()
@@ -244,10 +216,9 @@ private fun WelcomeMessage() {
         style = TextStyle(
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xff566a7f)
+            color = Color(0xFFFFFFFF)
         ),
         textAlign = TextAlign.Center,
-        modifier = Modifier.padding(top = 20.dp)
     )
 }
 
@@ -273,7 +244,7 @@ private fun LoginForm(
     if (loginMessage.isNotEmpty()) {
         Text(
             text = loginMessage,
-            color = Color.Red,
+            color = Color.White,
             style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -378,12 +349,6 @@ private fun UsernameField(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
-        label = {
-            Text(
-                stringResource(R.string.title_user),
-                color = darkerGray.copy(alpha = 0.8f)
-            )
-        },
         placeholder = {
             Text(
                 stringResource(R.string.title_user),
@@ -399,7 +364,10 @@ private fun UsernameField(
             focusedLabelColor = brandColor,
             cursorColor = brandColor,
             focusedTextColor = Color.DarkGray,
-            unfocusedTextColor = Color.DarkGray
+            unfocusedTextColor = Color.DarkGray,
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            disabledContainerColor = Color.White,
         )
     )
 }
@@ -418,12 +386,6 @@ private fun PasswordField(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
-        label = {
-            Text(
-                stringResource(R.string.title_contraseña),
-                color = darkerGray.copy(alpha = 0.8f)
-            )
-        },
         placeholder = {
             Text(
                 stringResource(R.string.title_contraseña),
@@ -454,7 +416,10 @@ private fun PasswordField(
             focusedLabelColor = brandColor,
             cursorColor = brandColor,
             focusedTextColor = Color.DarkGray,
-            unfocusedTextColor = Color.DarkGray
+            unfocusedTextColor = Color.DarkGray,
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            disabledContainerColor = Color.White
         )
 
     )

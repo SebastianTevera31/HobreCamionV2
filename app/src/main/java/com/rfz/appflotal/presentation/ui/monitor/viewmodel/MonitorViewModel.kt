@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.set
 import kotlin.math.roundToInt
 
 enum class SensorAlerts(@StringRes val message: Int) {
@@ -81,7 +82,7 @@ class MonitorViewModel @Inject constructor(
                                     monitorId = user.id_monitor,
                                     numWheels = config.toInt(),
                                     chassisImageUrl = data[0].fldUrlImage,
-                                    wheelsWithAlert = wheelsWithAlert,
+//                                    wheelsWithAlert = wheelsWithAlert,
                                     showDialog = user.id_monitor == 0
                                 )
                             }
@@ -89,6 +90,8 @@ class MonitorViewModel @Inject constructor(
                             if (_monitorUiState.value.chassisImageUrl.isNotEmpty()) {
                                 getDiagramCoordinates()
                             }
+
+                            getTireAlerts()
 
                             // Recibe datos Bluetooth
                             readBluetoothData()
@@ -104,6 +107,35 @@ class MonitorViewModel @Inject constructor(
                     }
                 }
 
+            }
+        }
+    }
+
+    private fun getTireAlerts() {
+        viewModelScope.launch {
+            val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
+            responseHelper(response = sensorData) { data ->
+                val newMap = _monitorUiState.value.tiresWithAlert.toMutableMap()
+                data?.forEach {
+                    val tempAlert = when (it.highTemperature) {
+                        true -> SensorAlerts.HIGH_TEMPERATURE
+                        false -> SensorAlerts.NO_DATA
+                    }
+                    val pressureAlert =
+                        if (it.lowPressure) SensorAlerts.LOW_PRESSURE
+                        else if (it.highPressure) SensorAlerts.HIGH_PRESSURE
+                        else SensorAlerts.NO_DATA
+
+                    val inAlert =
+                        tempAlert != SensorAlerts.NO_DATA || pressureAlert != SensorAlerts.NO_DATA
+
+                    newMap[it.sensorPosition] = inAlert
+                }
+                _monitorUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        tiresWithAlert = newMap
+                    )
+                }
             }
         }
     }
@@ -170,7 +202,7 @@ class MonitorViewModel @Inject constructor(
                 temperatureStatus != SensorAlerts.NO_DATA || pressureStatus != SensorAlerts.NO_DATA
 
             val newMap =
-                currentUiState.wheelsWithAlert.toMutableMap().apply {
+                currentUiState.tiresWithAlert.toMutableMap().apply {
                     this["P${wheel}"] = inAlert
                 }
 
@@ -186,7 +218,7 @@ class MonitorViewModel @Inject constructor(
                     temperatureStatus
                 ),
                 timestamp = getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss"),
-                wheelsWithAlert = newMap
+                tiresWithAlert = newMap
             )
         }
     }
@@ -234,7 +266,7 @@ class MonitorViewModel @Inject constructor(
                                         tempAlert != SensorAlerts.NO_DATA || pressureAlert != SensorAlerts.NO_DATA
 
                                     val newMap =
-                                        currentUiState.wheelsWithAlert.toMutableMap().apply {
+                                        currentUiState.tiresWithAlert.toMutableMap().apply {
                                             this[it.sensorPosition] = inAlert
                                         }
 
@@ -242,7 +274,7 @@ class MonitorViewModel @Inject constructor(
                                         temperature = Pair(it.temperature, tempAlert),
                                         pression = Pair(it.psi, pressureAlert),
                                         timestamp = convertDate(it.ultimalectura),
-                                        wheelsWithAlert = newMap
+                                        tiresWithAlert = newMap
                                     )
                                 }
                             }
@@ -250,12 +282,14 @@ class MonitorViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
 
-            _monitorUiState.update { currentUiState ->
-                currentUiState.copy(
-                    currentTire = tireSelected
-                )
-            }
+    fun updateSelectedTire(selectedTire: String) {
+        _monitorUiState.update { currentUiState ->
+            currentUiState.copy(
+                currentTire = selectedTire
+            )
         }
     }
 

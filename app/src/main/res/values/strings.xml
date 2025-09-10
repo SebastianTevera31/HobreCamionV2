@@ -152,4 +152,5 @@
     <string name="pobre">Pobre</string>
     <string name="conexion_status"><br/>Conexión: %1$s</string>
     <string name="conexion_perdidad_monitor">Sin conexión con el monitor.</string>
+    <string name="seleccione_una_llanta">Seleccione una llanta</string>
 </resources>

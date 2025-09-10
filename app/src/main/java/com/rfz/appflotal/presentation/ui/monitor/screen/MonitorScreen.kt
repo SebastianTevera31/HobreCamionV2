@@ -137,9 +137,7 @@ fun MonitorScreen(
                     }
                 }
 
-
                 if (selectedTab == R.string.diagrama) {
-
                     DiagramaMonitorScreen(
                         imageUrl = monitorUiState.value.chassisImageUrl,
                         currentWheel = monitorUiState.value.currentTire,
@@ -149,11 +147,12 @@ fun MonitorScreen(
                         temperatureStatus = monitorUiState.value.temperature.second,
                         pressionStatus = monitorUiState.value.pression.second,
                         numWheels = monitorUiState.value.numWheels,
-                        alertTires = monitorUiState.value.wheelsWithAlert,
+                        alertTires = monitorUiState.value.tiresWithAlert,
+                        updateSelectedTire = { selectedTire ->
+                            monitorViewModel.updateSelectedTire(selectedTire)
+                        },
                         getSensorData = { sensorId ->
-                            monitorViewModel.getSensorDataByWheel(
-                                sensorId
-                            )
+                            monitorViewModel.getSensorDataByWheel(sensorId)
                         },
                         coordinates = monitorUiState.value.coordinateList,
                         modifier = Modifier.padding(8.dp)
@@ -205,7 +204,7 @@ fun MonitorScreen(
                             when (monitorTireData) {
                                 is ApiResult.Success -> {
                                     val data: List<MonitorTireByDateResponse>? =
-                                        monitorTireData.data
+                                        monitorTireData.data?.sortedByDescending { it.sensorDate }
                                     CurrentPositionDataView(
                                         sensorDataList = data,
                                         isOnSearch = true

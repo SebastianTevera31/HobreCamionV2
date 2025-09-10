@@ -64,12 +64,7 @@ class HombreCamionService : Service() {
     private var isStaterd = false
 
     override fun onBind(p0: Intent?): IBinder? = null
-
-    private lateinit var notificationBuilder: Notification
-
     private lateinit var notificationCompactBuilder: NotificationCompat.Builder
-
-    private val notificationStyle = NotificationCompat.InboxStyle()
 
     override fun onCreate() {
         super.onCreate()

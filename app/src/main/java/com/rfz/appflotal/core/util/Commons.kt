@@ -39,6 +39,10 @@ object Commons {
         return quality in listOf(BluetoothSignalQuality.Excelente, BluetoothSignalQuality.Aceptable)
     }
 
+    fun isValidMacAddress(mac: String): Boolean {
+        val macRegex = "^([0-9A-Fa-f]{2}[:\\-]){5}([0-9A-Fa-f]{2})$".toRegex()
+        return mac.matches(macRegex)
+    }
 
     fun getCurrentDate(
         date: Date = Date(),

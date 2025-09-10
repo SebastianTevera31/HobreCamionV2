@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,10 +43,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,6 +73,7 @@ fun DiagramaMonitorScreen(
     pressionStatus: SensorAlerts,
     numWheels: Int,
     alertTires: Map<String, Boolean>,
+    updateSelectedTire: (String) -> Unit,
     getSensorData: (String) -> Unit,
     coordinates: List<PositionCoordinatesResponse>?,
     modifier: Modifier = Modifier
@@ -122,7 +125,8 @@ fun DiagramaMonitorScreen(
                         numWheels = numWheels,
                         wheelsWithAlert = alertTires,
                         tireSelected = tireSelected,
-                        Modifier
+                        updateSelectedTire = { updateSelectedTire(it) },
+                        modifier = Modifier
                             .height(320.dp)
                             .weight(1f)
                     ) { sensorId ->
@@ -140,8 +144,9 @@ fun PanelLlantas(
     numWheels: Int,
     wheelsWithAlert: Map<String, Boolean>,
     tireSelected: String,
+    updateSelectedTire: (String) -> Unit,
     modifier: Modifier = Modifier,
-    getSensorData: (String) -> Unit
+    getSensorData: (String) -> Unit,
 ) {
     Card(
         colors = CardDefaults.cardColors(Color.White),
@@ -172,7 +177,13 @@ fun PanelLlantas(
                     } else null
 
                     Button(
-                        onClick = { getSensorData("P${it + 1}") },
+                        onClick = {
+                            val tire = if ("P${it + 1}" == tireSelected) "" else {
+                                getSensorData("P${it + 1}")
+                                "P${it + 1}"
+                            }
+                            updateSelectedTire(tire)
+                        },
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(colorStatus.first),
                         border = border,
@@ -263,45 +274,60 @@ fun PanelSensor(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = if(wheel.isNotEmpty()) Arrangement.Top else Arrangement.Center
             ) {
-                Text(
-                    text = pluralStringResource(R.plurals.llanta_tag, 1, wheel),
-                    color = Color("#2E3192".toColorInt()),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Text(
-                    text = if (!timestamp.isNullOrEmpty()) stringResource(
-                        R.string.actualizado,
-                        timestamp
-                    ) else "N/A",
-                    fontSize = 12.sp,
-                    lineHeight = 16.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .weight(1f, fill = false)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    CeldaDatosSensor(
-                        title = stringResource(R.string.temperatura),
-                        img = R.drawable.temperature__1_,
-                        value = "${temperature.toInt()} ℃"
+                if (wheel.isNotEmpty()) {
+                    Text(
+                        text = pluralStringResource(R.plurals.llanta_tag, 1, wheel),
+                        color = Color("#2E3192".toColorInt()),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    CeldaDatosSensor(
-                        title = stringResource(R.string.presion),
-                        img = R.drawable.tire_pressure,
-                        value = "${pressure.toInt()} PSI"
+                    Text(
+                        text = if (!timestamp.isNullOrEmpty()) stringResource(
+                            R.string.actualizado,
+                            timestamp
+                        ) else "N/A",
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White)
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        CeldaDatosSensor(
+                            title = stringResource(R.string.temperatura),
+                            img = R.drawable.temperature__1_,
+                            value = "${temperature.toInt()} ℃"
+                        )
+                        CeldaDatosSensor(
+                            title = stringResource(R.string.presion),
+                            img = R.drawable.tire_pressure,
+                            value = "${pressure.toInt()} PSI"
+                        )
 //                    CeldaDatosSensor(title = "Profundidad", value = "12mm")
+                    }
+                } else {
+                    Text(
+                        text = stringResource(R.string.seleccione_una_llanta),
+                        color = Color("#2E3192".toColorInt()),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(
+                            dimensionResource(R.dimen.medium_dimen)
+                        )
+                    )
                 }
             }
         }
@@ -375,7 +401,8 @@ fun DiagramaMonitorScreenPreview() {
             pressionStatus = SensorAlerts.HIGH_PRESSURE,
             numWheels = 7,
             alertTires = emptyMap(),
-            getSensorData = { },
+            getSensorData = {},
+            updateSelectedTire = {},
             coordinates = emptyList(),
             modifier = Modifier.safeContentPadding()
         )

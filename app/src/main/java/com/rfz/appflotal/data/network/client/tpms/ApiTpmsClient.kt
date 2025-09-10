@@ -1,6 +1,5 @@
 package com.rfz.appflotal.data.network.client.tpms
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.model.tpms.ConfigurationByIdMonitorResponse
 import com.rfz.appflotal.data.model.tpms.CrudDiagramMonitorRequest
 import com.rfz.appflotal.data.model.tpms.CrudMonitor

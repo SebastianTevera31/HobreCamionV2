@@ -150,4 +150,5 @@
     <string name="pobre">Poor</string>
     <string name="conexion_status">Connection: %1$s</string>
     <string name="conexion_perdidad_monitor">No connection with monitor</string>
+    <string name="seleccione_una_llanta">Select a tire</string>
 </resources>

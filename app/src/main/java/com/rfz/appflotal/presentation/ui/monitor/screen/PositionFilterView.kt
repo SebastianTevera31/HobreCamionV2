@@ -151,7 +151,6 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
         }
     }
 
-
     if (showDialog) {
         DatePickerDialog(
             onDismissRequest = { showDialog = false },
