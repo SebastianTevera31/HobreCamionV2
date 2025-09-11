@@ -17,6 +17,7 @@ data class MonitorUiState(
         BluetoothSignalQuality.Desconocida,
         ""
     ),
+    val imageDimen: Pair<Int, Int> = Pair(0, 0),
     val numWheels: Int = 0,
     val chassisImageUrl: String = "",
     val tiresWithAlert: Map<String, Boolean> = emptyMap(),

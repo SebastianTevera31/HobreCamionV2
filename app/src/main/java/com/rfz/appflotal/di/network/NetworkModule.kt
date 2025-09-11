@@ -4,7 +4,6 @@ package com.rfz.appflotal.di.network
 import android.app.Application
 import android.content.Context
 import com.rfz.appflotal.core.network.NetworkConfig
-import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.network.client.login.LoginClient
 import com.rfz.appflotal.data.network.client.acquisitiontype.AcquisitionTypeClient
 import com.rfz.appflotal.data.network.client.airPressureRating.AirPressureRatingClient
@@ -87,7 +86,7 @@ class NetworkModule {
     @Provides
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(NetworkConfig.Base_Url)
+            .baseUrl(NetworkConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

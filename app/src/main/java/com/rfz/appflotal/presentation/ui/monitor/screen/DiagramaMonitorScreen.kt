@@ -65,6 +65,7 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 @Composable
 fun DiagramaMonitorScreen(
     imageUrl: String,
+    imageDimens: Pair<Int, Int>,
     currentWheel: String,
     temperature: Float,
     pressure: Float,
@@ -93,7 +94,9 @@ fun DiagramaMonitorScreen(
                     coordinates = coordinates,
                     image = bitmap,
                     alertTires = alertTires,
-                    tireSelected = tireSelected
+                    tireSelected = tireSelected,
+                    width = imageDimens.first,
+                    height = imageDimens.second
                 )
                 isLoading = false
             }
@@ -275,7 +278,7 @@ fun PanelSensor(
                     .fillMaxSize()
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = if(wheel.isNotEmpty()) Arrangement.Top else Arrangement.Center
+                verticalArrangement = if (wheel.isNotEmpty()) Arrangement.Top else Arrangement.Center
             ) {
                 if (wheel.isNotEmpty()) {
                     Text(
@@ -352,16 +355,18 @@ fun PanelSensor(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.verticalScroll(rememberScrollState())
-                ) {
-                    if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
-                        CeldaAlerta(wheel, stringResource(temperatureStatus.message))
-                    }
+                if (wheel.isNotEmpty()) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
+                            CeldaAlerta(wheel, stringResource(temperatureStatus.message))
+                        }
 
-                    if (pressureStatus != SensorAlerts.NO_DATA) {
-                        CeldaAlerta(wheel, stringResource(pressureStatus.message))
+                        if (pressureStatus != SensorAlerts.NO_DATA) {
+                            CeldaAlerta(wheel, stringResource(pressureStatus.message))
+                        }
                     }
                 }
             }
@@ -404,7 +409,8 @@ fun DiagramaMonitorScreenPreview() {
             getSensorData = {},
             updateSelectedTire = {},
             coordinates = emptyList(),
-            modifier = Modifier.safeContentPadding()
+            modifier = Modifier.safeContentPadding(),
+            imageDimens = Pair(1, 1)
         )
     }
 }

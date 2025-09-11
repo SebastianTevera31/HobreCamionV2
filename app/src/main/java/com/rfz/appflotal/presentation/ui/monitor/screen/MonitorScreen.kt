@@ -155,7 +155,8 @@ fun MonitorScreen(
                             monitorViewModel.getSensorDataByWheel(sensorId)
                         },
                         coordinates = monitorUiState.value.coordinateList,
-                        modifier = Modifier.padding(8.dp)
+                        imageDimens = monitorUiState.value.imageDimen,
+                        modifier = Modifier.padding(8.dp),
                     )
                 } else {
                     var positionOptionSelected by remember { mutableIntStateOf(R.string.recientes) }

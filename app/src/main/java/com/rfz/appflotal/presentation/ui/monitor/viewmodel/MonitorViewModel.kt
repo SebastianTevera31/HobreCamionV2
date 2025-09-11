@@ -6,6 +6,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.network.NetworkConfig.BASE_URL
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
@@ -29,7 +30,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.set
 import kotlin.math.roundToInt
 
 enum class SensorAlerts(@StringRes val message: Int) {
@@ -73,16 +73,11 @@ class MonitorViewModel @Inject constructor(
 
                         if (config.isDigitsOnly()) {
 
-                            val wheelsWithAlert =
-                                (1..config.toInt()).associate { it -> "P$it" to false }
-                                    .toMap()
-
                             _monitorUiState.update { currentUiState ->
                                 currentUiState.copy(
                                     monitorId = user.id_monitor,
                                     numWheels = config.toInt(),
                                     chassisImageUrl = data[0].fldUrlImage,
-//                                    wheelsWithAlert = wheelsWithAlert,
                                     showDialog = user.id_monitor == 0
                                 )
                             }
@@ -231,6 +226,7 @@ class MonitorViewModel @Inject constructor(
             responseHelper(response = coordinates) { response ->
                 _monitorUiState.update { currentUiState ->
                     currentUiState.copy(
+                        imageDimen = getImageDimens(currentUiState.chassisImageUrl),
                         coordinateList = response
                     )
                 }
@@ -333,4 +329,15 @@ class MonitorViewModel @Inject constructor(
     fun convertToTireData(diagramData: List<DiagramMonitorResponse>?): List<MonitorTireByDateResponse> =
         diagramData?.map { it.toTireData() }?.sortedBy { it.tirePosition.replace("P", "").toInt() }
             ?: emptyList()
+
+    private fun getImageDimens(url: String): Pair<Int, Int> {
+        val resourcer = url.replace(BASE_URL, "")
+        return when (resourcer) {
+            "Base6.png" -> Pair(620, 327)
+            "Base10.png" -> Pair(628, 327)
+            "Base22.png" -> Pair(1280, 425)
+            "Base32.png" -> Pair(1780, 327)
+            else -> Pair(0, 0)
+        }
+    }
 }

@@ -1,7 +1,7 @@
 package com.rfz.appflotal.core.network
 
 object NetworkConfig {
-    const val Base_Url = "https://truckdriverapi.azurewebsites.net/"
+    const val BASE_URL = "https://truckdriverapi.azurewebsites.net/"
     var imei = ""
     var fecha = ""
 }
