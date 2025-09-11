@@ -10,6 +10,7 @@ import com.rfz.appflotal.core.network.NetworkConfig.BASE_URL
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
+import com.rfz.appflotal.core.util.Positions.findOutPosition
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -173,7 +174,8 @@ class MonitorViewModel @Inject constructor(
 
     private fun updateSensorData(dataFrame: String) {
         _monitorUiState.update { currentUiState ->
-            val wheel = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
+            val tire = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
+            val realTire = findOutPosition("P${tire}")
 
             val pressionValue = decodeDataFrame(dataFrame, MonitorDataFrame.PRESSION)
 
@@ -198,11 +200,12 @@ class MonitorViewModel @Inject constructor(
 
             val newMap =
                 currentUiState.tiresWithAlert.toMutableMap().apply {
-                    this["P${wheel}"] = inAlert
+                    val tire = realTire
+                    this[tire] = inAlert
                 }
 
             currentUiState.copy(
-                currentTire = "P${wheel}",
+                currentTire = realTire,
                 battery = decodeAlertDataFrame(
                     dataFrame,
                     SensorAlertDataFrame.LOW_BATTERY
