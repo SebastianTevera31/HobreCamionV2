@@ -24,7 +24,7 @@ interface ApiTpmsClient {
         @Body request: SensorRequest,
     ): Response<List<TpmsResponse>>
 
-    @POST("api/DiagramMonitor/CrudDiagramMonitor")
+    @POST("api/Tpms/CrudDiagramMonitor")
     suspend fun postCrudDiagramMonitor(
         @Body request: CrudDiagramMonitorRequest
     )
@@ -35,7 +35,7 @@ interface ApiTpmsClient {
         @Body request: CrudMonitor
     ): Response<List<TpmsResponse>?>
 
-    @GET("api/DiagramMonitor/MonitorTireByDate")
+    @GET("api/Tpms/MonitorTireByDate")
     suspend fun getMonitorTireByDate(
         @Header("Authorization") token: String,
         @Query("id_monitor") monitorId: Int,
@@ -48,16 +48,16 @@ interface ApiTpmsClient {
         @Query("id_monitor") idMonitor: Int,
     ): Response<List<MonitorAlertsHistoryResponse>>
 
-    @GET("api/DiagramMonitor/DiagramMonitor")
+    @GET("api/Tpms/DiagramMonitor")
     suspend fun getDiagramMonitor(
         @Header("Authorization") token: String,
         @Query("id_monitor") idMonitor: Int
     ): Response<List<DiagramMonitorResponse>>
 
-    @GET("api/Configuration/Configuration")
+    @GET("api/Tpms/Configuration")
     suspend fun getConfigurations(@Header("Authorization") token: String): Response<List<GetConfigurationsResponse>>
 
-    @GET("api/Configuration/ConfigurationByIdMonitor")
+    @GET("api/Tpms/ConfigurationByIdMonitor")
     suspend fun getConfigurationByIdMonitor(
         @Header("Authorization") token: String,
         @Query("id_monitor") idMonitor: Int
@@ -66,7 +66,7 @@ interface ApiTpmsClient {
     @GET("api/show_claims")
     suspend fun checkLogin(): Response<Unit>
 
-    @GET("api/positionCoordinates/getPositionCoordinates")
+    @GET("api/Tpms/getPositionCoordinates")
     suspend fun getPositionCoordinates(
         @Header("Authorization") token: String,
         @Query("id_monitor") idMonitor: Int

@@ -8,6 +8,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -15,6 +16,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.PermissionChecker
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.data.NetworkStatus
@@ -36,6 +38,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -105,6 +108,9 @@ class HombreCamionService : Service() {
         // Tarea de lectura de estado de conexion
         readBluetoothStatus()
 
+        // Tarea de lectura de cambio de idioma
+        readLanguageUpdate()
+
         return START_STICKY
     }
 
@@ -133,7 +139,6 @@ class HombreCamionService : Service() {
         createServiceNotificationChannel()
 
         notificationCompactBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.hombrecamion_conexion_tpms))
             .setSmallIcon(R.drawable.logo)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -141,6 +146,7 @@ class HombreCamionService : Service() {
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
+        rebuildNotificationTexts()
         startForeground(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
     }
 
@@ -176,35 +182,35 @@ class HombreCamionService : Service() {
         coroutineScope.launch {
             bluetoothUseCase().distinctUntilChangedBy { it.bluetoothSignalQuality }
                 .collect { data ->
-                    val defaultMessage = getString(R.string.recibiendo_datos_monitor)
                     val quality = data.bluetoothSignalQuality
-                    val message = when (quality) {
+
+                    if (BluetoothSignalQuality.Desconocida != quality) {
+                        CONNECTION_CONTEXT_MESSAGE = R.string.recibiendo_datos_monitor
+                    }
+
+                    when (quality) {
                         BluetoothSignalQuality.Excelente -> {
-                            val msg = getString(
-                                R.string.conexion_status,
-                                getString(BluetoothSignalQuality.Excelente.signalText!!)
-                            )
-                            "$defaultMessage. \n$msg "
+                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                            CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Excelente.signalText
                         }
 
                         BluetoothSignalQuality.Aceptable -> {
-                            val msg = getString(
-                                R.string.conexion_status,
-                                getString(BluetoothSignalQuality.Aceptable.signalText!!)
-                            )
-                            "$defaultMessage. \n$msg "
+                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                            CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Aceptable.signalText
                         }
 
                         BluetoothSignalQuality.Pobre -> {
-                            val msg = getString(
-                                R.string.conexion_status,
-                                getString(BluetoothSignalQuality.Pobre.signalText!!)
-                            )
-                            "$defaultMessage. \n$msg"
+                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                            CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Pobre.signalText
                         }
-                        BluetoothSignalQuality.Desconocida -> getString(R.string.conexion_perdidad_monitor)
+
+                        BluetoothSignalQuality.Desconocida -> {
+                            CONNECTION_TITLE_MESSAGE = null
+                            CONNECTION_CONTEXT_MESSAGE = null
+                        }
                     }
-                    updateNotification(message)
+                    
+                    rebuildNotificationTexts()
                 }
         }
     }
@@ -305,15 +311,58 @@ class HombreCamionService : Service() {
         }
     }
 
-    private fun updateNotification(message: String) {
-        notificationCompactBuilder.setContentText(message)
-        notificationManager.notify(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
+    // FUNCIONES DE CAMBIO DE IDIOMA
+
+    private fun readLanguageUpdate() {
+        coroutineScope.launch {
+            AppLocale.currentLocale.distinctUntilChangedBy { it.language }.collect {
+                rebuildNotificationTexts()
+            }
+        }
     }
 
+    private fun Context.localized(appLocale: Locale): Context {
+        val conf = Configuration(resources.configuration)
+        conf.setLocales(android.os.LocaleList(appLocale))
+        return createConfigurationContext(conf)
+    }
+
+    private fun currentAppLocaleFromAppCompat(): Locale? {
+        val language = AppLocale.currentLocale.value.language
+        return if (language.isNotEmpty()) Locale(language) else null
+    }
+
+    private fun rebuildNotificationTexts() {
+        val appLocale = currentAppLocaleFromAppCompat() ?: Locale.getDefault()
+        val lctx = this.localized(appLocale)
+
+        val title = lctx.getString(R.string.hombrecamion_conexion_tpms)
+
+        val statusContent = if (CONNECTION_TITLE_MESSAGE != null) {
+            lctx.getString(
+                CONNECTION_TITLE_MESSAGE!!,
+                lctx.getString(CONNECTION_STATUS_MESSAGE!!)
+            )
+        } else null
+
+        val titleContent =
+            if (CONNECTION_CONTEXT_MESSAGE != null) lctx.getString(CONNECTION_CONTEXT_MESSAGE!!) else null
+
+        val content = if (statusContent != null) "$titleContent. $statusContent" else titleContent
+
+        notificationCompactBuilder.setContentTitle(title).setContentText(content)
+
+        // Actualiza la notificación foreground (basta con notify con el mismo ID)
+        notificationManager.notify(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
+    }
 
     companion object {
         const val CHANNEL_ID = "1003"
         const val ONGOING_NOTIFICATION_ID = 103
+
+        var CONNECTION_CONTEXT_MESSAGE: Int? = null
+        var CONNECTION_TITLE_MESSAGE: Int? = null
+        var CONNECTION_STATUS_MESSAGE: Int? = null
 
         fun startService(context: Context) {
             val intent = Intent(context, HombreCamionService::class.java)
