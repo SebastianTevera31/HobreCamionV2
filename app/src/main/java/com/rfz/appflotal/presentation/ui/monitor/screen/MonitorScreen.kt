@@ -15,8 +15,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,12 +23,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
@@ -38,7 +36,6 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
-import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
@@ -60,6 +57,8 @@ fun MonitorScreen(
 
     val configurationsUiState = registerMonitorViewModel.configurationList.collectAsState()
     val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
+
+    var selectedOption by rememberSaveable { mutableStateOf(MonitorScreenViews.DIAGRAMA) }
 
     // Carga la pantalla, vacia o no
     LaunchedEffect(Unit) {
@@ -101,43 +100,29 @@ fun MonitorScreen(
         }
     }
 
-    Scaffold(topBar = { if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar { navigateUp() } }) { innerPadding ->
-        var selectedTab by remember { mutableIntStateOf(R.string.diagrama) }
+    Scaffold(
+        topBar = { if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar { navigateUp() } },
+        bottomBar = {
+            MonitorBottomNavBar(
+                onClick = { view ->
+                    if (view == MonitorScreenViews.POSICION) monitorViewModel.getListSensorData()
+                    selectedOption = view
+                },
+                selectedView = selectedOption
+            )
+        },
 
-        Surface {
+    ) { contentPadding ->
+
+        Surface(
+            modifier = Modifier
+        ) {
             Column(
                 modifier = modifier
                     .background(Color("#EDF0F8".toColorInt())),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
-                // Navegacion entre Diagrama y Posiciones
-                TabRow(
-                    selectedTabIndex = if (selectedTab == R.string.diagrama) 0 else 1,
-                    containerColor = secondaryLight, contentColor = Color.White,
-                ) {
-                    Tab(
-                        selected = selectedTab == R.string.diagrama,
-                        onClick = { selectedTab = R.string.diagrama }) {
-                        Text(
-                            stringResource(R.string.diagrama),
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                    Tab(
-                        selected = selectedTab == R.plurals.posicion_tag,
-                        onClick = {
-                            monitorViewModel.getListSensorData()
-                            selectedTab = R.plurals.posicion_tag
-                        }) {
-                        Text(
-                            pluralStringResource(R.plurals.posicion_tag, 2),
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-
-                if (selectedTab == R.string.diagrama) {
+                if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                     DiagramaMonitorScreen(
                         imageUrl = monitorUiState.value.chassisImageUrl,
                         currentWheel = monitorUiState.value.currentTire,

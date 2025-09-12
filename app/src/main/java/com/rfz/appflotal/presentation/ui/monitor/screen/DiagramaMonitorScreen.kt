@@ -6,6 +6,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,11 +82,14 @@ fun DiagramaMonitorScreen(
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     // Actualizar rueda
     tireSelected = currentWheel
 
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier.verticalScroll(scrollState)
+    ) {
         Box {
             val bitmap = loadBitmapFromUrl(imageUrl)
 
@@ -122,6 +126,7 @@ fun DiagramaMonitorScreen(
                         pressureStatus = pressionStatus,
                         modifier = Modifier
                             .height(320.dp)
+                            .padding(bottom = dimensionResource(R.dimen.small_dimen))
                             .weight(1f)
                     )
                     PanelLlantas(
@@ -131,6 +136,7 @@ fun DiagramaMonitorScreen(
                         updateSelectedTire = { updateSelectedTire(it) },
                         modifier = Modifier
                             .height(320.dp)
+                            .padding(bottom = dimensionResource(R.dimen.small_dimen))
                             .weight(1f)
                     ) { sensorId ->
                         tireSelected = sensorId
