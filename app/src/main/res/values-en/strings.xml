@@ -152,4 +152,5 @@
     <string name="conexion_perdidad_monitor">No connection with monitor</string>
     <string name="seleccione_una_llanta">Select a tire</string>
     <string name="posiciones">Positions</string>
+    <string name="sin_alertas">No alerts</string>
 </resources>

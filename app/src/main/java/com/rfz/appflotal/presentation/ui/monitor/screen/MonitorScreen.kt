@@ -113,7 +113,6 @@ fun MonitorScreen(
         },
 
     ) { contentPadding ->
-
         Surface(
             modifier = Modifier
         ) {

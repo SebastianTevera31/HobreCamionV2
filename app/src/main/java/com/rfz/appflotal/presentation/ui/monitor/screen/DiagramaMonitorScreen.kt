@@ -6,7 +6,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +35,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -269,6 +267,9 @@ fun PanelSensor(
     pressureStatus: SensorAlerts,
     modifier: Modifier = Modifier
 ) {
+    val isTempAlert = temperatureStatus == SensorAlerts.HIGH_TEMPERATURE
+    val isPressureAlert = pressureStatus != SensorAlerts.NO_DATA
+
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier
     ) {
@@ -352,28 +353,46 @@ fun PanelSensor(
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = stringResource(R.string.alertas_activas),
-                    color = Color("#2E3192".toColorInt()),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (wheel.isNotEmpty()) {
+                if (isTempAlert || isPressureAlert) {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.verticalScroll(rememberScrollState())
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
-                            CeldaAlerta(wheel, stringResource(temperatureStatus.message))
-                        }
+                        Text(
+                            text = stringResource(R.string.alertas_activas),
+                            color = Color("#2E3192".toColorInt()),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-                        if (pressureStatus != SensorAlerts.NO_DATA) {
-                            CeldaAlerta(wheel, stringResource(pressureStatus.message))
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.verticalScroll(rememberScrollState())
+                        ) {
+                            if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
+                                CeldaAlerta(wheel, stringResource(temperatureStatus.message))
+                            }
+
+                            if (pressureStatus != SensorAlerts.NO_DATA) {
+                                CeldaAlerta(wheel, stringResource(pressureStatus.message))
+                            }
                         }
                     }
+                } else {
+                    Text(
+                        text = stringResource(R.string.sin_alertas),
+                        color = Color("#2E3192".toColorInt()),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(
+                            dimensionResource(R.dimen.medium_dimen)
+                        )
+                    )
                 }
             }
         }
