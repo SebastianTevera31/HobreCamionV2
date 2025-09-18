@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,12 +38,14 @@ fun CurrentPositionDataView(
     Surface(
         shape = RoundedCornerShape(8.dp),
         shadowElevation = 16.dp,
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxSize()
+            .padding(bottom = 48.dp),
         color = Color.White
     ) {
         if (sensorDataList != null) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 //Cabecera
@@ -61,12 +62,12 @@ fun CurrentPositionDataView(
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(2f)
                         )
-                        Text(
-                            text = pluralStringResource(R.plurals.llanta_tag, 1, ""),
-                            style = MaterialTheme.typography.titleSmall,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
-                        )
+//                        Text(
+//                            text = pluralStringResource(R.plurals.llanta_tag, 1, ""),
+//                            style = MaterialTheme.typography.titleSmall,
+//                            textAlign = TextAlign.Center,
+//                            modifier = Modifier.weight(1f)
+//                        )
                         Text(
                             text = stringResource(R.string.fecha),
                             style = MaterialTheme.typography.titleSmall,
@@ -139,11 +140,6 @@ fun SensorDataRow(
             modifier = Modifier.weight(2f)
         )
         Text(
-            text = llanta, style = MaterialTheme.typography.titleSmall,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
             text = fecha, style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(2f)
@@ -195,7 +191,8 @@ fun PreviewPositionMonitorScreen() {
             false,
             lowPressure = false,
             highPressure = false,
-            ultimalectura = "2025-08-12'T'10:30:00"
+            ultimalectura = "2025-08-12'T'10:30:00",
+            lowBattery = false,
         ),
         DiagramMonitorResponse(
             2,
@@ -215,7 +212,8 @@ fun PreviewPositionMonitorScreen() {
             highTemperature = false,
             lowPressure = false,
             highPressure = true,
-            ultimalectura = "2025-08-12'T'10:35:00"
+            ultimalectura = "2025-08-12'T'10:35:00",
+            lowBattery = true,
         ),
         DiagramMonitorResponse(
             3,
@@ -235,7 +233,8 @@ fun PreviewPositionMonitorScreen() {
             highTemperature = true,
             lowPressure = true,
             highPressure = false,
-            ultimalectura = "2025-08-12'T'10:40:00"
+            ultimalectura = "2025-08-12'T'10:40:00",
+            lowBattery = false
         )
     )
 }

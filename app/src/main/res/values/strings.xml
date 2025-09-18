@@ -155,4 +155,6 @@
     <string name="seleccione_una_llanta">Seleccione una llanta</string>
     <string name="posiciones">Posiciones</string>
     <string name="sin_alertas">Sin alertas</string>
+    <string name="bateria_baja">Bateria baja</string>
+    <string name="sin_conexi_n">Sin conexión</string>
 </resources>

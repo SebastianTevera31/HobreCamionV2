@@ -8,7 +8,6 @@ import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 data class MonitorUiState(
     val monitorId: Int = 0,
     val currentTire: String = "",
-    val battery: String = "",
     val pression: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
     val temperature: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
     val depth: Float = 0f,
@@ -22,7 +21,8 @@ data class MonitorUiState(
     val chassisImageUrl: String = "",
     val tiresWithAlert: Map<String, Boolean> = emptyMap(),
     val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
-    val showDialog: Boolean = false
+    val showDialog: Boolean = false,
+    val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA
 )
 
 fun DiagramMonitorResponse.toTireData(): MonitorTireByDateResponse {

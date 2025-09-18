@@ -153,4 +153,6 @@
     <string name="seleccione_una_llanta">Select a tire</string>
     <string name="posiciones">Positions</string>
     <string name="sin_alertas">No alerts</string>
+    <string name="bateria_baja">Low battery</string>
+    <string name="sin_conexi_n">Not connected</string>
 </resources>

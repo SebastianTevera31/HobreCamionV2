@@ -37,6 +37,8 @@ enum class SensorAlerts(@StringRes val message: Int) {
     HIGH_PRESSURE(R.string.presion_alta),
     LOW_PRESSURE(R.string.presion_baja),
     HIGH_TEMPERATURE(R.string.temperatura_alta),
+
+    LOW_BATTERY(R.string.bateria_baja),
     NO_DATA(R.string.sin_datos)
 }
 
@@ -117,13 +119,18 @@ class MonitorViewModel @Inject constructor(
                         true -> SensorAlerts.HIGH_TEMPERATURE
                         false -> SensorAlerts.NO_DATA
                     }
+
                     val pressureAlert =
                         if (it.lowPressure) SensorAlerts.LOW_PRESSURE
                         else if (it.highPressure) SensorAlerts.HIGH_PRESSURE
                         else SensorAlerts.NO_DATA
 
+                    val batteryAlert =
+                        if (it.lowBattery) SensorAlerts.LOW_BATTERY else SensorAlerts.NO_DATA
+
                     val inAlert =
                         tempAlert != SensorAlerts.NO_DATA || pressureAlert != SensorAlerts.NO_DATA
+                                || batteryAlert != SensorAlerts.NO_DATA
 
                     newMap[it.sensorPosition] = inAlert
                 }
@@ -179,21 +186,19 @@ class MonitorViewModel @Inject constructor(
 
             val pressionValue = decodeDataFrame(dataFrame, MonitorDataFrame.PRESSION)
 
-            val pressureStatus = SensorAlerts.valueOf(
-                decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
-            )
+            val pressureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
 
             val temperatureValue =
                 decodeDataFrame(dataFrame, MonitorDataFrame.TEMPERATURE)
 
-            val temperatureStatus = SensorAlerts.valueOf(
-                decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
-            )
+            val temperatureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
 
             val pression = (pressionValue.toFloat() * 100).roundToInt() / 100f
+
             val temperature =
                 if (temperatureValue.isDigitsOnly()) temperatureValue.toFloat() else 0f
 
+            val batteryStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
 
             val inAlert =
                 temperatureStatus != SensorAlerts.NO_DATA || pressureStatus != SensorAlerts.NO_DATA
@@ -206,17 +211,17 @@ class MonitorViewModel @Inject constructor(
 
             currentUiState.copy(
                 currentTire = realTire,
-                battery = decodeAlertDataFrame(
-                    dataFrame,
-                    SensorAlertDataFrame.LOW_BATTERY
-                ),
+
                 pression = Pair(pression, pressureStatus),
+
                 temperature = Pair(
                     temperature,
                     temperatureStatus
                 ),
+
                 timestamp = getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss"),
-                tiresWithAlert = newMap
+                tiresWithAlert = newMap,
+                batteryStatus = batteryStatus
             )
         }
     }
@@ -259,6 +264,9 @@ class MonitorViewModel @Inject constructor(
                                     else if (it.highPressure) SensorAlerts.HIGH_PRESSURE
                                     else SensorAlerts.NO_DATA
 
+                                val batteryAlert =
+                                    if (it.lowBattery) SensorAlerts.LOW_BATTERY else SensorAlerts.NO_DATA
+
                                 _monitorUiState.update { currentUiState ->
 
                                     val inAlert =
@@ -273,7 +281,8 @@ class MonitorViewModel @Inject constructor(
                                         temperature = Pair(it.temperature, tempAlert),
                                         pression = Pair(it.psi, pressureAlert),
                                         timestamp = convertDate(it.ultimalectura),
-                                        tiresWithAlert = newMap
+                                        tiresWithAlert = newMap,
+                                        batteryStatus = batteryAlert
                                     )
                                 }
                             }

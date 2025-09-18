@@ -42,13 +42,14 @@ fun decodeDataFrame(dataFrame: String?, typeData: MonitorDataFrame): String {
     return "N/A"
 }
 
-fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): String {
+fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): SensorAlerts {
     if (dataFrame != null) {
         when (alertType) {
             SensorAlertDataFrame.LOW_BATTERY -> {
                 val status = dataFrame.substring(25, dataFrame.length - 2)
                 val binary = status.toInt(16).toString().padStart(4, '0')
-                return if (binary.substring(3) != "0") "Cargada" else "Baja"
+                return if (binary.substring(3) == "0") SensorAlerts.LOW_BATTERY
+                else SensorAlerts.NO_DATA
             }
 
             SensorAlertDataFrame.PRESSURE -> {
@@ -64,24 +65,21 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
                 val lowPressureSignal = binaryLowPressure.substring(3, 4) == "0"
                 val highPressureSignal = binaryHighPressure.substring(0, 1) == "0"
 
-                return if (lowPressureSignal && !highPressureSignal) SensorAlerts.LOW_PRESSURE.name
-                else if (!lowPressureSignal && highPressureSignal) SensorAlerts.HIGH_PRESSURE.name
-                else SensorAlerts.NO_DATA.name
+                return if (lowPressureSignal && !highPressureSignal) SensorAlerts.LOW_PRESSURE
+                else if (!lowPressureSignal && highPressureSignal) SensorAlerts.HIGH_PRESSURE
+                else SensorAlerts.NO_DATA
             }
 
             SensorAlertDataFrame.HIGH_TEMPERATURE -> {
                 val status = dataFrame.substring(24, 25)
                 val binary = status.toInt(16).toString(2).padStart(4, '0')
                 // Si es diferente de 0 es alta
-                return if (binary.substring(
-                        2,
-                        3
-                    ) == "0"
-                ) SensorAlerts.HIGH_PRESSURE.name else SensorAlerts.NO_DATA.name
+                return if (binary.substring(2, 3) == "0") SensorAlerts.HIGH_PRESSURE
+                else SensorAlerts.NO_DATA
             }
         }
     }
-    return SensorAlerts.NO_DATA.name
+    return SensorAlerts.NO_DATA
 }
 
 fun verifyTemperature(dataFrame: String?): Boolean {

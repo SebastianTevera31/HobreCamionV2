@@ -112,13 +112,12 @@ fun MonitorScreen(
             )
         },
 
-    ) { contentPadding ->
+        ) { contentPadding ->
         Surface(
-            modifier = Modifier
+            modifier = Modifier.padding(bottom = 32.dp)
         ) {
             Column(
-                modifier = modifier
-                    .background(Color("#EDF0F8".toColorInt())),
+                modifier = modifier.background(Color("#EDF0F8".toColorInt())),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 if (selectedOption == MonitorScreenViews.DIAGRAMA) {
@@ -130,6 +129,7 @@ fun MonitorScreen(
                         timestamp = monitorUiState.value.timestamp,
                         temperatureStatus = monitorUiState.value.temperature.second,
                         pressionStatus = monitorUiState.value.pression.second,
+                        batteryStatus = monitorUiState.value.batteryStatus,
                         numWheels = monitorUiState.value.numWheels,
                         alertTires = monitorUiState.value.tiresWithAlert,
                         updateSelectedTire = { selectedTire ->
@@ -167,7 +167,10 @@ fun MonitorScreen(
                             val positionData = positionsUiState.value
                             when (positionData) {
                                 is ApiResult.Success -> {
-                                    val data: List<DiagramMonitorResponse>? = positionData.data
+
+                                    // FILTRAR POR SENSOR_ID
+                                    val data: List<DiagramMonitorResponse>? =
+                                        positionData.data?.filterNot { it.sensorId == 0 }
                                     CurrentPositionDataView(
                                         sensorDataList = monitorViewModel.convertToTireData(data),
                                         isOnSearch = false,

@@ -3,6 +3,12 @@ package com.rfz.appflotal.presentation.ui.monitor.screen
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,7 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -38,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -70,6 +77,7 @@ fun DiagramaMonitorScreen(
     pressure: Float,
     timestamp: String?,
     temperatureStatus: SensorAlerts,
+    batteryStatus: SensorAlerts,
     pressionStatus: SensorAlerts,
     numWheels: Int,
     alertTires: Map<String, Boolean>,
@@ -122,6 +130,7 @@ fun DiagramaMonitorScreen(
                         timestamp = timestamp,
                         temperatureStatus = temperatureStatus,
                         pressureStatus = pressionStatus,
+                        batteryStatus = batteryStatus,
                         modifier = Modifier
                             .height(320.dp)
                             .padding(bottom = dimensionResource(R.dimen.small_dimen))
@@ -265,6 +274,7 @@ fun PanelSensor(
     timestamp: String?,
     temperatureStatus: SensorAlerts,
     pressureStatus: SensorAlerts,
+    batteryStatus: SensorAlerts,
     modifier: Modifier = Modifier
 ) {
     val isTempAlert = temperatureStatus == SensorAlerts.HIGH_TEMPERATURE
@@ -288,31 +298,46 @@ fun PanelSensor(
                 verticalArrangement = if (wheel.isNotEmpty()) Arrangement.Top else Arrangement.Center
             ) {
                 if (wheel.isNotEmpty()) {
-                    Text(
-                        text = pluralStringResource(R.plurals.llanta_tag, 1, wheel),
-                        color = Color("#2E3192".toColorInt()),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(
-                        text = if (!timestamp.isNullOrEmpty()) stringResource(
-                            R.string.actualizado,
-                            timestamp
-                        ) else "N/A",
-                        fontSize = 12.sp,
-                        lineHeight = 16.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.White)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(0.5f)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = pluralStringResource(R.plurals.llanta_tag, 1, wheel),
+                                color = Color("#2E3192".toColorInt()),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Text(
+                                text = if (!timestamp.isNullOrEmpty()) {
+                                    stringResource(
+                                        R.string.actualizado,
+                                        timestamp
+                                    )
+                                } else "N/A",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp,
+                                lineHeight = 16.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White)
+                            )
+                        }
+
+                        BatteryAlertIcon(
+                            batteryStatus = batteryStatus
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Column(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
-                            .weight(1f, fill = false)
+                            .weight(1f)
                             .verticalScroll(rememberScrollState())
                     ) {
                         CeldaDatosSensor(
@@ -346,7 +371,7 @@ fun PanelSensor(
             colors = CardDefaults.cardColors(Color.White),
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(2f),
+                .weight(1.6f),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(
@@ -418,24 +443,69 @@ fun loadBitmapFromUrl(imageUrl: String): Bitmap? {
 }
 
 @Composable
+fun BatteryAlertIcon(batteryStatus: SensorAlerts, modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition()
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    val isAlert = batteryStatus == SensorAlerts.LOW_BATTERY
+
+    Image(
+        painter = if (isAlert) painterResource(R.drawable.dead_battery)
+        else painterResource(R.drawable.full_battery),
+        contentDescription = null,
+        modifier = modifier
+            .size(dimensionResource(R.dimen.huge_dimen))
+            .alpha(if (isAlert) alpha else 1f)
+    )
+}
+
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun DiagramaMonitorScreenPreview() {
+//    HombreCamionTheme {
+//        DiagramaMonitorScreen(
+//            imageUrl = "https://truckdriverapi.azurewebsites.net/Base32.png",
+//            currentWheel = "7",
+//            temperature = 54.0f,
+//            pressure = 39f,
+//            timestamp = "",
+//            temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
+//            pressionStatus = SensorAlerts.HIGH_PRESSURE,
+//            numWheels = 7,
+//            alertTires = emptyMap(),
+//            getSensorData = {},
+//            updateSelectedTire = {},
+//            coordinates = emptyList(),
+//            modifier = Modifier.safeContentPadding(),
+//            imageDimens = Pair(1, 1),
+//            batteryStatus = SensorAlerts.LOW_BATTERY
+//        )
+//    }
+// }
+
+@Composable
 @Preview(showBackground = true, showSystemUi = true)
-fun DiagramaMonitorScreenPreview() {
+fun PanelSensorViewPreview() {
     HombreCamionTheme {
-        DiagramaMonitorScreen(
-            imageUrl = "https://truckdriverapi.azurewebsites.net/Base32.png",
-            currentWheel = "7",
-            temperature = 54.0f,
-            pressure = 39f,
+        PanelSensor(
+            wheel = "P1",
+            temperature = 40.0f,
+            pressure = 3f,
             timestamp = "",
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
-            pressionStatus = SensorAlerts.HIGH_PRESSURE,
-            numWheels = 7,
-            alertTires = emptyMap(),
-            getSensorData = {},
-            updateSelectedTire = {},
-            coordinates = emptyList(),
-            modifier = Modifier.safeContentPadding(),
-            imageDimens = Pair(1, 1)
+            pressureStatus = SensorAlerts.LOW_PRESSURE,
+            batteryStatus = SensorAlerts.NO_DATA,
+            modifier = Modifier
+                .safeDrawingPadding()
+                .height(320.dp)
+                .padding(bottom = dimensionResource(R.dimen.small_dimen))
         )
     }
 }

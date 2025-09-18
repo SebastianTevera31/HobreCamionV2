@@ -44,7 +44,8 @@ data class BluetoothData(
 )
 
 enum class BluetoothSignalQuality(@StringRes val signalText: Int? = null) {
-    Excelente(R.string.excelente), Aceptable(R.string.aceptable), Pobre(R.string.pobre), Desconocida
+    Excelente(R.string.excelente), Aceptable(R.string.aceptable), Pobre(R.string.pobre), Desconocida(
+        R.string.sin_conexi_n)
 }
 
 class BluetoothRepositoryImp @Inject constructor(private val context: Context) :

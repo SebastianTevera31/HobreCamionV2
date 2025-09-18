@@ -205,11 +205,12 @@ class HombreCamionService : Service() {
                         }
 
                         BluetoothSignalQuality.Desconocida -> {
-                            CONNECTION_TITLE_MESSAGE = null
-                            CONNECTION_CONTEXT_MESSAGE = null
+                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                            CONNECTION_CONTEXT_MESSAGE =
+                                BluetoothSignalQuality.Desconocida.signalText
                         }
                     }
-                    
+
                     rebuildNotificationTexts()
                 }
         }
@@ -238,7 +239,7 @@ class HombreCamionService : Service() {
 
                         sensorTableUseCase.doInsert(
                             SensorTpmsEntity(
-                                monitorId = 3,
+                                monitorId = monitorId,
                                 sensorId = sensorId,
                                 dataFrame = dataFrame,
                                 timestamp = timestamp,
@@ -253,25 +254,25 @@ class HombreCamionService : Service() {
         }
     }
 
-    private suspend fun sendDataToApi(dataFrame: String, timestamp: String, userId: Int) {
+    private suspend fun sendDataToApi(dataFrame: String, timestamp: String, monitorId: Int) {
         val wifiStatus = wifiUseCase()
         Log.d("HombreCamionService", "WifiStatus: $wifiStatus")
         if (wifiStatus.value == NetworkStatus.Connected) {
 
             val localOldestTimestamp = oldestTimestamp
             if (localOldestTimestamp != null) {
-                getUnsentRecords(userId)
+                getUnsentRecords(monitorId)
                 oldestTimestamp = null
             }
 
             apiTpmsUseCase.doPostSensorData(
                 fldFrame = dataFrame,
-                monitorId = 3,
+                monitorId = monitorId,
                 fldDateData = timestamp
             )
 
             sensorTableUseCase.doSetRecordStatus(
-                monitorId = 3,
+                monitorId = monitorId,
                 timestamp = timestamp,
                 sendStatus = true
             )
@@ -338,12 +339,13 @@ class HombreCamionService : Service() {
 
         val title = lctx.getString(R.string.hombrecamion_conexion_tpms)
 
-        val statusContent = if (CONNECTION_TITLE_MESSAGE != null) {
-            lctx.getString(
-                CONNECTION_TITLE_MESSAGE!!,
-                lctx.getString(CONNECTION_STATUS_MESSAGE!!)
-            )
-        } else null
+        val statusContent =
+            if (CONNECTION_TITLE_MESSAGE != null && CONNECTION_STATUS_MESSAGE != null) {
+                lctx.getString(
+                    CONNECTION_TITLE_MESSAGE!!,
+                    lctx.getString(CONNECTION_STATUS_MESSAGE!!)
+                )
+            } else null
 
         val titleContent =
             if (CONNECTION_CONTEXT_MESSAGE != null) lctx.getString(CONNECTION_CONTEXT_MESSAGE!!) else null
