@@ -1,7 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -33,42 +32,38 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import com.rfz.appflotal.R
-import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 import kotlin.math.max
 
 @Composable
 fun DiagramImage(
-    coordinates: List<PositionCoordinatesResponse>,
+    tires: List<Tire>,
     image: Bitmap,
     width: Int,
     height: Int,
-    alertTires: Map<String, Boolean>,
     tireSelected: String,
     modifier: Modifier = Modifier,
 ) {
-    val coordinatesMapped = coordinates.map { it ->
+    val tireMapped = tires.map { it ->
         Hotspot.fromPixelCenter(
-            id = it.position,
-            px = it.fldPositionX.toFloat(),
-            py = it.fldPositionY.toFloat(),
+            id = it.sensorPosition,
+            px = it.xPosition.toFloat(),
+            py = it.yPosition.toFloat(),
+            inAlert = it.inAlert,
+            isActive = it.isActive,
             imageHeightPx = height,
             imageWidthPx = width,
-            label = it.position
+            label = it.sensorPosition
         )
     }
 
     ImageWithHotspotsProportional(
         img = image.asImageBitmap(),
-        hotspots = coordinatesMapped,
-        alertTires = alertTires,
+        hotspots = tireMapped,
         tireSelected = tireSelected,
         modifier = modifier
             .fillMaxWidth()
@@ -80,7 +75,6 @@ fun DiagramImage(
 fun ImageWithHotspotsProportional(
     img: ImageBitmap,
     hotspots: List<Hotspot>,
-    alertTires: Map<String, Boolean>,
     tireSelected: String,
     modifier: Modifier = Modifier,
 ) {
@@ -134,10 +128,14 @@ fun ImageWithHotspotsProportional(
             Canvas(modifier = Modifier.fillMaxSize()) {
                 bubbleBounds.clear()
                 hotspots.forEach { h ->
-                    val colorStatus = if (alertTires[h.id] == true)
+                    val colorStatus = if (h.inAlert)
                         Pair(Color.Red, Color.White)
-                    else
+                    else if (h.isActive) {
                         Pair(h.bubbleBg, Color.Black)
+                    } else Pair(
+                        Color.Gray,
+                        Color.Gray
+                    )
 
                     // Posición del centro en pixeles del canvas
                     val cx = h.center01.x * size.width
@@ -194,6 +192,8 @@ data class Hotspot(
     val id: String,
     /** Centro normalizado [0f..1f] relativo a ancho/alto de la imagen */
     val center01: Offset,
+    val inAlert: Boolean,
+    val isActive: Boolean,
     val label: String,
     val bubbleBg: Color = Color(0xCC212121),
     val bubbleText: Color = Color.White,
@@ -205,6 +205,8 @@ data class Hotspot(
             id: String,
             px: Float,
             py: Float,
+            inAlert: Boolean,
+            isActive: Boolean,
             imageWidthPx: Int,
             imageHeightPx: Int,
             label: String,
@@ -215,6 +217,8 @@ data class Hotspot(
             id = id,
             center01 = Offset(px / imageWidthPx.toFloat(), py / imageHeightPx.toFloat()),
             label = label,
+            inAlert = inAlert,
+            isActive = isActive,
             bubbleBg = bubbleBg,
             bubbleText = bubbleText,
             bubbleStroke = bubbleStroke
@@ -222,62 +226,62 @@ data class Hotspot(
     }
 }
 
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun DiagramaImagenPreview() {
-    val context = LocalContext.current
-    val drawable = ContextCompat.getDrawable(context, R.drawable.base32) as BitmapDrawable
-    val bitmap = drawable.bitmap
-    val coordinates = listOf(
-        PositionCoordinatesResponse(38, 0, 133, 30, 0, "P1"),
-        PositionCoordinatesResponse(38, 0, 133, 234, 0, "P2"),
-        PositionCoordinatesResponse(38, 0, 323, 234, 0, "P3"),
-        PositionCoordinatesResponse(38, 0, 323, 197, 0, "P4"),   // +5
-        PositionCoordinatesResponse(38, 0, 323, 67, 0, "P5"),  // -5
-        PositionCoordinatesResponse(38, 0, 323, 30, 0, "P6"),
-        PositionCoordinatesResponse(38, 0, 457, 30, 0, "P7"),
-        PositionCoordinatesResponse(38, 0, 457, 67, 0, "P8"),   // +5
-        PositionCoordinatesResponse(38, 0, 457, 234, 0, "P9"),  // -5
-        PositionCoordinatesResponse(38, 0, 457, 197, 0, "P10"),
-        PositionCoordinatesResponse(38, 0, 563, 30, 0, "P11"),
-        PositionCoordinatesResponse(38, 0, 563, 67, 0, "P12"),  // +5
-        PositionCoordinatesResponse(38, 0, 563, 234, 0, "P13"), // -5
-        PositionCoordinatesResponse(38, 0, 563, 197, 0, "P14"),
-        PositionCoordinatesResponse(38, 0, 740, 30, 0, "P15"),
-        PositionCoordinatesResponse(38, 0, 740, 67, 0, "P16"),  // +5
-        PositionCoordinatesResponse(38, 0, 740, 234, 0, "P17"), // -5
-        PositionCoordinatesResponse(38, 0, 740, 197, 0, "P18"),
-        PositionCoordinatesResponse(38, 0, 853, 30, 0, "P19"),
-        PositionCoordinatesResponse(38, 0, 853, 67, 0, "P20"),  // +5
-        PositionCoordinatesResponse(38, 0, 853, 234, 0, "P21"), // -5
-        PositionCoordinatesResponse(38, 0, 853, 197, 0, "P22"),
-        PositionCoordinatesResponse(38, 0, 967, 30, 0, "P23"),
-        PositionCoordinatesResponse(38, 0, 967, 67, 0, "P24"),  // +5
-        PositionCoordinatesResponse(38, 0, 967, 234, 0, "P25"), // -5
-        PositionCoordinatesResponse(38, 0, 967, 197, 0, "P26"),
-        PositionCoordinatesResponse(38, 0, 1163, 30, 0, "P27"),
-        PositionCoordinatesResponse(38, 0, 1163, 67, 0, "P28"),  // +5
-        PositionCoordinatesResponse(38, 0, 1163, 234, 0, "P29"), // -5
-        PositionCoordinatesResponse(38, 0, 1163, 197, 0, "P30"),
-        PositionCoordinatesResponse(38, 0, 1275, 30, 0, "P31"),
-        PositionCoordinatesResponse(38, 0, 1275, 67, 0, "P32"),  // +5
-        PositionCoordinatesResponse(38, 0, 1275, 234, 0, "P33"), // -5
-        PositionCoordinatesResponse(38, 0, 1275, 197, 0, "P34"),
-        PositionCoordinatesResponse(38, 0, 1390, 30, 0, "P35"),
-        PositionCoordinatesResponse(38, 0, 1390, 67, 0, "P36"),  // +5
-        PositionCoordinatesResponse(38, 0, 1390, 234, 0, "P37"), // -5
-        PositionCoordinatesResponse(38, 0, 1390, 197, 0, "P38")
-    )
-
-    if (bitmap != null) {
-        DiagramImage(
-            coordinates = coordinates,
-            image = bitmap,
-            alertTires = emptyMap(),
-            tireSelected = "",
-            height = 123,
-            width = 123,
-        )
-    }
-
-}
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun DiagramaImagenPreview() {
+//    val context = LocalContext.current
+//    val drawable = ContextCompat.getDrawable(context, R.drawable.base32) as BitmapDrawable
+//    val bitmap = drawable.bitmap
+//    val coordinates = listOf(
+//        PositionCoordinatesResponse(38, 0,0, 133, 30,  "P1"),
+//        PositionCoordinatesResponse(38, 0, 133, 234,  "P2"),
+//        PositionCoordinatesResponse(38, 0, 323, 234, , "P3"),
+//        PositionCoordinatesResponse(38, 0, 323, 197, , "P4"),   // +5
+//        PositionCoordinatesResponse(38, 0, 323, 67,  "P5"),  // -5
+//        PositionCoordinatesResponse(38, 0, 323, 30, , "P6"),
+//        PositionCoordinatesResponse(38, 0, 457, 30,  "P7"),
+//        PositionCoordinatesResponse(38, 0, 457, 67,  "P8"),   // +5
+//        PositionCoordinatesResponse(38, 0, 457, 234,  "P9"),  // -5
+//        PositionCoordinatesResponse(38, 0, 457, 197,  "P10"),
+//        PositionCoordinatesResponse(38, 0, 563, 30, , "P11"),
+//        PositionCoordinatesResponse(38, 0, 563, 67, 0, "P12"),  // +5
+//        PositionCoordinatesResponse(38, 0, 563, 234, 0, "P13"), // -5
+//        PositionCoordinatesResponse(38, 0, 563, 197, 0, "P14"),
+//        PositionCoordinatesResponse(38, 0, 740, 30, 0, "P15"),
+//        PositionCoordinatesResponse(38, 0, 740, 67, 0, "P16"),  // +5
+//        PositionCoordinatesResponse(38, 0, 740, 234, 0, "P17"), // -5
+//        PositionCoordinatesResponse(38, 0, 740, 197, 0, "P18"),
+//        PositionCoordinatesResponse(38, 0, 853, 30, 0, "P19"),
+//        PositionCoordinatesResponse(38, 0, 853, 67, 0, "P20"),  // +5
+//        PositionCoordinatesResponse(38, 0, 853, 234, 0, "P21"), // -5
+//        PositionCoordinatesResponse(38, 0, 853, 197, 0, "P22"),
+//        PositionCoordinatesResponse(38, 0, 967, 30, 0, "P23"),
+//        PositionCoordinatesResponse(38, 0, 967, 67, 0, "P24"),  // +5
+//        PositionCoordinatesResponse(38, 0, 967, 234, 0, "P25"), // -5
+//        PositionCoordinatesResponse(38, 0, 967, 197, 0, "P26"),
+//        PositionCoordinatesResponse(38, 0, 1163, 30, 0, "P27"),
+//        PositionCoordinatesResponse(38, 0, 1163, 67, 0, "P28"),  // +5
+//        PositionCoordinatesResponse(38, 0, 1163, 234, 0, "P29"), // -5
+//        PositionCoordinatesResponse(38, 0, 1163, 197, 0, "P30"),
+//        PositionCoordinatesResponse(38, 0, 1275, 30, 0, "P31"),
+//        PositionCoordinatesResponse(38, 0, 1275, 67, 0, "P32"),  // +5
+//        PositionCoordinatesResponse(38, 0, 1275, 234, 0, "P33"), // -5
+//        PositionCoordinatesResponse(38, 0, 1275, 197, 0, "P34"),
+//        PositionCoordinatesResponse(38, 0, 1390, 30, 0, "P35"),
+//        PositionCoordinatesResponse(38, 0, 1390, 67, 0, "P36"),  // +5
+//        PositionCoordinatesResponse(38, 0, 1390, 234, 0, "P37"), // -5
+//        PositionCoordinatesResponse(38, 0, 1390, 197, 0, "P38")
+//    )
+//
+//    if (bitmap != null) {
+//        DiagramImage(
+//            coordinates = coordinates,
+//            image = bitmap,
+//            alertTires = emptyMap(),
+//            tireSelected = "",
+//            height = 123,
+//            width = 123,
+//        )
+//    }
+//
+//}

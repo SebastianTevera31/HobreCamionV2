@@ -85,9 +85,7 @@ data class DiagramMonitorResponse(
 
 data class PositionCoordinatesResponse(
     @SerializedName("id_positionCoordinates") val positionCoordinatesId: Int,
-    @SerializedName("id_monitor") val monitorId: Int,
     @SerializedName("fld_positionx") val fldPositionX: Int,
     @SerializedName("fld_positiony") val fldPositionY: Int,
-    @SerializedName("id_sensor") val sensorId: Int,
     @SerializedName("position") val position: String,
 )

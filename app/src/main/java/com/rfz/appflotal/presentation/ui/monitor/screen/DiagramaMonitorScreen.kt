@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -64,9 +65,9 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.rfz.appflotal.R
-import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 
 @Composable
 fun DiagramaMonitorScreen(
@@ -79,11 +80,9 @@ fun DiagramaMonitorScreen(
     temperatureStatus: SensorAlerts,
     batteryStatus: SensorAlerts,
     pressionStatus: SensorAlerts,
-    numWheels: Int,
-    alertTires: Map<String, Boolean>,
     updateSelectedTire: (String) -> Unit,
     getSensorData: (String) -> Unit,
-    coordinates: List<PositionCoordinatesResponse>?,
+    tires: List<Tire>?,
     modifier: Modifier = Modifier
 ) {
     var isLoading by remember { mutableStateOf(true) }
@@ -99,11 +98,10 @@ fun DiagramaMonitorScreen(
         Box {
             val bitmap = loadBitmapFromUrl(imageUrl)
 
-            if (bitmap != null && coordinates != null) {
+            if (bitmap != null && tires != null) {
                 DiagramImage(
-                    coordinates = coordinates,
+                    tires = tires,
                     image = bitmap,
-                    alertTires = alertTires,
                     tireSelected = tireSelected,
                     width = imageDimens.first,
                     height = imageDimens.second
@@ -137,8 +135,7 @@ fun DiagramaMonitorScreen(
                             .weight(1f)
                     )
                     PanelLlantas(
-                        numWheels = numWheels,
-                        wheelsWithAlert = alertTires,
+                        tiresList = tires,
                         tireSelected = tireSelected,
                         updateSelectedTire = { updateSelectedTire(it) },
                         modifier = Modifier
@@ -157,8 +154,7 @@ fun DiagramaMonitorScreen(
 
 @Composable
 fun PanelLlantas(
-    numWheels: Int,
-    wheelsWithAlert: Map<String, Boolean>,
+    tiresList: List<Tire>?,
     tireSelected: String,
     updateSelectedTire: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -178,41 +174,44 @@ fun PanelLlantas(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(numWheels) {
-                    val colorStatus =
-                        if (wheelsWithAlert["P${it + 1}"] == true) Pair(Color.Red, Color.White)
-                        else Pair(Color(0x402E3192), Color.Black)
+            if (tiresList != null) {
+                val filterTireList = tiresList.filter { it.isActive }
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(items = filterTireList, key = { tire -> tire.sensorPosition }) {
+                        val colorStatus =
+                            if (it.inAlert) Pair(Color.Red, Color.White)
+                            else Pair(Color(0x402E3192), Color.Black)
 
-                    val border = if (tireSelected == "P${it + 1}") {
-                        BorderStroke(width = 4.dp, color = MaterialTheme.colorScheme.primary)
-                    } else null
+                        val border = if (tireSelected == it.sensorPosition) {
+                            BorderStroke(width = 4.dp, color = MaterialTheme.colorScheme.primary)
+                        } else null
 
-                    Button(
-                        onClick = {
-                            val tire = if ("P${it + 1}" == tireSelected) "" else {
-                                getSensorData("P${it + 1}")
-                                "P${it + 1}"
-                            }
-                            updateSelectedTire(tire)
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(colorStatus.first),
-                        border = border,
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
-                    ) {
-                        Text(
-                            text = "P${it + 1}",
-                            color = colorStatus.second,
-                            fontSize = 16.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Clip,
-                            softWrap = false,
-                        )
+                        Button(
+                            onClick = {
+                                val tire = if (it.sensorPosition == tireSelected) "" else {
+                                    getSensorData(it.sensorPosition)
+                                    it.sensorPosition
+                                }
+                                updateSelectedTire(tire)
+                            },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(colorStatus.first),
+                            border = border,
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+                        ) {
+                            Text(
+                                text = it.sensorPosition,
+                                color = colorStatus.second,
+                                fontSize = 16.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Clip,
+                                softWrap = false,
+                            )
+                        }
                     }
                 }
             }

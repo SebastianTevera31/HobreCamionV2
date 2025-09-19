@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
@@ -55,17 +56,18 @@ import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionFilterView(
-    numWheels: Int,
+    tiresList: List<Tire>?,
     modifier: Modifier = Modifier,
     onGetSensorData: (String, String) -> Unit
 ) {
-    val numTires = Array(numWheels) { it -> "P${it + 1}" }
+    val tires = tiresList?.filter { it.isActive }?.map { it.sensorPosition } ?: emptyList()
     var wheelSelected by remember { mutableStateOf("") }
     var dateSelected by remember { mutableStateOf(getCurrentDate(pattern = "yyyy-MM-dd")) }
 
@@ -78,7 +80,7 @@ fun PositionFilterView(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            TireSpinner(listOfTires = numTires, modifier = Modifier.weight(1f)) {
+            TireSpinner(listOfTires = tires, modifier = Modifier.weight(1f)) {
                 wheelSelected = it
             }
 
@@ -192,12 +194,13 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
 
 @Composable
 fun TireSpinner(
-    listOfTires: Array<String>,
+    listOfTires: List<String>,
     modifier: Modifier = Modifier,
     onSelectWheel: (String) -> Unit
 ) {
     var selectedText by remember { mutableStateOf("") }
     var isExpanded by remember { mutableStateOf(false) }
+
     Column(modifier = modifier) {
         Text(text = pluralStringResource(R.plurals.llanta_tag, 1, ""))
         Box {
@@ -224,7 +227,7 @@ fun TireSpinner(
                 modifier = Modifier
                     .background(Color.White)
                     .width(100.dp)
-                    .height(230.dp)
+                    .heightIn(max = 230.dp)
             ) {
                 listOfTires.forEach { tire ->
                     DropdownMenuItem(
@@ -233,7 +236,7 @@ fun TireSpinner(
                             onSelectWheel(tire.lowercase(Locale.getDefault()))
                             selectedText = tire
                             isExpanded = false
-                        }
+                        },
                     )
                 }
             }
@@ -247,7 +250,7 @@ fun TireSpinner(
 fun PositionFilterViewPreview() {
     HombreCamionTheme {
         PositionFilterView(
-            numWheels = 10,
+            tiresList = emptyList(),
             onGetSensorData = { _, _ -> },
             modifier = Modifier.safeContentPadding()
         )

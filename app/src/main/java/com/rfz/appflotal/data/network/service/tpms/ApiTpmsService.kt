@@ -1,7 +1,6 @@
 package com.rfz.appflotal.data.network.service.tpms
 
 import android.util.Log
-import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.model.tpms.ConfigurationByIdMonitorResponse
 import com.rfz.appflotal.data.model.tpms.CrudMonitor
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse

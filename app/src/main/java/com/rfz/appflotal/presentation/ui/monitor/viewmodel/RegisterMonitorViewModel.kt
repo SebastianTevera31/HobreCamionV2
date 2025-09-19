@@ -1,13 +1,16 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
@@ -124,11 +127,16 @@ class RegisterMonitorViewModel @Inject constructor(
                                 userData.id_user
                             )
                             showAlert(context, message = RegisterMonitorMessage.REGISTERED.message)
+
+                            onRestartClicked(context)
+
                             _registeredMonitorState.value = ApiResult.Success(data = idMonitor)
                         } else {
-                            _registeredMonitorState.value = ApiResult.Error(message = context.getString(
-                                R.string.no_se_ha_asignado_ningun_monitor
-                            ))
+                            _registeredMonitorState.value = ApiResult.Error(
+                                message = context.getString(
+                                    R.string.no_se_ha_asignado_ningun_monitor
+                                )
+                            )
                         }
                     } else {
                         _registeredMonitorState.value = ApiResult.Error(message = result[0].message)
@@ -207,5 +215,12 @@ class RegisterMonitorViewModel @Inject constructor(
         if (strMessage != null) {
             Toast.makeText(ctx, strMessage, Toast.LENGTH_LONG).show()
         }
+    }
+
+    fun onRestartClicked(context: Context) {
+        ContextCompat.startForegroundService(
+            context,
+            Intent(context, HombreCamionService::class.java).setAction("ACTION_RESTART")
+        )
     }
 }

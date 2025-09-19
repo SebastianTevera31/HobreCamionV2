@@ -39,6 +39,7 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -130,15 +131,13 @@ fun MonitorScreen(
                         temperatureStatus = monitorUiState.value.temperature.second,
                         pressionStatus = monitorUiState.value.pression.second,
                         batteryStatus = monitorUiState.value.batteryStatus,
-                        numWheels = monitorUiState.value.numWheels,
-                        alertTires = monitorUiState.value.tiresWithAlert,
                         updateSelectedTire = { selectedTire ->
                             monitorViewModel.updateSelectedTire(selectedTire)
                         },
                         getSensorData = { sensorId ->
                             monitorViewModel.getSensorDataByWheel(sensorId)
                         },
-                        coordinates = monitorUiState.value.coordinateList,
+                        tires = monitorUiState.value.listOfTires,
                         imageDimens = monitorUiState.value.imageDimen,
                         modifier = Modifier.padding(8.dp),
                     )
@@ -149,9 +148,9 @@ fun MonitorScreen(
                         modifier = Modifier.padding(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Navegacion Recientes y Buscar
+                        // Navegacion Recientes y Filtrar
                         NavPositionMonitorScreen(
-                            numWheels = monitorUiState.value.numWheels,
+                            tiresList = monitorUiState.value.listOfTires,
                             onSensorData = { sensorSelected, dateSelected ->
                                 monitorViewModel.getTireDataByDate(
                                     sensorSelected,
@@ -163,6 +162,8 @@ fun MonitorScreen(
                             }
                         )
 
+
+                        // Manejo de presentacion de lista
                         if (positionOptionSelected == R.string.recientes) {
                             val positionData = positionsUiState.value
                             when (positionData) {
@@ -219,7 +220,7 @@ fun MonitorScreen(
 
 @Composable
 fun NavPositionMonitorScreen(
-    numWheels: Int,
+    tiresList: List<Tire>?,
     onSensorData: (String, String) -> Unit,
     onPositionOptionSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -276,7 +277,7 @@ fun NavPositionMonitorScreen(
 
             if (showSearchRecords) {
                 PositionFilterView(
-                    numWheels = numWheels,
+                    tiresList = tiresList,
                     modifier = Modifier.padding(bottom = 8.dp)
                 ) { wheelSelected, dateSelected -> onSensorData(wheelSelected, dateSelected) }
             }

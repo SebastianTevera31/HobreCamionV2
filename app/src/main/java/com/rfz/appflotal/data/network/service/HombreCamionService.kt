@@ -87,6 +87,12 @@ class HombreCamionService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
+        when (intent?.action) {
+            "ACTION_RESTART" -> {
+                initBluetoothConnection()
+            }
+        }
+
         // Configurar e iniciar del servicio
         if (!isStaterd) {
             startForegroundService()
@@ -167,13 +173,12 @@ class HombreCamionService : Service() {
 
     private fun initBluetoothConnection() {
         coroutineScope.launch {
-            getUserUseCase().distinctUntilChangedBy { it.first().monitorMac }.collect { record ->
-                val dataUser = record.first()
-                Log.d("HombreCamionService", "Iniciando Bluetooth...")
-                if (dataUser.id_monitor != 0) {
-                    bluetoothUseCase.doConnect(dataUser.monitorMac)
-                    bluetoothUseCase.doStartRssiMonitoring()
-                }
+            val record = getUserUseCase().first()
+            val dataUser = record.first()
+            Log.d("HombreCamionService", "Iniciando Bluetooth...")
+            if (dataUser.id_monitor != 0) {
+                bluetoothUseCase.doConnect(dataUser.monitorMac)
+                bluetoothUseCase.doStartRssiMonitoring()
             }
         }
     }

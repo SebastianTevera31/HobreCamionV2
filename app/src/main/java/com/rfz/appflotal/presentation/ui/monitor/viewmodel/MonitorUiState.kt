@@ -17,12 +17,19 @@ data class MonitorUiState(
         ""
     ),
     val imageDimen: Pair<Int, Int> = Pair(0, 0),
-    val numWheels: Int = 0,
     val chassisImageUrl: String = "",
-    val tiresWithAlert: Map<String, Boolean> = emptyMap(),
+    val listOfTires: List<Tire> = emptyList(),
     val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
     val showDialog: Boolean = false,
     val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA
+)
+
+data class Tire(
+    val sensorPosition: String,
+    val inAlert: Boolean,
+    val isActive: Boolean,
+    val xPosition: Int,
+    val yPosition: Int,
 )
 
 fun DiagramMonitorResponse.toTireData(): MonitorTireByDateResponse {
