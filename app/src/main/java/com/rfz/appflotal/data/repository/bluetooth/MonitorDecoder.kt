@@ -48,7 +48,7 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
             SensorAlertDataFrame.LOW_BATTERY -> {
                 val status = dataFrame.substring(25, dataFrame.length - 2)
                 val binary = status.toInt(16).toString().padStart(4, '0')
-                return if (binary.substring(3) == "0") SensorAlerts.LOW_BATTERY
+                return if (binary.substring(3) != "0") SensorAlerts.LOW_BATTERY
                 else SensorAlerts.NO_DATA
             }
 
