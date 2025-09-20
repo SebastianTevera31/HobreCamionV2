@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
+import com.rfz.appflotal.core.util.Commons.getDateObject
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.core.util.Positions.findOutPosition
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
@@ -155,7 +156,7 @@ class MonitorViewModel @Inject constructor(
                         // Se agrega la funcion Let como seguridad, sin embargo el Id debe existir en esta parte
                         monitorId.let {
                             sensorTableUseCase.doGetLastRecord(it).forEach { data ->
-                                if (data != null) updateSensorData(data.dataFrame)
+                                if (data != null) updateSensorData(data.dataFrame, data.timestamp)
                             }
                         }
                     } else updateSensorData(dataFrame)
@@ -175,7 +176,7 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
-    private fun updateSensorData(dataFrame: String) {
+    private fun updateSensorData(dataFrame: String, timestamp: String? = null) {
         _monitorUiState.update { currentUiState ->
             val tire = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
             val realTire = findOutPosition("P${tire}")
@@ -197,12 +198,18 @@ class MonitorViewModel @Inject constructor(
 
             val batteryStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
 
-            val inAlert =
-                temperatureStatus != SensorAlerts.NO_DATA || pressureStatus != SensorAlerts.NO_DATA
+            val inAlert = temperatureStatus != SensorAlerts.NO_DATA
+                    || pressureStatus != SensorAlerts.NO_DATA
+                    || batteryStatus != SensorAlerts.NO_DATA
 
             val newList = currentUiState.listOfTires.toMutableList().map { tire ->
                 if (tire.sensorPosition == realTire) tire.copy(inAlert = inAlert) else tire
             }
+
+            val time = if (timestamp != null) {
+                val getDate = getDateObject(timestamp)
+                getCurrentDate(date = getDate, pattern = "dd/MM/yyyy HH:mm:ss")
+            } else getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss")
 
             currentUiState.copy(
                 currentTire = realTire,
@@ -214,7 +221,7 @@ class MonitorViewModel @Inject constructor(
                     temperatureStatus
                 ),
 
-                timestamp = getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss"),
+                timestamp = time,
                 batteryStatus = batteryStatus,
                 listOfTires = newList
             )
@@ -246,7 +253,8 @@ class MonitorViewModel @Inject constructor(
 
                                     val inAlert = getIsTireInAlert(
                                         tempAlert = tempAlert,
-                                        pressureAlert = pressureAlert
+                                        pressureAlert = pressureAlert,
+                                        batteryAlert = batteryAlert
                                     )
 
                                     val newList =

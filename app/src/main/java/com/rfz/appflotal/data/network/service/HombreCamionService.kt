@@ -210,9 +210,10 @@ class HombreCamionService : Service() {
                         }
 
                         BluetoothSignalQuality.Desconocida -> {
-                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
                             CONNECTION_CONTEXT_MESSAGE =
                                 BluetoothSignalQuality.Desconocida.signalText
+                            CONNECTION_TITLE_MESSAGE = null
+                            CONNECTION_STATUS_MESSAGE = null
                         }
                     }
 

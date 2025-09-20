@@ -171,7 +171,7 @@ fun MonitorScreen(
 
                                     // FILTRAR POR SENSOR_ID
                                     val data: List<DiagramMonitorResponse>? =
-                                        positionData.data?.filterNot { it.sensorId == 0 }
+                                        positionData.data?.filter { it.sensorId != 0 }
                                     CurrentPositionDataView(
                                         sensorDataList = monitorViewModel.convertToTireData(data),
                                         isOnSearch = false,

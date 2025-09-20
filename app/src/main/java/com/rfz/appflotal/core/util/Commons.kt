@@ -36,7 +36,7 @@ object Commons {
         }
 
     fun validateBluetoothConnectivity(quality: BluetoothSignalQuality): Boolean {
-        return quality in listOf(BluetoothSignalQuality.Excelente, BluetoothSignalQuality.Aceptable)
+        return quality != BluetoothSignalQuality.Desconocida
     }
 
     fun isValidMacAddress(mac: String): Boolean {
@@ -61,6 +61,14 @@ object Commons {
         val date = sdf.parse(date)!!
         val outDate = SimpleDateFormat(convertFormat, Locale.getDefault())
         return outDate.format(date)
+    }
+
+    fun getDateObject(
+        date: String,
+        initialFormat: String = "yyyy-MM-dd'T'HH:mm:ss",
+    ): Date {
+        val sdf = SimpleDateFormat(initialFormat, Locale.getDefault())
+        return sdf.parse(date)!!
     }
 
     fun addOneDay(date: Date): Date {
