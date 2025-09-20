@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -37,19 +39,25 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +69,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -70,14 +79,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
 import com.rfz.appflotal.data.model.brand.response.BranListResponse
-import com.rfz.appflotal.data.model.delete.CatalogDeleteDto
 import com.rfz.appflotal.domain.brand.BrandCrudUseCase
 import com.rfz.appflotal.domain.brand.BrandListUseCase
-import com.rfz.appflotal.domain.delete.CatalogDeleteUseCase
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
+import kotlin.math.min
 
 private const val ITEMS_PER_PAGE = 10
 
@@ -87,18 +97,23 @@ fun MarcasScreen(
     navController: NavController,
     brandListUseCase: BrandListUseCase,
     homeViewModel: HomeViewModel,
-    brandCrudUseCase: BrandCrudUseCase,
-    catalogDeleteUseCase: CatalogDeleteUseCase
+    brandCrudUseCase: BrandCrudUseCase
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
+
     val primaryColor = Color(0xFF4A3DAD)
     val secondaryColor = Color(0xFF5C4EC9)
+    val tertiaryColor = Color(0xFF7F77EA)
     val backgroundColor = Color(0xFFF8F7FF)
+    val cardColor = Color.White
     val textColor = Color(0xFF333333)
     val lightTextColor = Color.White
 
     val uiState by homeViewModel.uiState.collectAsState()
+
+
+
     val userData = uiState.userData
+
     val scope = rememberCoroutineScope()
 
     var allMarcas by remember { mutableStateOf<List<BranListResponse>>(emptyList()) }
@@ -113,13 +128,11 @@ fun MarcasScreen(
     var editingBrand by remember { mutableStateOf<BranListResponse?>(null) }
     var newBrandName by remember { mutableStateOf("") }
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var brandToDelete by remember { mutableStateOf<BranListResponse?>(null) }
-
     fun applyFilterAndPagination() {
         val filtered = if (searchQuery.isBlank()) allMarcas else allMarcas.filter {
             it.description.contains(searchQuery, ignoreCase = true)
         }
+
         val totalItems = filtered.size
         showLoadMoreButton = currentPage * ITEMS_PER_PAGE < totalItems
         displayedMarcas = filtered.take(currentPage * ITEMS_PER_PAGE)
@@ -140,7 +153,7 @@ fun MarcasScreen(
             isLoading = true
             errorMessage = null
             try {
-                val result = brandListUseCase("Bearer ${userData?.fld_token}" ?: "", userData?.id_user!!)
+                val result = brandListUseCase("Bearer ${userData?.fld_token}" ?: "",userData?.id_user!!)
                 if (result.isSuccess) {
                     allMarcas = result.getOrNull() ?: emptyList()
                     resetPagination()
@@ -162,34 +175,12 @@ fun MarcasScreen(
             } else {
                 brandCrudUseCase(BrandCrudDto(editingBrand!!.idBrand, newBrandName), "Bearer ${userData?.fld_token}")
             }
+
             if (result.isSuccess) {
                 showDialog = false
                 loadBrands()
-                snackbarHostState.showSnackbar(
-                    message = result.getOrNull()?.firstOrNull()?.message ?: "Marca guardada exitosamente",
-                    duration = SnackbarDuration.Short
-                )
             } else {
                 errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar"
-            }
-        }
-    }
-
-    fun deleteBrand() {
-        scope.launch {
-            brandToDelete?.let { brand ->
-                val dto = CatalogDeleteDto(id = brand.idBrand, table = "brand")
-                val result = catalogDeleteUseCase(dto, "Bearer ${userData?.fld_token}")
-                if (result.isSuccess) {
-                    showDeleteDialog = false
-                    loadBrands()
-                    snackbarHostState.showSnackbar(
-                        message = "Marca eliminada exitosamente",
-                        duration = SnackbarDuration.Short
-                    )
-                } else {
-                    errorMessage = result.exceptionOrNull()?.message ?: "Error al eliminar"
-                }
             }
         }
     }
@@ -236,6 +227,7 @@ fun MarcasScreen(
                     )
                     .shadow(4.dp)
             )
+
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -343,10 +335,6 @@ fun MarcasScreen(
                                 newBrandName = marca.description
                                 showDialog = true
                             },
-                            onDeleteClick = {
-                                brandToDelete = marca
-                                showDeleteDialog = true
-                            },
                             primaryColor = primaryColor,
                             secondaryColor = secondaryColor
                         )
@@ -382,6 +370,7 @@ fun MarcasScreen(
 
         if (showDialog) {
             AlertDialog(
+
                 onDismissRequest = { },
                 modifier = Modifier.padding(horizontal = 24.dp),
                 shape = RoundedCornerShape(20.dp),
@@ -469,24 +458,7 @@ fun MarcasScreen(
                     }
                 }
             )
-        }
 
-        if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = {},
-                title = { Text("Eliminar Marca") },
-                text = { Text("¿Estás seguro de que deseas eliminar esta marca?") },
-                confirmButton = {
-                    Button(onClick = { deleteBrand() }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
-                        Text("ELIMINAR", color = Color.White, fontWeight = FontWeight.Bold)
-                    }
-                },
-                dismissButton = {
-                    OutlinedButton(onClick = { showDeleteDialog = false }) {
-                        Text("CANCELAR")
-                    }
-                }
-            )
         }
     }
 }
@@ -495,7 +467,6 @@ fun MarcasScreen(
 fun BrandItem(
     marca: BranListResponse,
     onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
     primaryColor: Color,
     secondaryColor: Color
 ) {
@@ -521,50 +492,40 @@ fun BrandItem(
         ) {
             Text(
                 text = marca.description.uppercase(),
+                modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = primaryColor
                 ),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
+                overflow = TextOverflow.Ellipsis
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                IconButton(
-                    onClick = { onEditClick() },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(
-                            color = secondaryColor.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(secondaryColor.copy(alpha = 0.1f))
+                    .clickable { onEditClick() }
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_edit),
+                        Icons.Default.Edit,
                         contentDescription = "Editar",
-                        tint = secondaryColor
+                        tint = secondaryColor,
+                        modifier = Modifier.size(18.dp)
                     )
-                }
-
-                IconButton(
-                    onClick = { onDeleteClick() },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(
-                            color = Color.Red.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = "Eliminar",
-                        tint = Color.Red
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Editar",
+                        color = secondaryColor,
+                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
         }
     }
 }
-
-

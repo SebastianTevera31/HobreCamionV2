@@ -99,13 +99,7 @@ fun HomeScreen(
         MenuItem(stringResource(R.string.products), "productoScreen", R.drawable.ic_products),
         MenuItem(stringResource(R.string.tire_register), "registroLlantasScreen", R.drawable.ic_tire_register),
         MenuItem(stringResource(R.string.vehicle_register), "registroVehiculoScreen", R.drawable.ic_truck),
-        MenuItem(stringResource(R.string.tire_change), "montajeDesmontajeScreen", R.drawable.ic_tire_change),
-        MenuItem(stringResource(R.string.parametros_default), "defaultParameterScreen", R.drawable.ic_tire_change),
-        MenuItem(stringResource(R.string.airpressure), "airpressureratingscreen", R.drawable.ic_tire_change),
-        MenuItem(stringResource(R.string.imperfetpair), "imperfectpair", R.drawable.ic_tire_change),
-        MenuItem(stringResource(R.string.retreaddesign), "retreaddesign", R.drawable.ic_tire_change),
-        MenuItem(stringResource(R.string.retreaddesignbrand), "retreaddesignbrand", R.drawable.ic_tire_change)
-, MenuItem(stringResource(R.string.dephtcolor), "depthcolorScreen", R.drawable.ic_tire_change)
+        MenuItem(stringResource(R.string.tire_change), "montajeDesmontajeScreen", R.drawable.ic_tire_change)
     )
     val scope = rememberCoroutineScope()
 

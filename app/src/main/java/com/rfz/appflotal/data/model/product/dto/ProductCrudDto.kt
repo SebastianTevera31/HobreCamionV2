@@ -16,5 +16,5 @@ data class ProductCrudDto (
     val loadCapacityId: Int,
 
     @SerializedName("fld_treadDepth")
-    val treadDepth: Float
+    val treadDepth: Int
 )

@@ -10,9 +10,9 @@ import javax.inject.Inject
 
 
 class DefaultParameterService @Inject constructor(private val defaultParameterClient: DefaultParameterClient) {
-    suspend fun doDefaultParameter(tok:String): Response<List<DefaultParameterResponse>> {
+    suspend fun doDefaultParameter(tok:String, id_user:Int): Response<List<DefaultParameterResponse>> {
         return withContext(Dispatchers.IO) {
-            defaultParameterClient.doDefaultParameter(tok)
+            defaultParameterClient.doDefaultParameter(tok,id_user)
         }
     }
 }

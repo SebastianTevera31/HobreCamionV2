@@ -84,8 +84,8 @@ fun MontajeDesmontajeScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color(0xFF2E3192),
-                titleContentColor = Color.White
+                containerColor = Color(0xFF2E3192), // Color de fondo
+                titleContentColor = Color.White // Color del título
             ),title = { Text("Montaje y Desmontaje") }, navigationIcon = {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
@@ -93,16 +93,15 @@ fun MontajeDesmontajeScreen(navController: NavController) {
             })
         }
     ) { innerPadding ->
-       /* Column(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-        )
-        {
-
+        ) {
+            // DropdownMenu
             CabinaDropdownMenu(selectedCabina) { selectedCabina = it }
 
-
+            // Tabs
             TabRow(selectedTabIndex = if (selectedTab == "Diagrama") 0 else 1,
                 containerColor = Color(0xFF3F51B5), contentColor = Color.White,
                 ) {
@@ -166,7 +165,7 @@ fun MontajeDesmontajeScreen(navController: NavController) {
                             )
                         }
                         Spacer(Modifier.height(10.dp))
-
+                        // Row con los tres botones debajo
                         Row(
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
@@ -187,7 +186,7 @@ fun MontajeDesmontajeScreen(navController: NavController) {
                     Text("Contenido para Posiciones", modifier = Modifier.padding(16.dp))
                 }
             }
-        }*/
+        }
     }
     // Dialogs
     if (showMontajeDialog) {
@@ -202,7 +201,7 @@ fun MontajeDesmontajeScreen(navController: NavController) {
             onPresionChange = { presionInspeccionada = it },
             onDismiss = { showMontajeDialog = false },
             onProcess = {
-
+                // Procesar montaje
                 showMontajeDialog = false
             }
         )
@@ -226,7 +225,7 @@ fun MontajeDesmontajeScreen(navController: NavController) {
             onPresionChange = { presionInspeccionada = it },
             onDismiss = { showDesmontajeDialog = false },
             onProcess = {
-
+                // Procesar desmontaje
                 showDesmontajeDialog = false
             }
         )
@@ -253,7 +252,7 @@ fun MontajeDesmontajeScreen(navController: NavController) {
             onInformeChange = { informeInspeccion = it },
             onDismiss = { showInspeccionDialog = false },
             onProcess = {
-
+                // Procesar inspección
                 showInspeccionDialog = false
             }
         )
@@ -267,7 +266,8 @@ fun VehicleDiagram(onLlantaClick: (Int) -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-          Row(
+        // Primera fila de llantas (frontal) - 2 llantas
+        Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {

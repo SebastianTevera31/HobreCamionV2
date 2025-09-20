@@ -38,7 +38,6 @@ import androidx.navigation.NavController
 import com.google.gson.Gson
 import com.rfz.appflotal.data.model.acquisitiontype.response.AcquisitionTypeResponse
 import com.rfz.appflotal.data.model.base.BaseResponse
-import com.rfz.appflotal.data.model.delete.CatalogDeleteDto
 import com.rfz.appflotal.data.model.product.response.ProductResponse
 import com.rfz.appflotal.data.model.provider.response.ProviderListResponse
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
@@ -46,7 +45,6 @@ import com.rfz.appflotal.data.model.tire.response.TireListResponse
 import com.rfz.appflotal.data.model.tire.response.TirexIdResponse
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.base.BaseUseCase
-import com.rfz.appflotal.domain.delete.CatalogDeleteUseCase
 import com.rfz.appflotal.domain.product.ProductListUseCase
 import com.rfz.appflotal.domain.provider.ProviderListUseCase
 import com.rfz.appflotal.domain.tire.TireCrudUseCase
@@ -70,7 +68,6 @@ fun NuevoRegistroLlantasScreen(
     tireCrudUseCase: TireCrudUseCase,
     tireListUsecase: TireListUsecase,
     tireGetUseCase: TireGetUseCase,
-    catalogDeleteUseCase: CatalogDeleteUseCase,
     homeViewModel: HomeViewModel
 ) {
 
@@ -93,6 +90,7 @@ fun NuevoRegistroLlantasScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
+
     var showDialog by remember { mutableStateOf(false) }
     var editingTire by remember { mutableStateOf<TireListResponse?>(null) }
     var isLoadingTireDetails by remember { mutableStateOf(false) }
@@ -107,6 +105,7 @@ fun NuevoRegistroLlantasScreen(
     val products = remember { mutableStateListOf<ProductResponse>() }
     var isLoadingCombos by remember { mutableStateOf(false) }
 
+
     var selectedAcquisitionType by remember { mutableStateOf<AcquisitionTypeResponse?>(null) }
     var selectedProvider by remember { mutableStateOf<ProviderListResponse?>(null) }
     var selectedBase by remember { mutableStateOf<BaseResponse?>(null) }
@@ -118,11 +117,12 @@ fun NuevoRegistroLlantasScreen(
     var tireNumber by remember { mutableStateOf("") }
     var dot by remember { mutableStateOf("") }
 
+
+
     var showDatePicker by remember { mutableStateOf(false) }
     val calendar = Calendar.getInstance()
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var tireToDelete by remember { mutableStateOf<TireListResponse?>(null) }
+
 
     fun applyFilter() {
         displayedTires = if (searchQuery.isBlank()) {
@@ -136,6 +136,7 @@ fun NuevoRegistroLlantasScreen(
         }
     }
 
+    // Load tires
     fun loadTires() {
         scope.launch {
             isLoading = true
@@ -162,25 +163,30 @@ fun NuevoRegistroLlantasScreen(
             try {
                 val bearerToken = "Bearer ${userData?.fld_token ?: ""}"
 
+
                 acquisitionTypes.clear()
                 providers.clear()
                 bases.clear()
                 products.clear()
+
 
                 val acquisitionTypeResult = acquisitionTypeUseCase(bearerToken)
                 if (acquisitionTypeResult.isSuccess) {
                     acquisitionTypes.add(acquisitionTypeResult.getOrNull() ?: throw Exception("No acquisition types"))
                 }
 
+
                 val providersResult = providerListUseCase(bearerToken, 1)
                 if (providersResult.isSuccess) {
                     providers.addAll(providersResult.getOrNull() ?: emptyList())
                 }
 
+
                 val basesResult = baseUseCase(bearerToken)
                 if (basesResult.isSuccess) {
                     bases.addAll(basesResult.getOrNull() ?: emptyList())
                 }
+
 
                 val productsResult = productListUseCase(bearerToken)
                 if (productsResult.isSuccess) {
@@ -196,6 +202,7 @@ fun NuevoRegistroLlantasScreen(
             }
         }
     }
+
 
     fun loadTireDetails(tireId: Int) {
         scope.launch {
@@ -233,6 +240,7 @@ fun NuevoRegistroLlantasScreen(
         }
     }
 
+    // Save tire
     @RequiresApi(Build.VERSION_CODES.O)
     fun saveTire() {
         scope.launch {
@@ -245,13 +253,15 @@ fun NuevoRegistroLlantasScreen(
             }
 
             try {
+
                 val dateTime = try {
                     LocalDateTime.parse(acquisitionDate, DateTimeFormatter.ISO_DATE_TIME)
                 } catch (e: Exception) {
-                    try {
+                     try {
                         val formatter = DateTimeFormatter.ofPattern("yyyy-M-d'T'HH:mm:ss.SSS'Z'")
                         LocalDateTime.parse(acquisitionDate, formatter)
                     } catch (e: Exception) {
+
                         try {
                             val dateOnly = LocalDate.parse(
                                 acquisitionDate.substringBefore('T'),
@@ -259,6 +269,7 @@ fun NuevoRegistroLlantasScreen(
                             )
                             dateOnly.atStartOfDay()
                         } catch (e: Exception) {
+
                             LocalDateTime.now()
                         }
                     }
@@ -271,7 +282,7 @@ fun NuevoRegistroLlantasScreen(
                     acquisitionDate = dateTime.toString(),
                     registrationDate = LocalDateTime.now().toString(),
                     document = "x",
-                    treadDepth = treadDepth.toFloat(),
+                    treadDepth = treadDepth.toInt(),
                     unitCost = cost.toInt(),
                     tireNumber = tireNumber,
                     userId = userData?.id_user ?: 0,
@@ -287,44 +298,24 @@ fun NuevoRegistroLlantasScreen(
                 val jsonRequest = gson.toJson(request)
                 println("JSON Request: $jsonRequest")
 
+
                 val result = tireCrudUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
                 if (result.isSuccess) {
-
-                    showDialog = false
-                    loadTires()
                     snackbarHostState.showSnackbar(
                         message = result.getOrNull()?.message ?: "Llanta guardada exitosamente",
                         duration = SnackbarDuration.Short
                     )
+                    showDialog = false
+                    loadTires()
                 } else {
                     errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar la llanta"
                 }
             } catch (e: Exception) {
-                errorMessage = "Error al procesar: ${e.message}"
+                errorMessage = "Error al procesar la fecha: ${e.message}"
             }
         }
     }
 
-    fun deleteTire() {
-        scope.launch {
-            tireToDelete?.let { tire ->
-                val dto = CatalogDeleteDto(
-                    id = tire.idTire,
-                    table = "tire"
-                )
-                catalogDeleteUseCase(dto, "Bearer ${userData?.fld_token}" ?: "").onSuccess { response ->
-                    showDeleteDialog = false
-                    loadTires()
-                    snackbarHostState.showSnackbar(
-                        message = "Llanta eliminada exitosamente",
-                        duration = SnackbarDuration.Short
-                    )
-                }.onFailure {
-                    errorMessage = it.message ?: "Error al eliminar la llanta"
-                }
-            }
-        }
-    }
 
     LaunchedEffect(Unit) {
         loadTires()
@@ -341,6 +332,7 @@ fun NuevoRegistroLlantasScreen(
         }
     }
 
+
     LaunchedEffect(showDialog) {
         if (showDialog) {
             loadComboData { success ->
@@ -349,6 +341,7 @@ fun NuevoRegistroLlantasScreen(
                 }
             }
         } else {
+
             selectedAcquisitionType = null
             selectedProvider = null
             selectedBase = null
@@ -420,6 +413,7 @@ fun NuevoRegistroLlantasScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            // Search bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -458,6 +452,7 @@ fun NuevoRegistroLlantasScreen(
                 )
             }
 
+            // Tire list
             Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
                 when {
                     isLoading && displayedTires.isEmpty() -> {
@@ -479,10 +474,6 @@ fun NuevoRegistroLlantasScreen(
                                         editingTire = tire
                                         showDialog = true
                                     },
-                                    onDeleteClick = {
-                                        tireToDelete = tire
-                                        showDeleteDialog = true
-                                    },
                                     primaryColor = primaryColor,
                                     secondaryColor = secondaryColor
                                 )
@@ -492,6 +483,7 @@ fun NuevoRegistroLlantasScreen(
                 }
             }
         }
+
 
         if (showDatePicker) {
             val datePickerState = rememberDatePickerState()
@@ -528,6 +520,7 @@ fun NuevoRegistroLlantasScreen(
             }
         }
 
+
         if (showDialog) {
             Dialog(
                 onDismissRequest = { showDialog = false }
@@ -545,6 +538,7 @@ fun NuevoRegistroLlantasScreen(
                             .verticalScroll(rememberScrollState())
                             .padding(16.dp)
                     ) {
+                        // Title
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -578,6 +572,7 @@ fun NuevoRegistroLlantasScreen(
                                 CircularProgressIndicator(color = primaryColor)
                             }
                         } else {
+                            // Acquisition Type field
                             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Column {
                                     Text(
@@ -674,6 +669,7 @@ fun NuevoRegistroLlantasScreen(
                                 }
                             }
 
+
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Text(
                                     "Fecha de Adquisición",
@@ -702,6 +698,7 @@ fun NuevoRegistroLlantasScreen(
                                     shape = RoundedCornerShape(14.dp)
                                 )
                             }
+
 
                             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Column {
@@ -750,6 +747,7 @@ fun NuevoRegistroLlantasScreen(
                                     }
                                 }
                             }
+
 
                             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Column {
@@ -824,6 +822,7 @@ fun NuevoRegistroLlantasScreen(
                                 )
                             }
 
+
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Text(
                                     "Profundidad de Piso",
@@ -868,6 +867,7 @@ fun NuevoRegistroLlantasScreen(
                                 )
                             }
 
+
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Text(
                                     "DOT",
@@ -888,6 +888,7 @@ fun NuevoRegistroLlantasScreen(
                                     shape = RoundedCornerShape(14.dp)
                                 )
                             }
+
 
                             Row(
                                 modifier = Modifier
@@ -911,6 +912,7 @@ fun NuevoRegistroLlantasScreen(
                                             selectedBase != null &&
                                             selectedProduct != null &&
                                             acquisitionDate.isNotBlank() &&
+
                                             cost.isNotBlank() &&
                                             tireNumber.isNotBlank(),
                                     colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
@@ -924,43 +926,6 @@ fun NuevoRegistroLlantasScreen(
                 }
             }
         }
-
-        if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteDialog = false },
-                title = {
-                    Text(
-                        "Eliminar Llanta",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            color = primaryColor,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                },
-                text = {
-                    Text(
-                        "¿Estás seguro de que deseas eliminar la llanta #${tireToDelete?.idTire}?",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = { deleteTire() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    ) {
-                        Text("ELIMINAR", color = Color.White, fontWeight = FontWeight.Bold)
-                    }
-                },
-                dismissButton = {
-                    OutlinedButton(
-                        onClick = { showDeleteDialog = false },
-                        border = BorderStroke(1.dp, primaryColor)
-                    ) {
-                        Text("CANCELAR", color = primaryColor, fontWeight = FontWeight.Bold)
-                    }
-                }
-            )
-        }
     }
 }
 
@@ -968,7 +933,6 @@ fun NuevoRegistroLlantasScreen(
 fun TireItem(
     tire: TireListResponse,
     onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
     primaryColor: Color,
     secondaryColor: Color
 ) {
@@ -1008,54 +972,27 @@ fun TireItem(
                 style = MaterialTheme.typography.bodyMedium.copy(color = Color.DarkGray)
             )
             Spacer(Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(secondaryColor.copy(alpha = 0.1f))
+                    .clickable(onClick = onEditClick)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .align(Alignment.End)
             ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(secondaryColor.copy(alpha = 0.1f))
-                        .clickable(onClick = onEditClick)
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Edit,
-                            contentDescription = "Edit",
-                            tint = secondaryColor,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            "Editar",
-                            color = secondaryColor,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-                Spacer(Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.Red.copy(alpha = 0.1f))
-                        .clickable(onClick = onDeleteClick)
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = Color.Red,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            "Eliminar",
-                            color = Color.Red,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = secondaryColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Editar",
+                        color = secondaryColor,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }

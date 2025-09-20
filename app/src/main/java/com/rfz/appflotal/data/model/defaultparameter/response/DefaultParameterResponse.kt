@@ -14,11 +14,13 @@ data class DefaultParameterResponse(
     val currentValue: Int,
 
     @SerializedName("fld_previousValue")
-    val previousValue: Float,
+    val previousValue: Int,
 
     @SerializedName("fld_notes")
     val notes: String,
 
+    @SerializedName("c_user_fk_1")
+    val userFk: Int,
 
     @SerializedName("fld_active")
     val isActive: Boolean

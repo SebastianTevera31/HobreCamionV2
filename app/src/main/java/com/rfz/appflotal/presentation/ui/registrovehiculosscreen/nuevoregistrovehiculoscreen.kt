@@ -25,7 +25,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,16 +33,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.base.BaseResponse
 import com.rfz.appflotal.data.model.controltype.response.ControlTypeResponse
-import com.rfz.appflotal.data.model.delete.CatalogDeleteDto
 import com.rfz.appflotal.data.model.route.response.RouteResponse
 import com.rfz.appflotal.data.model.vehicle.dto.VehicleCrudDto
 import com.rfz.appflotal.data.model.vehicle.response.*
 import com.rfz.appflotal.domain.base.BaseUseCase
 import com.rfz.appflotal.domain.controltype.ControlTypeUseCase
-import com.rfz.appflotal.domain.delete.CatalogDeleteUseCase
 import com.rfz.appflotal.domain.route.RouteUseCase
 import com.rfz.appflotal.domain.vehicle.*
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
@@ -66,7 +62,6 @@ fun NuevoRegistroVehiculoScreen(
     controlTypeUseCase: ControlTypeUseCase,
     routeUseCase: RouteUseCase,
     baseUseCase: BaseUseCase,
-    catalogDeleteUseCase: CatalogDeleteUseCase,
     homeViewModel: HomeViewModel
 ) {
 
@@ -76,11 +71,14 @@ fun NuevoRegistroVehiculoScreen(
     val textColor = Color(0xFF333333)
     val lightTextColor = Color.White
 
+
     val uiState by homeViewModel.uiState.collectAsState()
+
     val userData = uiState.userData
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
+
 
     var allVehicles by remember { mutableStateOf<List<VehicleListResponse>>(emptyList()) }
     var displayedVehicles by remember { mutableStateOf<List<VehicleListResponse>>(emptyList()) }
@@ -88,9 +86,11 @@ fun NuevoRegistroVehiculoScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
+
     var showDialog by remember { mutableStateOf(false) }
     var editingVehicle by remember { mutableStateOf<VehicleListResponse?>(null) }
     var isLoadingVehicleDetails by remember { mutableStateOf(false) }
+
 
     var showVehicleTypeMenu by remember { mutableStateOf(false) }
     var showControlTypeMenu by remember { mutableStateOf(false) }
@@ -101,6 +101,7 @@ fun NuevoRegistroVehiculoScreen(
     val routes = remember { mutableStateListOf<RouteResponse>() }
     val bases = remember { mutableStateListOf<BaseResponse>() }
     var isLoadingCombos by remember { mutableStateOf(false) }
+
 
     var selectedVehicleType by remember { mutableStateOf<TypeVehicleResponse?>(null) }
     var spareTires by remember { mutableStateOf("") }
@@ -114,8 +115,6 @@ fun NuevoRegistroVehiculoScreen(
     var initialOdometerValue by remember { mutableStateOf("") }
     var averageDailyKilometers by remember { mutableStateOf("") }
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var vehicleToDelete by remember { mutableStateOf<VehicleListResponse?>(null) }
 
     fun applyFilter() {
         displayedVehicles = if (searchQuery.isBlank()) {
@@ -127,6 +126,7 @@ fun NuevoRegistroVehiculoScreen(
             }
         }
     }
+
 
     fun loadVehicles() {
         scope.launch {
@@ -148,11 +148,13 @@ fun NuevoRegistroVehiculoScreen(
         }
     }
 
+
     fun loadComboData(onComplete: (Boolean) -> Unit = {}) {
         scope.launch {
             isLoadingCombos = true
             try {
                 val bearerToken = "Bearer ${userData?.fld_token ?: ""}"
+
 
                 vehicleTypes.clear()
                 controlTypes.clear()
@@ -164,15 +166,18 @@ fun NuevoRegistroVehiculoScreen(
                     vehicleTypes.addAll(vehicleTypesResult.getOrNull() ?: emptyList())
                 }
 
+
                 val controlTypesResult = controlTypeUseCase(bearerToken)
                 if (controlTypesResult.isSuccess) {
                     controlTypes.addAll(controlTypesResult.getOrNull() ?: emptyList())
                 }
 
+
                 val routesResult = routeUseCase(bearerToken)
                 if (routesResult.isSuccess) {
                     routes.addAll(routesResult.getOrNull() ?: emptyList())
                 }
+
 
                 val basesResult = baseUseCase(bearerToken)
                 if (basesResult.isSuccess) {
@@ -189,6 +194,7 @@ fun NuevoRegistroVehiculoScreen(
         }
     }
 
+
     fun loadVehicleDetails(vehicleId: Int) {
         scope.launch {
             isLoadingVehicleDetails = true
@@ -197,7 +203,7 @@ fun NuevoRegistroVehiculoScreen(
                 if (result.isSuccess) {
                     val vehicleDetails = result.getOrNull()?.firstOrNull()
                     vehicleDetails?.let {
-                         selectedVehicleType = vehicleTypes.find { type ->
+                        selectedVehicleType = vehicleTypes.find { type ->
                             type.idTypeVehicle == vehicleDetails.typeVehicleFk
                         }
                         spareTires = vehicleDetails.spareTires.toString()
@@ -207,32 +213,16 @@ fun NuevoRegistroVehiculoScreen(
                         selectedRoute = routes.find { route ->
                             route.idRoute == vehicleDetails.routeFk
                         }
-
                         selectedBase = bases.find { base ->
-                            base.id_base == vehicleDetails.baseFk
+                            base.id_base == vehicleDetails.routeFk
                         }
                         vehicleNumber = vehicleDetails.vehicleNumber
                         plates = vehicleDetails.plates
                         dailyMaximumKm = vehicleDetails.dailyMaximumKm.toString()
-
-
-                        odometerStartDate = try {
-                            val instant = Instant.parse(vehicleDetails.odometerStartDate)
-                            val localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate()
-                            localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                        } catch (e: Exception) {
-                            if (vehicleDetails.odometerStartDate.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) {
-                                vehicleDetails.odometerStartDate
-                            } else {
-                                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                            }
-                        }
-
+                        odometerStartDate = vehicleDetails.odometerStartDate
                         initialOdometerValue = vehicleDetails.initialValueOdometer.toString()
                         averageDailyKilometers = vehicleDetails.averageDailyKilometers.toString()
                     }
-                } else {
-                    errorMessage = "Error al cargar los detalles del vehículo"
                 }
             } catch (e: Exception) {
                 errorMessage = "Error loading vehicle details: ${e.message}"
@@ -242,79 +232,71 @@ fun NuevoRegistroVehiculoScreen(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun saveVehicle() {
-        scope.launch {
-            if (selectedVehicleType == null || spareTires.isBlank() || selectedControlType == null ||
-                selectedRoute == null || selectedBase == null || vehicleNumber.isBlank() ||
-                plates.isBlank() || dailyMaximumKm.isBlank() || odometerStartDate.isBlank() ||
-                initialOdometerValue.isBlank() || averageDailyKilometers.isBlank()) {
-                errorMessage = "Todos los campos son requeridos"
-                return@launch
-            }
 
-            try {
+            @RequiresApi(Build.VERSION_CODES.O)
+            fun saveVehicle() {
+                scope.launch {
+                    if (selectedVehicleType == null || spareTires.isBlank() || selectedControlType == null ||
+                        selectedRoute == null || selectedBase == null || vehicleNumber.isBlank() ||
+                        plates.isBlank() || dailyMaximumKm.isBlank() || odometerStartDate.isBlank() ||
+                        initialOdometerValue.isBlank() || averageDailyKilometers.isBlank()) {
+                        errorMessage = "Todos los campos son requeridos"
+                        return@launch
+                    }
 
-                val localDate = LocalDate.parse(odometerStartDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                val odometerStartDateTime = localDate.atStartOfDay()
-                val zonedDateTimeUTC = odometerStartDateTime.atZone(ZoneOffset.UTC)
-                val dateEventOdometerUTC = zonedDateTimeUTC.toInstant()
+                    try {
 
-                val request = VehicleCrudDto(
-                    idVehicle = editingVehicle?.idVehicle ?: 0,
-                    typeVehicleId = selectedVehicleType!!.idTypeVehicle,
-                    spareTires = spareTires.toInt(),
-                    typeControlId = selectedControlType!!.idControlType,
-                    routeId = selectedRoute!!.idRoute,
-                     vehicleNumber = vehicleNumber,
-                    plates = plates,
-                    dailyMaximumKm = dailyMaximumKm.toInt(),
-                    odometerStartDate = dateEventOdometerUTC.toString(),
-                    initialOdometerValue = initialOdometerValue.toInt(),
-                    averageDailyKilometers = averageDailyKilometers.toInt(),
-                    userId = userData?.id_user ?: 0,
-                    isActive = true,
-                    odometerEvent = 0,
-                    dateEventOdometer = dateEventOdometerUTC.toString(),
-                    registrationDate = dateEventOdometerUTC.toString()
-                )
 
-                val result = vehicleCrudUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
-                if (result.isSuccess) {
 
-                    showDialog = false
-                    loadVehicles()
-                    snackbarHostState.showSnackbar(
-                        message = result.getOrNull()?.message ?: "Vehículo guardado exitosamente",
-                        duration = SnackbarDuration.Short
-                    )
-                } else {
-                    errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar el vehículo"
-                }
-            } catch (e: Exception) {
-                errorMessage = "Error: ${e.message}"
-            }
-        }
-    }
+                        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                        val odometerStartDateTime = try {
+                            LocalDateTime.parse(odometerStartDate)
+                        } catch (e: Exception) {
+                            val dateOnly = LocalDate.parse(odometerStartDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                            dateOnly.atStartOfDay()
+                        }
 
-    fun deleteVehicle() {
-        scope.launch {
-            vehicleToDelete?.let { vehicle ->
-                val dto = CatalogDeleteDto(id = vehicle.idVehicle, table = "vehicle")
-                val result = catalogDeleteUseCase(dto, "Bearer ${userData?.fld_token}")
-                if (result.isSuccess) {
-                    showDeleteDialog = false
-                    loadVehicles()
-                    snackbarHostState.showSnackbar(
-                        message = "Vehículo eliminado exitosamente",
-                        duration = SnackbarDuration.Short
-                    )
-                } else {
-                    errorMessage = result.exceptionOrNull()?.message ?: "Error al eliminar el vehículo"
+
+                        val zonedDateTimeUTC = odometerStartDateTime.atZone(ZoneOffset.UTC)
+                        val dateEventOdometerUTC = zonedDateTimeUTC.toInstant()
+
+                        val request = VehicleCrudDto(
+                            idVehicle = editingVehicle?.idVehicle ?: 0,
+                            typeVehicleId = selectedVehicleType!!.idTypeVehicle,
+                            spareTires = spareTires.toInt(),
+                            typeControlId = selectedControlType!!.idControlType,
+                            routeId = selectedRoute!!.idRoute,
+                            vehicleNumber = vehicleNumber,
+                            plates = plates,
+                            dailyMaximumKm = dailyMaximumKm.toInt(),
+                            odometerStartDate = dateEventOdometerUTC.toString(),
+                            initialOdometerValue = initialOdometerValue.toInt(),
+                            averageDailyKilometers = averageDailyKilometers.toInt(),
+                            userId = userData?.id_user ?: 0,
+                            isActive = true,
+                            odometerEvent = 0,
+                            dateEventOdometer = dateEventOdometerUTC.toString(),
+                            registrationDate = dateEventOdometerUTC.toString()
+                        )
+
+                        val result = vehicleCrudUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
+                        if (result.isSuccess) {
+                            snackbarHostState.showSnackbar(
+                                message = result.getOrNull()?.message ?: "Vehículo guardado exitosamente",
+                                duration = SnackbarDuration.Short
+                            )
+                            showDialog = false
+                            loadVehicles()
+                        } else {
+                            errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar el vehículo"
+                        }
+                    } catch (e: Exception) {
+                        errorMessage = "Error: ${e.message}"
+                    }
                 }
             }
-        }
-    }
+
+
 
     LaunchedEffect(Unit) {
         loadVehicles()
@@ -331,15 +313,17 @@ fun NuevoRegistroVehiculoScreen(
         }
     }
 
+
     LaunchedEffect(showDialog) {
         if (showDialog) {
             loadComboData { success ->
                 if (success && editingVehicle != null) {
-                         loadVehicleDetails(editingVehicle!!.idVehicle)
+                    loadVehicleDetails(editingVehicle!!.idVehicle)
                 }
             }
         } else {
-              selectedVehicleType = null
+
+            selectedVehicleType = null
             spareTires = ""
             selectedControlType = null
             selectedRoute = null
@@ -404,7 +388,7 @@ fun NuevoRegistroVehiculoScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-
+            // Search bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -415,68 +399,66 @@ fun NuevoRegistroVehiculoScreen(
                     )
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.White.copy(alpha = 0.9f)) },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Close, null, tint = Color.White.copy(alpha = 0.8f))
-                            }
-                        }
-                    },
-                    placeholder = { Text("Buscar vehículos...", color = Color.White.copy(alpha = 0.6f)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-                        cursorColor = Color.White,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color.White.copy(alpha = 0.1f),
-                        unfocusedContainerColor = Color.White.copy(alpha = 0.1f)
-                    ),
-                    shape = RoundedCornerShape(16.dp),
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
-                )
-            }
-
-            Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
-                when {
-                    isLoading && displayedVehicles.isEmpty() -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
-                    displayedVehicles.isEmpty() -> {
-                        Text(
-                            text = if (searchQuery.isBlank()) "No hay vehículos registrados" else "No se encontraron resultados",
-                            modifier = Modifier.align(Alignment.Center),
-                            color = textColor.copy(alpha = 0.6f)
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.White.copy(alpha = 0.9f)) },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { searchQuery = "" }) {
+                                        Icon(Icons.Default.Close, null, tint = Color.White.copy(alpha = 0.8f))
+                                    }
+                                }
+                            },
+                            placeholder = { Text("Buscar vehículos...", color = Color.White.copy(alpha = 0.6f)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.White,
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
+                                cursorColor = Color.White,
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedContainerColor = Color.White.copy(alpha = 0.1f),
+                                unfocusedContainerColor = Color.White.copy(alpha = 0.1f)
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
                         )
                     }
-                    else -> {
-                        LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-                            items(displayedVehicles) { vehicle ->
-                                VehicleItem(
-                                    vehicle = vehicle,
-                                    onEditClick = {
-                                        editingVehicle = vehicle
-                                        showDialog = true
-                                    },
-                                    onDeleteClick = {
-                                        vehicleToDelete = vehicle
-                                        showDeleteDialog = true
-                                    },
-                                    primaryColor = primaryColor,
-                                    secondaryColor = secondaryColor
-                                )
+
+
+                        Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
+                    when {
+                        isLoading && displayedVehicles.isEmpty() -> {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                        displayedVehicles.isEmpty() -> {
+                            Text(
+                                text = if (searchQuery.isBlank()) "No hay vehículos registrados" else "No se encontraron resultados",
+                                modifier = Modifier.align(Alignment.Center),
+                                color = textColor.copy(alpha = 0.6f)
+                            )
+                        }
+                        else -> {
+                            LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                                items(displayedVehicles) { vehicle ->
+                                    VehicleItem(
+                                        vehicle = vehicle,
+                                        onEditClick = {
+                                            editingVehicle = vehicle
+                                            showDialog = true
+                                        },
+                                        primaryColor = primaryColor,
+                                        secondaryColor = secondaryColor
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
         }
+
 
         if (showDialog) {
             AlertDialog(
@@ -574,6 +556,7 @@ fun NuevoRegistroVehiculoScreen(
                                 }
                             }
 
+
                             OutlinedTextField(
                                 value = spareTires,
                                 onValueChange = { spareTires = it.filter { c -> c.isDigit() } },
@@ -589,6 +572,7 @@ fun NuevoRegistroVehiculoScreen(
                                 ),
                                 shape = RoundedCornerShape(14.dp)
                             )
+
 
                             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Column {
@@ -638,6 +622,7 @@ fun NuevoRegistroVehiculoScreen(
                                 }
                             }
 
+
                             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Column {
                                     Text(
@@ -685,6 +670,7 @@ fun NuevoRegistroVehiculoScreen(
                                     }
                                 }
                             }
+
 
                             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Column {
@@ -750,6 +736,7 @@ fun NuevoRegistroVehiculoScreen(
                                 shape = RoundedCornerShape(14.dp)
                             )
 
+
                             OutlinedTextField(
                                 value = plates,
                                 onValueChange = { plates = it },
@@ -766,6 +753,7 @@ fun NuevoRegistroVehiculoScreen(
                                 shape = RoundedCornerShape(14.dp)
                             )
 
+
                             OutlinedTextField(
                                 value = dailyMaximumKm,
                                 onValueChange = { dailyMaximumKm = it.filter { c -> c.isDigit() } },
@@ -781,6 +769,7 @@ fun NuevoRegistroVehiculoScreen(
                                 ),
                                 shape = RoundedCornerShape(14.dp)
                             )
+
 
                             var showDatePicker by remember { mutableStateOf(false) }
 
@@ -813,6 +802,7 @@ fun NuevoRegistroVehiculoScreen(
                                 }
                             }
 
+
                             OutlinedTextField(
                                 value = initialOdometerValue,
                                 onValueChange = { initialOdometerValue = it.filter { c -> c.isDigit() } },
@@ -829,6 +819,7 @@ fun NuevoRegistroVehiculoScreen(
                                 shape = RoundedCornerShape(14.dp)
                             )
 
+
                             OutlinedTextField(
                                 value = averageDailyKilometers,
                                 onValueChange = { averageDailyKilometers = it.filter { c -> c.isDigit() } },
@@ -844,6 +835,7 @@ fun NuevoRegistroVehiculoScreen(
                                 ),
                                 shape = RoundedCornerShape(14.dp)
                             )
+
 
                             if (showDatePicker) {
                                 val datePickerState = rememberDatePickerState()
@@ -912,43 +904,6 @@ fun NuevoRegistroVehiculoScreen(
                 }
             )
         }
-
-        if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteDialog = false },
-                title = {
-                    Text(
-                        "Eliminar Vehículo",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            color = primaryColor,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                },
-                text = {
-                    Text(
-                        "¿Estás seguro de que deseas eliminar este vehículo?",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = { deleteVehicle() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    ) {
-                        Text("ELIMINAR", color = Color.White, fontWeight = FontWeight.Bold)
-                    }
-                },
-                dismissButton = {
-                    OutlinedButton(
-                        onClick = { showDeleteDialog = false },
-                        border = BorderStroke(1.dp, primaryColor)
-                    ) {
-                        Text("CANCELAR", color = primaryColor, fontWeight = FontWeight.Bold)
-                    }
-                }
-            )
-        }
     }
 }
 
@@ -956,7 +911,6 @@ fun NuevoRegistroVehiculoScreen(
 fun VehicleItem(
     vehicle: VehicleListResponse,
     onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
     primaryColor: Color,
     secondaryColor: Color
 ) {
@@ -968,68 +922,46 @@ fun VehicleItem(
             .shadow(4.dp, RoundedCornerShape(16.dp)),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(20.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f)
+            Text(
+                text = vehicle.fldVehicleNumber.uppercase(),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = primaryColor
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Placas: ${vehicle.fldPlates}",
+                style = MaterialTheme.typography.bodyMedium.copy(color = Color.DarkGray)
+            )
+            Spacer(Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(secondaryColor.copy(alpha = 0.1f))
+                    .clickable(onClick = onEditClick)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .align(Alignment.End)
             ) {
-                Text(
-                    text = vehicle.fldVehicleNumber.uppercase(),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = primaryColor
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "Placas: ${vehicle.fldPlates}",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.DarkGray)
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-
-                IconButton(
-                    onClick = onEditClick,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(
-                            color = secondaryColor.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_edit),
-                        contentDescription = "Editar",
+                        Icons.Default.Edit,
+                        contentDescription = "Edit",
                         tint = secondaryColor,
                         modifier = Modifier.size(18.dp)
                     )
-                }
-
-
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(
-                            color = Color.Red.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = "Eliminar",
-                        tint = Color.Red,
-                        modifier = Modifier.size(18.dp)
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Editar",
+                        color = secondaryColor,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }

@@ -1,6 +1,5 @@
 package com.rfz.appflotal.core.network
 
-import com.rfz.appflotal.data.model.airPressureRating.response.AirPressureRating
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -25,10 +24,6 @@ object NetworkConfig {
  const val REGISTRO_VEHICULOS = "registroVehiculoScreen"
  const val MONTAJE_DESMONTAJE = "montajeDesmontajeScreen"
  const val INICIO = "inicioScreen"
- const val DEFAULT_PARAMETER="defaultParameterScreen"
- const val AIRPRESSURERATING="airpressureratingscreen"
- const val DEPTHCOLOR="depthcolorScreen"
- const val IMPERFECTPAIR="imperfectpair"
- const val RETREADDESIGN="retreaddesign"
- const val RETREADDESIGNBRAND="retreaddesignbrand"
+
+
 }

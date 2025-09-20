@@ -7,7 +7,7 @@ import javax.inject.Inject
 class DefaultParameterUseCase @Inject constructor(
     private val defaultParameterRepository: DefaultParameterRepository
 ) {
-    suspend operator fun invoke(token: String): Result<List<DefaultParameterResponse>> {
-        return defaultParameterRepository.doDefaultParameter(token)
+    suspend operator fun invoke(token: String, userId: Int): Result<List<DefaultParameterResponse>> {
+        return defaultParameterRepository.doDefaultParameter(token, userId)
     }
 }

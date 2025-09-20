@@ -5,6 +5,5 @@ data class AirPressureRating(
     val fld_description: String,
     val fld_minimumPercentage: Int,
     val fld_maximumPercentage: Int,
-    val fld_performancePercentage: Int,
-    val fld_color:String
+    val fld_performancePercentage: Int
 )

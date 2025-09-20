@@ -10,9 +10,9 @@ import javax.inject.Inject
 
 class DefaultParameterRepository @Inject constructor(private val defaultParameterService: DefaultParameterService) {
 
-    suspend fun doDefaultParameter( tok: String): Result<List<DefaultParameterResponse>> {
+    suspend fun doDefaultParameter( tok: String, id_user:Int): Result<List<DefaultParameterResponse>> {
         return try {
-            val response = defaultParameterService.doDefaultParameter(tok)
+            val response = defaultParameterService.doDefaultParameter(tok,id_user)
             if (response.isSuccessful) {
 
                 response.body()?.let {

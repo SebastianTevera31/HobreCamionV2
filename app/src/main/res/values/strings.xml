@@ -14,17 +14,6 @@
 
 
 
-    <string name="parametros_default" translatable="false"> Parametros Default </string>
-
-    <string name="airpressure" translatable="false"> Clasificación de presión de Aire </string>
-
-    <string name="dephtcolor" translatable="false"> Valores Semáforo </string>
-
-    <string name="imperfetpair" translatable="false"> Clasificación de  pares imperfectos </string>
-
-    <string name="retreaddesign" translatable="false"> Diseño de renovado</string>
-
-    <string name="retreaddesignbrand" translatable="false"> Retread Design Brand</string>
 
 
     <string name="title_activity_login">LoginActivity</string>

@@ -13,17 +13,6 @@
     <string name="copyright">© %1$d Flotal Control</string>
 
 
-    <string name="parametros_default" translatable="false"> Default parameters </string>
-
-    <string name="airpressure" translatable="false"> Air Pressure Rating </string>
-    <string name="dephtcolor" translatable="false"> Traffic Light Values</string>
-
-    <string name="imperfetpair" translatable="false"> Classification of imperfect pairs </string>
-
-    <string name="retreaddesign" translatable="false"> Retread design</string>
-
-    <string name="retreaddesignbrand" translatable="false"> Retread Design Brand</string>
-
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_recuperar_contraseña">RecuperarContraseñaActivity</string>
     <string name="title_activity_otp">OtpActivity</string>
