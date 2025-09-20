@@ -73,7 +73,7 @@ class HomeViewModel @Inject constructor(
                     fscSoftRepository.saveSelectedLanguage(newLanguage)
                     _uiState.update { it.copy(selectedLanguage = newLanguage, isLoading = false) }
 
-                    // Actualiza el Locale global y guarda en SharedPreferences
+
                     AppLocale.setLocale(Locale(newLanguage))
                     context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
                         .edit()

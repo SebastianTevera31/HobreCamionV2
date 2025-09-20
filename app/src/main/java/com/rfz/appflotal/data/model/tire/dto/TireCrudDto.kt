@@ -24,7 +24,7 @@ data class TireCrudDto (
     val document: String,
 
     @SerializedName("fld_treadDepth")
-    val treadDepth: Int,
+    val treadDepth: Float,
 
     @SerializedName("fld_unitCost")
     val unitCost: Int,

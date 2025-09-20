@@ -13,5 +13,5 @@ data class ProductResponse(
     val userId: Int,
 
     @SerializedName("fld_treadDepth")
-    val treadDepth: Int
+    val treadDepth: Float
 )

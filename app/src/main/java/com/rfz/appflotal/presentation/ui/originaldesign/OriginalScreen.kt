@@ -29,7 +29,6 @@ import androidx.compose.material3.*
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,18 +50,20 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-import com.google.gson.annotations.SerializedName
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.brand.response.BranListResponse
+import com.rfz.appflotal.data.model.delete.CatalogDeleteDto
 import com.rfz.appflotal.data.model.originaldesign.dto.CrudOriginalDesignDto
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
 import com.rfz.appflotal.data.model.utilization.response.UtilizationResponse
+import com.rfz.appflotal.domain.delete.CatalogDeleteUseCase
 import com.rfz.appflotal.domain.originaldesign.OriginalDesignByIdUseCase
 import kotlinx.coroutines.launch
 
@@ -71,10 +72,11 @@ import kotlinx.coroutines.launch
 fun OriginalScreen(
     navController: NavController,
     originalDesignUseCase: OriginalDesignUseCase,
-    originalDesignByIdUseCase: OriginalDesignByIdUseCase, // Add this
+    originalDesignByIdUseCase: OriginalDesignByIdUseCase,
     crudOriginalDesignUseCase: CrudOriginalDesignUseCase,
     brandUseCase: BrandListUseCase,
     utilizationUseCase: UtilizationUseCase,
+    catalogDeleteUseCase: CatalogDeleteUseCase,
     homeViewModel: HomeViewModel
 ) {
 
@@ -85,15 +87,11 @@ fun OriginalScreen(
     val lightTextColor = Color.White
 
     val uiState by homeViewModel.uiState.collectAsState()
-
     val userData = uiState.userData
-
-
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
-
 
     var allOriginalDesigns by remember { mutableStateOf<List<OriginalDesignResponse>>(emptyList()) }
     var displayedOriginalDesigns by remember { mutableStateOf<List<OriginalDesignResponse>>(emptyList()) }
@@ -101,11 +99,9 @@ fun OriginalScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
-
     var showDialog by remember { mutableStateOf(false) }
     var editingDesign by remember { mutableStateOf<OriginalDesignResponse?>(null) }
     var isLoadingDesignDetails by remember { mutableStateOf(false) }
-
 
     var showBrandMenu by remember { mutableStateOf(false) }
     var showUtilizationMenu by remember { mutableStateOf(false) }
@@ -113,13 +109,15 @@ fun OriginalScreen(
     val utilizations = remember { mutableStateListOf<UtilizationResponse>() }
     var isLoadingCombos by remember { mutableStateOf(false) }
 
-
     var model by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedBrand by remember { mutableStateOf<BranListResponse?>(null) }
     var selectedUtilization by remember { mutableStateOf<UtilizationResponse?>(null) }
     var notes by remember { mutableStateOf("") }
 
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var designToDelete by remember { mutableStateOf<OriginalDesignResponse?>(null) }
 
     fun applyFilter() {
         displayedOriginalDesigns = if (searchQuery.isBlank()) {
@@ -131,7 +129,6 @@ fun OriginalScreen(
             }
         }
     }
-
 
     fun loadOriginalDesigns() {
         scope.launch {
@@ -153,23 +150,19 @@ fun OriginalScreen(
         }
     }
 
-
     fun loadComboData(onComplete: (Boolean) -> Unit = {}) {
         scope.launch {
             isLoadingCombos = true
             try {
                 val bearerToken = "Bearer ${userData?.fld_token ?: ""}"
 
-
                 brands.clear()
                 utilizations.clear()
 
-
-                val brandsResult = brandUseCase(bearerToken,userData?.id_user!!)
+                val brandsResult = brandUseCase(bearerToken, userData?.id_user!!)
                 if (brandsResult.isSuccess) {
                     brands.addAll(brandsResult.getOrNull() ?: emptyList())
                 }
-
 
                 val utilizationsResult = utilizationUseCase(bearerToken)
                 if (utilizationsResult.isSuccess) {
@@ -185,7 +178,6 @@ fun OriginalScreen(
             }
         }
     }
-
 
     fun loadDesignDetails(designId: Int) {
         scope.launch {
@@ -212,7 +204,6 @@ fun OriginalScreen(
         }
     }
 
-
     fun saveDesign() {
         scope.launch {
             if (model.isBlank() || description.isBlank() || selectedBrand == null || selectedUtilization == null) {
@@ -233,12 +224,13 @@ fun OriginalScreen(
 
                 val result = crudOriginalDesignUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
                 if (result.isSuccess) {
+                    showDialog = false
+                    loadOriginalDesigns()
                     snackbarHostState.showSnackbar(
                         message = result.getOrNull()?.firstOrNull()?.message ?: "Diseño guardado exitosamente",
                         duration = SnackbarDuration.Short
                     )
-                    showDialog = false
-                    loadOriginalDesigns()
+
                 } else {
                     errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar el diseño"
                 }
@@ -248,6 +240,27 @@ fun OriginalScreen(
         }
     }
 
+
+    fun deleteDesign() {
+        scope.launch {
+            designToDelete?.let { design ->
+                val dto = CatalogDeleteDto(id = design.idOriginalDesign, table = "originalDesign")
+                val result = catalogDeleteUseCase(dto, "Bearer ${userData?.fld_token}")
+                if (result.isSuccess) {
+                    showDeleteDialog = false
+                    loadOriginalDesigns()
+                    snackbarHostState.showSnackbar(
+                        message = "Diseño eliminado exitosamente",
+                        duration = SnackbarDuration.Short
+                    )
+
+
+                } else {
+                    errorMessage = result.exceptionOrNull()?.message ?: "Error al eliminar el diseño"
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         loadOriginalDesigns()
@@ -264,14 +277,12 @@ fun OriginalScreen(
         }
     }
 
-
     LaunchedEffect(showDialog) {
         if (showDialog) {
             loadComboData { success ->
                 if (success && editingDesign != null) {
                     loadDesignDetails(editingDesign!!.idOriginalDesign)
                 } else {
-
                     model = ""
                     description = ""
                     selectedBrand = null
@@ -280,7 +291,6 @@ fun OriginalScreen(
                 }
             }
         } else {
-
             editingDesign = null
         }
     }
@@ -374,7 +384,6 @@ fun OriginalScreen(
                 )
             }
 
-
             Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
                 when {
                     isLoading && displayedOriginalDesigns.isEmpty() -> {
@@ -396,6 +405,10 @@ fun OriginalScreen(
                                         editingDesign = design
                                         showDialog = true
                                     },
+                                    onDeleteClick = {
+                                        designToDelete = design
+                                        showDeleteDialog = true
+                                    },
                                     primaryColor = primaryColor,
                                     secondaryColor = secondaryColor
                                 )
@@ -405,7 +418,6 @@ fun OriginalScreen(
                 }
             }
         }
-
 
         if (showDialog) {
             AlertDialog(
@@ -452,7 +464,6 @@ fun OriginalScreen(
                         }
                     } else {
                         Column {
-
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Text(
                                     "Modelo",
@@ -474,7 +485,6 @@ fun OriginalScreen(
                                 )
                             }
 
-
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Text(
                                     "Descripción",
@@ -495,7 +505,6 @@ fun OriginalScreen(
                                     shape = RoundedCornerShape(14.dp)
                                 )
                             }
-
 
                             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Column {
@@ -593,7 +602,6 @@ fun OriginalScreen(
                                 }
                             }
 
-
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Text(
                                     "Notas",
@@ -643,6 +651,41 @@ fun OriginalScreen(
                 }
             )
         }
+
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = {
+                    Text(
+                        "Eliminar Diseño",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                },
+                text = {
+                    Text("¿Estás seguro de que deseas eliminar este diseño original? Esta acción no se puede deshacer.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { deleteDesign() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("ELIMINAR", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = { showDeleteDialog = false },
+                        border = BorderStroke(1.dp, primaryColor)
+                    ) {
+                        Text("CANCELAR", color = primaryColor, fontWeight = FontWeight.Bold)
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -650,6 +693,7 @@ fun OriginalScreen(
 fun OriginalDesignItem(
     design: OriginalDesignResponse,
     onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     primaryColor: Color,
     secondaryColor: Color
 ) {
@@ -688,27 +732,59 @@ fun OriginalDesignItem(
                 style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray)
             )
             Spacer(Modifier.height(16.dp))
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(secondaryColor.copy(alpha = 0.1f))
-                    .clickable(onClick = onEditClick)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                    .align(Alignment.End)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Edit",
-                        tint = secondaryColor,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "Editar",
-                        color = secondaryColor,
-                        fontWeight = FontWeight.Medium
-                    )
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(secondaryColor.copy(alpha = 0.1f))
+                        .clickable(onClick = onEditClick)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            tint = secondaryColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Editar",
+                            color = secondaryColor,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(12.dp))
+
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.Red.copy(alpha = 0.1f))
+                        .clickable(onClick = onDeleteClick)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_delete),
+                            contentDescription = "Delete",
+                            tint = Color.Red,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Eliminar",
+                            color = Color.Red,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
         }

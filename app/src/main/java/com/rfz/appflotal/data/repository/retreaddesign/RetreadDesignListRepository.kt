@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.repository.retreaddesign
 import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
 import com.rfz.appflotal.data.model.brand.response.BranListResponse
 import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.retreaddesing.response.RetreadDesignResponse
 import com.rfz.appflotal.data.network.service.brand.BrandCrudService
 import com.rfz.appflotal.data.network.service.retreaddesign.RetreadDesignListService
 import javax.inject.Inject
@@ -10,7 +11,7 @@ import javax.inject.Inject
 
 class RetreadDesignListRepository @Inject constructor(private val retreadDesignListService: RetreadDesignListService) {
 
-    suspend fun doBrandCrud(tok: String): Result<List<MessageResponse>> {
+    suspend fun doCrudRetreadDesignList(tok: String): Result<List<RetreadDesignResponse>> {
         return try {
             val response = retreadDesignListService.doCrudRetreadDesignList(tok)
             if (response.isSuccessful) {

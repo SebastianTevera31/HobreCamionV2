@@ -22,6 +22,8 @@ data class VehicleIdResponse(
     @SerializedName("fld_vehicleNumber")
     val vehicleNumber: String,
 
+    @SerializedName("baseFk")
+    val baseFk: Int,
     @SerializedName("fld_plates")
     val plates: String,
 

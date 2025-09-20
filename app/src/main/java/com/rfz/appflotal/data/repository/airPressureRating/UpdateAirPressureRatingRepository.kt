@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.repository.airPressureRating
 
 import com.rfz.appflotal.data.model.airPressureRating.dto.CreateAirPressureRatingDto
+import com.rfz.appflotal.data.model.airPressureRating.dto.UpdateAirPressureRatingDto
 import com.rfz.appflotal.data.model.airPressureRating.response.CreateAirPressureRatingResponse
 import com.rfz.appflotal.data.network.service.airPressureRating.CreateAirPressureRatingService
 import com.rfz.appflotal.data.network.service.airPressureRating.UpdateAirPressureRatingService
@@ -10,7 +11,7 @@ import javax.inject.Inject
 
 class UpdateAirPressureRatingRepository @Inject constructor(private val updateAirPressureRatingService: UpdateAirPressureRatingService) {
 
-    suspend fun docupdateAirPressureRating(requestBody: CreateAirPressureRatingDto, tok: String): Result<List<CreateAirPressureRatingResponse>> {
+    suspend fun docupdateAirPressureRating(requestBody: UpdateAirPressureRatingDto, tok: String): Result<List<CreateAirPressureRatingResponse>> {
         return try {
             val response = updateAirPressureRatingService.docupdateAirPressureRating(requestBody,tok)
             if (response.isSuccessful) {

@@ -10,9 +10,7 @@ import javax.inject.Inject
 class AirPressureRatingUseCase @Inject constructor(
     private val airPressureRatingRepository: AirPressureRatingRepository
 ) {
-    suspend operator fun invoke(token: String): Result<AirPressureRating> {
-        return airPressureRatingRepository.doAirPressureRating(token).mapCatching { list ->
-            list.firstOrNull() ?: throw Throwable("Lista vacía de AcquisitionTypeResponse")
-        }
+    suspend operator fun invoke(token: String): Result<List<AirPressureRating>> {
+        return airPressureRatingRepository.doAirPressureRating(token)
     }
 }

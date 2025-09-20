@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,12 +30,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.delete.CatalogDeleteDto
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
 import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
 import com.rfz.appflotal.data.model.product.response.ProductByIdResponse
 import com.rfz.appflotal.data.model.product.response.ProductResponse
 import com.rfz.appflotal.data.model.tire.response.LoadingCapacityResponse
 import com.rfz.appflotal.data.model.tire.response.TireSizeResponse
+import com.rfz.appflotal.domain.delete.CatalogDeleteUseCase
 import com.rfz.appflotal.domain.originaldesign.OriginalDesignUseCase
 import com.rfz.appflotal.domain.product.ProductByIdUseCase
 import com.rfz.appflotal.domain.product.ProductCrudUseCase
@@ -54,6 +58,7 @@ fun NuevoProductoScreen(
     originalDesignUseCase: OriginalDesignUseCase,
     tireSizeUseCase: TireSizeUseCase,
     loadingCapacityUseCase: LoadingCapacityUseCase,
+    catalogDeleteUseCase: CatalogDeleteUseCase,
     homeViewModel: HomeViewModel
 ) {
 
@@ -70,18 +75,15 @@ fun NuevoProductoScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
-
     var allProducts by remember { mutableStateOf<List<ProductResponse>>(emptyList()) }
     var displayedProducts by remember { mutableStateOf<List<ProductResponse>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
-
     var showDialog by remember { mutableStateOf(false) }
     var editingProduct by remember { mutableStateOf<ProductResponse?>(null) }
     var isLoadingProductDetails by remember { mutableStateOf(false) }
-
 
     var showOriginalDesignMenu by remember { mutableStateOf(false) }
     var showTireSizeMenu by remember { mutableStateOf(false) }
@@ -91,12 +93,34 @@ fun NuevoProductoScreen(
     val loadCapacities = remember { mutableStateListOf<LoadingCapacityResponse>() }
     var isLoadingCombos by remember { mutableStateOf(false) }
 
-
     var selectedOriginalDesign by remember { mutableStateOf<OriginalDesignResponse?>(null) }
     var selectedTireSize by remember { mutableStateOf<TireSizeResponse?>(null) }
     var selectedLoadCapacity by remember { mutableStateOf<LoadingCapacityResponse?>(null) }
     var treadDepth by remember { mutableStateOf("") }
+    var treadDepthError by remember { mutableStateOf<String?>(null) }
 
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var productToDelete by remember { mutableStateOf<ProductResponse?>(null) }
+
+    fun validateTreadDepth(value: String): Boolean {
+        if (value.isBlank()) {
+            treadDepthError = "La profundidad es requerida"
+            return false
+        }
+
+        try {
+            val depth = value.toFloat()
+            if (depth < 0.1f || depth > 100f) {
+                treadDepthError = "La profundidad debe estar entre 0.1 y 100 mm"
+                return false
+            }
+            treadDepthError = null
+            return true
+        } catch (e: NumberFormatException) {
+            treadDepthError = "Formato de número inválido"
+            return false
+        }
+    }
 
     fun applyFilter() {
         displayedProducts = if (searchQuery.isBlank()) {
@@ -107,7 +131,6 @@ fun NuevoProductoScreen(
             }
         }
     }
-
 
     fun loadProducts() {
         scope.launch {
@@ -129,7 +152,6 @@ fun NuevoProductoScreen(
         }
     }
 
-
     fun loadComboData(onComplete: (Boolean) -> Unit = {}) {
         scope.launch {
             isLoadingCombos = true
@@ -141,18 +163,15 @@ fun NuevoProductoScreen(
                 tireSizes.clear()
                 loadCapacities.clear()
 
-
                 val originalDesignsResult = originalDesignUseCase(bearerToken)
                 if (originalDesignsResult.isSuccess) {
                     originalDesigns.addAll(originalDesignsResult.getOrNull() ?: emptyList())
                 }
 
-
                 val tireSizesResult = tireSizeUseCase.doTireSizes(userId, bearerToken)
                 if (tireSizesResult.isSuccessful) {
                     tireSizesResult.body()?.let { tireSizes.addAll(it) }
                 }
-
 
                 val loadCapacitiesResult = loadingCapacityUseCase.doCapacity(userId, bearerToken)
                 if (loadCapacitiesResult.isSuccessful) {
@@ -168,8 +187,6 @@ fun NuevoProductoScreen(
             }
         }
     }
-
-
 
     fun loadProductDetails(productId: Int) {
         scope.launch {
@@ -189,6 +206,7 @@ fun NuevoProductoScreen(
                             capacity.id_loadingCapacity == productDetails.c_loadCapacity_fk_3
                         }
                         treadDepth = productDetails.fld_treadDepth?.toString() ?: ""
+                        validateTreadDepth(treadDepth)
                     }
                 }
             } catch (e: Exception) {
@@ -201,7 +219,7 @@ fun NuevoProductoScreen(
 
     fun saveProduct() {
         scope.launch {
-            if (selectedOriginalDesign == null || selectedTireSize == null || selectedLoadCapacity == null || treadDepth.isBlank()) {
+            if (selectedOriginalDesign == null || selectedTireSize == null || selectedLoadCapacity == null || !validateTreadDepth(treadDepth)) {
                 errorMessage = "Todos los campos son requeridos"
                 return@launch
             }
@@ -212,22 +230,43 @@ fun NuevoProductoScreen(
                     originalDesignId = selectedOriginalDesign!!.idOriginalDesign,
                     tireSizeId = selectedTireSize!!.id_tireSize,
                     loadCapacityId = selectedLoadCapacity!!.id_loadingCapacity,
-                    treadDepth = treadDepth.toInt()
+                    treadDepth = treadDepth.toFloat()
                 )
 
                 val result = productCrudUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
                 if (result.isSuccess) {
+
+                    showDialog = false
+                    loadProducts()
                     snackbarHostState.showSnackbar(
                         message = result.getOrNull()?.firstOrNull()?.message ?: "Producto guardado exitosamente",
                         duration = SnackbarDuration.Short
                     )
-                    showDialog = false
-                    loadProducts()
                 } else {
                     errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar el producto"
                 }
             } catch (e: Exception) {
                 errorMessage = "Error: ${e.message}"
+            }
+        }
+    }
+
+    fun deleteProduct() {
+        scope.launch {
+            productToDelete?.let { product ->
+                val dto = CatalogDeleteDto(id = product.idProduct, table = "product")
+                val result = catalogDeleteUseCase(dto, "Bearer ${userData?.fld_token}")
+                if (result.isSuccess) {
+
+                    showDeleteDialog = false
+                    loadProducts()
+                    snackbarHostState.showSnackbar(
+                        message = "Producto eliminado exitosamente",
+                        duration = SnackbarDuration.Short
+                    )
+                } else {
+                    errorMessage = result.exceptionOrNull()?.message ?: "Error al eliminar el producto"
+                }
             }
         }
     }
@@ -247,7 +286,6 @@ fun NuevoProductoScreen(
         }
     }
 
-
     LaunchedEffect(showDialog) {
         if (showDialog) {
             loadComboData { success ->
@@ -256,11 +294,11 @@ fun NuevoProductoScreen(
                 }
             }
         } else {
-
             selectedOriginalDesign = null
             selectedTireSize = null
             selectedLoadCapacity = null
             treadDepth = ""
+            treadDepthError = null
             editingProduct = null
         }
     }
@@ -355,7 +393,6 @@ fun NuevoProductoScreen(
                 )
             }
 
-
             Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
                 when {
                     isLoading && displayedProducts.isEmpty() -> {
@@ -380,6 +417,10 @@ fun NuevoProductoScreen(
                                         editingProduct = product
                                         showDialog = true
                                     },
+                                    onDeleteClick = {
+                                        productToDelete = product
+                                        showDeleteDialog = true
+                                    },
                                     primaryColor = primaryColor,
                                     secondaryColor = secondaryColor
                                 )
@@ -389,7 +430,6 @@ fun NuevoProductoScreen(
                 }
             }
         }
-
 
         if (showDialog) {
             AlertDialog(
@@ -533,7 +573,6 @@ fun NuevoProductoScreen(
                                 }
                             }
 
-
                             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Column {
                                     Text(
@@ -593,7 +632,12 @@ fun NuevoProductoScreen(
                                 )
                                 OutlinedTextField(
                                     value = treadDepth,
-                                    onValueChange = { treadDepth = it.filter { c -> c.isDigit() } },
+                                    onValueChange = { newValue ->
+                                        if (newValue.matches(Regex("^\\d*\\.?\\d*$")) && newValue.length <= 6) {
+                                            treadDepth = newValue
+                                            validateTreadDepth(newValue)
+                                        }
+                                    },
                                     modifier = Modifier.fillMaxWidth(),
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Number,
@@ -603,8 +647,17 @@ fun NuevoProductoScreen(
                                         focusedBorderColor = primaryColor,
                                         unfocusedBorderColor = Color.Gray
                                     ),
-                                    shape = RoundedCornerShape(14.dp)
+                                    shape = RoundedCornerShape(14.dp),
+                                    isError = treadDepthError != null
                                 )
+                                if (treadDepthError != null) {
+                                    Text(
+                                        text = treadDepthError!!,
+                                        color = Color.Red,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -616,7 +669,7 @@ fun NuevoProductoScreen(
                                 selectedOriginalDesign != null &&
                                 selectedTireSize != null &&
                                 selectedLoadCapacity != null &&
-                                treadDepth.isNotBlank(),
+                                treadDepthError == null && treadDepth.isNotBlank(),
                         colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
                         shape = RoundedCornerShape(14.dp)
                     ) {
@@ -634,6 +687,40 @@ fun NuevoProductoScreen(
                 }
             )
         }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = {
+                    Text(
+                        "Eliminar Producto",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                },
+                text = {
+                    Text("¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { deleteProduct() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("ELIMINAR", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = { showDeleteDialog = false },
+                        border = BorderStroke(1.dp, primaryColor)
+                    ) {
+                        Text("CANCELAR", color = primaryColor, fontWeight = FontWeight.Bold)
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -644,6 +731,7 @@ fun ProductItem(
     tireSizes: List<TireSizeResponse>,
     loadCapacities: List<LoadingCapacityResponse>,
     onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     primaryColor: Color,
     secondaryColor: Color
 ) {
@@ -675,27 +763,57 @@ fun ProductItem(
                 style = MaterialTheme.typography.bodyMedium.copy(color = Color.DarkGray)
             )
             Spacer(Modifier.height(16.dp))
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(secondaryColor.copy(alpha = 0.1f))
-                    .clickable(onClick = onEditClick)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                    .align(Alignment.End)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Edit",
-                        tint = secondaryColor,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "Editar",
-                        color = secondaryColor,
-                        fontWeight = FontWeight.Medium
-                    )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(secondaryColor.copy(alpha = 0.1f))
+                        .clickable(onClick = onEditClick)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            tint = secondaryColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Editar",
+                            color = secondaryColor,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(12.dp))
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.Red.copy(alpha = 0.1f))
+                        .clickable(onClick = onDeleteClick)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_delete),
+                            contentDescription = "Delete",
+                            tint = Color.Red,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Eliminar",
+                            color = Color.Red,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
         }

@@ -80,15 +80,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
+import com.rfz.appflotal.data.model.delete.CatalogDeleteDto
 import com.rfz.appflotal.data.model.tire.dto.TireSizeDto
 import com.rfz.appflotal.data.model.tire.response.TireSizeResponse
+import com.rfz.appflotal.domain.delete.CatalogDeleteUseCase
 import com.rfz.appflotal.domain.tire.TireSizeCrudUseCase
 import com.rfz.appflotal.domain.tire.TireSizeUseCase
 import com.rfz.appflotal.presentation.theme.backgroundColor
 import com.rfz.appflotal.presentation.theme.lightTextColor
 import com.rfz.appflotal.presentation.theme.primaryColor
 import com.rfz.appflotal.presentation.theme.secondaryColor
-
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
@@ -102,16 +103,11 @@ fun MedidasLlantasScreen(
     navController: NavController,
     tireSizeUseCase: TireSizeUseCase,
     homeViewModel: HomeViewModel,
-    tireSizeCrudUseCase: TireSizeCrudUseCase
+    tireSizeCrudUseCase: TireSizeCrudUseCase,
+    catalogDeleteUseCase: CatalogDeleteUseCase
 ) {
-
-
     val uiState by homeViewModel.uiState.collectAsState()
-
-
     val userData = uiState.userData
-
-
     val scope = rememberCoroutineScope()
 
     var allMedidas by remember { mutableStateOf<List<TireSizeResponse>>(emptyList()) }
@@ -126,6 +122,9 @@ fun MedidasLlantasScreen(
     var editingMedida by remember { mutableStateOf<TireSizeResponse?>(null) }
     var newMedida by remember { mutableStateOf("") }
     var newNota by remember { mutableStateOf("") }
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var medidaToDelete by remember { mutableStateOf<TireSizeResponse?>(null) }
 
     fun applyFilterAndPagination() {
         val filtered = if (searchQuery.isBlank()) allMedidas else allMedidas.filter {
@@ -184,6 +183,22 @@ fun MedidasLlantasScreen(
                 loadMedidas()
             } else {
                 errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar"
+            }
+        }
+    }
+
+
+    fun deleteMedida() {
+        scope.launch {
+            medidaToDelete?.let { medida ->
+                val dto = CatalogDeleteDto(id = medida.id_tireSize, table = "tireSize")
+                val result = catalogDeleteUseCase(dto, "Bearer ${userData?.fld_token}")
+                if (result.isSuccess) {
+                    showDeleteDialog = false
+                    loadMedidas()
+                } else {
+                    errorMessage = result.exceptionOrNull()?.message ?: "Error al eliminar la medida"
+                }
             }
         }
     }
@@ -256,7 +271,8 @@ fun MedidasLlantasScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Barra de búsqueda elegante
+
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -267,108 +283,112 @@ fun MedidasLlantasScreen(
                     )
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            leadingIcon = {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Buscar",
+                            tint = Color.White.copy(alpha = 0.9f)
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
                                 Icon(
-                                    Icons.Default.Search,
-                                    contentDescription = "Buscar",
-                                    tint = Color.White.copy(alpha = 0.9f)
+                                    Icons.Default.Close,
+                                    contentDescription = "Limpiar",
+                                    tint = Color.White.copy(alpha = 0.8f)
                                 )
-                            },
-                            trailingIcon = {
-                                if (searchQuery.isNotEmpty()) {
-                                    IconButton(onClick = { searchQuery = "" }) {
-                                        Icon(
-                                            Icons.Default.Close,
-                                            contentDescription = "Limpiar",
-                                            tint = Color.White.copy(alpha = 0.8f)
-                                        )
-                                    }
-                                }
-                            },
-                            placeholder = {
-                                Text(
-                                    "Buscar medidas...",
-                                    color = Color.White.copy(alpha = 0.6f)
-                                )
-                            },
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(6.dp, RoundedCornerShape(16.dp)),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color.White,
-                                unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-                                cursorColor = Color.White,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedContainerColor = Color.White.copy(alpha = 0.1f),
-                                unfocusedContainerColor = Color.White.copy(alpha = 0.1f)
-                            ),
-                            shape = RoundedCornerShape(16.dp),
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
-                        )
-                    }
-
-                        Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(backgroundColor)
-                        ) {
-                    if (isLoading && displayedMedidas.isEmpty()) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = primaryColor,
-                            strokeWidth = 3.dp
-                        )
-                    }
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        items(displayedMedidas) { medida ->
-                            MedidaItem(
-                                medida = medida,
-                                onEditClick = {
-                                    editingMedida = medida
-                                    newMedida = medida.fld_size
-                                    newNota = medida.fld_notes ?: ""
-                                    showDialog = true
-                                },
-                                primaryColor = primaryColor,
-                                secondaryColor = secondaryColor
-                            )
+                            }
                         }
+                    },
+                    placeholder = {
+                        Text(
+                            "Buscar medidas...",
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(6.dp, RoundedCornerShape(16.dp)),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
+                        cursorColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.White.copy(alpha = 0.1f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.1f)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
+                )
+            }
 
-                        if (showLoadMoreButton) {
-                            item {
-                                OutlinedButton(
-                                    onClick = { loadMoreItems() },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 16.dp, horizontal = 32.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(
-                                        contentColor = primaryColor
-                                    ),
-                                    border = BorderStroke(
-                                        1.dp,
-                                        Brush.horizontalGradient(
-                                            listOf(primaryColor, secondaryColor))
-                                    )
-                                ) {
-                                    Text(
-                                        "Cargar más medidas",
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundColor)
+            ) {
+                if (isLoading && displayedMedidas.isEmpty()) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = primaryColor,
+                        strokeWidth = 3.dp
+                    )
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    items(displayedMedidas) { medida ->
+                        MedidaItem(
+                            medida = medida,
+                            onEditClick = {
+                                editingMedida = medida
+                                newMedida = medida.fld_size
+                                newNota = medida.fld_notes ?: ""
+                                showDialog = true
+                            },
+                            onDeleteClick = {
+                                medidaToDelete = medida
+                                showDeleteDialog = true
+                            },
+                            primaryColor = primaryColor,
+                            secondaryColor = secondaryColor
+                        )
+                    }
+
+                    if (showLoadMoreButton) {
+                        item {
+                            OutlinedButton(
+                                onClick = { loadMoreItems() },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp, horizontal = 32.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = primaryColor
+                                ),
+                                border = BorderStroke(
+                                    1.dp,
+                                    Brush.horizontalGradient(
+                                        listOf(primaryColor, secondaryColor))
+                                )
+                            ) {
+                                Text(
+                                    "Cargar más medidas",
+                                    fontWeight = FontWeight.Medium
+                                )
                             }
                         }
                     }
                 }
+            }
         }
 
         if (showDialog) {
@@ -394,9 +414,9 @@ fun MedidasLlantasScreen(
                                 )
                                 .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
                         )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Text(
-                                    text = if (editingMedida == null) "Registrar Medida" else "Editar Medida",
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = if (editingMedida == null) "Registrar Medida" else "Editar Medida",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 color = Color(0xFF4A3DAD),
                                 fontWeight = FontWeight.Bold
@@ -481,6 +501,41 @@ fun MedidasLlantasScreen(
                 }
             )
         }
+
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = {
+                    Text(
+                        "Eliminar Medida",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                },
+                text = {
+                    Text("¿Estás seguro de que deseas eliminar esta medida de llanta? Esta acción no se puede deshacer.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { deleteMedida() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("ELIMINAR", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = { showDeleteDialog = false },
+                        border = BorderStroke(1.dp, primaryColor)
+                    ) {
+                        Text("CANCELAR", color = primaryColor, fontWeight = FontWeight.Bold)
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -488,6 +543,7 @@ fun MedidasLlantasScreen(
 fun MedidaItem(
     medida: TireSizeResponse,
     onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     primaryColor: Color,
     secondaryColor: Color
 ) {
@@ -522,29 +578,55 @@ fun MedidaItem(
                     )
                 )
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(secondaryColor.copy(alpha = 0.1f))
-                        .clickable { onEditClick() }
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(secondaryColor.copy(alpha = 0.1f))
+                            .clickable { onEditClick() }
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
-                        Icon(
-                            Icons.Default.Edit,
-                            contentDescription = "Editar",
-                            tint = secondaryColor,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "Editar",
-                            color = secondaryColor,
-                            fontWeight = FontWeight.Medium,
-                            style = MaterialTheme.typography.labelLarge
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Editar",
+                                tint = secondaryColor,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "Editar",
+                                color = secondaryColor,
+                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                    }
+
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.Red.copy(alpha = 0.1f))
+                            .clickable { onDeleteClick() }
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_delete),
+                                contentDescription = "Eliminar",
+                                tint = Color.Red,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "Eliminar",
+                                color = Color.Red,
+                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
                     }
                 }
             }

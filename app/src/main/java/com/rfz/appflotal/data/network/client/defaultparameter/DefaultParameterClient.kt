@@ -10,7 +10,7 @@ import retrofit2.http.Query
 
 interface DefaultParameterClient {
 
-    @GET("api/Catalog/DefaultParameter")
-    suspend fun doDefaultParameter( @Header("Authorization") token: String,@Query("id_user") id_user: Int): Response<List<DefaultParameterResponse>>
+    @GET("api/DefaultParameter/DefaultParameter")
+    suspend fun doDefaultParameter( @Header("Authorization") token: String): Response<List<DefaultParameterResponse>>
 
 }

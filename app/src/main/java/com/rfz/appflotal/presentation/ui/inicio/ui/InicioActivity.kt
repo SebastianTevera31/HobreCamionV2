@@ -23,11 +23,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rfz.appflotal.core.network.NetworkConfig
+import com.rfz.appflotal.data.model.delete.CatalogDeleteDto
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
+import com.rfz.appflotal.domain.airPressureRating.AirPressureRatingUseCase
+import com.rfz.appflotal.domain.airPressureRating.CreateAirPressureRatingUseCase
+import com.rfz.appflotal.domain.airPressureRating.UpdateAirPressureRatingUseCase
 import com.rfz.appflotal.domain.base.BaseUseCase
 import com.rfz.appflotal.domain.brand.BrandCrudUseCase
 import com.rfz.appflotal.domain.brand.BrandListUseCase
 import com.rfz.appflotal.domain.controltype.ControlTypeUseCase
+import com.rfz.appflotal.domain.defaultparameter.CreateDefaultParameterUseCase
+import com.rfz.appflotal.domain.defaultparameter.DefaultParameterUseCase
+import com.rfz.appflotal.domain.defaultparameter.UpdateDefaultParameterUseCase
+import com.rfz.appflotal.domain.delete.CatalogDeleteUseCase
+import com.rfz.appflotal.domain.depthcolor.CreateDepthColorUseCase
+import com.rfz.appflotal.domain.depthcolor.DepthColorUseCase
+import com.rfz.appflotal.domain.depthcolor.UpdateDepthColorUseCase
+import com.rfz.appflotal.domain.imperfectpair.ImperfectPairCreateUseCase
+import com.rfz.appflotal.domain.imperfectpair.ImperfectPairUpdateUseCase
+import com.rfz.appflotal.domain.imperfectpair.ImperfectPairUseCase
 import com.rfz.appflotal.domain.originaldesign.CrudOriginalDesignUseCase
 import com.rfz.appflotal.domain.originaldesign.OriginalDesignByIdUseCase
 import com.rfz.appflotal.domain.originaldesign.OriginalDesignUseCase
@@ -35,6 +49,10 @@ import com.rfz.appflotal.domain.product.ProductByIdUseCase
 import com.rfz.appflotal.domain.product.ProductCrudUseCase
 import com.rfz.appflotal.domain.product.ProductListUseCase
 import com.rfz.appflotal.domain.provider.ProviderListUseCase
+import com.rfz.appflotal.domain.retreadbrand.RetreadBrandCrudUseCase
+import com.rfz.appflotal.domain.retreadbrand.RetreadBrandListUseCase
+import com.rfz.appflotal.domain.retreaddesign.RetreadDesignCrudUseCase
+import com.rfz.appflotal.domain.retreaddesign.RetreadDesignListUseCase
 import com.rfz.appflotal.domain.route.RouteUseCase
 import com.rfz.appflotal.domain.tire.LoadingCapacityUseCase
 import com.rfz.appflotal.domain.tire.TireCrudUseCase
@@ -48,11 +66,15 @@ import com.rfz.appflotal.domain.vehicle.VehicleCrudUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.theme.ProyectoFscSoftTheme
+import com.rfz.appflotal.presentation.ui.airpressurerating.AirPressureRatingScreen
 import com.rfz.appflotal.presentation.ui.brand.MarcasScreen
+import com.rfz.appflotal.presentation.ui.defaultparameter.DefaultParameterScreen
+import com.rfz.appflotal.presentation.ui.diseñorenovadosscreen.DepthColorScreen
 
 
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
+import com.rfz.appflotal.presentation.ui.imperfectpair.ImperfectPairScreen
 import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
 import com.rfz.appflotal.presentation.ui.inicio.viewmodel.InicioScreenViewModel
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
@@ -70,6 +92,8 @@ import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlantasScreen
 
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
+import com.rfz.appflotal.presentation.ui.retreadbrand.RetreadBrandScreen
+import com.rfz.appflotal.presentation.ui.retreaddesign.RetreadDesignScreen
 
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLDecoder
@@ -102,6 +126,65 @@ class InicioActivity : ComponentActivity() {
     lateinit var brandCrudUseCase: BrandCrudUseCase
 
     @Inject
+    lateinit var catalogDeleteUseCase: CatalogDeleteUseCase
+
+
+    @Inject
+    lateinit var retreadDesignListUseCase: RetreadDesignListUseCase
+
+    @Inject
+    lateinit var retreadDesignCrudUseCase: RetreadDesignCrudUseCase
+
+
+    @Inject
+    lateinit var retreadBrandListUseCase: RetreadBrandListUseCase
+
+
+    @Inject
+    lateinit var retreadBrandCrudUseCase: RetreadBrandCrudUseCase
+
+
+
+    @Inject
+    lateinit var depthColorUseCase: DepthColorUseCase
+
+
+
+    @Inject
+    lateinit var imperfectPairUseCase: ImperfectPairUseCase
+
+
+
+    @Inject
+    lateinit var imperfectPairCreateUseCase: ImperfectPairCreateUseCase
+
+
+    @Inject
+    lateinit var imperfectPairUpdateUseCase: ImperfectPairUpdateUseCase
+
+
+    @Inject
+    lateinit var createDepthColorUseCase: CreateDepthColorUseCase
+
+
+
+    @Inject
+    lateinit var updateDepthColorUseCase: UpdateDepthColorUseCase
+
+
+
+
+    @Inject
+    lateinit var defaultParameterUseCase: DefaultParameterUseCase
+
+    @Inject
+    lateinit var createDefaultParameterUseCase: CreateDefaultParameterUseCase
+
+    @Inject
+    lateinit var updateDefaultParameterUseCase: UpdateDefaultParameterUseCase
+
+
+    @Inject
     lateinit var originalDesignByIdUseCase: OriginalDesignByIdUseCase
 
     @Inject
@@ -127,6 +210,13 @@ class InicioActivity : ComponentActivity() {
     @Inject
     lateinit var productCrudUseCase: ProductCrudUseCase
 
+    @Inject
+    lateinit var updateAirPressureRatingUseCase: UpdateAirPressureRatingUseCase
+
+    @Inject
+    lateinit var  airPressureRatingUseCase: AirPressureRatingUseCase
+    @Inject
+    lateinit var createAirPressureRatingUseCase: CreateAirPressureRatingUseCase
 
 
     @Inject
@@ -238,8 +328,32 @@ class InicioActivity : ComponentActivity() {
                                 navController = navController,
                                 brandListUseCase = brandListUseCase,
                                 homeViewModel = homeViewModel,
-                                brandCrudUseCase = brandCrudUseCase
+                                brandCrudUseCase = brandCrudUseCase,
+                                catalogDeleteUseCase = catalogDeleteUseCase
                             )
+                        }
+
+                        composable(NetworkConfig.DEFAULT_PARAMETER) {
+                            DefaultParameterScreen(
+                                navController = navController,
+
+                                homeViewModel = homeViewModel,
+                                defaultParameterUseCase = defaultParameterUseCase,
+                                createDefaultParameterUseCase =createDefaultParameterUseCase ,
+                                updateDefaultParameterUseCase = updateDefaultParameterUseCase
+                            )
+                        }
+
+
+                        composable(NetworkConfig.AIRPRESSURERATING) {
+                            AirPressureRatingScreen(
+                                navController = navController,
+
+                                homeViewModel = homeViewModel,
+                                airPressureRatingUseCase = airPressureRatingUseCase,
+                                createAirPressureRatingUseCase = createAirPressureRatingUseCase,
+                                updateAirPressureRatingUseCase = updateAirPressureRatingUseCase
+                                     )
                         }
                         composable(NetworkConfig.ORIGINAL) {
                             OriginalScreen(
@@ -249,6 +363,7 @@ class InicioActivity : ComponentActivity() {
                                 crudOriginalDesignUseCase,
                                 brandListUseCase,
                                 utilizationUseCase,
+                                catalogDeleteUseCase,
                                 homeViewModel
                             )
                         }
@@ -260,9 +375,62 @@ class InicioActivity : ComponentActivity() {
                                 navController,
                                 tireSizeUseCase,
                                 homeViewModel,
-                                tireSizeCrudUseCase
+                                tireSizeCrudUseCase,
+                                catalogDeleteUseCase
                             )
                         }
+
+
+                        composable(NetworkConfig.DEPTHCOLOR) {
+                            DepthColorScreen(
+                                navController,
+                                homeViewModel,
+                                depthColorUseCase,
+                                createDepthColorUseCase,
+                                updateDepthColorUseCase
+
+                            )
+                        }
+
+
+                        composable(NetworkConfig.IMPERFECTPAIR) {
+                            ImperfectPairScreen(
+                                navController,
+                                homeViewModel,
+                               imperfectPairUseCase,
+                                imperfectPairCreateUseCase,
+                                imperfectPairUpdateUseCase
+
+                            )
+                        }
+
+
+                        composable(NetworkConfig.RETREADDESIGN) {
+                            RetreadDesignScreen(
+                                navController,
+                                homeViewModel,
+                              retreadDesignListUseCase,
+                                retreadDesignCrudUseCase,
+                                retreadBrandListUseCase,
+                                utilizationUseCase,
+                                catalogDeleteUseCase
+
+                            )
+                        }
+
+
+                        composable(NetworkConfig.RETREADDESIGNBRAND) {
+                            RetreadBrandScreen(
+                                navController,
+                                homeViewModel,
+                                retreadBrandListUseCase,
+                                retreadBrandCrudUseCase,
+                                catalogDeleteUseCase
+
+                            )
+                        }
+
+
                         composable(NetworkConfig.PRODUCTOS) {
                             NuevoProductoScreen(
                                 navController,
@@ -272,6 +440,7 @@ class InicioActivity : ComponentActivity() {
                                 originalDesignUseCase,
                                 tireSizeUseCase,
                                 loadingCapacityUseCase,
+                                catalogDeleteUseCase,
                                 homeViewModel
                             )
                         }
@@ -284,6 +453,7 @@ class InicioActivity : ComponentActivity() {
                                 originalDesignUseCase,
                                 tireSizeUseCase,
                                 loadingCapacityUseCase,
+                                catalogDeleteUseCase,
                                 homeViewModel
                             )
                         }
@@ -297,6 +467,7 @@ class InicioActivity : ComponentActivity() {
                                 tireCrudUseCase,
                                 tireListUsecase,
                                 tireGetUseCase,
+                                catalogDeleteUseCase,
                                 homeViewModel
                             )
                         }
@@ -309,7 +480,7 @@ class InicioActivity : ComponentActivity() {
                                 vehicleTypeUseCase,
                                 controlTypeUseCase,
                                 routeUseCase,
-                                baseUseCase,
+                                baseUseCase, catalogDeleteUseCase,
                                 homeViewModel
                             )
                         }

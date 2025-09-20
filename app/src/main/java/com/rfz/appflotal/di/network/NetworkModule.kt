@@ -13,10 +13,19 @@ import com.rfz.appflotal.data.network.client.base.BaseClient
 import com.rfz.appflotal.data.network.client.brand.BrandCrudClient
 import com.rfz.appflotal.data.network.client.brand.BrandListClient
 import com.rfz.appflotal.data.network.client.controltype.ControlTypeClient
+import com.rfz.appflotal.data.network.client.defaultparameter.CreateDefaultParameterClient
 import com.rfz.appflotal.data.network.client.defaultparameter.DefaultParameterClient
+import com.rfz.appflotal.data.network.client.defaultparameter.UpdateDefaultParameterClient
+import com.rfz.appflotal.data.network.client.delete.CatalogDeleteClient
+import com.rfz.appflotal.data.network.client.depthcolor.CreateDepthColorClient
+import com.rfz.appflotal.data.network.client.depthcolor.DepthColorClient
+import com.rfz.appflotal.data.network.client.depthcolor.UpdateDepthColorClient
 import com.rfz.appflotal.data.network.client.destination.DestinationClient
 import com.rfz.appflotal.data.network.client.diagram.DiagramClient
 import com.rfz.appflotal.data.network.client.disassembly.DisassemblyCauseClient
+import com.rfz.appflotal.data.network.client.imperfectpair.ImperfectPairClient
+import com.rfz.appflotal.data.network.client.imperfectpair.ImperfectPairCreateClient
+import com.rfz.appflotal.data.network.client.imperfectpair.ImperfectPairUpdateClient
 import com.rfz.appflotal.data.network.client.languaje.LanguajeClient
 import com.rfz.appflotal.data.network.client.originaldesign.CrudOriginalDesignClient
 import com.rfz.appflotal.data.network.client.originaldesign.OriginalDesignByIdClient
@@ -64,7 +73,7 @@ class NetworkModule {
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(35, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
 
@@ -110,6 +119,44 @@ class NetworkModule {
     fun provideUpdateAirPressureRatingClient(retrofit: Retrofit): UpdateAirPressureRatingClient {
         return retrofit.create(UpdateAirPressureRatingClient::class.java)
     }
+
+    @Singleton
+    @Provides
+    fun provideCreateDefaultParameterClient (retrofit: Retrofit): CreateDefaultParameterClient {
+        return retrofit.create(CreateDefaultParameterClient ::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideUpdateDefaultParameterClient(retrofit: Retrofit): UpdateDefaultParameterClient {
+        return retrofit.create(UpdateDefaultParameterClient::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideDepthColorClient(retrofit: Retrofit): DepthColorClient {
+        return retrofit.create(DepthColorClient::class.java)
+    }
+
+
+
+    @Singleton
+    @Provides
+    fun provideCreateDepthColorClient(retrofit: Retrofit): CreateDepthColorClient {
+        return retrofit.create(CreateDepthColorClient::class.java)
+    }
+
+
+    @Singleton
+    @Provides
+    fun provideUpdateDepthColorClient(retrofit: Retrofit): UpdateDepthColorClient {
+        return retrofit.create(UpdateDepthColorClient::class.java)
+    }
+
+
+
+
+
 
     @Singleton
     @Provides
@@ -198,6 +245,42 @@ class NetworkModule {
     fun provideControlTypeClient(retrofit: Retrofit): ControlTypeClient {
         return retrofit.create(ControlTypeClient::class.java)
     }
+
+
+
+    @Singleton
+    @Provides
+    fun provideImperfectPairUpdateClient(retrofit: Retrofit): ImperfectPairUpdateClient {
+        return retrofit.create(ImperfectPairUpdateClient::class.java)
+    }
+
+
+
+
+
+    @Singleton
+    @Provides
+    fun provideImperfectPairCreateClient(retrofit: Retrofit): ImperfectPairCreateClient {
+        return retrofit.create(ImperfectPairCreateClient::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCatalogDeleteClient(retrofit: Retrofit): CatalogDeleteClient {
+        return retrofit.create(CatalogDeleteClient::class.java)
+    }
+
+
+    @Singleton
+    @Provides
+    fun provideImperfectPairClient(retrofit: Retrofit): ImperfectPairClient {
+        return retrofit.create(ImperfectPairClient::class.java)
+    }
+
+
+
+
+
 
 
     @Singleton
