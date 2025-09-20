@@ -11,6 +11,6 @@ import retrofit2.http.Query
 interface TireListClient {
 
 
-    @GET("Tire/ListTire")
+    @GET("api/Tire/ListTire")
     suspend fun TireList(@Header("Authorization") token: String): Response<List<TireListResponse>>
 }

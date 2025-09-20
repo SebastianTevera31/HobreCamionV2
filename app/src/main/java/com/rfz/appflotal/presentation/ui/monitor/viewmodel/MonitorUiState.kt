@@ -1,0 +1,43 @@
+package com.rfz.appflotal.presentation.ui.monitor.viewmodel
+
+import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
+import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
+import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
+
+data class MonitorUiState(
+    val monitorId: Int = 0,
+    val currentTire: String = "",
+    val pression: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
+    val temperature: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
+    val depth: Float = 0f,
+    val timestamp: String = "",
+    val signalIntensity: Pair<BluetoothSignalQuality, String> = Pair(
+        BluetoothSignalQuality.Desconocida,
+        ""
+    ),
+    val imageDimen: Pair<Int, Int> = Pair(0, 0),
+    val chassisImageUrl: String = "",
+    val listOfTires: List<Tire> = emptyList(),
+    val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
+    val showDialog: Boolean = false,
+    val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA
+)
+
+data class Tire(
+    val sensorPosition: String,
+    val inAlert: Boolean,
+    val isActive: Boolean,
+    val xPosition: Int,
+    val yPosition: Int,
+)
+
+fun DiagramMonitorResponse.toTireData(): MonitorTireByDateResponse {
+    return MonitorTireByDateResponse(
+        tirePosition = sensorPosition,
+        tireNumber = tireNumber,
+        sensorDate = ultimalectura,
+        psi = psi.toInt(),
+        temperature = temperature.toInt()
+    )
+}

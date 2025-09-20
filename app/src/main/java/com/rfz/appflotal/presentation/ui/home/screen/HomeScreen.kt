@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.home.screen
 
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.widget.Toast
@@ -9,18 +8,45 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,14 +66,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.network.NetworkConfig
+import com.rfz.appflotal.core.util.HombreCamionScreens
+import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.data.network.service.HombreCamionService
+import com.rfz.appflotal.presentation.theme.backgroundLight
+import com.rfz.appflotal.presentation.theme.onPrimaryLight
+import com.rfz.appflotal.presentation.theme.primaryLight
+import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.theme.surfaceLight
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorRegisterDialog
+import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.util.*
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,7 +93,9 @@ import java.util.*
 fun HomeScreen(
     navController: NavController,
     homeViewModel: HomeViewModel,
-    colors: ColorScheme
+    registerMonitorViewModel: RegisterMonitorViewModel,
+    updateUserData: (String) -> Unit,
+    monitorViewModel: MonitorViewModel,
 ) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
@@ -66,11 +106,57 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         homeViewModel.loadInitialData()
+        registerMonitorViewModel.stopScan()
     }
+
+    var showMonitorDialog by remember { mutableStateOf(false) }
+    val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
+
+    if (showMonitorDialog) {
+        val configurations = registerMonitorViewModel.configurationList.collectAsState()
+        val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
+        val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
+
+        LaunchedEffect(Unit) {
+            registerMonitorViewModel.getMonitorConfiguration()
+        }
+
+        MonitorRegisterDialog(
+            configurations = configurations.value,
+            isScanning = monitorConfigUiState.value.isScanning,
+            showCloseButton = true,
+            monitorSelected = monitorConfigUiState.value.configurationSelected,
+            macValue = monitorConfigUiState.value.mac,
+            onScan = { registerMonitorViewModel.startScan() },
+            onCloseButton = {
+                registerMonitorViewModel.stopScan()
+                showMonitorDialog = false
+            },
+            onContinueButton = { mac, configuration ->
+                registerMonitorViewModel.registerMonitor(
+                    idMonitor = monitorUiState.value.monitorId,
+                    mac = mac,
+                    configurationSelected = configuration,
+                    context = context
+                )
+            },
+            registerMonitorStatus = registerMonitorStatus.value,
+            onSuccessRegister = {
+                showMonitorDialog = false
+                monitorViewModel.initMonitorData()
+                registerMonitorViewModel.clearMonitorRegistrationData()
+            },
+        )
+    }
+
 
     val onlyLanguagesAllowedText = stringResource(R.string.only_languages_allowed)
     val languages = listOf("es" to "ES", "en" to "EN")
+
     val userName = uiState.userData?.fld_name ?: stringResource(R.string.operator)
+    val paymentPlan =
+        PaymentPlanType.valueOf(uiState.userData?.paymentPlan?.replace(" ", "") ?: "None")
+    val plates = uiState.userData?.vehiclePlates ?: ""
 
     LaunchedEffect(uiState.selectedLanguage) {
         if (uiState.selectedLanguage == "es" || uiState.selectedLanguage == "en") {
@@ -93,34 +179,76 @@ fun HomeScreen(
     }
 
     val menuItems = listOf(
-        MenuItem(stringResource(R.string.brands), "marcas_screen", R.drawable.ic_brand),
-        MenuItem(stringResource(R.string.original_design), "diseno_original_screen", R.drawable.ic_tire_design),
-        MenuItem(stringResource(R.string.tire_sizes), "medidasLlantasScreen", R.drawable.ic_tire_size),
-        MenuItem(stringResource(R.string.products), "productoScreen", R.drawable.ic_products),
-        MenuItem(stringResource(R.string.tire_register), "registroLlantasScreen", R.drawable.ic_tire_register),
-        MenuItem(stringResource(R.string.vehicle_register), "registroVehiculoScreen", R.drawable.ic_truck),
-        MenuItem(stringResource(R.string.tire_change), "montajeDesmontajeScreen", R.drawable.ic_tire_change)
+        MenuItem(
+            stringResource(R.string.brands),
+            NavScreens.MARCAS,
+            R.drawable.ic_brand
+        ),
+        MenuItem(
+            stringResource(R.string.original_design),
+            NavScreens.ORIGINAL,
+            R.drawable.ic_tire_design
+        ),
+        MenuItem(
+            stringResource(R.string.tire_sizes),
+            NavScreens.MEDIDAS_LLANTAS,
+            R.drawable.ic_tire_size
+        ),
+        MenuItem(
+            stringResource(R.string.products),
+            NavScreens.PRODUCTOS,
+            R.drawable.ic_products
+        ),
+        MenuItem(
+            stringResource(R.string.tire_register),
+            NavScreens.REGISTRO_LLANTAS,
+            R.drawable.ic_tire_register
+        ),
+        MenuItem(
+            stringResource(R.string.vehicle_register),
+            NavScreens.REGISTRO_VEHICULOS,
+            R.drawable.ic_truck
+        ),
+        MenuItem(
+            stringResource(R.string.tire_change),
+            NavScreens.MONTAJE_DESMONTAJE,
+            R.drawable.ic_tire_change
+        ),
+        MenuItem(
+            title = stringResource(R.string.monitoreo),
+            route = HombreCamionScreens.MONITOR.name,
+            iconRes = R.drawable.monitor
+        )
     )
+
     val scope = rememberCoroutineScope()
 
-    val primaryColor = Color(0xFF4A3DAD)
-    val primaryLight = Color(0xFF6A5DD9)
-    val secondaryColor = Color(0xFF5C4EC9)
-    val accentColor = Color(0xFF7D6BFF)
-    val lightBackground = Color(0xFFF9F8FF)
-    val cardBackground = Color.White
-    val surfaceColor = Color(0xFFF1EFFF)
+    val primaryColor = primaryLight
+    val primaryLight = primaryLight
+    val secondaryColor = secondaryLight
+    val lightBackground = backgroundLight
+    val cardBackground = backgroundLight
+    val surfaceColor = surfaceLight
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                    Box(
+                        modifier = Modifier
+                            .height(120.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.logo),
+                            contentDescription = stringResource(R.string.logo_description),
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .height(54.dp)
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = primaryColor,
@@ -154,13 +282,14 @@ fun HomeScreen(
                                             scope.launch {
                                                 homeViewModel.changeLanguage(code)
                                             }
-                                        }   .background(
+                                        }
+                                        .background(
                                             if (uiState.selectedLanguage == code)
                                                 Color.White.copy(alpha = 0.3f)
                                             else
                                                 Color.Transparent
                                         )
-                                        .padding(6.dp)
+                                        .padding(horizontal = 4.dp)
                                 ) {
                                     Text(
                                         text = display,
@@ -179,24 +308,41 @@ fun HomeScreen(
                     IconButton(
                         onClick = {
                             CoroutineScope(Dispatchers.IO).launch {
+
+                                HombreCamionService.stopService(context)
+
                                 homeViewModel.logout()
+
+                                monitorViewModel.clearMonitorData()
+
+                                registerMonitorViewModel.clearMonitorConfiguration()
+
+                                registerMonitorViewModel.stopScan()
+
                                 withContext(Dispatchers.Main) {
-                                    navController.navigate(NetworkConfig.LOGIN) {
-                                        popUpTo(0)
+                                    // navController.clearBackStack(NavScreens.LOGIN)
+
+                                    navController.navigate(NavScreens.LOGIN) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            inclusive = true
+                                        }
                                     }
                                 }
                             }
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.ExitToApp,
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = stringResource(R.string.logout),
                             tint = Color.White
                         )
                     }
 
                     IconButton(
-                        onClick = { /* Acción perfil */ }
+                        onClick = {
+                            updateUserData(uiState.selectedLanguage)
+                            navController.navigate(NavScreens.INFORMACION_USUARIO)
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.AccountCircle,
@@ -207,7 +353,7 @@ fun HomeScreen(
                 }
             )
         },
-        containerColor = lightBackground
+
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -217,16 +363,12 @@ fun HomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(80.dp)
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(primaryColor, primaryLight),
                             startY = 0f,
                             endY = 500f
-                        ),
-                        shape = RoundedCornerShape(
-                            bottomStart = 77.dp,
-                            bottomEnd = 77.dp
                         )
                     )
                     .shadow(
@@ -238,88 +380,76 @@ fun HomeScreen(
                         spotColor = primaryColor.copy(alpha = 0.3f)
                     )
             ) {
-                Column(
+                UserHeader(
+                    paymentPlan = paymentPlan,
+                    userName = userName,
+                    plates = plates
+                ) {
+                    showMonitorDialog = true
+                }
+            }
+
+            // PANTALLAS
+            if (paymentPlan == PaymentPlanType.Complete) {
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.logo),
-                        contentDescription = stringResource(R.string.logo_description),
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .height(80.dp)
-                            .padding(bottom = 8.dp)
-                    )
-
-                    Text(
-                        text = stringResource(R.string.welcome, userName),
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-
-                    Text(
-                        text = LocalDate.now().toString(),
-                        color = Color.White.copy(alpha = 0.9f),
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
-                    .background(surfaceColor)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 32.dp,
-                            topEnd = 32.dp
-                        )
-                    )
-            ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(menuItems) { item ->
-                        ElegantMenuCard(
-                            title = item.title,
-                            iconRes = item.iconRes,
-                            onClick = { navController.navigate(item.route) },
-                            primaryColor = primaryColor,
-                            secondaryColor = secondaryColor,
-                            cardBackground = cardBackground
-                        )
-                    }
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                primaryColor.copy(alpha = 0.9f),
-                                secondaryColor.copy(alpha = 0.9f)
+                        .weight(1f)
+                        .background(surfaceColor)
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 32.dp,
+                                topEnd = 32.dp
                             )
                         )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.copyright, LocalDate.now().year),
-                    color = Color.White.copy(alpha = 0.95f),
-                    style = MaterialTheme.typography.labelMedium
+                ) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(menuItems) { item ->
+                            ElegantMenuCard(
+                                title = item.title,
+                                iconRes = item.iconRes,
+                                onClick = { navController.navigate(item.route) },
+                                primaryColor = primaryColor,
+                                secondaryColor = secondaryColor,
+                                cardBackground = cardBackground
+                            )
+                        }
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    primaryColor.copy(alpha = 0.9f),
+                                    secondaryColor.copy(alpha = 0.9f)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.copyright, LocalDate.now().year),
+                        color = Color.White.copy(alpha = 0.95f),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            } else {
+                MonitorScreen(
+                    monitorViewModel = monitorViewModel,
+                    registerMonitorViewModel = registerMonitorViewModel,
+                    navigateUp = { navController.navigateUp() },
+                    paymentPlan = paymentPlan,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
@@ -331,12 +461,11 @@ private fun ElegantMenuCard(
     title: String,
     iconRes: Int,
     onClick: () -> Unit,
-    primaryColor: Color = Color(0xFF5B4B8A),
-    secondaryColor: Color = Color(0xFF9B87FF),
+    primaryColor: Color = primaryLight,
+    secondaryColor: Color = secondaryLight,
     cardBackground: Color = Color.White
 ) {
-    val highlightColor = Color(0xFFEDE7FF)
-    val accentColor = Color(0xFFD1C4FF)
+    val highlightColor = onPrimaryLight
 
     Card(
         modifier = Modifier

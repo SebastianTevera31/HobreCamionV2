@@ -12,6 +12,7 @@ import com.rfz.appflotal.data.network.client.airPressureRating.UpdateAirPressure
 import com.rfz.appflotal.data.network.client.base.BaseClient
 import com.rfz.appflotal.data.network.client.brand.BrandCrudClient
 import com.rfz.appflotal.data.network.client.brand.BrandListClient
+import com.rfz.appflotal.data.network.client.catalog.CatalogClient
 import com.rfz.appflotal.data.network.client.controltype.ControlTypeClient
 import com.rfz.appflotal.data.network.client.defaultparameter.DefaultParameterClient
 import com.rfz.appflotal.data.network.client.destination.DestinationClient
@@ -40,19 +41,28 @@ import com.rfz.appflotal.data.network.client.tire.TireGetClient
 import com.rfz.appflotal.data.network.client.tire.TireListClient
 import com.rfz.appflotal.data.network.client.tire.TireSizeClient
 import com.rfz.appflotal.data.network.client.tire.TireSizeCrudClient
+import com.rfz.appflotal.data.network.client.tpms.ApiTpmsClient
 import com.rfz.appflotal.data.network.client.utilization.UtilizationClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleByIdClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleCrudClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleListClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleTypeClient
 import com.rfz.appflotal.data.network.client.waster.WasteReportListClient
+import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepository
+import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepositoryImp
+import com.rfz.appflotal.data.repository.wifi.WifiRepository
+import com.rfz.appflotal.data.repository.wifi.WifiRepositoryImp
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -62,12 +72,13 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
+        val cacheDir = File(context.cacheDir, "image_cache")
         return OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(45, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
-
+            .cache(Cache(cacheDir, 50L * 1024 * 1024)) // 50 MB
             .build()
     }
 
@@ -75,7 +86,7 @@ class NetworkModule {
     @Provides
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(NetworkConfig.Base_Url)
+            .baseUrl(NetworkConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -154,6 +165,7 @@ class NetworkModule {
     fun provideAcquisitionTypeClient(retrofit: Retrofit): AcquisitionTypeClient {
         return retrofit.create(AcquisitionTypeClient::class.java)
     }
+
     @Singleton
     @Provides
     fun provideBrandCrudClient(retrofit: Retrofit): BrandCrudClient {
@@ -214,13 +226,11 @@ class NetworkModule {
     }
 
 
-
     @Singleton
     @Provides
     fun provideDiagramClient(retrofit: Retrofit): DiagramClient {
         return retrofit.create(DiagramClient::class.java)
     }
-
 
 
     @Singleton
@@ -278,13 +288,11 @@ class NetworkModule {
     }
 
 
-
     @Singleton
     @Provides
     fun provideRetreadDesignCrudClient(retrofit: Retrofit): RetreadDesignCrudClient {
         return retrofit.create(RetreadDesignCrudClient::class.java)
     }
-
 
 
     @Singleton
@@ -312,14 +320,11 @@ class NetworkModule {
         return retrofit.create(DisassemblyTireCrudClient::class.java)
     }
 
-
-
     @Singleton
     @Provides
     fun provideInspectionTireCrudClient(retrofit: Retrofit): InspectionTireCrudClient {
         return retrofit.create(InspectionTireCrudClient::class.java)
     }
-
 
     @Singleton
     @Provides
@@ -327,21 +332,17 @@ class NetworkModule {
         return retrofit.create(TireCrudClient::class.java)
     }
 
-
     @Singleton
     @Provides
     fun provideTireGetClient(retrofit: Retrofit): TireGetClient {
         return retrofit.create(TireGetClient::class.java)
     }
 
-
-
     @Singleton
     @Provides
     fun provideVehicleByIdClient(retrofit: Retrofit): VehicleByIdClient {
         return retrofit.create(VehicleByIdClient::class.java)
     }
-
 
     @Singleton
     @Provides
@@ -355,14 +356,11 @@ class NetworkModule {
         return retrofit.create(VehicleListClient::class.java)
     }
 
-
-
     @Singleton
     @Provides
     fun provideVehicleTypeClient(retrofit: Retrofit): VehicleTypeClient {
         return retrofit.create(VehicleTypeClient::class.java)
     }
-
 
     @Singleton
     @Provides
@@ -371,8 +369,33 @@ class NetworkModule {
     }
 
 
+    @Singleton
+    @Provides
+    fun provideTpmsClient(retrofit: Retrofit): ApiTpmsClient {
+        return retrofit.create(ApiTpmsClient::class.java)
+    }
 
+    @Singleton
+    @Provides
+    fun provideCatalogClient(retrofit: Retrofit): CatalogClient {
+        return retrofit.create(CatalogClient::class.java)
+    }
+}
 
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class BluetoothModule() {
 
+    @Binds
+    @Singleton
+    abstract fun provideBluetoothModule(impl: BluetoothRepositoryImp): BluetoothRepository
+}
 
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class WifiModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindWifiModule(impl: WifiRepositoryImp): WifiRepository
 }

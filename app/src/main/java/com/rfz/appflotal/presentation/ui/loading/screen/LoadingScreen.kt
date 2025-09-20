@@ -26,8 +26,6 @@ fun LoadingScreen() {
             contentDescription = "Loading Image",
             modifier = Modifier.size(200.dp)
         )
-
-
     }
 }
 

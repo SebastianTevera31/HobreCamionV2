@@ -2,8 +2,9 @@ package com.rfz.appflotal.di.database
 
 import android.content.Context
 import androidx.room.Room
-import com.rfz.appflotal.data.dao.AppFlotalDao
-import com.rfz.appflotal.data.database.AppFlotalDatabase
+import com.rfz.appflotal.data.dao.AppHCDao
+import com.rfz.appflotal.data.dao.SensorDao
+import com.rfz.appflotal.data.database.AppHombreCamionDatabase
 
 import dagger.Module
 import dagger.Provides
@@ -17,17 +18,22 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class DataBaseModule {
     @Provides
-    fun provideGasMonSoftDao(FscSoftDatabase: AppFlotalDatabase): AppFlotalDao {
-        return FscSoftDatabase.flotalSoftDao()
+    fun provideHCDao(hombreCamionDatabase: AppHombreCamionDatabase): AppHCDao {
+        return hombreCamionDatabase.hcSoftDao()
+    }
+
+    @Provides
+    fun provideSensorDao(hombreCamionDatabase: AppHombreCamionDatabase): SensorDao {
+        return hombreCamionDatabase.sensorDao()
     }
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext _appContext: Context): AppFlotalDatabase {
+    fun provideDatabase(@ApplicationContext appContext: Context): AppHombreCamionDatabase {
         return Room.databaseBuilder(
-            _appContext,
-            AppFlotalDatabase::class.java,
+            appContext,
+            AppHombreCamionDatabase::class.java,
             "AppFlotalDatabase"
-        ).build()
+        ).fallbackToDestructiveMigration(true).build()
     }
 }

@@ -104,8 +104,6 @@ fun ImageLogoInicio() {
     )
 }
 
-
-
 @SuppressLint("ResourceAsColor")
 @Composable
 fun InicioButton(navController: NavController) {

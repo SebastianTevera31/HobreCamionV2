@@ -3,7 +3,6 @@ package com.rfz.appflotal
 import android.app.Application
 import com.rfz.appflotal.core.util.AppLocale
 import dagger.hilt.android.HiltAndroidApp
-import java.util.Locale
 
 @HiltAndroidApp
 class ProyectoFscApp : Application() {

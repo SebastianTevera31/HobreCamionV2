@@ -1,29 +1,7 @@
 package com.rfz.appflotal.core.network
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-
 object NetworkConfig {
-
- const val Base_Url = "https://truckdriverapi.azurewebsites.net/"
- var imei = ""
- var fecha = ""
- const val LOADING = "loadingScreen"
- const val LOGIN = "loginScreen"
- const val HOME = "homescreen"
- const val MARCAS = "marcas_screen"
- const val NUEVA_MARCA = "nuevaMarca"
- const val RENOVADOS = "diseno_renovados_screen"
- const val ORIGINAL = "diseno_original_screen"
- const val NUEVO_RENOVADO = "nuevoRenovado"
- const val MEDIDAS_LLANTAS = "medidasLlantasScreen"
- const val NUEVA_MEDIDA = "medidas_llantas_screen"
- const val PRODUCTOS = "productoScreen"
- const val NUEVO_PRODUCTO = "producto_screen"
- const val REGISTRO_LLANTAS = "registroLlantasScreen"
- const val REGISTRO_VEHICULOS = "registroVehiculoScreen"
- const val MONTAJE_DESMONTAJE = "montajeDesmontajeScreen"
- const val INICIO = "inicioScreen"
-
-
+    const val BASE_URL = "https://truckdriverapi.azurewebsites.net/"
+    var imei = ""
+    var fecha = ""
 }

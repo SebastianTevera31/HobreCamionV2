@@ -1,0 +1,385 @@
+package com.rfz.appflotal.data.network.service
+
+import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.content.res.Configuration
+import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
+import androidx.core.content.PermissionChecker
+import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.AppLocale
+import com.rfz.appflotal.core.util.Commons.getCurrentDate
+import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
+import com.rfz.appflotal.data.NetworkStatus
+import com.rfz.appflotal.data.model.flotalSoft.SensorTpmsEntity
+import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
+import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
+import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
+import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
+import com.rfz.appflotal.domain.database.GetTasksUseCase
+import com.rfz.appflotal.domain.database.SensorTableUseCase
+import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
+import com.rfz.appflotal.domain.wifi.WifiUseCase
+import com.rfz.appflotal.presentation.ui.inicio.ui.InicioActivity
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import java.util.Locale
+import javax.inject.Inject
+
+@AndroidEntryPoint
+class HombreCamionService : Service() {
+    @Inject
+    lateinit var bluetoothUseCase: BluetoothUseCase
+
+    @Inject
+    lateinit var apiTpmsUseCase: ApiTpmsUseCase
+
+    @Inject
+    lateinit var wifiUseCase: WifiUseCase
+
+    @Inject
+    lateinit var sensorTableUseCase: SensorTableUseCase
+
+    @Inject
+    lateinit var getUserUseCase: GetTasksUseCase
+
+    lateinit var notificationManager: NotificationManager
+
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private var oldestTimestamp: String? = null
+
+    private var isStaterd = false
+
+    override fun onBind(p0: Intent?): IBinder? = null
+    private lateinit var notificationCompactBuilder: NotificationCompat.Builder
+
+    override fun onCreate() {
+        super.onCreate()
+        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val restartIntent = Intent("android.intent.action.SERVICE_RESTARTED")
+            .setPackage(packageName)
+        sendBroadcast(restartIntent)
+        isStaterd = false
+        coroutineScope.cancel()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+
+        when (intent?.action) {
+            "ACTION_RESTART" -> {
+                initBluetoothConnection()
+            }
+        }
+
+        // Configurar e iniciar del servicio
+        if (!isStaterd) {
+            startForegroundService()
+            isStaterd = true
+        }
+
+        // Reiniciando servicio
+        Log.d("HombreCamionService", "Servicio iniciado")
+
+        // Habilitar observador WiFi
+        wifiUseCase.doConnect()
+
+        // Iniciar conexión Bluetooth
+        initBluetoothConnection()
+
+        // Tarea de lectura de datos TPMS
+        readDataFromMonitor()
+
+        // Tarea de lectura de estado de conexion
+        readBluetoothStatus()
+
+        // Tarea de lectura de cambio de idioma
+        readLanguageUpdate()
+
+        return START_STICKY
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun startForegroundService() {
+        val notificationIntent = Intent(this, InicioActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Movier a la seccion de invocacion
+        // Verificar si se aceptaron permisos de Bluetooth.
+        val bluetoothPermission =
+            PermissionChecker.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+        if (bluetoothPermission != PermissionChecker.PERMISSION_GRANTED) {
+            stopSelf()
+            return
+        }
+
+        createServiceNotificationChannel()
+
+        notificationCompactBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.logo)
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
+        rebuildNotificationTexts()
+        startForeground(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
+    }
+
+    private fun createServiceNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Foreground Service Channel",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            setShowBadge(false)
+        }
+
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun initBluetoothConnection() {
+        coroutineScope.launch {
+            val record = getUserUseCase().first()
+            val dataUser = record.first()
+            Log.d("HombreCamionService", "Iniciando Bluetooth...")
+            if (dataUser.id_monitor != 0) {
+                bluetoothUseCase.doConnect(dataUser.monitorMac)
+                bluetoothUseCase.doStartRssiMonitoring()
+            }
+        }
+    }
+
+    private fun readBluetoothStatus() {
+        coroutineScope.launch {
+            bluetoothUseCase().distinctUntilChangedBy { it.bluetoothSignalQuality }
+                .collect { data ->
+                    val quality = data.bluetoothSignalQuality
+
+                    if (BluetoothSignalQuality.Desconocida != quality) {
+                        CONNECTION_CONTEXT_MESSAGE = R.string.recibiendo_datos_monitor
+                    }
+
+                    when (quality) {
+                        BluetoothSignalQuality.Excelente -> {
+                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                            CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Excelente.signalText
+                        }
+
+                        BluetoothSignalQuality.Aceptable -> {
+                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                            CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Aceptable.signalText
+                        }
+
+                        BluetoothSignalQuality.Pobre -> {
+                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                            CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Pobre.signalText
+                        }
+
+                        BluetoothSignalQuality.Desconocida -> {
+                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                            CONNECTION_CONTEXT_MESSAGE =
+                                BluetoothSignalQuality.Desconocida.signalText
+                        }
+                    }
+
+                    rebuildNotificationTexts()
+                }
+        }
+    }
+
+    private fun readDataFromMonitor() {
+        coroutineScope.launch {
+            val dataUser = getUserUseCase().first()[0]
+            val currentMonitorId = dataUser.id_monitor
+            bluetoothUseCase()
+                .distinctUntilChangedBy { it.timestamp }
+                .collect { data ->
+                    val bluetoothSignalQuality = data.bluetoothSignalQuality
+
+                    val dataFrame = data.dataFrame
+                    Log.d("HombreCamionService", "Dataframe: $dataFrame, ")
+                    if (validateBluetoothConnectivity(bluetoothSignalQuality) && dataFrame != null) {
+
+                        // Cambiar: Debe almancenarse el ID del Monitor
+                        val monitorId = currentMonitorId
+                        Log.d("HombreCamionService", "UserId: $monitorId")
+                        val timestamp = getCurrentDate()
+
+                        val sensorId =
+                            decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
+
+                        sensorTableUseCase.doInsert(
+                            SensorTpmsEntity(
+                                monitorId = monitorId,
+                                sensorId = sensorId,
+                                dataFrame = dataFrame,
+                                timestamp = timestamp,
+                                sent = false
+                            )
+                        )
+
+                        // Enviar datos a API
+                        sendDataToApi(dataFrame, timestamp, monitorId)
+                    }
+                }
+        }
+    }
+
+    private suspend fun sendDataToApi(dataFrame: String, timestamp: String, monitorId: Int) {
+        val wifiStatus = wifiUseCase()
+        Log.d("HombreCamionService", "WifiStatus: $wifiStatus")
+        if (wifiStatus.value == NetworkStatus.Connected) {
+
+            val localOldestTimestamp = oldestTimestamp
+            if (localOldestTimestamp != null) {
+                getUnsentRecords(monitorId)
+                oldestTimestamp = null
+            }
+
+            apiTpmsUseCase.doPostSensorData(
+                fldFrame = dataFrame,
+                monitorId = monitorId,
+                fldDateData = timestamp
+            )
+
+            sensorTableUseCase.doSetRecordStatus(
+                monitorId = monitorId,
+                timestamp = timestamp,
+                sendStatus = true
+            )
+
+        } else if (wifiStatus.value == NetworkStatus.Disconnected && oldestTimestamp.isNullOrEmpty()) {
+            oldestTimestamp = timestamp
+        }
+    }
+
+    private suspend fun getUnsentRecords(monitorId: Int) {
+        val records = sensorTableUseCase.doGetUnsentRecords(
+            monitorId = monitorId,
+        )
+
+        records.forEach {
+            if (it != null) {
+                val result = apiTpmsUseCase.doPostSensorData(
+                    it.dataFrame, it.monitorId, it.timestamp
+                )
+
+                when (result) {
+                    is ApiResult.Success -> {
+                        sensorTableUseCase.doSetRecordStatus(it.monitorId, it.timestamp, true)
+                    }
+
+                    is ApiResult.Error -> {
+                        Log.d(
+                            "HombreCamionServicio",
+                            "Error al enviar datos almacenados al servidor."
+                        )
+                    }
+
+                    ApiResult.Loading -> {}
+                }
+
+            }
+        }
+    }
+
+    // FUNCIONES DE CAMBIO DE IDIOMA
+
+    private fun readLanguageUpdate() {
+        coroutineScope.launch {
+            AppLocale.currentLocale.distinctUntilChangedBy { it.language }.collect {
+                rebuildNotificationTexts()
+            }
+        }
+    }
+
+    private fun Context.localized(appLocale: Locale): Context {
+        val conf = Configuration(resources.configuration)
+        conf.setLocales(android.os.LocaleList(appLocale))
+        return createConfigurationContext(conf)
+    }
+
+    private fun currentAppLocaleFromAppCompat(): Locale? {
+        val language = AppLocale.currentLocale.value.language
+        return if (language.isNotEmpty()) Locale(language) else null
+    }
+
+    private fun rebuildNotificationTexts() {
+        val appLocale = currentAppLocaleFromAppCompat() ?: Locale.getDefault()
+        val lctx = this.localized(appLocale)
+
+        val title = lctx.getString(R.string.hombrecamion_conexion_tpms)
+
+        val statusContent =
+            if (CONNECTION_TITLE_MESSAGE != null && CONNECTION_STATUS_MESSAGE != null) {
+                lctx.getString(
+                    CONNECTION_TITLE_MESSAGE!!,
+                    lctx.getString(CONNECTION_STATUS_MESSAGE!!)
+                )
+            } else null
+
+        val titleContent =
+            if (CONNECTION_CONTEXT_MESSAGE != null) lctx.getString(CONNECTION_CONTEXT_MESSAGE!!) else null
+
+        val content = if (statusContent != null) "$titleContent. $statusContent" else titleContent
+
+        notificationCompactBuilder.setContentTitle(title).setContentText(content)
+
+        // Actualiza la notificación foreground (basta con notify con el mismo ID)
+        notificationManager.notify(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
+    }
+
+    companion object {
+        const val CHANNEL_ID = "1003"
+        const val ONGOING_NOTIFICATION_ID = 103
+
+        var CONNECTION_CONTEXT_MESSAGE: Int? = null
+        var CONNECTION_TITLE_MESSAGE: Int? = null
+        var CONNECTION_STATUS_MESSAGE: Int? = null
+
+        fun startService(context: Context) {
+            val intent = Intent(context, HombreCamionService::class.java)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) context.startService(intent)
+            else context.startForegroundService(intent)
+        }
+
+        fun stopService(context: Context) {
+            val intent = Intent(context, HombreCamionService::class.java)
+            context.stopService(intent)
+        }
+    }
+}

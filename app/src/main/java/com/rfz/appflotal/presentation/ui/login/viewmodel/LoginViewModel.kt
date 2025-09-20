@@ -1,43 +1,36 @@
 package com.rfz.appflotal.presentation.ui.login.viewmodel
 
+
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
-import cn.pedant.SweetAlert.SweetAlertDialog
-import com.rfz.appflotal.core.network.NetworkConfig
-import  com.rfz.appflotal.data.model.login.response.Result
-
-
-import com.rfz.appflotal.core.network.NetworkConfig.imei
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.LBEncryptionUtils
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
-
 import com.rfz.appflotal.data.model.login.response.LoginState
+import com.rfz.appflotal.data.model.login.response.LoginState.Error
+import com.rfz.appflotal.data.model.login.response.LoginState.Idle
+import com.rfz.appflotal.data.model.login.response.LoginState.Loading
+import com.rfz.appflotal.data.model.login.response.LoginState.Success
+import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.domain.database.AddTaskUseCase
-
 import com.rfz.appflotal.domain.login.LoginUseCase
-
-
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
@@ -45,8 +38,8 @@ class LoginViewModel @Inject constructor(
     private val mapper: AppFlotalMapper
 ) : ViewModel() {
 
-    private val _navigateToHome = MutableLiveData<Boolean>()
-    val navigateToHome: LiveData<Boolean> = _navigateToHome
+    private val _navigateToHome = MutableLiveData<Pair<Boolean, PaymentPlanType>>()
+    val navigateToHome: LiveData<Pair<Boolean, PaymentPlanType>> = _navigateToHome
 
     private val _navigateverifycodeloginScreen = MutableLiveData<Boolean>()
     val navigateverifycodeloginScreen: LiveData<Boolean> = _navigateverifycodeloginScreen
@@ -66,7 +59,7 @@ class LoginViewModel @Inject constructor(
     private val _loginMessage = MutableLiveData<String>()
     val loginMessage: LiveData<String> = _loginMessage
 
-    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
+    private val _loginState = MutableStateFlow<LoginState>(Idle)
     val loginState: StateFlow<LoginState> = _loginState
 
     private val _isProgressVisible = MutableStateFlow(false)
@@ -90,34 +83,44 @@ class LoginViewModel @Inject constructor(
         return usuario.isNotEmpty() && password.isNotEmpty()
     }
 
+    fun cleanLoginData(){
+        _usuario.value = ""
+        _password.value = ""
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("HardwareIds")
-    fun onLoginSelected(navController: NavController) {
+    fun onLoginSelected(ctx: Context) {
         _isLoginEnable.value = false
         _loginMessage.value = ""
 
         viewModelScope.launch {
             showProgressDialog()
             _isLoading.value = true
-            _loginState.value = LoginState.Loading
+            _loginState.value = Loading
 
             try {
                 val user = LBEncryptionUtils.encrypt(usuario.value!!)
                 val pass = LBEncryptionUtils.encrypt(password.value!!)
 
-                when (val result = loginUseCase(user, pass)) {
+                when (val result = loginUseCase.doLogin(user, pass, ctx)) {
                     is Result.Success -> {
-                        result.data.let { response ->
-                            handleLoginResponse(response)
-                        }
+                        handleLoginResponse(
+                            result.data,
+                            ctx = ctx
+                        )
                     }
+
                     is Result.Failure -> {
-                        _loginState.value = LoginState.Error(result.exception.message ?: "Unknown error")
+                        _loginState.value =
+                            Error(result.exception.message ?: "Unknown error")
                         _loginMessage.value = result.exception.message ?: "Authentication error"
                     }
+
+                    Result.Loading -> {}
                 }
             } catch (e: Exception) {
-                _loginState.value = LoginState.Error(e.message ?: "Unexpected error")
+                _loginState.value = Error(e.message ?: "Unexpected error")
                 _loginMessage.value = e.message ?: "Connection error"
             } finally {
                 _isLoading.value = false
@@ -126,21 +129,31 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private suspend fun handleLoginResponse(loginResponse: LoginResponse) {
-        when {
-            loginResponse.id == 200 -> {
+    private fun handleLoginResponse(loginResponse: LoginResponse, ctx: Context) {
+        when (loginResponse.id) {
+            200 -> {
+                val paymentPlan = when (loginResponse.paymentPlan) {
+                    PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
+                    PaymentPlanType.OnlyTPMS.planName -> PaymentPlanType.OnlyTPMS
+                    else -> PaymentPlanType.None
+                }
                 onTaskCreated(loginResponse)
-                _navigateToHome.value = true
-                _loginState.value = LoginState.Success(loginResponse)
+                _navigateToHome.value =
+                    Pair(true, paymentPlan)
+                _loginState.value = Success(loginResponse)
             }
-            loginResponse.id == -100 -> {
-                _loginMessage.value = "Credenciales incorrectas"
+
+            -100 -> {
+                _loginMessage.value = ctx.getString(R.string.credenciales_incorrectas)
                 _isLoginEnable.value = true
-                _loginState.value = LoginState.Error("Credenciales incorrectas")
+                _loginState.value =
+                    Error(ctx.getString(R.string.credenciales_incorrectas))
             }
+
             else -> {
-                _loginMessage.value = "Error en el servidor: ${loginResponse.id}"
-                _loginState.value = LoginState.Error("Error en el servidor")
+                _loginMessage.value =
+                    ctx.getString(R.string.error_en_el_servidor, loginResponse.id)
+                _loginState.value = Error(ctx.getString(R.string.error_en_el_servidor_only))
             }
         }
     }
@@ -155,14 +168,11 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onNavigateToHomeComplete() {
-        _navigateToHome.value = false
+    fun onNavigateToHomeCompleted() {
+        _navigateToHome.value = Pair(false, PaymentPlanType.None)
     }
 
     fun onNavigateToVerificodeloginComplete() {
         _navigateverifycodeloginScreen.value = false
     }
-
-
-
 }

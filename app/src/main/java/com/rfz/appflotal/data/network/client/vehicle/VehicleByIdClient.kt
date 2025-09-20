@@ -9,6 +9,6 @@ import retrofit2.http.Query
 
 interface VehicleByIdClient {
 
-    @GET("Vehicle/GetVehicleById")
+    @GET("api/Vehicle/GetVehicleById")
     suspend fun doGetVehicleById(@Header("Authorization") token: String, @Query("id_vehicle") id_vehicle: Int): Response<List<VehicleIdResponse>>
 }
