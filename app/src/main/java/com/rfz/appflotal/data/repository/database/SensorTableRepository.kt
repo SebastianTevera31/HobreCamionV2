@@ -25,6 +25,6 @@ class SensorTableRepository @Inject constructor(
 
     suspend fun exist(sensorId: String): Boolean = sensorDao.exist(sensorId)
 
-    suspend fun setRecordStatus(monitorId: Int, timestamp: String, sendStatus: Boolean) =
-        sensorDao.setRecordStatus(monitorId, timestamp, sendStatus)
+    suspend fun setRecordStatus(monitorId: Int, timestamp: String, sendStatus: Boolean, active: Boolean) =
+        sensorDao.setRecordStatus(monitorId, timestamp, sendStatus, active)
 }

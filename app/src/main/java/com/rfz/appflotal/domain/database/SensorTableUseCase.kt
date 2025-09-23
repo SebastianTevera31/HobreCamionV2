@@ -23,8 +23,8 @@ class SensorTableUseCase @Inject constructor(private val sensorTableRepository: 
         return sensorTableRepository.exist(sensorId)
     }
 
-    suspend fun doSetRecordStatus(monitorId: Int, timestamp: String, sendStatus: Boolean) {
-        sensorTableRepository.setRecordStatus(monitorId, timestamp, sendStatus)
+    suspend fun doSetRecordStatus(monitorId: Int, timestamp: String, sendStatus: Boolean, active: Boolean) {
+        sensorTableRepository.setRecordStatus(monitorId, timestamp, sendStatus, active)
     }
 
 }

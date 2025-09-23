@@ -27,6 +27,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -111,12 +113,12 @@ class MonitorViewModel @Inject constructor(
 
             responseHelper(baseCoordinates) { coords ->
                 responseHelper(sensorData) { tireInfo ->
-                    val coordByPos = coords.orEmpty()
+                    val coordSByPos = coords.orEmpty()
                         .associateBy { it.position.trim().uppercase() }
 
                     val tires = tireInfo.orEmpty().map { info ->
                         val key = info.sensorPosition.trim().uppercase()
-                        val c = coordByPos[key]
+                        val c = coordSByPos[key]
                         Tire(
                             sensorPosition = info.sensorPosition,
                             inAlert = info.highTemperature || info.lowPressure || info.highPressure || info.lowBattery,

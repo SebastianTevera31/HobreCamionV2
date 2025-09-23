@@ -21,6 +21,8 @@ import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.flotalSoft.SensorTpmsEntity
+import com.rfz.appflotal.data.network.service.fgservice.currentAppLocaleFromAppCompat
+import com.rfz.appflotal.data.network.service.fgservice.localized
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
@@ -249,7 +251,8 @@ class HombreCamionService : Service() {
                                 sensorId = sensorId,
                                 dataFrame = dataFrame,
                                 timestamp = timestamp,
-                                sent = false
+                                sent = false,
+                                active = true
                             )
                         )
 
@@ -280,7 +283,8 @@ class HombreCamionService : Service() {
             sensorTableUseCase.doSetRecordStatus(
                 monitorId = monitorId,
                 timestamp = timestamp,
-                sendStatus = true
+                sendStatus = true,
+                active = true
             )
 
         } else if (wifiStatus.value == NetworkStatus.Disconnected && oldestTimestamp.isNullOrEmpty()) {
@@ -301,7 +305,11 @@ class HombreCamionService : Service() {
 
                 when (result) {
                     is ApiResult.Success -> {
-                        sensorTableUseCase.doSetRecordStatus(it.monitorId, it.timestamp, true)
+                        sensorTableUseCase.doSetRecordStatus(
+                            it.monitorId, it.timestamp,
+                            sendStatus = true,
+                            active = true
+                        )
                     }
 
                     is ApiResult.Error -> {
@@ -320,23 +328,12 @@ class HombreCamionService : Service() {
 
     // FUNCIONES DE CAMBIO DE IDIOMA
 
-    private fun readLanguageUpdate() {
+    fun readLanguageUpdate() {
         coroutineScope.launch {
             AppLocale.currentLocale.distinctUntilChangedBy { it.language }.collect {
                 rebuildNotificationTexts()
             }
         }
-    }
-
-    private fun Context.localized(appLocale: Locale): Context {
-        val conf = Configuration(resources.configuration)
-        conf.setLocales(android.os.LocaleList(appLocale))
-        return createConfigurationContext(conf)
-    }
-
-    private fun currentAppLocaleFromAppCompat(): Locale? {
-        val language = AppLocale.currentLocale.value.language
-        return if (language.isNotEmpty()) Locale(language) else null
     }
 
     private fun rebuildNotificationTexts() {

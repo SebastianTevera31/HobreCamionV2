@@ -45,7 +45,8 @@ data class BluetoothData(
 
 enum class BluetoothSignalQuality(@StringRes val signalText: Int? = null) {
     Excelente(R.string.excelente), Aceptable(R.string.aceptable), Pobre(R.string.pobre), Desconocida(
-        R.string.sin_conexi_n)
+        R.string.sin_conexi_n
+    )
 }
 
 class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
@@ -183,7 +184,11 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             launch {
                 while (true) {
                     delay(5000)
-                    bluetoothGatt?.readRemoteRssi()
+                    if (bluetoothGatt != null) {
+                        bluetoothGatt!!.readRemoteRssi()
+                    } else {
+                        Log.e("Bluetooth", "BluetoothGatt no está disponible o no está conectado")
+                    }
                 }
             }
         }

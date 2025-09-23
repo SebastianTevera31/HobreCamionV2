@@ -23,6 +23,7 @@ class ApiTpmsService @Inject constructor(
     suspend fun postSensorData(sensorRequest: SensorRequest): ApiResult<List<TpmsResponse>?> {
         return requestHelper("PostSensorData") {
             val token = getTasksUseCase().first()[0].fld_token
+
             apiTpmsClient.sendSensorData("bearer $token", sensorRequest)
         }
     }

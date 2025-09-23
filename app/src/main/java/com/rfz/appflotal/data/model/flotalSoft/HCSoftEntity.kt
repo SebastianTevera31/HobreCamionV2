@@ -39,5 +39,7 @@ data class SensorTpmsEntity(
     @ColumnInfo(name = "timestamp")
     val timestamp: String,
     @ColumnInfo(name = "sendStatus")
-    val sent: Boolean
+    val sent: Boolean,
+    @ColumnInfo(name = "active")
+    val active: Boolean
 )
