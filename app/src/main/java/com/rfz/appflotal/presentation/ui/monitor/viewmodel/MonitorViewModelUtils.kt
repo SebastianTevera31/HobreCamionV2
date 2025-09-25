@@ -25,7 +25,7 @@ fun getPressureAlert(lowPressure: Boolean, highPressure: Boolean): SensorAlerts 
 }
 
 fun getBatteryAlert(lowBattery: Boolean): SensorAlerts {
-    return if (!lowBattery) SensorAlerts.LOW_BATTERY else SensorAlerts.NO_DATA
+    return if (lowBattery) SensorAlerts.LOW_BATTERY else SensorAlerts.NO_DATA
 }
 
 fun getIsTireInAlert(

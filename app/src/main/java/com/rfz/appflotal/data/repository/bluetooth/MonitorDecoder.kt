@@ -62,8 +62,8 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
                 val binaryHighPressure = highPressureStatus.toInt(16).toString(2)
                     .padStart(4, '0')
 
-                val lowPressureSignal = binaryLowPressure.substring(3, 4) == "0"
-                val highPressureSignal = binaryHighPressure.substring(0, 1) == "0"
+                val lowPressureSignal = binaryLowPressure.substring(3, 4) != "0"
+                val highPressureSignal = binaryHighPressure.substring(0, 1) != "0"
 
                 return if (lowPressureSignal && !highPressureSignal) SensorAlerts.LOW_PRESSURE
                 else if (!lowPressureSignal && highPressureSignal) SensorAlerts.HIGH_PRESSURE
@@ -74,7 +74,7 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
                 val status = dataFrame.substring(24, 25)
                 val binary = status.toInt(16).toString(2).padStart(4, '0')
                 // Si es diferente de 0 es alta
-                return if (binary.substring(2, 3) == "0") SensorAlerts.HIGH_PRESSURE
+                return if (binary.substring(2, 3) != "0") SensorAlerts.HIGH_TEMPERATURE
                 else SensorAlerts.NO_DATA
             }
         }
