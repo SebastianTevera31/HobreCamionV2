@@ -271,7 +271,7 @@ fun NuevoRegistroVehiculoScreen(
                             odometerStartDate = dateEventOdometerUTC.toString(),
                             initialOdometerValue = initialOdometerValue.toInt(),
                             averageDailyKilometers = averageDailyKilometers.toInt(),
-                            userId = userData?.id_user ?: 0,
+                            userId = userData?.idUser ?: 0,
                             isActive = true,
                             odometerEvent = 0,
                             dateEventOdometer = dateEventOdometerUTC.toString(),

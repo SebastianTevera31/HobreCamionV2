@@ -8,7 +8,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -20,18 +19,29 @@ import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.data.NetworkStatus
-import com.rfz.appflotal.data.model.flotalSoft.SensorTpmsEntity
+import com.rfz.appflotal.data.model.database.DataframeEntity
 import com.rfz.appflotal.data.network.service.fgservice.currentAppLocaleFromAppCompat
+import com.rfz.appflotal.data.network.service.fgservice.getBatteryStatus
+import com.rfz.appflotal.data.network.service.fgservice.getHighPressureStatus
+import com.rfz.appflotal.data.network.service.fgservice.getHighTemperatureStatus
+import com.rfz.appflotal.data.network.service.fgservice.getLowPressureStatus
+import com.rfz.appflotal.data.network.service.fgservice.getPressure
+import com.rfz.appflotal.data.network.service.fgservice.getTemperature
+import com.rfz.appflotal.data.network.service.fgservice.getTire
 import com.rfz.appflotal.data.network.service.fgservice.localized
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
+import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
-import com.rfz.appflotal.domain.database.SensorTableUseCase
+import com.rfz.appflotal.domain.database.DataframeTableUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.InicioActivity
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getBatteryAlert
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getPressureAlert
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,10 +62,13 @@ class HombreCamionService : Service() {
     lateinit var apiTpmsUseCase: ApiTpmsUseCase
 
     @Inject
+    lateinit var sensorDataTableRepository: SensorDataTableRepository
+
+    @Inject
     lateinit var wifiUseCase: WifiUseCase
 
     @Inject
-    lateinit var sensorTableUseCase: SensorTableUseCase
+    lateinit var sensorTableUseCase: DataframeTableUseCase
 
     @Inject
     lateinit var getUserUseCase: GetTasksUseCase
@@ -67,6 +80,8 @@ class HombreCamionService : Service() {
     private var oldestTimestamp: String? = null
 
     private var isStaterd = false
+
+    private var currentMac: Int? = null
 
     override fun onBind(p0: Intent?): IBinder? = null
     private lateinit var notificationCompactBuilder: NotificationCompat.Builder
@@ -160,7 +175,6 @@ class HombreCamionService : Service() {
 
     private fun createServiceNotificationChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Foreground Service Channel",
@@ -169,7 +183,6 @@ class HombreCamionService : Service() {
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             setShowBadge(false)
         }
-
         notificationManager.createNotificationChannel(channel)
     }
 
@@ -178,7 +191,8 @@ class HombreCamionService : Service() {
             val record = getUserUseCase().first()
             val dataUser = record.first()
             Log.d("HombreCamionService", "Iniciando Bluetooth...")
-            if (dataUser.id_monitor != 0) {
+            if (dataUser.id_monitor != 0 && currentMac != dataUser.id_monitor) {
+                currentMac = dataUser.id_monitor
                 bluetoothUseCase.doConnect(dataUser.monitorMac)
                 bluetoothUseCase.doStartRssiMonitoring()
             }
@@ -246,7 +260,7 @@ class HombreCamionService : Service() {
                             decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
 
                         sensorTableUseCase.doInsert(
-                            SensorTpmsEntity(
+                            DataframeEntity(
                                 monitorId = monitorId,
                                 sensorId = sensorId,
                                 dataFrame = dataFrame,
@@ -254,6 +268,20 @@ class HombreCamionService : Service() {
                                 sent = false,
                                 active = true
                             )
+                        )
+
+                        sensorDataTableRepository.insertSensorData(
+                            idMonitor = monitorId,
+                            tire = getTire(dataFrame),
+                            tireNumber = "",
+                            timestamp = timestamp,
+                            temperature = getTemperature(dataFrame).toInt(),
+                            pressure = getPressure(dataFrame).toInt(),
+                            active = true,
+                            highTemperatureAlert = getHighTemperatureStatus(dataFrame),
+                            highPressureAlert = getHighPressureStatus(dataFrame),
+                            lowPressureAlert = getLowPressureStatus(dataFrame),
+                            lowBatteryAlert = getBatteryStatus(dataFrame)
                         )
 
                         // Enviar datos a API
@@ -269,24 +297,24 @@ class HombreCamionService : Service() {
         if (wifiStatus.value == NetworkStatus.Connected) {
 
             val localOldestTimestamp = oldestTimestamp
+
             if (localOldestTimestamp != null) {
                 getUnsentRecords(monitorId)
                 oldestTimestamp = null
+            } else {
+                apiTpmsUseCase.doPostSensorData(
+                    fldFrame = dataFrame,
+                    monitorId = monitorId,
+                    fldDateData = timestamp
+                )
+
+                sensorTableUseCase.doSetRecordStatus(
+                    monitorId = monitorId,
+                    timestamp = timestamp,
+                    sendStatus = true,
+                    active = true
+                )
             }
-
-            apiTpmsUseCase.doPostSensorData(
-                fldFrame = dataFrame,
-                monitorId = monitorId,
-                fldDateData = timestamp
-            )
-
-            sensorTableUseCase.doSetRecordStatus(
-                monitorId = monitorId,
-                timestamp = timestamp,
-                sendStatus = true,
-                active = true
-            )
-
         } else if (wifiStatus.value == NetworkStatus.Disconnected && oldestTimestamp.isNullOrEmpty()) {
             oldestTimestamp = timestamp
         }

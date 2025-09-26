@@ -135,7 +135,7 @@ fun MarcasScreen(
             isLoading = true
             errorMessage = null
             try {
-                val result = brandListUseCase("Bearer ${userData?.fld_token}" ?: "",userData?.id_user!!)
+                val result = brandListUseCase("Bearer ${userData?.fld_token}" ?: "",userData?.idUser!!)
                 if (result.isSuccess) {
                     allMarcas = result.getOrNull() ?: emptyList()
                     resetPagination()

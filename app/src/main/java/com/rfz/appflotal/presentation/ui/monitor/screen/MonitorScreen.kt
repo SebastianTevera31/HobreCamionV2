@@ -106,7 +106,7 @@ fun MonitorScreen(
         bottomBar = {
             MonitorBottomNavBar(
                 onClick = { view ->
-                    if (view == MonitorScreenViews.POSICION) monitorViewModel.getListSensorData()
+                    if (view == MonitorScreenViews.POSICION) monitorViewModel.getLastedSensorData()
                     selectedOption = view
                 },
                 selectedView = selectedOption
@@ -121,9 +121,10 @@ fun MonitorScreen(
                 modifier = modifier.background(Color("#EDF0F8".toColorInt())),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                val image = monitorViewModel.getBitmapImage()
                 if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                     DiagramaMonitorScreen(
-                        imageUrl = monitorUiState.value.chassisImageUrl,
+                        image = image,
                         currentWheel = monitorUiState.value.currentTire,
                         temperature = monitorUiState.value.temperature.first,
                         pressure = monitorUiState.value.pression.first,
@@ -167,25 +168,22 @@ fun MonitorScreen(
                         if (positionOptionSelected == R.string.recientes) {
                             val positionData = positionsUiState.value
                             when (positionData) {
-                                is ApiResult.Success -> {
-
-                                    // FILTRAR POR SENSOR_ID
-                                    val data: List<DiagramMonitorResponse>? =
-                                        positionData.data?.filter { it.sensorId != 0 }
-                                    CurrentPositionDataView(
-                                        sensorDataList = monitorViewModel.convertToTireData(data),
-                                        isOnSearch = false,
-                                    )
-                                }
-
-                                is ApiResult.Error -> {}
-                                is ApiResult.Loading -> {
+                                is ApiResult.Error -> NoPositionDataView()
+                                ApiResult.Loading -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         CircularProgressIndicator()
                                     }
+                                }
+
+                                is ApiResult.Success<List<MonitorTireByDateResponse>?> -> {
+                                    val data = positionData.data
+                                    CurrentPositionDataView(
+                                        sensorDataList = data,
+                                        isOnSearch = false,
+                                    )
                                 }
                             }
                         } else {

@@ -1,6 +1,15 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import com.rfz.appflotal.core.network.NetworkConfig.BASE_URL
+import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
+import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+
+
+enum class BaseConfig(val base: Int) {
+    BASE6(6), BASE10(10), BASE22(22), BASE38(38)
+}
+
+data class ImageConfig(val dimen: Pair<Int, Int>, val image: Int)
 
 fun getImageDimens(url: String): Pair<Int, Int> {
     val resourcer = url.replace(BASE_URL, "")
@@ -36,4 +45,13 @@ fun getIsTireInAlert(
     return tempAlert != SensorAlerts.NO_DATA
             || pressureAlert != SensorAlerts.NO_DATA
             || batteryAlert != SensorAlerts.NO_DATA
+}
+
+fun getBaseConfigImage(baseConfig: Int): BaseConfig {
+    return when (baseConfig) {
+        6 -> BaseConfig.BASE6
+        10 -> BaseConfig.BASE10
+        22 -> BaseConfig.BASE22
+        else -> BaseConfig.BASE38
+    }
 }

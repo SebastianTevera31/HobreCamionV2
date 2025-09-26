@@ -248,14 +248,6 @@ class InicioActivity : ComponentActivity() {
                                         val diferenciaHoras =
                                             ChronoUnit.HOURS.between(fechaUsuario, fechaActual)
 
-                                        val paymentPlan = when (data.paymentPlan) {
-                                            PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
-                                            PaymentPlanType.OnlyTPMS.planName, PaymentPlanType.Free.planName
-                                                -> PaymentPlanType.OnlyTPMS
-
-                                            else -> PaymentPlanType.None
-                                        }
-
                                         if (diferenciaHoras < 24) {
 
                                             if (!arePermissionsGranted(

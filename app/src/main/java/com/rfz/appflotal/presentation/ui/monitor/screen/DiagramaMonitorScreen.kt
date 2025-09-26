@@ -71,7 +71,7 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 
 @Composable
 fun DiagramaMonitorScreen(
-    imageUrl: String,
+    image: Bitmap?,
     imageDimens: Pair<Int, Int>,
     currentWheel: String,
     temperature: Float,
@@ -96,12 +96,10 @@ fun DiagramaMonitorScreen(
         modifier = modifier.verticalScroll(scrollState)
     ) {
         Box {
-            val bitmap = loadBitmapFromUrl(imageUrl)
-
-            if (bitmap != null && tires != null) {
+            if (image != null && tires != null) {
                 DiagramImage(
                     tires = tires,
-                    image = bitmap,
+                    image = image,
                     tireSelected = tireSelected,
                     width = imageDimens.first,
                     height = imageDimens.second
@@ -464,30 +462,6 @@ fun BatteryAlertIcon(batteryStatus: SensorAlerts, modifier: Modifier = Modifier)
             .alpha(if (isAlert) alpha else 1f)
     )
 }
-
-//@Composable
-//@Preview(showBackground = true, showSystemUi = true)
-//fun DiagramaMonitorScreenPreview() {
-//    HombreCamionTheme {
-//        DiagramaMonitorScreen(
-//            imageUrl = "https://truckdriverapi.azurewebsites.net/Base32.png",
-//            currentWheel = "7",
-//            temperature = 54.0f,
-//            pressure = 39f,
-//            timestamp = "",
-//            temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
-//            pressionStatus = SensorAlerts.HIGH_PRESSURE,
-//            numWheels = 7,
-//            alertTires = emptyMap(),
-//            getSensorData = {},
-//            updateSelectedTire = {},
-//            coordinates = emptyList(),
-//            modifier = Modifier.safeContentPadding(),
-//            imageDimens = Pair(1, 1),
-//            batteryStatus = SensorAlerts.LOW_BATTERY
-//        )
-//    }
-// }
 
 @Composable
 @Preview(showBackground = true, showSystemUi = true)

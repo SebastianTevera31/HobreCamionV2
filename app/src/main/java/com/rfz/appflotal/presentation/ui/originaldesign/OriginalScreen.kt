@@ -3,7 +3,6 @@ package com.rfz.appflotal.presentation.ui.originaldesign
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
-import com.rfz.appflotal.domain.brand.BrandCrudUseCase
 import com.rfz.appflotal.domain.brand.BrandListUseCase
 import com.rfz.appflotal.domain.originaldesign.CrudOriginalDesignUseCase
 import com.rfz.appflotal.domain.originaldesign.OriginalDesignUseCase
@@ -15,7 +14,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -58,7 +56,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-import com.google.gson.annotations.SerializedName
 import com.rfz.appflotal.data.model.brand.response.BranListResponse
 import com.rfz.appflotal.data.model.originaldesign.dto.CrudOriginalDesignDto
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
@@ -165,7 +162,7 @@ fun OriginalScreen(
                 utilizations.clear()
 
 
-                val brandsResult = brandUseCase(bearerToken,userData?.id_user!!)
+                val brandsResult = brandUseCase(bearerToken,userData?.idUser!!)
                 if (brandsResult.isSuccess) {
                     brands.addAll(brandsResult.getOrNull() ?: emptyList())
                 }
@@ -228,7 +225,7 @@ fun OriginalScreen(
                     c_brands_fk_1 = selectedBrand!!.idBrand,
                     c_utilization_fk_2 = selectedUtilization!!.id_utilization,
                     fld_notes = notes,
-                    c_user_fk_3 = userData?.id_user ?: 0
+                    c_user_fk_3 = userData?.idUser ?: 0
                 )
 
                 val result = crudOriginalDesignUseCase(request, "Bearer ${userData?.fld_token}" ?: "")

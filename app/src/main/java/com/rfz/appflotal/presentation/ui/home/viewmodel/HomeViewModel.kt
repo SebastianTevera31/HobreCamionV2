@@ -6,13 +6,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.AppLocale
-import com.rfz.appflotal.core.util.Commons.getCurrentDate
-import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
+import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.model.languaje.LanguageResponse
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
-import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
-import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async

@@ -1,6 +1,8 @@
 package com.rfz.appflotal.data.repository.bluetooth
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
@@ -11,15 +13,24 @@ import android.content.Context
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
+import androidx.room.concurrent.AtomicBoolean
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.UUID
 import javax.inject.Inject
 
@@ -27,13 +38,13 @@ interface BluetoothRepository {
     var sensorData: StateFlow<BluetoothData>
 
     val scannedDevices: StateFlow<ScanItem?>
-    fun connect(macAddress: String)
-    fun disconnect()
+    suspend fun connect(macAddress: String)
+    suspend fun disconnect()
 
     fun startScan()
 
     fun stopScan()
-    suspend fun startRSSIMonitoring()
+    fun startRssiPolling(intervalsMs: Long = 2000L): Job
 }
 
 data class BluetoothData(
@@ -51,11 +62,13 @@ enum class BluetoothSignalQuality(@StringRes val signalText: Int? = null) {
 
 class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     BluetoothRepository {
+    private var ready = false
+    private var device: BluetoothDevice? = null
+    private var currentMac: String? = null
 
+    private var connecting = AtomicBoolean(false)
     private var bluetoothGatt: BluetoothGatt? = null
-
-    private var _sensorData: MutableStateFlow<BluetoothData> = MutableStateFlow(BluetoothData())
-    override var sensorData: StateFlow<BluetoothData> = _sensorData.asStateFlow()
+    private val mutex = Mutex()
 
     private val bluetoothManager: BluetoothManager? by lazy {
         context.getSystemService(BluetoothManager::class.java)
@@ -68,18 +81,18 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     private val bluetoothScanner by lazy {
         BluetoothScannerImp(bluetoothAdapter)
     }
+    private var _sensorData: MutableStateFlow<BluetoothData> = MutableStateFlow(BluetoothData())
 
-    private var isConnected = false
-
+    override var sensorData: StateFlow<BluetoothData> = _sensorData.asStateFlow()
     override val scannedDevices: StateFlow<ScanItem?> = bluetoothScanner.resultScanDevices
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val gattCallback = object : BluetoothGattCallback() {
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
                     Log.d("BLE", "Conectado. Descubriendo servicios...")
-                    isConnected = true
                     gatt.discoverServices()
                 }
 
@@ -93,8 +106,9 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                             timestamp = null
                         )
                     }
-                    isConnected = false
-                    gatt.connect()
+
+                    ready = false
+                    safeCloseGatt(gatt)
                 }
             }
         }
@@ -108,10 +122,11 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             if (characteristic != null) {
                 gatt.setCharacteristicNotification(characteristic, true)
 
-                val descriptor =
-                    characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
+                val descriptor = characteristic
+                    .getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
                 descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                 gatt.writeDescriptor(descriptor)
+                ready = (status == BluetoothGatt.GATT_SUCCESS)
             }
         }
 
@@ -147,25 +162,60 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun connect(macAddress: String) {
-        val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
-        if (regex.matches(macAddress)) {
-
-            // Verificamos si exista una instancia previa
-            if (bluetoothGatt != null) disconnect()
-
-            val device = bluetoothAdapter?.getRemoteDevice(macAddress)
-            bluetoothGatt = device?.connectGatt(context, true, gattCallback)
-        } else {
+    override suspend fun connect(macAddress: String) {
+        require(Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$").matches(macAddress)) {
             Log.e("BluetoothRepository", "Bluetooth Address is not valid")
+        }
+
+        if (macAddress != currentMac) {
+            // Verificamos si exista una instancia previa
+            scope.launch {
+                awaitDisconnectAndCloseLocked(timeoutMs = 4000)
+                device = bluetoothAdapter?.getRemoteDevice(macAddress)
+
+                currentMac = macAddress
+                val dev = device ?: error("Dispositivo no encontrado")
+
+                bluetoothGatt = dev.connectGatt(context, false, gattCallback)
+                ready = false
+            }
         }
     }
 
+    @SuppressLint("MissingPermission")
+    private suspend fun awaitDisconnectAndCloseLocked(timeoutMs: Long) {
+        val gatt = bluetoothGatt ?: return
+        Log.d("BLE", "awaitDisconnect: gatt#${System.identityHashCode(gatt)}")
+        // 1) Pedir disconnect
+        try {
+            gatt.disconnect()
+        } catch (_: Exception) {
+        }
+        // 2) Esperar a que el stack marque DISCONNECTED
+        withTimeoutOrNull(timeoutMs) {
+            while (bluetoothManager?.getConnectionState(
+                    gatt.device,
+                    BluetoothProfile.GATT
+                ) != BluetoothProfile.STATE_DISCONNECTED
+            ) {
+                delay(100)
+            }
+        }
+        // 3) Close por si acaso y nullear
+        try {
+            gatt.close()
+        } catch (_: Exception) {
+        }
+        if (bluetoothGatt === gatt) bluetoothGatt = null
+        ready = false
+        Log.d("BLE", "awaitDisconnect: cerrado y limpio")
+        // 4) Margen para liberar el cliente en el stack (importante)
+        delay(250)
+    }
+
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun disconnect() {
-        bluetoothGatt?.disconnect()
-        bluetoothGatt?.close()
-        bluetoothGatt = null
+    override suspend fun disconnect() = mutex.withLock {
+        awaitDisconnectAndCloseLocked(timeoutMs = 4000)
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
@@ -176,22 +226,6 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     override fun stopScan() {
         bluetoothScanner.stopScan()
-    }
-
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override suspend fun startRSSIMonitoring() {
-        coroutineScope {
-            launch {
-                while (true) {
-                    delay(5000)
-                    if (bluetoothGatt != null) {
-                        bluetoothGatt!!.readRemoteRssi()
-                    } else {
-                        Log.e("Bluetooth", "BluetoothGatt no está disponible o no está conectado")
-                    }
-                }
-            }
-        }
     }
 
     private fun verifyDataFrame(dataFrame: ByteArray): String? {
@@ -226,6 +260,73 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             in -85..-56 -> BluetoothSignalQuality.Aceptable
             in -100..-86 -> BluetoothSignalQuality.Pobre
             else -> BluetoothSignalQuality.Desconocida
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun internalDisconnectLocked() {
+        bluetoothGatt?.run {
+            try {
+                disconnect()
+                close()
+            } catch (_: Exception) {
+            }
+        }
+        bluetoothGatt = null
+        device = null
+        ready = false
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun safeCloseGatt(gatt: BluetoothGatt) {
+        try {
+            gatt.disconnect()
+            gatt.close()
+        } catch (_: Exception) {
+        }
+        if (bluetoothGatt == gatt) bluetoothGatt = null
+    }
+
+    @SuppressLint("MissingPermission")
+    fun isConnected(): Boolean {
+        val dev = device ?: return false
+        return bluetoothManager?.getConnectionState(
+            dev,
+            BluetoothProfile.GATT
+        ) == BluetoothProfile.STATE_CONNECTED && ready
+    }
+
+    private inline fun safeGattCall(block: (BluetoothGatt) -> Unit): Boolean {
+        val gatt = bluetoothGatt ?: return false
+        return try {
+            block(gatt)
+            true
+        } catch (_: android.os.DeadObjectException) {
+            safeCloseGatt(gatt)
+            false
+        } catch (_: SecurityException) {
+            false
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    suspend fun readRssiSafely(): Boolean {
+        if (!isConnected()) return false
+        return withContext(Dispatchers.IO) {
+            safeGattCall { it.readRemoteRssi() }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun startRssiPolling(intervalsMs: Long): Job = scope.launch {
+        while (isActive) {
+            if (isConnected()) {
+                readRssiSafely()
+            }
+            if (bluetoothAdapter?.isEnabled == false) {
+                currentMac?.let { connect(it) }
+            }
+            delay(intervalsMs)
         }
     }
 }

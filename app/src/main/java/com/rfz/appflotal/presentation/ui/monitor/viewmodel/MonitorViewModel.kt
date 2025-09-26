@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.core.text.isDigitsOnly
@@ -7,10 +9,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
+import com.rfz.appflotal.core.util.Commons.getBitmapFromDrawable
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.getDateObject
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.core.util.Positions.findOutPosition
+import com.rfz.appflotal.data.NetworkStatus
+import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -18,16 +23,19 @@ import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
+import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
+import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
+import com.rfz.appflotal.domain.database.DataframeTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
-import com.rfz.appflotal.domain.database.SensorTableUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
+import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -48,15 +56,20 @@ enum class SensorAlerts(@StringRes val message: Int) {
 class MonitorViewModel @Inject constructor(
     private val apiTpmsUseCase: ApiTpmsUseCase,
     private val bluetoothUseCase: BluetoothUseCase,
-    private val sensorTableUseCase: SensorTableUseCase,
-    private val getTasksUseCase: GetTasksUseCase
+    private val dataframeTableUseCase: DataframeTableUseCase,
+    private val sensorDataTableRepository: SensorDataTableRepository,
+    private val getTasksUseCase: GetTasksUseCase,
+    private val coordinatesTableUseCase: CoordinatesTableUseCase,
+    private val wifiUseCase: WifiUseCase,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
+
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
         MutableStateFlow(MonitorUiState())
     val monitorUiState = _monitorUiState.asStateFlow()
 
     private val _positionsUiState =
-        MutableStateFlow<ApiResult<List<DiagramMonitorResponse>?>>(ApiResult.Loading)
+        MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Loading)
 
     val positionsUiState = _positionsUiState.asStateFlow()
 
@@ -64,41 +77,82 @@ class MonitorViewModel @Inject constructor(
         MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Success(emptyList()))
     val monitorTireUiState = _monitorTireUiState.asStateFlow()
 
+    private var _wifiStatus: MutableStateFlow<NetworkStatus> =
+        MutableStateFlow(NetworkStatus.Connected)
+
     var shouldReadManually = true
+
+    init {
+        viewModelScope.launch {
+            wifiUseCase().collect { status ->
+                _wifiStatus.update { status }
+            }
+        }
+    }
 
     fun initMonitorData() {
         viewModelScope.launch {
-            val userData = getTasksUseCase().first()
-            if (userData.isNotEmpty()) {
+            _wifiStatus.distinctUntilChangedBy { it }.collect { status ->
+                val userData = getTasksUseCase().first()
                 val user = userData[0]
-                val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(user.id_monitor)
-                responseHelper(response = configInfo) { data ->
-                    if (!data.isNullOrEmpty()) {
-                        _monitorUiState.update { currentUiState ->
-                            currentUiState.copy(
-                                monitorId = user.id_monitor,
-                                chassisImageUrl = data[0].fldUrlImage,
-                                showDialog = user.id_monitor == 0
-                            )
-                        }
+                val baseConfig = getBaseConfigImage(
+                    user.baseConfiguration.replace("BASE", "")
+                        .trim().toInt()
+                )
 
-                        if (_monitorUiState.value.chassisImageUrl.isNotEmpty()) {
-                            mapTires()
-                        }
+                val uiState = _monitorUiState
 
-                        // Recibe datos Bluetooth
-                        readBluetoothData()
-                    }
+                uiState.update { currentUiState ->
+                    currentUiState.copy(
+                        monitorId = user.id_monitor,
+                        baseConfig = baseConfig,
+                        showDialog = user.id_monitor == 0
+                    )
                 }
 
-                if (user.id_monitor == 0) {
-                    _monitorUiState.update { currentUiState ->
+
+                if (status == NetworkStatus.Connected) {
+                    coordinatesTableUseCase.deleteCoordinates(user.id_monitor)
+                    loadDataFromNetwork(userData)
+                } else {
+                    val localCoordinates = coordinatesTableUseCase.getCoordinates(user.id_monitor)
+                    uiState.update { currentUiState ->
                         currentUiState.copy(
-                            showDialog = true
+                            listOfTires = localCoordinates.map { it.toTire() }
                         )
                     }
                 }
+            }
+        }
+    }
 
+    private suspend fun loadDataFromNetwork(userData: List<AppHCEntity>) {
+        if (userData.isNotEmpty()) {
+            val user = userData[0]
+            val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(user.id_monitor)
+            responseHelper(response = configInfo) { data ->
+                if (!data.isNullOrEmpty()) {
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            chassisImageUrl = data[0].fldUrlImage,
+                        )
+                    }
+
+                    if (_monitorUiState.value.chassisImageUrl.isNotEmpty()) {
+                        mapTires()
+                    }
+
+                    // Recibe datos Bluetooth
+                    readBluetoothData()
+                }
+            }
+
+            if (user.id_monitor == 0) {
+                _monitorUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        showDialog = true
+                    )
+                }
             }
         }
     }
@@ -126,19 +180,22 @@ class MonitorViewModel @Inject constructor(
                             xPosition = c?.fldPositionX ?: 0,
                             yPosition = c?.fldPositionY ?: 0
                         )
+                    }.sortedBy {
+                        it.sensorPosition.removePrefix("P").trim().toIntOrNull()
+                            ?: Int.MAX_VALUE
                     }
 
                     _monitorUiState.update { currentUiState ->
                         currentUiState.copy(
                             imageDimen = getImageDimens(currentUiState.chassisImageUrl),
-                            listOfTires = tires.sortedBy {
-                                it.sensorPosition.removePrefix("P").trim().toIntOrNull()
-                                    ?: Int.MAX_VALUE
-                            },
+                            listOfTires = tires
                         )
                     }
                 }
             }
+
+            // Insertar registro de ruedas en la base de datos.
+            coordinatesTableUseCase.insertCoordinates(monitorId, _monitorUiState.value.listOfTires)
         }
     }
 
@@ -157,7 +214,7 @@ class MonitorViewModel @Inject constructor(
                         Log.d("MonitorViewModel", "Monitor ID $monitorId")
                         // Se agrega la funcion Let como seguridad, sin embargo el Id debe existir en esta parte
                         monitorId.let {
-                            sensorTableUseCase.doGetLastRecord(it).forEach { data ->
+                            dataframeTableUseCase.doGetLastRecord(it).forEach { data ->
                                 if (data != null) updateSensorData(data.dataFrame, data.timestamp)
                             }
                         }
@@ -233,50 +290,51 @@ class MonitorViewModel @Inject constructor(
     fun getSensorDataByWheel(tireSelected: String) {
         shouldReadManually = false
         viewModelScope.launch {
-            val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
+            val uiState = _monitorUiState.value
+            val data =
+                sensorDataTableRepository.getLastDataByTire(uiState.monitorId, tireSelected)
 
-            responseHelper(response = sensorData) { data ->
-                if (!data.isNullOrEmpty()) {
-                    val result = data.filter { data -> data.sensorPosition == tireSelected }
-                    if (!result.isEmpty()) {
-                        result[0].let {
-                            if (it.sensorPosition.contains("P")) {
+            if (data != null) {
+                val pressureStatus = if (data.lowPressureAlert) SensorAlerts.LOW_PRESSURE
+                else if (data.highPressureAlert) SensorAlerts.HIGH_PRESSURE
+                else SensorAlerts.NO_DATA
 
-                                val tempAlert = getAlertType(it.highTemperature)
+                val temperatureStatus =
+                    if (data.highTemperatureAlert) SensorAlerts.HIGH_TEMPERATURE
+                    else SensorAlerts.NO_DATA
 
-                                val pressureAlert = getPressureAlert(
-                                    lowPressure = it.lowPressure,
-                                    highPressure = it.highPressure
-                                )
+                val batteryStatus = if (data.lowBatteryAlert) SensorAlerts.LOW_BATTERY
+                else SensorAlerts.NO_DATA
 
-                                val batteryAlert = getBatteryAlert(it.lowBattery)
+                val inAlert = getIsTireInAlert(
+                    tempAlert = temperatureStatus,
+                    pressureAlert = pressureStatus,
+                    batteryAlert = batteryStatus
+                )
 
-                                _monitorUiState.update { currentUiState ->
+                _monitorUiState.update { currentUiState ->
 
-                                    val inAlert = getIsTireInAlert(
-                                        tempAlert = tempAlert,
-                                        pressureAlert = pressureAlert,
-                                        batteryAlert = batteryAlert
-                                    )
-
-                                    val newList =
-                                        currentUiState.listOfTires.toMutableList().map { tire ->
-                                            if (tire.sensorPosition == it.sensorPosition) tire.copy(
-                                                inAlert = inAlert
-                                            ) else tire
-                                        }
-
-                                    currentUiState.copy(
-                                        temperature = Pair(it.temperature, tempAlert),
-                                        pression = Pair(it.psi, pressureAlert),
-                                        timestamp = convertDate(it.ultimalectura),
-                                        listOfTires = newList,
-                                        batteryStatus = batteryAlert
-                                    )
-                                }
-                            }
+                    val newList =
+                        currentUiState.listOfTires.toMutableList().map { tire ->
+                            if (tire.sensorPosition == tireSelected) tire.copy(
+                                inAlert = inAlert
+                            ) else tire
                         }
-                    }
+
+                    currentUiState.copy(
+                        currentTire = data.tire,
+
+                        pression = Pair(data.pressure.toFloat(), pressureStatus),
+
+                        temperature = Pair(
+                            data.temperature.toFloat(),
+                            temperatureStatus
+                        ),
+
+                        timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+                        batteryStatus = batteryStatus,
+                        listOfTires = newList
+                    )
                 }
             }
         }
@@ -290,10 +348,37 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
-    fun getListSensorData() {
+    fun getLastedSensorData() {
         viewModelScope.launch {
-            val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
-            _positionsUiState.update { sensorData }
+            _positionsUiState.update { ApiResult.Loading }
+            if (_wifiStatus.value == NetworkStatus.Connected) {
+                val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
+                responseHelper(
+                    sensorData,
+                    onError = { _positionsUiState.update { ApiResult.Error(message = "Error al consultar lsos datos") } }) { data ->
+                    val filterData = data?.filter { it.sensorId != 0 }
+                    val sortedData = filterData?.map { it.toTireData() }
+                        ?.sortedBy { it.tirePosition.replace("P", "").toInt() }
+                        ?: emptyList()
+                    _positionsUiState.update {
+                        ApiResult.Success(sortedData)
+                    }
+                }
+            } else {
+                val sensorData =
+                    sensorDataTableRepository.getLastData(monitorUiState.value.monitorId)
+
+                val filterData = sensorData.filter { it.active }
+                val sortedData = filterData.map { it.toTireData() }
+                    .sortedBy { it.tirePosition.replace("P", "").toInt() }
+
+                if (sensorData.isNotEmpty()) {
+                    _positionsUiState.update { ApiResult.Success(sortedData) }
+                } else {
+                    Log.e("MonitorViewModel", "No se encontraron datos")
+                    _positionsUiState.update { ApiResult.Error() }
+                }
+            }
         }
     }
 
@@ -330,4 +415,21 @@ class MonitorViewModel @Inject constructor(
     fun convertToTireData(diagramData: List<DiagramMonitorResponse>?): List<MonitorTireByDateResponse> =
         diagramData?.map { it.toTireData() }?.sortedBy { it.tirePosition.replace("P", "").toInt() }
             ?: emptyList()
+
+    fun getBitmapImage(): Bitmap? {
+        val baseConfig = _monitorUiState.value.baseConfig ?: return null
+
+        val imageConfig = when (baseConfig) {
+            BaseConfig.BASE6 -> ImageConfig(Pair(620, 327), R.drawable.base6)
+            BaseConfig.BASE10 -> ImageConfig(Pair(628, 327), R.drawable.base22)
+            BaseConfig.BASE22 -> ImageConfig(Pair(1280, 425), R.drawable.base22)
+            BaseConfig.BASE38 -> ImageConfig(Pair(1780, 327), R.drawable.base32)
+        }
+
+        _monitorUiState.update { currentUiState ->
+            currentUiState.copy(imageDimen = imageConfig.dimen)
+        }
+
+        return getBitmapFromDrawable(imageConfig.image, context)
+    }
 }

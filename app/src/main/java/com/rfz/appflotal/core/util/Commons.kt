@@ -3,9 +3,12 @@ package com.rfz.appflotal.core.util
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.icu.text.TimeZoneFormat
 import android.os.Build
 import android.util.Log
+import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import java.text.SimpleDateFormat
@@ -76,5 +79,9 @@ object Commons {
         cal.time = date
         cal.add(Calendar.DAY_OF_MONTH, 1)
         return cal.time
+    }
+
+    fun getBitmapFromDrawable(@DrawableRes image: Int, context: Context): Bitmap? {
+        return BitmapFactory.decodeResource(context.resources, image)
     }
 }

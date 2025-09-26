@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,7 +23,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -42,7 +40,6 @@ import com.rfz.appflotal.data.model.product.response.ProductResponse
 import com.rfz.appflotal.data.model.provider.response.ProviderListResponse
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
-import com.rfz.appflotal.data.model.tire.response.TirexIdResponse
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.base.BaseUseCase
 import com.rfz.appflotal.domain.product.ProductListUseCase
@@ -285,7 +282,7 @@ fun NuevoRegistroLlantasScreen(
                     treadDepth = treadDepth.toInt(),
                     unitCost = cost.toInt(),
                     tireNumber = tireNumber,
-                    userId = userData?.id_user ?: 0,
+                    userId = userData?.idUser ?: 0,
                     productId = selectedProduct!!.idProduct,
                     dot = dot,
                     isActive = true,

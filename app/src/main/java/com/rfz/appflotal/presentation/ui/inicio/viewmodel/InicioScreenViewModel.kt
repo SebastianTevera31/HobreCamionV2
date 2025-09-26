@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
+import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.domain.database.DeleteTasksUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

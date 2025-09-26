@@ -1,7 +1,7 @@
 package com.rfz.appflotal.data.model.login.response
 
 import com.google.gson.annotations.SerializedName
-import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
+import com.rfz.appflotal.data.model.database.AppHCEntity
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -73,7 +73,7 @@ class AppFlotalMapper @Inject constructor() {
     fun fromLoginResponseToEntity(response: LoginResponse): AppHCEntity {
         return AppHCEntity(
             id = 0,
-            id_user = response.id_user,
+            idUser = response.id_user,
             fld_name = response.fld_name ?: "",
             fld_username = response.fld_username,
             fld_email = response.fld_email ?: "",

@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
 import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
-import com.rfz.appflotal.data.model.product.response.ProductByIdResponse
 import com.rfz.appflotal.data.model.product.response.ProductResponse
 import com.rfz.appflotal.data.model.tire.response.LoadingCapacityResponse
 import com.rfz.appflotal.data.model.tire.response.TireSizeResponse
@@ -135,7 +133,7 @@ fun NuevoProductoScreen(
             isLoadingCombos = true
             try {
                 val bearerToken = "Bearer ${userData?.fld_token ?: ""}"
-                val userId = userData?.id_user ?: 0
+                val userId = userData?.idUser ?: 0
 
                 originalDesigns.clear()
                 tireSizes.clear()

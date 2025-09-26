@@ -3,8 +3,11 @@ package com.rfz.appflotal.di.database
 import android.content.Context
 import androidx.room.Room
 import com.rfz.appflotal.data.dao.AppHCDao
-import com.rfz.appflotal.data.dao.SensorDao
+import com.rfz.appflotal.data.dao.CoordinatesDao
+import com.rfz.appflotal.data.dao.DataframeDao
+import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.database.AppHombreCamionDatabase
+import com.rfz.appflotal.data.model.database.SensorDataEntity
 
 import dagger.Module
 import dagger.Provides
@@ -23,8 +26,18 @@ class DataBaseModule {
     }
 
     @Provides
-    fun provideSensorDao(hombreCamionDatabase: AppHombreCamionDatabase): SensorDao {
-        return hombreCamionDatabase.sensorDao()
+    fun provideDataframeDao(hombreCamionDatabase: AppHombreCamionDatabase): DataframeDao {
+        return hombreCamionDatabase.dataframeDao()
+    }
+
+    @Provides
+    fun provideCoordinatesDao(hombreCamionDatabase: AppHombreCamionDatabase): CoordinatesDao {
+        return hombreCamionDatabase.coordinatesDao()
+    }
+
+    @Provides
+    fun provideSensorDataDao(hombreCamionDatabase: AppHombreCamionDatabase): SensorDataDao {
+        return hombreCamionDatabase.sensorDataDao()
     }
 
     @Provides

@@ -1,6 +1,6 @@
 package com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel
 
-import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
+import com.rfz.appflotal.data.model.database.AppHCEntity
 import kotlin.String
 
 data class UpdateUserUiState(
@@ -25,7 +25,7 @@ data class UserData(
 
 fun AppHCEntity.toUserData(): UserData {
     return UserData(
-        idUser = id_user,
+        idUser = idUser,
         name = fld_name,
         username = fld_username,
         email = fld_email,

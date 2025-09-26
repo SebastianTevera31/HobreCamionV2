@@ -135,7 +135,7 @@ fun MedidasLlantasScreen(
             errorMessage = null
             try {
                 val result = tireSizeUseCase.doTireSizes(
-                    userData?.id_user!!,
+                    userData?.idUser!!,
                     "Bearer ${userData?.fld_token}" ?: ""
                 )
                 if (result.isSuccessful) {
@@ -158,7 +158,7 @@ fun MedidasLlantasScreen(
                 id_tireSize = editingMedida?.id_tireSize ?: 0,
                 fld_size = newMedida ?: "",
                 fld_notes = newNota ?: "",
-                c_user_fk_1 = userData?.id_user ?: 0
+                c_user_fk_1 = userData?.idUser ?: 0
             )
 
             val result = tireSizeCrudUseCase(requestBody, "Bearer ${userData?.fld_token}")

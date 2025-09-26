@@ -124,7 +124,7 @@ class RegisterMonitorViewModel @Inject constructor(
                                 idMonitor,
                                 mac,
                                 "BASE ${configurationSelected.second.split(" ")[1]}",
-                                userData.id_user
+                                userData.idUser
                             )
                             showAlert(context, message = RegisterMonitorMessage.REGISTERED.message)
 

@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.rfz.appflotal.data.dao.AppHCDao
-import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
+import com.rfz.appflotal.data.model.database.AppHCEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 
 import kotlinx.coroutines.flow.Flow
@@ -65,7 +65,7 @@ class HombreCamionRepository @Inject constructor(
         items.map {
             AppHCEntity(
                 id = it.id,
-                id_user = it.id_user,
+                idUser = it.idUser,
                 fld_name = it.fld_name,
                 fld_email = it.fld_email,
                 fld_username = it.fld_username,

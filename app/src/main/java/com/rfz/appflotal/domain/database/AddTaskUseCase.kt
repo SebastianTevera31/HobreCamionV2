@@ -1,6 +1,6 @@
 package com.rfz.appflotal.domain.database
 
-import com.rfz.appflotal.data.model.flotalSoft.AppHCEntity
+import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import javax.inject.Inject
 
