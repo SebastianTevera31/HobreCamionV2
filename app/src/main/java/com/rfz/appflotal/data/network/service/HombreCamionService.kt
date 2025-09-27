@@ -34,14 +34,11 @@ import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
-import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.database.DataframeTableUseCase
+import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.InicioActivity
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getBatteryAlert
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getPressureAlert
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -168,7 +165,6 @@ class HombreCamionService : Service() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-
         rebuildNotificationTexts()
         startForeground(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
     }

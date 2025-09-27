@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.StringRes
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
@@ -16,9 +15,10 @@ import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.core.util.Positions.findOutPosition
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.database.AppHCEntity
-import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.network.service.fgservice.getPressure
+import com.rfz.appflotal.data.network.service.fgservice.getTemperature
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
@@ -41,13 +41,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 enum class SensorAlerts(@StringRes val message: Int) {
     HIGH_PRESSURE(R.string.presion_alta),
     LOW_PRESSURE(R.string.presion_baja),
     HIGH_TEMPERATURE(R.string.temperatura_alta),
-
     LOW_BATTERY(R.string.bateria_baja),
     NO_DATA(R.string.sin_datos)
 }
@@ -240,20 +238,11 @@ class MonitorViewModel @Inject constructor(
             val tire = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
             val realTire = findOutPosition("P${tire}")
 
-            val pressionValue = decodeDataFrame(dataFrame, MonitorDataFrame.PRESSION)
-
+            val pressure = getPressure(dataFrame)
             val pressureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
 
-            val temperatureValue =
-                decodeDataFrame(dataFrame, MonitorDataFrame.TEMPERATURE)
-
-            val temperatureStatus =
-                decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
-
-            val pression = (pressionValue.toFloat() * 100).roundToInt() / 100f
-
-            val temperature =
-                if (temperatureValue.isDigitsOnly()) temperatureValue.toFloat() else 0f
+            val temperature = getTemperature(dataFrame)
+            val temperatureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
 
             val batteryStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
 
@@ -272,14 +261,8 @@ class MonitorViewModel @Inject constructor(
 
             currentUiState.copy(
                 currentTire = realTire,
-
-                pression = Pair(pression, pressureStatus),
-
-                temperature = Pair(
-                    temperature,
-                    temperatureStatus
-                ),
-
+                pression = Pair(pressure, pressureStatus),
+                temperature = Pair(temperature, temperatureStatus),
                 timestamp = time,
                 batteryStatus = batteryStatus,
                 listOfTires = newList
@@ -313,7 +296,6 @@ class MonitorViewModel @Inject constructor(
                 )
 
                 _monitorUiState.update { currentUiState ->
-
                     val newList =
                         currentUiState.listOfTires.toMutableList().map { tire ->
                             if (tire.sensorPosition == tireSelected) tire.copy(
@@ -411,10 +393,6 @@ class MonitorViewModel @Inject constructor(
         _positionsUiState.value = ApiResult.Loading
         _monitorTireUiState.value = ApiResult.Success(emptyList())
     }
-
-    fun convertToTireData(diagramData: List<DiagramMonitorResponse>?): List<MonitorTireByDateResponse> =
-        diagramData?.map { it.toTireData() }?.sortedBy { it.tirePosition.replace("P", "").toInt() }
-            ?: emptyList()
 
     fun getBitmapImage(): Bitmap? {
         val baseConfig = _monitorUiState.value.baseConfig ?: return null

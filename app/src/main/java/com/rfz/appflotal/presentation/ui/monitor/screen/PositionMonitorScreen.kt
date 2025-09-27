@@ -62,12 +62,6 @@ fun CurrentPositionDataView(
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(2f)
                         )
-//                        Text(
-//                            text = pluralStringResource(R.plurals.llanta_tag, 1, ""),
-//                            style = MaterialTheme.typography.titleSmall,
-//                            textAlign = TextAlign.Center,
-//                            modifier = Modifier.weight(1f)
-//                        )
                         Text(
                             text = stringResource(R.string.fecha),
                             style = MaterialTheme.typography.titleSmall,

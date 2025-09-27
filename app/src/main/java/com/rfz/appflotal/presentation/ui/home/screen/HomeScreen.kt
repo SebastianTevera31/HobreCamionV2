@@ -42,7 +42,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -102,7 +101,6 @@ fun HomeScreen(
     val resources = context.resources
 
     val uiState by homeViewModel.uiState.collectAsState()
-    val message by homeViewModel.homeCheckInMessage.observeAsState()
 
     LaunchedEffect(Unit) {
         homeViewModel.loadInitialData()
@@ -226,7 +224,6 @@ fun HomeScreen(
     val primaryColor = primaryLight
     val primaryLight = primaryLight
     val secondaryColor = secondaryLight
-    val lightBackground = backgroundLight
     val cardBackground = backgroundLight
     val surfaceColor = surfaceLight
 
@@ -354,7 +351,7 @@ fun HomeScreen(
             )
         },
 
-    ) { innerPadding ->
+        ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
