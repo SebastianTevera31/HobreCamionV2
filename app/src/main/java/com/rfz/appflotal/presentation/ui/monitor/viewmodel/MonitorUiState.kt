@@ -24,8 +24,9 @@ data class MonitorUiState(
     val chassisImageUrl: String = "",
     val listOfTires: List<Tire> = emptyList(),
     val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
+    val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val showDialog: Boolean = false,
-    val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA
+    val showView: Boolean = false
 )
 
 data class Tire(

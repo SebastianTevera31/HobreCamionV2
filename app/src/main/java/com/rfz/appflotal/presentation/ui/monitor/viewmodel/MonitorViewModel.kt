@@ -13,12 +13,11 @@ import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.getDateObject
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.core.util.Positions.findOutPosition
+import com.rfz.appflotal.core.util.tpms.getPressure
+import com.rfz.appflotal.core.util.tpms.getTemperature
 import com.rfz.appflotal.data.NetworkStatus
-import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
-import com.rfz.appflotal.data.network.service.fgservice.getPressure
-import com.rfz.appflotal.data.network.service.fgservice.getTemperature
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
@@ -86,12 +85,18 @@ class MonitorViewModel @Inject constructor(
                 _wifiStatus.update { status }
             }
         }
+
+        readWifiStatus()
+
+        readBluetoothData()
     }
 
     fun initMonitorData() {
+        _monitorUiState.update { currentUiState -> currentUiState.copy(showView = false) }
+
         viewModelScope.launch {
-            _wifiStatus.distinctUntilChangedBy { it }.collect { status ->
-                val userData = getTasksUseCase().first()
+            val userData = getTasksUseCase().first()
+            if (userData.isNotEmpty()) {
                 val user = userData[0]
                 val baseConfig = getBaseConfigImage(
                     user.baseConfiguration.replace("BASE", "")
@@ -107,27 +112,21 @@ class MonitorViewModel @Inject constructor(
                         showDialog = user.id_monitor == 0
                     )
                 }
+            }
 
+            loadDataFromNetwork()
 
-                if (status == NetworkStatus.Connected) {
-                    coordinatesTableUseCase.deleteCoordinates(user.id_monitor)
-                    loadDataFromNetwork(userData)
-                } else {
-                    val localCoordinates = coordinatesTableUseCase.getCoordinates(user.id_monitor)
-                    uiState.update { currentUiState ->
-                        currentUiState.copy(
-                            listOfTires = localCoordinates.map { it.toTire() }
-                        )
-                    }
-                }
+            if (_monitorUiState.value.chassisImageUrl.isNotEmpty()) {
+                mapTires()
             }
         }
     }
 
-    private suspend fun loadDataFromNetwork(userData: List<AppHCEntity>) {
-        if (userData.isNotEmpty()) {
-            val user = userData[0]
-            val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(user.id_monitor)
+    private suspend fun loadDataFromNetwork() {
+        val monitorId = monitorUiState.value.monitorId
+        if (monitorId != 0) {
+            val configInfo =
+                apiTpmsUseCase.doGetConfigurationMonitorById(monitorId)
             responseHelper(response = configInfo) { data ->
                 if (!data.isNullOrEmpty()) {
                     _monitorUiState.update { currentUiState ->
@@ -135,21 +134,6 @@ class MonitorViewModel @Inject constructor(
                             chassisImageUrl = data[0].fldUrlImage,
                         )
                     }
-
-                    if (_monitorUiState.value.chassisImageUrl.isNotEmpty()) {
-                        mapTires()
-                    }
-
-                    // Recibe datos Bluetooth
-                    readBluetoothData()
-                }
-            }
-
-            if (user.id_monitor == 0) {
-                _monitorUiState.update { currentUiState ->
-                    currentUiState.copy(
-                        showDialog = true
-                    )
                 }
             }
         }
@@ -194,40 +178,74 @@ class MonitorViewModel @Inject constructor(
 
             // Insertar registro de ruedas en la base de datos.
             coordinatesTableUseCase.insertCoordinates(monitorId, _monitorUiState.value.listOfTires)
+            _monitorUiState.update { currentUiState -> currentUiState.copy(showView = true) }
+        }
+    }
+
+    private fun readWifiStatus() {
+        viewModelScope.launch {
+            wifiUseCase().distinctUntilChangedBy { it }.collect { status ->
+                val uiState = _monitorUiState
+                if (uiState.value.monitorId != 0) {
+                    if (status == NetworkStatus.Connected) {
+                        coordinatesTableUseCase.deleteCoordinates(uiState.value.monitorId)
+                        loadDataFromNetwork()
+                    } else {
+                        val localCoordinates =
+                            coordinatesTableUseCase.getCoordinates(uiState.value.monitorId)
+                        uiState.update { currentUiState ->
+                            currentUiState.copy(
+                                listOfTires = localCoordinates.map { it.toTire() }
+                            )
+                        }
+                    }
+                } else {
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            showDialog = true
+                        )
+                    }
+                }
+            }
         }
     }
 
     private fun readBluetoothData() {
         viewModelScope.launch {
             bluetoothUseCase().collect { data ->
-                if (shouldReadManually) {
-                    Log.d("MonitorViewModel", "$data")
-                    val rssi = data.rssi
-                    val bluetoothSignalQuality = data.bluetoothSignalQuality
+                val monitorId = monitorUiState.value.monitorId
+                if (monitorId != 0) {
+                    if (shouldReadManually) {
+                        Log.d("MonitorViewModel", "$data")
+                        val rssi = data.rssi
+                        val bluetoothSignalQuality = data.bluetoothSignalQuality
 
-                    val dataFrame = data.dataFrame
+                        val dataFrame = data.dataFrame
 
-                    if (!validateBluetoothConnectivity(bluetoothSignalQuality) || dataFrame == null) {
-                        val monitorId = monitorUiState.value.monitorId
-                        Log.d("MonitorViewModel", "Monitor ID $monitorId")
-                        // Se agrega la funcion Let como seguridad, sin embargo el Id debe existir en esta parte
-                        monitorId.let {
-                            dataframeTableUseCase.doGetLastRecord(it).forEach { data ->
-                                if (data != null) updateSensorData(data.dataFrame, data.timestamp)
+                        if (!validateBluetoothConnectivity(bluetoothSignalQuality) || dataFrame == null) {
+                            Log.d("MonitorViewModel", "Monitor ID $monitorId")
+                            // Se agrega la funcion Let como seguridad, sin embargo el Id debe existir en esta parte
+                            monitorId.let {
+                                dataframeTableUseCase.doGetLastRecord(it).forEach { data ->
+                                    if (data != null) updateSensorData(
+                                        data.dataFrame,
+                                        data.timestamp
+                                    )
+                                }
                             }
-                        }
-                    } else updateSensorData(dataFrame)
+                        } else updateSensorData(dataFrame)
 
-                    _monitorUiState.update { currentUiState ->
-                        currentUiState.copy(
-                            signalIntensity = Pair(
-                                bluetoothSignalQuality, if (rssi != null) "$rssi dBm" else "N/A"
-                            ),
-                        )
+                        _monitorUiState.update { currentUiState ->
+                            currentUiState.copy(
+                                signalIntensity = Pair(
+                                    bluetoothSignalQuality, if (rssi != null) "$rssi dBm" else "N/A"
+                                ),
+                            )
+                        }
+                    } else {
+                        delay(60000)
+                        shouldReadManually = true
                     }
-                } else {
-                    delay(60000)
-                    shouldReadManually = true
                 }
             }
         }
@@ -242,7 +260,8 @@ class MonitorViewModel @Inject constructor(
             val pressureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
 
             val temperature = getTemperature(dataFrame)
-            val temperatureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
+            val temperatureStatus =
+                decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
 
             val batteryStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
 

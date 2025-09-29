@@ -2,18 +2,19 @@ package com.rfz.appflotal.data.repository.bluetooth
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
-import androidx.room.concurrent.AtomicBoolean
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import kotlinx.coroutines.CoroutineScope
@@ -29,8 +30,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import java.util.UUID
 import javax.inject.Inject
 
@@ -38,13 +37,16 @@ interface BluetoothRepository {
     var sensorData: StateFlow<BluetoothData>
 
     val scannedDevices: StateFlow<ScanItem?>
+
+    val btReceiver: BroadcastReceiver
+
     suspend fun connect(macAddress: String)
-    suspend fun disconnect()
+
+    fun disconnect()
 
     fun startScan()
 
     fun stopScan()
-    fun startRssiPolling(intervalsMs: Long = 2000L): Job
 }
 
 data class BluetoothData(
@@ -63,12 +65,14 @@ enum class BluetoothSignalQuality(@StringRes val signalText: Int? = null) {
 class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     BluetoothRepository {
     private var ready = false
-    private var device: BluetoothDevice? = null
-    private var currentMac: String? = null
+    private var lastMacAddress: String? = null
 
-    private var connecting = AtomicBoolean(false)
+    private var isConnected: Boolean = false
+
     private var bluetoothGatt: BluetoothGatt? = null
     private val mutex = Mutex()
+
+    private var rssiJob: Job? = null
 
     private val bluetoothManager: BluetoothManager? by lazy {
         context.getSystemService(BluetoothManager::class.java)
@@ -81,23 +85,38 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     private val bluetoothScanner by lazy {
         BluetoothScannerImp(bluetoothAdapter)
     }
+
     private var _sensorData: MutableStateFlow<BluetoothData> = MutableStateFlow(BluetoothData())
 
     override var sensorData: StateFlow<BluetoothData> = _sensorData.asStateFlow()
+
     override val scannedDevices: StateFlow<ScanItem?> = bluetoothScanner.resultScanDevices
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     private val gattCallback = object : BluetoothGattCallback() {
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
-                    Log.d("BLE", "Conectado. Descubriendo servicios...")
+                    isConnected = true
+                    startRSSIMonitoring()
                     gatt.discoverServices()
+                    Log.d("BLE", "Conectado. Descubriendo servicios...")
                 }
 
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    Log.d("BLE", "Conexion perdidad")
+                    isConnected = false
+                    stopRSSIMonitoring()
+
+                    try {
+                        gatt.close()
+                    } catch (_: Exception) {
+                    }
+                    if (bluetoothGatt === gatt) {
+                        bluetoothGatt = null
+                    }
+
                     _sensorData.update { currentState ->
                         currentState.copy(
                             dataFrame = null,
@@ -107,8 +126,15 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                         )
                     }
 
-                    ready = false
-                    safeCloseGatt(gatt)
+                    // reintento controlado
+                    lastMacAddress?.let { mac ->
+                        scope.launch {
+                            delay(3000)
+                            connect(mac)
+                        }
+                    }
+
+                    Log.d("BLE", "Conexion perdidad")
                 }
             }
         }
@@ -163,59 +189,69 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override suspend fun connect(macAddress: String) {
-        require(Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$").matches(macAddress)) {
-            Log.e("BluetoothRepository", "Bluetooth Address is not valid")
-        }
+        scope.launch {
+            mutex.withLock {
+                val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
+                if (!regex.matches(macAddress)) {
+                    Log.e("BluetoothRepository", "Bluetooth Address is not valid")
+                    return@withLock
+                }
 
-        if (macAddress != currentMac) {
-            // Verificamos si exista una instancia previa
-            scope.launch {
-                awaitDisconnectAndCloseLocked(timeoutMs = 4000)
-                device = bluetoothAdapter?.getRemoteDevice(macAddress)
+                lastMacAddress = macAddress
 
-                currentMac = macAddress
-                val dev = device ?: error("Dispositivo no encontrado")
+                bluetoothGatt?.let {
+                    try {
+                        it.disconnect()
+                        it.close()
+                    } catch (_: Exception) {
+                    }
+                }
+                bluetoothGatt = null
+                stopRSSIMonitoring()
 
-                bluetoothGatt = dev.connectGatt(context, false, gattCallback)
-                ready = false
+                val device = bluetoothAdapter?.getRemoteDevice(macAddress)
+                bluetoothGatt = device?.connectGatt(context, false, gattCallback)
+
             }
         }
     }
 
     @SuppressLint("MissingPermission")
-    private suspend fun awaitDisconnectAndCloseLocked(timeoutMs: Long) {
-        val gatt = bluetoothGatt ?: return
-        Log.d("BLE", "awaitDisconnect: gatt#${System.identityHashCode(gatt)}")
-        // 1) Pedir disconnect
-        try {
-            gatt.disconnect()
-        } catch (_: Exception) {
-        }
-        // 2) Esperar a que el stack marque DISCONNECTED
-        withTimeoutOrNull(timeoutMs) {
-            while (bluetoothManager?.getConnectionState(
-                    gatt.device,
-                    BluetoothProfile.GATT
-                ) != BluetoothProfile.STATE_DISCONNECTED
-            ) {
-                delay(100)
+    override val btReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
+                    BluetoothAdapter.STATE_OFF -> {
+                        Log.d("BluetoothRepositoriy", "BT OFF -> limpiar")
+                        disconnect()
+                    }
+
+                    BluetoothAdapter.STATE_ON -> {
+                        Log.d("BluetoothRepository", "BT ON -> intentar reconectar")
+                        lastMacAddress?.let { mac ->
+                            scope.launch {
+                                delay(2000)
+                                connect(mac)
+                            }
+                        }
+                    }
+                }
             }
         }
-        // 3) Close por si acaso y nullear
-        try {
-            gatt.close()
-        } catch (_: Exception) {
-        }
-        if (bluetoothGatt === gatt) bluetoothGatt = null
-        ready = false
-        Log.d("BLE", "awaitDisconnect: cerrado y limpio")
-        // 4) Margen para liberar el cliente en el stack (importante)
-        delay(250)
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override suspend fun disconnect() = mutex.withLock {
-        awaitDisconnectAndCloseLocked(timeoutMs = 4000)
+    @SuppressLint("MissingPermission")
+    override fun disconnect() {
+        stopRSSIMonitoring()
+        bluetoothGatt?.let {
+            try {
+                it.disconnect()
+                it.close()
+            } catch (_: Exception) {
+            }
+        }
+        bluetoothGatt = null
+        isConnected = false
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
@@ -226,6 +262,28 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     override fun stopScan() {
         bluetoothScanner.stopScan()
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startRSSIMonitoring() {
+        rssiJob?.cancel()
+        rssiJob = scope.launch {
+            while (isActive) {
+                delay(5000)
+                bluetoothGatt?.let { gatt ->
+                    try {
+                        gatt.readRemoteRssi()
+                    } catch (e: Exception) {
+                        Log.w("BluetoothRepository", "readRemoteRssi error: ${e.message}")
+                    }
+                } ?: Log.d("BluetoothRepository", "No GATT al leer RSSI")
+            }
+        }
+    }
+
+    private fun stopRSSIMonitoring() {
+        rssiJob?.cancel()
+        rssiJob = null
     }
 
     private fun verifyDataFrame(dataFrame: ByteArray): String? {
@@ -260,73 +318,6 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             in -85..-56 -> BluetoothSignalQuality.Aceptable
             in -100..-86 -> BluetoothSignalQuality.Pobre
             else -> BluetoothSignalQuality.Desconocida
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun internalDisconnectLocked() {
-        bluetoothGatt?.run {
-            try {
-                disconnect()
-                close()
-            } catch (_: Exception) {
-            }
-        }
-        bluetoothGatt = null
-        device = null
-        ready = false
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun safeCloseGatt(gatt: BluetoothGatt) {
-        try {
-            gatt.disconnect()
-            gatt.close()
-        } catch (_: Exception) {
-        }
-        if (bluetoothGatt == gatt) bluetoothGatt = null
-    }
-
-    @SuppressLint("MissingPermission")
-    fun isConnected(): Boolean {
-        val dev = device ?: return false
-        return bluetoothManager?.getConnectionState(
-            dev,
-            BluetoothProfile.GATT
-        ) == BluetoothProfile.STATE_CONNECTED && ready
-    }
-
-    private inline fun safeGattCall(block: (BluetoothGatt) -> Unit): Boolean {
-        val gatt = bluetoothGatt ?: return false
-        return try {
-            block(gatt)
-            true
-        } catch (_: android.os.DeadObjectException) {
-            safeCloseGatt(gatt)
-            false
-        } catch (_: SecurityException) {
-            false
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    suspend fun readRssiSafely(): Boolean {
-        if (!isConnected()) return false
-        return withContext(Dispatchers.IO) {
-            safeGattCall { it.readRemoteRssi() }
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    override fun startRssiPolling(intervalsMs: Long): Job = scope.launch {
-        while (isActive) {
-            if (isConnected()) {
-                readRssiSafely()
-            }
-            if (bluetoothAdapter?.isEnabled == false) {
-                currentMac?.let { connect(it) }
-            }
-            delay(intervalsMs)
         }
     }
 }

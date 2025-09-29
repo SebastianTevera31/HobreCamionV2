@@ -6,8 +6,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -21,13 +24,13 @@ import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.database.DataframeEntity
 import com.rfz.appflotal.data.network.service.fgservice.currentAppLocaleFromAppCompat
-import com.rfz.appflotal.data.network.service.fgservice.getBatteryStatus
-import com.rfz.appflotal.data.network.service.fgservice.getHighPressureStatus
-import com.rfz.appflotal.data.network.service.fgservice.getHighTemperatureStatus
-import com.rfz.appflotal.data.network.service.fgservice.getLowPressureStatus
-import com.rfz.appflotal.data.network.service.fgservice.getPressure
-import com.rfz.appflotal.data.network.service.fgservice.getTemperature
-import com.rfz.appflotal.data.network.service.fgservice.getTire
+import com.rfz.appflotal.core.util.tpms.getBatteryStatus
+import com.rfz.appflotal.core.util.tpms.getHighPressureStatus
+import com.rfz.appflotal.core.util.tpms.getHighTemperatureStatus
+import com.rfz.appflotal.core.util.tpms.getLowPressureStatus
+import com.rfz.appflotal.core.util.tpms.getPressure
+import com.rfz.appflotal.core.util.tpms.getTemperature
+import com.rfz.appflotal.core.util.tpms.getTire
 import com.rfz.appflotal.data.network.service.fgservice.localized
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
@@ -78,10 +81,12 @@ class HombreCamionService : Service() {
 
     private var isStaterd = false
 
-    private var currentMac: Int? = null
+    private var currentMac: String? = null
 
     override fun onBind(p0: Intent?): IBinder? = null
     private lateinit var notificationCompactBuilder: NotificationCompat.Builder
+
+    private var btReceiver: BroadcastReceiver? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -90,10 +95,14 @@ class HombreCamionService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        if (btReceiver != null) this.unregisterReceiver(btReceiver)
+
         val restartIntent = Intent("android.intent.action.SERVICE_RESTARTED")
             .setPackage(packageName)
         sendBroadcast(restartIntent)
         isStaterd = false
+
         coroutineScope.cancel()
     }
 
@@ -125,12 +134,15 @@ class HombreCamionService : Service() {
         // Tarea de lectura de datos TPMS
         readDataFromMonitor()
 
+        // Observador de estados de bluetooth.
+        btReceiver = bluetoothUseCase.getBtReceiver()
+
         // Tarea de lectura de estado de conexion
         readBluetoothStatus()
 
         // Tarea de lectura de cambio de idioma
         readLanguageUpdate()
-
+        
         return START_STICKY
     }
 
@@ -187,15 +199,19 @@ class HombreCamionService : Service() {
             val record = getUserUseCase().first()
             val dataUser = record.first()
             Log.d("HombreCamionService", "Iniciando Bluetooth...")
-            if (dataUser.id_monitor != 0 && currentMac != dataUser.id_monitor) {
-                currentMac = dataUser.id_monitor
-                bluetoothUseCase.doConnect(dataUser.monitorMac)
-                bluetoothUseCase.doStartRssiMonitoring()
-            }
+            currentMac = dataUser.monitorMac
+            bluetoothUseCase.doConnect(dataUser.monitorMac)
         }
     }
 
     private fun readBluetoothStatus() {
+        if (btReceiver != null) {
+            val filter = IntentFilter().apply {
+                addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+            }
+            this.registerReceiver(btReceiver, filter)
+        }
+
         coroutineScope.launch {
             bluetoothUseCase().distinctUntilChangedBy { it.bluetoothSignalQuality }
                 .collect { data ->

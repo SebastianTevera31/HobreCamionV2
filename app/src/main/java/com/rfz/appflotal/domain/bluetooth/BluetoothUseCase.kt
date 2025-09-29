@@ -1,5 +1,6 @@
 package com.rfz.appflotal.domain.bluetooth
 
+import android.content.BroadcastReceiver
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothData
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepository
 import com.rfz.appflotal.data.repository.bluetooth.ScanItem
@@ -11,6 +12,8 @@ class BluetoothUseCase @Inject constructor(private val bluetoothRepository: Blue
         return bluetoothRepository.sensorData
     }
 
+    fun getBtReceiver(): BroadcastReceiver = bluetoothRepository.btReceiver
+
     fun scannedDevices(): StateFlow<ScanItem?> {
         return bluetoothRepository.scannedDevices
     }
@@ -18,8 +21,6 @@ class BluetoothUseCase @Inject constructor(private val bluetoothRepository: Blue
     suspend fun doConnect(mac: String) {
         bluetoothRepository.connect(mac)
     }
-
-    fun doStartRssiMonitoring() = bluetoothRepository.startRssiPolling()
 
     fun startScan() = bluetoothRepository.startScan()
 
