@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.network.service
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -21,9 +22,6 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
-import com.rfz.appflotal.data.NetworkStatus
-import com.rfz.appflotal.data.model.database.DataframeEntity
-import com.rfz.appflotal.data.network.service.fgservice.currentAppLocaleFromAppCompat
 import com.rfz.appflotal.core.util.tpms.getBatteryStatus
 import com.rfz.appflotal.core.util.tpms.getHighPressureStatus
 import com.rfz.appflotal.core.util.tpms.getHighTemperatureStatus
@@ -31,6 +29,9 @@ import com.rfz.appflotal.core.util.tpms.getLowPressureStatus
 import com.rfz.appflotal.core.util.tpms.getPressure
 import com.rfz.appflotal.core.util.tpms.getTemperature
 import com.rfz.appflotal.core.util.tpms.getTire
+import com.rfz.appflotal.data.NetworkStatus
+import com.rfz.appflotal.data.model.database.DataframeEntity
+import com.rfz.appflotal.data.network.service.fgservice.currentAppLocaleFromAppCompat
 import com.rfz.appflotal.data.network.service.fgservice.localized
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
@@ -45,8 +46,10 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.InicioActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -74,12 +77,19 @@ class HombreCamionService : Service() {
     lateinit var getUserUseCase: GetTasksUseCase
 
     lateinit var notificationManager: NotificationManager
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var jobWifi: Job? = null
+    private var jobBleConn: Job? = null
+    private var jobReadTpms: Job? = null
+    private var jobBtStatus: Job? = null
+    private var jobLang: Job? = null
 
     private var oldestTimestamp: String? = null
 
-    private var isStaterd = false
+    private var hasStarted = false
+
+    private var readingHasStarted = false
 
     private var currentMac: String? = null
 
@@ -91,6 +101,13 @@ class HombreCamionService : Service() {
     override fun onCreate() {
         super.onCreate()
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        startForegroundServiceSafelyOnce()
+
+        startWifiOnce()
+        startBleConnOnce()
+        startReadTpmsOnce()
+        startBtStatusOnce()
+        startLangOnce()
     }
 
     override fun onDestroy() {
@@ -101,49 +118,29 @@ class HombreCamionService : Service() {
         val restartIntent = Intent("android.intent.action.SERVICE_RESTARTED")
             .setPackage(packageName)
         sendBroadcast(restartIntent)
-        isStaterd = false
+        hasStarted = false
 
-        coroutineScope.cancel()
+        serviceScope.cancel()
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
         when (intent?.action) {
             "ACTION_RESTART" -> {
-                initBluetoothConnection()
+                restartBleOnly()
             }
         }
 
-        // Configurar e iniciar del servicio
-        if (!isStaterd) {
-            startForegroundService()
-            isStaterd = true
-        }
-
-        // Reiniciando servicio
-        Log.d("HombreCamionService", "Servicio iniciado")
-
-        // Habilitar observador WiFi
-        wifiUseCase.doConnect()
-
-        // Iniciar conexión Bluetooth
-        initBluetoothConnection()
-
-        // Tarea de lectura de datos TPMS
-        readDataFromMonitor()
-
-        // Observador de estados de bluetooth.
-        btReceiver = bluetoothUseCase.getBtReceiver()
-
-        // Tarea de lectura de estado de conexion
-        readBluetoothStatus()
-
-        // Tarea de lectura de cambio de idioma
-        readLanguageUpdate()
-        
         return START_STICKY
+    }
+
+    @SuppressLint("NewApi")
+    private fun startForegroundServiceSafelyOnce() {
+        if (!hasStarted) {
+            startForegroundService() // tu notificación + startForeground(...)
+            hasStarted = true
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -181,6 +178,61 @@ class HombreCamionService : Service() {
         startForeground(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
     }
 
+    private fun startWifiOnce() {
+        if (jobWifi?.isActive != true) {
+            jobWifi = serviceScope.launch {
+                wifiUseCase.doConnect()
+            }
+        }
+    }
+
+    private fun startBleConnOnce() {
+        if (jobBleConn?.isActive != true) {
+            jobBleConn = serviceScope.launch {
+                initBluetoothConnection() // debe ser segura y no duplicar GATT
+            }
+        }
+    }
+
+    private fun startReadTpmsOnce() {
+        if (!readingHasStarted) {
+            readingHasStarted = true
+            serviceScope.launch {
+                readDataFromMonitor()
+            }
+        }
+    }
+
+
+    private fun startBtStatusOnce() {
+        if (btReceiver != null) {
+            val filter = IntentFilter().apply {
+                addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+            }
+            this.registerReceiver(btReceiver, filter)
+        }
+        serviceScope.launch {
+            readBluetoothStatus()
+        }
+    }
+
+    private fun startLangOnce() {
+        if (jobLang?.isActive != true) {
+            jobLang = serviceScope.launch {
+                readLanguageUpdate()
+            }
+        }
+    }
+
+    private fun restartBleOnly() {
+        // Reinicia SOLO la parte BLE (sin tocar WiFi/Idioma/TPMS si no es necesario)
+        jobBleConn?.cancel()
+
+        jobBleConn = null
+
+        startBleConnOnce()
+    }
+
     private fun createServiceNotificationChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val channel = NotificationChannel(
@@ -194,113 +246,101 @@ class HombreCamionService : Service() {
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun initBluetoothConnection() {
-        coroutineScope.launch {
-            val record = getUserUseCase().first()
-            val dataUser = record.first()
-            Log.d("HombreCamionService", "Iniciando Bluetooth...")
-            currentMac = dataUser.monitorMac
-            bluetoothUseCase.doConnect(dataUser.monitorMac)
-        }
+    private suspend fun initBluetoothConnection() {
+        val record = getUserUseCase().first()
+        val dataUser = record.first()
+        Log.d("HombreCamionService", "Iniciando Bluetooth...")
+        currentMac = dataUser.monitorMac
+        bluetoothUseCase.doConnect(dataUser.monitorMac)
     }
 
-    private fun readBluetoothStatus() {
-        if (btReceiver != null) {
-            val filter = IntentFilter().apply {
-                addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+    private suspend fun readBluetoothStatus() {
+        bluetoothUseCase().distinctUntilChangedBy { it.bluetoothSignalQuality }
+            .collect { data ->
+                val quality = data.bluetoothSignalQuality
+
+                if (BluetoothSignalQuality.Desconocida != quality) {
+                    CONNECTION_CONTEXT_MESSAGE = R.string.recibiendo_datos_monitor
+                }
+
+                when (quality) {
+                    BluetoothSignalQuality.Excelente -> {
+                        CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                        CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Excelente.signalText
+                    }
+
+                    BluetoothSignalQuality.Aceptable -> {
+                        CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                        CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Aceptable.signalText
+                    }
+
+                    BluetoothSignalQuality.Pobre -> {
+                        CONNECTION_TITLE_MESSAGE = R.string.conexion_status
+                        CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Pobre.signalText
+                    }
+
+                    BluetoothSignalQuality.Desconocida -> {
+                        CONNECTION_CONTEXT_MESSAGE =
+                            BluetoothSignalQuality.Desconocida.signalText
+                        CONNECTION_TITLE_MESSAGE = null
+                        CONNECTION_STATUS_MESSAGE = null
+                    }
+                }
+
+                rebuildNotificationTexts()
             }
-            this.registerReceiver(btReceiver, filter)
-        }
-
-        coroutineScope.launch {
-            bluetoothUseCase().distinctUntilChangedBy { it.bluetoothSignalQuality }
-                .collect { data ->
-                    val quality = data.bluetoothSignalQuality
-
-                    if (BluetoothSignalQuality.Desconocida != quality) {
-                        CONNECTION_CONTEXT_MESSAGE = R.string.recibiendo_datos_monitor
-                    }
-
-                    when (quality) {
-                        BluetoothSignalQuality.Excelente -> {
-                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
-                            CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Excelente.signalText
-                        }
-
-                        BluetoothSignalQuality.Aceptable -> {
-                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
-                            CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Aceptable.signalText
-                        }
-
-                        BluetoothSignalQuality.Pobre -> {
-                            CONNECTION_TITLE_MESSAGE = R.string.conexion_status
-                            CONNECTION_STATUS_MESSAGE = BluetoothSignalQuality.Pobre.signalText
-                        }
-
-                        BluetoothSignalQuality.Desconocida -> {
-                            CONNECTION_CONTEXT_MESSAGE =
-                                BluetoothSignalQuality.Desconocida.signalText
-                            CONNECTION_TITLE_MESSAGE = null
-                            CONNECTION_STATUS_MESSAGE = null
-                        }
-                    }
-
-                    rebuildNotificationTexts()
-                }
-        }
     }
 
-    private fun readDataFromMonitor() {
-        coroutineScope.launch {
-            val dataUser = getUserUseCase().first()[0]
-            val currentMonitorId = dataUser.id_monitor
-            bluetoothUseCase()
-                .distinctUntilChangedBy { it.timestamp }
-                .collect { data ->
-                    val bluetoothSignalQuality = data.bluetoothSignalQuality
+    private suspend fun readDataFromMonitor() {
+        val dataUser = getUserUseCase().first()[0]
+        val currentMonitorId = dataUser.id_monitor
+        bluetoothUseCase()
+            .distinctUntilChangedBy { it.timestamp }
+            .collectLatest { data ->
+                Log.i("HombreCamionService", "Leyendo datos desde el servicio")
+                val bluetoothSignalQuality = data.bluetoothSignalQuality
 
-                    val dataFrame = data.dataFrame
-                    Log.d("HombreCamionService", "Dataframe: $dataFrame, ")
-                    if (validateBluetoothConnectivity(bluetoothSignalQuality) && dataFrame != null) {
+                val dataFrame = data.dataFrame
+                Log.d("HombreCamionService", "Dataframe: $dataFrame, ")
+                if (validateBluetoothConnectivity(bluetoothSignalQuality) && dataFrame != null) {
 
-                        // Cambiar: Debe almancenarse el ID del Monitor
-                        val monitorId = currentMonitorId
-                        Log.d("HombreCamionService", "UserId: $monitorId")
-                        val timestamp = getCurrentDate()
+                    // Cambiar: Debe almancenarse el ID del Monitor
+                    val monitorId = currentMonitorId
+                    Log.d("HombreCamionService", "UserId: $monitorId")
+                    val timestamp = getCurrentDate()
 
-                        val sensorId =
-                            decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
+                    val sensorId =
+                        decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
 
-                        sensorTableUseCase.doInsert(
-                            DataframeEntity(
-                                monitorId = monitorId,
-                                sensorId = sensorId,
-                                dataFrame = dataFrame,
-                                timestamp = timestamp,
-                                sent = false,
-                                active = true
-                            )
-                        )
-
-                        sensorDataTableRepository.insertSensorData(
-                            idMonitor = monitorId,
-                            tire = getTire(dataFrame),
-                            tireNumber = "",
+                    sensorTableUseCase.doInsert(
+                        DataframeEntity(
+                            monitorId = monitorId,
+                            sensorId = sensorId,
+                            dataFrame = dataFrame,
                             timestamp = timestamp,
-                            temperature = getTemperature(dataFrame).toInt(),
-                            pressure = getPressure(dataFrame).toInt(),
-                            active = true,
-                            highTemperatureAlert = getHighTemperatureStatus(dataFrame),
-                            highPressureAlert = getHighPressureStatus(dataFrame),
-                            lowPressureAlert = getLowPressureStatus(dataFrame),
-                            lowBatteryAlert = getBatteryStatus(dataFrame)
+                            sent = false,
+                            active = true
                         )
+                    )
 
-                        // Enviar datos a API
-                        sendDataToApi(dataFrame, timestamp, monitorId)
-                    }
+                    sensorDataTableRepository.insertSensorData(
+                        idMonitor = monitorId,
+                        tire = getTire(dataFrame),
+                        tireNumber = "",
+                        timestamp = timestamp,
+                        temperature = getTemperature(dataFrame).toInt(),
+                        pressure = getPressure(dataFrame).toInt(),
+                        active = true,
+                        highTemperatureAlert = getHighTemperatureStatus(dataFrame),
+                        highPressureAlert = getHighPressureStatus(dataFrame),
+                        lowPressureAlert = getLowPressureStatus(dataFrame),
+                        lowBatteryAlert = getBatteryStatus(dataFrame)
+                    )
+
+                    // Enviar datos a API
+                    sendDataToApi(dataFrame, timestamp, monitorId)
                 }
-        }
+            }
     }
 
     private suspend fun sendDataToApi(dataFrame: String, timestamp: String, monitorId: Int) {
@@ -366,13 +406,11 @@ class HombreCamionService : Service() {
         }
     }
 
-    // FUNCIONES DE CAMBIO DE IDIOMA
+// FUNCIONES DE CAMBIO DE IDIOMA
 
-    fun readLanguageUpdate() {
-        coroutineScope.launch {
-            AppLocale.currentLocale.distinctUntilChangedBy { it.language }.collect {
-                rebuildNotificationTexts()
-            }
+    private suspend fun readLanguageUpdate() {
+        AppLocale.currentLocale.distinctUntilChangedBy { it.language }.collect {
+            rebuildNotificationTexts()
         }
     }
 
