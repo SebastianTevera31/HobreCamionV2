@@ -67,6 +67,7 @@ import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
@@ -101,6 +102,7 @@ fun HomeScreen(
     val resources = context.resources
 
     val uiState by homeViewModel.uiState.collectAsState()
+    val wifiStatus = monitorViewModel.wifiStatus.collectAsState()
 
     LaunchedEffect(Unit) {
         homeViewModel.loadInitialData()
@@ -382,7 +384,12 @@ fun HomeScreen(
                     userName = userName,
                     plates = plates
                 ) {
-                    showMonitorDialog = true
+                    if (wifiStatus.value == NetworkStatus.Connected) showMonitorDialog = true
+                    else Toast.makeText(
+                        context,
+                        R.string.error_conexion_internet,
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
 

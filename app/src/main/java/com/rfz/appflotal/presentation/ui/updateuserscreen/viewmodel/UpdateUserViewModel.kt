@@ -8,12 +8,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
+import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +32,8 @@ class UpdateUserViewModel @Inject constructor(
     private val catalogUseCase: CatalogUseCase,
     private val loginUseCase: LoginUseCase,
     private val addTaskUseCase: AddTaskUseCase,
-    private val getTasksUseCase: GetTasksUseCase
+    private val getTasksUseCase: GetTasksUseCase,
+    private val wifiUseCase: WifiUseCase,
 ) : ViewModel() {
 
     private var _updateUserUiState = MutableStateFlow(UpdateUserUiState())
@@ -38,6 +41,18 @@ class UpdateUserViewModel @Inject constructor(
 
     var updateUserStatus: ApiResult<List<MessageResponse>?> by mutableStateOf(ApiResult.Loading)
         private set
+
+    private val _wifiStatus: MutableStateFlow<NetworkStatus> =
+        MutableStateFlow(NetworkStatus.Connected)
+    val wifiStatus = _wifiStatus.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            wifiUseCase().collect { status ->
+                _wifiStatus.update { status }
+            }
+        }
+    }
 
     fun fetchUserData(selectedLanguage: String) {
         viewModelScope.launch {

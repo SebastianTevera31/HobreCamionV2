@@ -49,10 +49,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
 
@@ -71,7 +75,7 @@ class HombreCamionService : Service() {
     lateinit var wifiUseCase: WifiUseCase
 
     @Inject
-    lateinit var sensorTableUseCase: DataframeTableUseCase
+    lateinit var dataframeTableUseCase: DataframeTableUseCase
 
     @Inject
     lateinit var getUserUseCase: GetTasksUseCase
@@ -81,16 +85,11 @@ class HombreCamionService : Service() {
 
     private var jobWifi: Job? = null
     private var jobBleConn: Job? = null
-    private var jobReadTpms: Job? = null
-    private var jobBtStatus: Job? = null
     private var jobLang: Job? = null
-
+    private var jobUpdateStatus: Job? = null
     private var oldestTimestamp: String? = null
-
     private var hasStarted = false
-
     private var readingHasStarted = false
-
     private var currentMac: String? = null
 
     override fun onBind(p0: Intent?): IBinder? = null
@@ -108,6 +107,7 @@ class HombreCamionService : Service() {
         startReadTpmsOnce()
         startBtStatusOnce()
         startLangOnce()
+        updateSensorStatus()
     }
 
     override fun onDestroy() {
@@ -312,7 +312,7 @@ class HombreCamionService : Service() {
                     val sensorId =
                         decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
 
-                    sensorTableUseCase.doInsert(
+                    dataframeTableUseCase.doInsert(
                         DataframeEntity(
                             monitorId = monitorId,
                             sensorId = sensorId,
@@ -360,7 +360,7 @@ class HombreCamionService : Service() {
                     fldDateData = timestamp
                 )
 
-                sensorTableUseCase.doSetRecordStatus(
+                dataframeTableUseCase.doSetRecordStatus(
                     monitorId = monitorId,
                     timestamp = timestamp,
                     sendStatus = true,
@@ -373,7 +373,7 @@ class HombreCamionService : Service() {
     }
 
     private suspend fun getUnsentRecords(monitorId: Int) {
-        val records = sensorTableUseCase.doGetUnsentRecords(
+        val records = dataframeTableUseCase.doGetUnsentRecords(
             monitorId = monitorId,
         )
 
@@ -385,7 +385,7 @@ class HombreCamionService : Service() {
 
                 when (result) {
                     is ApiResult.Success -> {
-                        sensorTableUseCase.doSetRecordStatus(
+                        dataframeTableUseCase.doSetRecordStatus(
                             it.monitorId, it.timestamp,
                             sendStatus = true,
                             active = true
@@ -401,12 +401,11 @@ class HombreCamionService : Service() {
 
                     ApiResult.Loading -> {}
                 }
-
             }
         }
     }
 
-// FUNCIONES DE CAMBIO DE IDIOMA
+    // FUNCIONES DE CAMBIO DE IDIOMA
 
     private suspend fun readLanguageUpdate() {
         AppLocale.currentLocale.distinctUntilChangedBy { it.language }.collect {
@@ -437,6 +436,26 @@ class HombreCamionService : Service() {
 
         // Actualiza la notificación foreground (basta con notify con el mismo ID)
         notificationManager.notify(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
+    }
+
+    @SuppressLint("NewApi")
+    private fun updateSensorStatus() {
+        if (jobUpdateStatus?.isActive == true) return
+        jobUpdateStatus = serviceScope.launch(Dispatchers.IO) {
+            val monitorId = getUserUseCase().first().firstOrNull()?.id_monitor
+            while (isActive) {
+                try {
+                    if (monitorId != null) {
+                        val cutoff =
+                            Instant.now().minus(15, ChronoUnit.MINUTES).toString() // ISO-8601 Z
+                        sensorDataTableRepository.markInactiveOlderThan(monitorId, cutoff)
+                    }
+                } catch (t: Throwable) {
+                    Log.e("Updater", "Error actualizando sensores", t)
+                }
+                delay(10 * 60_000L) // 10 minutos
+            }
+        }
     }
 
     companion object {

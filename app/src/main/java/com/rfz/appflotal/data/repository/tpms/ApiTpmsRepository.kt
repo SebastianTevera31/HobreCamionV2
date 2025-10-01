@@ -66,7 +66,6 @@ class ApiTpmsRepository @Inject constructor(
     }
 
     suspend fun doGetConfigurationById(monitorId: Int): ApiResult<List<ConfigurationByIdMonitorResponse>?> {
-
         return apiTpmsService.getConfigurationByIdMonitor(monitorId)
     }
 

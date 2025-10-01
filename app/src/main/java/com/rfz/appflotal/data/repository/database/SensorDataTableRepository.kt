@@ -1,6 +1,5 @@
 package com.rfz.appflotal.data.repository.database
 
-import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
@@ -59,7 +58,12 @@ class SensorDataTableRepository @Inject constructor(private val sensorData: Sens
         return sensorData.getLastRecordByTire(monitorId, tire)
     }
 
-    suspend fun deleteData() {}
+    suspend fun markInactiveOlderThan(monitorId: Int, cutoffUtc: String) {
+        sensorData.updateSensorRecord(
+            monitorId = monitorId,
+            cutoffUtc = cutoffUtc
+        )
+    }
 }
 
 fun SensorDataEntity.toMonitorTireByDateResponse(): MonitorTireByDateResponse {

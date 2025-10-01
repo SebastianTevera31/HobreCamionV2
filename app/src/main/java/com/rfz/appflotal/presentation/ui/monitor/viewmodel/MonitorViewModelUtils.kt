@@ -11,14 +11,13 @@ enum class BaseConfig(val base: Int) {
 
 data class ImageConfig(val dimen: Pair<Int, Int>, val image: Int)
 
-fun getImageDimens(url: String): Pair<Int, Int> {
-    val resourcer = url.replace(BASE_URL, "")
+fun getImageDimens(resourcer: BaseConfig?): Pair<Int, Int> {
     return when (resourcer) {
-        "Base6.png" -> Pair(620, 327)
-        "Base10.png" -> Pair(628, 327)
-        "Base22.png" -> Pair(1280, 425)
-        "Base32.png" -> Pair(1780, 327)
-        else -> Pair(0, 0)
+        BaseConfig.BASE6 -> Pair(620, 327)
+        BaseConfig.BASE10 -> Pair(628, 327)
+        BaseConfig.BASE22 -> Pair(1280, 425)
+        BaseConfig.BASE38 -> Pair(1780, 327)
+        null ->  Pair(0, 0)
     }
 }
 

@@ -28,6 +28,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.UserInfoTopBar
@@ -48,6 +49,7 @@ fun UpdateUserScreen(
     val updateUserUiState = updateUserViewModel.updateUserUiState.collectAsState()
     val context = LocalContext.current
     val updateUserStaus = updateUserViewModel.updateUserStatus
+    val wifiStatus = updateUserViewModel.wifiStatus.collectAsState()
 
     LaunchedEffect(updateUserStaus) {
         when (updateUserStaus) {
@@ -113,8 +115,16 @@ fun UpdateUserScreen(
                     })
                 Button(
                     onClick = {
-                        if (updateUserStaus != ApiResult.Error()) {
-                            updateUserViewModel.saveUserData()
+                        if (wifiStatus.value == NetworkStatus.Connected) {
+                            if (updateUserStaus != ApiResult.Error()) {
+                                updateUserViewModel.saveUserData()
+                            }
+                        } else {
+                            Toast.makeText(
+                                context,
+                                R.string.error_conexion_internet,
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     },
                     enabled = updateUserUiState.value.isNewData,

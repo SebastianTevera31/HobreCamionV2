@@ -35,9 +35,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -76,6 +76,7 @@ class MonitorViewModel @Inject constructor(
 
     private var _wifiStatus: MutableStateFlow<NetworkStatus> =
         MutableStateFlow(NetworkStatus.Connected)
+    val wifiStatus = _wifiStatus.asStateFlow()
 
     var shouldReadManually = true
 
@@ -86,9 +87,8 @@ class MonitorViewModel @Inject constructor(
             }
         }
 
-        readWifiStatus()
-
         readBluetoothData()
+        statusObserver()
     }
 
     fun initMonitorData() {
@@ -114,19 +114,15 @@ class MonitorViewModel @Inject constructor(
                 }
             }
 
-            loadDataFromNetwork()
-
-            if (_monitorUiState.value.chassisImageUrl.isNotEmpty()) {
-                mapTires()
-            }
+            getConfigData()
+            _monitorUiState.update { currentUiState -> currentUiState.copy(showView = true) }
         }
     }
 
-    private suspend fun loadDataFromNetwork() {
+    private suspend fun getConfigurationFromApi() {
         val monitorId = monitorUiState.value.monitorId
         if (monitorId != 0) {
-            val configInfo =
-                apiTpmsUseCase.doGetConfigurationMonitorById(monitorId)
+            val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(monitorId)
             responseHelper(response = configInfo) { data ->
                 if (!data.isNullOrEmpty()) {
                     _monitorUiState.update { currentUiState ->
@@ -157,7 +153,7 @@ class MonitorViewModel @Inject constructor(
                         val c = coordSByPos[key]
                         Tire(
                             sensorPosition = info.sensorPosition,
-                            inAlert = info.highTemperature || info.lowPressure || info.highPressure || info.lowBattery,
+                            inAlert = false,
                             isActive = info.sensorId != 0,
                             xPosition = c?.fldPositionX ?: 0,
                             yPosition = c?.fldPositionY ?: 0
@@ -169,7 +165,7 @@ class MonitorViewModel @Inject constructor(
 
                     _monitorUiState.update { currentUiState ->
                         currentUiState.copy(
-                            imageDimen = getImageDimens(currentUiState.chassisImageUrl),
+                            imageDimen = getImageDimens(currentUiState.baseConfig),
                             listOfTires = tires
                         )
                     }
@@ -178,34 +174,29 @@ class MonitorViewModel @Inject constructor(
 
             // Insertar registro de ruedas en la base de datos.
             coordinatesTableUseCase.insertCoordinates(monitorId, _monitorUiState.value.listOfTires)
-            _monitorUiState.update { currentUiState -> currentUiState.copy(showView = true) }
         }
     }
 
-    private fun readWifiStatus() {
-        viewModelScope.launch {
-            wifiUseCase().distinctUntilChangedBy { it }.collect { status ->
-                val uiState = _monitorUiState
-                if (uiState.value.monitorId != 0) {
-                    if (status == NetworkStatus.Connected) {
-                        coordinatesTableUseCase.deleteCoordinates(uiState.value.monitorId)
-                        loadDataFromNetwork()
-                    } else {
-                        val localCoordinates =
-                            coordinatesTableUseCase.getCoordinates(uiState.value.monitorId)
-                        uiState.update { currentUiState ->
-                            currentUiState.copy(
-                                listOfTires = localCoordinates.map { it.toTire() }
-                            )
-                        }
-                    }
-                } else {
-                    _monitorUiState.update { currentUiState ->
-                        currentUiState.copy(
-                            showDialog = true
-                        )
-                    }
+    private suspend fun getConfigData() {
+        val uiState = _monitorUiState
+        if (uiState.value.monitorId != 0) {
+            if (_wifiStatus.value == NetworkStatus.Connected) {
+                coordinatesTableUseCase.deleteCoordinates(uiState.value.monitorId)
+                mapTires()
+            } else {
+                val localCoordinates =
+                    coordinatesTableUseCase.getCoordinates(uiState.value.monitorId)
+                uiState.update { currentUiState ->
+                    currentUiState.copy(
+                        listOfTires = localCoordinates.map { it.toTire() }
+                    )
                 }
+            }
+        } else {
+            _monitorUiState.update { currentUiState ->
+                currentUiState.copy(
+                    showDialog = true
+                )
             }
         }
     }
@@ -247,6 +238,29 @@ class MonitorViewModel @Inject constructor(
                         shouldReadManually = true
                     }
                 }
+            }
+        }
+    }
+
+    private fun statusObserver() {
+        viewModelScope.launch {
+            val monitorId = _monitorUiState.value.monitorId
+            while (isActive) {
+                val storedData = sensorDataTableRepository.getLastData(monitorId)
+
+                val activeTire = storedData.associate { it.tire to it.active }
+
+                val currentData = _monitorUiState.value.listOfTires.toMutableList().map { tire ->
+                    if (activeTire[tire.sensorPosition] == false) tire.copy(inAlert = false) else tire
+                }
+
+                _monitorUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        listOfTires = currentData
+                    )
+                }
+
+                delay(10 * 60_000L)
             }
         }
     }

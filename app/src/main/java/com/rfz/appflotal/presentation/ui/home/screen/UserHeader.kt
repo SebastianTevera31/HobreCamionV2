@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
@@ -89,7 +90,6 @@ fun UserHeader(
                     contentDescription = null,
                     modifier = Modifier.size(100.dp),
                     tint = Color.White
-
                 )
             }
 
