@@ -1,8 +1,11 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import com.rfz.appflotal.core.network.NetworkConfig.BASE_URL
+import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 enum class BaseConfig(val base: Int) {
@@ -17,7 +20,7 @@ fun getImageDimens(resourcer: BaseConfig?): Pair<Int, Int> {
         BaseConfig.BASE10 -> Pair(628, 327)
         BaseConfig.BASE22 -> Pair(1280, 425)
         BaseConfig.BASE38 -> Pair(1780, 327)
-        null ->  Pair(0, 0)
+        null -> Pair(0, 0)
     }
 }
 
@@ -52,5 +55,20 @@ fun getBaseConfigImage(baseConfig: Int): BaseConfig {
         10 -> BaseConfig.BASE10
         22 -> BaseConfig.BASE22
         else -> BaseConfig.BASE38
+    }
+}
+
+suspend fun updateTireStatus(
+    listTires: List<Tire>,
+    onGetData: suspend () -> List<SensorDataEntity>,
+): List<Tire> = withContext(Dispatchers.IO) {
+    val data = onGetData()
+    val activeTire = data.associate { it.tire to it.active }
+
+    listTires.toMutableList().map { tire ->
+        val activeStatus = activeTire[tire.sensorPosition]
+        if (activeStatus == false)
+            tire.copy(inAlert = false)
+        else tire
     }
 }

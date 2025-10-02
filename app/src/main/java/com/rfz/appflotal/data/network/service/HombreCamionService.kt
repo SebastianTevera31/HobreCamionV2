@@ -31,6 +31,7 @@ import com.rfz.appflotal.core.util.tpms.getTemperature
 import com.rfz.appflotal.core.util.tpms.getTire
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.database.DataframeEntity
+import com.rfz.appflotal.data.network.service.fgservice.HombreCamionServiceController
 import com.rfz.appflotal.data.network.service.fgservice.currentAppLocaleFromAppCompat
 import com.rfz.appflotal.data.network.service.fgservice.localized
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
@@ -80,6 +81,9 @@ class HombreCamionService : Service() {
     @Inject
     lateinit var getUserUseCase: GetTasksUseCase
 
+    @Inject
+    lateinit var hcServiceController: HombreCamionServiceController
+
     lateinit var notificationManager: NotificationManager
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -102,6 +106,8 @@ class HombreCamionService : Service() {
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         startForegroundServiceSafelyOnce()
 
+        hcServiceController.getDataApi()
+
         startWifiOnce()
         startBleConnOnce()
         startReadTpmsOnce()
@@ -119,6 +125,8 @@ class HombreCamionService : Service() {
             .setPackage(packageName)
         sendBroadcast(restartIntent)
         hasStarted = false
+
+        hcServiceController.stopService()
 
         serviceScope.cancel()
     }

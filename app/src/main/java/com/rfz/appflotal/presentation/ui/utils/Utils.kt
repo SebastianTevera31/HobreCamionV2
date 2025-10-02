@@ -19,3 +19,21 @@ fun <T> responseHelper(
         ApiResult.Loading -> {}
     }
 }
+
+suspend fun <T> asyncResponseHelper(
+    response: ApiResult<T>,
+    onError: () -> Unit = {},
+    onSuccess: suspend (data: T) -> Unit
+) {
+    return when (response) {
+        is ApiResult.Success -> {
+            onSuccess(response.data)
+        }
+
+        is ApiResult.Error -> {
+            onError()
+        }
+
+        ApiResult.Loading -> {}
+    }
+}

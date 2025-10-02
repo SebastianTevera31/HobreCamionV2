@@ -32,6 +32,7 @@ import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 enum class SensorAlerts(@StringRes val message: Int) {
@@ -153,7 +155,7 @@ class MonitorViewModel @Inject constructor(
                         val c = coordSByPos[key]
                         Tire(
                             sensorPosition = info.sensorPosition,
-                            inAlert = false,
+                            inAlert = info.highTemperature || info.lowPressure || info.highPressure || info.lowBattery,
                             isActive = info.sensorId != 0,
                             xPosition = c?.fldPositionX ?: 0,
                             yPosition = c?.fldPositionY ?: 0
@@ -244,23 +246,21 @@ class MonitorViewModel @Inject constructor(
 
     private fun statusObserver() {
         viewModelScope.launch {
-            val monitorId = _monitorUiState.value.monitorId
-            while (isActive) {
-                val storedData = sensorDataTableRepository.getLastData(monitorId)
+            val uiState = _monitorUiState.value
+            val monitorId = uiState.monitorId
+            withContext(Dispatchers.IO) {
+                while (isActive) {
+                    val tires = updateTireStatus(
+                        listTires = uiState.listOfTires
+                    ) { sensorDataTableRepository.getLastData(monitorId) }
 
-                val activeTire = storedData.associate { it.tire to it.active }
-
-                val currentData = _monitorUiState.value.listOfTires.toMutableList().map { tire ->
-                    if (activeTire[tire.sensorPosition] == false) tire.copy(inAlert = false) else tire
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            listOfTires = tires
+                        )
+                    }
+                    delay(10 * 60_000L)
                 }
-
-                _monitorUiState.update { currentUiState ->
-                    currentUiState.copy(
-                        listOfTires = currentData
-                    )
-                }
-
-                delay(10 * 60_000L)
             }
         }
     }

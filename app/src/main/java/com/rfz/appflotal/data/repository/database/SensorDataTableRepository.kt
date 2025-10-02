@@ -64,6 +64,8 @@ class SensorDataTableRepository @Inject constructor(private val sensorData: Sens
             cutoffUtc = cutoffUtc
         )
     }
+
+    suspend fun deleteMonitorData(monitorId: Int) = sensorData.deleteMonitorData(monitorId)
 }
 
 fun SensorDataEntity.toMonitorTireByDateResponse(): MonitorTireByDateResponse {
