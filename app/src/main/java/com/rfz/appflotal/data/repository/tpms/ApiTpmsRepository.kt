@@ -36,7 +36,6 @@ class ApiTpmsRepository @Inject constructor(
     private val coordinatesTableUseCase: CoordinatesTableUseCase,
     private val dataframeTableUseCase: DataframeTableUseCase
 ) {
-
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var _wifiState: MutableStateFlow<NetworkStatus> =
         MutableStateFlow(NetworkStatus.Disconnected)

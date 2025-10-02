@@ -1,9 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
-import com.rfz.appflotal.core.network.NetworkConfig.BASE_URL
 import com.rfz.appflotal.data.model.database.SensorDataEntity
-import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
-import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -58,7 +55,7 @@ fun getBaseConfigImage(baseConfig: Int): BaseConfig {
     }
 }
 
-suspend fun updateTireStatus(
+suspend fun updateTiresStatus(
     listTires: List<Tire>,
     onGetData: suspend () -> List<SensorDataEntity>,
 ): List<Tire> = withContext(Dispatchers.IO) {
@@ -70,5 +67,14 @@ suspend fun updateTireStatus(
         if (activeStatus == false)
             tire.copy(inAlert = false)
         else tire
+    }
+}
+
+fun updateTireState(currentTire: String, tires: List<Tire>, onUpdate: (tire: Tire) -> Unit) {
+    if (currentTire.isEmpty()) return
+    tires.find { it.sensorPosition == currentTire }.let { tire ->
+        if (tire?.isActive == false) {
+            onUpdate(tire)
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.network.service.fgservice
 
 import android.util.Log
+import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -17,6 +18,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.text.toInt
 
 class HombreCamionServiceController @Inject constructor(
     private val apiTmpsUseCase: ApiTpmsUseCase,
@@ -56,28 +58,26 @@ class HombreCamionServiceController @Inject constructor(
             onError = { Log.e("HBServiceController", "Error al traer datos del monitor") },
         ) { data ->
             withContext(Dispatchers.IO) {
-                data?.filter { it.sensorId != 0 }?.let { sensors ->
-                    insertMonitorData(sensors)
+                data?.forEach {
+                    sensorDataTableRepository.insertSensorData(
+                        idMonitor = it.monitorId,
+                        tire = it.sensorPosition,
+                        tireNumber = "",
+                        timestamp = convertDate(
+                            it.ultimalectura,
+                            "yyyy-MM-dd'T'HH:mm:ss",
+                            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                        ),
+                        temperature = it.temperature.toInt(),
+                        pressure = it.psi.toInt(),
+                        highTemperatureAlert = it.highTemperature,
+                        highPressureAlert = it.highPressure,
+                        lowPressureAlert = it.lowPressure,
+                        lowBatteryAlert = it.lowBattery,
+                        active = it.sensorId != 0
+                    )
                 }
             }
-        }
-    }
-
-    private suspend fun insertMonitorData(sensors: List<DiagramMonitorResponse>) {
-        sensors.forEach {
-            sensorDataTableRepository.insertSensorData(
-                idMonitor = it.monitorId,
-                tire = it.sensorPosition,
-                tireNumber = "",
-                timestamp = it.ultimalectura,
-                temperature = it.temperature.toInt(),
-                pressure = it.psi.toInt(),
-                highTemperatureAlert = it.highTemperature,
-                highPressureAlert = it.highPressure,
-                lowPressureAlert = it.lowPressure,
-                lowBatteryAlert = it.lowBattery,
-                active = true
-            )
         }
     }
 }

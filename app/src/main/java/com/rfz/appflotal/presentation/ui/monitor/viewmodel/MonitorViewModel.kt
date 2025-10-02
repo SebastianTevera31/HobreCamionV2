@@ -90,7 +90,7 @@ class MonitorViewModel @Inject constructor(
         }
 
         readBluetoothData()
-        statusObserver()
+        //statusObserver()
     }
 
     fun initMonitorData() {
@@ -118,22 +118,6 @@ class MonitorViewModel @Inject constructor(
 
             getConfigData()
             _monitorUiState.update { currentUiState -> currentUiState.copy(showView = true) }
-        }
-    }
-
-    private suspend fun getConfigurationFromApi() {
-        val monitorId = monitorUiState.value.monitorId
-        if (monitorId != 0) {
-            val configInfo = apiTpmsUseCase.doGetConfigurationMonitorById(monitorId)
-            responseHelper(response = configInfo) { data ->
-                if (!data.isNullOrEmpty()) {
-                    _monitorUiState.update { currentUiState ->
-                        currentUiState.copy(
-                            chassisImageUrl = data[0].fldUrlImage,
-                        )
-                    }
-                }
-            }
         }
     }
 
@@ -248,11 +232,27 @@ class MonitorViewModel @Inject constructor(
         viewModelScope.launch {
             val uiState = _monitorUiState.value
             val monitorId = uiState.monitorId
+            delay(10 * 60_000L)
             withContext(Dispatchers.IO) {
                 while (isActive) {
-                    val tires = updateTireStatus(
+                    val tires = updateTiresStatus(
                         listTires = uiState.listOfTires
                     ) { sensorDataTableRepository.getLastData(monitorId) }
+
+                    updateTireState(
+                        currentTire = uiState.currentTire,
+                        tires = tires,
+                    ) { tire ->
+                        _monitorUiState.update { currentUiState ->
+                            currentUiState.copy(
+                                currentTire = "",
+                                batteryStatus = SensorAlerts.NO_DATA,
+                                pression = Pair(0f, SensorAlerts.NO_DATA),
+                                temperature = Pair(0f, SensorAlerts.NO_DATA),
+                                timestamp = ""
+                            )
+                        }
+                    }
 
                     _monitorUiState.update { currentUiState ->
                         currentUiState.copy(
@@ -403,13 +403,11 @@ class MonitorViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _monitorTireUiState.update { ApiResult.Loading }
-
             val tireData = apiTpmsUseCase.doGetMonitorTireByDate(
                 monitorUiState.value.monitorId,
                 position,
                 date
             )
-
             when (tireData) {
                 is ApiResult.Success -> {
                     _monitorTireUiState.update { tireData }

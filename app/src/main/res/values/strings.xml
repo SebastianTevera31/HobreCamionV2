@@ -133,7 +133,7 @@
     <string name="error_desconocido">Error desconocido</string>
     <string name="connection_error">Error de conexion</string>
     <string name="mac_no_disponible">MAC No encontrada</string>
-    <string name="escanear">Escanear</string>
+    <string name="escanear">Vincular monitor</string>
     <string name="vehiculo">Vehiculo</string>
     <string name="perfil">Perfil</string>
     <string name="chofer">Chofer</string>
