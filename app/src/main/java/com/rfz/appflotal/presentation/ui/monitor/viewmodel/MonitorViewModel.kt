@@ -48,7 +48,9 @@ enum class SensorAlerts(@StringRes val message: Int) {
     LOW_PRESSURE(R.string.presion_baja),
     HIGH_TEMPERATURE(R.string.temperatura_alta),
     LOW_BATTERY(R.string.bateria_baja),
-    NO_DATA(R.string.sin_datos)
+    NO_DATA(R.string.sin_datos),
+    FUGA_RAPIDA(R.string.fuga_rapida),
+    FUGA_LENTA(R.string.fuga_lenta)
 }
 
 @HiltViewModel
@@ -90,7 +92,7 @@ class MonitorViewModel @Inject constructor(
         }
 
         readBluetoothData()
-        statusObserver()
+        //statusObserver()
     }
 
     fun initMonitorData() {

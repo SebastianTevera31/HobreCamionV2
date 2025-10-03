@@ -14,6 +14,7 @@ enum class SensorAlertDataFrame {
     LOW_BATTERY,
     HIGH_TEMPERATURE,
     PRESSURE,
+    PERFORACION
 }
 
 fun decodeDataFrame(dataFrame: String?, typeData: MonitorDataFrame): String {
@@ -46,24 +47,21 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
     if (dataFrame != null) {
         when (alertType) {
             SensorAlertDataFrame.LOW_BATTERY -> {
-                val status = dataFrame.substring(25, dataFrame.length - 2)
-                val binary = status.toInt(16).toString().padStart(4, '0')
+                val status = dataFrame.substring(25, 26)
+                val binary = status.toInt(16).toString(2).padStart(4, '0')
                 return if (binary.substring(3, 4) != "0") SensorAlerts.LOW_BATTERY
                 else SensorAlerts.NO_DATA
             }
 
             SensorAlertDataFrame.PRESSURE -> {
-                val statusLowPressure = dataFrame.substring(24, 25)
-                val highPressureStatus = dataFrame.substring(25, 26)
+                val status1 = dataFrame.substring(24, 25)
+                val binary1 = status1.toInt(16).toString(2).padStart(4, '0')
 
-                val binaryLowPressure = statusLowPressure.toInt(16).toString(2)
-                    .padStart(4, '0')
+                val status2 = dataFrame.substring(25, 26)
+                val binary2 = status2.toInt(16).toString(2).padStart(4, '0')
 
-                val binaryHighPressure = highPressureStatus.toInt(16).toString(2)
-                    .padStart(4, '0')
-
-                val lowPressureSignal = binaryLowPressure.substring(0, 1) == "0"
-                val highPressureSignal = binaryHighPressure.substring(3, 4) == "0"
+                val highPressureSignal = binary1.substring(3, 4) != "0"
+                val lowPressureSignal = binary2.substring(0, 1) != "0"
 
                 return if (lowPressureSignal && !highPressureSignal) SensorAlerts.LOW_PRESSURE
                 else if (!lowPressureSignal && highPressureSignal) SensorAlerts.HIGH_PRESSURE
@@ -71,10 +69,19 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
             }
 
             SensorAlertDataFrame.HIGH_TEMPERATURE -> {
-                val status = dataFrame.substring(24, 25)
+                val status = dataFrame.substring(25, 26)
                 val binary = status.toInt(16).toString(2).padStart(4, '0')
                 // Si es diferente de 0 es alta
                 return if (binary.substring(1, 2) != "0") SensorAlerts.HIGH_TEMPERATURE
+                else SensorAlerts.NO_DATA
+            }
+
+            SensorAlertDataFrame.PERFORACION -> {
+                val status = dataFrame.substring(25, 26)
+                val binary = status.toInt(16).toString(2).padStart(4, '0')
+                val bits = binary.substring(0, 2) // 01 = Fuga rapida, 10 = Fuga lenta
+                if (bits == "01") SensorAlerts.FUGA_LENTA
+                else if (bits == "10") SensorAlerts.FUGA_RAPIDA
                 else SensorAlerts.NO_DATA
             }
         }

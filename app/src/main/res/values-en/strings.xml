@@ -156,4 +156,6 @@
     <string name="bateria_baja">Low battery</string>
     <string name="sin_conexi_n">Not connected</string>
     <string name="no_registros">Results no found</string>
+    <string name="fuga_rapida">Fuga rapida</string>
+    <string name="fuga_lenta">Fuga lenta</string>
 </resources>

@@ -158,4 +158,6 @@
     <string name="bateria_baja">Bateria baja</string>
     <string name="sin_conexi_n">Sin conexión</string>
     <string name="no_registros">No se encontraron registros</string>
+    <string name="fuga_rapida">Fuga rapida</string>
+    <string name="fuga_lenta">Fuga lenta</string>
 </resources>
