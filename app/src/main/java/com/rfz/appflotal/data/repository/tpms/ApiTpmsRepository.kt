@@ -1,8 +1,7 @@
 package com.rfz.appflotal.data.repository.tpms
 
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.toUpperCase
 import com.rfz.appflotal.data.NetworkStatus
+import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.tpms.ConfigurationByIdMonitorResponse
 import com.rfz.appflotal.data.model.tpms.CrudMonitor
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
@@ -16,11 +15,8 @@ import com.rfz.appflotal.data.network.service.tpms.ApiTpmsService
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.data.repository.database.toMonitorTireByDateResponse
 import com.rfz.appflotal.data.repository.wifi.WifiRepository
-import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
-import com.rfz.appflotal.domain.database.DataframeTableUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -33,8 +29,6 @@ class ApiTpmsRepository @Inject constructor(
     private val apiTpmsService: ApiTpmsService,
     private val wifiRepository: WifiRepository,
     private val sensorDataTableRepository: SensorDataTableRepository,
-    private val coordinatesTableUseCase: CoordinatesTableUseCase,
-    private val dataframeTableUseCase: DataframeTableUseCase
 ) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var _wifiState: MutableStateFlow<NetworkStatus> =
@@ -57,7 +51,12 @@ class ApiTpmsRepository @Inject constructor(
     }
 
     suspend fun doGetDiagramMonitor(monitorId: Int): ApiResult<List<DiagramMonitorResponse>?> {
-        return apiTpmsService.getDiagramMonitor(monitorId)
+        return if (_wifiState.value == NetworkStatus.Connected) {
+            apiTpmsService.getDiagramMonitor(monitorId)
+        } else {
+            val list = sensorDataTableRepository.getLastData(monitorId)
+            ApiResult.Success(list.map { it.toDiagram() })
+        }
     }
 
     suspend fun doGetConfigurations(): ApiResult<List<GetConfigurationsResponse>?> {
@@ -88,4 +87,28 @@ class ApiTpmsRepository @Inject constructor(
             ApiResult.Success(result)
         }
     }
+}
+
+fun SensorDataEntity.toDiagram(): DiagramMonitorResponse {
+    return DiagramMonitorResponse(
+        idDiagramaMonitor = 0,
+        monitorId = idMonitor,
+        monitorMac = "",
+        axleId = 0,
+        axleDescription = "",
+        sensorPosition = tire,
+        positionDescription = "",
+        sensorId = if (active) 1 else 0,
+        sensorName = "",
+        configId = 0,
+        configDescription = "",
+        psi = pressure.toFloat(),
+        tireNumber = tireNumber,
+        temperature = temperature.toFloat(),
+        highTemperature = false,
+        lowPressure = false,
+        highPressure = false,
+        lowBattery = false,
+        ultimalectura = timestamp
+    )
 }

@@ -54,7 +54,7 @@ fun MonitorScreen(
 
     val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
     val positionsUiState = monitorViewModel.positionsUiState.collectAsState()
-    val monitorTireUiState = monitorViewModel.monitorTireUiState.collectAsState()
+    val monitorTireUiState = monitorViewModel.filteredTiresUiState.collectAsState()
 
     val configurationsUiState = registerMonitorViewModel.configurationList.collectAsState()
     val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
@@ -164,12 +164,13 @@ fun MonitorScreen(
                                 }
                             )
 
-
                             // Manejo de presentacion de lista
                             if (positionOptionSelected == R.string.recientes) {
                                 val positionData = positionsUiState.value
+                                monitorViewModel.clearFilteredTire()
+
                                 when (positionData) {
-                                    is ApiResult.Error -> NoPositionDataView()
+                                    is ApiResult.Error -> NoPositionDataView(R.string.no_registros)
                                     ApiResult.Loading -> {
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
@@ -182,6 +183,7 @@ fun MonitorScreen(
                                     is ApiResult.Success<List<MonitorTireByDateResponse>?> -> {
                                         val data = positionData.data
                                         CurrentPositionDataView(
+                                            message = R.string.no_ruedas_activas,
                                             sensorDataList = data,
                                             isOnSearch = false,
                                         )
@@ -194,6 +196,7 @@ fun MonitorScreen(
                                         val data: List<MonitorTireByDateResponse>? =
                                             monitorTireData.data?.sortedByDescending { it.sensorDate }
                                         CurrentPositionDataView(
+                                            message = R.string.no_registros,
                                             sensorDataList = data,
                                             isOnSearch = true
                                         )
@@ -283,11 +286,13 @@ fun NavPositionMonitorScreen(
                 }
             }
 
-            if (showSearchRecords) {
-                PositionFilterView(
-                    tiresList = tiresList,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) { wheelSelected, dateSelected -> onSensorData(wheelSelected, dateSelected) }
+            if (tiresList != null) {
+                if (showSearchRecords && tiresList.isNotEmpty()) {
+                    PositionFilterView(
+                        tiresList = tiresList,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) { wheelSelected, dateSelected -> onSensorData(wheelSelected, dateSelected) }
+                }
             }
         }
     }

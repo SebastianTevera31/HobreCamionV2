@@ -21,7 +21,7 @@ enum class SignUpAlerts(@StringRes val message: Int = -1) {
     VEHICLE_ALERT(R.string.signup_typevehicle_alert),
     PLATES_ALERT(R.string.signup_plates_alert),
     SIGNUP_ALERT(R.string.signup_successfull),
-    UNKNOWN(R.string.no_resultados)
+    UNKNOWN(R.string.no_ruedas_activas)
 }
 
 data class SignUpUiState(

@@ -112,14 +112,14 @@ fun HomeScreen(
     var showMonitorDialog by remember { mutableStateOf(false) }
     val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
 
+    LaunchedEffect(showMonitorDialog) {
+        registerMonitorViewModel.getMonitorConfiguration()
+    }
+
     if (showMonitorDialog) {
         val configurations = registerMonitorViewModel.configurationList.collectAsState()
         val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
         val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
-
-        LaunchedEffect(Unit) {
-            registerMonitorViewModel.getMonitorConfiguration()
-        }
 
         MonitorRegisterDialog(
             configurations = configurations.value,

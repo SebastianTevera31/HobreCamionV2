@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -31,6 +32,7 @@ import com.rfz.appflotal.presentation.theme.primaryLight
 
 @Composable
 fun CurrentPositionDataView(
+    @StringRes message: Int,
     sensorDataList: List<MonitorTireByDateResponse>?,
     isOnSearch: Boolean,
     modifier: Modifier = Modifier
@@ -90,7 +92,6 @@ fun CurrentPositionDataView(
                         val color = if (index % 2 == 0) Color(0x402E3192) else Color.White
                         SensorDataRow(
                             position = data.tirePosition,
-                            llanta = data.tireNumber,
                             fecha = if (isOnSearch) convertDate(
                                 date = data.sensorDate,
                                 convertFormat = "HH:mm:ss"
@@ -101,11 +102,11 @@ fun CurrentPositionDataView(
                         )
                     }
                 } else {
-                    item { NoPositionDataView() }
+                    item { NoPositionDataView(message) }
                 }
             }
         } else {
-            NoPositionDataView()
+            NoPositionDataView(message)
         }
     }
 }
@@ -113,7 +114,6 @@ fun CurrentPositionDataView(
 @Composable
 fun SensorDataRow(
     position: String,
-    llanta: String,
     fecha: String,
     psi: Int,
     temperatura: Int,
@@ -152,10 +152,10 @@ fun SensorDataRow(
 }
 
 @Composable
-fun NoPositionDataView(modifier: Modifier = Modifier) {
+fun NoPositionDataView(@StringRes message: Int, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize()) {
         Text(
-            text = stringResource(R.string.no_resultados),
+            text = stringResource(message),
             modifier = Modifier.align(Alignment.Center),
             color = primaryLight
         )

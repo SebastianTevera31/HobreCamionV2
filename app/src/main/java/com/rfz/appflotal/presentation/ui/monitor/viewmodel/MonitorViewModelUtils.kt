@@ -3,6 +3,8 @@ package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.collections.associateBy
+import kotlin.collections.orEmpty
 
 
 enum class BaseConfig(val base: Int) {
@@ -57,15 +59,16 @@ fun getBaseConfigImage(baseConfig: Int): BaseConfig {
 
 suspend fun updateTiresStatus(
     listTires: List<Tire>,
-    onGetData: suspend () -> List<SensorDataEntity>,
+    onGetSensorData: suspend () -> List<SensorDataEntity>,
 ): List<Tire> = withContext(Dispatchers.IO) {
-    val data = onGetData()
-    val activeTire = data.associate { it.tire to it.active }
+    val sensorData = onGetSensorData()
+
+    val activeTire = sensorData.associate { it.tire to it.active }
 
     listTires.toMutableList().map { tire ->
         val activeStatus = activeTire[tire.sensorPosition]
         if (activeStatus == false)
-            tire.copy(inAlert = false)
+            tire.copy(inAlert = false, isActive = false)
         else tire
     }
 }

@@ -82,7 +82,7 @@
     <string name="buscar_registros">Search records</string>
     <string name="filtrar">Filter</string>
     <string name="recientes">Recent</string>
-    <string name="no_resultados">Results no found</string>
+    <string name="no_ruedas_activas">No active tires were found</string>
     <string name="buscar">Search</string>
     <string name="truckdriver">TruckDriver</string>
     <string name="seleccionar_fecha">Select date</string>
@@ -155,4 +155,5 @@
     <string name="sin_alertas">No alerts</string>
     <string name="bateria_baja">Low battery</string>
     <string name="sin_conexi_n">Not connected</string>
+    <string name="no_registros">Results no found</string>
 </resources>

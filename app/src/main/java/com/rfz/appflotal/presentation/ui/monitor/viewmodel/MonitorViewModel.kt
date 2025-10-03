@@ -72,9 +72,9 @@ class MonitorViewModel @Inject constructor(
 
     val positionsUiState = _positionsUiState.asStateFlow()
 
-    private val _monitorTireUiState =
+    private val _filteredTiresUiState =
         MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Success(emptyList()))
-    val monitorTireUiState = _monitorTireUiState.asStateFlow()
+    val filteredTiresUiState = _filteredTiresUiState.asStateFlow()
 
     private var _wifiStatus: MutableStateFlow<NetworkStatus> =
         MutableStateFlow(NetworkStatus.Connected)
@@ -90,7 +90,7 @@ class MonitorViewModel @Inject constructor(
         }
 
         readBluetoothData()
-        //statusObserver()
+        statusObserver()
     }
 
     fun initMonitorData() {
@@ -131,18 +131,17 @@ class MonitorViewModel @Inject constructor(
 
             responseHelper(baseCoordinates) { coords ->
                 responseHelper(sensorData) { tireInfo ->
-                    val coordSByPos = coords.orEmpty()
-                        .associateBy { it.position.trim().uppercase() }
+                    val tireByPos =
+                        tireInfo.orEmpty().associateBy { it.sensorPosition.trim().uppercase() }
 
-                    val tires = tireInfo.orEmpty().map { info ->
-                        val key = info.sensorPosition.trim().uppercase()
-                        val c = coordSByPos[key]
+                    val tires = coords.orEmpty().map { info ->
+                        val c = tireByPos[info.position]
                         Tire(
-                            sensorPosition = info.sensorPosition,
-                            inAlert = info.highTemperature || info.lowPressure || info.highPressure || info.lowBattery,
-                            isActive = info.sensorId != 0,
-                            xPosition = c?.fldPositionX ?: 0,
-                            yPosition = c?.fldPositionY ?: 0
+                            sensorPosition = c?.sensorPosition ?: info.position,
+                            inAlert = c?.highPressure == true || c?.lowPressure == true || c?.highPressure == true || c?.lowBattery == true,
+                            isActive = c?.sensorId != 0,
+                            xPosition = info.fldPositionX,
+                            yPosition = info.fldPositionY
                         )
                     }.sortedBy {
                         it.sensorPosition.removePrefix("P").trim().toIntOrNull()
@@ -232,7 +231,6 @@ class MonitorViewModel @Inject constructor(
         viewModelScope.launch {
             val uiState = _monitorUiState.value
             val monitorId = uiState.monitorId
-            delay(10 * 60_000L)
             withContext(Dispatchers.IO) {
                 while (isActive) {
                     val tires = updateTiresStatus(
@@ -259,7 +257,7 @@ class MonitorViewModel @Inject constructor(
                             listOfTires = tires
                         )
                     }
-                    delay(10 * 60_000L)
+                    delay(60_000L)
                 }
             }
         }
@@ -277,14 +275,18 @@ class MonitorViewModel @Inject constructor(
             val temperatureStatus =
                 decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
 
-            val batteryStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
+            val batteryStatus =
+                decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
 
             val inAlert = temperatureStatus != SensorAlerts.NO_DATA
                     || pressureStatus != SensorAlerts.NO_DATA
                     || batteryStatus != SensorAlerts.NO_DATA
 
-            val newList = currentUiState.listOfTires.toMutableList().map { tire ->
-                if (tire.sensorPosition == realTire) tire.copy(inAlert = inAlert) else tire
+            val newList = currentUiState.listOfTires.toMutableList().map { tireData ->
+                if (tireData.sensorPosition == realTire) tireData.copy(
+                    inAlert = inAlert,
+                    isActive = true
+                ) else tireData
             }
 
             val time = if (timestamp != null) {
@@ -367,11 +369,13 @@ class MonitorViewModel @Inject constructor(
         viewModelScope.launch {
             _positionsUiState.update { ApiResult.Loading }
             if (_wifiStatus.value == NetworkStatus.Connected) {
-                val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
+                val sensorData =
+                    apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
                 responseHelper(
                     sensorData,
                     onError = { _positionsUiState.update { ApiResult.Error(message = "Error al consultar lsos datos") } }) { data ->
-                    val filterData = data?.filter { it.sensorId != 0 }
+                    val filterData =
+                        data?.filter { it.sensorId != 0 } // Representa si esta activo
                     val sortedData = filterData?.map { it.toTireData() }
                         ?.sortedBy { it.tirePosition.replace("P", "").toInt() }
                         ?: emptyList()
@@ -402,7 +406,7 @@ class MonitorViewModel @Inject constructor(
         date: String
     ) {
         viewModelScope.launch {
-            _monitorTireUiState.update { ApiResult.Loading }
+            _filteredTiresUiState.update { ApiResult.Loading }
             val tireData = apiTpmsUseCase.doGetMonitorTireByDate(
                 monitorUiState.value.monitorId,
                 position,
@@ -410,7 +414,7 @@ class MonitorViewModel @Inject constructor(
             )
             when (tireData) {
                 is ApiResult.Success -> {
-                    _monitorTireUiState.update { tireData }
+                    _filteredTiresUiState.update { tireData }
                 }
 
                 is ApiResult.Error -> {}
@@ -422,7 +426,11 @@ class MonitorViewModel @Inject constructor(
     fun clearMonitorData() {
         _monitorUiState.value = MonitorUiState()
         _positionsUiState.value = ApiResult.Loading
-        _monitorTireUiState.value = ApiResult.Success(emptyList())
+        clearFilteredTire()
+    }
+
+    fun clearFilteredTire() {
+        _filteredTiresUiState.value = ApiResult.Success(emptyList())
     }
 
     fun getBitmapImage(): Bitmap? {

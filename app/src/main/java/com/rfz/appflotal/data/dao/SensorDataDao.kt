@@ -21,7 +21,7 @@ interface SensorDataDao {
     @Query(
         "SELECT * FROM sensor_data AS st1 WHERE monitor_id = :monitorId " +
                 "AND timestamp = (SELECT MAX(st2.timestamp) FROM sensor_data AS st2 " +
-                "WHERE st1.tire = st2.tire) AND active = 1 ORDER BY st1.timestamp DESC"
+                "WHERE st1.tire = st2.tire) ORDER BY st1.timestamp DESC"
     )
     suspend fun getLastRecords(monitorId: Int): List<SensorDataEntity>
 
