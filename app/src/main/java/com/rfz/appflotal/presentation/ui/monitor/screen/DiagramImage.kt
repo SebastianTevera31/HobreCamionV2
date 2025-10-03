@@ -120,8 +120,7 @@ fun ImageWithHotspotsProportional(
                 bitmap = img,
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             )
 
             // Canvas de hotspots

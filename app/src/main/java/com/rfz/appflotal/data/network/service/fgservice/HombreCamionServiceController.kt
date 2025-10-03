@@ -6,6 +6,7 @@ import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
+import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
@@ -18,13 +19,17 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.text.toInt
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 class HombreCamionServiceController @Inject constructor(
     private val apiTmpsUseCase: ApiTpmsUseCase,
     private val wifiUseCase: WifiUseCase,
     private val getTasksUseCase: GetTasksUseCase,
-    private val sensorDataTableRepository: SensorDataTableRepository
+    private val sensorDataTableRepository: SensorDataTableRepository,
+    private val coordinatesTableUseCase: CoordinatesTableUseCase
 ) {
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -47,11 +52,12 @@ class HombreCamionServiceController @Inject constructor(
     private suspend fun processMonitorData(monitorId: Int) {
         val response = apiTmpsUseCase.doGetDiagramMonitor(monitorId)
         sensorDataTableRepository.deleteMonitorData(monitorId)
-        handleMonitorResponse(response)
+        handleMonitorResponse(response, monitorId)
     }
 
     private suspend fun handleMonitorResponse(
         response: ApiResult<List<DiagramMonitorResponse>?>,
+        monitorId: Int
     ) {
         asyncResponseHelper(
             response,
@@ -59,22 +65,44 @@ class HombreCamionServiceController @Inject constructor(
         ) { data ->
             withContext(Dispatchers.IO) {
                 data?.forEach {
+                    val tire = it.sensorPosition
+
+                    val inAlert =
+                        it.highPressure && it.highTemperature && it.lowPressure && it.lowBattery
+
+                    val date = convertDate(
+                        it.ultimalectura,
+                        "yyyy-MM-dd'T'HH:mm:ss",
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                    )
+
+                    val localInstance =
+                        LocalDateTime.ofInstant(
+                            Instant.now(), ZoneId.systemDefault()
+                        ).minusMinutes(15)
+
+                    val storeData = LocalDateTime.parse(it.ultimalectura.removeSuffix("Z"))
+                    val isActive = it.sensorId != 0 && !storeData.isBefore(localInstance)
+
                     sensorDataTableRepository.insertSensorData(
                         idMonitor = it.monitorId,
-                        tire = it.sensorPosition,
+                        tire = tire,
                         tireNumber = "",
-                        timestamp = convertDate(
-                            it.ultimalectura,
-                            "yyyy-MM-dd'T'HH:mm:ss",
-                            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                        ),
+                        timestamp = date,
                         temperature = it.temperature.toInt(),
                         pressure = it.psi.toInt(),
                         highTemperatureAlert = it.highTemperature,
                         highPressureAlert = it.highPressure,
                         lowPressureAlert = it.lowPressure,
                         lowBatteryAlert = it.lowBattery,
-                        active = it.sensorId != 0
+                        active = isActive
+                    )
+
+                    coordinatesTableUseCase.updateCoordinates(
+                        monitorId,
+                        tire,
+                        inAlert,
+                        isActive
                     )
                 }
             }

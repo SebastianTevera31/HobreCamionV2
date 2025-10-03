@@ -133,6 +133,7 @@ fun MonitorScreen(
                             temperatureStatus = monitorUiState.value.temperature.second,
                             pressionStatus = monitorUiState.value.pression.second,
                             batteryStatus = monitorUiState.value.batteryStatus,
+                            ponchaduraStatus = monitorUiState.value.alertaPonchadura,
                             updateSelectedTire = { selectedTire ->
                                 monitorViewModel.updateSelectedTire(selectedTire)
                             },

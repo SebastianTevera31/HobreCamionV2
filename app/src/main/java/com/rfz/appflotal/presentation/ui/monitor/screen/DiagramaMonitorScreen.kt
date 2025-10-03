@@ -74,6 +74,7 @@ fun DiagramaMonitorScreen(
     temperatureStatus: SensorAlerts,
     batteryStatus: SensorAlerts,
     pressionStatus: SensorAlerts,
+    ponchaduraStatus: SensorAlerts,
     updateSelectedTire: (String) -> Unit,
     getSensorData: (String) -> Unit,
     tires: List<Tire>?,
@@ -121,6 +122,7 @@ fun DiagramaMonitorScreen(
                         temperatureStatus = temperatureStatus,
                         pressureStatus = pressionStatus,
                         batteryStatus = batteryStatus,
+                        ponchaduraStatus = ponchaduraStatus,
                         modifier = Modifier
                             .height(320.dp)
                             .padding(bottom = dimensionResource(R.dimen.small_dimen))
@@ -184,6 +186,7 @@ fun PanelLlantas(
 
                         Button(
                             onClick = {
+                                // LOGICA PARA MANEJO DE SELECCIONAR | DESELECCIONAR LLANTA
                                 val tire = if (it.sensorPosition == tireSelected) "" else {
                                     getSensorData(it.sensorPosition)
                                     it.sensorPosition
@@ -265,11 +268,13 @@ fun PanelSensor(
     timestamp: String?,
     temperatureStatus: SensorAlerts,
     pressureStatus: SensorAlerts,
+    ponchaduraStatus: SensorAlerts,
     batteryStatus: SensorAlerts,
     modifier: Modifier = Modifier
 ) {
     val isTempAlert = temperatureStatus == SensorAlerts.HIGH_TEMPERATURE
     val isPressureAlert = pressureStatus != SensorAlerts.NO_DATA
+    val isPonchadura = ponchaduraStatus != SensorAlerts.NO_DATA
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier
@@ -372,31 +377,47 @@ fun PanelSensor(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                if (isTempAlert || isPressureAlert) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                if (wheel.isNotEmpty()) {
+                    if (isTempAlert || isPressureAlert || isPonchadura) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.alertas_activas),
+                                color = Color("#2E3192".toColorInt()),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.verticalScroll(rememberScrollState())
+                            ) {
+                                if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
+                                    CeldaAlerta(wheel, stringResource(temperatureStatus.message))
+                                }
+
+                                if (pressureStatus != SensorAlerts.NO_DATA) {
+                                    CeldaAlerta(wheel, stringResource(pressureStatus.message))
+                                }
+
+                                if (ponchaduraStatus != SensorAlerts.NO_DATA) {
+                                    CeldaAlerta(wheel, stringResource(ponchaduraStatus.message))
+                                }
+                            }
+                        }
+                    } else {
                         Text(
-                            text = stringResource(R.string.alertas_activas),
+                            text = stringResource(R.string.sin_alertas),
                             color = Color("#2E3192".toColorInt()),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.fillMaxWidth()
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(
+                                dimensionResource(R.dimen.medium_dimen)
+                            )
                         )
-
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.verticalScroll(rememberScrollState())
-                        ) {
-                            if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
-                                CeldaAlerta(wheel, stringResource(temperatureStatus.message))
-                            }
-
-                            if (pressureStatus != SensorAlerts.NO_DATA) {
-                                CeldaAlerta(wheel, stringResource(pressureStatus.message))
-                            }
-                        }
                     }
                 } else {
                     Text(
@@ -451,6 +472,7 @@ fun PanelSensorViewPreview() {
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
             pressureStatus = SensorAlerts.LOW_PRESSURE,
             batteryStatus = SensorAlerts.NO_DATA,
+            ponchaduraStatus = SensorAlerts.NO_DATA,
             modifier = Modifier
                 .safeDrawingPadding()
                 .height(320.dp)

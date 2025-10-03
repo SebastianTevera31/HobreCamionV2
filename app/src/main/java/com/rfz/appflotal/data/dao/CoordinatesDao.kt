@@ -10,9 +10,13 @@ import com.rfz.appflotal.data.model.database.CoordinatesEntity
 interface CoordinatesDao {
     @Insert
     suspend fun insertCoordinates(coords: CoordinatesEntity)
+
     @Query("SELECT * FROM coordinates WHERE monitor_id =:monitorId")
     suspend fun getCoordinates(monitorId: Int): List<CoordinatesEntity>
 
     @Query("DELETE FROM coordinates WHERE monitor_id =:monitorId")
     suspend fun deleteCoordinates(monitorId: Int)
+
+    @Query("UPDATE coordinates SET inActive =:isActive, inAlert =:isAlert WHERE monitor_id =:monitorId AND idPosition =:tire")
+    suspend fun updateCoordinates(monitorId: Int, tire: String, isActive: Boolean, isAlert: Boolean)
 }

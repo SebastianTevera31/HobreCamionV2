@@ -16,4 +16,17 @@ class CoordinatesTableUseCase @Inject constructor(private val coordinatesTableRe
 
     suspend fun deleteCoordinates(monitorId: Int) =
         coordinatesTableRepository.deleteCoordinates(monitorId)
+
+    suspend fun updateCoordinates(
+        monitorId: Int,
+        tire: String,
+        isActive: Boolean,
+        isAlert: Boolean
+    ) =
+        coordinatesTableRepository.updateCoordinates(
+            monitorId = monitorId,
+            tire = tire,
+            isActive = isActive,
+            isAlert = isAlert
+        )
 }

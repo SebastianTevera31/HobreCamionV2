@@ -18,6 +18,18 @@ class CoordinatesTableRepository @Inject constructor(private val coordinatesDao:
     }
 
     suspend fun deleteCoordinates(monitorId: Int) = coordinatesDao.deleteCoordinates(monitorId)
+
+    suspend fun updateCoordinates(
+        monitorId: Int,
+        tire: String,
+        isActive: Boolean,
+        isAlert: Boolean
+    ) = coordinatesDao.updateCoordinates(
+        monitorId = monitorId,
+        tire = tire,
+        isActive = isActive,
+        isAlert = isAlert
+    )
 }
 
 fun Tire.toEntity(monitorId: Int): CoordinatesEntity {

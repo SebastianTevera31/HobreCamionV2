@@ -79,10 +79,12 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
             SensorAlertDataFrame.PERFORACION -> {
                 val status = dataFrame.substring(25, 26)
                 val binary = status.toInt(16).toString(2).padStart(4, '0')
-                val bits = binary.substring(0, 2) // 01 = Fuga rapida, 10 = Fuga lenta
-                if (bits == "01") SensorAlerts.FUGA_LENTA
-                else if (bits == "10") SensorAlerts.FUGA_RAPIDA
-                else SensorAlerts.NO_DATA
+                val bits = binary.substring(2, 4) // 01 = Fuga rapida, 10 = Fuga lenta
+                when (bits) {
+                    "01" -> SensorAlerts.FUGA_LENTA
+                    "10" -> SensorAlerts.FUGA_RAPIDA
+                    else -> SensorAlerts.NO_DATA
+                }
             }
         }
     }

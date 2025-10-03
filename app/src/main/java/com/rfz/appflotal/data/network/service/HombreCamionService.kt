@@ -39,6 +39,7 @@ import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
+import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
 import com.rfz.appflotal.domain.database.DataframeTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
@@ -57,6 +58,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
@@ -83,6 +87,9 @@ class HombreCamionService : Service() {
 
     @Inject
     lateinit var hcServiceController: HombreCamionServiceController
+
+    @Inject
+    lateinit var coordinatesTableUseCase: CoordinatesTableUseCase
 
     lateinit var notificationManager: NotificationManager
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -331,18 +338,34 @@ class HombreCamionService : Service() {
                         )
                     )
 
+                    val highTemperatureAlert = getHighTemperatureStatus(dataFrame)
+                    val highPressureAlert = getHighPressureStatus(dataFrame)
+                    val lowPressureAlert = getLowPressureStatus(dataFrame)
+                    val lowBatteryAlert = getBatteryStatus(dataFrame)
+
+                    val tire = getTire(dataFrame)
                     sensorDataTableRepository.insertSensorData(
                         idMonitor = monitorId,
-                        tire = getTire(dataFrame),
+                        tire = tire,
                         tireNumber = "",
                         timestamp = timestamp,
                         temperature = getTemperature(dataFrame).toInt(),
                         pressure = getPressure(dataFrame).toInt(),
                         active = true,
-                        highTemperatureAlert = getHighTemperatureStatus(dataFrame),
-                        highPressureAlert = getHighPressureStatus(dataFrame),
-                        lowPressureAlert = getLowPressureStatus(dataFrame),
-                        lowBatteryAlert = getBatteryStatus(dataFrame)
+                        highTemperatureAlert = highTemperatureAlert,
+                        highPressureAlert = highPressureAlert,
+                        lowPressureAlert = lowPressureAlert,
+                        lowBatteryAlert = lowBatteryAlert
+                    )
+
+                    val inAlert =
+                        highTemperatureAlert && highPressureAlert && lowPressureAlert && lowBatteryAlert
+
+                    coordinatesTableUseCase.updateCoordinates(
+                        monitorId,
+                        tire,
+                        isAlert = inAlert,
+                        isActive = true
                     )
 
                     // Enviar datos a API
@@ -454,14 +477,28 @@ class HombreCamionService : Service() {
             while (isActive) {
                 try {
                     if (monitorId != null) {
-                        val cutoff =
-                            Instant.now().minus(15, ChronoUnit.MINUTES).toString() // ISO-8601 Z
-                        sensorDataTableRepository.markInactiveOlderThan(monitorId, cutoff)
+                        val cutoff = LocalDateTime.ofInstant(
+                            Instant.now(), ZoneId.systemDefault()
+                        ).minusMinutes(15) // ISO-8601 Z
+                        val tires = sensorDataTableRepository.getLastData(monitorId)
+
+                        tires.forEach {
+                            val tireDate = LocalDateTime.parse(it.timestamp.removeSuffix("Z"))
+                            if (tireDate.isBefore(cutoff)) {
+                                sensorDataTableRepository.updateTireRecord(monitorId, it.tire)
+                                coordinatesTableUseCase.updateCoordinates(
+                                    monitorId,
+                                    it.tire,
+                                    isActive = false,
+                                    isAlert = false
+                                )
+                            }
+                        }
                     }
                 } catch (t: Throwable) {
                     Log.e("Updater", "Error actualizando sensores", t)
                 }
-                delay(10 * 60_000L) // 10 minutos
+                delay(8 * 60_000L) // 10 minutos
             }
         }
     }

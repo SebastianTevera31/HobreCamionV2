@@ -92,7 +92,7 @@ class MonitorViewModel @Inject constructor(
         }
 
         readBluetoothData()
-        //statusObserver()
+        statusObserver()
     }
 
     fun initMonitorData() {
@@ -231,10 +231,10 @@ class MonitorViewModel @Inject constructor(
 
     private fun statusObserver() {
         viewModelScope.launch {
-            val uiState = _monitorUiState.value
-            val monitorId = uiState.monitorId
             withContext(Dispatchers.IO) {
                 while (isActive) {
+                    val uiState = _monitorUiState.value
+                    val monitorId = uiState.monitorId
                     val tires = updateTiresStatus(
                         listTires = uiState.listOfTires
                     ) { sensorDataTableRepository.getLastData(monitorId) }
@@ -259,7 +259,7 @@ class MonitorViewModel @Inject constructor(
                             listOfTires = tires
                         )
                     }
-                    delay(60_000L)
+                    delay(8 * 60_000L)
                 }
             }
         }
@@ -277,12 +277,15 @@ class MonitorViewModel @Inject constructor(
             val temperatureStatus =
                 decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
 
+            val alertaPonchadura = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PERFORACION)
+
             val batteryStatus =
                 decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
 
             val inAlert = temperatureStatus != SensorAlerts.NO_DATA
                     || pressureStatus != SensorAlerts.NO_DATA
                     || batteryStatus != SensorAlerts.NO_DATA
+                    || alertaPonchadura != SensorAlerts.NO_DATA
 
             val newList = currentUiState.listOfTires.toMutableList().map { tireData ->
                 if (tireData.sensorPosition == realTire) tireData.copy(
@@ -302,7 +305,8 @@ class MonitorViewModel @Inject constructor(
                 temperature = Pair(temperature, temperatureStatus),
                 timestamp = time,
                 batteryStatus = batteryStatus,
-                listOfTires = newList
+                listOfTires = newList,
+                alertaPonchadura = alertaPonchadura
             )
         }
     }
@@ -375,7 +379,7 @@ class MonitorViewModel @Inject constructor(
                     apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
                 responseHelper(
                     sensorData,
-                    onError = { _positionsUiState.update { ApiResult.Error(message = "Error al consultar lsos datos") } }) { data ->
+                    onError = { _positionsUiState.update { ApiResult.Error(message = "Error al consultar los datos") } }) { data ->
                     val filterData =
                         data?.filter { it.sensorId != 0 } // Representa si esta activo
                     val sortedData = filterData?.map { it.toTireData() }

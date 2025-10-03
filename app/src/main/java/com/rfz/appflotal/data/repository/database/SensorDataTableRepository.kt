@@ -58,10 +58,10 @@ class SensorDataTableRepository @Inject constructor(private val sensorData: Sens
         return sensorData.getLastRecordByTire(monitorId, tire)
     }
 
-    suspend fun markInactiveOlderThan(monitorId: Int, cutoffUtc: String) {
+    suspend fun updateTireRecord(monitorId: Int, tire: String) {
         sensorData.updateSensorRecord(
             monitorId = monitorId,
-            cutoffUtc = cutoffUtc
+            tire = tire
         )
     }
 
