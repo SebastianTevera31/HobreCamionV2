@@ -59,9 +59,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
 
@@ -218,7 +216,6 @@ class HombreCamionService : Service() {
         }
     }
 
-
     private fun startBtStatusOnce() {
         if (btReceiver != null) {
             val filter = IntentFilter().apply {
@@ -344,6 +341,7 @@ class HombreCamionService : Service() {
                     val lowBatteryAlert = getBatteryStatus(dataFrame)
 
                     val tire = getTire(dataFrame)
+
                     sensorDataTableRepository.insertSensorData(
                         idMonitor = monitorId,
                         tire = tire,
@@ -358,8 +356,8 @@ class HombreCamionService : Service() {
                         lowBatteryAlert = lowBatteryAlert
                     )
 
-                    val inAlert =
-                        highTemperatureAlert && highPressureAlert && lowPressureAlert && lowBatteryAlert
+                    val inAlert = highTemperatureAlert || highPressureAlert
+                            || lowPressureAlert || lowBatteryAlert
 
                     coordinatesTableUseCase.updateCoordinates(
                         monitorId,
@@ -437,7 +435,6 @@ class HombreCamionService : Service() {
     }
 
     // FUNCIONES DE CAMBIO DE IDIOMA
-
     private suspend fun readLanguageUpdate() {
         AppLocale.currentLocale.distinctUntilChangedBy { it.language }.collect {
             rebuildNotificationTexts()
@@ -473,8 +470,8 @@ class HombreCamionService : Service() {
     private fun updateSensorStatus() {
         if (jobUpdateStatus?.isActive == true) return
         jobUpdateStatus = serviceScope.launch(Dispatchers.IO) {
-            val monitorId = getUserUseCase().first().firstOrNull()?.id_monitor
             while (isActive) {
+                val monitorId = getUserUseCase().first().firstOrNull()?.id_monitor
                 try {
                     if (monitorId != null) {
                         val cutoff = LocalDateTime.ofInstant(
@@ -485,7 +482,7 @@ class HombreCamionService : Service() {
                         tires.forEach {
                             val tireDate = LocalDateTime.parse(it.timestamp.removeSuffix("Z"))
                             if (tireDate.isBefore(cutoff)) {
-                                sensorDataTableRepository.updateTireRecord(monitorId, it.tire)
+                                sensorDataTableRepository.deactivateTireRecord(monitorId, it.tire)
                                 coordinatesTableUseCase.updateCoordinates(
                                     monitorId,
                                     it.tire,
@@ -498,7 +495,7 @@ class HombreCamionService : Service() {
                 } catch (t: Throwable) {
                     Log.e("Updater", "Error actualizando sensores", t)
                 }
-                delay(8 * 60_000L) // 10 minutos
+                delay(4 * 60_000L) // 8 minutos
             }
         }
     }
@@ -506,7 +503,6 @@ class HombreCamionService : Service() {
     companion object {
         const val CHANNEL_ID = "1003"
         const val ONGOING_NOTIFICATION_ID = 103
-
         var CONNECTION_CONTEXT_MESSAGE: Int? = null
         var CONNECTION_TITLE_MESSAGE: Int? = null
         var CONNECTION_STATUS_MESSAGE: Int? = null

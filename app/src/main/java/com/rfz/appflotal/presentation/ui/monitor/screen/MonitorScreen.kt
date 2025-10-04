@@ -288,11 +288,18 @@ fun NavPositionMonitorScreen(
             }
 
             if (tiresList != null) {
-                if (showSearchRecords && tiresList.isNotEmpty()) {
-                    PositionFilterView(
-                        tiresList = tiresList,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    ) { wheelSelected, dateSelected -> onSensorData(wheelSelected, dateSelected) }
+                if (showSearchRecords) {
+                    if (tiresList.count { it.isActive } != 0) {
+                        PositionFilterView(
+                            tiresList = tiresList,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) { wheelSelected, dateSelected ->
+                            onSensorData(
+                                wheelSelected,
+                                dateSelected
+                            )
+                        }
+                    }
                 }
             }
         }

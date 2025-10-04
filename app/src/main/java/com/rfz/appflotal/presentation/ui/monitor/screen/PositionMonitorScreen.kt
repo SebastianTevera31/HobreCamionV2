@@ -46,67 +46,71 @@ fun CurrentPositionDataView(
         color = Color.White
     ) {
         if (sensorDataList != null) {
-            LazyColumn(
-                modifier = modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                //Cabecera
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(32.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = pluralStringResource(R.plurals.posicion_tag, 1),
-                            style = MaterialTheme.typography.titleSmall,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(2f)
-                        )
-                        Text(
-                            text = stringResource(R.string.fecha),
-                            style = MaterialTheme.typography.titleSmall,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(2f)
-                        )
-                        Text(
-                            text = "PSI", style = MaterialTheme.typography.titleSmall,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = stringResource(R.string.temperatura),
-                            style = MaterialTheme.typography.titleSmall,
-                            textAlign = TextAlign.Center,
-                            fontSize = 12.sp,
-                            modifier = Modifier.weight(1f)
-                        )
+            if (sensorDataList.isNotEmpty()) {
+                LazyColumn(
+                    modifier = modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    //Cabecera
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(32.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = pluralStringResource(R.plurals.posicion_tag, 1),
+                                style = MaterialTheme.typography.titleSmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.weight(2f)
+                            )
+                            Text(
+                                text = stringResource(R.string.fecha),
+                                style = MaterialTheme.typography.titleSmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.weight(2f)
+                            )
+                            Text(
+                                text = "PSI", style = MaterialTheme.typography.titleSmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = stringResource(R.string.temperatura),
+                                style = MaterialTheme.typography.titleSmall,
+                                textAlign = TextAlign.Center,
+                                fontSize = 12.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
-                }
 
-                if (sensorDataList.isNotEmpty()) {
-                    itemsIndexed(
-                        items = sensorDataList
-                    ) { index, data ->
-                        val color = if (index % 2 == 0) Color(0x402E3192) else Color.White
-                        SensorDataRow(
-                            position = data.tirePosition,
-                            fecha = if (isOnSearch) convertDate(
-                                date = data.sensorDate,
-                                convertFormat = "HH:mm:ss"
-                            ) else convertDate(data.sensorDate),
-                            psi = data.psi,
-                            temperatura = data.temperature,
-                            color = color
-                        )
+                    if (sensorDataList.isNotEmpty()) {
+                        itemsIndexed(
+                            items = sensorDataList
+                        ) { index, data ->
+                            val color = if (index % 2 == 0) Color(0x402E3192) else Color.White
+                            SensorDataRow(
+                                position = data.tirePosition,
+                                fecha = if (isOnSearch) convertDate(
+                                    date = data.sensorDate,
+                                    convertFormat = "HH:mm:ss"
+                                ) else convertDate(data.sensorDate),
+                                psi = data.psi,
+                                temperatura = data.temperature,
+                                color = color
+                            )
+                        }
+                    } else {
+                        item { NoPositionDataView(message) }
                     }
-                } else {
-                    item { NoPositionDataView(message) }
                 }
+            } else {
+                NoPositionDataView(R.string.no_ruedas_activas)
             }
         } else {
-            NoPositionDataView(message)
+            NoPositionDataView(R.string.no_ruedas_activas)
         }
     }
 }

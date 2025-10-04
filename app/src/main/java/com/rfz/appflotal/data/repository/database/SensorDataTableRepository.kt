@@ -58,8 +58,8 @@ class SensorDataTableRepository @Inject constructor(private val sensorData: Sens
         return sensorData.getLastRecordByTire(monitorId, tire)
     }
 
-    suspend fun updateTireRecord(monitorId: Int, tire: String) {
-        sensorData.updateSensorRecord(
+    suspend fun deactivateTireRecord(monitorId: Int, tire: String) {
+        sensorData.deactivateSensorRecord(
             monitorId = monitorId,
             tire = tire
         )

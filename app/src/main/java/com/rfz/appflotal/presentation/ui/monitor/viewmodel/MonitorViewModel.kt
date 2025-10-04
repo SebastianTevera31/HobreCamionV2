@@ -259,7 +259,7 @@ class MonitorViewModel @Inject constructor(
                             listOfTires = tires
                         )
                     }
-                    delay(8 * 60_000L)
+                    delay(5 * 60_000L)
                 }
             }
         }
@@ -315,8 +315,8 @@ class MonitorViewModel @Inject constructor(
         shouldReadManually = false
         viewModelScope.launch {
             val uiState = _monitorUiState.value
-            val data =
-                sensorDataTableRepository.getLastDataByTire(uiState.monitorId, tireSelected)
+            val data = sensorDataTableRepository
+                .getLastDataByTire(uiState.monitorId, tireSelected)
 
             if (data != null) {
                 val pressureStatus = if (data.lowPressureAlert) SensorAlerts.LOW_PRESSURE
@@ -374,35 +374,17 @@ class MonitorViewModel @Inject constructor(
     fun getLastedSensorData() {
         viewModelScope.launch {
             _positionsUiState.update { ApiResult.Loading }
-            if (_wifiStatus.value == NetworkStatus.Connected) {
-                val sensorData =
-                    apiTpmsUseCase.doGetDiagramMonitor(monitorUiState.value.monitorId)
-                responseHelper(
-                    sensorData,
-                    onError = { _positionsUiState.update { ApiResult.Error(message = "Error al consultar los datos") } }) { data ->
-                    val filterData =
-                        data?.filter { it.sensorId != 0 } // Representa si esta activo
-                    val sortedData = filterData?.map { it.toTireData() }
-                        ?.sortedBy { it.tirePosition.replace("P", "").toInt() }
-                        ?: emptyList()
-                    _positionsUiState.update {
-                        ApiResult.Success(sortedData)
-                    }
-                }
+            val sensorData = sensorDataTableRepository.getLastData(monitorUiState.value.monitorId)
+
+            val filterData = sensorData.filter { it.active }
+            val sortedData = filterData.map { it.toTireData() }
+                .sortedBy { it.tirePosition.replace("P", "").toInt() }
+
+            if (sensorData.isNotEmpty()) {
+                _positionsUiState.update { ApiResult.Success(sortedData) }
             } else {
-                val sensorData =
-                    sensorDataTableRepository.getLastData(monitorUiState.value.monitorId)
-
-                val filterData = sensorData.filter { it.active }
-                val sortedData = filterData.map { it.toTireData() }
-                    .sortedBy { it.tirePosition.replace("P", "").toInt() }
-
-                if (sensorData.isNotEmpty()) {
-                    _positionsUiState.update { ApiResult.Success(sortedData) }
-                } else {
-                    Log.e("MonitorViewModel", "No se encontraron datos")
-                    _positionsUiState.update { ApiResult.Error() }
-                }
+                Log.e("MonitorViewModel", "No se encontraron datos")
+                _positionsUiState.update { ApiResult.Error() }
             }
         }
     }
