@@ -1,6 +1,6 @@
 *.iml
 .gradle
-.kotlin/sessions
+.kotlin/sessions/*.salive
 /local.properties
 /.idea/caches
 /.idea/libraries
