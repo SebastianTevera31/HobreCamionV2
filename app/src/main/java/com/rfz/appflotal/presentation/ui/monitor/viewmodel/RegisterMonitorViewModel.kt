@@ -94,12 +94,13 @@ class RegisterMonitorViewModel @Inject constructor(
         _registeredMonitorState.value = ApiResult.Loading
 
         if (configurationSelected == null) {
-            showAlert(context, message = RegisterMonitorMessage.EMPTY_CONFIGURATION.message)
+            _registeredMonitorState.value =
+                ApiResult.Error(message = context.getString(RegisterMonitorMessage.EMPTY_CONFIGURATION.message))
             return
         }
 
         if (mac.isEmpty()) {
-            showAlert(context, message = RegisterMonitorMessage.EMPTY_MONITOR.message)
+            ApiResult.Error(message = context.getString(RegisterMonitorMessage.EMPTY_MONITOR.message))
             return
         }
 

@@ -12,6 +12,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -91,7 +92,6 @@ class HombreCamionService : Service() {
 
     lateinit var notificationManager: NotificationManager
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
     private var jobWifi: Job? = null
     private var jobBleConn: Job? = null
     private var jobLang: Job? = null
@@ -188,7 +188,24 @@ class HombreCamionService : Service() {
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         rebuildNotificationTexts()
-        startForeground(ONGOING_NOTIFICATION_ID, notificationCompactBuilder.build())
+        startForeground(
+            ONGOING_NOTIFICATION_ID,
+            notificationCompactBuilder.build(),
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+        )
+    }
+
+    private fun createServiceNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Foreground Service Channel",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            setShowBadge(false)
+        }
+        notificationManager.createNotificationChannel(channel)
     }
 
     private fun startWifiOnce() {
@@ -243,19 +260,6 @@ class HombreCamionService : Service() {
         jobBleConn = null
 
         startBleConnOnce()
-    }
-
-    private fun createServiceNotificationChannel() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Foreground Service Channel",
-            NotificationManager.IMPORTANCE_LOW
-        ).apply {
-            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            setShowBadge(false)
-        }
-        notificationManager.createNotificationChannel(channel)
     }
 
     private suspend fun initBluetoothConnection() {

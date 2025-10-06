@@ -490,8 +490,22 @@ class InicioActivity : ComponentActivity() {
                                     languageSelected = uiState.value.selectedLanguage,
                                     signUpViewModel = signUpViewModel
                                 ) { paymentPlanType ->
-                                    navController.navigate("${NavScreens.HOME}/$paymentPlanType") {
-                                        popUpTo(NavScreens.LOGIN) { inclusive = true }
+                                    if (!arePermissionsGranted(
+                                            this@InicioActivity,
+                                            getRequiredPermissions()
+                                        )
+                                    ) {
+                                        navController.navigate(NavScreens.PERMISOS) {
+                                            popUpTo(NavScreens.REGISTRAR_USUARIO) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    } else {
+                                        navController.navigate(NavScreens.HOME) {
+                                            popUpTo(NavScreens.REGISTRAR_USUARIO) {
+                                                inclusive = true
+                                            }
+                                        }
                                     }
                                 }
                             }

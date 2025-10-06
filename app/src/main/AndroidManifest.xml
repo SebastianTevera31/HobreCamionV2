@@ -72,7 +72,7 @@
             android:name=".data.network.service.HombreCamionService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="connectedDevice|dataSync"
+            android:foregroundServiceType="connectedDevice"
             android:stopWithTask="false"
             />
 

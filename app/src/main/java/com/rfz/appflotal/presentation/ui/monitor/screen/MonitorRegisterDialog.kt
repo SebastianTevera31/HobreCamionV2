@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -69,6 +71,7 @@ fun MonitorRegisterDialog(
     ) {
     var macAddress by remember { mutableStateOf("") }
     var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    val ctx = LocalContext.current
 
 
     macAddress = if (isScanning) stringResource(R.string.escaneando) else {
@@ -84,7 +87,11 @@ fun MonitorRegisterDialog(
     val isMacAddress = isValidMacAddress(macAddress)
 
     when (registerMonitorStatus) {
-        is ApiResult.Error -> {}
+        is ApiResult.Error -> {
+            val errorMessage = registerMonitorStatus.message
+            Toast.makeText(ctx, errorMessage, Toast.LENGTH_LONG).show()
+        }
+
         ApiResult.Loading -> {}
         is ApiResult.Success -> {
             // Actualiza la vista si estaba vacia

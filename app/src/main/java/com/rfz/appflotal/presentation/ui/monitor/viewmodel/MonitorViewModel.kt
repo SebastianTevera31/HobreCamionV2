@@ -102,10 +102,10 @@ class MonitorViewModel @Inject constructor(
             val userData = getTasksUseCase().first()
             if (userData.isNotEmpty()) {
                 val user = userData[0]
-                val baseConfig = getBaseConfigImage(
+                val baseConfig = if (!user.baseConfiguration.isEmpty()) getBaseConfigImage(
                     user.baseConfiguration.replace("BASE", "")
                         .trim().toInt()
-                )
+                ) else null
 
                 val uiState = _monitorUiState
 

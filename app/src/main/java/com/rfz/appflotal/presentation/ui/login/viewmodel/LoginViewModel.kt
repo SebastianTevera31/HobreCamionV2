@@ -4,7 +4,11 @@ package com.rfz.appflotal.presentation.ui.login.viewmodel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
+import android.util.Patterns
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -65,6 +69,9 @@ class LoginViewModel @Inject constructor(
     private val _isProgressVisible = MutableStateFlow(false)
     val isProgressVisible: StateFlow<Boolean> = _isProgressVisible
 
+    var isUserDataValid: Pair<Boolean, Int?> by mutableStateOf(Pair(true, null))
+        private set
+
     private fun showProgressDialog() {
         _isProgressVisible.value = true
     }
@@ -83,7 +90,7 @@ class LoginViewModel @Inject constructor(
         return usuario.isNotEmpty() && password.isNotEmpty()
     }
 
-    fun cleanLoginData(){
+    fun cleanLoginData() {
         _usuario.value = ""
         _password.value = ""
     }
@@ -91,34 +98,38 @@ class LoginViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("HardwareIds")
     fun onLoginSelected(ctx: Context) {
-        _isLoginEnable.value = false
-        _loginMessage.value = ""
-
         viewModelScope.launch {
             showProgressDialog()
             _isLoading.value = true
             _loginState.value = Loading
 
             try {
-                val user = LBEncryptionUtils.encrypt(usuario.value!!)
-                val pass = LBEncryptionUtils.encrypt(password.value!!)
+                if (!Patterns.EMAIL_ADDRESS.matcher(usuario.value!!).matches()) {
+                    _loginState.value = Error(ctx.getString(R.string.error_invalid_email))
+                    _loginMessage.value = ctx.getString(R.string.error_invalid_email)
+                } else {
 
-                when (val result = loginUseCase.doLogin(user, pass, ctx)) {
-                    is Result.Success -> {
-                        handleLoginResponse(
-                            result.data,
-                            ctx = ctx
-                        )
+                    val user = LBEncryptionUtils.encrypt(usuario.value!!)
+                    val pass = LBEncryptionUtils.encrypt(password.value!!)
+
+                    when (val result = loginUseCase.doLogin(user, pass, ctx)) {
+                        is Result.Success -> {
+                            handleLoginResponse(
+                                result.data,
+                                ctx = ctx
+                            )
+                        }
+
+                        is Result.Failure -> {
+                            _loginState.value =
+                                Error(result.exception.message ?: "Unknown error")
+                            _loginMessage.value = result.exception.message ?: "Authentication error"
+                        }
+
+                        Result.Loading -> {}
                     }
-
-                    is Result.Failure -> {
-                        _loginState.value =
-                            Error(result.exception.message ?: "Unknown error")
-                        _loginMessage.value = result.exception.message ?: "Authentication error"
-                    }
-
-                    Result.Loading -> {}
                 }
+
             } catch (e: Exception) {
                 _loginState.value = Error(e.message ?: "Unexpected error")
                 _loginMessage.value = e.message ?: "Connection error"
