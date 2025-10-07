@@ -64,11 +64,11 @@ fun MonitorRegisterDialog(
     showCloseButton: Boolean = false,
     monitorSelected: Pair<Int, String>? = null,
     macValue: String = "",
+    closeText: String,
     onScan: () -> Unit,
     onCloseButton: () -> Unit = {},
-    onContinueButton: (String, Pair<Int, String>?) -> Unit,
-
-    ) {
+    onContinueButton: (String, Pair<Int, String>?) -> Unit
+) {
     var macAddress by remember { mutableStateOf("") }
     var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
     val ctx = LocalContext.current
@@ -166,7 +166,7 @@ fun MonitorRegisterDialog(
                                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
                             ) {
                                 Text(
-                                    text = stringResource(R.string.cerrar)
+                                    text = closeText
                                 )
                             }
                         }
@@ -258,17 +258,22 @@ fun DropDownConfigurationMenu(
     }
 }
 
-@Composable
-@Preview(showBackground = true)
-fun MonitorRegisterDialogPreview() {
-    HombreCamionTheme {
-        MonitorRegisterDialog(
-            configurations = emptyMap(),
-            isScanning = false,
-            registerMonitorStatus = ApiResult.Loading,
-            onScan = {},
-            onSuccessRegister = {},
-            onContinueButton = { _, _ -> false },
-        )
-    }
-}
+//@Composable
+//@Preview(showBackground = true)
+//fun MonitorRegisterDialogPreview() {
+//    HombreCamionTheme {
+//        MonitorRegisterDialog(
+//            configurations = emptyMap(),
+//            isScanning = false,
+//            registerMonitorStatus = ApiResult.Loading,
+//            onScan = {},
+//            onSuccessRegister = {},
+//            onContinueButton = { _, _ -> false },
+//            showCloseButton = TODO(),
+//            monitorSelected = TODO(),
+//            macValue = TODO(),
+//            closeText = TODO(),
+//            onCloseButton = TODO(),
+//        )
+//    }
+//}

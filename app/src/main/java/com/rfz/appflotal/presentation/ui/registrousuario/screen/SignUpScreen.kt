@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
@@ -43,11 +45,15 @@ import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.AuthFlow
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 
+enum class SignUpViews() {
+    USER_DATA_VIEW, VEHICLE_DATA_VIEW, TERMS_VIEW
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
-    navigateUp: () -> Unit,
+    navController: NavController,
     languageSelected: String,
     signUpViewModel: SignUpViewModel,
     modifier: Modifier = Modifier,
@@ -64,16 +70,22 @@ fun SignUpScreen(
     var enableRegisterButton by remember { mutableStateOf(true) }
     var authFlow by remember { mutableStateOf<AuthFlow>(AuthFlow.None) }
 
-    signUpViewModel.populateListMenus(languageSelected)
+    LaunchedEffect(Unit) {
+        signUpViewModel.populateListMenus(languageSelected)
+        signUpViewModel.changeScreen(SignUpViews.USER_DATA_VIEW)
+        signUpViewModel.cleanSignUpData()
+    }
 
     Scaffold(topBar = {
-        UserInfoTopBar(
-            showNavigateUp = !isNextScreen,
-            onNavigateUp = {
-                signUpViewModel.cleanSignUpData()
-                navigateUp()
-            }
-        )
+        if (signUpUiState.value.currentScreen != SignUpViews.TERMS_VIEW) {
+            UserInfoTopBar(
+                showNavigateUp = !isNextScreen,
+                onNavigateUp = {
+                    signUpViewModel.cleanSignUpData()
+                    navController.navigateUp()
+                }
+            )
+        }
     }) { innerPadding ->
         Surface(
             modifier = modifier
@@ -86,74 +98,98 @@ fun SignUpScreen(
                     .height(230.dp)
                     .drawWithContent {
                         drawContent()
+                        if (signUpUiState.value.currentScreen != SignUpViews.TERMS_VIEW) {
+                            val path = Path().apply {
+                                moveTo(0f, 0f)
+                                lineTo(size.width, 0f)
+                                lineTo(size.width, size.height * 0.1f)
+                                quadraticTo(
+                                    size.width / 2,
+                                    size.height * 0.2f,
+                                    0f,
+                                    size.height * 0.1f
+                                )
+                                close()
+                            }
 
-                        val path = Path().apply {
-                            moveTo(0f, 0f)
-                            lineTo(size.width, 0f)
-                            lineTo(size.width, size.height * 0.1f)
-                            quadraticTo(
-                                size.width / 2,
-                                size.height * 0.2f,
-                                0f,
-                                size.height * 0.1f
+                            drawPath(
+                                path = path,
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(primaryLight, secondaryLight),
+                                    startY = 0f,
+                                    endY = size.height
+                                )
                             )
-                            close()
                         }
-
-                        drawPath(
-                            path = path,
-                            brush = Brush.verticalGradient(
-                                colors = listOf(primaryLight, secondaryLight),
-                                startY = 0f,
-                                endY = size.height
-                            )
-                        )
                     },
                 contentAlignment = Alignment.Center
             ) {
-                if (!isNextScreen) {
-                    UserForm(
-                        title = R.string.registro,
-                        profileData = signUpUiState.value.profileData,
-                        modifier = Modifier
-                            .padding(top = 80.dp)
-                            .padding(horizontal = 40.dp),
-                        countries = signUpUiState.value.countries,
-                        sectors = signUpUiState.value.sectors
-                    ) { name, password, email, country, sector ->
-                        val message = signUpViewModel.chargeUserData(
-                            name = name,
-                            username = email,
-                            email = email,
-                            password = password,
-                            country = country,
-                            sector = sector
-                        )
-                        if (message == SignUpAlerts.SIGNUP_ALERT) isNextScreen = true
-                        else Toast.makeText(ctx, ctx.getString(message.message), Toast.LENGTH_SHORT)
-                            .show()
+                when (signUpUiState.value.currentScreen) {
+                    SignUpViews.USER_DATA_VIEW -> {
+                        UserForm(
+                            title = R.string.registro,
+                            profileData = signUpUiState.value.profileData,
+                            modifier = Modifier
+                                .padding(top = 80.dp)
+                                .padding(horizontal = 40.dp),
+                            countries = signUpUiState.value.countries,
+                            sectors = signUpUiState.value.sectors
+                        ) { name, password, email, country, sector ->
+                            val message = signUpViewModel.chargeUserData(
+                                name = name,
+                                username = email,
+                                email = email,
+                                password = password,
+                                country = country,
+                                sector = sector
+                            )
+                            if (message == SignUpAlerts.DATAREGISTER_SUCCESSFULY) {
+                                isNextScreen = true
+                                signUpViewModel.changeScreen(SignUpViews.VEHICLE_DATA_VIEW)
+                            } else Toast.makeText(
+                                ctx,
+                                ctx.getString(message.message),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                } else {
-                    VehicleForm(
-                        title = R.string.registrar_vehiculo,
-                        vehicleData = signUpUiState.value.vehicleData,
-                        modifier = Modifier.padding(horizontal = 40.dp),
-                        enableRegisterButton = enableRegisterButton,
-                        onBack = { vehicleType, plates ->
-                            signUpViewModel.chargeVehicleData(
+
+                    SignUpViews.VEHICLE_DATA_VIEW -> {
+                        VehicleForm(
+                            title = R.string.registrar_vehiculo,
+                            vehicleData = signUpUiState.value.vehicleData,
+                            modifier = Modifier.padding(horizontal = 40.dp),
+                            enableRegisterButton = enableRegisterButton,
+                            onBack = { vehicleType, plates ->
+                                signUpViewModel.chargeVehicleData(
+                                    typeVehicle = vehicleType,
+                                    plates = plates
+                                )
+                                signUpViewModel.changeScreen(SignUpViews.USER_DATA_VIEW)
+                                isNextScreen = false
+                            }
+                        ) { vehicleType, plates ->
+                            val message = signUpViewModel.chargeVehicleData(
                                 typeVehicle = vehicleType,
                                 plates = plates
                             )
-                            isNextScreen = false
-                        }
-                    ) { vehicleType, plates ->
-                        val message = signUpViewModel.chargeVehicleData(
-                            typeVehicle = vehicleType,
-                            plates = plates
-                        )
 
-                        if (message == SignUpAlerts.SIGNUP_ALERT) {
-                            enableRegisterButton = false
+                            if (message == SignUpAlerts.DATAREGISTER_SUCCESSFULY) {
+                                signUpViewModel.changeScreen(SignUpViews.TERMS_VIEW)
+                            } else {
+                                Toast.makeText(
+                                    ctx,
+                                    ctx.getString(message.message),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+
+                    SignUpViews.TERMS_VIEW -> {
+                        TerminosScreen(
+                            context = ctx,
+                        ) {
                             authFlow = AuthFlow.SignUp
                             signUpViewModel.signUpUser(ctx) {
                                 snackbarHostState.showSnackbar(
@@ -161,45 +197,49 @@ fun SignUpScreen(
                                     actionLabel = "OK"
                                 )
                             }
-                        } else {
-                            Toast.makeText(ctx, ctx.getString(message.message), Toast.LENGTH_SHORT)
-                                .show()
                         }
-                    }
-
-                    if (authFlow == AuthFlow.SignUp || authFlow == AuthFlow.Login) {
-                        ProgressDialog()
-                    }
-
-                    when (authFlow) {
-                        AuthFlow.SignUp -> {
-                            SignUpStatus(
-                                ctx = ctx,
-                                onEnableButton = { enableRegisterButton = true },
-                                signUpRequestStatus = signUpRequestStatus,
-                                onFailure = { authFlow = AuthFlow.None }
-                            ) {
-                                authFlow = AuthFlow.Login
-                                signUpViewModel.onLogin(ctx)
-                            }
-                        }
-
-                        AuthFlow.Login -> {
-                            LoginStatus(
-                                ctx = ctx,
-                                loginRequestStatus = loginRequestStatus,
-                                onFailure = { authFlow = AuthFlow.None }
-                            ) {
-                                navigateToMenu(signUpUiState.value.paymentPlan)
-                                authFlow = AuthFlow.None
-                            }
-                        }
-
-                        AuthFlow.None -> {}
                     }
                 }
             }
         }
+    }
+
+
+    if (authFlow == AuthFlow.SignUp || authFlow == AuthFlow.Login) {
+        ProgressDialog()
+    }
+
+    when (authFlow) {
+        AuthFlow.SignUp -> {
+            SignUpStatus(
+                ctx = ctx,
+                onEnableButton = { enableRegisterButton = true },
+                signUpRequestStatus = signUpRequestStatus,
+                onFailure = {
+                    authFlow = AuthFlow.None
+                    signUpViewModel.changeScreen(SignUpViews.VEHICLE_DATA_VIEW)
+                }
+            ) {
+                authFlow = AuthFlow.Login
+                signUpViewModel.onLogin(ctx)
+            }
+        }
+
+        AuthFlow.Login -> {
+            LoginStatus(
+                ctx = ctx,
+                loginRequestStatus = loginRequestStatus,
+                onFailure = {
+                    authFlow = AuthFlow.None
+                    signUpViewModel.changeScreen(SignUpViews.VEHICLE_DATA_VIEW)
+                }
+            ) {
+                navigateToMenu(signUpUiState.value.paymentPlan)
+                authFlow = AuthFlow.None
+            }
+        }
+
+        AuthFlow.None -> {}
     }
 }
 

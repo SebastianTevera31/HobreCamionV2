@@ -4,6 +4,7 @@ package com.rfz.appflotal.data.network.client.login
 import com.rfz.appflotal.data.model.login.dto.LoginDto
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.RegisterBody
+import com.rfz.appflotal.data.model.login.response.UpdateUserBody
 import com.rfz.appflotal.data.model.message.response.MessageResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -26,6 +27,6 @@ interface LoginClient {
     @PUT("api/UpdateUser")
     suspend fun updateUser(
         @Header("Authorization") token: String,
-        @Body requestBody: RegisterBody
+        @Body requestBody: UpdateUserBody
     ): Response<List<MessageResponse>>
 }

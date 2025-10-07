@@ -4,6 +4,7 @@ package com.rfz.appflotal.data.repository.login
 import com.rfz.appflotal.data.model.login.dto.LoginDto
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.RegisterBody
+import com.rfz.appflotal.data.model.login.response.UpdateUserBody
 import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.login.LoginService
@@ -17,31 +18,32 @@ class LoginRepository @Inject constructor(private val loginService: LoginService
 
     suspend fun doRegisterUser(
         name: String,
-        username: String,
         email: String,
         password: String,
         idCountry: Int,
         idSector: Int,
         typeVehicle: String,
-        plates: String
+        plates: String,
+        termsGranted: Boolean,
+        registerDate: String
     ): ApiResult<List<MessageResponse>?> {
         return loginService.doRegisterUser(
             RegisterBody(
                 fldName = name,
-                fldUsername = username,
                 fldEmail = email,
                 fldPassword = password,
                 idCountry = idCountry,
                 idSector = idSector,
                 typeVehicle = typeVehicle,
-                plates = plates
+                plates = plates,
+                termsGranted = termsGranted,
+                registerDate = registerDate
             )
         )
     }
 
     suspend fun doUpdateUser(
         name: String,
-        username: String,
         email: String,
         password: String,
         idCountry: Int,
@@ -50,15 +52,14 @@ class LoginRepository @Inject constructor(private val loginService: LoginService
         plates: String
     ): ApiResult<List<MessageResponse>?> {
         return loginService.doUpdateUser(
-            RegisterBody(
+            UpdateUserBody(
                 fldName = name,
-                fldUsername = username,
                 fldEmail = email,
                 fldPassword = password,
                 idCountry = idCountry,
                 idSector = idSector,
                 typeVehicle = typeVehicle,
-                plates = plates
+                plates = plates,
             )
         )
     }

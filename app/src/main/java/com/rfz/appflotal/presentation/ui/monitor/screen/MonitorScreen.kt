@@ -34,17 +34,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MonitorScreen(
     monitorViewModel: MonitorViewModel,
+    onDialogCancel: () -> Unit,
     registerMonitorViewModel: RegisterMonitorViewModel,
     navigateUp: () -> Unit,
     paymentPlan: PaymentPlanType,
@@ -86,12 +93,15 @@ fun MonitorScreen(
             monitorSelected = null,
             registerMonitorStatus = registerMonitorStatus.value,
             isScanning = monitorConfigUiState.value.isScanning,
+            showCloseButton = true,
             onScan = { registerMonitorViewModel.startScan() },
             configurations = configurationsUiState.value,
+            onCloseButton = { onDialogCancel() },
             onSuccessRegister = {
                 monitorViewModel.initMonitorData()
                 registerMonitorViewModel.clearMonitorRegistrationData()
-            }
+            },
+            closeText = stringResource(R.string.salir)
         ) { mac, configuration ->
             registerMonitorViewModel.registerMonitor(
                 mac = mac,

@@ -23,6 +23,7 @@ import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpViews
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,7 +89,6 @@ class SignUpViewModel @Inject constructor(
                 signUpRequestStatus = ApiResult.Loading
                 signUpRequestStatus = loginUseCase.doRegisterUser(
                     name = _signUpUiState.value.profileData.name,
-                    username = _signUpUiState.value.username,
                     email = _signUpUiState.value.profileData.email,
                     password = _signUpUiState.value.profileData.password,
                     idCountry = _signUpUiState.value.profileData.country!!.first,
@@ -151,7 +151,7 @@ class SignUpViewModel @Inject constructor(
 
         if (sector == null) return SignUpAlerts.INDUSTRY_ALERT
 
-        return SignUpAlerts.SIGNUP_ALERT
+        return SignUpAlerts.DATAREGISTER_SUCCESSFULY
     }
 
     fun chargeVehicleData(typeVehicle: String, plates: String): SignUpAlerts {
@@ -170,11 +170,19 @@ class SignUpViewModel @Inject constructor(
         if (plates.isEmpty())
             return SignUpAlerts.PLATES_ALERT
 
-        return SignUpAlerts.SIGNUP_ALERT
+        return SignUpAlerts.DATAREGISTER_SUCCESSFULY
     }
 
     fun cleanSignUpData() {
         _signUpUiState.value = SignUpUiState()
+    }
+
+    fun changeScreen(currentScreen: SignUpViews) {
+        _signUpUiState.update { currentUiState ->
+            currentUiState.copy(
+                currentScreen = currentScreen
+            )
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

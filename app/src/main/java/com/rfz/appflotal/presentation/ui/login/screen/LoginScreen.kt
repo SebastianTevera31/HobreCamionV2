@@ -64,6 +64,7 @@ import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.core.util.NavScreens.RECUPERAR_CONTRASENIA
 import com.rfz.appflotal.core.util.NavScreens.REGISTRAR_USUARIO
 import com.rfz.appflotal.data.model.login.response.LoginState
+import com.rfz.appflotal.presentation.commons.TermsAndConditionsText
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.ProgressDialog
@@ -173,6 +174,12 @@ private fun LoginContent(
                         navController.navigate(RECUPERAR_CONTRASENIA)
                     }
                 )
+
+                TermsAndConditionsText(
+                    text = stringResource(R.string.terminos_condiciones),
+                    context = context,
+                    modifier = Modifier.padding(20.dp)
+                )
             }
         }
     }
@@ -270,20 +277,6 @@ private fun LoginForm(
             .padding(vertical = 8.dp),
         textAlign = TextAlign.Start
     )
-
-    //    Text(
-//        text = stringResource(R.string.title_forget),
-//        color = brandColor,
-//        style = TextStyle(
-//            fontSize = 15.sp,
-//            fontWeight = FontWeight.Bold
-//        ),
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .clickable(onClick = onForgotPasswordClick)
-//            .padding(vertical = 8.dp),
-//        textAlign = TextAlign.End
-//    )
 
     Spacer(modifier = Modifier.height(24.dp))
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Patterns
 import com.google.gson.Gson
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.data.model.message.response.MessageResponse
@@ -43,7 +44,6 @@ class LoginUseCase @Inject constructor(
 
     suspend fun doRegisterUser(
         name: String,
-        username: String,
         email: String,
         password: String,
         idCountry: Int,
@@ -59,19 +59,19 @@ class LoginUseCase @Inject constructor(
 
         return repository.doRegisterUser(
             name,
-            username,
             email,
             password,
             idCountry,
             idSector,
             typeVehicle,
-            plates
+            plates,
+            true,
+            getCurrentDate()
         )
     }
 
     suspend fun doUpdateUser(
         name: String,
-        username: String,
         email: String,
         password: String,
         idCountry: Int,
@@ -81,7 +81,6 @@ class LoginUseCase @Inject constructor(
     ): ApiResult<List<MessageResponse>?> {
         return repository.doUpdateUser(
             name,
-            username,
             email,
             password,
             idCountry,

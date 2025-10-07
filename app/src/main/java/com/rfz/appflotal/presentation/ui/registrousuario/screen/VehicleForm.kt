@@ -83,7 +83,7 @@ fun VehicleForm(
                 shape = MaterialTheme.shapes.medium,
                 enabled = enableRegisterButton,
                 modifier = Modifier.weight(1f)
-            ) { Text(text = stringResource(R.string.registrarse)) }
+            ) { Text(text = stringResource(R.string.siguiente)) }
         }
     }
 }

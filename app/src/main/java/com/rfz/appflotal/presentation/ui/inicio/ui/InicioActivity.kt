@@ -95,6 +95,10 @@ import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVe
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -196,6 +200,7 @@ class InicioActivity : ComponentActivity() {
 
         setContent {
             var allGranted by remember { mutableStateOf(false) }
+            val ctx = LocalContext.current
 
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -362,7 +367,31 @@ class InicioActivity : ComponentActivity() {
                                     monitorViewModel = monitorViewModel,
                                     registerMonitorViewModel = registerMonitorViewModel,
                                     navigateUp = { navController.navigateUp() },
-                                    paymentPlan = PaymentPlanType.Complete
+                                    paymentPlan = PaymentPlanType.Complete,
+                                    onDialogCancel = {
+                                        CoroutineScope(Dispatchers.IO).launch {
+
+                                            HombreCamionService.stopService(ctx)
+
+                                            homeViewModel.logout()
+
+                                            monitorViewModel.clearMonitorData()
+
+                                            registerMonitorViewModel.clearMonitorConfiguration()
+
+                                            registerMonitorViewModel.stopScan()
+
+                                            withContext(Dispatchers.Main) {
+                                                // navController.clearBackStack(NavScreens.LOGIN)
+
+                                                navController.navigate(NavScreens.LOGIN) {
+                                                    popUpTo(navController.graph.startDestinationId) {
+                                                        inclusive = true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
                                 )
                             }
 
@@ -486,7 +515,7 @@ class InicioActivity : ComponentActivity() {
                             composable(route = NavScreens.REGISTRAR_USUARIO) {
                                 val uiState = homeViewModel.uiState.collectAsState()
                                 SignUpScreen(
-                                    navigateUp = { navController.navigateUp() },
+                                    navController,
                                     languageSelected = uiState.value.selectedLanguage,
                                     signUpViewModel = signUpViewModel
                                 ) { paymentPlanType ->

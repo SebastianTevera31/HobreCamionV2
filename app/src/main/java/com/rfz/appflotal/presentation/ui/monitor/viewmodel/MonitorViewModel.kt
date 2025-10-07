@@ -64,14 +64,11 @@ class MonitorViewModel @Inject constructor(
     private val wifiUseCase: WifiUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
-
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
         MutableStateFlow(MonitorUiState())
     val monitorUiState = _monitorUiState.asStateFlow()
-
     private val _positionsUiState =
         MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Loading)
-
     val positionsUiState = _positionsUiState.asStateFlow()
 
     private val _filteredTiresUiState =
@@ -171,8 +168,8 @@ class MonitorViewModel @Inject constructor(
                 coordinatesTableUseCase.deleteCoordinates(uiState.value.monitorId)
                 mapTires()
             } else {
-                val localCoordinates =
-                    coordinatesTableUseCase.getCoordinates(uiState.value.monitorId)
+                val localCoordinates = coordinatesTableUseCase
+                    .getCoordinates(uiState.value.monitorId)
                 uiState.update { currentUiState ->
                     currentUiState.copy(
                         listOfTires = localCoordinates.map { it.toTire() }

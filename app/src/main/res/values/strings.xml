@@ -160,4 +160,8 @@
     <string name="no_registros">No se encontraron registros</string>
     <string name="fuga_rapida">Fuga rapida</string>
     <string name="fuga_lenta">Fuga lenta</string>
+    <string name="terminos_condiciones">Términos y Condiciones</string>
+    <string name="aceptar_terminos_condiciones">Estoy deacuerdo con los Términos y Condiciones</string>
+    <string name="invitacion_terminos">"Usted puede conocer nuestro Aviso de Privacidad integral en: "</string>
+    <string name="salir">Salir</string>
 </resources>

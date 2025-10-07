@@ -17,6 +17,7 @@ import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
+import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.intellij.lang.annotations.Language
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,7 +36,8 @@ class UpdateUserViewModel @Inject constructor(
     private val wifiUseCase: WifiUseCase,
 ) : ViewModel() {
 
-    private var _updateUserUiState = MutableStateFlow(UpdateUserUiState())
+    private var _updateUserUiState: MutableStateFlow<UpdateUserUiState> =
+        MutableStateFlow(UpdateUserUiState())
     val updateUserUiState = _updateUserUiState.asStateFlow()
 
     var updateUserStatus: ApiResult<List<MessageResponse>?> by mutableStateOf(ApiResult.Loading)
@@ -149,10 +150,10 @@ class UpdateUserViewModel @Inject constructor(
         _updateUserUiState.update { currentUiState ->
             currentUiState.copy(
                 newData = currentUiState.newData.copy(
-                    name = name.trim(),
+                    name = name,
                     username = username,
-                    email = email.trim(),
-                    password = password.trim(),
+                    email = email,
+                    password = password,
                     country = country,
                     industry = industry
                 )
@@ -173,8 +174,8 @@ class UpdateUserViewModel @Inject constructor(
         _updateUserUiState.update { currentUiState ->
             currentUiState.copy(
                 newData = currentUiState.newData.copy(
-                    typeVehicle = typeVehicle.trim(),
-                    plates = plates.trim()
+                    typeVehicle = typeVehicle,
+                    plates = plates
                 )
             )
         }
@@ -201,35 +202,37 @@ class UpdateUserViewModel @Inject constructor(
         updateUserStatus = ApiResult.Loading
         viewModelScope.launch {
             val response = loginUseCase.doUpdateUser(
-                name = _updateUserUiState.value.newData.name,
-                username = _updateUserUiState.value.newData.username,
-                email = _updateUserUiState.value.newData.email,
-                password = _updateUserUiState.value.newData.password,
+                name = _updateUserUiState.value.newData.name.trim(),
+                email = _updateUserUiState.value.newData.email.trim(),
+                password = _updateUserUiState.value.newData.password.trim(),
                 idCountry = _updateUserUiState.value.newData.country?.first ?: 0,
                 idSector = _updateUserUiState.value.newData.industry?.first ?: 0,
-                typeVehicle = _updateUserUiState.value.newData.typeVehicle,
-                plates = _updateUserUiState.value.newData.plates
+                typeVehicle = _updateUserUiState.value.newData.typeVehicle.trim(),
+                plates = _updateUserUiState.value.newData.plates.trim()
             )
 
-            responseHelper(response = response) { data ->
+            asyncResponseHelper(
+                response = response,
+                onError = {  updateUserStatus = ApiResult.Error() }
+            ) { data ->
                 updateUserStatus = ApiResult.Success(data)
                 _updateUserUiState.update { currentUiState ->
                     currentUiState.copy(
                         isNewData = false
                     )
                 }
-            }
 
-            if (updateUserStatus != ApiResult.Loading || updateUserStatus != ApiResult.Error()) {
-                addTaskUseCase.updateUserData(
-                    idUser = _updateUserUiState.value.newData.idUser,
-                    fldName = _updateUserUiState.value.newData.name,
-                    fldEmail = _updateUserUiState.value.newData.email,
-                    vehiclePlates = _updateUserUiState.value.newData.plates,
-                    country = _updateUserUiState.value.newData.country?.first ?: 0,
-                    industry = _updateUserUiState.value.newData.industry?.first ?: 0,
-                    vehicleType = _updateUserUiState.value.newData.typeVehicle
-                )
+                if (updateUserStatus != ApiResult.Loading || updateUserStatus != ApiResult.Error()) {
+                    addTaskUseCase.updateUserData(
+                        idUser = _updateUserUiState.value.newData.idUser,
+                        fldName = _updateUserUiState.value.newData.name,
+                        fldEmail = _updateUserUiState.value.newData.email,
+                        vehiclePlates = _updateUserUiState.value.newData.plates,
+                        country = _updateUserUiState.value.newData.country?.first ?: 0,
+                        industry = _updateUserUiState.value.newData.industry?.first ?: 0,
+                        vehicleType = _updateUserUiState.value.newData.typeVehicle
+                    )
+                }
             }
         }
     }

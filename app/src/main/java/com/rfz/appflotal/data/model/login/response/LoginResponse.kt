@@ -5,7 +5,6 @@ import com.rfz.appflotal.data.model.database.AppHCEntity
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 sealed class LoginState {
     object Idle : LoginState()
     object Loading : LoginState()
@@ -58,7 +57,18 @@ data class ErrorMessage(
 
 data class RegisterBody(
     @SerializedName("fld_name") val fldName: String,
-    @SerializedName("fld_username") val fldUsername: String,
+    @SerializedName("fld_email") val fldEmail: String,
+    @SerializedName("fld_password") val fldPassword: String,
+    @SerializedName("id_country") val idCountry: Int,
+    @SerializedName("id_sector") val idSector: Int,
+    @SerializedName("typeVehicle") val typeVehicle: String,
+    @SerializedName("plates") val plates: String,
+    @SerializedName("termsAndConditions") val termsGranted: Boolean,
+    @SerializedName("registerDate") val registerDate: String,
+)
+
+data class UpdateUserBody(
+    @SerializedName("fld_name") val fldName: String,
     @SerializedName("fld_email") val fldEmail: String,
     @SerializedName("fld_password") val fldPassword: String,
     @SerializedName("id_country") val idCountry: Int,

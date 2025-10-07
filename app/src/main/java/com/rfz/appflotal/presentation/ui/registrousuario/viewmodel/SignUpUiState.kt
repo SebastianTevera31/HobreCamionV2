@@ -5,6 +5,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.forms.ProfileFormModel
 import com.rfz.appflotal.data.model.forms.VehicleFormModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpViews
 
 sealed class AuthFlow {
     object None : AuthFlow()
@@ -20,7 +21,7 @@ enum class SignUpAlerts(@StringRes val message: Int = -1) {
     INDUSTRY_ALERT(R.string.signup_industry_alert),
     VEHICLE_ALERT(R.string.signup_typevehicle_alert),
     PLATES_ALERT(R.string.signup_plates_alert),
-    SIGNUP_ALERT(R.string.signup_successfull),
+    DATAREGISTER_SUCCESSFULY(R.string.signup_successfull),
     UNKNOWN(R.string.no_ruedas_activas)
 }
 
@@ -30,5 +31,6 @@ data class SignUpUiState(
     val username: String = "",
     val countries: Map<Int, String> = emptyMap(),
     val sectors: Map<Int, String> = emptyMap(),
+    val currentScreen: SignUpViews = SignUpViews.USER_DATA_VIEW,
     val paymentPlan: PaymentPlanType = PaymentPlanType.None
 )

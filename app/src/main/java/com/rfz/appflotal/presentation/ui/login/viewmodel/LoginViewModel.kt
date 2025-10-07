@@ -41,20 +41,23 @@ class LoginViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
     private val mapper: AppFlotalMapper
 ) : ViewModel() {
-
     private val _navigateToHome = MutableLiveData<Pair<Boolean, PaymentPlanType>>()
+
     val navigateToHome: LiveData<Pair<Boolean, PaymentPlanType>> = _navigateToHome
 
     private val _navigateverifycodeloginScreen = MutableLiveData<Boolean>()
     val navigateverifycodeloginScreen: LiveData<Boolean> = _navigateverifycodeloginScreen
 
     private val _usuario = MutableLiveData<String>()
+
     val usuario: LiveData<String> = _usuario
 
     private val _password = MutableLiveData<String>()
+
     val password: LiveData<String> = _password
 
     private val _isLoginEnable = MutableLiveData<Boolean>()
+
     val isLoginEnable: LiveData<Boolean> = _isLoginEnable
 
     private val _isLoading = MutableLiveData<Boolean>()
@@ -129,7 +132,6 @@ class LoginViewModel @Inject constructor(
                         Result.Loading -> {}
                     }
                 }
-
             } catch (e: Exception) {
                 _loginState.value = Error(e.message ?: "Unexpected error")
                 _loginMessage.value = e.message ?: "Connection error"

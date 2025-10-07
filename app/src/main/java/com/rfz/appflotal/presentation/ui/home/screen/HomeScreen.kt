@@ -146,6 +146,7 @@ fun HomeScreen(
                 monitorViewModel.initMonitorData()
                 registerMonitorViewModel.clearMonitorRegistrationData()
             },
+            closeText = stringResource(R.string.cerrar),
         )
     }
 
@@ -453,7 +454,30 @@ fun HomeScreen(
                     registerMonitorViewModel = registerMonitorViewModel,
                     navigateUp = { navController.navigateUp() },
                     paymentPlan = paymentPlan,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    onDialogCancel = {
+                        CoroutineScope(Dispatchers.IO).launch {
+
+                            HombreCamionService.stopService(context)
+
+                            homeViewModel.logout()
+
+                            monitorViewModel.clearMonitorData()
+
+                            registerMonitorViewModel.clearMonitorConfiguration()
+
+                            registerMonitorViewModel.stopScan()
+
+                            withContext(Dispatchers.Main) {
+                                // navController.clearBackStack(NavScreens.LOGIN)
+                                navController.navigate(NavScreens.LOGIN) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        }
+                    }
                 )
             }
         }
