@@ -65,6 +65,7 @@ fun MonitorRegisterDialog(
     monitorSelected: Pair<Int, String>? = null,
     macValue: String = "",
     closeText: String,
+    onMonitorConfiguration: (Pair<Int, String>?) -> Unit,
     onScan: () -> Unit,
     onCloseButton: () -> Unit = {},
     onContinueButton: (String, Pair<Int, String>?) -> Unit
@@ -131,6 +132,7 @@ fun MonitorRegisterDialog(
                         defaultOption = configurationSelected?.second ?: ""
                     ) {
                         configurationSelected = it
+                        onMonitorConfiguration(it)
                     }
 
                     MacTextField(

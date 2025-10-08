@@ -154,6 +154,14 @@ class RegisterMonitorViewModel @Inject constructor(
         }
     }
 
+    fun updateMonitorConfiguration(config: Pair<Int, String>?) {
+        _monitorConfigUiState.update { currentUiState ->
+            currentUiState.copy(
+                configurationSelected = config
+            )
+        }
+    }
+
     fun startScan() {
         _monitorConfigUiState.update { currentUiState ->
             currentUiState.copy(

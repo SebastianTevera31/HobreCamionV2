@@ -71,7 +71,6 @@ fun MonitorScreen(
     LaunchedEffect(monitorUiState.value.monitorId) {
         if (monitorUiState.value.monitorId == 0) {
             monitorViewModel.initMonitorData()
-            monitorViewModel.showView()
         }
     }
 
@@ -102,10 +101,14 @@ fun MonitorScreen(
             onCloseButton = { onDialogCancel() },
             onSuccessRegister = {
                 monitorViewModel.initMonitorData()
-                monitorViewModel.showView()
                 registerMonitorViewModel.clearMonitorRegistrationData()
             },
-            closeText = stringResource(R.string.salir)
+            closeText = stringResource(R.string.salir),
+            onMonitorConfiguration = { config ->
+                registerMonitorViewModel.updateMonitorConfiguration(
+                    config
+                )
+            }
         ) { mac, configuration ->
             registerMonitorViewModel.registerMonitor(
                 mac = mac,
@@ -233,7 +236,8 @@ fun MonitorScreen(
                     }
 
                     if (visible) {
-                        val text = stringResource(monitorUiState.value.signalIntensity.first.alertMessage!!)
+                        val text =
+                            stringResource(monitorUiState.value.signalIntensity.first.alertMessage!!)
                         BluetoothSnackBanner(
                             visible = true,
                             message = text,

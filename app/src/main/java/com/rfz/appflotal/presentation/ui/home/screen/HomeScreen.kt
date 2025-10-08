@@ -145,10 +145,14 @@ fun HomeScreen(
             onSuccessRegister = {
                 showMonitorDialog = false
                 monitorViewModel.initMonitorData()
-                monitorViewModel.showView()
                 registerMonitorViewModel.clearMonitorRegistrationData()
             },
             closeText = stringResource(R.string.cerrar),
+            onMonitorConfiguration = { config ->
+                registerMonitorViewModel.updateMonitorConfiguration(
+                    config
+                )
+            }
         )
     }
 
