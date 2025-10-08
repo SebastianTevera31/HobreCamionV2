@@ -45,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -144,6 +145,7 @@ fun HomeScreen(
             onSuccessRegister = {
                 showMonitorDialog = false
                 monitorViewModel.initMonitorData()
+                monitorViewModel.showView()
                 registerMonitorViewModel.clearMonitorRegistrationData()
             },
             closeText = stringResource(R.string.cerrar),
@@ -313,17 +315,15 @@ fun HomeScreen(
 
                                 homeViewModel.logout()
 
-                                monitorViewModel.clearMonitorData()
-
                                 registerMonitorViewModel.clearMonitorConfiguration()
 
                                 registerMonitorViewModel.stopScan()
 
                                 withContext(Dispatchers.Main) {
                                     // navController.clearBackStack(NavScreens.LOGIN)
-
                                     navController.navigate(NavScreens.LOGIN) {
                                         popUpTo(navController.graph.startDestinationId) {
+                                            monitorViewModel.clearMonitorData()
                                             inclusive = true
                                         }
                                     }
@@ -462,8 +462,6 @@ fun HomeScreen(
 
                             homeViewModel.logout()
 
-                            monitorViewModel.clearMonitorData()
-
                             registerMonitorViewModel.clearMonitorConfiguration()
 
                             registerMonitorViewModel.stopScan()
@@ -472,6 +470,7 @@ fun HomeScreen(
                                 // navController.clearBackStack(NavScreens.LOGIN)
                                 navController.navigate(NavScreens.LOGIN) {
                                     popUpTo(navController.graph.startDestinationId) {
+                                        monitorViewModel.clearMonitorData()
                                         inclusive = true
                                     }
                                 }

@@ -67,17 +67,17 @@ fun MonitorScreen(
     val visible = monitorUiState.value.signalIntensity.first == BluetoothSignalQuality.Desconocida
             && monitorUiState.value.monitorId != 0
 
-    var isShowingDialog by rememberSaveable { mutableStateOf(false) }
-
     // Carga la pantalla, vacia o no
     LaunchedEffect(monitorUiState.value.monitorId) {
         if (monitorUiState.value.monitorId == 0) {
             monitorViewModel.initMonitorData()
+            monitorViewModel.showView()
         }
     }
 
-    if (monitorUiState.value.showView && monitorUiState.value.showDialog && !isShowingDialog) {
-        // registerMonitorViewModel.loadConfigurations()
+    if (monitorUiState.value.showView && monitorUiState.value.showDialog) {
+
+        registerMonitorViewModel.clearMonitorRegistrationData()
 
         LaunchedEffect(Unit) {
             registerMonitorViewModel.startScan()
@@ -101,8 +101,8 @@ fun MonitorScreen(
             configurations = configurationsUiState.value,
             onCloseButton = { onDialogCancel() },
             onSuccessRegister = {
-                isShowingDialog = false
                 monitorViewModel.initMonitorData()
+                monitorViewModel.showView()
                 registerMonitorViewModel.clearMonitorRegistrationData()
             },
             closeText = stringResource(R.string.salir)
@@ -131,7 +131,7 @@ fun MonitorScreen(
             modifier = Modifier.padding(bottom = 32.dp)
         ) {
             if (monitorUiState.value.showView) {
-                Box {
+                Box(modifier = Modifier.fillMaxSize()) {
                     Column(
                         modifier = modifier.background(Color("#EDF0F8".toColorInt())),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -233,11 +233,11 @@ fun MonitorScreen(
                     }
 
                     if (visible) {
-                        val text =
-                            stringResource(monitorUiState.value.signalIntensity.first.alertMessage!!)
+                        val text = stringResource(monitorUiState.value.signalIntensity.first.alertMessage!!)
                         BluetoothSnackBanner(
                             visible = true,
                             message = text,
+                            modifier = Modifier.align(Alignment.TopStart)
                         )
                     }
                 }

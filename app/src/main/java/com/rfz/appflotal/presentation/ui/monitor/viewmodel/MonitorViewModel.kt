@@ -125,10 +125,12 @@ class MonitorViewModel @Inject constructor(
                         showDialog = user.id_monitor == 0
                     )
                 }
-            }
 
-            getConfigData()
-            _monitorUiState.update { currentUiState -> currentUiState.copy(showView = true) }
+                getConfigData()
+
+                // Controlar si mostrar la vista
+                _monitorUiState.update { currentUiState -> currentUiState.copy(showView = true) }
+            }
         }
     }
 

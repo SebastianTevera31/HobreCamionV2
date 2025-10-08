@@ -54,7 +54,6 @@ fun BluetoothSnackBanner(
             exit = slideOutVertically(animationSpec = tween(2000)) { with(density) { -40.dp.roundToPx() } } + shrinkVertically() + fadeOut(),
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .windowInsetsPadding(WindowInsets.statusBars) // respeta status bar
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
             Surface(

@@ -21,7 +21,7 @@ fun TermsAndConditionsText(text: String, context: Context, modifier: Modifier = 
     val annotatedLinkString: AnnotatedString = buildAnnotatedString {
         pushStringAnnotation(
             tag = "URL",
-            annotation = ""
+            annotation = "https://www.flotal.com.mx"
         )
         withStyle(
             style = SpanStyle(
@@ -44,6 +44,7 @@ fun TermsAndConditionsText(text: String, context: Context, modifier: Modifier = 
             annotatedLinkString.getStringAnnotations("URL", offset, offset)
                 .firstOrNull()?.let { annotation ->
                     val intent = Intent(Intent.ACTION_VIEW, annotation.item.toUri())
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
                 }
         }

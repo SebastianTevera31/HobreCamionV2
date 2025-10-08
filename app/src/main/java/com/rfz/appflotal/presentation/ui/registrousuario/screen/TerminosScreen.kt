@@ -57,16 +57,16 @@ fun TerminosScreen(context: Context, modifier: Modifier = Modifier, onGranted: (
 
         Spacer(modifier = Modifier.padding(4.dp))
         Text(
-            text = "IMPORTANTE \\ CONFIDENCIAL: Este mensaje contiene información de la compañía CENTRO CAMIONERO MONTAJES, S.A. DE C.V., con domicilio en Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, México, C.P. 29020. La cual es de carácter privilegiado, confidencial, y de acceso restringido conforme a la Ley aplicable."
+            text = stringResource(R.string.main_term_text)
         )
 
         Spacer(modifier = Modifier.padding(4.dp))
-        Text(text = "CENTRO CAMIONERO MONTAJES, S.A. DE C.V. es Responsable del tratamiento (uso) de sus datos personales, los cuales serán usados a efecto de dar contestación a las comunicaciones generadas por esta vía y para proveerle los productos o prestarle los servicios que se nos encomienden.")
+        Text(text = stringResource(R.string.body_terms_text))
 
         Spacer(modifier = Modifier.padding(16.dp))
         LinkText(
             text = stringResource(R.string.terminos_condiciones),
-            url = "",
+            url = "https://www.flotal.com.mx",
             context = context
         )
 
@@ -121,6 +121,7 @@ fun LinkText(text: String, url: String, context: Context) {
             annotatedLinkString.getStringAnnotations("URL", offset, offset)
                 .firstOrNull()?.let { annotation ->
                     val intent = Intent(Intent.ACTION_VIEW, annotation.item.toUri())
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
                 }
         }

@@ -371,8 +371,6 @@ class InicioActivity : ComponentActivity() {
 
                                             homeViewModel.logout()
 
-                                            monitorViewModel.clearMonitorData()
-
                                             registerMonitorViewModel.clearMonitorRegistrationData()
                                             registerMonitorViewModel.clearMonitorConfiguration()
 
@@ -382,6 +380,7 @@ class InicioActivity : ComponentActivity() {
                                                 // navController.clearBackStack(NavScreens.LOGIN)
                                                 navController.navigate(NavScreens.LOGIN) {
                                                     popUpTo(navController.graph.startDestinationId) {
+                                                        monitorViewModel.clearMonitorData()
                                                         inclusive = true
                                                     }
                                                 }

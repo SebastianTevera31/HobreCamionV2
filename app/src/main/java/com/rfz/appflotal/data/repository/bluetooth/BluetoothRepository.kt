@@ -222,7 +222,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     @SuppressLint("MissingPermission")
     override val btReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+            if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED || intent?.action == BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED) {
                 when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
                     BluetoothAdapter.STATE_OFF -> {
                         Log.d("BluetoothRepositoriy", "BT OFF -> limpiar")

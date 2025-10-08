@@ -163,4 +163,6 @@
     <string name="invitacion_terminos">"See our full Privacy Policy at: "</string>
     <string name="salir">Logout</string>
     <string name="aviso_conexion_blueotooth">Monitor data not available. Please check your connection.</string>
+    <string name="main_term_text">IMPORTANT \\ CONFIDENTIAL: This message contains information from the company CENTRO CAMIONERO MONTAJES, S.A. DE C.V., located at Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, Mexico, C.P. 29020. The information is privileged, confidential, and access is restricted in accordance with applicable law.</string>
+    <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. is responsible for the processing (use) of your personal data, which will be used to respond to communications generated through this channel and to provide you with the products or services entrusted to us.</string>
 </resources>
