@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import android.R.attr.visible
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.LinearEasing
@@ -37,6 +38,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,7 +61,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.monitor.component.BluetoothSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 

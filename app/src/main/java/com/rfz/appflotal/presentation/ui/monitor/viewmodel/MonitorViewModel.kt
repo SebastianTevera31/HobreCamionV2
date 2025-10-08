@@ -83,8 +83,20 @@ class MonitorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            val userData = getTasksUseCase().first()
+
             wifiUseCase().collect { status ->
                 _wifiStatus.update { status }
+            }
+
+            if (userData.isNotEmpty()) {
+                val user = userData[0]
+
+                _monitorUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        monitorId = user.id_monitor,
+                    )
+                }
             }
         }
 

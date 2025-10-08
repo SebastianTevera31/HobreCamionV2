@@ -56,10 +56,12 @@ data class BluetoothData(
     val timestamp: String? = null
 )
 
-enum class BluetoothSignalQuality(@StringRes val signalText: Int? = null) {
-    Excelente(R.string.excelente), Aceptable(R.string.aceptable), Pobre(R.string.pobre), Desconocida(
-        R.string.sin_conexi_n
-    )
+enum class BluetoothSignalQuality(
+    @StringRes val signalText: Int? = null,
+    @StringRes val alertMessage: Int? = null
+) {
+    Excelente(R.string.excelente), Aceptable(R.string.aceptable), Pobre(R.string.pobre),
+    Desconocida(R.string.sin_conexi_n, R.string.aviso_conexion_blueotooth)
 }
 
 class BluetoothRepositoryImp @Inject constructor(private val context: Context) :

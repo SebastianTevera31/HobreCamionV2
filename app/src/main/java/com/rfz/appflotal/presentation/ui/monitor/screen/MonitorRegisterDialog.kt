@@ -182,7 +182,7 @@ fun MonitorRegisterDialog(
                                 .weight(1f)
                         ) {
                             Text(
-                                text = stringResource(R.string.save)
+                                text = stringResource(R.string.confirmar)
                             )
                         }
                     }
@@ -257,23 +257,3 @@ fun DropDownConfigurationMenu(
         }
     }
 }
-
-//@Composable
-//@Preview(showBackground = true)
-//fun MonitorRegisterDialogPreview() {
-//    HombreCamionTheme {
-//        MonitorRegisterDialog(
-//            configurations = emptyMap(),
-//            isScanning = false,
-//            registerMonitorStatus = ApiResult.Loading,
-//            onScan = {},
-//            onSuccessRegister = {},
-//            onContinueButton = { _, _ -> false },
-//            showCloseButton = TODO(),
-//            monitorSelected = TODO(),
-//            macValue = TODO(),
-//            closeText = TODO(),
-//            onCloseButton = TODO(),
-//        )
-//    }
-//}

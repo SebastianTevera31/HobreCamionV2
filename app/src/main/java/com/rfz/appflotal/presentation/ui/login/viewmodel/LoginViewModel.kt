@@ -96,6 +96,7 @@ class LoginViewModel @Inject constructor(
     fun cleanLoginData() {
         _usuario.value = ""
         _password.value = ""
+        _loginMessage.value = ""
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

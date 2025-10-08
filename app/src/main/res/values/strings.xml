@@ -164,4 +164,5 @@
     <string name="aceptar_terminos_condiciones">Estoy deacuerdo con los Términos y Condiciones</string>
     <string name="invitacion_terminos">"Usted puede conocer nuestro Aviso de Privacidad integral en: "</string>
     <string name="salir">Salir</string>
+    <string name="aviso_conexion_blueotooth">Datos del monitor no disponible. Verique su conexion.</string>
 </resources>

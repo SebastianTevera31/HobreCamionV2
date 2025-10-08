@@ -162,4 +162,5 @@
     <string name="aceptar_terminos_condiciones">I agree to the Terms and Conditions</string>
     <string name="invitacion_terminos">"See our full Privacy Policy at: "</string>
     <string name="salir">Logout</string>
+    <string name="aviso_conexion_blueotooth">Monitor data not available. Please check your connection.</string>
 </resources>
