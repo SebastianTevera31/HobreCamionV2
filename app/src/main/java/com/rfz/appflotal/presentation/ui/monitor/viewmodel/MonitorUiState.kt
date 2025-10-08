@@ -27,7 +27,8 @@ data class MonitorUiState(
     val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val showDialog: Boolean = false,
     val showView: Boolean = false,
-    val alertaPonchadura: SensorAlerts = SensorAlerts.NO_DATA
+    val alertaPonchadura: SensorAlerts = SensorAlerts.NO_DATA,
+    val isBluetoothOn: Boolean = false
 )
 
 data class Tire(

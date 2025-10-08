@@ -53,7 +53,8 @@ data class BluetoothData(
     val dataFrame: String? = null,
     val bluetoothSignalQuality: BluetoothSignalQuality = BluetoothSignalQuality.Desconocida,
     val rssi: Int? = null,
-    val timestamp: String? = null
+    val timestamp: String? = null,
+    val isBluetoothOn: Boolean = false
 )
 
 enum class BluetoothSignalQuality(
@@ -225,11 +226,17 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                 when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
                     BluetoothAdapter.STATE_OFF -> {
                         Log.d("BluetoothRepositoriy", "BT OFF -> limpiar")
+                        _sensorData.update { currentState ->
+                            currentState.copy(isBluetoothOn = false)
+                        }
                         disconnect()
                     }
 
                     BluetoothAdapter.STATE_ON -> {
                         Log.d("BluetoothRepository", "BT ON -> intentar reconectar")
+                        _sensorData.update { currentState ->
+                            currentState.copy(isBluetoothOn = true)
+                        }
                         lastMacAddress?.let { mac ->
                             scope.launch {
                                 delay(2000)

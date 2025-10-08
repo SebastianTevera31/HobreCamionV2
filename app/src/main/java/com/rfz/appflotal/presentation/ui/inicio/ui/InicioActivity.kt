@@ -11,9 +11,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,7 +19,6 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -345,7 +342,6 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             composable(HombreCamionScreens.MONITOR.name) {
-
                                 // Efecto: si ya están concedidos, arrancar servicio automáticamente
                                 LaunchedEffect(Unit) {
                                     if (arePermissionsGranted(
@@ -377,13 +373,13 @@ class InicioActivity : ComponentActivity() {
 
                                             monitorViewModel.clearMonitorData()
 
+                                            registerMonitorViewModel.clearMonitorRegistrationData()
                                             registerMonitorViewModel.clearMonitorConfiguration()
 
                                             registerMonitorViewModel.stopScan()
 
                                             withContext(Dispatchers.Main) {
                                                 // navController.clearBackStack(NavScreens.LOGIN)
-
                                                 navController.navigate(NavScreens.LOGIN) {
                                                     popUpTo(navController.graph.startDestinationId) {
                                                         inclusive = true

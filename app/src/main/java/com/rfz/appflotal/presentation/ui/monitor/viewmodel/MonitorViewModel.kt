@@ -202,11 +202,20 @@ class MonitorViewModel @Inject constructor(
             bluetoothUseCase().collect { data ->
                 val monitorId = monitorUiState.value.monitorId
                 if (monitorId != 0) {
+                    val rssi = data.rssi
+                    val bluetoothSignalQuality = data.bluetoothSignalQuality
+
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            signalIntensity = Pair(
+                                bluetoothSignalQuality, if (rssi != null) "$rssi dBm" else "N/A"
+                            ),
+                            isBluetoothOn = data.isBluetoothOn
+                        )
+                    }
+
                     if (shouldReadManually) {
                         Log.d("MonitorViewModel", "$data")
-                        val rssi = data.rssi
-                        val bluetoothSignalQuality = data.bluetoothSignalQuality
-
                         val dataFrame = data.dataFrame
 
                         if (!validateBluetoothConnectivity(bluetoothSignalQuality) || dataFrame == null) {
@@ -221,14 +230,6 @@ class MonitorViewModel @Inject constructor(
                                 }
                             }
                         } else updateSensorData(dataFrame)
-
-                        _monitorUiState.update { currentUiState ->
-                            currentUiState.copy(
-                                signalIntensity = Pair(
-                                    bluetoothSignalQuality, if (rssi != null) "$rssi dBm" else "N/A"
-                                ),
-                            )
-                        }
                     } else {
                         delay(60000)
                         shouldReadManually = true

@@ -89,7 +89,7 @@ fun MonitorRegisterDialog(
     when (registerMonitorStatus) {
         is ApiResult.Error -> {
             val errorMessage = registerMonitorStatus.message
-            Toast.makeText(ctx, errorMessage, Toast.LENGTH_LONG).show()
+            Toast.makeText(ctx, errorMessage, Toast.LENGTH_SHORT).show()
         }
 
         ApiResult.Loading -> {}

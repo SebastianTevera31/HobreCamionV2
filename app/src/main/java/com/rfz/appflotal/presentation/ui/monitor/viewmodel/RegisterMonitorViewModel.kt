@@ -93,6 +93,10 @@ class RegisterMonitorViewModel @Inject constructor(
     ) {
         _registeredMonitorState.value = ApiResult.Loading
 
+        _monitorConfigUiState.update { currentUiState ->
+            currentUiState.copy(configurationSelected = configurationSelected)
+        }
+
         if (configurationSelected == null) {
             _registeredMonitorState.value =
                 ApiResult.Error(message = context.getString(RegisterMonitorMessage.EMPTY_CONFIGURATION.message))

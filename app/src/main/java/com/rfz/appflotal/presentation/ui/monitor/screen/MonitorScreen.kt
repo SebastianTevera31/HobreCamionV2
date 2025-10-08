@@ -65,6 +65,9 @@ fun MonitorScreen(
     var selectedOption by rememberSaveable { mutableStateOf(MonitorScreenViews.DIAGRAMA) }
 
     val visible = monitorUiState.value.signalIntensity.first == BluetoothSignalQuality.Desconocida
+            && monitorUiState.value.monitorId != 0
+
+    var isShowingDialog by rememberSaveable { mutableStateOf(false) }
 
     // Carga la pantalla, vacia o no
     LaunchedEffect(monitorUiState.value.monitorId) {
@@ -73,13 +76,13 @@ fun MonitorScreen(
         }
     }
 
-    if (monitorUiState.value.showView && monitorUiState.value.showDialog) {
+    if (monitorUiState.value.showView && monitorUiState.value.showDialog && !isShowingDialog) {
         // registerMonitorViewModel.loadConfigurations()
+
         LaunchedEffect(Unit) {
             registerMonitorViewModel.startScan()
+            registerMonitorViewModel.clearMonitorConfiguration()
         }
-
-        registerMonitorViewModel.clearMonitorConfiguration()
 
         val monitorConfigUiState =
             registerMonitorViewModel.monitorConfigUiState.collectAsState()
@@ -90,7 +93,7 @@ fun MonitorScreen(
 
         MonitorRegisterDialog(
             macValue = monitorConfigUiState.value.mac,
-            monitorSelected = null,
+            monitorSelected = monitorConfigUiState.value.configurationSelected,
             registerMonitorStatus = registerMonitorStatus.value,
             isScanning = monitorConfigUiState.value.isScanning,
             showCloseButton = true,
@@ -98,6 +101,7 @@ fun MonitorScreen(
             configurations = configurationsUiState.value,
             onCloseButton = { onDialogCancel() },
             onSuccessRegister = {
+                isShowingDialog = false
                 monitorViewModel.initMonitorData()
                 registerMonitorViewModel.clearMonitorRegistrationData()
             },

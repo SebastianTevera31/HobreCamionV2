@@ -57,11 +57,11 @@ fun TerminosScreen(context: Context, modifier: Modifier = Modifier, onGranted: (
 
         Spacer(modifier = Modifier.padding(4.dp))
         Text(
-            text = "IMPORTANTE  \\ CONFIDENCIAL: Este mensaje contiene información de la compañía GASMONSOFT S.A. de C.V., con domicilio en Av. 14A Norte Poniente No. 1028, Colonia Vista Hemrosa, Tuxtla Gutiérrez, Chiapas, México, CP 29030. La cual es de carácter privilegiado, confidencial, y de acceso restringido conforme a la Ley aplicable."
+            text = "IMPORTANTE \\ CONFIDENCIAL: Este mensaje contiene información de la compañía CENTRO CAMIONERO MONTAJES, S.A. DE C.V., con domicilio en Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, México, C.P. 29020. La cual es de carácter privilegiado, confidencial, y de acceso restringido conforme a la Ley aplicable."
         )
 
         Spacer(modifier = Modifier.padding(4.dp))
-        Text(text = "GASMONSOFT S.A. de C.V. es Responsable del tratamiento (uso) de sus datos personales, los cuales serán usados a efecto de dar contestación a las comunicaciones generadas por esta vía y para proveerle los productos o prestarle los servicios que se nos encomienden.")
+        Text(text = "CENTRO CAMIONERO MONTAJES, S.A. DE C.V. es Responsable del tratamiento (uso) de sus datos personales, los cuales serán usados a efecto de dar contestación a las comunicaciones generadas por esta vía y para proveerle los productos o prestarle los servicios que se nos encomienden.")
 
         Spacer(modifier = Modifier.padding(16.dp))
         LinkText(
