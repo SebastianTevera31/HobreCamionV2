@@ -139,6 +139,14 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
                     Log.d("BLE", "Conexion perdidad")
                 }
+
+                BluetoothProfile.STATE_DISCONNECTING -> {
+                    Log.d("BLE", "Disconectando de la red.")
+                }
+
+                BluetoothProfile.STATE_CONNECTING -> {
+                    Log.d("BLE", "Conectando de la red.")
+                }
             }
         }
 

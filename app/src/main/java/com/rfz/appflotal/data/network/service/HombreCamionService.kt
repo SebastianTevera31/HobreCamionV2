@@ -234,6 +234,7 @@ class HombreCamionService : Service() {
     }
 
     private fun startBtStatusOnce() {
+        btReceiver = bluetoothUseCase.getBtReceiver()
         if (btReceiver != null) {
             val filter = IntentFilter().apply {
                 addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
