@@ -22,7 +22,7 @@ object AppLocale {
         _currentLocale.value = Locale(lang)
     }
 
-    private fun getSystemLocale(): Locale {
+    fun getSystemLocale(): Locale {
         val systemLang = Locale.getDefault().language
         return if (systemLang.contains("es")) Locale("es")
         else Locale("en")

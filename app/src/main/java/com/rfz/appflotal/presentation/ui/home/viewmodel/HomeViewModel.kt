@@ -56,6 +56,8 @@ class HomeViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
+
+                changeLanguage(AppLocale.currentLocale.value.language)
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false) }
                 _homeCheckInMessage.value = "Error loading data: ${e.message}"
@@ -82,6 +84,14 @@ class HomeViewModel @Inject constructor(
                         .edit()
                         .putString("app_language", newLanguage)
                         .apply()
+                }
+                val response = result.getOrNull()
+                val idUser = _uiState.value.userData
+                if (response != null && idUser != null) {
+                    hombreCamionRepository.updateToken(
+                        idUser.idUser,
+                        response.token
+                    )
                 }
 
                 result

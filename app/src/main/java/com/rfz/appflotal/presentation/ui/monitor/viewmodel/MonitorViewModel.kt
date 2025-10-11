@@ -216,6 +216,7 @@ class MonitorViewModel @Inject constructor(
                         )
                     }
 
+
                     if (shouldReadManually) {
                         Log.d("MonitorViewModel", "$data")
                         val dataFrame = data.dataFrame

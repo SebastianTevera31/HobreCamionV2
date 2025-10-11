@@ -66,7 +66,7 @@ fun TerminosScreen(context: Context, modifier: Modifier = Modifier, onGranted: (
         Spacer(modifier = Modifier.padding(16.dp))
         LinkText(
             text = stringResource(R.string.terminos_condiciones),
-            url = "https://www.flotal.com.mx",
+            url = "https://www.flotal.com.mx/aviso-de-privacidad",
             context = context
         )
 

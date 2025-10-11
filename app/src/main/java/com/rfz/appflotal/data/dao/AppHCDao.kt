@@ -16,9 +16,11 @@ interface AppHCDao {
     @Query("UPDATE user SET id_monitor =:idMonitor, monitorMac =:mac, baseConfiguration =:baseConfiguration WHERE idUser =:idUser")
     suspend fun updateMonitorId(idMonitor: Int, mac: String, baseConfiguration: String, idUser: Int)
 
-    @Query("UPDATE user SET fld_name =:fldName, fld_email =:fldEmail, " +
-            "country =:country, industry =:industry, vehiclePlates =:vehiclePlates, " +
-            "vehicleType =:vehicleType  WHERE idUser =:idUser")
+    @Query(
+        "UPDATE user SET fld_name =:fldName, fld_email =:fldEmail, " +
+                "country =:country, industry =:industry, vehiclePlates =:vehiclePlates, " +
+                "vehicleType =:vehicleType  WHERE idUser =:idUser"
+    )
     suspend fun updateUserData(
         idUser: Int,
         fldName: String,
@@ -28,6 +30,9 @@ interface AppHCDao {
         vehiclePlates: String,
         vehicleType: String,
     )
+
+    @Query("UPDATE user SET fld_token =:token WHERE idUser =:idUser")
+    suspend fun updateToken(idUser: Int, token: String)
 
     @Query("DELETE FROM user")
     suspend fun deleteAllFlotalSoft()

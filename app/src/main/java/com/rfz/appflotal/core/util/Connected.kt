@@ -23,7 +23,4 @@ object Connected {
             return activeNetworkInfo != null && activeNetworkInfo.isConnected
         }
     }
-
-
-
 }

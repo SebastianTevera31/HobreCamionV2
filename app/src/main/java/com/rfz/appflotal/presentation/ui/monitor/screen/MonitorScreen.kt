@@ -162,28 +162,82 @@ fun MonitorScreen(
                                 modifier = Modifier.padding(8.dp),
                             )
                         } else {
-                            var positionOptionSelected by remember { mutableIntStateOf(R.string.recientes) }
+                            if (paymentPlan == PaymentPlanType.Complete) {
+                                var positionOptionSelected by remember { mutableIntStateOf(R.string.recientes) }
 
-                            Column(
-                                modifier = Modifier.padding(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                // Navegacion Recientes y Filtrar
-                                NavPositionMonitorScreen(
-                                    tiresList = monitorUiState.value.listOfTires,
-                                    onSensorData = { sensorSelected, dateSelected ->
-                                        monitorViewModel.getTireDataByDate(
-                                            sensorSelected,
-                                            dateSelected
-                                        )
-                                    },
-                                    onPositionOptionSelected = { option ->
-                                        positionOptionSelected = option
+                                Column(
+                                    modifier = Modifier.padding(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    // Navegacion Recientes y Filtrar
+                                    NavPositionMonitorScreen(
+                                        tiresList = monitorUiState.value.listOfTires,
+                                        onSensorData = { sensorSelected, dateSelected ->
+                                            monitorViewModel.getTireDataByDate(
+                                                sensorSelected,
+                                                dateSelected
+                                            )
+                                        },
+                                        onPositionOptionSelected = { option ->
+                                            positionOptionSelected = option
+                                        }
+                                    )
+
+                                    // Manejo de presentacion de lista
+                                    if (positionOptionSelected == R.string.recientes) {
+                                        val positionData = positionsUiState.value
+                                        monitorViewModel.clearFilteredTire()
+
+                                        when (positionData) {
+                                            is ApiResult.Error -> NoPositionDataView(R.string.no_registros)
+                                            ApiResult.Loading -> {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    CircularProgressIndicator()
+                                                }
+                                            }
+
+                                            is ApiResult.Success<List<MonitorTireByDateResponse>?> -> {
+                                                val data = positionData.data
+                                                CurrentPositionDataView(
+                                                    message = R.string.no_ruedas_activas,
+                                                    sensorDataList = data,
+                                                    isOnSearch = false,
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        val monitorTireData = monitorTireUiState.value
+                                        when (monitorTireData) {
+                                            is ApiResult.Success -> {
+                                                val data: List<MonitorTireByDateResponse>? =
+                                                    monitorTireData.data?.sortedByDescending { it.sensorDate }
+                                                CurrentPositionDataView(
+                                                    message = R.string.no_registros,
+                                                    sensorDataList = data,
+                                                    isOnSearch = true
+                                                )
+                                            }
+
+                                            is ApiResult.Error -> {}
+                                            is ApiResult.Loading -> {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    CircularProgressIndicator()
+                                                }
+                                            }
+                                        }
                                     }
-                                )
-
-                                // Manejo de presentacion de lista
-                                if (positionOptionSelected == R.string.recientes) {
+                                }
+                            } else {
+                                Column(
+                                    modifier = Modifier.padding(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     val positionData = positionsUiState.value
                                     monitorViewModel.clearFilteredTire()
 
@@ -207,31 +261,9 @@ fun MonitorScreen(
                                             )
                                         }
                                     }
-                                } else {
-                                    val monitorTireData = monitorTireUiState.value
-                                    when (monitorTireData) {
-                                        is ApiResult.Success -> {
-                                            val data: List<MonitorTireByDateResponse>? =
-                                                monitorTireData.data?.sortedByDescending { it.sensorDate }
-                                            CurrentPositionDataView(
-                                                message = R.string.no_registros,
-                                                sensorDataList = data,
-                                                isOnSearch = true
-                                            )
-                                        }
-
-                                        is ApiResult.Error -> {}
-                                        is ApiResult.Loading -> {
-                                            Box(
-                                                modifier = Modifier.fillMaxSize(),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                CircularProgressIndicator()
-                                            }
-                                        }
-                                    }
                                 }
                             }
+
                         }
                     }
 

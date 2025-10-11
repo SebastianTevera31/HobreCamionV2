@@ -28,4 +28,11 @@ class AddTaskUseCase @Inject constructor(private val appFlotalRepository: Hombre
             vehicleType = vehicleType
         )
     }
+
+    suspend fun updateToken(idUser: Int, token: String) {
+        appFlotalRepository.updateToken(
+            idUser = idUser,
+            token = token
+        )
+    }
 }

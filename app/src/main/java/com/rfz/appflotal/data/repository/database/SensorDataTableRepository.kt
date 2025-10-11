@@ -66,6 +66,11 @@ class SensorDataTableRepository @Inject constructor(private val sensorData: Sens
     }
 
     suspend fun deleteMonitorData(monitorId: Int) = sensorData.deleteMonitorData(monitorId)
+
+    suspend fun isTireActive(monitorId: Int, tire: String): Boolean {
+        val data = sensorData.getLastRecordByTire(monitorId, tire)
+        return data?.active ?: false
+    }
 }
 
 fun SensorDataEntity.toMonitorTireByDateResponse(): MonitorTireByDateResponse {

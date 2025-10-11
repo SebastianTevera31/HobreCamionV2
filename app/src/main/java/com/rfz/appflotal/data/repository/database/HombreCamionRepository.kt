@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.dao.AppHCDao
 import com.rfz.appflotal.data.model.database.AppHCEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,6 +29,8 @@ class HombreCamionRepository @Inject constructor(
 ) {
     suspend fun clearUserData() {
         flotalDao.deleteAllFlotalSoft()
+        val data = AppLocale.getSystemLocale()
+        saveSelectedLanguage(data.language)
     }
 
     suspend fun getUserData(): AppHCEntity? {
@@ -82,6 +85,13 @@ class HombreCamionRepository @Inject constructor(
                 vehicleType = it.vehicleType
             )
         }
+    }
+
+    suspend fun updateToken(idUser: Int, token: String) {
+        flotalDao.updateToken(
+            idUser = idUser,
+            token = token
+        )
     }
 
     suspend fun saveSelectedLanguage(language: String) {

@@ -21,7 +21,7 @@ fun TermsAndConditionsText(text: String, context: Context, modifier: Modifier = 
     val annotatedLinkString: AnnotatedString = buildAnnotatedString {
         pushStringAnnotation(
             tag = "URL",
-            annotation = "https://www.flotal.com.mx"
+            annotation = "https://www.flotal.com.mx/aviso-de-privacidad"
         )
         withStyle(
             style = SpanStyle(
