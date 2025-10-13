@@ -57,23 +57,7 @@ fun UpdateDriverScreen(
                 userData.country,
                 userData.industry
             )
-        }
-        )
-
-        FormTextField(
-            title = R.string.correo_electr_nico,
-            value = userData.email,
-            onValueChange = {
-                saveDriverData(
-                    userData.name,
-                    userData.password,
-                    it,
-                    userData.country,
-                    userData.industry
-                )
-            },
-            keyboardType = KeyboardType.Email
-        )
+        })
 
         FormTextField(
             title = R.string.contrase_a,
