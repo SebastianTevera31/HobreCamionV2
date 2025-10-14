@@ -393,25 +393,39 @@ fun PanelSensor(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = stringResource(R.string.alertas_activas),
-                                color = Color("#2E3192".toColorInt()),
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier.verticalScroll(rememberScrollState())
-                            ) {
-                                val tireRemovingAlert =
-                                    activeAlerts.find { it == SensorAlerts.REMOVAL }
-                                if (tireRemovingAlert != null) {
+                            val tireRemovingAlert = activeAlerts.find { it == SensorAlerts.REMOVAL }
+                            if (tireRemovingAlert != null) {
+                                Text(
+                                    text = stringResource(R.string.alertas_activas),
+                                    color = Color("#2E3192".toColorInt()),
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Color.Red)
+                                ) {
                                     CeldaAlerta(
-                                        tireRemovingAlert.name,
-                                        stringResource(tireRemovingAlert.message)
+                                        wheel,
+                                        stringResource(tireRemovingAlert.message),
                                     )
-                                } else {
+                                }
+                            } else {
+                                Text(
+                                    text = stringResource(R.string.alertas_activas),
+                                    color = Color("#2E3192".toColorInt()),
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.verticalScroll(rememberScrollState())
+                                ) {
                                     activeAlerts.forEach { alerts ->
                                         CeldaAlerta(wheel, stringResource(alerts.message))
                                     }
