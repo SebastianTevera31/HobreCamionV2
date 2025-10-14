@@ -84,7 +84,7 @@
     <string name="recientes">Recent</string>
     <string name="no_ruedas_activas">No active tires were found</string>
     <string name="buscar">Search</string>
-    <string name="truckdriver">TruckDriver</string>
+    <string name="flotal">Flotal</string>
     <string name="seleccionar_fecha">Select date</string>
     <string name="confirmar">OK</string>
     <string name="cancelar">Cancel</string>
@@ -143,7 +143,7 @@
     <string name="conceder_permisos_btn">Grant permissions</string>
     <string name="texto_permisos_app">Bluetooth and Notifications access are required to connect to your HawksHead TPMS monitor.</string>
     <string name="no_se_ha_asignado_ningun_monitor">No monitor has been assigned</string>
-    <string name="hombrecamion_conexion_tpms">TruckDriver - TPMS Connection</string>
+    <string name="hombrecamion_conexion_tpms">Flotal - TPMS Connection</string>
     <string name="recibiendo_datos_monitor">Receiving TPMS data</string>
     <string name="excelente">Excellent</string>
     <string name="aceptable">Fair</string>
@@ -165,4 +165,5 @@
     <string name="aviso_conexion_blueotooth">Monitor data not available. Please check your connection.</string>
     <string name="main_term_text">IMPORTANT \\ CONFIDENTIAL: This message contains information from the company CENTRO CAMIONERO MONTAJES, S.A. DE C.V., located at Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, Mexico, C.P. 29020. The information is privileged, confidential, and access is restricted in accordance with applicable law.</string>
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. is responsible for the processing (use) of your personal data, which will be used to respond to communications generated through this channel and to provide you with the products or services entrusted to us.</string>
+    <string name="en_extraccion">En extracción</string>
 </resources>

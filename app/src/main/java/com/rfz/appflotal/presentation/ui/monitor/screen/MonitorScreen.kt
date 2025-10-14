@@ -59,6 +59,8 @@ fun MonitorScreen(
     val positionsUiState = monitorViewModel.positionsUiState.collectAsState()
     val monitorTireUiState = monitorViewModel.filteredTiresUiState.collectAsState()
 
+    val tireUiState = monitorViewModel.tireUiState.collectAsState()
+
     val configurationsUiState = registerMonitorViewModel.configurationList.collectAsState()
     val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
 
@@ -142,15 +144,8 @@ fun MonitorScreen(
                         val image = monitorViewModel.getBitmapImage()
                         if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                             DiagramaMonitorScreen(
+                                tireUiState = tireUiState.value,
                                 image = image,
-                                currentWheel = monitorUiState.value.currentTire,
-                                temperature = monitorUiState.value.temperature.first,
-                                pressure = monitorUiState.value.pression.first,
-                                timestamp = monitorUiState.value.timestamp,
-                                temperatureStatus = monitorUiState.value.temperature.second,
-                                pressionStatus = monitorUiState.value.pression.second,
-                                batteryStatus = monitorUiState.value.batteryStatus,
-                                ponchaduraStatus = monitorUiState.value.alertaPonchadura,
                                 updateSelectedTire = { selectedTire ->
                                     monitorViewModel.updateSelectedTire(selectedTire)
                                 },

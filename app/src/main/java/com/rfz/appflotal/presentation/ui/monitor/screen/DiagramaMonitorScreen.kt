@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
-import android.R.attr.visible
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.LinearEasing
@@ -38,7 +37,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,24 +59,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
-import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.monitor.component.BluetoothSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 
 @Composable
 fun DiagramaMonitorScreen(
+    tireUiState: TireUiState,
     image: Bitmap?,
     imageDimens: Pair<Int, Int>,
-    currentWheel: String,
-    temperature: Float,
-    pressure: Float,
-    timestamp: String?,
-    temperatureStatus: SensorAlerts,
-    batteryStatus: SensorAlerts,
-    pressionStatus: SensorAlerts,
-    ponchaduraStatus: SensorAlerts,
     updateSelectedTire: (String) -> Unit,
     getSensorData: (String) -> Unit,
     tires: List<Tire>?,
@@ -89,7 +79,7 @@ fun DiagramaMonitorScreen(
     val scrollState = rememberScrollState()
 
     // Actualizar rueda
-    tireSelected = currentWheel
+    tireSelected = tireUiState.currentTire
 
     Column(
         modifier = modifier.verticalScroll(scrollState)
@@ -119,14 +109,15 @@ fun DiagramaMonitorScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 ) {
                     PanelSensor(
-                        wheel = currentWheel,
-                        temperature = temperature,
-                        pressure = pressure,
-                        timestamp = timestamp,
-                        temperatureStatus = temperatureStatus,
-                        pressureStatus = pressionStatus,
-                        batteryStatus = batteryStatus,
-                        ponchaduraStatus = ponchaduraStatus,
+                        wheel = tireUiState.currentTire,
+                        temperature = tireUiState.temperature.first,
+                        pressure = tireUiState.pressure.first,
+                        timestamp = tireUiState.timestamp,
+                        temperatureStatus = tireUiState.temperature.second,
+                        pressureStatus = tireUiState.pressure.second,
+                        batteryStatus = tireUiState.batteryStatus,
+                        flatTireStatus = tireUiState.flatTireStatus,
+                        tireRemovingStatus = tireUiState.tireRemovingStatus,
                         modifier = Modifier
                             .height(320.dp)
                             .padding(bottom = dimensionResource(R.dimen.small_dimen))
@@ -272,13 +263,28 @@ fun PanelSensor(
     timestamp: String?,
     temperatureStatus: SensorAlerts,
     pressureStatus: SensorAlerts,
-    ponchaduraStatus: SensorAlerts,
+    flatTireStatus: SensorAlerts,
+    tireRemovingStatus: SensorAlerts,
     batteryStatus: SensorAlerts,
     modifier: Modifier = Modifier
 ) {
-    val isTempAlert = temperatureStatus == SensorAlerts.HIGH_TEMPERATURE
-    val isPressureAlert = pressureStatus != SensorAlerts.NO_DATA
-    val isPonchadura = ponchaduraStatus != SensorAlerts.NO_DATA
+    val activeAlerts =
+        remember(temperatureStatus, pressureStatus, flatTireStatus, tireRemovingStatus) {
+            buildList {
+                if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
+                    add(temperatureStatus)
+                }
+                if (pressureStatus != SensorAlerts.NO_DATA) {
+                    add(pressureStatus)
+                }
+                if (flatTireStatus != SensorAlerts.NO_DATA) {
+                    add(flatTireStatus)
+                }
+                if (tireRemovingStatus != SensorAlerts.NO_DATA) {
+                    add(tireRemovingStatus)
+                }
+            }
+        }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier
@@ -382,7 +388,7 @@ fun PanelSensor(
                 verticalArrangement = Arrangement.Center
             ) {
                 if (wheel.isNotEmpty()) {
-                    if (isTempAlert || isPressureAlert || isPonchadura) {
+                    if (activeAlerts.isNotEmpty()) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -398,16 +404,17 @@ fun PanelSensor(
                                 verticalArrangement = Arrangement.spacedBy(4.dp),
                                 modifier = Modifier.verticalScroll(rememberScrollState())
                             ) {
-                                if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
-                                    CeldaAlerta(wheel, stringResource(temperatureStatus.message))
-                                }
-
-                                if (pressureStatus != SensorAlerts.NO_DATA) {
-                                    CeldaAlerta(wheel, stringResource(pressureStatus.message))
-                                }
-
-                                if (ponchaduraStatus != SensorAlerts.NO_DATA) {
-                                    CeldaAlerta(wheel, stringResource(ponchaduraStatus.message))
+                                val tireRemovingAlert =
+                                    activeAlerts.find { it == SensorAlerts.REMOVAL }
+                                if (tireRemovingAlert != null) {
+                                    CeldaAlerta(
+                                        tireRemovingAlert.name,
+                                        stringResource(tireRemovingAlert.message)
+                                    )
+                                } else {
+                                    activeAlerts.forEach { alerts ->
+                                        CeldaAlerta(wheel, stringResource(alerts.message))
+                                    }
                                 }
                             }
                         }
@@ -476,7 +483,8 @@ fun PanelSensorViewPreview() {
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
             pressureStatus = SensorAlerts.LOW_PRESSURE,
             batteryStatus = SensorAlerts.NO_DATA,
-            ponchaduraStatus = SensorAlerts.NO_DATA,
+            flatTireStatus = SensorAlerts.NO_DATA,
+            tireRemovingStatus = SensorAlerts.REMOVAL,
             modifier = Modifier
                 .safeDrawingPadding()
                 .height(320.dp)

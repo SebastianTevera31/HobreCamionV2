@@ -49,8 +49,9 @@ enum class SensorAlerts(@StringRes val message: Int) {
     HIGH_TEMPERATURE(R.string.temperatura_alta),
     LOW_BATTERY(R.string.bateria_baja),
     NO_DATA(R.string.sin_datos),
-    FUGA_RAPIDA(R.string.fuga_rapida),
-    FUGA_LENTA(R.string.fuga_lenta)
+    FAST_LEAK(R.string.fuga_rapida),
+    SLOW_LEAK(R.string.fuga_lenta),
+    REMOVAL(R.string.en_extraccion)
 }
 
 @HiltViewModel
@@ -67,6 +68,7 @@ class MonitorViewModel @Inject constructor(
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
         MutableStateFlow(MonitorUiState())
     val monitorUiState = _monitorUiState.asStateFlow()
+
     private val _positionsUiState =
         MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Loading)
     val positionsUiState = _positionsUiState.asStateFlow()
@@ -75,8 +77,13 @@ class MonitorViewModel @Inject constructor(
         MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Success(emptyList()))
     val filteredTiresUiState = _filteredTiresUiState.asStateFlow()
 
+    private val _tireUiState = MutableStateFlow(TireUiState())
+    val tireUiState = _tireUiState.asStateFlow()
+
+
     private var _wifiStatus: MutableStateFlow<NetworkStatus> =
         MutableStateFlow(NetworkStatus.Connected)
+
     val wifiStatus = _wifiStatus.asStateFlow()
 
     var shouldReadManually = true
@@ -247,20 +254,21 @@ class MonitorViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 while (isActive) {
                     val uiState = _monitorUiState.value
+                    val tireUiState = _tireUiState.value
                     val monitorId = uiState.monitorId
                     val tires = updateTiresStatus(
                         listTires = uiState.listOfTires
                     ) { sensorDataTableRepository.getLastData(monitorId) }
 
                     updateTireState(
-                        currentTire = uiState.currentTire,
+                        currentTire = tireUiState.currentTire,
                         tires = tires,
                     ) { tire ->
-                        _monitorUiState.update { currentUiState ->
+                        _tireUiState.update { currentUiState ->
                             currentUiState.copy(
                                 currentTire = "",
                                 batteryStatus = SensorAlerts.NO_DATA,
-                                pression = Pair(0f, SensorAlerts.NO_DATA),
+                                pressure = Pair(0f, SensorAlerts.NO_DATA),
                                 temperature = Pair(0f, SensorAlerts.NO_DATA),
                                 timestamp = ""
                             )
@@ -279,26 +287,28 @@ class MonitorViewModel @Inject constructor(
     }
 
     private fun updateSensorData(dataFrame: String, timestamp: String? = null) {
+        val pressure = getPressure(dataFrame)
+        val pressureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
+
+        val temperature = getTemperature(dataFrame)
+        val temperatureStatus =
+            decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
+
+        val flatTireStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PERFORACION)
+
+        val batteryStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
+
+        val tire = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
+        val realTire = getTirePosition(tire, pressure, temperature)
+
+        val time = if (timestamp != null) {
+            val getDate = getDateObject(timestamp)
+            getCurrentDate(date = getDate, pattern = "dd/MM/yyyy HH:mm:ss")
+        } else getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss")
+
         _monitorUiState.update { currentUiState ->
-            val tire = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
-            val realTire = findOutPosition("P${tire}")
-
-            val pressure = getPressure(dataFrame)
-            val pressureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
-
-            val temperature = getTemperature(dataFrame)
-            val temperatureStatus =
-                decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
-
-            val alertaPonchadura = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PERFORACION)
-
-            val batteryStatus =
-                decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
-
-            val inAlert = temperatureStatus != SensorAlerts.NO_DATA
-                    || pressureStatus != SensorAlerts.NO_DATA
-                    || batteryStatus != SensorAlerts.NO_DATA
-                    || alertaPonchadura != SensorAlerts.NO_DATA
+            val inAlert =
+                getIsTireInAlert(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
 
             val newList = currentUiState.listOfTires.toMutableList().map { tireData ->
                 if (tireData.sensorPosition == realTire) tireData.copy(
@@ -306,20 +316,18 @@ class MonitorViewModel @Inject constructor(
                     isActive = true
                 ) else tireData
             }
+            currentUiState.copy(listOfTires = newList)
+        }
 
-            val time = if (timestamp != null) {
-                val getDate = getDateObject(timestamp)
-                getCurrentDate(date = getDate, pattern = "dd/MM/yyyy HH:mm:ss")
-            } else getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss")
-
+        _tireUiState.update { currentUiState ->
             currentUiState.copy(
                 currentTire = realTire,
-                pression = Pair(pressure, pressureStatus),
+                pressure = Pair(pressure, pressureStatus),
                 temperature = Pair(temperature, temperatureStatus),
                 timestamp = time,
                 batteryStatus = batteryStatus,
-                listOfTires = newList,
-                alertaPonchadura = alertaPonchadura
+                flatTireStatus = flatTireStatus,
+                tireRemovingStatus = if (pressure.toInt() == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA
             )
         }
     }
@@ -327,48 +335,49 @@ class MonitorViewModel @Inject constructor(
     fun getSensorDataByWheel(tireSelected: String) {
         shouldReadManually = false
         viewModelScope.launch {
-            val uiState = _monitorUiState.value
+            val monitorUiState = _monitorUiState.value
             val data = sensorDataTableRepository
-                .getLastDataByTire(uiState.monitorId, tireSelected)
+                .getLastDataByTire(monitorUiState.monitorId, tireSelected)
 
             if (data != null) {
                 val pressureStatus = if (data.lowPressureAlert) SensorAlerts.LOW_PRESSURE
                 else if (data.highPressureAlert) SensorAlerts.HIGH_PRESSURE
                 else SensorAlerts.NO_DATA
 
-                val temperatureStatus =
-                    if (data.highTemperatureAlert) SensorAlerts.HIGH_TEMPERATURE
-                    else SensorAlerts.NO_DATA
+                val temperatureStatus = if (data.highTemperatureAlert) SensorAlerts.HIGH_TEMPERATURE
+                else SensorAlerts.NO_DATA
 
                 val batteryStatus = if (data.lowBatteryAlert) SensorAlerts.LOW_BATTERY
                 else SensorAlerts.NO_DATA
 
                 val inAlert = getIsTireInAlert(
-                    tempAlert = temperatureStatus,
-                    pressureAlert = pressureStatus,
-                    batteryAlert = batteryStatus
+                    temperatureStatus = temperatureStatus,
+                    pressureStatus = pressureStatus,
+                    batteryStatus = batteryStatus,
+                    flatTireStatus = SensorAlerts.NO_DATA,
                 )
 
-                _monitorUiState.update { currentUiState ->
-                    val newList =
-                        currentUiState.listOfTires.toMutableList().map { tire ->
-                            if (tire.sensorPosition == tireSelected) tire.copy(
-                                inAlert = inAlert
-                            ) else tire
-                        }
+                val newList = monitorUiState.listOfTires.toMutableList().map { tire ->
+                    if (tire.sensorPosition == tireSelected) tire.copy(
+                        inAlert = inAlert
+                    ) else tire
+                }
 
+                _tireUiState.update { currentUiState ->
                     currentUiState.copy(
                         currentTire = data.tire,
-
-                        pression = Pair(data.pressure.toFloat(), pressureStatus),
-
+                        pressure = Pair(data.pressure.toFloat(), pressureStatus),
                         temperature = Pair(
                             data.temperature.toFloat(),
                             temperatureStatus
                         ),
-
                         timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
                         batteryStatus = batteryStatus,
+                    )
+                }
+
+                _monitorUiState.update { currentUiState ->
+                    currentUiState.copy(
                         listOfTires = newList
                     )
                 }
@@ -377,7 +386,7 @@ class MonitorViewModel @Inject constructor(
     }
 
     fun updateSelectedTire(selectedTire: String) {
-        _monitorUiState.update { currentUiState ->
+        _tireUiState.update { currentUiState ->
             currentUiState.copy(
                 currentTire = selectedTire
             )
@@ -386,12 +395,17 @@ class MonitorViewModel @Inject constructor(
 
     fun getLastedSensorData() {
         viewModelScope.launch {
-            _positionsUiState.update { ApiResult.Loading }
-            val sensorData = sensorDataTableRepository.getLastData(monitorUiState.value.monitorId)
+            val uiState = monitorUiState.value
+            val tires = uiState.listOfTires.associateBy { it.sensorPosition }
 
-            val filterData = sensorData.filter { it.active }
-            val sortedData = filterData.map { it.toTireData() }
-                .sortedBy { it.tirePosition.replace("P", "").toInt() }
+            _positionsUiState.update { ApiResult.Loading }
+
+            val sensorData = sensorDataTableRepository.getLastData(uiState.monitorId)
+
+            val filterData = sensorData.filter { it.active == (tires[it.tire]?.isActive ?: false) }
+            val sortedData = filterData.map { it.toTireData() }.sortedBy {
+                it.tirePosition.replace("P", "").toInt()
+            }
 
             if (sensorData.isNotEmpty()) {
                 _positionsUiState.update { ApiResult.Success(sortedData) }
@@ -434,15 +448,12 @@ class MonitorViewModel @Inject constructor(
         _filteredTiresUiState.value = ApiResult.Success(emptyList())
     }
 
+
+    // Corregir funcion
     fun getBitmapImage(): Bitmap? {
         val baseConfig = _monitorUiState.value.baseConfig ?: return null
 
-        val imageConfig = when (baseConfig) {
-            BaseConfig.BASE6 -> ImageConfig(Pair(620, 327), R.drawable.base6)
-            BaseConfig.BASE10 -> ImageConfig(Pair(628, 327), R.drawable.base22)
-            BaseConfig.BASE22 -> ImageConfig(Pair(1280, 425), R.drawable.base22)
-            BaseConfig.BASE38 -> ImageConfig(Pair(1780, 327), R.drawable.base32)
-        }
+        val imageConfig = getImageConfig(baseConfig)
 
         _monitorUiState.update { currentUiState ->
             currentUiState.copy(imageDimen = imageConfig.dimen)

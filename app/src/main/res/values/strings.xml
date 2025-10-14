@@ -86,7 +86,7 @@
     <string name="recientes">Recientes</string>
     <string name="no_ruedas_activas">No se encontraron llantas activas</string>
     <string name="buscar">Buscar</string>
-    <string name="truckdriver">TruckDriver</string>
+    <string name="flotal">Flotal</string>
     <string name="seleccionar_fecha">Seleccionar fecha</string>
     <string name="confirmar">Confirmar</string>
     <string name="cancelar">Cancelar</string>
@@ -145,7 +145,7 @@
     <string name="conceder_permisos_btn">Conceder permisos</string>
     <string name="texto_permisos_app">Se requiere de acceso a Bluetooth y Notificaciones para conectarse con tu monitor HawksHead TPMS.</string>
     <string name="no_se_ha_asignado_ningun_monitor">No se ha asignado ningun monitor</string>
-    <string name="hombrecamion_conexion_tpms">TruckDriver - Conexion TPMS</string>
+    <string name="hombrecamion_conexion_tpms">Flotal - Conexion TPMS</string>
     <string name="recibiendo_datos_monitor">Recibiendo datos del monitor</string>
     <string name="excelente">Excelente</string>
     <string name="aceptable">Aceptable</string>
@@ -167,4 +167,5 @@
     <string name="aviso_conexion_blueotooth">Datos del monitor no disponible. Verifique su conexion.</string>
     <string name="main_term_text">IMPORTANTE \\ CONFIDENCIAL: Este mensaje contiene información de la compañía CENTRO CAMIONERO MONTAJES, S.A. DE C.V., con domicilio en Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, México, C.P. 29020. La cual es de carácter privilegiado, confidencial, y de acceso restringido conforme a la Ley aplicable.</string>
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. es Responsable del tratamiento (uso) de sus datos personales, los cuales serán usados a efecto de dar contestación a las comunicaciones generadas por esta vía y para proveerle los productos o prestarle los servicios que se nos encomienden.</string>
+    <string name="en_extraccion">Being removed</string>
 </resources>

@@ -1,17 +1,16 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
+import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.Positions.findOutPosition
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.collections.associateBy
-import kotlin.collections.orEmpty
 
+data class ImageConfig(val dimen: Pair<Int, Int>, val image: Int)
 
 enum class BaseConfig(val base: Int) {
     BASE6(6), BASE10(10), BASE22(22), BASE38(38)
 }
-
-data class ImageConfig(val dimen: Pair<Int, Int>, val image: Int)
 
 fun getImageDimens(resourcer: BaseConfig?): Pair<Int, Int> {
     return when (resourcer) {
@@ -23,29 +22,25 @@ fun getImageDimens(resourcer: BaseConfig?): Pair<Int, Int> {
     }
 }
 
-fun getAlertType(highTemperature: Boolean): SensorAlerts {
-    return if (highTemperature) SensorAlerts.HIGH_TEMPERATURE
-    else SensorAlerts.NO_DATA
-}
-
-fun getPressureAlert(lowPressure: Boolean, highPressure: Boolean): SensorAlerts {
-    return if (lowPressure) SensorAlerts.LOW_PRESSURE
-    else if (highPressure) SensorAlerts.HIGH_PRESSURE
-    else SensorAlerts.NO_DATA
-}
-
-fun getBatteryAlert(lowBattery: Boolean): SensorAlerts {
-    return if (lowBattery) SensorAlerts.LOW_BATTERY else SensorAlerts.NO_DATA
+fun getImageConfig(baseConfig: BaseConfig): ImageConfig {
+    return when (baseConfig) {
+        BaseConfig.BASE6 -> ImageConfig(Pair(620, 327), R.drawable.base6)
+        BaseConfig.BASE10 -> ImageConfig(Pair(628, 327), R.drawable.base22)
+        BaseConfig.BASE22 -> ImageConfig(Pair(1280, 425), R.drawable.base22)
+        BaseConfig.BASE38 -> ImageConfig(Pair(1780, 327), R.drawable.base32)
+    }
 }
 
 fun getIsTireInAlert(
-    tempAlert: SensorAlerts,
-    pressureAlert: SensorAlerts,
-    batteryAlert: SensorAlerts
+    temperatureStatus: SensorAlerts,
+    pressureStatus: SensorAlerts,
+    batteryStatus: SensorAlerts,
+    flatTireStatus: SensorAlerts
 ): Boolean {
-    return tempAlert != SensorAlerts.NO_DATA
-            || pressureAlert != SensorAlerts.NO_DATA
-            || batteryAlert != SensorAlerts.NO_DATA
+    return temperatureStatus != SensorAlerts.NO_DATA
+            || pressureStatus != SensorAlerts.NO_DATA
+            || batteryStatus != SensorAlerts.NO_DATA
+            || flatTireStatus != SensorAlerts.NO_DATA
 }
 
 fun getBaseConfigImage(baseConfig: Int): BaseConfig {
@@ -80,4 +75,10 @@ fun updateTireState(currentTire: String, tires: List<Tire>, onUpdate: (tire: Tir
             onUpdate(tire)
         }
     }
+}
+
+fun getTirePosition(tire: Int, pressure: Float, temperature: Float): String {
+    val pressureValue = pressure.toInt()
+    val temperatureValue = temperature.toInt()
+    return if (pressureValue != 0 && temperatureValue != 0) findOutPosition("P${tire}") else ""
 }

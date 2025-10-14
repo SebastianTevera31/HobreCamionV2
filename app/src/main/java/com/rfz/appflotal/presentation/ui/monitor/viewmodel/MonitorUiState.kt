@@ -2,20 +2,14 @@ package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.data.model.database.SensorDataEntity
-import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 
 data class MonitorUiState(
     val monitorId: Int = 0,
-    val currentTire: String = "",
     val currentData: String = "",
     val baseConfig: BaseConfig? = null,
-    val pression: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
-    val temperature: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
-    val depth: Float = 0f,
-    val timestamp: String = "",
     val signalIntensity: Pair<BluetoothSignalQuality, String> = Pair(
         BluetoothSignalQuality.Desconocida,
         ""
@@ -24,11 +18,20 @@ data class MonitorUiState(
     val chassisImageUrl: String = "",
     val listOfTires: List<Tire> = emptyList(),
     val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
-    val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val showDialog: Boolean = false,
     val showView: Boolean = false,
-    val alertaPonchadura: SensorAlerts = SensorAlerts.NO_DATA,
     val isBluetoothOn: Boolean = false
+)
+
+data class TireUiState(
+    val currentTire: String = "",
+    val pressure: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
+    val temperature: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
+    val depth: Float = 0f,
+    val timestamp: String = "",
+    val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA,
+    val flatTireStatus: SensorAlerts = SensorAlerts.NO_DATA,
+    val tireRemovingStatus: SensorAlerts = SensorAlerts.NO_DATA
 )
 
 data class Tire(
@@ -46,16 +49,6 @@ fun CoordinatesEntity.toTire(): Tire {
         isActive = isActive,
         xPosition = xPosition,
         yPosition = yPosition
-    )
-}
-
-fun DiagramMonitorResponse.toTireData(): MonitorTireByDateResponse {
-    return MonitorTireByDateResponse(
-        tirePosition = sensorPosition,
-        tireNumber = tireNumber,
-        sensorDate = ultimalectura,
-        psi = psi.toInt(),
-        temperature = temperature.toInt()
     )
 }
 

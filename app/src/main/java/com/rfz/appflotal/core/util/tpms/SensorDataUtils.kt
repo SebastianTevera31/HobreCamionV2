@@ -16,7 +16,7 @@ fun getTire(dataFrame: String): String {
 
 fun getPressure(dataFrame: String): Float {
     val data = decodeDataFrame(dataFrame, MonitorDataFrame.PRESSION)
-    return  (data.toFloat() * 100).roundToInt() / 100f
+    return (data.toFloat() * 100).roundToInt() / 100f
 }
 
 fun getTemperature(dataFrame: String): Float {
