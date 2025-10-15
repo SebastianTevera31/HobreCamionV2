@@ -40,7 +40,7 @@ class UpdateSensorDataUseCase @Inject constructor() {
 
         val tire = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
         val realTire =
-            if (pressure.toInt() != 0 && temperature.toInt() != 0) findOutPosition("P${tire}") else ""
+            if (pressure.toInt() != 0 || temperature.toInt() != 0) findOutPosition("P${tire}") else ""
 
 
         val time = if (timestamp != null) {
