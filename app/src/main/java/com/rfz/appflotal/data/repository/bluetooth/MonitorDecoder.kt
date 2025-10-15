@@ -14,7 +14,7 @@ enum class SensorAlertDataFrame {
     LOW_BATTERY,
     HIGH_TEMPERATURE,
     PRESSURE,
-    PERFORACION
+    FLAT_TIRE
 }
 
 fun decodeDataFrame(dataFrame: String?, typeData: MonitorDataFrame): String {
@@ -76,13 +76,13 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
                 else SensorAlerts.NO_DATA
             }
 
-            SensorAlertDataFrame.PERFORACION -> {
+            SensorAlertDataFrame.FLAT_TIRE -> {
                 val status = dataFrame.substring(25, 26)
                 val binary = status.toInt(16).toString(2).padStart(4, '0')
                 val bits = binary.substring(2, 4) // 01 = Fuga rapida, 10 = Fuga lenta
                 when (bits) {
-                    "01" -> SensorAlerts.SLOW_LEAK
-                    "10" -> SensorAlerts.FAST_LEAK
+                    "01" -> SensorAlerts.FAST_LEAKAGE
+                    "10" -> SensorAlerts.SLOW_LEAKAGE
                     else -> SensorAlerts.NO_DATA
                 }
             }

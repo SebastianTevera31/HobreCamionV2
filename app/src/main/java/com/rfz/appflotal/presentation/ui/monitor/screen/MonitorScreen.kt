@@ -141,11 +141,11 @@ fun MonitorScreen(
                         modifier = modifier.background(Color("#EDF0F8".toColorInt())),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        val image = monitorViewModel.getBitmapImage()
+                        monitorViewModel.getBitmapImage()
                         if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                             DiagramaMonitorScreen(
                                 tireUiState = tireUiState.value,
-                                image = image,
+                                image = monitorUiState.value.imageBitmap,
                                 updateSelectedTire = { selectedTire ->
                                     monitorViewModel.updateSelectedTire(selectedTire)
                                 },

@@ -34,7 +34,7 @@ class UpdateSensorDataUseCase @Inject constructor() {
         val temperatureStatus =
             decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
 
-        val flatTireStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PERFORACION)
+        val flatTireStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.FLAT_TIRE)
 
         val batteryStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
 

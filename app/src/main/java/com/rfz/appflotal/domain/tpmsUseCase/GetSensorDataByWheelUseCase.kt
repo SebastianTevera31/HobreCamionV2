@@ -51,7 +51,8 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             pressure = Pair(data.pressure.toFloat(), pressureStatus),
             temperature = Pair(data.temperature.toFloat(), temperatureStatus),
             timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
-            batteryStatus = batteryStatus
+            batteryStatus = batteryStatus,
+            tireRemovingStatus = if (data.pressure == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA
         )
 
         return Result(

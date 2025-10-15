@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
+import android.graphics.Bitmap
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
@@ -15,6 +16,7 @@ data class MonitorUiState(
         ""
     ),
     val imageDimen: Pair<Int, Int> = Pair(0, 0),
+    val imageBitmap: Bitmap? = null,
     val chassisImageUrl: String = "",
     val listOfTires: List<Tire> = emptyList(),
     val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),

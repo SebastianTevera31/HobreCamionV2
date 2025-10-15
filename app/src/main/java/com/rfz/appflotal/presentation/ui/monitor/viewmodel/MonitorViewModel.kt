@@ -1,7 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -41,8 +40,8 @@ enum class SensorAlerts(@StringRes val message: Int) {
     HIGH_TEMPERATURE(R.string.temperatura_alta),
     LOW_BATTERY(R.string.bateria_baja),
     NO_DATA(R.string.sin_datos),
-    FAST_LEAK(R.string.fuga_rapida),
-    SLOW_LEAK(R.string.fuga_lenta),
+    FAST_LEAKAGE(R.string.fuga_rapida),
+    SLOW_LEAKAGE(R.string.fuga_lenta),
     REMOVAL(R.string.en_extraccion)
 }
 
@@ -371,15 +370,15 @@ class MonitorViewModel @Inject constructor(
     }
 
     // Corregir funcion
-    fun getBitmapImage(): Bitmap? {
-        val baseConfig = _monitorUiState.value.baseConfig ?: return null
+    fun getBitmapImage() {
+        val baseConfig = _monitorUiState.value.baseConfig ?: return
 
         val imageConfig = getImageConfig(baseConfig)
 
-        _monitorUiState.update { currentUiState ->
-            currentUiState.copy(imageDimen = imageConfig.dimen)
-        }
+        val bitmap = getBitmapFromDrawable(imageConfig.image, context)
 
-        return getBitmapFromDrawable(imageConfig.image, context)
+        _monitorUiState.update { currentUiState ->
+            currentUiState.copy(imageDimen = imageConfig.dimen, imageBitmap = bitmap)
+        }
     }
 }
