@@ -11,9 +11,6 @@ data class TireCrudDto (
     @SerializedName("c_typeAcquisition_fk_1")
     val typeAcquisitionId: Int,
 
-    @SerializedName("c_provider_fk_3")
-    val providerId: Int,
-
     @SerializedName("fld_acquisitionDate")
     val acquisitionDate: String,
 
@@ -46,9 +43,6 @@ data class TireCrudDto (
 
     @SerializedName("c_retreadDesign_fk_2")
     val retreadDesignId: Int,
-
-    @SerializedName("c_destination_fk_8")
-    val destinationId: Int,
 
     @SerializedName("fld_lifecycle")
     val lifecycle: Int

@@ -17,6 +17,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
@@ -64,7 +65,7 @@ import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.backgroundLight
-import com.rfz.appflotal.presentation.ui.brand.MarcasScreen
+import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
@@ -387,6 +388,7 @@ class InicioActivity : ComponentActivity() {
                                             }
                                         }
                                     },
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
 

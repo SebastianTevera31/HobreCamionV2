@@ -7,5 +7,4 @@ data class CrudOriginalDesignDto(
     val c_brands_fk_1: Int,
     val c_utilization_fk_2: Int,
     val fld_notes: String,
-    val c_user_fk_3: Int
 )

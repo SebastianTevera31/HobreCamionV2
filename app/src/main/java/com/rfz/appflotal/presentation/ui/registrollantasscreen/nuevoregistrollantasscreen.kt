@@ -110,15 +110,14 @@ fun NuevoRegistroLlantasScreen(
     var acquisitionDate by remember { mutableStateOf("") }
     var document by remember { mutableStateOf("") }
     var cost by remember { mutableStateOf("") }
+    var folioFactura by remember { mutableStateOf("") }
     var treadDepth by remember { mutableStateOf("") }
     var tireNumber by remember { mutableStateOf("") }
     var dot by remember { mutableStateOf("") }
 
 
-
     var showDatePicker by remember { mutableStateOf(false) }
     val calendar = Calendar.getInstance()
-
 
 
     fun applyFilter() {
@@ -169,7 +168,9 @@ fun NuevoRegistroLlantasScreen(
 
                 val acquisitionTypeResult = acquisitionTypeUseCase(bearerToken)
                 if (acquisitionTypeResult.isSuccess) {
-                    acquisitionTypes.add(acquisitionTypeResult.getOrNull() ?: throw Exception("No acquisition types"))
+                    acquisitionTypes.add(
+                        acquisitionTypeResult.getOrNull() ?: throw Exception("No acquisition types")
+                    )
                 }
 
 
@@ -244,7 +245,8 @@ fun NuevoRegistroLlantasScreen(
             if (selectedAcquisitionType == null || selectedProvider == null ||
                 selectedBase == null || selectedProduct == null ||
                 acquisitionDate.isBlank() ||
-                cost.isBlank() || tireNumber.isBlank()) {
+                cost.isBlank() || tireNumber.isBlank()
+            ) {
                 errorMessage = "Todos los campos requeridos deben estar completos"
                 return@launch
             }
@@ -254,7 +256,7 @@ fun NuevoRegistroLlantasScreen(
                 val dateTime = try {
                     LocalDateTime.parse(acquisitionDate, DateTimeFormatter.ISO_DATE_TIME)
                 } catch (e: Exception) {
-                     try {
+                    try {
                         val formatter = DateTimeFormatter.ofPattern("yyyy-M-d'T'HH:mm:ss.SSS'Z'")
                         LocalDateTime.parse(acquisitionDate, formatter)
                     } catch (e: Exception) {
@@ -275,10 +277,9 @@ fun NuevoRegistroLlantasScreen(
                 val request = TireCrudDto(
                     idTire = editingTire?.idTire ?: 0,
                     typeAcquisitionId = selectedAcquisitionType!!.idAcquisitionType,
-                    providerId = selectedProvider!!.idProvider,
                     acquisitionDate = dateTime.toString(),
                     registrationDate = LocalDateTime.now().toString(),
-                    document = "x",
+                    document = folioFactura,
                     treadDepth = treadDepth.toInt(),
                     unitCost = cost.toInt(),
                     tireNumber = tireNumber,
@@ -287,7 +288,6 @@ fun NuevoRegistroLlantasScreen(
                     dot = dot,
                     isActive = true,
                     retreadDesignId = 0,
-                    destinationId = selectedBase!!.id_base,
                     lifecycle = 0
                 )
 
@@ -344,7 +344,7 @@ fun NuevoRegistroLlantasScreen(
             selectedBase = null
             selectedProduct = null
             acquisitionDate = ""
-            document = ""
+            folioFactura = ""
             cost = ""
             treadDepth = ""
             tireNumber = ""
@@ -409,7 +409,11 @@ fun NuevoRegistroLlantasScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             // Search bar
             Box(
                 modifier = Modifier
@@ -424,15 +428,30 @@ fun NuevoRegistroLlantasScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.White.copy(alpha = 0.9f)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            null,
+                            tint = Color.White.copy(alpha = 0.9f)
+                        )
+                    },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Close, null, tint = Color.White.copy(alpha = 0.8f))
+                                Icon(
+                                    Icons.Default.Close,
+                                    null,
+                                    tint = Color.White.copy(alpha = 0.8f)
+                                )
                             }
                         }
                     },
-                    placeholder = { Text("Buscar llantas...", color = Color.White.copy(alpha = 0.6f)) },
+                    placeholder = {
+                        Text(
+                            "Buscar llantas...",
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.White,
@@ -450,11 +469,16 @@ fun NuevoRegistroLlantasScreen(
             }
 
             // Tire list
-            Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundColor)
+            ) {
                 when {
                     isLoading && displayedTires.isEmpty() -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
+
                     displayedTires.isEmpty() -> {
                         Text(
                             text = if (searchQuery.isBlank()) "No hay llantas registradas" else "No se encontraron resultados",
@@ -462,8 +486,13 @@ fun NuevoRegistroLlantasScreen(
                             color = textColor.copy(alpha = 0.6f)
                         )
                     }
+
                     else -> {
-                        LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp)
+                        ) {
                             items(displayedTires) { tire ->
                                 TireItem(
                                     tire = tire,
@@ -491,12 +520,15 @@ fun NuevoRegistroLlantasScreen(
                         onClick = {
                             showDatePicker = false
                             datePickerState.selectedDateMillis?.let { millis ->
-                                val calendar = Calendar.getInstance().apply { timeInMillis = millis }
+                                val calendar =
+                                    Calendar.getInstance().apply { timeInMillis = millis }
                                 val year = calendar.get(Calendar.YEAR)
                                 val month = calendar.get(Calendar.MONTH) + 1
                                 val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-                                acquisitionDate = "$year-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T00:00:00.000Z"
+                                acquisitionDate = "$year-${month.toString().padStart(2, '0')}-${
+                                    day.toString().padStart(2, '0')
+                                }T00:00:00.000Z"
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
@@ -570,7 +602,11 @@ fun NuevoRegistroLlantasScreen(
                             }
                         } else {
                             // Acquisition Type field
-                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
                                 Column {
                                     Text(
                                         "Tipo de Compra",
@@ -582,7 +618,9 @@ fun NuevoRegistroLlantasScreen(
                                     )
                                     ExposedDropdownMenuBox(
                                         expanded = showAcquisitionTypeMenu,
-                                        onExpandedChange = { showAcquisitionTypeMenu = !showAcquisitionTypeMenu }
+                                        onExpandedChange = {
+                                            showAcquisitionTypeMenu = !showAcquisitionTypeMenu
+                                        }
                                     ) {
                                         OutlinedTextField(
                                             value = selectedAcquisitionType?.description ?: "",
@@ -618,56 +656,60 @@ fun NuevoRegistroLlantasScreen(
                                 }
                             }
 
-                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Column {
-                                    Text(
-                                        "Proveedor",
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            color = primaryColor,
-                                            fontWeight = FontWeight.SemiBold
-                                        ),
-                                        modifier = Modifier.padding(bottom = 4.dp)
-                                    )
-                                    ExposedDropdownMenuBox(
-                                        expanded = showProviderMenu,
-                                        onExpandedChange = { showProviderMenu = !showProviderMenu }
-                                    ) {
-                                        OutlinedTextField(
-                                            value = selectedProvider?.description ?: "",
-                                            onValueChange = {},
-                                            readOnly = true,
-                                            trailingIcon = {
-                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showProviderMenu)
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .menuAnchor(),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = primaryColor,
-                                                unfocusedBorderColor = Color.Gray
-                                            ),
-                                            shape = RoundedCornerShape(14.dp)
-                                        )
-                                        ExposedDropdownMenu(
-                                            expanded = showProviderMenu,
-                                            onDismissRequest = { showProviderMenu = false }
-                                        ) {
-                                            providers.forEach { provider ->
-                                                DropdownMenuItem(
-                                                    text = { Text(provider.description) },
-                                                    onClick = {
-                                                        selectedProvider = provider
-                                                        showProviderMenu = false
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+//                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+//                                Column {
+//                                    Text(
+//                                        "Proveedor",
+//                                        style = MaterialTheme.typography.labelMedium.copy(
+//                                            color = primaryColor,
+//                                            fontWeight = FontWeight.SemiBold
+//                                        ),
+//                                        modifier = Modifier.padding(bottom = 4.dp)
+//                                    )
+//                                    ExposedDropdownMenuBox(
+//                                        expanded = showProviderMenu,
+//                                        onExpandedChange = { showProviderMenu = !showProviderMenu }
+//                                    ) {
+//                                        OutlinedTextField(
+//                                            value = selectedProvider?.description ?: "",
+//                                            onValueChange = {},
+//                                            readOnly = true,
+//                                            trailingIcon = {
+//                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showProviderMenu)
+//                                            },
+//                                            modifier = Modifier
+//                                                .fillMaxWidth()
+//                                                .menuAnchor(),
+//                                            colors = OutlinedTextFieldDefaults.colors(
+//                                                focusedBorderColor = primaryColor,
+//                                                unfocusedBorderColor = Color.Gray
+//                                            ),
+//                                            shape = RoundedCornerShape(14.dp)
+//                                        )
+//                                        ExposedDropdownMenu(
+//                                            expanded = showProviderMenu,
+//                                            onDismissRequest = { showProviderMenu = false }
+//                                        ) {
+//                                            providers.forEach { provider ->
+//                                                DropdownMenuItem(
+//                                                    text = { Text(provider.description) },
+//                                                    onClick = {
+//                                                        selectedProvider = provider
+//                                                        showProviderMenu = false
+//                                                    }
+//                                                )
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
 
 
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
                                 Text(
                                     "Fecha de Adquisición",
                                     style = MaterialTheme.typography.labelMedium.copy(
@@ -685,7 +727,10 @@ fun NuevoRegistroLlantasScreen(
                                         .clickable { showDatePicker = true },
                                     trailingIcon = {
                                         IconButton(onClick = { showDatePicker = true }) {
-                                            Icon(Icons.Default.DateRange, contentDescription = "Select Date")
+                                            Icon(
+                                                Icons.Default.DateRange,
+                                                contentDescription = "Select Date"
+                                            )
                                         }
                                     },
                                     colors = OutlinedTextFieldDefaults.colors(
@@ -697,56 +742,60 @@ fun NuevoRegistroLlantasScreen(
                             }
 
 
-                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Column {
-                                    Text(
-                                        "Base",
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            color = primaryColor,
-                                            fontWeight = FontWeight.SemiBold
-                                        ),
-                                        modifier = Modifier.padding(bottom = 4.dp)
-                                    )
-                                    ExposedDropdownMenuBox(
-                                        expanded = showBaseMenu,
-                                        onExpandedChange = { showBaseMenu = !showBaseMenu }
-                                    ) {
-                                        OutlinedTextField(
-                                            value = selectedBase?.fld_description ?: "",
-                                            onValueChange = {},
-                                            readOnly = true,
-                                            trailingIcon = {
-                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showBaseMenu)
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .menuAnchor(),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = primaryColor,
-                                                unfocusedBorderColor = Color.Gray
-                                            ),
-                                            shape = RoundedCornerShape(14.dp)
-                                        )
-                                        ExposedDropdownMenu(
-                                            expanded = showBaseMenu,
-                                            onDismissRequest = { showBaseMenu = false }
-                                        ) {
-                                            bases.forEach { base ->
-                                                DropdownMenuItem(
-                                                    text = { Text(base.fld_description) },
-                                                    onClick = {
-                                                        selectedBase = base
-                                                        showBaseMenu = false
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+//                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+//                                Column {
+//                                    Text(
+//                                        "Base",
+//                                        style = MaterialTheme.typography.labelMedium.copy(
+//                                            color = primaryColor,
+//                                            fontWeight = FontWeight.SemiBold
+//                                        ),
+//                                        modifier = Modifier.padding(bottom = 4.dp)
+//                                    )
+//                                    ExposedDropdownMenuBox(
+//                                        expanded = showBaseMenu,
+//                                        onExpandedChange = { showBaseMenu = !showBaseMenu }
+//                                    ) {
+//                                        OutlinedTextField(
+//                                            value = selectedBase?.fld_description ?: "",
+//                                            onValueChange = {},
+//                                            readOnly = true,
+//                                            trailingIcon = {
+//                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showBaseMenu)
+//                                            },
+//                                            modifier = Modifier
+//                                                .fillMaxWidth()
+//                                                .menuAnchor(),
+//                                            colors = OutlinedTextFieldDefaults.colors(
+//                                                focusedBorderColor = primaryColor,
+//                                                unfocusedBorderColor = Color.Gray
+//                                            ),
+//                                            shape = RoundedCornerShape(14.dp)
+//                                        )
+//                                        ExposedDropdownMenu(
+//                                            expanded = showBaseMenu,
+//                                            onDismissRequest = { showBaseMenu = false }
+//                                        ) {
+//                                            bases.forEach { base ->
+//                                                DropdownMenuItem(
+//                                                    text = { Text(base.fld_description) },
+//                                                    onClick = {
+//                                                        selectedBase = base
+//                                                        showBaseMenu = false
+//                                                    }
+//                                                )
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
 
 
-                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
                                 Column {
                                     Text(
                                         "Producto",
@@ -794,7 +843,36 @@ fun NuevoRegistroLlantasScreen(
                                 }
                             }
 
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Text(
+                                    "#Documento",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        color = primaryColor,
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                                OutlinedTextField(
+                                    value = folioFactura,
+                                    onValueChange = { folioFactura = it },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = primaryColor,
+                                        unfocusedBorderColor = Color.Gray
+                                    ),
+                                    shape = RoundedCornerShape(14.dp)
+                                )
+                            }
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
                                 Text(
                                     "Costo $ (SIN IVA)",
                                     style = MaterialTheme.typography.labelMedium.copy(
@@ -819,8 +897,11 @@ fun NuevoRegistroLlantasScreen(
                                 )
                             }
 
-
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
                                 Text(
                                     "Profundidad de Piso",
                                     style = MaterialTheme.typography.labelMedium.copy(
@@ -843,7 +924,11 @@ fun NuevoRegistroLlantasScreen(
                                 )
                             }
 
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
                                 Text(
                                     "Llanta",
                                     style = MaterialTheme.typography.labelMedium.copy(
@@ -865,7 +950,11 @@ fun NuevoRegistroLlantasScreen(
                             }
 
 
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
                                 Text(
                                     "DOT",
                                     style = MaterialTheme.typography.labelMedium.copy(
@@ -899,19 +988,22 @@ fun NuevoRegistroLlantasScreen(
                                     shape = RoundedCornerShape(14.dp),
                                     modifier = Modifier.padding(end = 8.dp)
                                 ) {
-                                    Text("CANCELAR", color = primaryColor, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        "CANCELAR",
+                                        color = primaryColor,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
                                 Button(
                                     onClick = { saveTire() },
                                     enabled = !isLoadingCombos && !isLoadingTireDetails &&
                                             selectedAcquisitionType != null &&
-                                            selectedProvider != null &&
-                                            selectedBase != null &&
+                                            folioFactura.isNotEmpty() &&
                                             selectedProduct != null &&
                                             acquisitionDate.isNotBlank() &&
-
                                             cost.isNotBlank() &&
-                                            tireNumber.isNotBlank(),
+                                            tireNumber.isNotBlank() &&
+                                            dot.isNotBlank(),
                                     colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
                                     shape = RoundedCornerShape(14.dp)
                                 ) {
