@@ -80,7 +80,7 @@ fun decodeAlertDataFrame(dataFrame: String?, alertType: SensorAlertDataFrame): S
                 val status = dataFrame.substring(25, 26)
                 val binary = status.toInt(16).toString(2).padStart(4, '0')
                 val bits = binary.substring(2, 4) // 01 = Fuga rapida, 10 = Fuga lenta
-                when (bits) {
+                return when (bits) {
                     "01" -> SensorAlerts.FAST_LEAKAGE
                     "10" -> SensorAlerts.SLOW_LEAKAGE
                     else -> SensorAlerts.NO_DATA
