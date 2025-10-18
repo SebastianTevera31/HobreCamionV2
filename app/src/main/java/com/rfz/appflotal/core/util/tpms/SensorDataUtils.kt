@@ -21,7 +21,7 @@ fun getPressure(dataFrame: String): Float {
 
 fun getTemperature(dataFrame: String): Float {
     val data = decodeDataFrame(dataFrame, MonitorDataFrame.TEMPERATURE)
-    return if (data.isDigitsOnly()) data.toFloat() else 0f
+    return data.toFloat()
 }
 
 fun getHighTemperatureStatus(dataFrame: String): Boolean {
