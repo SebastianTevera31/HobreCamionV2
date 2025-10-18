@@ -28,11 +28,12 @@ class UpdateSensorDataUseCase @Inject constructor() {
         timestamp: String? = null
     ): Result {
         val pressure = getPressure(dataFrame)
+
         val pressureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
 
         val temperature = getTemperature(dataFrame)
-        val temperatureStatus =
-            decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
+
+        val temperatureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
 
         val flatTireStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.FLAT_TIRE)
 

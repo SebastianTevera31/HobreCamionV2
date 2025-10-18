@@ -105,10 +105,11 @@ fun SensorDataEntity.toDiagram(): DiagramMonitorResponse {
         psi = pressure.toFloat(),
         tireNumber = tireNumber,
         temperature = temperature.toFloat(),
-        highTemperature = false,
-        lowPressure = false,
-        highPressure = false,
-        lowBattery = false,
+        highTemperature = highTemperatureAlert,
+        lowPressure = lowPressureAlert,
+        highPressure = highPressureAlert,
+        lowBattery = lowBatteryAlert,
+        puncture = punctureAlert,
         ultimalectura = timestamp
     )
 }

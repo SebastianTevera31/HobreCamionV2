@@ -43,3 +43,8 @@ fun getBatteryStatus(dataFrame: String): Boolean {
     val data = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
     return data == SensorAlerts.LOW_BATTERY
 }
+
+fun getPunctureStatus(dataFrame: String): Boolean {
+    val data = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.FLAT_TIRE)
+    return data == SensorAlerts.FAST_LEAKAGE
+}

@@ -13,7 +13,7 @@ import com.rfz.appflotal.data.model.database.SensorDataEntity
 
 @Database(
     entities = [AppHCEntity::class, DataframeEntity::class, CoordinatesEntity::class, SensorDataEntity::class],
-    version = 12,
+    version = 13,
     exportSchema = false
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {

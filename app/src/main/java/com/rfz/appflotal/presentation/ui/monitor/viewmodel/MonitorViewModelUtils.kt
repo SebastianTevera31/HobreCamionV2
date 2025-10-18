@@ -1,7 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.Positions.findOutPosition
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -43,6 +42,20 @@ fun getIsTireInAlert(
             || flatTireStatus != SensorAlerts.NO_DATA
 }
 
+fun getIsTireInAlertByApi(
+    highTemperatureStatus: Boolean?,
+    highPressureStatus: Boolean?,
+    lowPressureStatus: Boolean?,
+    batteryStatus: Boolean?,
+    flatTireStatus: Boolean?
+): Boolean {
+    return highTemperatureStatus == true
+            || highPressureStatus == true
+            || lowPressureStatus == true
+            || batteryStatus == true
+            || flatTireStatus == true
+}
+
 fun getBaseConfigImage(baseConfig: Int): BaseConfig {
     return when (baseConfig) {
         6 -> BaseConfig.BASE6
@@ -70,10 +83,4 @@ fun updateTireState(currentTire: String, tires: List<Tire>, onUpdate: (tire: Tir
             onUpdate(tire)
         }
     }
-}
-
-fun getTirePosition(tire: Int, pressure: Float, temperature: Float): String {
-    val pressureValue = pressure.toInt()
-    val temperatureValue = temperature.toInt()
-    return if (pressureValue != 0 && temperatureValue != 0) findOutPosition("P${tire}") else ""
 }
