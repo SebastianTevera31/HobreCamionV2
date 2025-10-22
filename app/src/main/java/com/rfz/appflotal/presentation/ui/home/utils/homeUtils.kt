@@ -60,6 +60,11 @@ val menuItems = listOf(
         title = R.string.monitoreo,
         route = HombreCamionScreens.MONITOR.name,
         iconRes = R.drawable.monitor
+    ),
+    MenuItem(
+        title = R.string.marca_renovada,
+        route = NavScreens.MARCA_RENOVADA,
+        iconRes = R.drawable.ic_brand
     )
 )
 

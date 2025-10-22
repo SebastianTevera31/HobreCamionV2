@@ -74,6 +74,8 @@ import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.loading.screen.LoadingScreen
 import com.rfz.appflotal.presentation.ui.login.screen.LoginScreen
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
+import com.rfz.appflotal.presentation.ui.marcarenovados.screens.MarcaRenovadosScreen
+import com.rfz.appflotal.presentation.ui.marcarenovados.viewmodel.MarcaRenovadosViewModel
 import com.rfz.appflotal.presentation.ui.medidasllantasscreen.MedidasLlantasScreen
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
@@ -113,6 +115,7 @@ class InicioActivity : ComponentActivity() {
     private val signUpViewModel: SignUpViewModel by viewModels()
     private val registerMonitorViewModel: RegisterMonitorViewModel by viewModels()
     private val updateUserViewModel: UpdateUserViewModel by viewModels()
+    private val marcaRenovadosScreen: MarcaRenovadosViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -190,6 +193,7 @@ class InicioActivity : ComponentActivity() {
     @Inject
     lateinit var baseUseCase: BaseUseCase
 
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -198,6 +202,7 @@ class InicioActivity : ComponentActivity() {
 
         setContent {
             var allGranted by remember { mutableStateOf(false) }
+            val navController = rememberNavController()
             val ctx = LocalContext.current
 
             val permissionLauncher = rememberLauncherForActivityResult(
@@ -221,8 +226,6 @@ class InicioActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxWidth(),
                         color = backgroundLight
                     ) {
-                        val navController = rememberNavController()
-
                         NetworkConfig.imei = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
                         } else {
@@ -428,6 +431,10 @@ class InicioActivity : ComponentActivity() {
                                 NuevoRenovadoScreen(
                                     navController
                                 )
+                            }
+
+                            composable(NavScreens.MARCA_RENOVADA) {
+                                MarcaRenovadosScreen(viewModel = marcaRenovadosScreen)
                             }
                             composable(NavScreens.MEDIDAS_LLANTAS) {
                                 MedidasLlantasScreen(

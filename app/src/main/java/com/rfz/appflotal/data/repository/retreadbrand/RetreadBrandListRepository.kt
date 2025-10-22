@@ -10,9 +10,9 @@ import javax.inject.Inject
 
 class RetreadBrandListRepository @Inject constructor(private val retreadBrandListService: RetreadBrandListService) {
 
-    suspend fun doBrandCrud( tok: String): Result<List<RetreadBrandListResponse>> {
+    suspend fun doBrandCrud(): Result<List<RetreadBrandListResponse>> {
         return try {
-            val response = retreadBrandListService.doRetreadBrandList(tok)
+            val response = retreadBrandListService.doRetreadBrandList()
             if (response.isSuccessful) {
 
                 response.body()?.let {

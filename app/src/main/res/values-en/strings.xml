@@ -166,6 +166,8 @@
     <string name="main_term_text">IMPORTANT \\ CONFIDENTIAL: This message contains information from the company CENTRO CAMIONERO MONTAJES, S.A. DE C.V., located at Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, Mexico, C.P. 29020. The information is privileged, confidential, and access is restricted in accordance with applicable law.</string>
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. is responsible for the processing (use) of your personal data, which will be used to respond to communications generated through this channel and to provide you with the products or services entrusted to us.</string>
     <string name="en_extraccion">Being removed</string>
+
     <string name="registro_de_llantas">Registro de Llantas</string>
-    <string name="dise_os_renovados">Diseños Renovados</string>
+    <string name="dise_os_renovados">Renewed Designs</string>
+    <string name="marca_renovada">Retreated Brands</string>
 </resources>

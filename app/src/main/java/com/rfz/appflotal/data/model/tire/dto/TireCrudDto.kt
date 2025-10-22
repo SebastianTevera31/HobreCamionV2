@@ -3,7 +3,7 @@ package com.rfz.appflotal.data.model.tire.dto
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 
-data class TireCrudDto (
+data class TireCrudDto(
 
     @SerializedName("id_tire")
     val idTire: Int,
@@ -29,9 +29,6 @@ data class TireCrudDto (
     @SerializedName("fld_tireNumber")
     val tireNumber: String,
 
-    @SerializedName("c_user_fk_5")
-    val userId: Int,
-
     @SerializedName("c_product_fk_6")
     val productId: Int,
 
@@ -43,6 +40,9 @@ data class TireCrudDto (
 
     @SerializedName("c_retreadDesign_fk_2")
     val retreadDesignId: Int,
+
+    @SerializedName("c_destination_fk_8")
+    val destination: Int,
 
     @SerializedName("fld_lifecycle")
     val lifecycle: Int

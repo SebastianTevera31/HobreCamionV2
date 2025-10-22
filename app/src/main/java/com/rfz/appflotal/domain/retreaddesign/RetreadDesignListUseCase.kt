@@ -7,7 +7,7 @@ import javax.inject.Inject
 class RetreadDesignListUseCase @Inject constructor(
     private val retreadDesignListRepository: RetreadDesignListRepository
 ) {
-    suspend operator fun invoke(token: String): Result<List<MessageResponse>> {
-        return retreadDesignListRepository.doBrandCrud(token)
+    suspend operator fun invoke(): Result<List<MessageResponse>> {
+        return retreadDesignListRepository.doBrandCrud()
     }
 }
