@@ -34,6 +34,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.viewbinding.BuildConfig
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens

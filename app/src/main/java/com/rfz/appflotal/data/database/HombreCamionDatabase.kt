@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.database
 
+import androidx.annotation.Keep
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.rfz.appflotal.data.dao.AppHCDao
@@ -11,6 +12,7 @@ import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.data.model.database.DataframeEntity
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 
+@Keep
 @Database(
     entities = [AppHCEntity::class, DataframeEntity::class, CoordinatesEntity::class, SensorDataEntity::class],
     version = 13,

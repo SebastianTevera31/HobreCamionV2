@@ -19,7 +19,7 @@ class RetreatedDesignViewModel @Inject constructor(
 
     fun getRetreatedDesigns() {
         viewModelScope.launch {
-            retreatedDesignUseCase.invoke()
+
         }
     }
 }

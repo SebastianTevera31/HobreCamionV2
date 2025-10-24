@@ -1,3 +1,5 @@
+import com.android.tools.r8.shaking.r8
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -14,8 +16,8 @@ android {
         applicationId = "com.rfz.appflotal"
         minSdk = 28
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -24,12 +26,31 @@ android {
     }
 
     buildTypes {
+
+        debug {
+            applicationIdSuffix = ".debug"
+            buildConfigField(
+                "String",
+                "URL_API",
+                "\"https://owneroperator.azurewebsites.net/\""
+            )
+            buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField(
+                "String",
+                "URL_API",
+                "\"https://owneroperator.azurewebsites.net/\""
+            )
+            buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -41,6 +62,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
 

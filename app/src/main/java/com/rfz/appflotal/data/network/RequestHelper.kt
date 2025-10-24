@@ -1,10 +1,12 @@
 package com.rfz.appflotal.data.network
 
 import android.util.Log
+import androidx.annotation.Keep
 import com.rfz.appflotal.data.network.service.ApiResult
 import retrofit2.Response
 import java.net.SocketTimeoutException
 
+@Keep
 suspend fun <T> requestHelper(
     endpointName: String = "",
     request: suspend () -> Response<T>

@@ -16,6 +16,7 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.AppLog
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -105,7 +106,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                     isConnected = true
                     startRSSIMonitoring()
                     gatt.discoverServices()
-                    Log.d("BLE", "Conectado. Descubriendo servicios...")
+                    AppLog.d("BLE", "Conectado. Descubriendo servicios...")
                 }
 
                 BluetoothProfile.STATE_DISCONNECTED -> {
@@ -137,15 +138,15 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                         }
                     }
 
-                    Log.d("BLE", "Conexion perdidad")
+                    AppLog.d("BLE", "Conexion perdidad")
                 }
 
                 BluetoothProfile.STATE_DISCONNECTING -> {
-                    Log.d("BLE", "Disconectando de la red.")
+                    AppLog.d("BLE", "Disconectando de la red.")
                 }
 
                 BluetoothProfile.STATE_CONNECTING -> {
-                    Log.d("BLE", "Conectando de la red.")
+                    AppLog.d("BLE", "Conectando de la red.")
                 }
             }
         }
@@ -188,7 +189,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             status: Int
         ) {
             super.onReadRemoteRssi(gatt, rssi, status)
-            Log.d("BLE", "Rssi: $rssi Status: $status")
+            AppLog.d("BLE", "Rssi: $rssi Status: $status")
             _sensorData.update { currentState ->
                 currentState.copy(
                     bluetoothSignalQuality = rssiToQuality(rssi),
@@ -204,7 +205,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             mutex.withLock {
                 val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
                 if (!regex.matches(macAddress)) {
-                    Log.e("BluetoothRepository", "Bluetooth Address is not valid")
+                    AppLog.e("BluetoothRepository", "Bluetooth Address is not valid")
                     return@withLock
                 }
 
@@ -233,7 +234,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED || intent?.action == BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED) {
                 when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
                     BluetoothAdapter.STATE_OFF -> {
-                        Log.d("BluetoothRepositoriy", "BT OFF -> limpiar")
+                        AppLog.d("BluetoothRepositoriy", "BT OFF -> limpiar")
                         _sensorData.update { currentState ->
                             currentState.copy(isBluetoothOn = false)
                         }
@@ -241,7 +242,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                     }
 
                     BluetoothAdapter.STATE_ON -> {
-                        Log.d("BluetoothRepository", "BT ON -> intentar reconectar")
+                        AppLog.d("BluetoothRepository", "BT ON -> intentar reconectar")
                         _sensorData.update { currentState ->
                             currentState.copy(isBluetoothOn = true)
                         }
@@ -269,6 +270,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
         }
         bluetoothGatt = null
         isConnected = false
+        lastMacAddress = null
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
@@ -291,9 +293,9 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                     try {
                         gatt.readRemoteRssi()
                     } catch (e: Exception) {
-                        Log.w("BluetoothRepository", "readRemoteRssi error: ${e.message}")
+                        AppLog.w("BluetoothRepository", "readRemoteRssi error: ${e.message}")
                     }
-                } ?: Log.d("BluetoothRepository", "No GATT al leer RSSI")
+                } ?: AppLog.d("BluetoothRepository", "No GATT al leer RSSI")
             }
         }
     }
@@ -305,22 +307,22 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
     private fun verifyDataFrame(dataFrame: ByteArray): String? {
         val dataFrameToHex = dataFrame.toHexString()
-        Log.d("BLE", "Current dataframe $dataFrameToHex")
+        AppLog.d("BLE", "Current dataframe $dataFrameToHex")
         // Verificación de longitud
         if (dataFrameToHex.length == 28) {
             val calculatedDataFrame =
                 dataFrame.dropLast(1).sumOf { data -> data.toUByte().toInt() } % 256
 
-            Log.d("BLE", "CalculatedDataFrame $calculatedDataFrame")
-            Log.d("BLE", "CheckSum ${dataFrame.last().toUByte().toInt()}")
+            AppLog.d("BLE", "CalculatedDataFrame $calculatedDataFrame")
+            AppLog.d("BLE", "CheckSum ${dataFrame.last().toUByte().toInt()}")
 
             // Verificación de CheckSum
             if (calculatedDataFrame == dataFrame.last().toUByte().toInt()
                 && verifyTemperature(dataFrameToHex)
             ) {
-                Log.d("BLE", "Trama correcta")
+                AppLog.d("BLE", "Trama correcta")
                 return dataFrameToHex
-            } else Log.d("BLE", "Trama incorrecta")
+            } else AppLog.d("BLE", "Trama incorrecta")
         }
         return null
     }

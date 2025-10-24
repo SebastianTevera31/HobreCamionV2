@@ -3,8 +3,7 @@ package com.rfz.appflotal.di.network
 
 import android.app.Application
 import android.content.Context
-import com.rfz.appflotal.core.network.NetworkConfig
-import com.rfz.appflotal.data.network.client.login.LoginClient
+import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.data.network.client.acquisitiontype.AcquisitionTypeClient
 import com.rfz.appflotal.data.network.client.airPressureRating.AirPressureRatingClient
 import com.rfz.appflotal.data.network.client.airPressureRating.CreateAirPressureRatingClient
@@ -19,6 +18,7 @@ import com.rfz.appflotal.data.network.client.destination.DestinationClient
 import com.rfz.appflotal.data.network.client.diagram.DiagramClient
 import com.rfz.appflotal.data.network.client.disassembly.DisassemblyCauseClient
 import com.rfz.appflotal.data.network.client.languaje.LanguajeClient
+import com.rfz.appflotal.data.network.client.login.LoginClient
 import com.rfz.appflotal.data.network.client.originaldesign.CrudOriginalDesignClient
 import com.rfz.appflotal.data.network.client.originaldesign.OriginalDesignByIdClient
 import com.rfz.appflotal.data.network.client.originaldesign.OriginalDesignClient
@@ -86,7 +86,7 @@ class NetworkModule {
     @Provides
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(NetworkConfig.BASE_URL)
+            .baseUrl(BuildConfig.URL_API)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

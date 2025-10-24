@@ -1,14 +1,14 @@
 package com.rfz.appflotal.di.database
 
 import android.content.Context
+import androidx.annotation.Keep
 import androidx.room.Room
+import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.data.dao.AppHCDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
 import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.database.AppHombreCamionDatabase
-import com.rfz.appflotal.data.model.database.SensorDataEntity
-
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,13 +40,14 @@ class DataBaseModule {
         return hombreCamionDatabase.sensorDataDao()
     }
 
+    @Keep
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext appContext: Context): AppHombreCamionDatabase {
         return Room.databaseBuilder(
             appContext,
             AppHombreCamionDatabase::class.java,
-            "AppFlotalDatabase"
+            BuildConfig.DB_NAME
         ).fallbackToDestructiveMigration(true).build()
     }
 }
