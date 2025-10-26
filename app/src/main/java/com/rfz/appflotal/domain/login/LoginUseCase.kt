@@ -15,8 +15,6 @@ import javax.inject.Inject
 class LoginUseCase @Inject constructor(
     private val repository: LoginRepository
 ) {
-    private val gson = Gson()
-
     suspend fun doLogin(
         usuario: String,
         password: String,

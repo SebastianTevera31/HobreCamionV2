@@ -87,6 +87,8 @@ data class SensorDataEntity(
     val lowPressureAlert: Boolean,
     @ColumnInfo(name = "low_battery_alert")
     val lowBatteryAlert: Boolean,
+    @ColumnInfo(name = "puncture_alert")
+    val punctureAlert: Boolean,
     @ColumnInfo(name = "active")
     val active: Boolean
 )

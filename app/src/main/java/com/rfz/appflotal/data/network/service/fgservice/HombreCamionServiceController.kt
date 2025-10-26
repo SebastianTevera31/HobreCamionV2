@@ -22,7 +22,6 @@ import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 
 class HombreCamionServiceController @Inject constructor(
     private val apiTmpsUseCase: ApiTpmsUseCase,
@@ -95,6 +94,7 @@ class HombreCamionServiceController @Inject constructor(
                         highPressureAlert = it.highPressure,
                         lowPressureAlert = it.lowPressure,
                         lowBatteryAlert = it.lowBattery,
+                        punctureAlert = it.puncture,
                         active = isActive
                     )
 

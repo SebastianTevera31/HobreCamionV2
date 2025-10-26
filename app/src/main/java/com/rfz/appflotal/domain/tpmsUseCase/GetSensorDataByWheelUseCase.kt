@@ -35,11 +35,14 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         val batteryStatus = if (data.lowBatteryAlert) SensorAlerts.LOW_BATTERY
         else SensorAlerts.NO_DATA
 
+        val flatTireStatus =
+            if (data.punctureAlert) SensorAlerts.FAST_LEAKAGE else SensorAlerts.NO_DATA
+
         val inAlert = getIsTireInAlert(
             temperatureStatus = temperatureStatus,
             pressureStatus = pressureStatus,
             batteryStatus = batteryStatus,
-            flatTireStatus = SensorAlerts.NO_DATA,
+            flatTireStatus = flatTireStatus,
         )
 
         val updatedTireList = currentTires.map { tire ->
@@ -52,7 +55,8 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             temperature = Pair(data.temperature.toFloat(), temperatureStatus),
             timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             batteryStatus = batteryStatus,
-            tireRemovingStatus = if (data.pressure == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA
+            tireRemovingStatus = if (data.pressure == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
+            flatTireStatus = flatTireStatus
         )
 
         return Result(

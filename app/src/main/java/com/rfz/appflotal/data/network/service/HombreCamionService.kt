@@ -28,6 +28,7 @@ import com.rfz.appflotal.core.util.tpms.getHighPressureStatus
 import com.rfz.appflotal.core.util.tpms.getHighTemperatureStatus
 import com.rfz.appflotal.core.util.tpms.getLowPressureStatus
 import com.rfz.appflotal.core.util.tpms.getPressure
+import com.rfz.appflotal.core.util.tpms.getPunctureStatus
 import com.rfz.appflotal.core.util.tpms.getTemperature
 import com.rfz.appflotal.core.util.tpms.getTire
 import com.rfz.appflotal.data.NetworkStatus
@@ -344,6 +345,7 @@ class HombreCamionService : Service() {
                     val highPressureAlert = getHighPressureStatus(dataFrame)
                     val lowPressureAlert = getLowPressureStatus(dataFrame)
                     val lowBatteryAlert = getBatteryStatus(dataFrame)
+                    val puncture = getPunctureStatus(dataFrame)
 
                     val tire = getTire(dataFrame)
 
@@ -358,7 +360,8 @@ class HombreCamionService : Service() {
                         highTemperatureAlert = highTemperatureAlert,
                         highPressureAlert = highPressureAlert,
                         lowPressureAlert = lowPressureAlert,
-                        lowBatteryAlert = lowBatteryAlert
+                        lowBatteryAlert = lowBatteryAlert,
+                        punctureAlert = puncture
                     )
 
                     val inAlert = highTemperatureAlert || highPressureAlert

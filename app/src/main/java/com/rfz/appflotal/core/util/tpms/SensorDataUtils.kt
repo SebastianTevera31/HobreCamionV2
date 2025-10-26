@@ -21,7 +21,7 @@ fun getPressure(dataFrame: String): Float {
 
 fun getTemperature(dataFrame: String): Float {
     val data = decodeDataFrame(dataFrame, MonitorDataFrame.TEMPERATURE)
-    return if (data.isDigitsOnly()) data.toFloat() else 0f
+    return data.toFloat()
 }
 
 fun getHighTemperatureStatus(dataFrame: String): Boolean {
@@ -42,4 +42,9 @@ fun getHighPressureStatus(dataFrame: String): Boolean {
 fun getBatteryStatus(dataFrame: String): Boolean {
     val data = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
     return data == SensorAlerts.LOW_BATTERY
+}
+
+fun getPunctureStatus(dataFrame: String): Boolean {
+    val data = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.FLAT_TIRE)
+    return data == SensorAlerts.FAST_LEAKAGE
 }

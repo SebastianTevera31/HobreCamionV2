@@ -80,6 +80,7 @@ data class DiagramMonitorResponse(
     @SerializedName("lowPressure") val lowPressure: Boolean,
     @SerializedName("highPressure") val highPressure: Boolean,
     @SerializedName("lowBattery") val lowBattery: Boolean,
+    @SerializedName("puncture") val puncture: Boolean,
     @SerializedName("ultimalectura") val ultimalectura: String,
 )
 

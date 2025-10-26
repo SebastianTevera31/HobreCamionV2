@@ -17,6 +17,7 @@ class SensorDataTableRepository @Inject constructor(private val sensorData: Sens
         highPressureAlert: Boolean,
         lowPressureAlert: Boolean,
         lowBatteryAlert: Boolean,
+        punctureAlert: Boolean,
         active: Boolean
     ) {
         sensorData.insertSensorData(
@@ -31,7 +32,8 @@ class SensorDataTableRepository @Inject constructor(private val sensorData: Sens
                 highTemperatureAlert = highTemperatureAlert,
                 highPressureAlert = highPressureAlert,
                 lowPressureAlert = lowPressureAlert,
-                lowBatteryAlert = lowBatteryAlert
+                lowBatteryAlert = lowBatteryAlert,
+                punctureAlert = punctureAlert
             )
         )
     }

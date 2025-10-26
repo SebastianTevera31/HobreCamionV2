@@ -151,7 +151,13 @@ class MonitorViewModel @Inject constructor(
                         val c = tireByPos[info.position]
                         Tire(
                             sensorPosition = c?.sensorPosition ?: info.position,
-                            inAlert = c?.highPressure == true || c?.lowPressure == true || c?.highPressure == true || c?.lowBattery == true,
+                            inAlert = getIsTireInAlertByApi(
+                                highTemperatureStatus = c?.highTemperature,
+                                highPressureStatus = c?.highPressure,
+                                lowPressureStatus = c?.lowPressure,
+                                batteryStatus = c?.lowBattery,
+                                flatTireStatus = c?.puncture
+                            ),
                             isActive = c?.sensorId != 0,
                             xPosition = info.fldPositionX,
                             yPosition = info.fldPositionY
