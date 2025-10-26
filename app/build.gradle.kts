@@ -73,6 +73,7 @@ android {
 
 dependencies {
 
+    // Se usa la Bill of Materials (BOM) de Compose para gestionar las versiones de las librerías de Compose.
     implementation(platform("androidx.compose:compose-bom:2024.02.02"))
 
     implementation("androidx.core:core-ktx:1.16.0")
@@ -83,10 +84,12 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    // Corregido: La versión la gestiona la BOM. Se quita el <version> placeholder.
+    implementation("androidx.compose.material:material-icons-extended")
 
     implementation("androidx.work:work-runtime:2.10.2")
-
-    implementation("androidx.compose.material:material-icons-extended:<version>")
+    // Corregido: Las versiones de WorkManager deben ser las mismas.
+    implementation("androidx.work:work-runtime-ktx:2.10.2")
 
     implementation("com.google.android.engage:engage-core:1.5.8")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
@@ -96,14 +99,14 @@ dependencies {
 
     implementation("androidx.room:room-runtime:2.7.2")
     implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.compose.animation:animation:1.9.1")
+    implementation("androidx.compose.animation:animation") // Versión gestionada por BOM
     kapt("androidx.room:room-compiler:2.7.2")
 
     implementation("androidx.room:room-ktx:2.7.2")
 
     implementation("androidx.navigation:navigation-compose:2.9.0")
 
-    implementation("androidx.compose.runtime:runtime-livedata:1.8.3")
+    implementation("androidx.compose.runtime:runtime-livedata") // Versión gestionada por BOM
 
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
@@ -117,8 +120,6 @@ dependencies {
     kapt("com.google.dagger:hilt-compiler:2.57.2")
     // Hilt ViewModels
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
-
-    implementation("androidx.compose.material3:material3:1.3.2")
 
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")
 
@@ -134,22 +135,14 @@ dependencies {
 
     implementation("com.vanniktech:android-image-cropper:4.5.0")
 
-    // WorkManager
-    implementation("androidx.work:work-runtime-ktx:2.7.1")
-
+    // Dependencias de Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.02"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
+
+    // Dependencias de Debug
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
-

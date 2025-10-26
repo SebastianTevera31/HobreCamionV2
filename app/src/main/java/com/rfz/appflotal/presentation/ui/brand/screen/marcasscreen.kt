@@ -93,7 +93,6 @@ fun MarcasScreen(
     val uiState by homeViewModel.uiState.collectAsState()
 
 
-
     val userData = uiState.userData
 
     val scope = rememberCoroutineScope()
@@ -135,7 +134,8 @@ fun MarcasScreen(
             isLoading = true
             errorMessage = null
             try {
-                val result = brandListUseCase("Bearer ${userData?.fld_token}" ?: "",userData?.idUser!!)
+                val result =
+                    brandListUseCase("Bearer ${userData?.fld_token}" ?: "", userData?.idUser!!)
                 if (result.isSuccess) {
                     allMarcas = result.getOrNull() ?: emptyList()
                     resetPagination()
@@ -155,7 +155,10 @@ fun MarcasScreen(
             val result = if (editingBrand == null) {
                 brandCrudUseCase(BrandCrudDto(0, newBrandName), "Bearer ${userData?.fld_token}")
             } else {
-                brandCrudUseCase(BrandCrudDto(editingBrand!!.idBrand, newBrandName), "Bearer ${userData?.fld_token}")
+                brandCrudUseCase(
+                    BrandCrudDto(editingBrand!!.idBrand, newBrandName),
+                    "Bearer ${userData?.fld_token}"
+                )
             }
 
             if (result.isSuccess) {
@@ -209,7 +212,6 @@ fun MarcasScreen(
                     )
                     .shadow(4.dp)
             )
-
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -352,7 +354,6 @@ fun MarcasScreen(
 
         if (showDialog) {
             AlertDialog(
-
                 onDismissRequest = { },
                 modifier = Modifier.padding(horizontal = 24.dp),
                 shape = RoundedCornerShape(20.dp),

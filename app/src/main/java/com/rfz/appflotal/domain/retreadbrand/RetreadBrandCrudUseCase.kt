@@ -8,7 +8,7 @@ import javax.inject.Inject
 class RetreadBrandCrudUseCase @Inject constructor(
     private val retreadBrandCrudRepository: RetreadBrandCrudRepository
 ) {
-    suspend operator fun invoke(requestBody: RetreadBrandDto, token: String): Result<List<MessageResponse>> {
-        return retreadBrandCrudRepository.doRetreadBrand(requestBody, token)
+    suspend operator fun invoke(requestBody: RetreadBrandDto): Result<List<MessageResponse>> {
+        return retreadBrandCrudRepository.doRetreadBrand(requestBody)
     }
 }

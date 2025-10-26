@@ -29,6 +29,11 @@ interface ListManagementViewModel<T> {
     fun onSearchQueryChanged(query: String)
 
     /**
+     * Se llama cuando el usuario borra el texto en la barra de búsqueda.
+     */
+    fun onClearQuery()
+
+    /**
      * Se llama cuando el usuario presiona el FAB para mostrar el diálogo de creación/edición.
      */
     fun onShowDialog()
@@ -48,7 +53,7 @@ interface ListManagementViewModel<T> {
      * @param field Un identificador único para el campo (e.g., "name", "code").
      * @param value El nuevo valor del campo.
      */
-    fun onDialogFieldChanged(field: String, value: Any)
+    fun onDialogFieldChanged(field: String, value: Any?)
 }
 
 /**
@@ -64,5 +69,5 @@ data class ListManagementUiState<T>(
     val showDialog: Boolean = false,
     // Un mapa flexible para contener los datos de los campos del diálogo.
     // Permite que cada pantalla defina sus propios campos sin cambiar la estructura.
-    val dialogData: Map<String, Any> = emptyMap()
+    val dialogData: Map<String, Any?> = emptyMap()
 )

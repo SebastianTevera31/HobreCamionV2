@@ -33,7 +33,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -63,7 +62,9 @@ import com.rfz.appflotal.presentation.ui.common.viewmodel.ListManagementUiState
 fun <T> ListManagementScreen(
     state: ListManagementUiState<T>,
     onSearchQueryChanged: (String) -> Unit,
+    onClearSearchQuery: () -> Unit,
     onShowDialog: () -> Unit,
+    onBackScreen: () -> Unit,
     listItemContent: @Composable (item: T) -> Unit,
     dialogContent: @Composable () -> Unit,
     modifier: Modifier = Modifier
@@ -83,7 +84,7 @@ fun <T> ListManagementScreen(
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = { },
+                            onClick = onBackScreen,
                             modifier = Modifier.padding(start = 8.dp)
                         ) {
                             Icon(
@@ -113,16 +114,15 @@ fun <T> ListManagementScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clip(RoundedCornerShape(16.dp))
                         .background(
                             Brush.horizontalGradient(
                                 listOf(
-                                    MaterialTheme.colorScheme.primaryContainer,
-                                    MaterialTheme.colorScheme.secondaryContainer
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                                    MaterialTheme.colorScheme.tertiaryContainer
                                 )
                             )
                         )
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     OutlinedTextField(
                         value = state.searchQuery,
@@ -131,16 +131,16 @@ fun <T> ListManagementScreen(
                             Icon(
                                 Icons.Default.Search,
                                 contentDescription = "Buscar",
-                                tint = Color.White.copy(alpha = 0.9f)
+                                tint = Color.White
                             )
                         },
                         trailingIcon = {
                             if (state.searchQuery.isNotEmpty()) {
-                                IconButton(onClick = {}) {
+                                IconButton(onClick = onClearSearchQuery) {
                                     Icon(
                                         Icons.Default.Close,
                                         contentDescription = "Limpiar",
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        tint = Color.White
                                     )
                                 }
                             }
@@ -151,21 +151,21 @@ fun <T> ListManagementScreen(
                         placeholder = {
                             Text(
                                 "Buscar...",
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = Color.White
                             )
                         },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                            focusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
                                 alpha = 0.4f
                             ),
-                            cursorColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            focusedContainerColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                            cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            focusedContainerColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
                                 alpha = 0.1f
                             ),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                            unfocusedContainerColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
                                 alpha = 0.1f
                             )
                         ),
@@ -191,9 +191,7 @@ fun <T> ListManagementScreen(
     ) { paddingValues ->
 
         Box(
-            modifier = Modifier
-
-                .padding(paddingValues)
+            modifier = Modifier.padding(paddingValues)
         ) {
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -236,7 +234,9 @@ fun ListManagementScreenPreview() {
             onSearchQueryChanged = {},
             onShowDialog = {},
             listItemContent = { data -> Text(text = data, modifier = Modifier.fillMaxSize()) },
-            dialogContent = {}
+            dialogContent = {},
+            onBackScreen = {},
+            onClearSearchQuery = {},
         )
     }
 }

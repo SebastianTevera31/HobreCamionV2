@@ -288,7 +288,6 @@ class InicioActivity : ComponentActivity() {
                             }
                         }
 
-
                         loginViewModel.navigateToHome.observe(this) { shouldNavigate ->
                             if (shouldNavigate.first) {
 
@@ -435,7 +434,9 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             composable(NavScreens.MARCA_RENOVADA) {
-                                MarcaRenovadosScreen(viewModel = marcaRenovadosScreen)
+                                MarcaRenovadosScreen(
+                                    viewModel = marcaRenovadosScreen,
+                                    onBackScreen = { navController.popBackStack() })
                             }
                             composable(NavScreens.MEDIDAS_LLANTAS) {
                                 MedidasLlantasScreen(
