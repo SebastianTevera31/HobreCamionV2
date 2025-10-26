@@ -14,3 +14,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+*.hprof
+/app/release
+/app/mapping.txt
+/.kotlin/errors

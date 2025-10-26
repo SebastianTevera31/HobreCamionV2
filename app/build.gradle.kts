@@ -14,7 +14,7 @@ android {
         applicationId = "com.rfz.appflotal"
         minSdk = 28
         targetSdk = 35
-        versionCode = 3
+        versionCode = 5
         versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -24,7 +24,6 @@ android {
     }
 
     buildTypes {
-
         debug {
             applicationIdSuffix = ".debug"
             buildConfigField(
@@ -37,7 +36,6 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
