@@ -1,5 +1,3 @@
-import com.android.tools.r8.shaking.r8
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -39,7 +37,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            isDebuggable = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
