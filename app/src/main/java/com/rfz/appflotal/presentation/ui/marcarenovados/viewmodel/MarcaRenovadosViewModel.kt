@@ -34,7 +34,7 @@ enum class RetreadBrandFields { ID, DESCRIPTION }
 data class ShowToast(@StringRes val message: Int)
 
 data class RetreadBrandDialogState(
-    val id: String = "",
+    val id: String = "0",
     val description: String = ""
 )
 
@@ -133,12 +133,6 @@ class MarcaRenovadosViewModel @Inject constructor(
                         description = description.trim()
                     )
                 )
-            },
-            onList = { items, id, description ->
-                items + RetreadBrand(
-                    id = id.toInt(),
-                    description = description.trim()
-                )
             }
         )
     }
@@ -146,14 +140,12 @@ class MarcaRenovadosViewModel @Inject constructor(
     override fun onUpdateItem() {
         onSaveItem(
             onRequest = { id, description ->
-                Result.success(emptyList())
-            },
-            onList = { items, id, description ->
-                items.map { item ->
-                    if (item.id.toString() == id) {
-                        item.copy(id = id.toInt(), description = description)
-                    } else item
-                }
+                retreadBrandCrudUseCase.invoke(
+                    RetreadBrandDto(
+                        idRetreadBrand = id.toInt(),
+                        description = description.trim()
+                    )
+                )
             }
         )
     }
@@ -167,8 +159,7 @@ class MarcaRenovadosViewModel @Inject constructor(
     }
 
     private fun onSaveItem(
-        onRequest: suspend (id: String, description: String) -> Result<List<MessageResponse>>,
-        onList: (List<RetreadBrand>, id: String, description: String) -> List<RetreadBrand>
+        onRequest: suspend (id: String, description: String) -> Result<List<MessageResponse>>
     ) {
         _uiState.update { it.copy(isSending = true) }
         viewModelScope.launch {
@@ -189,14 +180,7 @@ class MarcaRenovadosViewModel @Inject constructor(
             if (response.isSuccess) {
                 _eventFlow.emit(ShowToast(UploadingItemMessage.SUCCESS.message))
 
-                val newItemList = onList(_uiState.value.originalItems, id, description)
-
-                _uiState.update { currentUiState ->
-                    currentUiState.copy(
-                        originalItems = newItemList,
-                        itemsToShow = newItemList,
-                    )
-                }
+                loadItems()
             } else {
                 _eventFlow.emit(ShowToast(UploadingItemMessage.GENERAL_ERROR.message))
             }

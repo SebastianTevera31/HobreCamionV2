@@ -76,18 +76,6 @@ fun MarcaRenovadosScreen(
                 ) else pluralStringResource(R.plurals.editar_elemento, 2, fieldTitle),
                 content = {
                     ItemDialog(
-                        label = pluralStringResource(R.plurals.codigo_field, 1),
-                        value = dialogState.value.id,
-                        isEmpty = dialogState.value.id.isBlank(),
-                        onValueChange = { code ->
-                            viewModel.onDialogFieldChanged(
-                                field = RetreadBrandFields.ID,
-                                value = code
-                            )
-                        },
-                        keyboardType = KeyboardType.NumberPassword
-                    )
-                    ItemDialog(
                         label = pluralStringResource(R.plurals.description_field, 1),
                         value = dialogState.value.description,
                         isEmpty = dialogState.value.description.isBlank(),
