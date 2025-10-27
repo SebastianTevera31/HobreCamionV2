@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.marcarenovados.viewmodel
 
+import androidx.compose.runtime.currentRecomposeScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.model.retreadbrand.dto.RetreadBrandDto
@@ -17,6 +18,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class RetreadBrandFields(val value: String) {
+    ID("idRetreatedBrand"),
+    DESCRIPTION("description")
+}
+
 @HiltViewModel
 class MarcaRenovadosViewModel @Inject constructor(
     private val retreadBrandCrudUseCase: RetreadBrandCrudUseCase,
@@ -33,7 +39,8 @@ class MarcaRenovadosViewModel @Inject constructor(
             responseHelperWithResult(result) { response ->
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
-                        items = response.map { it.toDomain() },
+                        originalItems = response.map { it.toDomain() },
+                        itemsToShow = response.map { it.toDomain() },
                         isLoading = false
                     )
                 }
@@ -42,9 +49,18 @@ class MarcaRenovadosViewModel @Inject constructor(
     }
 
     override fun onSearchQueryChanged(query: String) {
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
-                searchQuery = query
+        _uiState.update { currentState ->
+            val filteredList = if (query.isBlank()) {
+                currentState.originalItems
+            } else {
+                currentState.originalItems.filter { brand ->
+                    brand.description.contains(query, ignoreCase = true) ||
+                            brand.id.toString().contains(query, ignoreCase = true)
+                }
+            }
+            currentState.copy(
+                searchQuery = query,
+                itemsToShow = filteredList
             )
         }
     }
@@ -52,7 +68,8 @@ class MarcaRenovadosViewModel @Inject constructor(
     override fun onClearQuery() {
         _uiState.update { currentUiState ->
             currentUiState.copy(
-                searchQuery = ""
+                searchQuery = "",
+                itemsToShow = currentUiState.originalItems
             )
         }
     }
@@ -68,7 +85,8 @@ class MarcaRenovadosViewModel @Inject constructor(
     override fun onDismissDialog() {
         _uiState.update { currentUiState ->
             currentUiState.copy(
-                showDialog = false
+                showDialog = false,
+                dialogData = emptyMap()
             )
         }
     }
@@ -76,22 +94,41 @@ class MarcaRenovadosViewModel @Inject constructor(
     override fun onSaveItem() {
         viewModelScope.launch {
             val data = _uiState.value.dialogData
-            val description = data["description"] as String
-            val idRetreadBrand = data["idRetreatedBrand"] as Int
+            val description = data[RetreadBrandFields.DESCRIPTION.value] as String
+            val idRetreadBrand = data[RetreadBrandFields.ID.value] as String
             val response = retreadBrandCrudUseCase.invoke(
                 RetreadBrandDto(
-                    idRetreadBrand = idRetreadBrand,
+                    idRetreadBrand = idRetreadBrand.toInt(),
                     description = description
                 )
             )
 
             responseHelperWithResult(response) {
+                val items = _uiState.value.originalItems.toMutableList()
+                items.add(
+                    RetreadBrand(
+                        id = idRetreadBrand.toInt(),
+                        description = description
+                    )
+                )
+
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
-                        showDialog = false
+                        originalItems = items,
+                        itemsToShow = items,
                     )
                 }
+
+                onDismissDialog()
             }
+        }
+    }
+
+    override fun onIsEditing(isEditing: Boolean) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                isEditing = isEditing
+            )
         }
     }
 
@@ -103,6 +140,12 @@ class MarcaRenovadosViewModel @Inject constructor(
                 dialogData = newDialogData
             )
         }
+    }
+
+    override fun setItemBrandById(id: Int) {
+        val item = _uiState.value.originalItems.first { it.id == id }
+        onDialogFieldChanged(RetreadBrandFields.ID.value, item.id.toString())
+        onDialogFieldChanged(RetreadBrandFields.DESCRIPTION.value, item.description)
     }
 
     fun setTitle(title: String) {

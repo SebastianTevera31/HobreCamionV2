@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.common.viewmodel
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -21,7 +20,6 @@ interface ListManagementViewModel<T> {
      * Se llama al iniciar la pantalla para cargar los datos iniciales.
      */
     fun loadItems()
-
 
     /**
      * Se llama cuando el usuario modifica el texto en la barra de búsqueda.
@@ -49,11 +47,18 @@ interface ListManagementViewModel<T> {
     fun onSaveItem()
 
     /**
+     * Se llama cuando el usuario quiere editar un ítem de la lista.
+     */
+    fun onIsEditing(isEditing: Boolean)
+
+    /**
      * Gestiona los cambios en los campos del formulario del diálogo.
      * @param field Un identificador único para el campo (e.g., "name", "code").
      * @param value El nuevo valor del campo.
      */
     fun onDialogFieldChanged(field: String, value: Any?)
+
+    fun setItemBrandById(id: Int)
 }
 
 /**
@@ -64,8 +69,10 @@ interface ListManagementViewModel<T> {
 data class ListManagementUiState<T>(
     val title: String = "",
     val searchQuery: String = "",
-    val items: List<T> = emptyList(),
+    val originalItems: List<T> = emptyList(),
+    val itemsToShow: List<T> = emptyList(),
     val isLoading: Boolean = true,
+    val isEditing: Boolean = false,
     val showDialog: Boolean = false,
     // Un mapa flexible para contener los datos de los campos del diálogo.
     // Permite que cada pantalla defina sus propios campos sin cambiar la estructura.

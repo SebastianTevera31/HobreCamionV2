@@ -200,7 +200,7 @@ fun <T> ListManagementScreen(
                     contentPadding = PaddingValues(16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(state.items) { item ->
+                    items(state.itemsToShow) { item ->
                         // Aquí es donde se "inyecta" el Composable de cada fila específica.
                         listItemContent(item)
                     }
@@ -222,7 +222,7 @@ fun ListManagementScreenPreview() {
         ListManagementScreen(
             state = ListManagementUiState(
                 title = "Título de la Lista",
-                items = listOf(
+                originalItems = listOf(
                     "Elemento 1",
                     "Elemento 2",
                     "Elemento 3"

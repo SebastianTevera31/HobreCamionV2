@@ -150,7 +150,7 @@
     <string name="excelente">Excelente</string>
     <string name="aceptable">Aceptable</string>
     <string name="pobre">Pobre</string>
-    <string name="conexion_status"><br/>Conexión: %1$s</string>
+    <string name="conexion_status"><br />Conexión: %1$s</string>
     <string name="conexion_perdidad_monitor">Sin conexión con el monitor.</string>
     <string name="seleccione_una_llanta">Seleccione una llanta</string>
     <string name="posiciones">Posiciones</string>
@@ -169,6 +169,6 @@
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. es Responsable del tratamiento (uso) de sus datos personales, los cuales serán usados a efecto de dar contestación a las comunicaciones generadas por esta vía y para proveerle los productos o prestarle los servicios que se nos encomienden.</string>
     <string name="en_extraccion">En extracción</string>
     <string name="registro_de_llantas">Registro de Llantas</string>
-    <string name="dise_os_renovados">Diseños Renovados</string>
-    <string name="marca_renovada">Marca Renovada</string>
+    <string name="dise_os_renovados">Diseños de Renovado</string>
+    <string name="marca_renovada">Marcas de Renovado</string>
 </resources>
