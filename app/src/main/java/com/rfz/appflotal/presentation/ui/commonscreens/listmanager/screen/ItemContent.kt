@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.common.screen
+package com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
@@ -82,13 +84,13 @@ fun ItemContent(
                 ) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Editar",
+                        contentDescription = pluralStringResource(R.plurals.editar_elemento, 1),
                         tint = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Editar",
+                        pluralStringResource(R.plurals.editar_elemento, 1),
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         fontWeight = FontWeight.Medium,
                         style = MaterialTheme.typography.labelLarge

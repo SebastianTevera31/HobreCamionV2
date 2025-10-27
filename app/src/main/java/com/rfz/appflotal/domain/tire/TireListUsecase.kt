@@ -1,8 +1,6 @@
 package com.rfz.appflotal.domain.tire
 
-import com.rfz.appflotal.data.model.tire.response.TireInspectionReportResponse
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
-import com.rfz.appflotal.data.repository.tire.TireGetRepository
 import com.rfz.appflotal.data.repository.tire.TireListRepository
 import javax.inject.Inject
 

@@ -2,10 +2,7 @@ package com.rfz.appflotal.data.repository.airPressureRating
 
 import com.rfz.appflotal.data.model.airPressureRating.dto.CreateAirPressureRatingDto
 import com.rfz.appflotal.data.model.airPressureRating.response.CreateAirPressureRatingResponse
-import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
-import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.network.service.airPressureRating.CreateAirPressureRatingService
-import com.rfz.appflotal.data.network.service.brand.BrandCrudService
 import javax.inject.Inject
 
 

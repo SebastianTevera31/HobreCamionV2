@@ -1,8 +1,6 @@
 package com.rfz.appflotal.data.repository.scrap
 
-import com.rfz.appflotal.data.model.route.response.RouteResponse
 import com.rfz.appflotal.data.model.scrap.response.ScrapReportResponse
-import com.rfz.appflotal.data.network.service.route.RouteService
 import com.rfz.appflotal.data.network.service.scrap.ScrapReportService
 import javax.inject.Inject
 

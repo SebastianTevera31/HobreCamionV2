@@ -1,9 +1,6 @@
 package com.rfz.appflotal.data.repository.route
 
-import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
-import com.rfz.appflotal.data.model.brand.response.BranListResponse
 import com.rfz.appflotal.data.model.route.response.RouteResponse
-import com.rfz.appflotal.data.network.service.brand.BrandCrudService
 import com.rfz.appflotal.data.network.service.route.RouteService
 import javax.inject.Inject
 

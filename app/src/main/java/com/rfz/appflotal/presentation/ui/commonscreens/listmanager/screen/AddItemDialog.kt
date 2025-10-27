@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.common.screen
+package com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

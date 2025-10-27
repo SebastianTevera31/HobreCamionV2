@@ -1,9 +1,7 @@
 package com.rfz.appflotal.domain.acquisitiontype
 
 import com.rfz.appflotal.data.model.acquisitiontype.response.AcquisitionTypeResponse
-import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.repository.acquisitiontype.AcquisitionTypeRepository
-import com.rfz.appflotal.data.repository.login.LoginRepository
 import javax.inject.Inject
 
 

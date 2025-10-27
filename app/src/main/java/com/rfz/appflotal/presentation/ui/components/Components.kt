@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -19,7 +20,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 
 @Composable
-fun ProgressDialog() {
+fun AwaitDialog(@StringRes message: Int = R.string.espere_un_momento) {
     AlertDialog(
         onDismissRequest = { },
         title = {},
@@ -32,7 +33,7 @@ fun ProgressDialog() {
                         strokeWidth = 4.dp
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(stringResource(R.string.espere_un_momento), fontWeight = FontWeight.Medium)
+                    Text(stringResource(message), fontWeight = FontWeight.Medium)
                 }
             }
         },

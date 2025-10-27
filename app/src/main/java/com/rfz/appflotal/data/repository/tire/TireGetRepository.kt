@@ -1,10 +1,6 @@
 package com.rfz.appflotal.data.repository.tire
 
-import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
-import com.rfz.appflotal.data.model.brand.response.BranListResponse
-import com.rfz.appflotal.data.model.tire.response.TireInspectionReportResponse
 import com.rfz.appflotal.data.model.tire.response.TirexIdResponse
-import com.rfz.appflotal.data.network.service.brand.BrandCrudService
 import com.rfz.appflotal.data.network.service.tire.TireGetService
 import javax.inject.Inject
 

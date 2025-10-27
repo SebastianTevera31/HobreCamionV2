@@ -168,7 +168,37 @@
     <string name="main_term_text">IMPORTANTE \\ CONFIDENCIAL: Este mensaje contiene información de la compañía CENTRO CAMIONERO MONTAJES, S.A. DE C.V., con domicilio en Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, México, C.P. 29020. La cual es de carácter privilegiado, confidencial, y de acceso restringido conforme a la Ley aplicable.</string>
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. es Responsable del tratamiento (uso) de sus datos personales, los cuales serán usados a efecto de dar contestación a las comunicaciones generadas por esta vía y para proveerle los productos o prestarle los servicios que se nos encomienden.</string>
     <string name="en_extraccion">En extracción</string>
+
     <string name="registro_de_llantas">Registro de Llantas</string>
     <string name="dise_os_renovados">Diseños de Renovado</string>
-    <string name="marca_renovada">Marcas de Renovado</string>
+
+    <string name="marca_de_renovado_guardada">Marca de renovado guardada con éxito</string>
+    <string name="error_guardar_marca_renovado">No se pudo guardar la marca de renovado. Inténtalo de nuevo</string>
+    <string name="error_id_no_valida">Solo se permiten números en el campo ID</string>
+
+    <string name="agregar_elemento">Agregar %s</string>
+
+    <plurals name="editar_elemento">
+        <item quantity="one">Edit</item>
+        <item quantity="other">Edit %s</item>
+    </plurals>
+
+    <string name="marca_renovado">Marcas de Renovado</string>
+    <string name="limpiar">Limpiar</string>
+    <string name="add_item">Añadir ítem</string>
+
+    <plurals name="description_field">
+        <item quantity="one">Descripción</item>
+        <item quantity="other">Descripción: %s</item>
+    </plurals>
+
+    <plurals name="codigo_field">
+        <item quantity="one">Código</item>
+        <item quantity="other">Código: %d</item>
+    </plurals>
+
+    <plurals name="marca_renovado_tag">
+        <item quantity="one">Marca de Renovado</item>
+        <item quantity="other">Marcas de Renovado</item>
+    </plurals>
 </resources>

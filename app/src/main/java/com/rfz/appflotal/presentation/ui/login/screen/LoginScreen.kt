@@ -67,7 +67,7 @@ import com.rfz.appflotal.data.model.login.response.LoginState
 import com.rfz.appflotal.presentation.commons.TermsAndConditionsText
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
-import com.rfz.appflotal.presentation.ui.components.ProgressDialog
+import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
@@ -105,7 +105,7 @@ fun LoginScreen(
         }
 
         if (isProgressVisible) {
-            ProgressDialog()
+            AwaitDialog()
         }
 
         LoginContent(loginViewModel, navController)

@@ -1,9 +1,10 @@
-package com.rfz.appflotal.presentation.ui.common.screen
+package com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,18 +58,19 @@ fun ListItemContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = title.uppercase(),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
 
-            itemContent()
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title.uppercase(),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                itemContent()
+            }
 
             Box(
                 modifier = Modifier
@@ -99,10 +101,12 @@ fun ListItemContent(
     }
 }
 
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun IteCardPreview() {
-//    HombreCamionTheme {
-//        ListItemContent(title = "Item de Prueba", onEditClick = {})
-//    }
-//}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ItemCardPreview() {
+    HombreCamionTheme {
+        ListItemContent(title = "Item de Prueba", onEditClick = {}){
+            Text(text = "Descripcion")
+        }
+    }
+}

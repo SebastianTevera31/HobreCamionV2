@@ -168,6 +168,37 @@
     <string name="en_extraccion">Being removed</string>
 
     <string name="registro_de_llantas">Registro de Llantas</string>
-    <string name="dise_os_renovados">Renewed Designs</string>
-    <string name="marca_renovada">Retreated Brands</string>
+
+    <string name="dise_os_renovados">Renewal Designs</string>
+
+    <string name="marca_de_renovado_guardada">Renewal brand saved successfully</string>
+    <string name="error_guardar_marca_renovado">Couldn’t save the renewal brand. Please try again</string>
+    <string name="error_id_no_valida">Only numbers are allowed in the ID field</string>
+
+    <string name="agregar_elemento">Add %1$s</string>
+
+    <plurals name="editar_elemento">
+        <item quantity="one">Edit</item>
+        <item quantity="other">Edit %1$d</item>
+    </plurals>
+
+    <string name="marca_renovado">Renewal Brand</string>
+    <string name="limpiar">Clean</string>
+    <string name="add_item">Add ítem</string>
+
+
+    <plurals name="description_field">
+        <item quantity="one">Description</item>
+        <item quantity="other">Description: %1$d</item>
+    </plurals>
+
+    <plurals name="codigo_field">
+        <item quantity="one">Código</item>
+        <item quantity="other">Código: %1$d</item>
+    </plurals>
+
+    <plurals name="marca_renovado_tag">
+        <item quantity="one">Renewal Brand</item>
+        <item quantity="other">Renewal Brands</item>
+    </plurals>
 </resources>

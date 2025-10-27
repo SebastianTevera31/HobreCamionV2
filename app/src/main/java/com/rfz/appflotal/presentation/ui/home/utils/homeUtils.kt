@@ -62,7 +62,7 @@ val menuItems = listOf(
         iconRes = R.drawable.monitor
     ),
     MenuItem(
-        title = R.string.marca_renovada,
+        title = R.string.marca_renovado,
         route = NavScreens.MARCA_RENOVADA,
         iconRes = R.drawable.ic_brand
     )

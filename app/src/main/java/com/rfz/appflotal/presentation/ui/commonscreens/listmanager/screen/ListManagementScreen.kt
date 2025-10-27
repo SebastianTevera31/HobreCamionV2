@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.common.screen
+package com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -36,13 +36,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.common.viewmodel.ListManagementUiState
+import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ListManagementUiState
 
 /**
  * Un Composable genérico y reutilizable que define la estructura para todas las pantallas
@@ -89,7 +91,7 @@ fun <T> ListManagementScreen(
                         ) {
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Regresar",
+                                contentDescription = stringResource(R.string.regresar),
                                 tint = Color.White,
                                 modifier = Modifier.size(28.dp)
                             )
@@ -130,8 +132,8 @@ fun <T> ListManagementScreen(
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Search,
-                                contentDescription = "Buscar",
-                                tint = Color.White
+                                contentDescription = stringResource(R.string.buscar),
+                                tint = Color.White,
                             )
                         },
                         trailingIcon = {
@@ -139,7 +141,7 @@ fun <T> ListManagementScreen(
                                 IconButton(onClick = onClearSearchQuery) {
                                     Icon(
                                         Icons.Default.Close,
-                                        contentDescription = "Limpiar",
+                                        contentDescription = stringResource(R.string.limpiar),
                                         tint = Color.White
                                     )
                                 }
@@ -147,10 +149,10 @@ fun <T> ListManagementScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .shadow(6.dp, RoundedCornerShape(16.dp)),
+                            .shadow(4.dp, RoundedCornerShape(16.dp)),
                         placeholder = {
                             Text(
-                                "Buscar...",
+                                "${stringResource(R.string.buscar)}...",
                                 color = Color.White
                             )
                         },
@@ -182,16 +184,19 @@ fun <T> ListManagementScreen(
                 modifier = Modifier.shadow(elevation = 8.dp, shape = CircleShape)
             ) {
                 Icon(
-                    Icons.Default.Add, contentDescription = "Añadir ítem", tint = Color.White,
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.add_item),
+                    tint = Color.White,
                     modifier = Modifier.size(28.dp)
                 )
             }
         },
         modifier = modifier
     ) { paddingValues ->
-
         Box(
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -228,7 +233,7 @@ fun ListManagementScreenPreview() {
                     "Elemento 3"
                 ),
                 searchQuery = "",
-                isLoading = false,
+                isLoading = true,
                 showDialog = false
             ),
             onSearchQueryChanged = {},

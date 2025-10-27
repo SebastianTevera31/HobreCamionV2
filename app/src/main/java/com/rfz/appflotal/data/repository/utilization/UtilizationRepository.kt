@@ -1,8 +1,6 @@
 package com.rfz.appflotal.data.repository.utilization
 
-import com.rfz.appflotal.data.model.scrap.response.ScrapReportResponse
 import com.rfz.appflotal.data.model.utilization.response.UtilizationResponse
-import com.rfz.appflotal.data.network.service.scrap.ScrapReportService
 import com.rfz.appflotal.data.network.service.utilization.UtilizationService
 import javax.inject.Inject
 
