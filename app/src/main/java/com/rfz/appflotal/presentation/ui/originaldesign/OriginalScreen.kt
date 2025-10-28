@@ -168,7 +168,7 @@ fun OriginalScreen(
                 }
 
 
-                val utilizationsResult = utilizationUseCase(bearerToken)
+                val utilizationsResult = utilizationUseCase()
                 if (utilizationsResult.isSuccess) {
                     utilizations.addAll(utilizationsResult.getOrNull() ?: emptyList())
                 }

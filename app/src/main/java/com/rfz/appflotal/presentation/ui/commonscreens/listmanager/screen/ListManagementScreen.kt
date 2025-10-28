@@ -37,8 +37,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -233,12 +236,60 @@ fun ListManagementScreenPreview() {
                     "Elemento 3"
                 ),
                 searchQuery = "",
-                isLoading = true,
+                itemsToShow = listOf(
+                    "Elemento 1",
+                    "Elemento 2",
+                    "Elemento 3"
+                ),
+                isLoading = false,
                 showDialog = false
             ),
             onSearchQueryChanged = {},
             onShowDialog = {},
-            listItemContent = { data -> Text(text = data, modifier = Modifier.fillMaxSize()) },
+            listItemContent = { data ->
+                ListItemContent(
+                    title = "DR5",
+                    onEditClick = {
+
+                    }
+                ) {
+                    Text(text = "DISEÑO DE REN 15 DE ABRIL")
+                    Text(buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
+                            append("Profunidad de piso: ")
+                        }
+                        append("17,0")
+                    })
+                    Text(buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
+                            append("Utilizacion: ")
+                        }
+                        append("Eje libre")
+                    })
+                    Text(buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
+                            append("Marca de Renovado:")
+                        }
+                    }
+                    )
+                    Text(text = "R15 MARCA RENOVADO 15 ABRIL")
+                }
+            },
             dialogContent = {},
             onBackScreen = {},
             onClearSearchQuery = {},

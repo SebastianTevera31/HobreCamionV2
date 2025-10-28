@@ -29,6 +29,7 @@ import com.rfz.appflotal.data.network.client.provider.ProviderCrudClient
 import com.rfz.appflotal.data.network.client.provider.ProviderListClient
 import com.rfz.appflotal.data.network.client.retreaband.RetreadBrandCrudClient
 import com.rfz.appflotal.data.network.client.retreaband.RetreadBrandListClient
+import com.rfz.appflotal.data.network.client.retreaddesign.RetreadDesignByIdClient
 import com.rfz.appflotal.data.network.client.retreaddesign.RetreadDesignCrudClient
 import com.rfz.appflotal.data.network.client.retreaddesign.RetreadDesignListClient
 import com.rfz.appflotal.data.network.client.route.RouteClient
@@ -301,6 +302,11 @@ class NetworkModule {
         return retrofit.create(RetreadDesignListClient::class.java)
     }
 
+    @Singleton
+    @Provides
+    fun provideRetreadDesignByIdClient(retrofit: Retrofit): RetreadDesignByIdClient {
+        return retrofit.create(RetreadDesignByIdClient::class.java)
+    }
 
     @Singleton
     @Provides

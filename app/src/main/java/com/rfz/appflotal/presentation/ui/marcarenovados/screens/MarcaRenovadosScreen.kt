@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.AddItemDialog
@@ -70,10 +69,11 @@ fun MarcaRenovadosScreen(
         },
         dialogContent = {
             AddItemDialog(
-                title = if (!state.value.isEditing) stringResource(
-                    R.string.agregar_elemento,
-                    fieldTitle
-                ) else pluralStringResource(R.plurals.editar_elemento, 2, fieldTitle),
+                title = if (!state.value.isEditing) {
+                    stringResource(R.string.agregar_elemento, fieldTitle)
+                } else {
+                    stringResource(R.string.editar_elemento, fieldTitle)
+                },
                 content = {
                     ItemDialog(
                         label = pluralStringResource(R.plurals.description_field, 1),
@@ -87,18 +87,15 @@ fun MarcaRenovadosScreen(
                         },
                     )
                 },
-                onConfirm = {
-                    if (!state.value.isEditing) {
-                        viewModel.onAddItem()
-                    } else {
-                        viewModel.onUpdateItem()
-                    }
-                },
+                onConfirm = viewModel::onSaveItem,
                 onDismiss = viewModel::onDismissDialog,
-                isEntryValid = dialogState.value.id.isNotBlank() && dialogState.value.description.isNotBlank()
+                isEntryValid = dialogState.value.description.isNotBlank()
             )
         },
-        onBackScreen = onBackScreen,
+        onBackScreen = {
+            viewModel.onDismissDialog()
+            onBackScreen()
+        },
         modifier = modifier,
     )
 }

@@ -22,6 +22,11 @@ val menuItems = listOf(
         R.drawable.ic_brand
     ),
     MenuItem(
+        title = R.string.marca_renovado,
+        route = NavScreens.MARCA_RENOVADA,
+        iconRes = R.drawable.ic_brand
+    ),
+    MenuItem(
         R.string.original_design,
         NavScreens.ORIGINAL,
         R.drawable.ic_tire_design
@@ -61,11 +66,6 @@ val menuItems = listOf(
         route = HombreCamionScreens.MONITOR.name,
         iconRes = R.drawable.monitor
     ),
-    MenuItem(
-        title = R.string.marca_renovado,
-        route = NavScreens.MARCA_RENOVADA,
-        iconRes = R.drawable.ic_brand
-    )
 )
 
 val primaryColor = primaryLight

@@ -1,6 +1,9 @@
 package com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel
 
+import androidx.annotation.StringRes
 import kotlinx.coroutines.flow.StateFlow
+
+data class ShowToast(@StringRes val message: Int)
 
 /**
  * Define el contrato que cualquier ViewModel que gestione una pantalla de tipo "Management List"
@@ -49,12 +52,7 @@ interface ListManagementViewModel<T> {
     /**
      * Se llama cuando el usuario confirma la acción de guardado en el diálogo.
      */
-    fun onAddItem()
-
-    /**
-     * Se llama cuando el usuario confirma la acción de edición en el diálogo.
-     */
-    fun onUpdateItem()
+    fun onSaveItem()
 
     /**
      * Se llama cuando el usuario quiere editar un ítem de la lista.

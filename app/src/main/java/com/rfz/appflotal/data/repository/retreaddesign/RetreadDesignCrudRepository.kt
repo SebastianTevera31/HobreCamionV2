@@ -8,9 +8,11 @@ import javax.inject.Inject
 
 class RetreadDesignCrudRepository @Inject constructor(private val retreadDesignCrudService: RetreadDesignCrudService) {
 
-    suspend fun doBrandCrud(requestBody: RetreadDesignCrudDto, tok: String): Result<List<MessageResponse>> {
+    suspend fun doBrandCrud(
+        requestBody: RetreadDesignCrudDto,
+    ): Result<List<MessageResponse>> {
         return try {
-            val response = retreadDesignCrudService.doCrudRetreadDesign(requestBody,tok)
+            val response = retreadDesignCrudService.doCrudRetreadDesign(requestBody)
             if (response.isSuccessful) {
 
                 response.body()?.let {

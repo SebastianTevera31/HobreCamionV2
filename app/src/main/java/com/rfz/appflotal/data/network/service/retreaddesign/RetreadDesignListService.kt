@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.network.service.retreaddesign
 
 import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.retreaddesing.response.RetreadDesignListResponse
 import com.rfz.appflotal.data.network.client.retreaddesign.RetreadDesignListClient
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import kotlinx.coroutines.Dispatchers
@@ -14,10 +15,10 @@ class RetreadDesignListService @Inject constructor(
     private val retreadDesignListClient: RetreadDesignListClient,
     private val getTasksUseCase: GetTasksUseCase
 ) {
-    suspend fun doCrudRetreadDesignList(): Response<List<MessageResponse>> {
+    suspend fun doCrudRetreadDesignList(): Response<List<RetreadDesignListResponse>> {
         return withContext(Dispatchers.IO) {
             val token = getTasksUseCase.invoke().first()[0].fld_token
-            retreadDesignListClient.doRetreadDesignList(token)
+            retreadDesignListClient.doRetreadDesignList("bearer $token")
         }
     }
 }

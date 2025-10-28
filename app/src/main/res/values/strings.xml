@@ -183,9 +183,16 @@
         <item quantity="other">Edit %s</item>
     </plurals>
 
+    <string name="editar_elemento">Editar %s</string>
+
     <string name="marca_renovado">Marcas de Renovado</string>
     <string name="limpiar">Limpiar</string>
     <string name="add_item">Añadir ítem</string>
+    <string name="guardado_retreated_design_exito">Diseño de renovado guardada con éxito</string>
+    <string name="error_guardar_retreated_design">No se pudo guardar el diseño de renovado. Inténtalo de nuevo</string>
+    <string name="es_requerido_message">%1$s es requerido</string>
+    <string name="utilizacion">Utilizacion</string>
+    <string name="profundidad_de_piso">Profundidad de piso</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>
@@ -200,5 +207,10 @@
     <plurals name="marca_renovado_tag">
         <item quantity="one">Marca de Renovado</item>
         <item quantity="other">Marcas de Renovado</item>
+    </plurals>
+
+    <plurals name="disenio_renovado_tag">"
+        <item quantity="one">Diseño de Renovado</item>
+        <item quantity="other">Diseños de Renovado</item>
     </plurals>
 </resources>

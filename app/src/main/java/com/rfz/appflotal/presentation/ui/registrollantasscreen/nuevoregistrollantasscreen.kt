@@ -704,54 +704,6 @@ fun NuevoRegistroLlantasScreen(
                                 }
                             }
 
-//                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-//                                Column {
-//                                    Text(
-//                                        "Proveedor",
-//                                        style = MaterialTheme.typography.labelMedium.copy(
-//                                            color = primaryColor,
-//                                            fontWeight = FontWeight.SemiBold
-//                                        ),
-//                                        modifier = Modifier.padding(bottom = 4.dp)
-//                                    )
-//                                    ExposedDropdownMenuBox(
-//                                        expanded = showProviderMenu,
-//                                        onExpandedChange = { showProviderMenu = !showProviderMenu }
-//                                    ) {
-//                                        OutlinedTextField(
-//                                            value = selectedProvider?.description ?: "",
-//                                            onValueChange = {},
-//                                            readOnly = true,
-//                                            trailingIcon = {
-//                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showProviderMenu)
-//                                            },
-//                                            modifier = Modifier
-//                                                .fillMaxWidth()
-//                                                .menuAnchor(),
-//                                            colors = OutlinedTextFieldDefaults.colors(
-//                                                focusedBorderColor = primaryColor,
-//                                                unfocusedBorderColor = Color.Gray
-//                                            ),
-//                                            shape = RoundedCornerShape(14.dp)
-//                                        )
-//                                        ExposedDropdownMenu(
-//                                            expanded = showProviderMenu,
-//                                            onDismissRequest = { showProviderMenu = false }
-//                                        ) {
-//                                            providers.forEach { provider ->
-//                                                DropdownMenuItem(
-//                                                    text = { Text(provider.description) },
-//                                                    onClick = {
-//                                                        selectedProvider = provider
-//                                                        showProviderMenu = false
-//                                                    }
-//                                                )
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -787,55 +739,6 @@ fun NuevoRegistroLlantasScreen(
                                     shape = RoundedCornerShape(14.dp)
                                 )
                             }
-
-//                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-//                                Column {
-//                                    Text(
-//                                        "Base",
-//                                        style = MaterialTheme.typography.labelMedium.copy(
-//                                            color = primaryColor,
-//                                            fontWeight = FontWeight.SemiBold
-//                                        ),
-//                                        modifier = Modifier.padding(bottom = 4.dp)
-//                                    )
-//                                    ExposedDropdownMenuBox(
-//                                        expanded = showBaseMenu,
-//                                        onExpandedChange = { showBaseMenu = !showBaseMenu }
-//                                    ) {
-//                                        OutlinedTextField(
-//                                            value = selectedBase?.fld_description ?: "",
-//                                            onValueChange = {},
-//                                            readOnly = true,
-//                                            trailingIcon = {
-//                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showBaseMenu)
-//                                            },
-//                                            modifier = Modifier
-//                                                .fillMaxWidth()
-//                                                .menuAnchor(),
-//                                            colors = OutlinedTextFieldDefaults.colors(
-//                                                focusedBorderColor = primaryColor,
-//                                                unfocusedBorderColor = Color.Gray
-//                                            ),
-//                                            shape = RoundedCornerShape(14.dp)
-//                                        )
-//                                        ExposedDropdownMenu(
-//                                            expanded = showBaseMenu,
-//                                            onDismissRequest = { showBaseMenu = false }
-//                                        ) {
-//                                            bases.forEach { base ->
-//                                                DropdownMenuItem(
-//                                                    text = { Text(base.fld_description) },
-//                                                    onClick = {
-//                                                        selectedBase = base
-//                                                        showBaseMenu = false
-//                                                    }
-//                                                )
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()

@@ -82,8 +82,6 @@ import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.montajedesmontajescreen.MontajeDesmontajeScreen
-import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.NuevoRenovadoScreen
-import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.RenovadosScreen
 import com.rfz.appflotal.presentation.ui.originaldesign.OriginalScreen
 import com.rfz.appflotal.presentation.ui.password.screen.PasswordScreen
 import com.rfz.appflotal.presentation.ui.password.viewmodel.PasswordViewModel
@@ -93,6 +91,8 @@ import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlan
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
+import com.rfz.appflotal.presentation.ui.retreatedesign.RetreatedDesignScreen
+import com.rfz.appflotal.presentation.ui.retreatedesign.RetreatedDesignViewModel
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -116,6 +116,8 @@ class InicioActivity : ComponentActivity() {
     private val signUpViewModel: SignUpViewModel by viewModels()
     private val registerMonitorViewModel: RegisterMonitorViewModel by viewModels()
     private val updateUserViewModel: UpdateUserViewModel by viewModels()
+    private val retreatedDesignViewModel: RetreatedDesignViewModel by viewModels()
+
     private val marcaRenovadosScreen: MarcaRenovadosViewModel by viewModels()
 
     @Inject
@@ -426,10 +428,11 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
-                            composable(NavScreens.RENOVADOS) { RenovadosScreen(navController) }
-                            composable(NavScreens.NUEVO_RENOVADO) {
-                                NuevoRenovadoScreen(
-                                    navController
+
+                            composable(NavScreens.RENOVADOS) {
+                                RetreatedDesignScreen(
+                                    viewModel = retreatedDesignViewModel,
+                                    onBackScreen = { navController.popBackStack() }
                                 )
                             }
 
@@ -438,6 +441,7 @@ class InicioActivity : ComponentActivity() {
                                     viewModel = marcaRenovadosScreen,
                                     onBackScreen = { navController.popBackStack() })
                             }
+
                             composable(NavScreens.MEDIDAS_LLANTAS) {
                                 MedidasLlantasScreen(
                                     navController,

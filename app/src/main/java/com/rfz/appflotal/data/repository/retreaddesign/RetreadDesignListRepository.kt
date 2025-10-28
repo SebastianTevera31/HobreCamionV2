@@ -1,13 +1,13 @@
 package com.rfz.appflotal.data.repository.retreaddesign
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.retreaddesing.response.RetreadDesignListResponse
 import com.rfz.appflotal.data.network.service.retreaddesign.RetreadDesignListService
 import javax.inject.Inject
 
 
 class RetreadDesignListRepository @Inject constructor(private val retreadDesignListService: RetreadDesignListService) {
 
-    suspend fun doBrandCrud(): Result<List<MessageResponse>> {
+    suspend fun doBrandCrud(): Result<List<RetreadDesignListResponse>> {
         return try {
             val response = retreadDesignListService.doCrudRetreadDesignList()
             if (response.isSuccessful) {

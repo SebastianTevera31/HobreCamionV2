@@ -7,9 +7,9 @@ import javax.inject.Inject
 
 class UtilizationRepository @Inject constructor(private val utilizationService: UtilizationService) {
 
-    suspend fun doUtilization(tok: String): Result<List<UtilizationResponse>> {
+    suspend fun doUtilization(): Result<List<UtilizationResponse>> {
         return try {
-            val response = utilizationService.doUtilization(tok)
+            val response = utilizationService.doUtilization()
             if (response.isSuccessful) {
 
                 response.body()?.let {

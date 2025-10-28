@@ -169,10 +169,10 @@
 
     <string name="registro_de_llantas">Registro de Llantas</string>
 
-    <string name="dise_os_renovados">Renewal Designs</string>
+    <string name="dise_os_renovados">Retread Designs</string>
 
-    <string name="marca_de_renovado_guardada">Renewal brand saved successfully</string>
-    <string name="error_guardar_marca_renovado">Couldn’t save the renewal brand. Please try again</string>
+    <string name="marca_de_renovado_guardada">Retread brand saved successfully</string>
+    <string name="error_guardar_marca_renovado">Couldn’t save the retread brand. Please try again</string>
     <string name="error_id_no_valida">Only numbers are allowed in the ID field</string>
 
     <string name="agregar_elemento">Add %1$s</string>
@@ -182,10 +182,17 @@
         <item quantity="other">Edit %1$d</item>
     </plurals>
 
-    <string name="marca_renovado">Renewal Brand</string>
+    <string name="editar_elemento">Edit %s</string>
+
+    <string name="marca_renovado">Retread Brand</string>
     <string name="limpiar">Clean</string>
     <string name="add_item">Add ítem</string>
 
+    <string name="guardado_retreated_design_exito">Retread design saved successfully</string>
+    <string name="error_guardar_retreated_design">Failed to save retread design. Please try again</string>
+    <string name="es_requerido_message">%1$s is required</string>
+    <string name="utilizacion">Usage</string>
+    <string name="profundidad_de_piso">Tread Depth</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
@@ -193,12 +200,17 @@
     </plurals>
 
     <plurals name="codigo_field">
-        <item quantity="one">Código</item>
-        <item quantity="other">Código: %1$d</item>
+        <item quantity="one">Code</item>
+        <item quantity="other">Code: %1$d</item>
     </plurals>
 
     <plurals name="marca_renovado_tag">
-        <item quantity="one">Renewal Brand</item>
-        <item quantity="other">Renewal Brands</item>
+        <item quantity="one">Retread Brand</item>
+        <item quantity="other">Retread Brands</item>
+    </plurals>
+
+    <plurals name="disenio_renovado_tag">"
+        <item quantity="one">Retread Design</item>
+        <item quantity="other">Retread Designs</item>
     </plurals>
 </resources>
