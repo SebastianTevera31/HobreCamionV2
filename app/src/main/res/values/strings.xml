@@ -193,6 +193,7 @@
     <string name="es_requerido_message">%1$s es requerido</string>
     <string name="utilizacion">Utilizacion</string>
     <string name="profundidad_de_piso">Profundidad de piso</string>
+    <string name="fecha_de_adquisicion">Fecha de Adquisición</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

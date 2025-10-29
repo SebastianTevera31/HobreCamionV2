@@ -35,7 +35,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.viewbinding.BuildConfig
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens
@@ -88,11 +87,12 @@ import com.rfz.appflotal.presentation.ui.password.viewmodel.PasswordViewModel
 import com.rfz.appflotal.presentation.ui.permission.PermissionScreen
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlantasScreen
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlantasViewModel
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
-import com.rfz.appflotal.presentation.ui.retreatedesign.RetreatedDesignScreen
-import com.rfz.appflotal.presentation.ui.retreatedesign.RetreatedDesignViewModel
+import com.rfz.appflotal.presentation.ui.retreatedesign.screens.RetreatedDesignScreen
+import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesignViewModel
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -118,6 +118,7 @@ class InicioActivity : ComponentActivity() {
     private val updateUserViewModel: UpdateUserViewModel by viewModels()
     private val retreatedDesignViewModel: RetreatedDesignViewModel by viewModels()
 
+    private val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel by viewModels()
     private val marcaRenovadosScreen: MarcaRenovadosViewModel by viewModels()
 
     @Inject
@@ -477,14 +478,7 @@ class InicioActivity : ComponentActivity() {
                             composable(NavScreens.REGISTRO_LLANTAS) {
                                 NuevoRegistroLlantasScreen(
                                     navController,
-                                    acquisitionTypeUseCase,
-                                    providerListUseCase,
-                                    baseUseCase,
-                                    productListUseCase,
-                                    tireCrudUseCase,
-                                    tireListUsecase,
-                                    tireGetUseCase,
-                                    homeViewModel
+                                    nuevoRegistroLllantasViewModel
                                 )
                             }
                             composable(NavScreens.REGISTRO_VEHICULOS) {

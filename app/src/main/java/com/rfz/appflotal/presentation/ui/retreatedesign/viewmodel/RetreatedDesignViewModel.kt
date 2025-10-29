@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.retreatedesign
+package com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel
 
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
