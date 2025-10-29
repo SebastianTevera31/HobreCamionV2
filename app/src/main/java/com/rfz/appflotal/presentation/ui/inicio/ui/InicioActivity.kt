@@ -569,6 +569,7 @@ class InicioActivity : ComponentActivity() {
                                 TerminosScreen(context = this@InicioActivity) {
 
                                 }
+                            }
                         }
                     }
                 }

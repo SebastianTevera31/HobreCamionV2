@@ -3,16 +3,12 @@ package com.rfz.appflotal.presentation.ui.registrollantasscreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.model.acquisitiontype.response.AcquisitionTypeResponse
-import com.rfz.appflotal.data.model.base.BaseResponse
 import com.rfz.appflotal.data.model.product.response.ProductResponse
-import com.rfz.appflotal.data.model.provider.response.ProviderListResponse
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
-import com.rfz.appflotal.domain.base.BaseUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.product.ProductListUseCase
-import com.rfz.appflotal.domain.provider.ProviderListUseCase
 import com.rfz.appflotal.domain.tire.TireCrudUseCase
 import com.rfz.appflotal.domain.tire.TireGetUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
@@ -39,8 +35,6 @@ data class NuevoRegistroLlantasUiState(
     val isLoadingDialogData: Boolean = false,
     // Combo box lists
     val acquisitionTypes: List<AcquisitionTypeResponse> = emptyList(),
-    val providers: List<ProviderListResponse> = emptyList(),
-    val bases: List<BaseResponse> = emptyList(),
     val products: List<ProductResponse> = emptyList(),
     // Dialog fields state
     val dialogState: TireDialogState = TireDialogState()
@@ -49,11 +43,8 @@ data class NuevoRegistroLlantasUiState(
 data class TireDialogState(
     val id: Int = 0,
     val selectedAcquisitionType: AcquisitionTypeResponse? = null,
-    val selectedProvider: ProviderListResponse? = null,
-    val selectedBase: BaseResponse? = null,
     val selectedProduct: ProductResponse? = null,
     val acquisitionDate: String = "",
-    val document: String = "",
     val cost: String = "",
     val folioFactura: String = "",
     val treadDepth: String = "",
@@ -67,8 +58,6 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
     private val tireGetUseCase: TireGetUseCase,
     private val tireCrudUseCase: TireCrudUseCase,
     private val acquisitionTypeUseCase: AcquisitionTypeUseCase,
-    private val providerListUseCase: ProviderListUseCase,
-    private val baseUseCase: BaseUseCase,
     private val productListUseCase: ProductListUseCase,
     private val getTasksUseCase: GetTasksUseCase
 ) : ViewModel() {
@@ -127,16 +116,19 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
             val tireDto = TireCrudDto(
                 idTire = if (_uiState.value.isEditing) currentState.id else 0,
                 typeAcquisitionId = currentState.selectedAcquisitionType!!.idAcquisitionType,
-                providerId = currentState.selectedProvider!!.idProvider,
-                destinationId = currentState.selectedBase!!.id_base,
+                providerId = 0,
                 productId = currentState.selectedProduct!!.idProduct,
                 acquisitionDate = formatAcquisitionDate(currentState.acquisitionDate),
-                document = currentState.document,
-                unitCost = currentState.cost.toDoubleOrNull() ?: 0.0,
-                invoiceFolio = currentState.folioFactura,
+                document = currentState.folioFactura,
+                unitCost = currentState.cost.toInt(),
                 dot = currentState.dot,
                 tireNumber = currentState.tireNumber,
-                treadDepth = currentState.treadDepth.toIntOrNull() ?: 0,
+                treadDepth = currentState.treadDepth.toInt(),
+                registrationDate = LocalDateTime.now().toString(),
+                isActive = true,
+                retreadDesignId = 0,
+                destination = 14,
+                lifecycle = 0,
             )
 
             try {
@@ -180,15 +172,11 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
             val bearerToken = "Bearer ${token ?: ""}"
             try {
                 val acqTypes = acquisitionTypeUseCase(bearerToken).getOrNull()
-                val providers = providerListUseCase(bearerToken, 1).getOrNull() ?: emptyList()
-                val bases = baseUseCase(bearerToken).getOrNull() ?: emptyList()
                 val products = productListUseCase(bearerToken).getOrNull() ?: emptyList()
 
                 _uiState.update {
                     it.copy(
-                        acquisitionTypes = acqTypes?.let { listOf(it) } ?: emptyList(),
-                        providers = providers,
-                        bases = bases,
+                        acquisitionTypes = acqTypes ?: emptyList(),
                         products = products
                     )
                 }
@@ -211,16 +199,13 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
                                 dialogState = TireDialogState(
                                     id = details.idTire,
                                     selectedAcquisitionType = it.acquisitionTypes.find { type -> type.idAcquisitionType == details.typeAcquisitionId },
-                                    selectedProvider = it.providers.find { p -> p.idProvider == details.providerId },
-                                    selectedBase = it.bases.find { b -> b.id_base == details.destinationId },
                                     selectedProduct = it.products.find { p -> p.idProduct == details.productId },
                                     acquisitionDate = details.acquisitionDate,
-                                    document = details.document,
                                     cost = details.unitCost.toString(),
                                     treadDepth = details.treadDepth.toString(),
                                     tireNumber = details.tireNumber,
                                     dot = details.dot,
-                                    folioFactura = details.invoiceFolio
+                                    folioFactura = details.document
                                 )
                             )
                         }
@@ -241,7 +226,6 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
         } else {
             state.tires.filter { tire ->
                 tire.typeAcquisition.contains(state.searchQuery, ignoreCase = true) ||
-                        tire.provider.contains(state.searchQuery, ignoreCase = true) ||
                         tire.brand.contains(state.searchQuery, ignoreCase = true)
             }
         }
@@ -249,8 +233,7 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
     }
 
     private fun isDialogStateInvalid(state: TireDialogState): Boolean {
-        return state.selectedAcquisitionType == null || state.selectedProvider == null ||
-                state.selectedBase == null || state.selectedProduct == null ||
+        return state.selectedAcquisitionType == null || state.selectedProduct == null ||
                 state.acquisitionDate.isBlank() || state.cost.isBlank() || state.tireNumber.isBlank()
     }
 
@@ -258,7 +241,7 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
         return try {
             val dateOnly = LocalDate.parse(date.substringBefore('T'), DateTimeFormatter.ISO_DATE)
             dateOnly.atStartOfDay().toString()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             LocalDateTime.now().toString()
         }
     }

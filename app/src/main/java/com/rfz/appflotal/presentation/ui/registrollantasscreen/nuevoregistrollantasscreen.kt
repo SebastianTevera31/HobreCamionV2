@@ -175,6 +175,10 @@ private fun TireItem(tire: TireListResponse, onEdit: () -> Unit) {
         ) {
             Column(Modifier.weight(1f)) {
                 Text(tire.brand, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("Modelo: ${tire.model}", fontSize = 16.sp)
+                Text("Tamaño: ${tire.size}", fontSize = 16.sp)
+                Text("Tipo de adquisición: ${tire.typeAcquisition}", fontSize = 16.sp)
+                Text("Id: ${tire.idTire}", fontSize =12.sp)
             }
             IconButton(onClick = onEdit) {
                 Icon(Icons.Default.Edit, contentDescription = "Editar")
@@ -189,6 +193,9 @@ private fun TireDialog(
     uiState: NuevoRegistroLlantasUiState,
     viewModel: NuevoRegistroLlantasViewModel
 ) {
+    val acquisitionType = uiState.dialogState.selectedAcquisitionType?.idAcquisitionType
+        ?: 0
+
     Dialog(onDismissRequest = viewModel::onDismissDialog) {
         Surface(
             shape = RoundedCornerShape(16.dp),
@@ -276,7 +283,8 @@ private fun TireDialog(
                         DialogTextField(
                             label = "Profundidad (mm)",
                             value = uiState.dialogState.treadDepth,
-                            keyboardType = KeyboardType.Number
+                            keyboardType = KeyboardType.Number,
+                            isEditable = acquisitionType != 1 && acquisitionType != 2
                         ) { value -> viewModel.onDialogFieldChange { it.copy(treadDepth = value) } }
                     }
 
@@ -328,6 +336,7 @@ private fun DialogTextField(
         onValueChange = onValueChange,
         label = { Text(label) },
         enabled = isEditable,
+        readOnly = !isEditable,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
