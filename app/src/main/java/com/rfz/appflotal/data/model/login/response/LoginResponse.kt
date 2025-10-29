@@ -29,6 +29,7 @@ data class LoginResponse(
     @SerializedName("vehicle_plates") val vehiclePlates: String,
     @SerializedName("typeVehicle") val typeVehicle: String,
     @SerializedName("paymentPlan") val paymentPlan: String,
+    @SerializedName("termsAndConditions") val termsGranted: Boolean,
     var fecha: String? = null
 )
 
@@ -97,7 +98,8 @@ class AppFlotalMapper @Inject constructor() {
             vehiclePlates = response.vehiclePlates,
             country = response.idCountry,
             industry = response.idIndustry,
-            vehicleType = response.typeVehicle
+            vehicleType = response.typeVehicle,
+            termsGranted = response.termsGranted
         )
     }
 }

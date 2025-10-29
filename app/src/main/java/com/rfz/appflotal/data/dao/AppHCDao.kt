@@ -31,6 +31,9 @@ interface AppHCDao {
         vehicleType: String,
     )
 
+    @Query("UPDATE user SET termsGranted =:flag WHERE idUser =:idUser")
+    suspend fun updateTermsFlag(idUser: Int, flag: Boolean)
+
     @Query("UPDATE user SET fld_token =:token WHERE idUser =:idUser")
     suspend fun updateToken(idUser: Int, token: String)
 

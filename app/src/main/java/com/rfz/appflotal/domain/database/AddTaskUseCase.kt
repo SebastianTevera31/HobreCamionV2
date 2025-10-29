@@ -29,10 +29,14 @@ class AddTaskUseCase @Inject constructor(private val appFlotalRepository: Hombre
         )
     }
 
-    suspend fun updateToken(idUser: Int, token: String) {
-        appFlotalRepository.updateToken(
+    suspend fun updateTermsFlag(idUser: Int, flag: Boolean) {
+        appFlotalRepository.updateTermsFlag(
             idUser = idUser,
-            token = token
+            flag = flag
         )
+    }
+
+    suspend fun updateToken(idUser: Int, token: String) {
+        appFlotalRepository.updateToken(idUser = idUser, token = token)
     }
 }

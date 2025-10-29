@@ -87,5 +87,9 @@ class LoginUseCase @Inject constructor(
             plates
         )
     }
+
+    suspend fun doAcceptTermsAndConditions(): ApiResult<List<MessageResponse>?> {
+        return repository.doAcceptTermsAndConditions()
+    }
 }
 

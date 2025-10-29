@@ -41,9 +41,9 @@ class LoginViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
     private val mapper: AppFlotalMapper
 ) : ViewModel() {
-    private val _navigateToHome = MutableLiveData<Pair<Boolean, PaymentPlanType>>()
+    private val _navigateToHome = MutableLiveData<Triple<Boolean, PaymentPlanType, Boolean>>()
 
-    val navigateToHome: LiveData<Pair<Boolean, PaymentPlanType>> = _navigateToHome
+    val navigateToHome: LiveData<Triple<Boolean, PaymentPlanType, Boolean>> = _navigateToHome
 
     private val _navigateverifycodeloginScreen = MutableLiveData<Boolean>()
     val navigateverifycodeloginScreen: LiveData<Boolean> = _navigateverifycodeloginScreen
@@ -153,7 +153,7 @@ class LoginViewModel @Inject constructor(
                 }
                 onTaskCreated(loginResponse)
                 _navigateToHome.value =
-                    Pair(true, paymentPlan)
+                    Triple(true, paymentPlan, loginResponse.termsGranted)
                 _loginState.value = Success(loginResponse)
             }
 
@@ -183,7 +183,14 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onNavigateToHomeCompleted() {
-        _navigateToHome.value = Pair(false, PaymentPlanType.None)
+        _navigateToHome.value = Triple(false, PaymentPlanType.None, false)
+    }
+
+    fun acceptTermsConditions() {
+        viewModelScope.launch {
+            loginUseCase.doAcceptTermsAndConditions()
+            addTaskUseCase.updateTermsFlag((loginState.value as Success).userData.id, true)
+        }
     }
 
     fun onNavigateToVerificodeloginComplete() {

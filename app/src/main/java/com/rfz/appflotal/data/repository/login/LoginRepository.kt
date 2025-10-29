@@ -63,4 +63,8 @@ class LoginRepository @Inject constructor(private val loginService: LoginService
             )
         )
     }
+
+    suspend fun doAcceptTermsAndConditions(): ApiResult<List<MessageResponse>?> {
+        return loginService.doAcceptTermsAndConditions()
+    }
 }

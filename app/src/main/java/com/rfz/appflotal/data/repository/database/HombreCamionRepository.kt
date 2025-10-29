@@ -82,16 +82,21 @@ class HombreCamionRepository @Inject constructor(
                 fecha = it.fecha,
                 country = it.country,
                 industry = it.industry,
-                vehicleType = it.vehicleType
+                vehicleType = it.vehicleType,
+                termsGranted = it.termsGranted
             )
         }
     }
 
-    suspend fun updateToken(idUser: Int, token: String) {
-        flotalDao.updateToken(
+    suspend fun updateTermsFlag(idUser: Int, flag: Boolean) {
+        flotalDao.updateTermsFlag(
             idUser = idUser,
-            token = token
+            flag = flag
         )
+    }
+
+    suspend fun updateToken(idUser: Int, token: String) {
+        flotalDao.updateToken(idUser = idUser, token = token)
     }
 
     suspend fun saveSelectedLanguage(language: String) {

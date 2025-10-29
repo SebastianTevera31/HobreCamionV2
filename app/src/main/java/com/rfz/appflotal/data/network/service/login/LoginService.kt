@@ -37,4 +37,11 @@ class LoginService @Inject constructor(
             loginClient.updateUser("bearer $token", requestBody)
         }
     }
+
+    suspend fun doAcceptTermsAndConditions(): ApiResult<List<MessageResponse>?> {
+        return requestHelper(endpointName = "AcceptTermsAndConditions") {
+            val token = getTasksUseCase().first()[0].fld_token
+            loginClient.acceptTermsAndConditions("bearer $token")
+        }
+    }
 }

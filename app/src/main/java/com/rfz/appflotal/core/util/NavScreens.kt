@@ -21,4 +21,5 @@ object NavScreens {
     const val REGISTRAR_USUARIO = "registrarusuario"
     const val INFORMACION_USUARIO = "informacionusuario"
     const val PERMISOS = "permisos"
+    const val TERMINOS = "terminos"
 }

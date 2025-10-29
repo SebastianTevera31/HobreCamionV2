@@ -22,7 +22,8 @@ data class AppHCEntity(
     val idVehicle: Int,
     val vehiclePlates: String,
     val paymentPlan: String,
-    val fecha: String
+    val fecha: String,
+    val termsGranted: Boolean
 )
 
 @Entity(tableName = "dataframe")

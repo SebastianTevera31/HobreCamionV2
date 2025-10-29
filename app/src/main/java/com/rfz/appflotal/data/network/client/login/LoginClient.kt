@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.model.message.response.MessageResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -29,4 +30,8 @@ interface LoginClient {
         @Header("Authorization") token: String,
         @Body requestBody: UpdateUserBody
     ): Response<List<MessageResponse>>
+
+    @PUT("api/AcceptTermsAndConditions")
+    suspend fun acceptTermsAndConditions(@Header("Authorization") token: String):
+            Response<List<MessageResponse>>
 }
