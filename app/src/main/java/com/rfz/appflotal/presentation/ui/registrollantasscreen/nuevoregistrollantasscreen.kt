@@ -177,7 +177,7 @@ private fun TireItem(tire: TireListResponse, onEdit: () -> Unit) {
                 Text(tire.brand, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Text("Modelo: ${tire.model}", fontSize = 16.sp)
                 Text("Tamaño: ${tire.size}", fontSize = 16.sp)
-                Text("Tipo de adquisición: ${tire.typeAcquisition}", fontSize = 16.sp)
+                Text("Adquisición: ${tire.typeAcquisition}", fontSize = 16.sp)
                 Text("Id: ${tire.idTire}", fontSize =12.sp)
             }
             IconButton(onClick = onEdit) {
