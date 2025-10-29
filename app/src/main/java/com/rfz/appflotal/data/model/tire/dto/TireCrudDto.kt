@@ -1,7 +1,6 @@
 package com.rfz.appflotal.data.model.tire.dto
 
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDateTime
 
 data class TireCrudDto(
 
@@ -10,6 +9,9 @@ data class TireCrudDto(
 
     @SerializedName("c_typeAcquisition_fk_1")
     val typeAcquisitionId: Int,
+
+    @SerializedName("c_provider_fk_1")
+    val providerId: Int,
 
     @SerializedName("fld_acquisitionDate")
     val acquisitionDate: String,

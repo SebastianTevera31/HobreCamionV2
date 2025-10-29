@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.retreatedesign
+package com.rfz.appflotal.presentation.ui.retreatedesign.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +44,9 @@ import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ItemDi
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ListItemContent
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ListManagementScreen
 import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreadCatalogDesignFields
+import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreadDesignFields
+import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesignViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -137,6 +142,7 @@ fun RetreatedDesignScreen(
                         label = stringResource(R.string.profundidad_de_piso),
                         value = dialogState.value.profundidadPiso,
                         isEmpty = dialogState.value.profundidadPiso.isBlank(),
+                        keyboardType = KeyboardType.Decimal,
                         onValueChange = { description ->
                             viewModel.onDialogFieldChanged(
                                 field = RetreadDesignFields.PROFUNDIDAD_PISO,

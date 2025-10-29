@@ -193,6 +193,7 @@
     <string name="es_requerido_message">%1$s is required</string>
     <string name="utilizacion">Usage</string>
     <string name="profundidad_de_piso">Tread Depth</string>
+    <string name="fecha_de_adquisicion">Fecha de Adquisición</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
