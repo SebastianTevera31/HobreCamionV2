@@ -89,6 +89,7 @@ import com.rfz.appflotal.presentation.ui.permission.PermissionScreen
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlantasScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
+import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
 import com.rfz.appflotal.presentation.ui.retreatedesign.RetreatedDesignScreen
@@ -569,6 +570,11 @@ class InicioActivity : ComponentActivity() {
                                     }
                                 )
                             }
+
+                            composable(route = NavScreens.TERMINOS) {
+                                TerminosScreen(context = this@InicioActivity) {
+
+                                }
                         }
                     }
                 }
