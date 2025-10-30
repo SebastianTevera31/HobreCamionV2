@@ -14,7 +14,7 @@ android {
         applicationId = "com.rfz.appflotal"
         minSdk = 28
         targetSdk = 35
-        versionCode = 5
+        versionCode = 6
         versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -34,8 +34,8 @@ android {
             buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
         }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
