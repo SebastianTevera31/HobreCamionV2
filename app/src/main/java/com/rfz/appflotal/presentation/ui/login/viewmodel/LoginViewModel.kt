@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Patterns
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.copy
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,26 +25,40 @@ import com.rfz.appflotal.data.model.login.response.LoginState.Loading
 import com.rfz.appflotal.data.model.login.response.LoginState.Success
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.domain.database.AddTaskUseCase
+import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.inicio.ui.arePermissionsGranted
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
+sealed class NavigationEvent {
+    object NavigateToHome : NavigationEvent()
+    object NavigateToPermissions : NavigationEvent()
+}
+
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val addTaskUseCase: AddTaskUseCase,
+    private val getTasksUseCase: GetTasksUseCase,
     private val mapper: AppFlotalMapper
 ) : ViewModel() {
     private val _navigateToHome = MutableLiveData<Triple<Boolean, PaymentPlanType, Boolean>>()
 
     val navigateToHome: LiveData<Triple<Boolean, PaymentPlanType, Boolean>> = _navigateToHome
+
+    private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
 
     private val _navigateverifycodeloginScreen = MutableLiveData<Boolean>()
     val navigateverifycodeloginScreen: LiveData<Boolean> = _navigateverifycodeloginScreen
@@ -126,16 +141,16 @@ class LoginViewModel @Inject constructor(
 
                         is Result.Failure -> {
                             _loginState.value =
-                                Error(result.exception.message ?: "Unknown error")
-                            _loginMessage.value = result.exception.message ?: "Authentication error"
+                                Error("Unexpected error")
+                            _loginMessage.value = "Authentication error"
                         }
 
                         Result.Loading -> {}
                     }
                 }
             } catch (e: Exception) {
-                _loginState.value = Error(e.message ?: "Unexpected error")
-                _loginMessage.value = e.message ?: "Connection error"
+                _loginState.value = Error("Unexpected error")
+                _loginMessage.value = "Connection error"
             } finally {
                 _isLoading.value = false
                 dismissProgressDialog()
@@ -186,10 +201,25 @@ class LoginViewModel @Inject constructor(
         _navigateToHome.value = Triple(false, PaymentPlanType.None, false)
     }
 
-    fun acceptTermsConditions() {
+    fun acceptTermsConditions(onPermissionsGranted: () -> Boolean) {
         viewModelScope.launch {
-            loginUseCase.doAcceptTermsAndConditions()
-            addTaskUseCase.updateTermsFlag((loginState.value as Success).userData.id, true)
+            val user = getTasksUseCase.invoke().first()
+
+            try {
+                if (user.isNotEmpty()) {
+                    loginUseCase.doAcceptTermsAndConditions()
+                    addTaskUseCase.updateTermsFlag(user.first().idUser, true)
+
+                    if (onPermissionsGranted()) {
+                        _navigationEvent.emit(NavigationEvent.NavigateToPermissions)
+                    } else {
+                        _navigationEvent.emit(NavigationEvent.NavigateToHome)
+                    }
+
+                }
+            } catch (e: Exception) {
+                _loginMessage.value = "Error al aceptar los términos: ${e.message}"
+            }
         }
     }
 

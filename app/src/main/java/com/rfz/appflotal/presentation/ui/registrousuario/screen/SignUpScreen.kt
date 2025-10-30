@@ -189,6 +189,9 @@ fun SignUpScreen(
                     SignUpViews.TERMS_VIEW -> {
                         TerminosScreen(
                             context = ctx,
+                            onBack = {
+                                navController.popBackStack()
+                            }
                         ) {
                             authFlow = AuthFlow.SignUp
                             signUpViewModel.signUpUser(ctx) {

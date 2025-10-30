@@ -34,6 +34,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens
@@ -73,6 +74,7 @@ import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.loading.screen.LoadingScreen
 import com.rfz.appflotal.presentation.ui.login.screen.LoginScreen
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
+import com.rfz.appflotal.presentation.ui.login.viewmodel.NavigationEvent
 import com.rfz.appflotal.presentation.ui.medidasllantasscreen.MedidasLlantasScreen
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
@@ -236,6 +238,24 @@ class InicioActivity : ComponentActivity() {
                         )
                         val userData by inicioScreenViewModel.userData.observeAsState()
 
+                        LaunchedEffect(Unit) {
+                            loginViewModel.navigationEvent.collect { event ->
+                                when (event) {
+                                    NavigationEvent.NavigateToHome -> {
+                                        navController.navigate(NavScreens.HOME) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+
+                                    NavigationEvent.NavigateToPermissions -> {
+                                        navController.navigate(NavScreens.PERMISOS) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         // Control de traslado de pantalla cuando se inicia la aplicacion
                         LaunchedEffect(hasInitialValidation, userData) {
                             if (hasInitialValidation) {
@@ -264,11 +284,13 @@ class InicioActivity : ComponentActivity() {
                                                     )
                                                 ) {
                                                     navController.navigate(NavScreens.PERMISOS) {
-                                                        popUpTo(NavScreens.LOADING) { inclusive = true }
+                                                        popUpTo(NavScreens.LOADING) {
+                                                            inclusive = true
+                                                        }
                                                     }
                                                 } else {
                                                     navController.navigate(NavScreens.HOME) {
-                                                        popUpTo(NavScreens.LOADING) {
+                                                        popUpTo(0) {
                                                             inclusive = true
                                                         }
                                                     }
@@ -296,7 +318,7 @@ class InicioActivity : ComponentActivity() {
                                     navController.navigate(NavScreens.TERMINOS) {
                                         popUpTo(NavScreens.LOADING) { inclusive = true }
                                     }
-                                }else {
+                                } else {
                                     if (!arePermissionsGranted(
                                             this@InicioActivity,
                                             getRequiredPermissions()
@@ -307,7 +329,7 @@ class InicioActivity : ComponentActivity() {
                                         }
                                     } else {
                                         navController.navigate(NavScreens.HOME) {
-                                            popUpTo(NavScreens.LOGIN) { inclusive = true }
+                                            popUpTo(0) { inclusive = true }
                                         }
                                     }
                                 }
@@ -560,7 +582,7 @@ class InicioActivity : ComponentActivity() {
                                     launcher = permissionLauncher,
                                     onGranted = {
                                         navController.navigate(NavScreens.HOME) {
-                                            popUpTo(NavScreens.PERMISOS) { inclusive = true }
+                                            popUpTo(0) { inclusive = true }
                                         }
                                     }
                                 )
@@ -568,23 +590,18 @@ class InicioActivity : ComponentActivity() {
 
                             composable(route = NavScreens.TERMINOS) {
                                 TerminosScreen(
-                                    this@InicioActivity
+                                    context = this@InicioActivity,
+                                    buttonText = R.string.confirmar,
+                                    onBack = {
+                                        inicioScreenViewModel.deleteUserData()
+                                        navController.popBackStack()
+                                    }
                                 ) {
-                                    loginViewModel.acceptTermsConditions()
-                                    if (!arePermissionsGranted(
+                                    loginViewModel.acceptTermsConditions() {
+                                        !arePermissionsGranted(
                                             this@InicioActivity,
                                             getRequiredPermissions()
                                         )
-                                    ) {
-                                        navController.navigate(NavScreens.PERMISOS) {
-                                            popUpTo(NavScreens.LOADING) { inclusive = true }
-                                        }
-                                    } else {
-                                        navController.navigate(NavScreens.HOME) {
-                                            popUpTo(NavScreens.LOADING) {
-                                                inclusive = true
-                                            }
-                                        }
                                     }
                                 }
                             }

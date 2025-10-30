@@ -2,6 +2,8 @@ package com.rfz.appflotal.presentation.ui.registrousuario.screen
 
 import android.content.Context
 import android.content.Intent
+import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,10 +42,19 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
-fun TerminosScreen(context: Context, modifier: Modifier = Modifier, onGranted: () -> Unit) {
+fun TerminosScreen(
+    modifier: Modifier = Modifier,
+    @StringRes buttonText: Int = R.string.registrarse,
+    context: Context,
+    onBack: () -> Unit,
+    onGranted: () -> Unit
+) {
+    BackHandler {
+        onBack()
+    }
+
     val scrollState = rememberScrollState()
     var checked by remember { mutableStateOf(false) }
-
     Column(
         modifier = modifier
             .padding(28.dp)
@@ -91,7 +102,7 @@ fun TerminosScreen(context: Context, modifier: Modifier = Modifier, onGranted: (
             modifier = Modifier
                 .width(200.dp)
                 .height(60.dp)
-        ) { Text(text = stringResource(R.string.registrarse)) }
+        ) { Text(text = stringResource(buttonText)) }
     }
 }
 
@@ -133,8 +144,6 @@ fun LinkText(text: String, url: String, context: Context) {
 fun TermsAndConditionsPreview() {
     HombreCamionTheme {
         val context = LocalContext.current
-        TerminosScreen(modifier = Modifier, context = context) {
-
-        }
+        TerminosScreen(modifier = Modifier, context = context, onBack = {}, onGranted = {})
     }
 }

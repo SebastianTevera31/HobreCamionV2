@@ -315,20 +315,19 @@ fun HomeScreen(
                             CoroutineScope(Dispatchers.IO).launch {
 
                                 HombreCamionService.stopService(context)
-
                                 homeViewModel.logout()
-
                                 registerMonitorViewModel.clearMonitorConfiguration()
-
                                 registerMonitorViewModel.stopScan()
+                                monitorViewModel.clearMonitorData()
 
                                 withContext(Dispatchers.Main) {
-                                    // navController.clearBackStack(NavScreens.LOGIN)
                                     navController.navigate(NavScreens.LOGIN) {
-                                        popUpTo(navController.graph.startDestinationId) {
-                                            monitorViewModel.clearMonitorData()
+                                        // Pop-up hasta la raíz del grafo de navegación (ID 0)
+                                        // y elimina TODO lo que hay en el back stack.
+                                        popUpTo(0) {
                                             inclusive = true
                                         }
+                                        launchSingleTop = true
                                     }
                                 }
                             }

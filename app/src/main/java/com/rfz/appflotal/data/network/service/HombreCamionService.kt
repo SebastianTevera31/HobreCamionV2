@@ -266,6 +266,7 @@ class HombreCamionService : Service() {
 
     private suspend fun initBluetoothConnection() {
         val record = getUserUseCase().first()
+        if (record.isEmpty()) return
         val dataUser = record.first()
         Log.d("HombreCamionService", "Iniciando Bluetooth...")
         currentMac = dataUser.monitorMac
@@ -310,74 +311,76 @@ class HombreCamionService : Service() {
     }
 
     private suspend fun readDataFromMonitor() {
-        val dataUser = getUserUseCase().first()[0]
-        val currentMonitorId = dataUser.id_monitor
-        bluetoothUseCase()
-            .distinctUntilChangedBy { it.timestamp }
-            .collectLatest { data ->
-                Log.i("HombreCamionService", "Leyendo datos desde el servicio")
-                val bluetoothSignalQuality = data.bluetoothSignalQuality
+        val dataUser = getUserUseCase().first()
+        if (dataUser.isNotEmpty()) {
+            val currentMonitorId = dataUser.first().id_monitor
+            bluetoothUseCase()
+                .distinctUntilChangedBy { it.timestamp }
+                .collectLatest { data ->
+                    Log.i("HombreCamionService", "Leyendo datos desde el servicio")
+                    val bluetoothSignalQuality = data.bluetoothSignalQuality
 
-                val dataFrame = data.dataFrame
-                Log.d("HombreCamionService", "Dataframe: $dataFrame, ")
-                if (validateBluetoothConnectivity(bluetoothSignalQuality) && dataFrame != null) {
+                    val dataFrame = data.dataFrame
+                    Log.d("HombreCamionService", "Dataframe: $dataFrame, ")
+                    if (validateBluetoothConnectivity(bluetoothSignalQuality) && dataFrame != null) {
 
-                    // Cambiar: Debe almancenarse el ID del Monitor
-                    val monitorId = currentMonitorId
-                    Log.d("HombreCamionService", "UserId: $monitorId")
-                    val timestamp = getCurrentDate()
+                        // Cambiar: Debe almancenarse el ID del Monitor
+                        val monitorId = currentMonitorId
+                        Log.d("HombreCamionService", "UserId: $monitorId")
+                        val timestamp = getCurrentDate()
 
-                    val sensorId =
-                        decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
+                        val sensorId =
+                            decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
 
-                    dataframeTableUseCase.doInsert(
-                        DataframeEntity(
-                            monitorId = monitorId,
-                            sensorId = sensorId,
-                            dataFrame = dataFrame,
-                            timestamp = timestamp,
-                            sent = false,
-                            active = true
+                        dataframeTableUseCase.doInsert(
+                            DataframeEntity(
+                                monitorId = monitorId,
+                                sensorId = sensorId,
+                                dataFrame = dataFrame,
+                                timestamp = timestamp,
+                                sent = false,
+                                active = true
+                            )
                         )
-                    )
 
-                    val highTemperatureAlert = getHighTemperatureStatus(dataFrame)
-                    val highPressureAlert = getHighPressureStatus(dataFrame)
-                    val lowPressureAlert = getLowPressureStatus(dataFrame)
-                    val lowBatteryAlert = getBatteryStatus(dataFrame)
-                    val puncture = getPunctureStatus(dataFrame)
+                        val highTemperatureAlert = getHighTemperatureStatus(dataFrame)
+                        val highPressureAlert = getHighPressureStatus(dataFrame)
+                        val lowPressureAlert = getLowPressureStatus(dataFrame)
+                        val lowBatteryAlert = getBatteryStatus(dataFrame)
+                        val puncture = getPunctureStatus(dataFrame)
 
-                    val tire = getTire(dataFrame)
+                        val tire = getTire(dataFrame)
 
-                    sensorDataTableRepository.insertSensorData(
-                        idMonitor = monitorId,
-                        tire = tire,
-                        tireNumber = "",
-                        timestamp = timestamp,
-                        temperature = getTemperature(dataFrame).toInt(),
-                        pressure = getPressure(dataFrame).toInt(),
-                        active = true,
-                        highTemperatureAlert = highTemperatureAlert,
-                        highPressureAlert = highPressureAlert,
-                        lowPressureAlert = lowPressureAlert,
-                        lowBatteryAlert = lowBatteryAlert,
-                        punctureAlert = puncture
-                    )
+                        sensorDataTableRepository.insertSensorData(
+                            idMonitor = monitorId,
+                            tire = tire,
+                            tireNumber = "",
+                            timestamp = timestamp,
+                            temperature = getTemperature(dataFrame).toInt(),
+                            pressure = getPressure(dataFrame).toInt(),
+                            active = true,
+                            highTemperatureAlert = highTemperatureAlert,
+                            highPressureAlert = highPressureAlert,
+                            lowPressureAlert = lowPressureAlert,
+                            lowBatteryAlert = lowBatteryAlert,
+                            punctureAlert = puncture
+                        )
 
-                    val inAlert = highTemperatureAlert || highPressureAlert
-                            || lowPressureAlert || lowBatteryAlert
+                        val inAlert = highTemperatureAlert || highPressureAlert
+                                || lowPressureAlert || lowBatteryAlert
 
-                    coordinatesTableUseCase.updateCoordinates(
-                        monitorId,
-                        tire,
-                        isAlert = inAlert,
-                        isActive = true
-                    )
+                        coordinatesTableUseCase.updateCoordinates(
+                            monitorId,
+                            tire,
+                            isAlert = inAlert,
+                            isActive = true
+                        )
 
-                    // Enviar datos a API
-                    sendDataToApi(dataFrame, timestamp, monitorId)
+                        // Enviar datos a API
+                        sendDataToApi(dataFrame, timestamp, monitorId)
+                    }
                 }
-            }
+        }
     }
 
     private suspend fun sendDataToApi(dataFrame: String, timestamp: String, monitorId: Int) {
