@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.registrollantasscreen
+package com.rfz.appflotal.presentation.ui.registrollantasscreen.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -70,6 +70,8 @@ import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasUiState
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -178,7 +180,7 @@ private fun TireItem(tire: TireListResponse, onEdit: () -> Unit) {
                 Text("Modelo: ${tire.model}", fontSize = 16.sp)
                 Text("Tamaño: ${tire.size}", fontSize = 16.sp)
                 Text("Adquisición: ${tire.typeAcquisition}", fontSize = 16.sp)
-                Text("Id: ${tire.idTire}", fontSize =12.sp)
+                Text("Id: ${tire.idTire}", fontSize = 12.sp)
             }
             IconButton(onClick = onEdit) {
                 Icon(Icons.Default.Edit, contentDescription = "Editar")

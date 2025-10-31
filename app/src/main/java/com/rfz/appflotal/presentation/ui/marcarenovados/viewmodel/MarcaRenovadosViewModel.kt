@@ -167,8 +167,8 @@ class MarcaRenovadosViewModel @Inject constructor(
         onEditing(true)
         _dialogState.update { currentState ->
             currentState.copy(
-                item.id.toString().trim(),
-                item.description.trim()
+                id = item.id.toString().trim(),
+                description = item.description.trim()
             )
         }
     }

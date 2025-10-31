@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.registrollantasscreen
+package com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
