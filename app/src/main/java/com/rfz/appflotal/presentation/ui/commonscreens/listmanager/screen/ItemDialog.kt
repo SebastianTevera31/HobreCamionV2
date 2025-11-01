@@ -24,8 +24,9 @@ fun ItemDialog(
     label: String,
     value: String,
     isEmpty: Boolean,
-    onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isEditable: Boolean = true,
+    onValueChange: (String) -> Unit,
     keyboardType: KeyboardType = KeyboardType.Text,
 ) {
     Column(modifier = modifier) {
@@ -49,7 +50,8 @@ fun ItemDialog(
             shape = RoundedCornerShape(14.dp),
             keyboardOptions = KeyboardOptions().copy(
                 keyboardType = keyboardType
-            )
+            ),
+            enabled = isEditable
         )
 
         if (isEmpty) {

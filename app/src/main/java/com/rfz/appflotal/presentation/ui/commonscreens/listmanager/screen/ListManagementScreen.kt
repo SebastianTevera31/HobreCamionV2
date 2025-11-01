@@ -80,7 +80,8 @@ fun <T> ListManagementScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            state.title, style = MaterialTheme.typography.titleLarge.copy(
+                            text = state.title,
+                            style = MaterialTheme.typography.titleLarge.copy(
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp
@@ -112,8 +113,7 @@ fun <T> ListManagementScreen(
                                     MaterialTheme.colorScheme.primaryContainer
                                 )
                             )
-                        )
-                        .shadow(4.dp)
+                        ).shadow(4.dp)
                 )
 
                 Box(

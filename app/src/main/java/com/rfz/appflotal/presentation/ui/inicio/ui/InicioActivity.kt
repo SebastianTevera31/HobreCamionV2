@@ -478,8 +478,8 @@ class InicioActivity : ComponentActivity() {
                             }
                             composable(NavScreens.REGISTRO_LLANTAS) {
                                 NuevoRegistroLlantasScreen(
-                                    navController,
-                                    nuevoRegistroLllantasViewModel
+                                    navController = navController,
+                                    viewModel = nuevoRegistroLllantasViewModel
                                 )
                             }
                             composable(NavScreens.REGISTRO_VEHICULOS) {

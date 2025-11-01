@@ -1,28 +1,29 @@
 package com.rfz.appflotal.presentation.ui.registrollantasscreen.screens
 
+import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,10 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -56,19 +55,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
+import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.AddItemDialog
+import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ItemDialog
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasUiState
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
@@ -80,81 +84,196 @@ import java.util.Locale
 @Composable
 fun NuevoRegistroLlantasScreen(
     navController: NavController,
+    modifier: Modifier = Modifier,
     viewModel: NuevoRegistroLlantasViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(uiState.errorMessage) {
-        uiState.errorMessage?.let { snackbarHostState.showSnackbar(it) }
-    }
+    val context = LocalContext.current
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text("Registro de Llantas") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
+            Column {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(R.string.registro_de_llantas),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
+                            )
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.regresar),
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primaryContainer
+                                )
+                            )
+                        )
+                        .shadow(4.dp)
                 )
-            )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                                    MaterialTheme.colorScheme.tertiaryContainer
+                                )
+                            )
+                        )
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    SearchBar(
+                        uiState.searchQuery,
+                        onClearSearchQuery = viewModel::onClearQuery,
+                        onQueryChanged = viewModel::onSearchQueryChanged,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(4.dp, RoundedCornerShape(16.dp)),
+                    )
+                }
+            }
+
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = viewModel::onAddNewTireClicked) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar Llanta")
+            FloatingActionButton(
+                onClick = viewModel::onAddNewTireClicked,
+                modifier = Modifier.shadow(elevation = 8.dp, shape = CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.agregar_llanta),
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
             }
-        }
+        },
+        modifier = modifier
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
         ) {
-            SearchBar(uiState.searchQuery, viewModel::onSearchQueryChanged)
-            Spacer(Modifier.height(16.dp))
-
             if (uiState.isLoading && uiState.tires.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else {
-                TireList(tires = uiState.displayedTires, onEdit = viewModel::onEditTireClicked)
+                TireList(
+                    tires = uiState.displayedTires,
+                    onEdit = viewModel::onEditTireClicked,
+                    modifier = Modifier
+                )
             }
         }
 
         if (uiState.isDialogShown) {
-            TireDialog(uiState = uiState, viewModel = viewModel)
+            TireDialog(uiState = uiState, viewModel = viewModel, onShowMessage = {
+                if (uiState.isSending) {
+                    uiState.errorMessage?.let {
+                        Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                    }
+                }
+            })
         }
     }
 }
 
 @Composable
-private fun SearchBar(query: String, onQueryChanged: (String) -> Unit) {
+private fun SearchBar(
+    query: String,
+    onClearSearchQuery: () -> Unit,
+    onQueryChanged: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChanged,
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text("Buscar llanta...") },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        modifier = modifier,
+        leadingIcon = {
+            Icon(
+                Icons.Default.Search,
+                contentDescription = stringResource(R.string.buscar),
+                tint = Color.White,
+            )
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = onClearSearchQuery) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = stringResource(R.string.limpiar),
+                        tint = Color.White
+                    )
+                }
+            }
+        },
+        placeholder = {
+            Text(
+                "${stringResource(R.string.buscar)}...",
+                color = Color.White
+            )
+        },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            unfocusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+                alpha = 0.4f
+            ),
+            cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            focusedContainerColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+                alpha = 0.1f
+            ),
+            unfocusedContainerColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+                alpha = 0.1f
+            )
+        ),
+        singleLine = true,
+        shape = RoundedCornerShape(16.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
     )
 }
 
 @Composable
-private fun TireList(tires: List<TireListResponse>, onEdit: (TireListResponse) -> Unit) {
+private fun TireList(
+    tires: List<TireListResponse>,
+    onEdit: (TireListResponse) -> Unit,
+    modifier: Modifier = Modifier
+) {
     if (tires.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No se encontraron llantas.")
+            Text(stringResource(R.string.no_se_encontraron_llantas))
         }
     } else {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = modifier.fillMaxSize()
+        ) {
             items(tires) { tire ->
                 TireItem(tire = tire, onEdit = { onEdit(tire) })
             }
@@ -163,27 +282,46 @@ private fun TireList(tires: List<TireListResponse>, onEdit: (TireListResponse) -
 }
 
 @Composable
-private fun TireItem(tire: TireListResponse, onEdit: () -> Unit) {
+private fun TireItem(tire: TireListResponse, onEdit: () -> Unit, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(Modifier.weight(1f)) {
-                Text(tire.brand, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text("Modelo: ${tire.model}", fontSize = 16.sp)
-                Text("Tamaño: ${tire.size}", fontSize = 16.sp)
-                Text("Adquisición: ${tire.typeAcquisition}", fontSize = 16.sp)
-                Text("Id: ${tire.idTire}", fontSize = 12.sp)
+                Text(
+                    text = tire.brand, style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(stringResource(R.string.modelo, tire.model), fontSize = 16.sp)
+                Text(stringResource(R.string.tama_o, tire.size), fontSize = 16.sp)
+                Text(stringResource(R.string.adquisici_n, tire.typeAcquisition), fontSize = 16.sp)
+                Text(stringResource(R.string.id, tire.idTire), fontSize = 12.sp)
             }
             IconButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, contentDescription = "Editar")
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.editar_elemento)
+                )
             }
         }
     }
@@ -193,156 +331,111 @@ private fun TireItem(tire: TireListResponse, onEdit: () -> Unit) {
 @Composable
 private fun TireDialog(
     uiState: NuevoRegistroLlantasUiState,
-    viewModel: NuevoRegistroLlantasViewModel
+    viewModel: NuevoRegistroLlantasViewModel,
+    onShowMessage: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val acquisitionType = uiState.dialogState.selectedAcquisitionType?.idAcquisitionType
         ?: 0
 
-    Dialog(onDismissRequest = viewModel::onDismissDialog) {
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (uiState.isLoadingDialogData) {
-                Box(modifier = Modifier.padding(32.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+    AddItemDialog(
+        title = if (uiState.isEditing) stringResource(R.string.editar_llanta) else stringResource(R.string.nueva_llanta),
+        content = {
+            LaunchedEffect(uiState.errorMessage) {
+                onShowMessage()
+            }
+
+            FieldSpinner(
+                label = stringResource(R.string.tipo_de_adquisici_n),
+                selectedValue = uiState.dialogState.selectedAcquisitionType?.description
+                    ?: "",
+                values = uiState.acquisitionTypes.map { it.description },
+                onValueSelected = { selected ->
+                    viewModel.onDialogFieldChange { state ->
+                        state.copy(selectedAcquisitionType = uiState.acquisitionTypes.find { it.description == selected })
+                    }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.padding(16.dp),
-                    contentPadding = PaddingValues(vertical = 8.dp)
-                ) {
-                    item {
-                        Text(
-                            if (uiState.isEditing) "Editar Llanta" else "Nueva Llanta",
-                            style = MaterialTheme.typography.headlineSmall
+            )
+
+            FieldSpinner(
+                label = stringResource(R.string.products),
+                selectedValue = uiState.dialogState.selectedProduct?.descriptionProduct
+                    ?: "",
+                values = uiState.products.map { it.descriptionProduct },
+                onValueSelected = { selected ->
+                    viewModel.onDialogFieldChange {
+                        it.copy(
+                            selectedProduct = uiState.products.find { p ->
+                                p.descriptionProduct == selected
+                            },
+                            treadDepth = uiState.products.find { p ->
+                                p.descriptionProduct == selected
+                            }?.treadDepth.toString()
                         )
                     }
+                }
+            )
 
-                    item { Spacer(Modifier.height(16.dp)) }
-
-                    item {
-                        FieldSpinner(
-                            label = "Tipo de adquisición",
-                            selectedValue = uiState.dialogState.selectedAcquisitionType?.description
-                                ?: "",
-                            values = uiState.acquisitionTypes.map { it.description },
-                            onValueSelected = { selected ->
-                                viewModel.onDialogFieldChange { state ->
-                                    state.copy(selectedAcquisitionType = uiState.acquisitionTypes.find { it.description == selected })
-                                }
-                            }
-                        )
-                    }
-
-                    item {
-                        FieldSpinner(
-                            label = "Producto",
-                            selectedValue = uiState.dialogState.selectedProduct?.descriptionProduct
-                                ?: "",
-                            values = uiState.products.map { it.descriptionProduct },
-                            onValueSelected = { selected ->
-                                viewModel.onDialogFieldChange {
-                                    it.copy(
-                                        selectedProduct = uiState.products.find { p ->
-                                            p.descriptionProduct == selected
-                                        },
-                                        treadDepth = uiState.products.find { p ->
-                                            p.descriptionProduct == selected
-                                        }?.treadDepth.toString()
-                                    )
-                                }
-                            }
-                        )
-                    }
-
-                    item {
-                        DatePickerField(uiState.dialogState.acquisitionDate) { date ->
-                            viewModel.onDialogFieldChange {
-                                it.copy(
-                                    acquisitionDate = date
-                                )
-                            }
-                        }
-                    }
-
-                    item {
-                        DialogTextField(
-                            label = "Folio Factura",
-                            value = uiState.dialogState.folioFactura
-                        ) { value -> viewModel.onDialogFieldChange { it.copy(folioFactura = value) } }
-                    }
-
-                    item {
-                        DialogTextField(
-                            label = "Costo",
-                            value = uiState.dialogState.cost,
-                            keyboardType = KeyboardType.Number
-                        ) { value -> viewModel.onDialogFieldChange { it.copy(cost = value) } }
-                    }
-
-                    item {
-                        DialogTextField(
-                            label = "Profundidad (mm)",
-                            value = uiState.dialogState.treadDepth,
-                            keyboardType = KeyboardType.Number,
-                            isEditable = acquisitionType != 1 && acquisitionType != 2
-                        ) { value -> viewModel.onDialogFieldChange { it.copy(treadDepth = value) } }
-                    }
-
-                    item {
-                        DialogTextField(
-                            label = "Número de llanta",
-                            value = uiState.dialogState.tireNumber
-                        ) { value -> viewModel.onDialogFieldChange { it.copy(tireNumber = value) } }
-                    }
-
-                    item {
-                        DialogTextField(
-                            label = "DOT",
-                            value = uiState.dialogState.dot
-                        ) { value -> viewModel.onDialogFieldChange { it.copy(dot = value) } }
-                    }
-
-                    item { Spacer(Modifier.height(16.dp)) }
-
-                    item {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                            TextButton(onClick = viewModel::onDismissDialog) {
-                                Text("Cancelar")
-                            }
-                            Spacer(Modifier.width(8.dp))
-                            Button(onClick = viewModel::saveTire) {
-                                LocalizedApp {
-                                    Text(stringResource(R.string.save))
-                                }
-                            }
-                        }
-                    }
+            DatePickerField(uiState.dialogState.acquisitionDate) { date ->
+                viewModel.onDialogFieldChange {
+                    it.copy(
+                        acquisitionDate = date
+                    )
                 }
             }
-        }
-    }
+
+            DialogTextField(
+                label = stringResource(R.string.folio_factura),
+                value = uiState.dialogState.folioFactura
+            ) { value -> viewModel.onDialogFieldChange { it.copy(folioFactura = value) } }
+
+            DialogTextField(
+                label = stringResource(R.string.costo),
+                value = uiState.dialogState.cost,
+                keyboardType = KeyboardType.Number
+            ) { value -> viewModel.onDialogFieldChange { it.copy(cost = value) } }
+
+            DialogTextField(
+                label = stringResource(R.string.profundidad),
+                value = uiState.dialogState.treadDepth,
+                keyboardType = KeyboardType.Number,
+                isEditable = acquisitionType != 1 && acquisitionType != 2
+            ) { value -> viewModel.onDialogFieldChange { it.copy(treadDepth = value) } }
+
+            DialogTextField(
+                label = stringResource(R.string.numero_de_llanta),
+                value = uiState.dialogState.tireNumber
+            ) { value -> viewModel.onDialogFieldChange { it.copy(tireNumber = value) } }
+
+            DialogTextField(
+                label = stringResource(R.string.dot),
+                value = uiState.dialogState.dot
+            ) { value -> viewModel.onDialogFieldChange { it.copy(dot = value) } }
+        },
+        onConfirm = viewModel::saveTire,
+        onDismiss = viewModel::onDismissDialog,
+        isEntryValid = true,
+        modifier = modifier
+    )
 }
 
 @Composable
 private fun DialogTextField(
     label: String,
     value: String,
+    modifier: Modifier = Modifier,
     isEditable: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
 ) {
-    OutlinedTextField(
+    ItemDialog(
+        label = label,
         value = value,
+        isEmpty = false,
+        isEditable = isEditable,
         onValueChange = onValueChange,
-        label = { Text(label) },
-        enabled = isEditable,
-        readOnly = !isEditable,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Next)
+        modifier = modifier,
+        keyboardType = keyboardType
     )
 }
 
@@ -407,7 +500,7 @@ fun DatePickerField(selectedDate: String, onDateSelected: (String) -> Unit) {
         trailingIcon = {
             Icon(
                 imageVector = Icons.Default.DateRange,
-                contentDescription = "Seleccionar fecha",
+                contentDescription = stringResource(R.string.seleccionar_fecha),
                 modifier = Modifier.clickable { showDatePicker = true; focusManager.clearFocus() }
             )
         },

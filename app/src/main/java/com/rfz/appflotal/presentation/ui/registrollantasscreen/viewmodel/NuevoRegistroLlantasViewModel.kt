@@ -32,6 +32,7 @@ data class NuevoRegistroLlantasUiState(
     val searchQuery: String = "",
     val isDialogShown: Boolean = false,
     val isEditing: Boolean = false,
+    val isSending: Boolean = false,
     val isLoadingDialogData: Boolean = false,
     // Combo box lists
     val acquisitionTypes: List<AcquisitionTypeResponse> = emptyList(),
@@ -80,12 +81,21 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
         applyFilter()
     }
 
+    fun onClearQuery() {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                searchQuery = "",
+                displayedTires = currentUiState.tires
+            )
+        }
+    }
+
     fun onAddNewTireClicked() {
         _uiState.update {
             it.copy(
                 isDialogShown = true,
                 isEditing = false,
-                dialogState = TireDialogState()
+                dialogState = TireDialogState(acquisitionDate = LocalDateTime.now().toString())
             )
         }
     }
@@ -104,6 +114,8 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
     }
 
     fun saveTire() {
+        _uiState.update { it.copy(isSending = true) }
+
         val currentState = _uiState.value.dialogState
         if (isDialogStateInvalid(currentState)) {
             _uiState.update { it.copy(errorMessage = "Todos los campos requeridos deben estar completos") }
@@ -143,6 +155,7 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
                 _uiState.update { it.copy(errorMessage = e.message) }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
+                _uiState.update { it.copy(isSending = false) }
             }
         }
     }
