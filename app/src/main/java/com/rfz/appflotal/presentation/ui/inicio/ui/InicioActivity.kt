@@ -294,7 +294,6 @@ class InicioActivity : ComponentActivity() {
 
                         loginViewModel.navigateToHome.observe(this) { shouldNavigate ->
                             if (shouldNavigate.first) {
-
                                 if (!arePermissionsGranted(
                                         this@InicioActivity,
                                         getRequiredPermissions()
@@ -317,8 +316,7 @@ class InicioActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = NavScreens.LOADING
                         ) {
-                            composable(NavScreens.HOME) { backStackEntry ->
-
+                            composable(NavScreens.HOME) {
                                 // Efecto: si ya están concedidos, arrancar servicio automáticamente
                                 LaunchedEffect(Unit) {
                                     if (arePermissionsGranted(
@@ -404,6 +402,7 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             composable(NavScreens.LOADING) { LoadingScreen() }
+
                             composable(NavScreens.LOGIN) {
                                 LoginScreen(
                                     loginViewModel,
@@ -411,6 +410,7 @@ class InicioActivity : ComponentActivity() {
                                     navController
                                 )
                             }
+
                             composable(NavScreens.MARCAS) {
                                 MarcasScreen(
                                     navController = navController,
@@ -419,6 +419,7 @@ class InicioActivity : ComponentActivity() {
                                     brandCrudUseCase = brandCrudUseCase
                                 )
                             }
+
                             composable(NavScreens.ORIGINAL) {
                                 OriginalScreen(
                                     navController,
@@ -452,6 +453,7 @@ class InicioActivity : ComponentActivity() {
                                     tireSizeCrudUseCase
                                 )
                             }
+
                             composable(NavScreens.PRODUCTOS) {
                                 NuevoProductoScreen(
                                     navController,
@@ -464,6 +466,7 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
+
                             composable(NavScreens.NUEVO_PRODUCTO) {
                                 NuevoProductoScreen(
                                     navController,
@@ -476,12 +479,14 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
+
                             composable(NavScreens.REGISTRO_LLANTAS) {
                                 NuevoRegistroLlantasScreen(
                                     navController = navController,
                                     viewModel = nuevoRegistroLllantasViewModel
                                 )
                             }
+
                             composable(NavScreens.REGISTRO_VEHICULOS) {
                                 NuevoRegistroVehiculoScreen(
                                     navController,

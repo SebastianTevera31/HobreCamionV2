@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.acquisitiontype.response.AcquisitionTypeResponse
 import com.rfz.appflotal.data.model.product.response.ProductResponse
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto

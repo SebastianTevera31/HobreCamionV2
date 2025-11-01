@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.AddItemDialog
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ItemDialog
@@ -338,6 +339,7 @@ private fun TireDialog(
     val acquisitionType = uiState.dialogState.selectedAcquisitionType?.idAcquisitionType
         ?: 0
 
+    val currentLanguage = AppLocale.currentLocale.collectAsState().value.language
     AddItemDialog(
         title = if (uiState.isEditing) stringResource(R.string.editar_llanta) else stringResource(R.string.nueva_llanta),
         content = {
@@ -347,12 +349,18 @@ private fun TireDialog(
 
             FieldSpinner(
                 label = stringResource(R.string.tipo_de_adquisici_n),
-                selectedValue = uiState.dialogState.selectedAcquisitionType?.description
-                    ?: "",
-                values = uiState.acquisitionTypes.map { it.description },
+                selectedValue = (if (currentLanguage == "es") uiState.dialogState.selectedAcquisitionType?.description
+                else uiState.dialogState.selectedAcquisitionType?.enDescription) ?: "",
+                values = uiState.acquisitionTypes.map {
+                    if (currentLanguage == "es") it.description
+                    else it.enDescription
+                },
                 onValueSelected = { selected ->
                     viewModel.onDialogFieldChange { state ->
-                        state.copy(selectedAcquisitionType = uiState.acquisitionTypes.find { it.description == selected })
+                        state.copy(selectedAcquisitionType = uiState.acquisitionTypes.find {
+                            (if (currentLanguage == "es") it.description
+                            else it.enDescription) == selected
+                        })
                     }
                 }
             )
