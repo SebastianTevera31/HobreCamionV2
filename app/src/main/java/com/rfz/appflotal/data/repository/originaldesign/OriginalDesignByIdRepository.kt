@@ -1,9 +1,7 @@
 package com.rfz.appflotal.data.repository.originaldesign
 
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignByIdResponse
-import com.rfz.appflotal.data.model.product.response.ProductByIdResponse
 import com.rfz.appflotal.data.network.service.originaldesign.OriginalDesignByIdService
-import com.rfz.appflotal.data.network.service.product.ProductByIdService
 import javax.inject.Inject
 
 

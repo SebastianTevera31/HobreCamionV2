@@ -1,9 +1,10 @@
-package com.rfz.appflotal.presentation.ui.common.screen
+package com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,10 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
@@ -57,18 +60,19 @@ fun ListItemContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = title.uppercase(),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
 
-            itemContent()
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title.uppercase(),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                itemContent()
+            }
 
             Box(
                 modifier = Modifier
@@ -82,13 +86,13 @@ fun ListItemContent(
                 ) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Editar",
+                        contentDescription = pluralStringResource(R.plurals.editar_elemento, 1),
                         tint = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Editar",
+                        pluralStringResource(R.plurals.editar_elemento, 1),
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         fontWeight = FontWeight.Medium,
                         style = MaterialTheme.typography.labelLarge
@@ -99,10 +103,12 @@ fun ListItemContent(
     }
 }
 
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun IteCardPreview() {
-//    HombreCamionTheme {
-//        ListItemContent(title = "Item de Prueba", onEditClick = {})
-//    }
-//}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ItemCardPreview() {
+    HombreCamionTheme {
+        ListItemContent(title = "Item de Prueba", onEditClick = {}) {
+            Text(text = "Descripcion")
+        }
+    }
+}

@@ -85,13 +85,9 @@ fun MedidasLlantasScreen(
     homeViewModel: HomeViewModel,
     tireSizeCrudUseCase: TireSizeCrudUseCase
 ) {
-
-
     val uiState by homeViewModel.uiState.collectAsState()
 
-
     val userData = uiState.userData
-
 
     val scope = rememberCoroutineScope()
 

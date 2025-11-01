@@ -17,6 +17,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
@@ -65,7 +66,7 @@ import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.backgroundLight
-import com.rfz.appflotal.presentation.ui.brand.MarcasScreen
+import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
@@ -74,24 +75,27 @@ import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.loading.screen.LoadingScreen
 import com.rfz.appflotal.presentation.ui.login.screen.LoginScreen
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
+import com.rfz.appflotal.presentation.ui.marcarenovados.screens.MarcaRenovadosScreen
+import com.rfz.appflotal.presentation.ui.marcarenovados.viewmodel.MarcaRenovadosViewModel
 import com.rfz.appflotal.presentation.ui.login.viewmodel.NavigationEvent
 import com.rfz.appflotal.presentation.ui.medidasllantasscreen.MedidasLlantasScreen
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.montajedesmontajescreen.MontajeDesmontajeScreen
-import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.NuevoRenovadoScreen
-import com.rfz.appflotal.presentation.ui.nuevorenovadoscreen.RenovadosScreen
 import com.rfz.appflotal.presentation.ui.originaldesign.OriginalScreen
 import com.rfz.appflotal.presentation.ui.password.screen.PasswordScreen
 import com.rfz.appflotal.presentation.ui.password.viewmodel.PasswordViewModel
 import com.rfz.appflotal.presentation.ui.permission.PermissionScreen
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
-import com.rfz.appflotal.presentation.ui.registrollantasscreen.NuevoRegistroLlantasScreen
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.NuevoRegistroLlantasScreen
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
+import com.rfz.appflotal.presentation.ui.retreatedesign.screens.RetreatedDesignScreen
+import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesignViewModel
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -115,6 +119,10 @@ class InicioActivity : ComponentActivity() {
     private val signUpViewModel: SignUpViewModel by viewModels()
     private val registerMonitorViewModel: RegisterMonitorViewModel by viewModels()
     private val updateUserViewModel: UpdateUserViewModel by viewModels()
+    private val retreatedDesignViewModel: RetreatedDesignViewModel by viewModels()
+
+    private val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel by viewModels()
+    private val marcaRenovadosScreen: MarcaRenovadosViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -200,6 +208,7 @@ class InicioActivity : ComponentActivity() {
 
         setContent {
             var allGranted by remember { mutableStateOf(false) }
+            val navController = rememberNavController()
             val ctx = LocalContext.current
 
             val permissionLauncher = rememberLauncherForActivityResult(
@@ -223,8 +232,6 @@ class InicioActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxWidth(),
                         color = backgroundLight
                     ) {
-                        val navController = rememberNavController()
-
                         NetworkConfig.imei = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
                         } else {
@@ -311,26 +318,19 @@ class InicioActivity : ComponentActivity() {
                             }
                         }
 
-
                         loginViewModel.navigateToHome.observe(this) { shouldNavigate ->
                             if (shouldNavigate.first) {
-                                if (!shouldNavigate.third) {
-                                    navController.navigate(NavScreens.TERMINOS) {
-                                        popUpTo(NavScreens.LOADING) { inclusive = true }
+                                if (!arePermissionsGranted(
+                                        this@InicioActivity,
+                                        getRequiredPermissions()
+                                    )
+                                ) {
+                                    navController.navigate(NavScreens.PERMISOS) {
+                                        popUpTo(NavScreens.LOGIN) { inclusive = true }
                                     }
                                 } else {
-                                    if (!arePermissionsGranted(
-                                            this@InicioActivity,
-                                            getRequiredPermissions()
-                                        )
-                                    ) {
-                                        navController.navigate(NavScreens.PERMISOS) {
-                                            popUpTo(NavScreens.LOGIN) { inclusive = true }
-                                        }
-                                    } else {
-                                        navController.navigate(NavScreens.HOME) {
-                                            popUpTo(0) { inclusive = true }
-                                        }
+                                    navController.navigate(NavScreens.HOME) {
+                                        popUpTo(NavScreens.LOGIN) { inclusive = true }
                                     }
                                 }
 
@@ -342,8 +342,7 @@ class InicioActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = NavScreens.LOADING
                         ) {
-                            composable(NavScreens.HOME) { backStackEntry ->
-
+                            composable(NavScreens.HOME) {
                                 // Efecto: si ya están concedidos, arrancar servicio automáticamente
                                 LaunchedEffect(Unit) {
                                     if (arePermissionsGranted(
@@ -420,6 +419,7 @@ class InicioActivity : ComponentActivity() {
                                             }
                                         }
                                     },
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
 
@@ -428,6 +428,7 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             composable(NavScreens.LOADING) { LoadingScreen() }
+
                             composable(NavScreens.LOGIN) {
                                 LoginScreen(
                                     loginViewModel,
@@ -435,6 +436,7 @@ class InicioActivity : ComponentActivity() {
                                     navController
                                 )
                             }
+
                             composable(NavScreens.MARCAS) {
                                 MarcasScreen(
                                     navController = navController,
@@ -443,6 +445,7 @@ class InicioActivity : ComponentActivity() {
                                     brandCrudUseCase = brandCrudUseCase
                                 )
                             }
+
                             composable(NavScreens.ORIGINAL) {
                                 OriginalScreen(
                                     navController,
@@ -454,12 +457,20 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
-                            composable(NavScreens.RENOVADOS) { RenovadosScreen(navController) }
-                            composable(NavScreens.NUEVO_RENOVADO) {
-                                NuevoRenovadoScreen(
-                                    navController
+
+                            composable(NavScreens.RENOVADOS) {
+                                RetreatedDesignScreen(
+                                    viewModel = retreatedDesignViewModel,
+                                    onBackScreen = { navController.popBackStack() }
                                 )
                             }
+
+                            composable(NavScreens.MARCA_RENOVADA) {
+                                MarcaRenovadosScreen(
+                                    viewModel = marcaRenovadosScreen,
+                                    onBackScreen = { navController.popBackStack() })
+                            }
+
                             composable(NavScreens.MEDIDAS_LLANTAS) {
                                 MedidasLlantasScreen(
                                     navController,
@@ -468,6 +479,7 @@ class InicioActivity : ComponentActivity() {
                                     tireSizeCrudUseCase
                                 )
                             }
+
                             composable(NavScreens.PRODUCTOS) {
                                 NuevoProductoScreen(
                                     navController,
@@ -480,6 +492,7 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
+
                             composable(NavScreens.NUEVO_PRODUCTO) {
                                 NuevoProductoScreen(
                                     navController,
@@ -492,19 +505,14 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel
                                 )
                             }
+
                             composable(NavScreens.REGISTRO_LLANTAS) {
                                 NuevoRegistroLlantasScreen(
-                                    navController,
-                                    acquisitionTypeUseCase,
-                                    providerListUseCase,
-                                    baseUseCase,
-                                    productListUseCase,
-                                    tireCrudUseCase,
-                                    tireListUsecase,
-                                    tireGetUseCase,
-                                    homeViewModel
+                                    navController = navController,
+                                    viewModel = nuevoRegistroLllantasViewModel
                                 )
                             }
+
                             composable(NavScreens.REGISTRO_VEHICULOS) {
                                 NuevoRegistroVehiculoScreen(
                                     navController,

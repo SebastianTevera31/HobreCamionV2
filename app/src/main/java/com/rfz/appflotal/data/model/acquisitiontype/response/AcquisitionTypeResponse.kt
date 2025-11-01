@@ -8,5 +8,8 @@ data class AcquisitionTypeResponse(
     val idAcquisitionType: Int,
 
     @SerializedName("fld_description")
-    val description: String
+    val description: String,
+
+    @SerializedName("fld_descriptionEn")
+    val enDescription: String
 )

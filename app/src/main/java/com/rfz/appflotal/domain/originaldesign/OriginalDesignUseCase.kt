@@ -1,6 +1,5 @@
 package com.rfz.appflotal.domain.originaldesign
 
-import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
 import com.rfz.appflotal.data.repository.originaldesign.OriginalDesignRepository
 import javax.inject.Inject

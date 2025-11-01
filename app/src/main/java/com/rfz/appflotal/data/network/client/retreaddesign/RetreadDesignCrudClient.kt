@@ -11,5 +11,8 @@ import retrofit2.http.POST
 interface RetreadDesignCrudClient {
 
     @POST("api/Catalog/CrudRetreadDesign")
-    suspend fun doCrudRetreadDesign(@Body requestBody: RetreadDesignCrudDto, @Header("Authorization") token: String): Response<List<MessageResponse>>
+    suspend fun doCrudRetreadDesign(
+        @Header("Authorization") token: String,
+        @Body requestBody: RetreadDesignCrudDto
+    ): Response<List<MessageResponse>>
 }

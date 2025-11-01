@@ -65,18 +65,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.network.service.HombreCamionService
-import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
-import com.rfz.appflotal.presentation.theme.surfaceLight
+import com.rfz.appflotal.presentation.ui.home.utils.cardBackground
+import com.rfz.appflotal.presentation.ui.home.utils.menuItems
+import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
+import com.rfz.appflotal.presentation.ui.home.utils.secondaryColor
+import com.rfz.appflotal.presentation.ui.home.utils.surfaceColor
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
-import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorRegisterDialog
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
@@ -104,57 +105,8 @@ fun HomeScreen(
     val uiState by homeViewModel.uiState.collectAsState()
     val wifiStatus = monitorViewModel.wifiStatus.collectAsState()
 
-    LaunchedEffect(Unit) {
-        homeViewModel.loadInitialData()
-        registerMonitorViewModel.stopScan()
-    }
-
     var showMonitorDialog by remember { mutableStateOf(false) }
     val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
-
-    LaunchedEffect(showMonitorDialog) {
-        registerMonitorViewModel.getMonitorConfiguration()
-    }
-
-    if (showMonitorDialog) {
-        val configurations = registerMonitorViewModel.configurationList.collectAsState()
-        val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
-        val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
-
-        MonitorRegisterDialog(
-            configurations = configurations.value,
-            isScanning = monitorConfigUiState.value.isScanning,
-            showCloseButton = true,
-            monitorSelected = monitorConfigUiState.value.configurationSelected,
-            macValue = monitorConfigUiState.value.mac,
-            onScan = { registerMonitorViewModel.startScan() },
-            onCloseButton = {
-                registerMonitorViewModel.stopScan()
-                showMonitorDialog = false
-            },
-            onContinueButton = { mac, configuration ->
-                registerMonitorViewModel.registerMonitor(
-                    idMonitor = monitorUiState.value.monitorId,
-                    mac = mac,
-                    configurationSelected = configuration,
-                    context = context
-                )
-            },
-            registerMonitorStatus = registerMonitorStatus.value,
-            onSuccessRegister = {
-                showMonitorDialog = false
-                monitorViewModel.initMonitorData()
-                registerMonitorViewModel.clearMonitorRegistrationData()
-            },
-            closeText = stringResource(R.string.cerrar),
-            onMonitorConfiguration = { config ->
-                registerMonitorViewModel.updateMonitorConfiguration(
-                    config
-                )
-            }
-        )
-    }
-
 
     val onlyLanguagesAllowedText = stringResource(R.string.only_languages_allowed)
     val languages = listOf("es" to "ES", "en" to "EN")
@@ -163,6 +115,17 @@ fun HomeScreen(
     val paymentPlan =
         PaymentPlanType.valueOf(uiState.userData?.paymentPlan?.replace(" ", "") ?: "None")
     val plates = uiState.userData?.vehiclePlates ?: ""
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        homeViewModel.loadInitialData()
+        registerMonitorViewModel.stopScan()
+    }
+
+    LaunchedEffect(showMonitorDialog) {
+        registerMonitorViewModel.getMonitorConfiguration()
+    }
 
     LaunchedEffect(uiState.selectedLanguage) {
         if (uiState.selectedLanguage == "es" || uiState.selectedLanguage == "en") {
@@ -184,56 +147,39 @@ fun HomeScreen(
         }
     }
 
-    val menuItems = listOf(
-        MenuItem(
-            stringResource(R.string.brands),
-            NavScreens.MARCAS,
-            R.drawable.ic_brand
-        ),
-        MenuItem(
-            stringResource(R.string.original_design),
-            NavScreens.ORIGINAL,
-            R.drawable.ic_tire_design
-        ),
-        MenuItem(
-            stringResource(R.string.tire_sizes),
-            NavScreens.MEDIDAS_LLANTAS,
-            R.drawable.ic_tire_size
-        ),
-        MenuItem(
-            stringResource(R.string.products),
-            NavScreens.PRODUCTOS,
-            R.drawable.ic_products
-        ),
-        MenuItem(
-            stringResource(R.string.tire_register),
-            NavScreens.REGISTRO_LLANTAS,
-            R.drawable.ic_tire_register
-        ),
-        MenuItem(
-            stringResource(R.string.vehicle_register),
-            NavScreens.REGISTRO_VEHICULOS,
-            R.drawable.ic_truck
-        ),
-        MenuItem(
-            stringResource(R.string.tire_change),
-            NavScreens.MONTAJE_DESMONTAJE,
-            R.drawable.ic_tire_change
-        ),
-        MenuItem(
-            title = stringResource(R.string.monitoreo),
-            route = HombreCamionScreens.MONITOR.name,
-            iconRes = R.drawable.monitor
-        )
-    )
+    if (showMonitorDialog) {
+        val configurations = registerMonitorViewModel.configurationList.collectAsState()
+        val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
+        val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
 
-    val scope = rememberCoroutineScope()
-
-    val primaryColor = primaryLight
-    val primaryLight = primaryLight
-    val secondaryColor = secondaryLight
-    val cardBackground = backgroundLight
-    val surfaceColor = surfaceLight
+        RegisterMonitorDialog(
+            configurations = configurations.value,
+            monitorConfigurationUiState = monitorConfigUiState.value,
+            registerMonitorStatus = registerMonitorStatus.value,
+            onCloseButton = {
+                registerMonitorViewModel.stopScan()
+                showMonitorDialog = false
+            },
+            onContinueButton = { mac, configuration ->
+                registerMonitorViewModel.registerMonitor(
+                    idMonitor = monitorUiState.value.monitorId,
+                    mac = mac,
+                    configurationSelected = configuration,
+                    context = context
+                )
+            },
+            onScan = { registerMonitorViewModel.startScan() },
+            onMonitorConfiguration = { config ->
+                registerMonitorViewModel.updateMonitorConfiguration(
+                    config
+                )
+            }
+        ) {
+            showMonitorDialog = false
+            monitorViewModel.initMonitorData()
+            registerMonitorViewModel.clearMonitorRegistrationData()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -397,7 +343,7 @@ fun HomeScreen(
             }
 
             // PANTALLAS
-            if (paymentPlan == PaymentPlanType.Complete) {
+            if (paymentPlan != PaymentPlanType.Complete) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -419,7 +365,7 @@ fun HomeScreen(
                     ) {
                         items(menuItems) { item ->
                             ElegantMenuCard(
-                                title = item.title,
+                                title = stringResource(item.title),
                                 iconRes = item.iconRes,
                                 onClick = { navController.navigate(item.route) },
                                 primaryColor = primaryColor,
@@ -569,9 +515,3 @@ private fun ElegantMenuCard(
         }
     }
 }
-
-private data class MenuItem(
-    val title: String,
-    val route: String,
-    val iconRes: Int
-)

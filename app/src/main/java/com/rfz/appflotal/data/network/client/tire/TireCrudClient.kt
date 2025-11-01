@@ -10,6 +10,9 @@ import retrofit2.http.POST
 
 interface TireCrudClient {
 
-    @POST("Tire/CrudTire")
-    suspend fun doTireCrud(@Body requestBody: TireCrudDto, @Header("Authorization") token: String): Response<MessageResponse>
+    @POST("api/Tire/CrudTire")
+    suspend fun doTireCrud(
+        @Header("Authorization") token: String,
+        @Body requestBody: TireCrudDto,
+    ): Response<MessageResponse>
 }

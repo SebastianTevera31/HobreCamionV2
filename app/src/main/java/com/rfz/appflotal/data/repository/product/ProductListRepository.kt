@@ -1,9 +1,6 @@
 package com.rfz.appflotal.data.repository.product
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
-import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
 import com.rfz.appflotal.data.model.product.response.ProductResponse
-import com.rfz.appflotal.data.network.service.product.ProductCrudService
 import com.rfz.appflotal.data.network.service.product.ProductListService
 import javax.inject.Inject
 

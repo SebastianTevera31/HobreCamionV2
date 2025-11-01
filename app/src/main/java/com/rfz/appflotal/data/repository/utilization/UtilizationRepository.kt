@@ -1,17 +1,15 @@
 package com.rfz.appflotal.data.repository.utilization
 
-import com.rfz.appflotal.data.model.scrap.response.ScrapReportResponse
 import com.rfz.appflotal.data.model.utilization.response.UtilizationResponse
-import com.rfz.appflotal.data.network.service.scrap.ScrapReportService
 import com.rfz.appflotal.data.network.service.utilization.UtilizationService
 import javax.inject.Inject
 
 
 class UtilizationRepository @Inject constructor(private val utilizationService: UtilizationService) {
 
-    suspend fun doUtilization(tok: String): Result<List<UtilizationResponse>> {
+    suspend fun doUtilization(): Result<List<UtilizationResponse>> {
         return try {
-            val response = utilizationService.doUtilization(tok)
+            val response = utilizationService.doUtilization()
             if (response.isSuccessful) {
 
                 response.body()?.let {

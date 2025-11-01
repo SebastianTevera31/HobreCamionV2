@@ -168,7 +168,7 @@ fun OriginalScreen(
                 }
 
 
-                val utilizationsResult = utilizationUseCase(bearerToken)
+                val utilizationsResult = utilizationUseCase()
                 if (utilizationsResult.isSuccess) {
                     utilizations.addAll(utilizationsResult.getOrNull() ?: emptyList())
                 }
@@ -225,7 +225,6 @@ fun OriginalScreen(
                     c_brands_fk_1 = selectedBrand!!.idBrand,
                     c_utilization_fk_2 = selectedUtilization!!.id_utilization,
                     fld_notes = notes,
-                    c_user_fk_3 = userData?.idUser ?: 0
                 )
 
                 val result = crudOriginalDesignUseCase(request, "Bearer ${userData?.fld_token}" ?: "")

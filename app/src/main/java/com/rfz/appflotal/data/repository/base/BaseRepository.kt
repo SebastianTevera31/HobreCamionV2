@@ -1,9 +1,7 @@
 package com.rfz.appflotal.data.repository.base
 
 import com.rfz.appflotal.data.model.base.BaseResponse
-import com.rfz.appflotal.data.model.controltype.response.ControlTypeResponse
 import com.rfz.appflotal.data.network.service.base.BaseService
-import com.rfz.appflotal.data.network.service.controltype.ControlTypeService
 import javax.inject.Inject
 
 

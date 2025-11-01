@@ -20,6 +20,18 @@ fun <T> responseHelper(
     }
 }
 
+fun <T> responseHelperWithResult(
+    response: Result<T>,
+    onError: () -> Unit = {},
+    onSuccess: (data: T) -> Unit
+) {
+    response.onSuccess {
+        onSuccess(it)
+    }.onFailure {
+        onError()
+    }
+}
+
 suspend fun <T> asyncResponseHelper(
     response: ApiResult<T>,
     onError: () -> Unit = {},

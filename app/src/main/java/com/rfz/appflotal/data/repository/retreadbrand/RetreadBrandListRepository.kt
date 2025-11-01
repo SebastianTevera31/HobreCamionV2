@@ -1,18 +1,15 @@
 package com.rfz.appflotal.data.repository.retreadbrand
 
-import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
-import com.rfz.appflotal.data.model.brand.response.BranListResponse
 import com.rfz.appflotal.data.model.retreadbrand.response.RetreadBrandListResponse
-import com.rfz.appflotal.data.network.service.brand.BrandCrudService
 import com.rfz.appflotal.data.network.service.retreadbrand.RetreadBrandListService
 import javax.inject.Inject
 
 
 class RetreadBrandListRepository @Inject constructor(private val retreadBrandListService: RetreadBrandListService) {
 
-    suspend fun doBrandCrud( tok: String): Result<List<RetreadBrandListResponse>> {
+    suspend fun doBrandCrud(): Result<List<RetreadBrandListResponse>> {
         return try {
-            val response = retreadBrandListService.doRetreadBrandList(tok)
+            val response = retreadBrandListService.doRetreadBrandList()
             if (response.isSuccessful) {
 
                 response.body()?.let {

@@ -131,7 +131,8 @@ fun MonitorScreen(
                 selectedView = selectedOption
             )
         },
-    ) { contentPadding ->
+        modifier = modifier
+    ) { innerPadding ->
         Surface(
             modifier = Modifier.padding(bottom = 32.dp)
         ) {

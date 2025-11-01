@@ -2,7 +2,6 @@ package com.rfz.appflotal.domain.airPressureRating
 
 import com.rfz.appflotal.data.model.airPressureRating.dto.CreateAirPressureRatingDto
 import com.rfz.appflotal.data.model.airPressureRating.response.CreateAirPressureRatingResponse
-import com.rfz.appflotal.data.repository.airPressureRating.CreateAirPressureRatingRepository
 import com.rfz.appflotal.data.repository.airPressureRating.UpdateAirPressureRatingRepository
 import javax.inject.Inject
 

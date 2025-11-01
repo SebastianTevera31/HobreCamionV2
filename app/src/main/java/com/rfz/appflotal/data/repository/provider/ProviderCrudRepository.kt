@@ -1,10 +1,7 @@
 package com.rfz.appflotal.data.repository.provider
 
-import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
-import com.rfz.appflotal.data.model.brand.response.BranListResponse
 import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.model.provider.dto.ProviderDto
-import com.rfz.appflotal.data.network.service.brand.BrandCrudService
 import com.rfz.appflotal.data.network.service.provider.ProviderCrudService
 import javax.inject.Inject
 

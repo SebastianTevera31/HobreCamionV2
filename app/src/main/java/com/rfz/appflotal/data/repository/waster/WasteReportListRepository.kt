@@ -1,9 +1,6 @@
 package com.rfz.appflotal.data.repository.waster
 
-import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
-import com.rfz.appflotal.data.model.brand.response.BranListResponse
 import com.rfz.appflotal.data.model.waster.response.WasteReportListResponse
-import com.rfz.appflotal.data.network.service.brand.BrandCrudService
 import com.rfz.appflotal.data.network.service.waster.WasteReportListService
 import javax.inject.Inject
 

@@ -2,9 +2,7 @@ package com.rfz.appflotal.data.repository.originaldesign
 
 import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.model.originaldesign.dto.CrudOriginalDesignDto
-import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
 import com.rfz.appflotal.data.network.service.originaldesign.CrudOriginalDesignService
-import com.rfz.appflotal.data.network.service.product.ProductCrudService
 import javax.inject.Inject
 
 

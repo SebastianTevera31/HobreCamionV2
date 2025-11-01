@@ -1,8 +1,6 @@
 package com.rfz.appflotal.data.repository.airPressureRating
 
-import com.rfz.appflotal.data.model.acquisitiontype.response.AcquisitionTypeResponse
 import com.rfz.appflotal.data.model.airPressureRating.response.AirPressureRating
-import com.rfz.appflotal.data.network.service.acquisitiontype.AcquisitionTypeService
 import com.rfz.appflotal.data.network.service.airPressureRating.AirPressureRatingService
 import javax.inject.Inject
 

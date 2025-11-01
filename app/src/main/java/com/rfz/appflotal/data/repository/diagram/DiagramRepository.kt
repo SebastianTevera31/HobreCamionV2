@@ -1,8 +1,6 @@
 package com.rfz.appflotal.data.repository.diagram
 
-import com.rfz.appflotal.data.model.destination.response.DestinationResponse
 import com.rfz.appflotal.data.model.diagram.response.DiagramResponse
-import com.rfz.appflotal.data.network.service.destination.DestinationService
 import com.rfz.appflotal.data.network.service.diagram.DiagramService
 import javax.inject.Inject
 

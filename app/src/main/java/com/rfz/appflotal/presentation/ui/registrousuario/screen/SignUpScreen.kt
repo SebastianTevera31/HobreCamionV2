@@ -38,7 +38,7 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
-import com.rfz.appflotal.presentation.ui.components.ProgressDialog
+import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.components.UserInfoTopBar
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.AuthFlow
@@ -209,7 +209,7 @@ fun SignUpScreen(
 
 
     if (authFlow == AuthFlow.SignUp || authFlow == AuthFlow.Login) {
-        ProgressDialog()
+        AwaitDialog()
     }
 
     when (authFlow) {
