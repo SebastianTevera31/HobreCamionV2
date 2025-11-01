@@ -194,6 +194,20 @@
     <string name="utilizacion">Utilizacion</string>
     <string name="profundidad_de_piso">Profundidad de piso</string>
     <string name="fecha_de_adquisicion">Fecha de Adquisición</string>
+    <string name="agregar_llanta">Agregar Llanta</string>
+    <string name="no_se_encontraron_llantas">No se encontraron llantas.</string>
+    <string name="modelo">Modelo: %1$s</string>
+    <string name="tama_o">Tamaño: %1$s</string>
+    <string name="adquisici_n">Adquisición: %1$s</string>
+    <string name="id">ID: %1$d</string>
+    <string name="editar_llanta">Editar Llanta</string>
+    <string name="nueva_llanta">Nueva Llanta</string>
+    <string name="tipo_de_adquisici_n">Tipo de adquisición</string>
+    <string name="costo">Costo</string>
+    <string name="folio_factura">Folio Factura</string>
+    <string name="profundidad">Profundidad (mm)</string>
+    <string name="numero_de_llanta">Número de llanta</string>
+    <string name="dot">DOT</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

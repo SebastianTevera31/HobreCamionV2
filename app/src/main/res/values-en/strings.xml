@@ -167,7 +167,7 @@
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. is responsible for the processing (use) of your personal data, which will be used to respond to communications generated through this channel and to provide you with the products or services entrusted to us.</string>
     <string name="en_extraccion">Being removed</string>
 
-    <string name="registro_de_llantas">Registro de Llantas</string>
+    <string name="registro_de_llantas">Tire Registration</string>
 
     <string name="dise_os_renovados">Retread Designs</string>
 
@@ -193,7 +193,21 @@
     <string name="es_requerido_message">%1$s is required</string>
     <string name="utilizacion">Usage</string>
     <string name="profundidad_de_piso">Tread Depth</string>
-    <string name="fecha_de_adquisicion">Fecha de Adquisición</string>
+    <string name="fecha_de_adquisicion">Acquisition Date</string>
+    <string name="agregar_llanta">Add Tyre</string>
+    <string name="no_se_encontraron_llantas">No tyres found.</string>
+    <string name="modelo">Model: %1$s</string>
+    <string name="tama_o">Size: %1$s</string>
+    <string name="adquisici_n">Acquisition: %1$s</string>
+    <string name="id">ID: %1$d</string>
+    <string name="editar_llanta">Edit Tyre</string>
+    <string name="nueva_llanta">New Tyre</string>
+    <string name="tipo_de_adquisici_n">Type of Acquisition</string>
+    <string name="costo">Cost</string>
+    <string name="folio_factura">Invoice Number</string>
+    <string name="profundidad">Depth (mm)</string>
+    <string name="numero_de_llanta">Tire Number</string>
+    <string name="dot">DOT</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
