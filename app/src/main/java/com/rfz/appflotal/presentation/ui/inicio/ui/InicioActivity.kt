@@ -396,27 +396,12 @@ class InicioActivity : ComponentActivity() {
                                     registerMonitorViewModel = registerMonitorViewModel,
                                     navigateUp = { navController.navigateUp() },
                                     paymentPlan = PaymentPlanType.Complete,
-                                    onDialogCancel = {
-                                        CoroutineScope(Dispatchers.IO).launch {
-
-                                            HombreCamionService.stopService(ctx)
-
-                                            homeViewModel.logout()
-
-                                            registerMonitorViewModel.clearMonitorRegistrationData()
-                                            registerMonitorViewModel.clearMonitorConfiguration()
-
-                                            registerMonitorViewModel.stopScan()
-
-                                            withContext(Dispatchers.Main) {
-                                                // navController.clearBackStack(NavScreens.LOGIN)
-                                                navController.navigate(NavScreens.LOGIN) {
-                                                    popUpTo(navController.graph.startDestinationId) {
-                                                        monitorViewModel.clearMonitorData()
-                                                        inclusive = true
-                                                    }
-                                                }
-                                            }
+                                    onDialogCancel = { monitorId ->
+                                        registerMonitorViewModel.stopScan()
+                                        if (monitorId != 0) {
+                                            monitorViewModel.showMonitorDialog(false)
+                                        } else {
+                                            navController.navigateUp()
                                         }
                                     },
                                     modifier = Modifier.fillMaxSize()

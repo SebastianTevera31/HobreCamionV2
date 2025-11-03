@@ -35,7 +35,6 @@ private data class MonitorNavItem(
     @StringRes val labelRes: Int
 )
 
-// Ajusta tus icons aquí:
 private val monitorNavItems = listOf(
     MonitorNavItem(
         MonitorScreenViews.DIAGRAMA,
@@ -63,7 +62,7 @@ fun MonitorBottomNavBar(
     ) {
         monitorNavItems.forEach { item ->
             val selected = (item.view == selectedView)
-            // Evita recrear lambdas en cada recomposición:
+
             val onTap = remember(onClick, item.view) { { onClick(item.view) } }
 
             NavigationBarItem(

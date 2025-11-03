@@ -36,6 +36,7 @@ class HomeViewModel @Inject constructor(
 
     suspend fun logout() {
         hombreCamionRepository.clearUserData()
+        _uiState.value = HomeUiState()
     }
 
     fun loadInitialData() {

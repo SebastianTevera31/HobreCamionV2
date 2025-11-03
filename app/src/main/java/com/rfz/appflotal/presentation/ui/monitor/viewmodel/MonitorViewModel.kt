@@ -375,6 +375,12 @@ class MonitorViewModel @Inject constructor(
         _filteredTiresUiState.value = ApiResult.Success(emptyList())
     }
 
+    fun showMonitorDialog(show: Boolean) {
+        _monitorUiState.update { currentUiState ->
+            currentUiState.copy(showDialog = show)
+        }
+    }
+
     // Corregir funcion
     fun getBitmapImage() {
         val baseConfig = _monitorUiState.value.baseConfig ?: return

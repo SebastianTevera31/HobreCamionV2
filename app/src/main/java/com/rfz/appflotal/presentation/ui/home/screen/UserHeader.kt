@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -25,7 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
-import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
@@ -97,9 +95,8 @@ fun UserHeader(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-@Preview()
+@Preview(showSystemUi = true, showBackground = true)
 fun UserTitlePreview() {
     HombreCamionTheme {
         UserHeader(paymentPlan = PaymentPlanType.Free, userName = "FK", plates = "KFKFFK") {}

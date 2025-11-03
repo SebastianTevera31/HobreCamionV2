@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
-import android.annotation.SuppressLint
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,107 +22,84 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
+import com.rfz.appflotal.presentation.ui.home.screen.RegisterMonitorDialog
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.BluetoothSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+enum class PositionView {
+    RECIENTES, FILTRAR
+}
+
 @Composable
 fun MonitorScreen(
     monitorViewModel: MonitorViewModel,
-    onDialogCancel: () -> Unit,
+    onDialogCancel: (mac: Int) -> Unit,
     registerMonitorViewModel: RegisterMonitorViewModel,
     navigateUp: () -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-
-    val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
-    val positionsUiState = monitorViewModel.positionsUiState.collectAsState()
-    val monitorTireUiState = monitorViewModel.filteredTiresUiState.collectAsState()
-
-    val tireUiState = monitorViewModel.tireUiState.collectAsState()
-
-    val configurationsUiState = registerMonitorViewModel.configurationList.collectAsState()
-    val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
+    val monitorUiState by monitorViewModel.monitorUiState.collectAsState()
+    val positionsUiState by monitorViewModel.positionsUiState.collectAsState()
+    val monitorTireUiState by monitorViewModel.filteredTiresUiState.collectAsState()
+    val tireUiState by monitorViewModel.tireUiState.collectAsState()
+    val wifiStatus = monitorViewModel.wifiStatus.collectAsState()
 
     var selectedOption by rememberSaveable { mutableStateOf(MonitorScreenViews.DIAGRAMA) }
 
-    val visible = monitorUiState.value.signalIntensity.first == BluetoothSignalQuality.Desconocida
-            && monitorUiState.value.monitorId != 0
+    val buttonCancelText =
+        if (paymentPlan == PaymentPlanType.Complete || monitorUiState.monitorId != 0) {
+            stringResource(R.string.cerrar)
+        } else stringResource(R.string.logout)
 
-    // Carga la pantalla, vacia o no
-    LaunchedEffect(monitorUiState.value.monitorId) {
-        if (monitorUiState.value.monitorId == 0) {
+    LaunchedEffect(monitorUiState.monitorId) {
+        if (monitorUiState.monitorId == 0) {
             monitorViewModel.initMonitorData()
         }
     }
 
-    if (monitorUiState.value.showView && monitorUiState.value.showDialog) {
-
-        registerMonitorViewModel.clearMonitorRegistrationData()
-
-        LaunchedEffect(Unit) {
-            registerMonitorViewModel.startScan()
-            registerMonitorViewModel.clearMonitorConfiguration()
-        }
-
-        val monitorConfigUiState =
-            registerMonitorViewModel.monitorConfigUiState.collectAsState()
-
-        if (!monitorConfigUiState.value.isScanning) {
-            registerMonitorViewModel.stopScan()
-        }
-
-        MonitorRegisterDialog(
-            macValue = monitorConfigUiState.value.mac,
-            monitorSelected = monitorConfigUiState.value.configurationSelected,
-            registerMonitorStatus = registerMonitorStatus.value,
-            isScanning = monitorConfigUiState.value.isScanning,
-            showCloseButton = true,
-            onScan = { registerMonitorViewModel.startScan() },
-            configurations = configurationsUiState.value,
-            onCloseButton = { onDialogCancel() },
-            onSuccessRegister = {
-                monitorViewModel.initMonitorData()
-                registerMonitorViewModel.clearMonitorRegistrationData()
-            },
-            closeText = stringResource(R.string.salir),
-            onMonitorConfiguration = { config ->
-                registerMonitorViewModel.updateMonitorConfiguration(
-                    config
-                )
-            }
-        ) { mac, configuration ->
-            registerMonitorViewModel.registerMonitor(
-                mac = mac,
-                configurationSelected = configuration,
-                context = context
-            )
-        }
+    if (monitorUiState.showView && monitorUiState.showDialog) {
+        ShowMonitorRegisterDialog(
+            monitorId = monitorUiState.monitorId,
+            monitorViewModel = monitorViewModel,
+            cancelButtonText = buttonCancelText,
+            registerMonitorViewModel = registerMonitorViewModel,
+            onDialogCancel = { onDialogCancel(monitorUiState.monitorId) },
+            context = context,
+        )
     }
 
     Scaffold(
-        topBar = { if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar { navigateUp() } },
+        topBar = {
+            if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar(showDialog = {
+                if (wifiStatus.value == NetworkStatus.Connected) monitorViewModel.showMonitorDialog(
+                    true
+                )
+                else Toast.makeText(
+                    context,
+                    R.string.error_conexion_internet,
+                    Toast.LENGTH_LONG
+                ).show()
+            }) { navigateUp() }
+        },
         bottomBar = {
             MonitorBottomNavBar(
                 onClick = { view ->
@@ -133,139 +111,47 @@ fun MonitorScreen(
         },
         modifier = modifier
     ) { innerPadding ->
-        Surface(
-            modifier = Modifier.padding(bottom = 32.dp)
-        ) {
-            if (monitorUiState.value.showView) {
+        Surface(modifier = Modifier.padding(innerPadding)) {
+            if (monitorUiState.showView) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Column(
-                        modifier = modifier.background(Color("#EDF0F8".toColorInt())),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         monitorViewModel.getBitmapImage()
                         if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                             DiagramaMonitorScreen(
-                                tireUiState = tireUiState.value,
-                                image = monitorUiState.value.imageBitmap,
+                                tireUiState = tireUiState,
+                                image = monitorUiState.imageBitmap,
                                 updateSelectedTire = { selectedTire ->
                                     monitorViewModel.updateSelectedTire(selectedTire)
                                 },
                                 getSensorData = { sensorId ->
                                     monitorViewModel.getSensorDataByWheel(sensorId)
                                 },
-                                tires = monitorUiState.value.listOfTires,
-                                imageDimens = monitorUiState.value.imageDimen,
+                                tires = monitorUiState.listOfTires,
+                                imageDimens = monitorUiState.imageDimen,
                                 modifier = Modifier.padding(8.dp),
                             )
                         } else {
-                            if (paymentPlan == PaymentPlanType.Complete) {
-                                var positionOptionSelected by remember { mutableIntStateOf(R.string.recientes) }
-
-                                Column(
-                                    modifier = Modifier.padding(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    // Navegacion Recientes y Filtrar
-                                    NavPositionMonitorScreen(
-                                        tiresList = monitorUiState.value.listOfTires,
-                                        onSensorData = { sensorSelected, dateSelected ->
-                                            monitorViewModel.getTireDataByDate(
-                                                sensorSelected,
-                                                dateSelected
-                                            )
-                                        },
-                                        onPositionOptionSelected = { option ->
-                                            positionOptionSelected = option
-                                        }
-                                    )
-
-                                    // Manejo de presentacion de lista
-                                    if (positionOptionSelected == R.string.recientes) {
-                                        val positionData = positionsUiState.value
-                                        monitorViewModel.clearFilteredTire()
-
-                                        when (positionData) {
-                                            is ApiResult.Error -> NoPositionDataView(R.string.no_registros)
-                                            ApiResult.Loading -> {
-                                                Box(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    CircularProgressIndicator()
-                                                }
-                                            }
-
-                                            is ApiResult.Success<List<MonitorTireByDateResponse>?> -> {
-                                                val data = positionData.data
-                                                CurrentPositionDataView(
-                                                    message = R.string.no_ruedas_activas,
-                                                    sensorDataList = data,
-                                                    isOnSearch = false,
-                                                )
-                                            }
-                                        }
-                                    } else {
-                                        val monitorTireData = monitorTireUiState.value
-                                        when (monitorTireData) {
-                                            is ApiResult.Success -> {
-                                                val data: List<MonitorTireByDateResponse>? =
-                                                    monitorTireData.data?.sortedByDescending { it.sensorDate }
-                                                CurrentPositionDataView(
-                                                    message = R.string.no_registros,
-                                                    sensorDataList = data,
-                                                    isOnSearch = true
-                                                )
-                                            }
-
-                                            is ApiResult.Error -> {}
-                                            is ApiResult.Loading -> {
-                                                Box(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    CircularProgressIndicator()
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                Column(
-                                    modifier = Modifier.padding(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    val positionData = positionsUiState.value
-                                    monitorViewModel.clearFilteredTire()
-
-                                    when (positionData) {
-                                        is ApiResult.Error -> NoPositionDataView(R.string.no_registros)
-                                        ApiResult.Loading -> {
-                                            Box(
-                                                modifier = Modifier.fillMaxSize(),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                CircularProgressIndicator()
-                                            }
-                                        }
-
-                                        is ApiResult.Success<List<MonitorTireByDateResponse>?> -> {
-                                            val data = positionData.data
-                                            CurrentPositionDataView(
-                                                message = R.string.no_ruedas_activas,
-                                                sensorDataList = data,
-                                                isOnSearch = false,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
+                            PositionScreenContent(
+                                paymentPlan = paymentPlan,
+                                monitorViewModel = monitorViewModel,
+                                positionsUiState = positionsUiState,
+                                monitorTireUiState = monitorTireUiState,
+                                listOfTires = monitorUiState.listOfTires
+                            )
                         }
                     }
 
-                    if (visible) {
+                    val isSignalUnknown =
+                        monitorUiState.signalIntensity.first == BluetoothSignalQuality.Desconocida
+                                && monitorUiState.monitorId != 0
+                    if (isSignalUnknown) {
                         val text =
-                            stringResource(monitorUiState.value.signalIntensity.first.alertMessage!!)
+                            stringResource(monitorUiState.signalIntensity.first.alertMessage!!)
                         BluetoothSnackBanner(
                             visible = true,
                             message = text,
@@ -274,31 +160,187 @@ fun MonitorScreen(
                     }
                 }
             } else {
-                Card(modifier = Modifier.fillMaxSize()) {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxSize()
-                    ) { CircularProgressIndicator() }
-                }
+                LoadingView()
             }
         }
     }
 }
 
 @Composable
+private fun ShowMonitorRegisterDialog(
+    monitorId: Int,
+    monitorViewModel: MonitorViewModel,
+    cancelButtonText: String,
+    registerMonitorViewModel: RegisterMonitorViewModel,
+    onDialogCancel: () -> Unit,
+    context: Context
+) {
+    val configurationsUiState by registerMonitorViewModel.configurationList.collectAsState()
+    val registerMonitorStatus by registerMonitorViewModel.registeredMonitorState.collectAsState()
+    val monitorConfigUiState by registerMonitorViewModel.monitorConfigUiState.collectAsState()
+
+    LaunchedEffect(monitorId) {
+        if (monitorId == 0) {
+            registerMonitorViewModel.clearMonitorRegistrationData()
+            registerMonitorViewModel.clearMonitorConfiguration()
+            registerMonitorViewModel.startScan()
+        } else {
+            registerMonitorViewModel.getMonitorConfiguration()
+        }
+    }
+
+    if (!monitorConfigUiState.isScanning) {
+        registerMonitorViewModel.stopScan()
+    }
+
+    MonitorRegisterDialog(
+        macValue = monitorConfigUiState.mac,
+        monitorSelected = monitorConfigUiState.configurationSelected,
+        registerMonitorStatus = registerMonitorStatus,
+        isScanning = monitorConfigUiState.isScanning,
+        showCloseButton = true,
+        onScan = { registerMonitorViewModel.startScan() },
+        configurations = configurationsUiState,
+        onCloseButton = onDialogCancel,
+        onSuccessRegister = {
+            monitorViewModel.initMonitorData()
+            registerMonitorViewModel.clearMonitorRegistrationData()
+        },
+        closeText = cancelButtonText,
+        onMonitorConfiguration = { config ->
+            registerMonitorViewModel.updateMonitorConfiguration(config)
+        }
+    ) { mac, configuration ->
+        registerMonitorViewModel.registerMonitor(
+            mac = mac,
+            configurationSelected = configuration,
+            context = context
+        )
+    }
+}
+
+@Composable
+private fun PositionScreenContent(
+    paymentPlan: PaymentPlanType,
+    monitorViewModel: MonitorViewModel,
+    positionsUiState: ApiResult<List<MonitorTireByDateResponse>?>,
+    monitorTireUiState: ApiResult<List<MonitorTireByDateResponse>?>,
+    listOfTires: List<Tire>?
+) {
+    if (paymentPlan == PaymentPlanType.Complete) {
+        var positionOptionSelected by remember { mutableStateOf(PositionView.RECIENTES) }
+        Column(
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            NavPositionMonitorScreen(
+                selectedView = positionOptionSelected,
+                tiresList = listOfTires,
+                onSensorData = { sensorSelected, dateSelected ->
+                    monitorViewModel.getTireDataByDate(sensorSelected, dateSelected)
+                },
+                onPositionOptionSelected = { option -> positionOptionSelected = option }
+            )
+
+            if (positionOptionSelected == PositionView.RECIENTES) {
+                RecentPositionsView(
+                    positionsUiState = positionsUiState,
+                    onClearFilteredTire = { monitorViewModel.clearFilteredTire() }
+                )
+            } else {
+                FilteredPositionsView(monitorTireUiState = monitorTireUiState)
+            }
+        }
+    } else {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            RecentPositionsView(
+                positionsUiState = positionsUiState,
+                onClearFilteredTire = { monitorViewModel.clearFilteredTire() }
+            )
+        }
+    }
+}
+
+@Composable
+private fun RecentPositionsView(
+    positionsUiState: ApiResult<List<MonitorTireByDateResponse>?>,
+    onClearFilteredTire: () -> Unit
+) {
+    onClearFilteredTire()
+    when (positionsUiState) {
+        is ApiResult.Error -> NoPositionDataView(R.string.no_registros)
+        ApiResult.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+
+        is ApiResult.Success<List<MonitorTireByDateResponse>?> -> {
+            val data = positionsUiState.data
+            CurrentPositionDataView(
+                message = R.string.no_ruedas_activas,
+                sensorDataList = data,
+                isOnSearch = false,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FilteredPositionsView(
+    monitorTireUiState: ApiResult<List<MonitorTireByDateResponse>?>
+) {
+    when (monitorTireUiState) {
+        is ApiResult.Success -> {
+            val data: List<MonitorTireByDateResponse>? =
+                monitorTireUiState.data?.sortedByDescending { it.sensorDate }
+            CurrentPositionDataView(
+                message = R.string.no_registros,
+                sensorDataList = data,
+                isOnSearch = true
+            )
+        }
+
+        is ApiResult.Error -> {}
+        is ApiResult.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoadingView(modifier: Modifier = Modifier) {
+    Card(modifier = modifier.fillMaxSize()) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CircularProgressIndicator()
+        }
+    }
+}
+
+@Composable
 fun NavPositionMonitorScreen(
+    selectedView: PositionView,
     tiresList: List<Tire>?,
     onSensorData: (String, String) -> Unit,
-    onPositionOptionSelected: (Int) -> Unit,
+    onPositionOptionSelected: (PositionView) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showSearchRecords by remember { mutableStateOf(false) }
+    val showSearchRecords = selectedView == PositionView.FILTRAR
+
     Surface(
         shape = RoundedCornerShape(8.dp),
         shadowElevation = 16.dp,
         modifier = modifier,
-        color = Color.White
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -311,51 +353,30 @@ fun NavPositionMonitorScreen(
                 modifier = Modifier.padding(horizontal = 4.dp)
             ) {
                 Button(
-                    onClick = {
-                        onPositionOptionSelected(R.string.recientes)
-                        showSearchRecords = false
-                    },
+                    onClick = { onPositionOptionSelected(PositionView.RECIENTES) },
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (!showSearchRecords) MaterialTheme.colorScheme.tertiary else Color(
-                            "#2E3192".toColorInt()
-                        )
+                        containerColor = if (!showSearchRecords) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                     ),
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(text = stringResource(R.string.recientes))
-                }
+                ) { Text(text = stringResource(R.string.recientes)) }
 
                 Button(
-                    onClick = {
-                        onPositionOptionSelected(R.string.filtrar)
-                        showSearchRecords = true
-                    },
+                    onClick = { onPositionOptionSelected(PositionView.FILTRAR) },
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (showSearchRecords) MaterialTheme.colorScheme.tertiary else Color(
-                            "#2E3192".toColorInt()
-                        )
+                        containerColor = if (showSearchRecords) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                     ),
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(text = stringResource(R.string.filtrar))
-                }
+                ) { Text(text = stringResource(R.string.filtrar)) }
             }
 
-            if (tiresList != null) {
-                if (showSearchRecords) {
-                    if (tiresList.count { it.isActive } != 0) {
-                        PositionFilterView(
-                            tiresList = tiresList,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        ) { wheelSelected, dateSelected ->
-                            onSensorData(
-                                wheelSelected,
-                                dateSelected
-                            )
-                        }
-                    }
+            if (showSearchRecords && tiresList?.any { it.isActive } == true) {
+                PositionFilterView(
+                    tiresList = tiresList,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) { wheelSelected, dateSelected ->
+                    onSensorData(wheelSelected, dateSelected)
                 }
             }
         }

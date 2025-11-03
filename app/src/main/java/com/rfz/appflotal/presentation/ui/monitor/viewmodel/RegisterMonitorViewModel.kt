@@ -205,7 +205,7 @@ class RegisterMonitorViewModel @Inject constructor(
         _registeredMonitorState.value = ApiResult.Loading
     }
 
-    fun clearMonitorConfiguration() = {
+    fun clearMonitorConfiguration() {
         _monitorConfigUiState.value = MonitorConfigurationUiState()
     }
 

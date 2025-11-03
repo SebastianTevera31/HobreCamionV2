@@ -1,9 +1,7 @@
 package com.rfz.appflotal.presentation.ui.home.screen
 
 import android.content.res.Configuration
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,10 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,7 +83,6 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -105,9 +99,6 @@ fun HomeScreen(
     val uiState by homeViewModel.uiState.collectAsState()
     val wifiStatus = monitorViewModel.wifiStatus.collectAsState()
 
-    var showMonitorDialog by remember { mutableStateOf(false) }
-    val registerMonitorStatus = registerMonitorViewModel.registeredMonitorState.collectAsState()
-
     val onlyLanguagesAllowedText = stringResource(R.string.only_languages_allowed)
     val languages = listOf("es" to "ES", "en" to "EN")
 
@@ -121,10 +112,6 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         homeViewModel.loadInitialData()
         registerMonitorViewModel.stopScan()
-    }
-
-    LaunchedEffect(showMonitorDialog) {
-        registerMonitorViewModel.getMonitorConfiguration()
     }
 
     LaunchedEffect(uiState.selectedLanguage) {
@@ -144,40 +131,6 @@ fun HomeScreen(
                 onlyLanguagesAllowedText,
                 Toast.LENGTH_SHORT
             ).show()
-        }
-    }
-
-    if (showMonitorDialog) {
-        val configurations = registerMonitorViewModel.configurationList.collectAsState()
-        val monitorConfigUiState = registerMonitorViewModel.monitorConfigUiState.collectAsState()
-        val monitorUiState = monitorViewModel.monitorUiState.collectAsState()
-
-        RegisterMonitorDialog(
-            configurations = configurations.value,
-            monitorConfigurationUiState = monitorConfigUiState.value,
-            registerMonitorStatus = registerMonitorStatus.value,
-            onCloseButton = {
-                registerMonitorViewModel.stopScan()
-                showMonitorDialog = false
-            },
-            onContinueButton = { mac, configuration ->
-                registerMonitorViewModel.registerMonitor(
-                    idMonitor = monitorUiState.value.monitorId,
-                    mac = mac,
-                    configurationSelected = configuration,
-                    context = context
-                )
-            },
-            onScan = { registerMonitorViewModel.startScan() },
-            onMonitorConfiguration = { config ->
-                registerMonitorViewModel.updateMonitorConfiguration(
-                    config
-                )
-            }
-        ) {
-            showMonitorDialog = false
-            monitorViewModel.initMonitorData()
-            registerMonitorViewModel.clearMonitorRegistrationData()
         }
     }
 
@@ -333,7 +286,9 @@ fun HomeScreen(
                     userName = userName,
                     plates = plates
                 ) {
-                    if (wifiStatus.value == NetworkStatus.Connected) showMonitorDialog = true
+                    if (wifiStatus.value == NetworkStatus.Connected) monitorViewModel.showMonitorDialog(
+                        true
+                    )
                     else Toast.makeText(
                         context,
                         R.string.error_conexion_internet,
@@ -343,7 +298,7 @@ fun HomeScreen(
             }
 
             // PANTALLAS
-            if (paymentPlan != PaymentPlanType.Complete) {
+            if (paymentPlan == PaymentPlanType.Complete) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -403,26 +358,32 @@ fun HomeScreen(
                     navigateUp = { navController.navigateUp() },
                     paymentPlan = paymentPlan,
                     modifier = Modifier.fillMaxSize(),
-                    onDialogCancel = {
-                        CoroutineScope(Dispatchers.IO).launch {
+                    onDialogCancel = { monitorId ->
+                        if (monitorId == 0) {
+                            CoroutineScope(Dispatchers.IO).launch {
 
-                            HombreCamionService.stopService(context)
+                                HombreCamionService.stopService(context)
 
-                            homeViewModel.logout()
+                                homeViewModel.logout()
 
-                            registerMonitorViewModel.clearMonitorConfiguration()
+                                registerMonitorViewModel.clearMonitorConfiguration()
 
-                            registerMonitorViewModel.stopScan()
+                                registerMonitorViewModel.stopScan()
 
-                            withContext(Dispatchers.Main) {
-                                // navController.clearBackStack(NavScreens.LOGIN)
-                                navController.navigate(NavScreens.LOGIN) {
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        monitorViewModel.clearMonitorData()
-                                        inclusive = true
+                                monitorViewModel.clearMonitorData()
+
+                                withContext(Dispatchers.Main) {
+                                    // navController.clearBackStack(NavScreens.LOGIN)
+                                    navController.navigate(NavScreens.LOGIN) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            inclusive = true
+                                        }
                                     }
                                 }
                             }
+                        } else {
+                            registerMonitorViewModel.stopScan()
+                            monitorViewModel.showMonitorDialog(false)
                         }
                     }
                 )

@@ -22,7 +22,7 @@ data class MonitorUiState(
     val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
     val showDialog: Boolean = false,
     val showView: Boolean = false,
-    val isBluetoothOn: Boolean = false
+    val isBluetoothOn: Boolean = false,
 )
 
 data class TireUiState(
