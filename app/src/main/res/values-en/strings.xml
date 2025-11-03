@@ -208,6 +208,7 @@
     <string name="profundidad">Depth (mm)</string>
     <string name="numero_de_llanta">Tire Number</string>
     <string name="dot">DOT</string>
+    <string name="sin_llantas">No active tires</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

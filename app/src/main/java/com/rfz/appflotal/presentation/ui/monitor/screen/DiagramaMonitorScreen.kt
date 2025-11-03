@@ -154,56 +154,92 @@ fun PanelLlantas(
         modifier = modifier,
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = pluralStringResource(R.plurals.llanta_tag, 2),
-                color = Color("#2E3192".toColorInt()),
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            if (tiresList != null) {
-                val filterTireList = tiresList.filter { it.isActive }
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize()
+        if (tiresList != null) {
+            val filterTireList = tiresList.filter { it.isActive }
+            if (filterTireList.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    items(items = filterTireList, key = { tire -> tire.sensorPosition }) {
-                        val colorStatus =
-                            if (it.inAlert) Pair(Color.Red, Color.White)
-                            else Pair(Color(0x402E3192), Color.Black)
+                    Text(
+                        text = stringResource(R.string.sin_llantas),
+                        color = Color("#2E3192".toColorInt()),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+            } else {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Text(
+                        text = pluralStringResource(R.plurals.llanta_tag, 2),
+                        color = Color("#2E3192".toColorInt()),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                        val border = if (tireSelected == it.sensorPosition) {
-                            BorderStroke(width = 4.dp, color = MaterialTheme.colorScheme.primary)
-                        } else null
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        items(items = filterTireList, key = { tire -> tire.sensorPosition }) {
+                            val colorStatus =
+                                if (it.inAlert) Pair(Color.Red, Color.White)
+                                else Pair(Color(0x402E3192), Color.Black)
 
-                        Button(
-                            onClick = {
-                                // LOGICA PARA MANEJO DE SELECCIONAR | DESELECCIONAR LLANTA
-                                val tire = if (it.sensorPosition == tireSelected) "" else {
-                                    getSensorData(it.sensorPosition)
-                                    it.sensorPosition
-                                }
-                                updateSelectedTire(tire)
-                            },
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(colorStatus.first),
-                            border = border,
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
-                        ) {
-                            Text(
-                                text = it.sensorPosition,
-                                color = colorStatus.second,
-                                fontSize = 16.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Clip,
-                                softWrap = false,
-                            )
+                            val border = if (tireSelected == it.sensorPosition) {
+                                BorderStroke(
+                                    width = 4.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            } else null
+
+                            Button(
+                                onClick = {
+                                    // LOGICA PARA MANEJO DE SELECCIONAR | DESELECCIONAR LLANTA
+                                    val tire = if (it.sensorPosition == tireSelected) "" else {
+                                        getSensorData(it.sensorPosition)
+                                        it.sensorPosition
+                                    }
+                                    updateSelectedTire(tire)
+                                },
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(colorStatus.first),
+                                border = border,
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+                            ) {
+                                Text(
+                                    text = it.sensorPosition,
+                                    color = colorStatus.second,
+                                    fontSize = 16.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Clip,
+                                    softWrap = false,
+                                )
+                            }
                         }
                     }
                 }
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.sin_llantas),
+                    color = Color("#2E3192".toColorInt()),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
         }
     }
