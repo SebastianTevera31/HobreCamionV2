@@ -36,7 +36,6 @@ import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
-import com.rfz.appflotal.presentation.ui.home.screen.RegisterMonitorDialog
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.BluetoothSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
