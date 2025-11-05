@@ -260,7 +260,7 @@ class MonitorViewModel @Inject constructor(
                     updateTireState(
                         currentTire = tireUiState.currentTire,
                         tires = tires,
-                    ) { tire ->
+                    ) {
                         _tireUiState.update { currentUiState ->
                             currentUiState.copy(
                                 currentTire = "",

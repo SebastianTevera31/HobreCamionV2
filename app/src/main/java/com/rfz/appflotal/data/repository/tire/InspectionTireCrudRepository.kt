@@ -9,9 +9,9 @@ import javax.inject.Inject
 
 class InspectionTireCrudRepository @Inject constructor(private val inspectionTireCrudService: InspectionTireCrudService) {
 
-    suspend fun doInspectionTire(requestBody: InspectionTireDto, tok: String): Result<List<MessageResponse>> {
+    suspend fun doInspectionTire(requestBody: InspectionTireDto): Result<List<MessageResponse>> {
         return try {
-            val response = inspectionTireCrudService.doInspectionTire(requestBody,tok)
+            val response = inspectionTireCrudService.doInspectionTire(requestBody)
             if (response.isSuccessful) {
 
                 response.body()?.let {

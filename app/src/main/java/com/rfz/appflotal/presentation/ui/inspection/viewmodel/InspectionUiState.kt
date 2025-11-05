@@ -1,0 +1,50 @@
+package com.rfz.appflotal.presentation.ui.inspection.viewmodel
+
+import com.rfz.appflotal.R
+import com.rfz.appflotal.domain.Catalog
+
+sealed interface InspectionUiState {
+    data object Loading : InspectionUiState
+    data class Error(val message: String) : InspectionUiState
+    data object Empty : InspectionUiState
+    data class Success(val inspectionList: List<Catalog>) : InspectionUiState
+}
+
+data class InspectionRequestState(
+    val isSending: Boolean = false,
+    val message: String? = null,
+)
+
+data class InspectionUi(
+    val reportId: String?,
+    val odometer: Int,
+    val temperature: Int,
+    val pressure: Int,
+    val adjustedPressure: Int,
+    val treadDepth1: Float,
+    val treadDepth2: Float,
+    val treadDepth3: Float,
+    val treadDepth4: Float,
+)
+
+fun String.filterNumericDot(): String {
+    // Solo dígitos y un único punto; perfecto para permitir decimales si los necesitas.
+    val filtered = buildString {
+        var dotSeen = false
+        for (ch in this@filterNumericDot) {
+            if (ch.isDigit()) append(ch)
+            else if (ch == '.' && !dotSeen) {
+                append(ch)
+                dotSeen = true
+            }
+        }
+    }
+    return filtered
+}
+
+fun String.toIntOrError(): Pair<Int?, Int?> {
+    // Devuelve el Int (si se puede) y un posible mensaje de error
+    if (isBlank()) return null to R.string.requerido
+    val value = toDoubleOrNull() ?: return null to R.string.numero_invalido
+    return value.toInt() to null
+}

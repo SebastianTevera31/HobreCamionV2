@@ -7,17 +7,22 @@ import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
 import com.rfz.appflotal.data.network.client.tire.DisassemblyTireCrudClient
 import com.rfz.appflotal.data.network.client.tire.InspectionTireCrudClient
 import com.rfz.appflotal.data.network.client.tire.TireCrudClient
+import com.rfz.appflotal.domain.database.GetTasksUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import javax.inject.Inject
 
 
-
-class InspectionTireCrudService @Inject constructor(private val inspectionTireCrudClient: InspectionTireCrudClient) {
-    suspend fun doInspectionTire(requestBody: InspectionTireDto, tok:String): Response<List<MessageResponse>> {
+class InspectionTireCrudService @Inject constructor(
+    private val inspectionTireCrudClient: InspectionTireCrudClient,
+    private val getTasksUseCase: GetTasksUseCase
+) {
+    suspend fun doInspectionTire(requestBody: InspectionTireDto): Response<List<MessageResponse>> {
         return withContext(Dispatchers.IO) {
-            inspectionTireCrudClient.doInspectionTire(requestBody,tok)
+            val token = getTasksUseCase().first()[0].fld_token
+            inspectionTireCrudClient.doInspectionTire("bearer $token", requestBody)
         }
     }
 }

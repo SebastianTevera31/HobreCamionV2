@@ -52,6 +52,7 @@ fun MonitorScreen(
     onDialogCancel: (mac: Int) -> Unit,
     registerMonitorViewModel: RegisterMonitorViewModel,
     navigateUp: () -> Unit,
+    onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
 ) {
@@ -122,6 +123,7 @@ fun MonitorScreen(
                         monitorViewModel.getBitmapImage()
                         if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                             DiagramaMonitorScreen(
+                                isInspectionActive = paymentPlan == PaymentPlanType.Complete,
                                 tireUiState = tireUiState,
                                 image = monitorUiState.imageBitmap,
                                 updateSelectedTire = { selectedTire ->
@@ -132,6 +134,7 @@ fun MonitorScreen(
                                 },
                                 tires = monitorUiState.listOfTires,
                                 imageDimens = monitorUiState.imageDimen,
+                                onInspectClick = { tire, temp, press -> onInspectClick(tire, temp, press) },
                                 modifier = Modifier.padding(8.dp),
                             )
                         } else {
