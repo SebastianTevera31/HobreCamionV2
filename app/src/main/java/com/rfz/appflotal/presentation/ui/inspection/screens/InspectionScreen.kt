@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.inspection.screens
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,8 +42,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -172,7 +175,7 @@ fun InspectionScreen(
         },
         snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
-            Surface(shadowElevation = 4.dp) {
+            Surface(shadowElevation = 4.dp, contentColor = Color.White) {
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -311,60 +314,76 @@ fun InspectionScreen(
                     // Bloque: Profundidad de piso
                     SectionHeader(stringResource(R.string.profundidad_de_piso_mm))
                     Spacer(Modifier.height(8.dp))
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(
-                            dimensionResource(id = R.dimen.small_dimen)
-                        )
-                    ) {
-                        NumberField(
-                            value = form.treadDepth1,
-                            onValueChange = { form.treadDepth1 = it },
-                            label = "T1",
-                            errorText = form.treadDepth1Error,
-                            modifier = Modifier
-                                .widthIn(min = 220.dp)
-                                .heightIn(min = 56.dp)
-                                .weight(1f),
-                            keyboardType = KeyboardType.Number
-                        )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                dimensionResource(id = R.dimen.small_dimen)
+                            )
+                        ) {
+                            NumberField(
+                                value = form.treadDepth1,
+                                onValueChange = { form.treadDepth1 = it },
+                                label = "T1",
+                                errorText = form.treadDepth1Error,
+                                modifier = Modifier
+                                    .widthIn(min = 220.dp)
+                                    .heightIn(min = 56.dp)
+                                    .weight(1f),
+                                keyboardType = KeyboardType.Number
+                            )
 
-                        NumberField(
-                            value = form.treadDepth2,
-                            onValueChange = { form.treadDepth2 = it },
-                            label = "T2",
-                            errorText = form.treadDepth2Error,
-                            modifier = Modifier
-                                .widthIn(min = 220.dp)
-                                .heightIn(min = 56.dp)
-                                .weight(1f),
-                            keyboardType = KeyboardType.Number
-                        )
+                            NumberField(
+                                value = form.treadDepth2,
+                                onValueChange = { form.treadDepth2 = it },
+                                label = "T2",
+                                errorText = form.treadDepth2Error,
+                                modifier = Modifier
+                                    .widthIn(min = 220.dp)
+                                    .heightIn(min = 56.dp)
+                                    .weight(1f),
+                                keyboardType = KeyboardType.Number
+                            )
 
-                        NumberField(
-                            value = form.treadDepth3,
-                            onValueChange = { form.treadDepth3 = it },
-                            label = "T3",
-                            errorText = form.treadDepth3Error,
-                            modifier = Modifier
-                                .widthIn(min = 220.dp)
-                                .heightIn(min = 56.dp)
-                                .weight(1f),
-                            keyboardType = KeyboardType.Number
-                        )
+                            NumberField(
+                                value = form.treadDepth3,
+                                onValueChange = { form.treadDepth3 = it },
+                                label = "T3",
+                                errorText = form.treadDepth3Error,
+                                modifier = Modifier
+                                    .widthIn(min = 220.dp)
+                                    .heightIn(min = 56.dp)
+                                    .weight(1f),
+                                keyboardType = KeyboardType.Number
+                            )
 
-                        NumberField(
-                            value = form.treadDepth4,
-                            onValueChange = { form.treadDepth4 = it },
-                            label = "T4",
-                            errorText = form.treadDepth4Error,
-                            modifier = Modifier
-                                .widthIn(min = 220.dp)
-                                .heightIn(min = 56.dp)
-                                .weight(1f),
-                            keyboardType = KeyboardType.Number
+                            NumberField(
+                                value = form.treadDepth4,
+                                onValueChange = { form.treadDepth4 = it },
+                                label = "T4",
+                                errorText = form.treadDepth4Error,
+                                modifier = Modifier
+                                    .widthIn(min = 220.dp)
+                                    .heightIn(min = 56.dp)
+                                    .weight(1f),
+                                keyboardType = KeyboardType.Number
+                            )
+                        }
+                        if (form.oneTreadDepthAtLeast != null) {
+                            Text(
+                                text = stringResource(R.string.una_medidad_profundidad_mayor_0),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                        Image(
+                            painterResource(R.drawable.tire_tread_diagram),
+                            contentDescription = null,
+                            modifier = Modifier.height(140.dp)
                         )
                     }
+
 
                     Spacer(Modifier.height(80.dp)) // espacio para que no lo tape la bottomBar
                 }

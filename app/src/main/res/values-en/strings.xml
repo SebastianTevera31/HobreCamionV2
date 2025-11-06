@@ -225,6 +225,7 @@
     <string name="profundidad_de_piso_mm">Tread Depth (mm)</string>
     <string name="requerido">Required</string>
     <string name="numero_invalido">Invalid number</string>
+    <string name="una_medidad_profundidad_mayor_0">At least one tread depth must be greater than 0.</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

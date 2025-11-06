@@ -16,10 +16,10 @@ class InspectionFormState(
     temperature: String = "",
     pressureMeasured: String = "",
     adjustedPressure: String = "",
-    treadDepth1: String = "",
-    treadDepth2: String = "",
-    treadDepth3: String = "",
-    treadDepth4: String = "",
+    treadDepth1: String = "0",
+    treadDepth2: String = "0",
+    treadDepth3: String = "0",
+    treadDepth4: String = "0",
     selectedReportId: String? = null
 ) {
     var odometer by mutableStateOf(odometer)
@@ -43,6 +43,7 @@ class InspectionFormState(
     var treadDepth2Error by mutableStateOf<Int?>(null)
     var treadDepth3Error by mutableStateOf<Int?>(null)
     var treadDepth4Error by mutableStateOf<Int?>(null)
+    var oneTreadDepthAtLeast by mutableStateOf<Boolean?>(false)
 
     fun validate(): Boolean {
         val (reportInt, reportErr) = if (selectedReportId != null) Pair(
@@ -78,10 +79,17 @@ class InspectionFormState(
         val (td4Int, td4Err) = treadDepth4.toIntOrError()
         treadDepth4Error = td4Err
 
+        oneTreadDepthAtLeast = treadDeptError(
+            td1Int,
+            td2Int,
+            td3Int,
+            td4Int
+        )
+
         // Si alguno dio error (no null), no es válido
         return listOf(
             odoErr, tempErr, pressErr, adjErr,
-            td1Err, td2Err, td3Err, td4Err, reportErr
+            td1Err, td2Err, td3Err, td4Err, reportErr, oneTreadDepthAtLeast
         ).all { it == null } &&
                 // Y además todos pudieron convertirse:
                 listOf(
@@ -93,7 +101,7 @@ class InspectionFormState(
                     td1Int,
                     td2Int,
                     td3Int,
-                    td4Int
+                    td4Int,
                 ).all { it != null }
     }
 

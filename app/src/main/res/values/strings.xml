@@ -78,7 +78,7 @@
 
     <string name="temperatura">Temp.</string>
     <string name="presion">Presión</string>
-    <string name="actualizado">Actualizado:\n%1$s</string>
+    <string name="actualizado">Ultima lectura: \n%1$s</string>
     <string name="llantas">Llantas</string>
     <string name="alertas_activas">Alertas activas</string>
     <string name="presion_alta">Presión alta</string>
@@ -233,6 +233,7 @@
     <string name="profundidad_de_piso_mm">Profundidad de piso (mm)</string>
     <string name="requerido">Requerido</string>
     <string name="numero_invalido">Número inválido</string>
+    <string name="una_medidad_profundidad_mayor_0">Debe haber al menos una medida de profundidad mayor que 0.</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

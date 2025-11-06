@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -389,39 +388,35 @@ fun PanelSensor(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     Column(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(0.8f)
                             .verticalScroll(rememberScrollState())
                     ) {
                         CeldaDatosSensor(
                             title = stringResource(R.string.temperatura),
                             img = R.drawable.temperature__1_,
-                            value = "${temperature.toInt()} ℃"
+                            value = "${temperature.toInt()} ℃",
+                            modifier = Modifier.weight(1f)
                         )
                         CeldaDatosSensor(
                             title = stringResource(R.string.presion),
                             img = R.drawable.tire_pressure,
-                            value = "${pressure.toInt()} PSI"
+                            value = "${pressure.toInt()} PSI",
+                            modifier = Modifier.weight(1f)
                         )
-                        if (isInspectionActive && isAssembled) {
-                            Button(
-                                onClick = onInspectClick,
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = MaterialTheme.shapes.medium,
-                                elevation = ButtonDefaults.elevatedButtonElevation(
-                                    defaultElevation = dimensionResource(R.dimen.small_dimen)
-                                ),
-                                border = BorderStroke(
-                                    width = dimensionResource(R.dimen.small_dimen),
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            ) {
-                                Text(stringResource(R.string.inspeccionar))
-                            }
+                    }
+
+                    if (isInspectionActive && isAssembled) {
+                        Button(
+                            onClick = onInspectClick,
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = ButtonDefaults.buttonElevation(8.dp),
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(12.dp) // Borde redondeado
+                        ) {
+                            Text(stringResource(R.string.inspeccionar))
                         }
                     }
                 } else {
