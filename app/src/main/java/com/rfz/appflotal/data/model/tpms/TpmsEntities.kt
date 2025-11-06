@@ -67,6 +67,7 @@ data class DiagramMonitorResponse(
     @SerializedName("monitor_MAC") val monitorMac: String,
     @SerializedName("axle_id") val axleId: Int,
     @SerializedName("axle_description") val axleDescription: String,
+    @SerializedName("isAssembled") val isAssembled: Boolean,
     @SerializedName("sensor_position") val sensorPosition: String,
     @SerializedName("position_description") val positionDescription: String,
     @SerializedName("sensor_id") val sensorId: Int,

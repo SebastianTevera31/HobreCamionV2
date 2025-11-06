@@ -622,7 +622,10 @@ class InicioActivity : ComponentActivity() {
                                     temperature = temp.toFloat(),
                                     pressure = pressure.toFloat(),
                                     onBack = { navController.popBackStack() },
-                                    onFinish = { navController.popBackStack() },
+                                    onFinish = { tire ->
+                                        navController.popBackStack()
+                                        monitorViewModel.getSensorDataByWheel(tire)
+                                    },
                                     viewModel = inspectionViewModel
                                 )
                             }

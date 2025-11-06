@@ -67,7 +67,7 @@ fun InspectionRoute(
     temperature: Float,
     pressure: Float,
     onBack: () -> Unit = {},
-    onFinish: () -> Unit = {},
+    onFinish: (tire: String) -> Unit = {},
     viewModel: InspectionViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.uiState.collectAsState()
@@ -75,6 +75,7 @@ fun InspectionRoute(
     val context = LocalContext.current
 
     BackHandler {
+        onBack()
         viewModel.clearInspectionUiState()
     }
 
@@ -100,7 +101,7 @@ fun InspectionRoute(
         onBack = onBack,
         onFinish = { report ->
             viewModel.uploadInspection(tire, report)
-            onFinish()
+            onFinish(tire)
         }
     )
 }
@@ -148,7 +149,10 @@ fun InspectionScreen(
                         )
                         Text(
                             tireLabel,
-                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onPrimary)
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
                     }
                 },
@@ -316,7 +320,7 @@ fun InspectionScreen(
                         NumberField(
                             value = form.treadDepth1,
                             onValueChange = { form.treadDepth1 = it },
-                            label = "1",
+                            label = "T1",
                             errorText = form.treadDepth1Error,
                             modifier = Modifier
                                 .widthIn(min = 220.dp)
@@ -328,7 +332,7 @@ fun InspectionScreen(
                         NumberField(
                             value = form.treadDepth2,
                             onValueChange = { form.treadDepth2 = it },
-                            label = "2",
+                            label = "T2",
                             errorText = form.treadDepth2Error,
                             modifier = Modifier
                                 .widthIn(min = 220.dp)
@@ -340,7 +344,7 @@ fun InspectionScreen(
                         NumberField(
                             value = form.treadDepth3,
                             onValueChange = { form.treadDepth3 = it },
-                            label = "3",
+                            label = "T3",
                             errorText = form.treadDepth3Error,
                             modifier = Modifier
                                 .widthIn(min = 220.dp)
@@ -352,7 +356,7 @@ fun InspectionScreen(
                         NumberField(
                             value = form.treadDepth4,
                             onValueChange = { form.treadDepth4 = it },
-                            label = "4",
+                            label = "T4",
                             errorText = form.treadDepth4Error,
                             modifier = Modifier
                                 .widthIn(min = 220.dp)
@@ -394,5 +398,13 @@ private suspend fun SnackbarHostState.showMessage(
 @Composable
 private fun PreviewInspection() {
     HombreCamionTheme {
+        InspectionScreen(
+            tireLabel = "P2",
+            initialTemperature = 2,
+            initialPressure = 2,
+            uiState = InspectionUiState.Success(inspectionList = emptyList()),
+            onBack = {},
+            onFinish = {}
+        )
     }
 }

@@ -33,12 +33,14 @@ data class TireUiState(
     val timestamp: String = "",
     val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val flatTireStatus: SensorAlerts = SensorAlerts.NO_DATA,
-    val tireRemovingStatus: SensorAlerts = SensorAlerts.NO_DATA
+    val tireRemovingStatus: SensorAlerts = SensorAlerts.NO_DATA,
+    val isAssembled: Boolean = false
 )
 
 data class Tire(
     val sensorPosition: String,
     val inAlert: Boolean,
+    val isAssembled: Boolean,
     val isActive: Boolean,
     val xPosition: Int,
     val yPosition: Int,
@@ -47,6 +49,7 @@ data class Tire(
 fun CoordinatesEntity.toTire(): Tire {
     return Tire(
         sensorPosition = idPosition,
+        isAssembled = isAssembled,
         inAlert = inAlert,
         isActive = isActive,
         xPosition = xPosition,

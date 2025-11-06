@@ -113,6 +113,7 @@ fun DiagramaMonitorScreen(
                 ) {
                     PanelSensor(
                         isInspectionActive = isInspectionActive,
+                        isAssembled = tireUiState.isAssembled,
                         wheel = tireUiState.currentTire,
                         temperature = tireUiState.temperature.first,
                         pressure = tireUiState.pressure.first,
@@ -305,6 +306,7 @@ fun CeldaAlerta(wheel: String, alertMessage: String, modifier: Modifier = Modifi
 @Composable
 fun PanelSensor(
     isInspectionActive: Boolean,
+    isAssembled: Boolean,
     wheel: String,
     temperature: Float,
     pressure: Float,
@@ -405,11 +407,18 @@ fun PanelSensor(
                             img = R.drawable.tire_pressure,
                             value = "${pressure.toInt()} PSI"
                         )
-                        if (isInspectionActive) {
+                        if (isInspectionActive && isAssembled) {
                             Button(
                                 onClick = onInspectClick,
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = MaterialTheme.shapes.medium
+                                shape = MaterialTheme.shapes.medium,
+                                elevation = ButtonDefaults.elevatedButtonElevation(
+                                    defaultElevation = dimensionResource(R.dimen.small_dimen)
+                                ),
+                                border = BorderStroke(
+                                    width = dimensionResource(R.dimen.small_dimen),
+                                    color = MaterialTheme.colorScheme.primaryContainer
+                                )
                             ) {
                                 Text(stringResource(R.string.inspeccionar))
                             }
@@ -552,6 +561,7 @@ fun PanelSensorViewPreview() {
             temperature = 40.0f,
             pressure = 3f,
             timestamp = "",
+            isAssembled = true,
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
             pressureStatus = SensorAlerts.LOW_PRESSURE,
             batteryStatus = SensorAlerts.NO_DATA,

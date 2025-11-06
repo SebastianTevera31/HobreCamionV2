@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
+import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ShowToast
@@ -27,7 +28,8 @@ enum class UploadingInspectionMessage(@StringRes val message: Int) {
 @HiltViewModel
 class InspectionViewModel @Inject constructor(
     private val catalogUseCase: CatalogUseCase,
-    private val inspectionTireCrudUseCase: InspectionTireCrudUseCase
+    private val inspectionTireCrudUseCase: InspectionTireCrudUseCase,
+    private val sensorDataTableRepository: SensorDataTableRepository
 ) : ViewModel() {
     private var _uiState: MutableStateFlow<InspectionUiState> =
         MutableStateFlow(InspectionUiState.Empty)
@@ -86,6 +88,11 @@ class InspectionViewModel @Inject constructor(
         }
 
         if (result.isSuccess) {
+            sensorDataTableRepository.updateTireRecord(
+                tire = positionTire,
+                temperature = values.temperature,
+                pressure = values.adjustedPressure
+            )
             _eventFlow.emit(ShowToast(UploadingInspectionMessage.SUCCESS.message))
         } else {
             _eventFlow.emit(ShowToast(UploadingInspectionMessage.GENERAL_ERROR.message))

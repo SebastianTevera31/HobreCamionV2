@@ -54,6 +54,8 @@ data class CoordinatesEntity(
     val monitorId: Int,
     @ColumnInfo(name = "idPosition")
     val idPosition: String,
+    @ColumnInfo(name = "isAssembled")
+    val isAssembled: Boolean,
     @ColumnInfo(name = "inAlert")
     val inAlert: Boolean,
     @ColumnInfo(name = "inActive")

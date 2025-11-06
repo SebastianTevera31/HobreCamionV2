@@ -96,6 +96,7 @@ fun SensorDataEntity.toDiagram(): DiagramMonitorResponse {
         monitorMac = "",
         axleId = 0,
         axleDescription = "",
+        isAssembled = false,
         sensorPosition = tire,
         positionDescription = "",
         sensorId = if (active) 1 else 0,

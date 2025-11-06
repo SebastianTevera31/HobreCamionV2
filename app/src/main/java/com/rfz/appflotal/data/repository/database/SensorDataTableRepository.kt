@@ -3,9 +3,14 @@ package com.rfz.appflotal.data.repository.database
 import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import com.rfz.appflotal.domain.database.GetTasksUseCase
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.first
 
-class SensorDataTableRepository @Inject constructor(private val sensorData: SensorDataDao) {
+class SensorDataTableRepository @Inject constructor(
+    private val sensorData: SensorDataDao,
+    private val getTasksUseCase: GetTasksUseCase
+) {
     suspend fun insertSensorData(
         idMonitor: Int,
         tire: String,
@@ -68,6 +73,16 @@ class SensorDataTableRepository @Inject constructor(private val sensorData: Sens
     }
 
     suspend fun deleteMonitorData(monitorId: Int) = sensorData.deleteMonitorData(monitorId)
+
+    suspend fun updateTireRecord(tire: String, temperature: Int, pressure: Int) {
+        val idMonitor = getTasksUseCase.invoke().first()[0].id_monitor
+        sensorData.updateSensorRecord(
+            monitorId = idMonitor,
+            tire = tire,
+            temperature = temperature,
+            pressure = pressure
+        )
+    }
 
     suspend fun isTireActive(monitorId: Int, tire: String): Boolean {
         val data = sensorData.getLastRecordByTire(monitorId, tire)
