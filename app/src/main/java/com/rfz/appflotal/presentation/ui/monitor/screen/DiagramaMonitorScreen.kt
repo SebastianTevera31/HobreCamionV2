@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.dimensionResource
@@ -59,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
@@ -400,6 +402,7 @@ fun PanelSensor(
                             value = "${temperature.toInt()} ℃",
                             modifier = Modifier.weight(1f)
                         )
+
                         CeldaDatosSensor(
                             title = stringResource(R.string.presion),
                             img = R.drawable.tire_pressure,
@@ -411,8 +414,14 @@ fun PanelSensor(
                     if (isInspectionActive && isAssembled) {
                         Button(
                             onClick = onInspectClick,
-                            modifier = Modifier.fillMaxWidth(),
-                            elevation = ButtonDefaults.buttonElevation(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(
+                                    elevation = 8.dp,
+                                    shape = RoundedCornerShape(20.dp),
+                                    ambientColor = primaryColor.copy(alpha = 0.1f)
+                                ),
+                            elevation = ButtonDefaults.buttonElevation(12.dp),
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                             shape = RoundedCornerShape(12.dp) // Borde redondeado
                         ) {
