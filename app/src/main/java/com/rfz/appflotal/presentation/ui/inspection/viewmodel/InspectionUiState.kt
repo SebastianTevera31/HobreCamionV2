@@ -49,7 +49,7 @@ fun String.toIntOrError(): Pair<Int?, Int?> {
     return value.toInt() to null
 }
 
-fun treadDeptError(td1: Int?, td2: Int?, td3: Int?, td4: Int?): Boolean? {
-    if (td1 == null || td2 == null || td3 == null || td4 == null) return true
-    return if (td1 > 0 || td2 > 0 || td3 > 0 || td4 > 0) null else true
+fun treadDeptError(td1: Int?, td4: Int?): Boolean? {
+    if (td1 == null || td4 == null) return true
+    return if (td1 > 0 && td4 > 0) null else true
 }

@@ -81,8 +81,6 @@ class InspectionFormState(
 
         oneTreadDepthAtLeast = treadDeptError(
             td1Int,
-            td2Int,
-            td3Int,
             td4Int
         )
 
