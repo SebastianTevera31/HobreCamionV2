@@ -29,7 +29,7 @@ android {
             buildConfigField(
                 "String",
                 "URL_API",
-                "\"https://owneroperator.azurewebsites.net/\""
+                "\"https://owneroperatorapi.azurewebsites.net/\""
             )
             buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
         }
@@ -43,7 +43,7 @@ android {
             buildConfigField(
                 "String",
                 "URL_API",
-                "\"https://owneroperator.azurewebsites.net/\""
+                "\"https://owneroperatorapi.azurewebsites.net/\""
             )
             buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
             signingConfig = signingConfigs.getByName("debug")
