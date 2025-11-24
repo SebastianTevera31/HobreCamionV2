@@ -5,6 +5,7 @@ import androidx.annotation.Keep
 import androidx.room.Room
 import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.data.dao.AppHCDao
+import com.rfz.appflotal.data.dao.AssemblyTireDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
 import com.rfz.appflotal.data.dao.SensorDataDao
@@ -39,6 +40,12 @@ class DataBaseModule {
     fun provideSensorDataDao(hombreCamionDatabase: AppHombreCamionDatabase): SensorDataDao {
         return hombreCamionDatabase.sensorDataDao()
     }
+
+    @Provides
+    fun provideAssemblyTireDao(hombreCamionDatabase: AppHombreCamionDatabase): AssemblyTireDao {
+        return hombreCamionDatabase.assemblyTireDao()
+    }
+
 
     @Keep
     @Provides

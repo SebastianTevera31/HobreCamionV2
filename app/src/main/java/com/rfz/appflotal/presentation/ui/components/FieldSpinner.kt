@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
-import com.rfz.appflotal.domain.Catalog
+import com.rfz.appflotal.domain.CatalogItem
 import kotlin.collections.forEach
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,8 +34,8 @@ fun FieldSpinner(
     label: String,
     isEmpty: Boolean,
     selectedValue: String,
-    values: List<Catalog>,
-    onValueSelected: (Catalog) -> Unit
+    values: List<CatalogItem>,
+    onValueSelected: (CatalogItem) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 

@@ -1,7 +1,7 @@
 package com.rfz.appflotal.data.model.retreadbrand.response
 
 import com.google.gson.annotations.SerializedName
-import com.rfz.appflotal.domain.Catalog
+import com.rfz.appflotal.domain.CatalogItem
 
 data class RetreadBrandListResponse(
 
@@ -11,8 +11,8 @@ data class RetreadBrandListResponse(
     @SerializedName("fld_description")
     val description: String
 ) {
-    fun toDomain(): Catalog {
-        return Catalog(
+    fun toDomain(): CatalogItem {
+        return CatalogItem(
             id = idRetreadBrand,
             description = description
         )

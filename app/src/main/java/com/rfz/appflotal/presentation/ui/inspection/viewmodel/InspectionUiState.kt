@@ -1,13 +1,13 @@
 package com.rfz.appflotal.presentation.ui.inspection.viewmodel
 
 import com.rfz.appflotal.R
-import com.rfz.appflotal.domain.Catalog
+import com.rfz.appflotal.domain.CatalogItem
 
 sealed interface InspectionUiState {
     data object Loading : InspectionUiState
     data class Error(val message: String) : InspectionUiState
     data object Empty : InspectionUiState
-    data class Success(val inspectionList: List<Catalog>) : InspectionUiState
+    data class Success(val inspectionList: List<CatalogItem>) : InspectionUiState
 }
 
 data class InspectionRequestState(

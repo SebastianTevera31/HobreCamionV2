@@ -8,6 +8,7 @@ import com.rfz.appflotal.data.network.client.acquisitiontype.AcquisitionTypeClie
 import com.rfz.appflotal.data.network.client.airPressureRating.AirPressureRatingClient
 import com.rfz.appflotal.data.network.client.airPressureRating.CreateAirPressureRatingClient
 import com.rfz.appflotal.data.network.client.airPressureRating.UpdateAirPressureRatingClient
+import com.rfz.appflotal.data.network.client.assembly.AssemblyTireService
 import com.rfz.appflotal.data.network.client.base.BaseClient
 import com.rfz.appflotal.data.network.client.brand.BrandCrudClient
 import com.rfz.appflotal.data.network.client.brand.BrandListClient
@@ -385,6 +386,12 @@ class NetworkModule {
     @Provides
     fun provideCatalogClient(retrofit: Retrofit): CatalogClient {
         return retrofit.create(CatalogClient::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideAssemblyTireService(retrofit: Retrofit): AssemblyTireService {
+        return retrofit.create(AssemblyTireService::class.java)
     }
 }
 

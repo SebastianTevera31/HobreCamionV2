@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.retreadbrand.dto.RetreadBrandDto
-import com.rfz.appflotal.domain.Catalog
+import com.rfz.appflotal.domain.CatalogItem
 import com.rfz.appflotal.domain.retreadbrand.RetreadBrandCrudUseCase
 import com.rfz.appflotal.domain.retreadbrand.RetreadBrandListUseCase
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ListManagementUiState
@@ -38,10 +38,10 @@ data class RetreadBrandDialogState(
 class MarcaRenovadosViewModel @Inject constructor(
     private val retreadBrandCrudUseCase: RetreadBrandCrudUseCase,
     private val retreadBrandListUseCase: RetreadBrandListUseCase
-) : ViewModel(), ListManagementViewModel<Catalog> {
+) : ViewModel(), ListManagementViewModel<CatalogItem> {
 
-    private var _uiState = MutableStateFlow(ListManagementUiState<Catalog>())
-    override val uiState: StateFlow<ListManagementUiState<Catalog>> =
+    private var _uiState = MutableStateFlow(ListManagementUiState<CatalogItem>())
+    override val uiState: StateFlow<ListManagementUiState<CatalogItem>> =
         _uiState.asStateFlow()
 
     private var _dialogState = MutableStateFlow(RetreadBrandDialogState())
@@ -163,7 +163,7 @@ class MarcaRenovadosViewModel @Inject constructor(
         }
     }
 
-    fun setItemBrandById(item: Catalog) {
+    fun setItemBrandById(item: CatalogItem) {
         onEditing(true)
         _dialogState.update { currentState ->
             currentState.copy(

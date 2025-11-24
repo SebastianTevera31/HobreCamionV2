@@ -1,6 +1,6 @@
 package com.rfz.appflotal.domain
 
-data class Catalog(
+data class CatalogItem(
     val id: Int,
     val description: String
 )

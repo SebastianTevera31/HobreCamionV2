@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.retreaddesing.dto.RetreadDesignCrudDto
-import com.rfz.appflotal.domain.Catalog
+import com.rfz.appflotal.domain.CatalogItem
 import com.rfz.appflotal.domain.retreadbrand.RetreadBrandListUseCase
 import com.rfz.appflotal.domain.retreaddesign.RetreadDesign
 import com.rfz.appflotal.domain.retreaddesign.RetreadDesignCrudUseCase
@@ -37,9 +37,9 @@ enum class RetreadCatalogDesignFields { MARCA_RENOVADO, UTILIZACION }
 data class RetreadDesignDialogState(
     val id: String = "0",
     val description: String = "",
-    val marcaRenovado: Catalog? = null,
+    val marcaRenovado: CatalogItem? = null,
     val profundidadPiso: String = "",
-    val utilizacion: Catalog? = null,
+    val utilizacion: CatalogItem? = null,
 )
 
 @HiltViewModel
@@ -60,9 +60,9 @@ class RetreatedDesignViewModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
     // Estas listas actúan como un caché para los catálogos
-    var brandList: List<Catalog> = emptyList()
+    var brandList: List<CatalogItem> = emptyList()
         private set
-    var utilizationList: List<Catalog> = emptyList()
+    var utilizationList: List<CatalogItem> = emptyList()
         private set
 
     init {
@@ -203,7 +203,7 @@ class RetreatedDesignViewModel @Inject constructor(
 
     fun onDialogCatalogFieldChanged(
         field: RetreadCatalogDesignFields,
-        value: Catalog
+        value: CatalogItem
     ) {
         _dialogState.update { currentState ->
             when (field) {
@@ -219,9 +219,9 @@ class RetreatedDesignViewModel @Inject constructor(
             it.copy(
                 id = item.idBrand.toString().trim(),
                 description = item.description.trim(),
-                marcaRenovado = Catalog(item.idRetreadBrand, item.retreadBrand),
+                marcaRenovado = CatalogItem(item.idRetreadBrand, item.retreadBrand),
                 profundidadPiso = item.treadDepth.toString().trim(),
-                utilizacion = Catalog(item.idUtilization, item.utilization)
+                utilizacion = CatalogItem(item.idUtilization, item.utilization)
             )
         }
     }

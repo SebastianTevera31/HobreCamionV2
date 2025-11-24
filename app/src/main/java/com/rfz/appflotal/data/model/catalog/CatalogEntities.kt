@@ -1,7 +1,7 @@
 package com.rfz.appflotal.data.model.catalog
 
 import com.google.gson.annotations.SerializedName
-import com.rfz.appflotal.domain.Catalog
+import com.rfz.appflotal.domain.CatalogItem
 
 data class GetCountriesResponse(
     @SerializedName("id_country") val idCountry: Int,
@@ -19,8 +19,8 @@ data class GetTireInspectionReportResponse(
     @SerializedName("id_tireInspectionReport") val idTireInspectionReport: Int,
     @SerializedName("fld_description") val description: String,
 ) {
-    fun toCatalog(): Catalog {
-        return Catalog(
+    fun toCatalog(): CatalogItem {
+        return CatalogItem(
             id = idTireInspectionReport,
             description = description
         )

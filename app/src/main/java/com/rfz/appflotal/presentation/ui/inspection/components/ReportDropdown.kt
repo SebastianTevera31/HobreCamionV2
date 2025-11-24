@@ -23,12 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.rfz.appflotal.domain.Catalog
+import com.rfz.appflotal.domain.CatalogItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportDropdown(
-    reports: List<Catalog>,
+    reports: List<CatalogItem>,
     selectedId: String?,
     errorText: Int?,
     onSelected: (String?) -> Unit,
