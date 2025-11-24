@@ -36,4 +36,7 @@ interface SensorDataDao {
 
     @Query("DELETE FROM sensor_data WHERE monitor_id =:monitorId")
     suspend fun deleteMonitorData(monitorId: Int)
+
+    @Query("UPDATE sensor_data SET temperature =:temperature, pressure =:pressure WHERE monitor_id =:monitorId AND tire =:tire")
+    suspend fun updateSensorRecord(monitorId: Int, tire: String, temperature: Int, pressure: Int)
 }

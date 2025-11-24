@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.dimensionResource
@@ -60,23 +60,27 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 
 @Composable
 fun DiagramaMonitorScreen(
+    isInspectionActive: Boolean,
     tireUiState: TireUiState,
     image: Bitmap?,
     imageDimens: Pair<Int, Int>,
     updateSelectedTire: (String) -> Unit,
     getSensorData: (String) -> Unit,
+    onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     tires: List<Tire>?,
     modifier: Modifier = Modifier
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
+    val panelDimension = if (!isInspectionActive) 320.dp else 420.dp
 
     // Actualizar rueda
     tireSelected = tireUiState.currentTire
@@ -109,6 +113,8 @@ fun DiagramaMonitorScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 ) {
                     PanelSensor(
+                        isInspectionActive = isInspectionActive,
+                        isAssembled = tireUiState.isAssembled,
                         wheel = tireUiState.currentTire,
                         temperature = tireUiState.temperature.first,
                         pressure = tireUiState.pressure.first,
@@ -118,8 +124,15 @@ fun DiagramaMonitorScreen(
                         batteryStatus = tireUiState.batteryStatus,
                         flatTireStatus = tireUiState.flatTireStatus,
                         tireRemovingStatus = tireUiState.tireRemovingStatus,
+                        onInspectClick = {
+                            onInspectClick(
+                                tireUiState.currentTire,
+                                tireUiState.temperature.first,
+                                tireUiState.pressure.first
+                            )
+                        },
                         modifier = Modifier
-                            .height(320.dp)
+                            .height(panelDimension)
                             .padding(bottom = dimensionResource(R.dimen.small_dimen))
                             .weight(1f)
                     )
@@ -128,7 +141,7 @@ fun DiagramaMonitorScreen(
                         tireSelected = tireSelected,
                         updateSelectedTire = { updateSelectedTire(it) },
                         modifier = Modifier
-                            .height(320.dp)
+                            .height(panelDimension)
                             .padding(bottom = dimensionResource(R.dimen.small_dimen))
                             .weight(1f)
                     ) { sensorId ->
@@ -293,6 +306,8 @@ fun CeldaAlerta(wheel: String, alertMessage: String, modifier: Modifier = Modifi
 
 @Composable
 fun PanelSensor(
+    isInspectionActive: Boolean,
+    isAssembled: Boolean,
     wheel: String,
     temperature: Float,
     pressure: Float,
@@ -302,6 +317,7 @@ fun PanelSensor(
     flatTireStatus: SensorAlerts,
     tireRemovingStatus: SensorAlerts,
     batteryStatus: SensorAlerts,
+    onInspectClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val activeAlerts =
@@ -374,25 +390,43 @@ fun PanelSensor(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     Column(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(0.8f)
                             .verticalScroll(rememberScrollState())
                     ) {
                         CeldaDatosSensor(
                             title = stringResource(R.string.temperatura),
                             img = R.drawable.temperature__1_,
-                            value = "${temperature.toInt()} ℃"
+                            value = "${temperature.toInt()} ℃",
+                            modifier = Modifier.weight(1f)
                         )
+
                         CeldaDatosSensor(
                             title = stringResource(R.string.presion),
                             img = R.drawable.tire_pressure,
-                            value = "${pressure.toInt()} PSI"
+                            value = "${pressure.toInt()} PSI",
+                            modifier = Modifier.weight(1f)
                         )
-//                    CeldaDatosSensor(title = "Profundidad", value = "12mm")
+                    }
+
+                    if (isInspectionActive && isAssembled) {
+                        Button(
+                            onClick = onInspectClick,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(
+                                    elevation = 8.dp,
+                                    shape = RoundedCornerShape(20.dp),
+                                    ambientColor = primaryColor.copy(alpha = 0.1f)
+                                ),
+                            elevation = ButtonDefaults.buttonElevation(12.dp),
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(12.dp) // Borde redondeado
+                        ) {
+                            Text(stringResource(R.string.inspeccionar))
+                        }
                     }
                 } else {
                     Text(
@@ -526,18 +560,21 @@ fun BatteryAlertIcon(batteryStatus: SensorAlerts, modifier: Modifier = Modifier)
 fun PanelSensorViewPreview() {
     HombreCamionTheme {
         PanelSensor(
+            isInspectionActive = true,
             wheel = "P1",
             temperature = 40.0f,
             pressure = 3f,
             timestamp = "",
+            isAssembled = true,
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
             pressureStatus = SensorAlerts.LOW_PRESSURE,
             batteryStatus = SensorAlerts.NO_DATA,
             flatTireStatus = SensorAlerts.NO_DATA,
             tireRemovingStatus = SensorAlerts.REMOVAL,
+            onInspectClick = {},
             modifier = Modifier
                 .safeDrawingPadding()
-                .height(320.dp)
+                .height(420.dp)
                 .padding(bottom = dimensionResource(R.dimen.small_dimen))
         )
     }

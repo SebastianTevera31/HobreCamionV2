@@ -107,6 +107,8 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
 
     implementation("androidx.compose.animation:animation:1.9.1")
+    implementation("androidx.compose.runtime:runtime-saveable:1.9.4")
+    implementation("androidx.compose.foundation:foundation:1.9.4")
 
     kapt("androidx.room:room-compiler:2.7.2")
 

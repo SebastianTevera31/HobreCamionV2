@@ -36,7 +36,6 @@ import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
-import com.rfz.appflotal.presentation.ui.home.screen.RegisterMonitorDialog
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.BluetoothSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
@@ -53,6 +52,7 @@ fun MonitorScreen(
     onDialogCancel: (mac: Int) -> Unit,
     registerMonitorViewModel: RegisterMonitorViewModel,
     navigateUp: () -> Unit,
+    onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
 ) {
@@ -123,6 +123,7 @@ fun MonitorScreen(
                         monitorViewModel.getBitmapImage()
                         if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                             DiagramaMonitorScreen(
+                                isInspectionActive = paymentPlan == PaymentPlanType.Complete,
                                 tireUiState = tireUiState,
                                 image = monitorUiState.imageBitmap,
                                 updateSelectedTire = { selectedTire ->
@@ -133,6 +134,7 @@ fun MonitorScreen(
                                 },
                                 tires = monitorUiState.listOfTires,
                                 imageDimens = monitorUiState.imageDimen,
+                                onInspectClick = { tire, temp, press -> onInspectClick(tire, temp, press) },
                                 modifier = Modifier.padding(8.dp),
                             )
                         } else {

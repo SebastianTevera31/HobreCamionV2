@@ -33,7 +33,8 @@ class UpdateSensorDataUseCase @Inject constructor() {
 
         val temperature = getTemperature(dataFrame)
 
-        val temperatureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
+        val temperatureStatus =
+            decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
 
         val flatTireStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.FLAT_TIRE)
 
@@ -55,12 +56,15 @@ class UpdateSensorDataUseCase @Inject constructor() {
         val newList = currentTires.map { tireData ->
             if (tireData.sensorPosition == realTire) tireData.copy(
                 inAlert = inAlert,
-                isActive = true
+                isActive = true,
             ) else tireData
         }
 
+        val isAssembled = newList.find { it.sensorPosition == realTire }?.isAssembled == true
+
         val newTireState = TireUiState(
             currentTire = realTire,
+            isAssembled = isAssembled,
             pressure = Pair(pressure, pressureStatus),
             temperature = Pair(temperature, temperatureStatus),
             timestamp = time,

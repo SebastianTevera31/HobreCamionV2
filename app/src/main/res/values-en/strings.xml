@@ -52,7 +52,7 @@
     <string name="title_verificar">Verify</string>
     <string name="title_subtitle_verificar">Enter the verification code we just sent to your email address</string>
     <string name="title_activity_verify_code">VerifyCodeActivity</string>
-    <string name="title_activity_veriy_code_device">VeriyCodeDeviceActivity</string>
+    <string name="title_activity_veriy_code_device">VerifyCodeDeviceActivity</string>
 
     <string name="operator">Operator</string>
     <string name="logout">Logout</string>
@@ -209,6 +209,23 @@
     <string name="numero_de_llanta">Tire Number</string>
     <string name="dot">DOT</string>
     <string name="sin_llantas">No active tires</string>
+    <string name="inspeccionar">Inspect</string>
+    <string name="inspeccion_exitosa_mensaje">Inspection saved successfully</string>
+    <string name="error_registrar_inspeccion">An error occurred while registering the inspection</string>
+    <string name="inspeccion">Inspection</string>
+    <string name="corregir_campos_marcados">Correct the highlighted fields.</string>
+    <string name="terminar_inspeccion">FINISH INSPECTION</string>
+    <string name="sin_informacion">No information available.</string>
+    <string name="tipo_de_reporte">Report Type</string>
+    <string name="lecturas">Readings</string>
+    <string name="temperatura_c">Temperature (°C)</string>
+    <string name="odometro">Odometer</string>
+    <string name="presion_medida">Measured Pressure</string>
+    <string name="presion_ajustada">Adjusted Pressure</string>
+    <string name="profundidad_de_piso_mm">Tread Depth (mm)</string>
+    <string name="requerido">Required</string>
+    <string name="numero_invalido">Invalid number</string>
+    <string name="una_medidad_profundidad_mayor_0">You must fill in at least the fields at the lateral ends.</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

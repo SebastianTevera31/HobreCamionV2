@@ -49,9 +49,13 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             if (tire.sensorPosition == tireSelected) tire.copy(inAlert = inAlert) else tire
         }
 
+        val isAssembled =
+            currentTires.find { it.sensorPosition == tireSelected }?.isAssembled == true
+
         val newTireUiState = TireUiState(
             currentTire = data.tire,
             pressure = Pair(data.pressure.toFloat(), pressureStatus),
+            isAssembled = isAssembled,
             temperature = Pair(data.temperature.toFloat(), temperatureStatus),
             timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             batteryStatus = batteryStatus,

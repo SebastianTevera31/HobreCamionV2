@@ -2,6 +2,7 @@ package com.rfz.appflotal.data.network.service.catalog
 
 import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
+import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
 import com.rfz.appflotal.data.network.client.catalog.CatalogClient
 import com.rfz.appflotal.data.network.requestHelper
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -22,6 +23,13 @@ class CatalogService @Inject constructor(
     suspend fun getSectors(): ApiResult<List<GetSectorsResponse>?> {
         return requestHelper("GetSectors") {
             catalogClient.getSectors()
+        }
+    }
+
+    suspend fun getTireInspectionReport(): ApiResult<List<GetTireInspectionReportResponse>?> {
+        return requestHelper("GetTireInspectionReportType") {
+            val token = getTasksUseCase().first()[0].fld_token
+            catalogClient.getTireInspectionReport("bearer $token")
         }
     }
 }

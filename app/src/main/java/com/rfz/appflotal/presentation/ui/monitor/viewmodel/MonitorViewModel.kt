@@ -151,6 +151,7 @@ class MonitorViewModel @Inject constructor(
                         val c = tireByPos[info.position]
                         Tire(
                             sensorPosition = c?.sensorPosition ?: info.position,
+                            isAssembled = c?.isAssembled == true,
                             inAlert = getIsTireInAlertByApi(
                                 highTemperatureStatus = c?.highTemperature,
                                 highPressureStatus = c?.highPressure,
@@ -260,14 +261,14 @@ class MonitorViewModel @Inject constructor(
                     updateTireState(
                         currentTire = tireUiState.currentTire,
                         tires = tires,
-                    ) { tire ->
+                    ) {
                         _tireUiState.update { currentUiState ->
                             currentUiState.copy(
                                 currentTire = "",
                                 batteryStatus = SensorAlerts.NO_DATA,
                                 pressure = Pair(0f, SensorAlerts.NO_DATA),
                                 temperature = Pair(0f, SensorAlerts.NO_DATA),
-                                timestamp = ""
+                                timestamp = "",
                             )
                         }
 

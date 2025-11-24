@@ -21,6 +21,7 @@ object NavScreens {
     const val INFORMACION_USUARIO = "informacionusuario"
     const val PERMISOS = "permisos"
     const val MARCA_RENOVADA = "marca_renovada"
-
     const val TERMINOS = "terminos"
+
+    const val INSPECCION = "inspeccion"
 }

@@ -13,5 +13,5 @@ import retrofit2.http.POST
 interface InspectionTireCrudClient {
 
     @POST("api/InspectionTire")
-    suspend fun doInspectionTire(@Body requestBody: InspectionTireDto, @Header("Authorization") token: String): Response<List<MessageResponse>>
+    suspend fun doInspectionTire(@Header("Authorization") token: String, @Body requestBody: InspectionTireDto, ): Response<List<MessageResponse>>
 }

@@ -28,7 +28,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -71,13 +70,15 @@ import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
 import com.rfz.appflotal.presentation.ui.inicio.viewmodel.InicioScreenViewModel
+import com.rfz.appflotal.presentation.ui.inspection.screens.InspectionRoute
+import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionViewModel
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.loading.screen.LoadingScreen
 import com.rfz.appflotal.presentation.ui.login.screen.LoginScreen
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
+import com.rfz.appflotal.presentation.ui.login.viewmodel.NavigationEvent
 import com.rfz.appflotal.presentation.ui.marcarenovados.screens.MarcaRenovadosScreen
 import com.rfz.appflotal.presentation.ui.marcarenovados.viewmodel.MarcaRenovadosViewModel
-import com.rfz.appflotal.presentation.ui.login.viewmodel.NavigationEvent
 import com.rfz.appflotal.presentation.ui.medidasllantasscreen.MedidasLlantasScreen
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
@@ -99,10 +100,6 @@ import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesig
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -120,7 +117,7 @@ class InicioActivity : ComponentActivity() {
     private val registerMonitorViewModel: RegisterMonitorViewModel by viewModels()
     private val updateUserViewModel: UpdateUserViewModel by viewModels()
     private val retreatedDesignViewModel: RetreatedDesignViewModel by viewModels()
-
+    private val inspectionViewModel: InspectionViewModel by viewModels()
     private val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel by viewModels()
     private val marcaRenovadosScreen: MarcaRenovadosViewModel by viewModels()
 
@@ -209,7 +206,6 @@ class InicioActivity : ComponentActivity() {
         setContent {
             var allGranted by remember { mutableStateOf(false) }
             val navController = rememberNavController()
-            val ctx = LocalContext.current
 
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -364,6 +360,9 @@ class InicioActivity : ComponentActivity() {
                                     navController = navController,
                                     homeViewModel = homeViewModel,
                                     registerMonitorViewModel = registerMonitorViewModel,
+                                    onInspectClick = { tire, temp, pressure ->
+                                        navController.navigate("${NavScreens.INSPECCION}/$tire?temp=$temp&pressure=$pressure")
+                                    },
                                     updateUserData = { selectedLanguage ->
                                         updateUserViewModel.fetchUserData(
                                             selectedLanguage
@@ -404,7 +403,10 @@ class InicioActivity : ComponentActivity() {
                                             navController.navigateUp()
                                         }
                                     },
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxSize(),
+                                    onInspectClick = { tire, temp, pressure ->
+                                        navController.navigate("${NavScreens.INSPECCION}/$tire?temp=$temp&pressure=$pressure")
+                                    }
                                 )
                             }
 
@@ -539,7 +541,7 @@ class InicioActivity : ComponentActivity() {
                                     navController,
                                     languageSelected = uiState.value.selectedLanguage,
                                     signUpViewModel = signUpViewModel
-                                ) { paymentPlanType ->
+                                ) {
                                     if (!arePermissionsGranted(
                                             this@InicioActivity,
                                             getRequiredPermissions()
@@ -590,13 +592,42 @@ class InicioActivity : ComponentActivity() {
                                         navController.popBackStack()
                                     }
                                 ) {
-                                    loginViewModel.acceptTermsConditions() {
+                                    loginViewModel.acceptTermsConditions {
                                         !arePermissionsGranted(
                                             this@InicioActivity,
                                             getRequiredPermissions()
                                         )
                                     }
                                 }
+                            }
+
+                            composable(
+                                route = "${NavScreens.INSPECCION}/{tire}?temp={temp}&pressure={pressure}",
+                                arguments = listOf(
+                                    navArgument("tire") { type = NavType.StringType },
+                                    navArgument("temp") {
+                                        type = NavType.FloatType; defaultValue = 0
+                                    },
+                                    navArgument("pressure") {
+                                        type = NavType.FloatType; defaultValue = 0
+                                    }
+                                )) { backStackEntry ->
+
+                                val tire = backStackEntry.arguments?.getString("tire") ?: ""
+                                val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
+                                val pressure = backStackEntry.arguments?.getFloat("pressure") ?: 0.0
+
+                                InspectionRoute(
+                                    tire = tire,
+                                    temperature = temp.toFloat(),
+                                    pressure = pressure.toFloat(),
+                                    onBack = { navController.popBackStack() },
+                                    onFinish = { tire ->
+                                        navController.popBackStack()
+                                        monitorViewModel.getSensorDataByWheel(tire)
+                                    },
+                                    viewModel = inspectionViewModel
+                                )
                             }
                         }
                     }
