@@ -448,7 +448,6 @@ fun OriginalScreen(
                         }
                     } else {
                         Column {
-
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                 Text(
                                     "Modelo",

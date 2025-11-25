@@ -63,7 +63,6 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
     private val productListUseCase: ProductListUseCase,
     private val getTasksUseCase: GetTasksUseCase
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(NuevoRegistroLlantasUiState())
     val uiState: StateFlow<NuevoRegistroLlantasUiState> = _uiState.asStateFlow()
 
@@ -164,9 +163,8 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
     private fun loadTires() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            val bearerToken = "Bearer ${token ?: ""}"
             try {
-                val result = tireListUsecase(bearerToken)
+                val result = tireListUsecase()
                 if (result.isSuccess) {
                     val tires = result.getOrNull() ?: emptyList()
                     _uiState.update { it.copy(tires = tires, displayedTires = tires) }

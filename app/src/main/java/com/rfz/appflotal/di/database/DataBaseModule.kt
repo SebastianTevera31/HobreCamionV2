@@ -6,6 +6,7 @@ import androidx.room.Room
 import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.data.dao.AppHCDao
 import com.rfz.appflotal.data.dao.AssemblyTireDao
+import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
 import com.rfz.appflotal.data.dao.SensorDataDao
@@ -46,6 +47,10 @@ class DataBaseModule {
         return hombreCamionDatabase.assemblyTireDao()
     }
 
+    @Provides
+    fun provideAxleDao(hombreCamionDatabase: AppHombreCamionDatabase): AxleDao {
+        return hombreCamionDatabase.axleDao()
+    }
 
     @Keep
     @Provides

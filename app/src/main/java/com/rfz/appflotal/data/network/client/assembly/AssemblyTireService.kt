@@ -9,7 +9,7 @@ import retrofit2.http.POST
 
 interface AssemblyTireService {
     @POST("api/AssemblyTire/CrudAssemblyTire")
-    suspend fun registerAssemblyTire(
+    suspend fun createAssemblyTire(
         @Header("Authorization") token: String,
         @Body assemblyTire: AssemblyTireDto
     ): Response<Unit>

@@ -65,6 +65,7 @@ import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.backgroundLight
+import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
 import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
@@ -120,6 +121,8 @@ class InicioActivity : ComponentActivity() {
     private val inspectionViewModel: InspectionViewModel by viewModels()
     private val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel by viewModels()
     private val marcaRenovadosScreen: MarcaRenovadosViewModel by viewModels()
+
+    private val assemblyTireViewModel: AssemblyTireViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
