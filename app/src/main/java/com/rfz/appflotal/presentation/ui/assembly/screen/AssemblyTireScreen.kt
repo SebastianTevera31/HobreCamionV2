@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
@@ -65,23 +66,26 @@ fun AssemblyTireView(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .safeContentPadding()
         ) {
             if (uiState.tireList != null && uiState.axleList != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = "Odometro")
                     OutlinedTextField(
                         value = odometer.toString(),
                         onValueChange = { odometer = it.toInt() },
-                        label = { Text("Odometro") },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.NumberPassword,
                         ),
                         isError = false,
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF6A5DD9),
                             unfocusedBorderColor = Color(0xFFAAAAAA),

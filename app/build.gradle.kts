@@ -109,6 +109,7 @@ dependencies {
     implementation("androidx.compose.animation:animation:1.9.1")
     implementation("androidx.compose.runtime:runtime-saveable:1.9.4")
     implementation("androidx.compose.foundation:foundation:1.9.4")
+    implementation("androidx.hilt:hilt-common:1.3.0")
 
     kapt("androidx.room:room-compiler:2.7.2")
 
