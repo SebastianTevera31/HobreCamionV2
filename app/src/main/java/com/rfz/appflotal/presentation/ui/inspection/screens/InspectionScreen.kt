@@ -27,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -55,12 +54,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.AwaitDialog
-import com.rfz.appflotal.presentation.ui.inspection.components.NumberField
+import com.rfz.appflotal.presentation.ui.components.NumberField
+import com.rfz.appflotal.presentation.ui.components.SectionHeader
 import com.rfz.appflotal.presentation.ui.inspection.components.ReportDropdown
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUi
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUiState
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionViewModel
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.rememberInspectionFormState
+import com.rfz.appflotal.presentation.ui.utils.showMessage
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -392,26 +393,6 @@ fun InspectionScreen(
     }
 }
 
-// ========= Helpers =========
-@Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-        modifier = Modifier.padding(vertical = 8.dp)
-    )
-}
-
-private suspend fun SnackbarHostState.showMessage(
-    message: String,
-    withDismiss: Boolean = true
-) {
-    showSnackbar(
-        message = message,
-        withDismissAction = withDismiss,
-        duration = SnackbarDuration.Short
-    )
-}
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 800)
 @Composable

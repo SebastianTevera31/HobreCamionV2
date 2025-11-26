@@ -9,9 +9,9 @@ import javax.inject.Inject
 
 
 class TireListService @Inject constructor(private val tireListClient: TireListClient) {
-    suspend fun doTireList(tok:String): Response<List<TireListResponse>> {
+    suspend fun doTireList(tok: String): Response<List<TireListResponse>> {
         return withContext(Dispatchers.IO) {
-            tireListClient.tireList(tok)
+            tireListClient.tireList("bearer $tok")
         }
     }
 }

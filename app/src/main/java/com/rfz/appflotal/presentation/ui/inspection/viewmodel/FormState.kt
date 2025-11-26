@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.ui.utils.toIntOrError
 
 @Stable
 class InspectionFormState(

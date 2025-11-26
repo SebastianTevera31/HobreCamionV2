@@ -55,6 +55,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+
     }
     buildFeatures {
         compose = true
@@ -74,6 +75,10 @@ android {
 
 
 dependencies {
+    implementation("androidx.hilt:hilt-work:1.3.0")
+    implementation("androidx.hilt:hilt-compiler:1.3.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
     implementation(platform("androidx.compose:compose-bom:2024.02.02"))
 
     implementation("androidx.core:core-ktx:1.16.0")

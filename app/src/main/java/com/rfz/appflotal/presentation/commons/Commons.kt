@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -74,17 +76,33 @@ fun TermsAndConditionsText(text: String, context: Context, modifier: Modifier = 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SimpleTopBar(modifier: Modifier = Modifier, title: String, onBack: () -> Unit) {
+fun SimpleTopBar(
+    title: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    subTitle: String = "",
+) {
     TopAppBar(
         title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp
+            Column {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleLarge
+                        .copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
                 )
-            )
+                if (subTitle.isNotEmpty()) {
+                    Text(
+                        subTitle,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            }
         },
         navigationIcon = {
             IconButton(
@@ -121,9 +139,7 @@ fun CircularLoading(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize())
     {
         CircularProgressIndicator(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(200.dp)
+            modifier = Modifier.align(Alignment.Center)
         )
     }
 }

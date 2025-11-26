@@ -53,6 +53,7 @@ fun MonitorScreen(
     registerMonitorViewModel: RegisterMonitorViewModel,
     navigateUp: () -> Unit,
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
+    onAssemblyClick: (tire: String) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
 ) {
@@ -134,7 +135,16 @@ fun MonitorScreen(
                                 },
                                 tires = monitorUiState.listOfTires,
                                 imageDimens = monitorUiState.imageDimen,
-                                onInspectClick = { tire, temp, press -> onInspectClick(tire, temp, press) },
+                                onInspectClick = { tire, temp, press ->
+                                    onInspectClick(
+                                        tire,
+                                        temp,
+                                        press
+                                    )
+                                },
+                                onAssemblyClick = { tire ->
+                                    onAssemblyClick(tire)
+                                },
                                 modifier = Modifier.padding(8.dp),
                             )
                         } else {
@@ -152,8 +162,10 @@ fun MonitorScreen(
                         monitorUiState.signalIntensity.first == BluetoothSignalQuality.Desconocida
                                 && monitorUiState.monitorId != 0
                     if (isSignalUnknown) {
-                        val text =
-                            stringResource(monitorUiState.signalIntensity.first.alertMessage!!)
+                        val text = stringResource(
+                            monitorUiState.signalIntensity.first.alertMessage!!
+                        )
+
                         BluetoothSnackBanner(
                             visible = true,
                             message = text,

@@ -44,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.dimensionResource
@@ -60,7 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
+import com.rfz.appflotal.presentation.ui.monitor.component.MonitorMenuButton
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
@@ -74,6 +73,7 @@ fun DiagramaMonitorScreen(
     updateSelectedTire: (String) -> Unit,
     getSensorData: (String) -> Unit,
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
+    onAssemblyClick: (tire: String) -> Unit,
     tires: List<Tire>?,
     modifier: Modifier = Modifier
 ) {
@@ -131,6 +131,7 @@ fun DiagramaMonitorScreen(
                                 tireUiState.pressure.first
                             )
                         },
+                        onAssemblyClick = { onAssemblyClick(tireUiState.currentTire) },
                         modifier = Modifier
                             .height(panelDimension)
                             .padding(bottom = dimensionResource(R.dimen.small_dimen))
@@ -318,6 +319,7 @@ fun PanelSensor(
     tireRemovingStatus: SensorAlerts,
     batteryStatus: SensorAlerts,
     onInspectClick: () -> Unit,
+    onAssemblyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val activeAlerts =
@@ -412,21 +414,17 @@ fun PanelSensor(
                     }
 
                     if (isInspectionActive && isAssembled) {
-                        Button(
-                            onClick = onInspectClick,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(
-                                    elevation = 8.dp,
-                                    shape = RoundedCornerShape(20.dp),
-                                    ambientColor = primaryColor.copy(alpha = 0.1f)
-                                ),
-                            elevation = ButtonDefaults.buttonElevation(12.dp),
-                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                            shape = RoundedCornerShape(12.dp) // Borde redondeado
-                        ) {
-                            Text(stringResource(R.string.inspeccionar))
-                        }
+                        MonitorMenuButton(
+                            text = stringResource(R.string.inspeccionar),
+                            onClick = onInspectClick
+                        )
+                    }
+
+                    if (!isAssembled) {
+                        MonitorMenuButton(
+                            text = "Montar",
+                            onClick = onAssemblyClick
+                        )
                     }
                 } else {
                     Text(
@@ -565,13 +563,14 @@ fun PanelSensorViewPreview() {
             temperature = 40.0f,
             pressure = 3f,
             timestamp = "",
-            isAssembled = true,
+            isAssembled = false,
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
             pressureStatus = SensorAlerts.LOW_PRESSURE,
             batteryStatus = SensorAlerts.NO_DATA,
             flatTireStatus = SensorAlerts.NO_DATA,
             tireRemovingStatus = SensorAlerts.REMOVAL,
             onInspectClick = {},
+            onAssemblyClick = {},
             modifier = Modifier
                 .safeDrawingPadding()
                 .height(420.dp)

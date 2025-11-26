@@ -65,6 +65,7 @@ import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.backgroundLight
+import com.rfz.appflotal.presentation.ui.assembly.screen.AssemblyTireScreen
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
 import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
@@ -366,6 +367,9 @@ class InicioActivity : ComponentActivity() {
                                     onInspectClick = { tire, temp, pressure ->
                                         navController.navigate("${NavScreens.INSPECCION}/$tire?temp=$temp&pressure=$pressure")
                                     },
+                                    onAssemblyClick = { tire ->
+                                        navController.navigate("${NavScreens.MONTAJE}/$tire")
+                                    },
                                     updateUserData = { selectedLanguage ->
                                         updateUserViewModel.fetchUserData(
                                             selectedLanguage
@@ -409,6 +413,9 @@ class InicioActivity : ComponentActivity() {
                                     modifier = Modifier.fillMaxSize(),
                                     onInspectClick = { tire, temp, pressure ->
                                         navController.navigate("${NavScreens.INSPECCION}/$tire?temp=$temp&pressure=$pressure")
+                                    },
+                                    onAssemblyClick = { tire ->
+                                        navController.navigate("${NavScreens.MONTAJE}/$tire")
                                     }
                                 )
                             }
@@ -630,6 +637,22 @@ class InicioActivity : ComponentActivity() {
                                         monitorViewModel.getSensorDataByWheel(tire)
                                     },
                                     viewModel = inspectionViewModel
+                                )
+                            }
+
+                            composable(
+                                route = "${NavScreens.MONTAJE}/{tire}",
+                                arguments = listOf(
+                                    navArgument("tire") { type = NavType.StringType }
+                                )
+                            ) { backStackEntry ->
+                                val positionTire = backStackEntry.arguments?.getString("tire") ?: ""
+                                AssemblyTireScreen(
+                                    positionTire = positionTire,
+                                    viewModel = assemblyTireViewModel,
+                                    onBack = {
+                                        navController.popBackStack()
+                                    }
                                 )
                             }
                         }

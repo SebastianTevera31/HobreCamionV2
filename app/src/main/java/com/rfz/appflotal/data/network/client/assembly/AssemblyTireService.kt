@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.network.client.assembly
 
 import com.rfz.appflotal.data.model.assembly.AssemblyTireDto
+import com.rfz.appflotal.data.model.message.response.MessageResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Header
@@ -12,5 +13,5 @@ interface AssemblyTireService {
     suspend fun createAssemblyTire(
         @Header("Authorization") token: String,
         @Body assemblyTire: AssemblyTireDto
-    ): Response<Unit>
+    ): Response<List<MessageResponse>>
 }

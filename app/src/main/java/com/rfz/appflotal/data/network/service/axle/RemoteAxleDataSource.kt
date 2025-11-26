@@ -9,7 +9,7 @@ import javax.inject.Inject
 class RemoteAxleDataSource @Inject constructor(private val axleService: AxleService) {
     suspend fun fetchAxleList(token: String): List<GetAxleResponseDto> {
         return withContext(Dispatchers.IO) {
-            axleService.getAxleList(token)
+            axleService.getAxleList("Bearer $token")
         }
     }
 }

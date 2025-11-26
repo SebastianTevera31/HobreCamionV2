@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.inspection.viewmodel
 
-import com.rfz.appflotal.R
 import com.rfz.appflotal.domain.CatalogItem
 
 sealed interface InspectionUiState {
@@ -40,13 +39,6 @@ fun String.filterNumericDot(): String {
         }
     }
     return filtered
-}
-
-fun String.toIntOrError(): Pair<Int?, Int?> {
-    // Devuelve el Int (si se puede) y un posible mensaje de error
-    if (isBlank()) return null to R.string.requerido
-    val value = toDoubleOrNull() ?: return null to R.string.numero_invalido
-    return value.toInt() to null
 }
 
 fun treadDeptError(td1: Int?, td4: Int?): Boolean? {

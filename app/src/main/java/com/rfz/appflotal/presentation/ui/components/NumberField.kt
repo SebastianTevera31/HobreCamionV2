@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.inspection.components
+package com.rfz.appflotal.presentation.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

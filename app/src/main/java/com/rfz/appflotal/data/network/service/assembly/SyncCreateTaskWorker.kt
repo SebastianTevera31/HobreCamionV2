@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.network.service.assembly
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -16,17 +17,44 @@ class SyncCreateAssemblyTireWorker @AssistedInject constructor(
     private val local: LocalAssemblyDataSource,
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
+        Log.d("SyncWorker", "Worker Iniciado.")
+
         val position = inputData.getString("assemblyTirePosition")
-            ?: return Result.failure()
-        val token = inputData.getString("token") ?: return Result.failure()
+            ?: run {
+                Log.e("SyncWorker", "FAILURE: Posición del neumático no encontrada en InputData.")
+                return Result.failure()
+            }
+        val token = inputData.getString("token")
+            ?: run {
+                Log.e("SyncWorker", "FAILURE: Token no encontrado en InputData.")
+                return Result.failure()
+            }
 
-        val record = local.getAssemblyTire(position)
+        return try {
+            val record = local.getAssemblyTire(position)
+            Log.d("SyncWorker", "Registro local obtenido para posición: $position")
 
-        val result = remote.pushAssemblyTire(
-            token = token,
-            assemblyTire = record.toDto()
-        )
+            val result = remote.pushAssemblyTire(
+                token = token,
+                assemblyTire = record.toDto().copy(idMonitor = record.idMonitor)
+            )
 
-        return if (result.isSuccessful) Result.success() else Result.failure()
+            if (result.isSuccessful) {
+                Log.i("SyncWorker", "SUCCESS: Datos sincronizados exitosamente al servidor.")
+                if (result.body()?.get(0)?.id == 200) Result.success()
+                else Result.failure()
+            } else {
+                Log.e("SyncWorker", "FAILURE: Error en la respuesta del servidor: ${result.code()}")
+                Result.failure()
+            }
+        } catch (e: Exception) {
+            // Capturar cualquier excepción de red o base de datos que no esté cubierta por 'Result'
+            Log.e(
+                "SyncWorker",
+                "FAILURE (Exception): Error inesperado durante la sincronización.",
+                e
+            )
+            Result.failure() // Puedes usar Result.retry() si el error es recuperable (ej: red)
+        }
     }
 }

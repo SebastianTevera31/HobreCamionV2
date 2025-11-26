@@ -2,14 +2,14 @@ package com.rfz.appflotal.presentation.ui.assembly.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
-import com.rfz.appflotal.data.model.axle.Axle
-import com.rfz.appflotal.data.model.tire.toTire
+import com.rfz.appflotal.data.model.axle.toCatalogItem
+import com.rfz.appflotal.data.model.tire.toCatalogItem
 import com.rfz.appflotal.domain.assembly.AddAssemblyTire
 import com.rfz.appflotal.domain.axle.GetAxleDomain
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,22 +26,45 @@ class AssemblyTireViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AssemblyTireUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun loadDataList() {
+    fun loadDataList(positionTire: String) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                positionTire = positionTire
+            )
+        }
+
         viewModelScope.launch {
-            val listOfTires = async { tireUseCase() }
-            val listOfAxle: Deferred<Result<List<Axle>>> = async { getAxleUseCase() }
-            if (listOfTires.await().isSuccess && listOfAxle.await().isSuccess) {
+            val tiresDeferred = async { tireUseCase() }
+            val axleDeferred = async { getAxleUseCase() }
+            val tiresResult = tiresDeferred.await()
+            val axleResult = axleDeferred.await()
+
+            if (tiresResult.isSuccess && axleResult.isSuccess) {
+                val tiresList = tiresResult.getOrThrow()
+                    .filter { it.destination == "Almacen" }
+                    .map { it.toCatalogItem() }
+
+                val axleList = axleResult.getOrThrow()
+                    .map { it.toCatalogItem() }
+
+                // Actualizamos el estado de la UI una sola vez
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
-                        tireList = listOfTires.await().getOrNull()?.map { it.toTire() },
-                        axleList = listOfAxle.await().getOrNull(),
+                        tireList = tiresList,
+                        axleList = axleList,
                     )
                 }
+            } else {
+
             }
         }
     }
 
-    fun registerAssemblyTire() {
+    fun registerAssemblyTire(
+        odometer: String,
+        idAxle: Int,
+        idTire: Int,
+    ) {
         _uiState.update { currentUiState ->
             currentUiState.copy(
                 operationStatus = OperationStatus.Loading
@@ -52,18 +75,20 @@ class AssemblyTireViewModel @Inject constructor(
             val uiState = _uiState.value
             val result = addAssemblyTire(
                 assemblyTire = AssemblyTire(
-                    idAxle = uiState.axleSelected?.id ?: 0,
-                    idTire = uiState.tireSelected?.id ?: 0,
+                    idAxle = idAxle,
+                    idTire = idTire,
                     positionTire = uiState.positionTire,
-                    odometer = uiState.odometer,
-                    assemblyDate = uiState.assemblyDate,
+                    odometer = odometer.toInt(),
+                    assemblyDate = getCurrentDate(),
                     updatedAt = System.currentTimeMillis()
                 )
             )
             _uiState.update { currentUiState ->
                 currentUiState.copy(
                     operationStatus = result.fold(
-                        onSuccess = { OperationStatus.AssemblyTire("OK") },
+                        onSuccess = {
+                            OperationStatus.Success("OK")
+                        },
                         onFailure = { OperationStatus.Error("Error") }
                     )
                 )
@@ -71,11 +96,12 @@ class AssemblyTireViewModel @Inject constructor(
         }
     }
 
-    private fun validateAssemblyTireData() {
 
-    }
-
-    private fun cleanUiState() {
-
+    fun cleanUiState() {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                operationStatus = null
+            )
+        }
     }
 }

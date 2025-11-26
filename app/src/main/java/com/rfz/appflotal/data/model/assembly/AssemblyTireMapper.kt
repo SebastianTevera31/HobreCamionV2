@@ -16,7 +16,7 @@ fun AssemblyTireEntity.toDto(): AssemblyTireDto {
     return AssemblyTireDto(
         idAxle = idAxle,
         idTire = idTire,
-        idMonitor = 0,
+        idMonitor = idMonitor,
         positionTire = positionTire,
         odometer = odometer,
         assemblyDate = assemblyDate

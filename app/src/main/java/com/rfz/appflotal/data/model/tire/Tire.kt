@@ -1,19 +1,12 @@
 package com.rfz.appflotal.data.model.tire
 
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
+import com.rfz.appflotal.domain.CatalogItem
 
-data class Tire(
-    val idTire: Int,
-    val typeAcquisition: String,
-    val brand: String,
-    val size: String
-)
 
-fun TireListResponse.toTire(): Tire {
-    return Tire(
-        idTire = idTire,
-        typeAcquisition = typeAcquisition,
-        brand = brand,
-        size = size
+fun TireListResponse.toCatalogItem(): CatalogItem {
+    return CatalogItem(
+        id = idTire,
+        description = "$brand - size: $size",
     )
 }

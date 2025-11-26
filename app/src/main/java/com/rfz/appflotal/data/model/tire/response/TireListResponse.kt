@@ -18,7 +18,7 @@ data class TireListResponse(
     @SerializedName("fld_vehicleNumber") val vehicleNumber: String,
     @SerializedName("fld_dateEventAssembly") val dateEventAssembly: String,
     @SerializedName("fld_dateEventA") val dateEventA: String,
-    @SerializedName("fld_treadDepthAssembly") val treadDepthAssembly: Int,
+    @SerializedName("fld_treadDepthAssembly") val treadDepthAssembly: Double,
     @SerializedName("fld_odometerAssembly") val odometerAssembly: Int,
     @SerializedName("fld_typeVehicle") val typeVehicle: String
 )

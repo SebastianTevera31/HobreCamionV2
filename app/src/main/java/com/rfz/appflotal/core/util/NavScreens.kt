@@ -24,4 +24,6 @@ object NavScreens {
     const val TERMINOS = "terminos"
 
     const val INSPECCION = "inspeccion"
+
+    const val MONTAJE = "montaje"
 }
