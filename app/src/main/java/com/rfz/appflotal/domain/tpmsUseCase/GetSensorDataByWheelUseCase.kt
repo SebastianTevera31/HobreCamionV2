@@ -22,8 +22,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         tireSelected: String,
         currentTires: List<Tire>
     ): Result? {
-        val data =
-            sensorDataTableRepository.getLastDataByTire(monitorId, tireSelected) ?: return null
+        val data = sensorDataTableRepository.getLastDataByTire(monitorId, tireSelected) ?: return null
 
         val pressureStatus = if (data.lowPressureAlert) SensorAlerts.LOW_PRESSURE
         else if (data.highPressureAlert) SensorAlerts.HIGH_PRESSURE
@@ -35,8 +34,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         val batteryStatus = if (data.lowBatteryAlert) SensorAlerts.LOW_BATTERY
         else SensorAlerts.NO_DATA
 
-        val flatTireStatus =
-            if (data.punctureAlert) SensorAlerts.FAST_LEAKAGE else SensorAlerts.NO_DATA
+        val flatTireStatus = if (data.punctureAlert) SensorAlerts.FAST_LEAKAGE else SensorAlerts.NO_DATA
 
         val inAlert = getIsTireInAlert(
             temperatureStatus = temperatureStatus,
@@ -49,8 +47,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             if (tire.sensorPosition == tireSelected) tire.copy(inAlert = inAlert) else tire
         }
 
-        val isAssembled =
-            currentTires.find { it.sensorPosition == tireSelected }?.isAssembled == true
+        val isAssembled = currentTires.find { it.sensorPosition == tireSelected }?.isAssembled == true
 
         val newTireUiState = TireUiState(
             currentTire = data.tire,

@@ -56,7 +56,7 @@ class MonitorViewModel @Inject constructor(
     private val wifiUseCase: WifiUseCase,
     private val updateSensorDataUseCase: UpdateSensorDataUseCase,
     private val getSensorDataByWheelUseCase: GetSensorDataByWheelUseCase,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
         MutableStateFlow(MonitorUiState())
@@ -144,8 +144,7 @@ class MonitorViewModel @Inject constructor(
 
             responseHelper(baseCoordinates) { coords ->
                 responseHelper(sensorData) { tireInfo ->
-                    val tireByPos =
-                        tireInfo.orEmpty().associateBy { it.sensorPosition.trim().uppercase() }
+                    val tireByPos = tireInfo.orEmpty().associateBy { it.sensorPosition.trim().uppercase() }
 
                     val tires = coords.orEmpty().map { info ->
                         val c = tireByPos[info.position]

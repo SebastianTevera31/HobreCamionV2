@@ -80,6 +80,7 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
+        <!-- Configuración de WorkManager \\ Deshabilitar construccion por defecto -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
