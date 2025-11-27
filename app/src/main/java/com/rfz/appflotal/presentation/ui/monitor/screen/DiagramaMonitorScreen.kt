@@ -422,7 +422,7 @@ fun PanelSensor(
 
                     if (!isAssembled) {
                         MonitorMenuButton(
-                            text = "Montar",
+                            text = stringResource(R.string.montar),
                             onClick = onAssemblyClick
                         )
                     }

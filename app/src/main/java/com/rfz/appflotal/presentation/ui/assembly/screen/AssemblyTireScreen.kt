@@ -8,6 +8,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -159,7 +161,7 @@ fun AssemblyTireView(
         bottomBar = {
             if (uiState.screenLoadStatus == ScreenLoadStatus.Success) {
                 CompleteFormButton(
-                    textButton = "Montar",
+                    textButton = stringResource(R.string.montar),
                     isValid = isFormValid
                 ) {
                     onAssembly(odometer, axleSelected!!.id, tireSelected!!.id)
@@ -209,17 +211,21 @@ fun AssemblyTireView(
                         .verticalScroll(scroll)
                         .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
                 ) {
-                    SectionHeader(text = "Eje", modifier = Modifier.fillMaxWidth())
+
+                    Spacer(modifier = Modifier.padding(top = 16.dp))
+
                     CatalogDropdown(
                         catalog = uiState.axleList,
                         selected = axleSelected?.description,
                         errorText = axleSelected.validate(),
                         onSelected = { axleSelected = it },
-                        label = "Eje",
-                        modifier = Modifier.fillMaxWidth()
+                        label = stringResource(R.string.eje),
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
 
-                    SectionHeader(text = "Llantas", modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.padding(top = 16.dp))
+
                     CatalogDropdown(
                         catalog = uiState.tireList,
                         selected = tireSelected?.description,
@@ -228,8 +234,9 @@ fun AssemblyTireView(
                             updateTire(it?.id)
                             tireSelected = it
                         },
-                        label = "Llantas",
-                        modifier = Modifier.fillMaxWidth()
+                        label = stringResource(R.string.llantas),
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
 
                     AnimatedVisibility(
@@ -249,41 +256,74 @@ fun AssemblyTireView(
                                     .fillMaxSize()
                             ) {
                                 Text(
-                                    text = "Detalles de la Llanta",
+                                    text = stringResource(R.string.detalles_de_llanta),
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     modifier = Modifier.fillMaxWidth()
                                 )
                                 Text(
-                                    "Llanta: ${uiState.currentTire?.id}",
+                                    pluralStringResource(
+                                        R.plurals.llanta_tag,
+                                        1,
+                                        ": ${uiState.currentTire?.id}"
+                                    ),
                                     style = MaterialTheme.typography.labelLarge
                                 )
+
+                                val brandDescription = uiState.currentTire?.brand ?: ""
                                 Text(
-                                    text = "Marca: ${uiState.currentTire?.brand}",
+                                    text = stringResource(
+                                        R.string.marca_description,
+                                        brandDescription
+                                    ),
                                     style = MaterialTheme.typography.labelLarge
                                 )
+
+                                val modelDescription = uiState.currentTire?.model ?: ""
                                 Text(
-                                    text = "Modelo: ${uiState.currentTire?.model}",
+                                    text = stringResource(
+                                        R.string.modelo_description,
+                                        modelDescription
+                                    ),
                                     style = MaterialTheme.typography.labelLarge
                                 )
+
+                                val sizeDescription = uiState.currentTire?.size ?: ""
                                 Text(
-                                    text = "Tamaño: ${uiState.currentTire?.size}",
+                                    text = stringResource(
+                                        R.string.size_description,
+                                        sizeDescription
+                                    ),
                                     style = MaterialTheme.typography.labelLarge
                                 )
+
+                                val threadDescription = uiState.currentTire?.thread ?: ""
                                 Text(
-                                    text = "Profundidad: ${uiState.currentTire?.thread}",
+                                    text = stringResource(
+                                        R.string.profundidad_description,
+                                        threadDescription
+                                    ),
                                     style = MaterialTheme.typography.labelLarge
                                 )
+
+                                val loadingCapDescription =
+                                    uiState.currentTire?.loadingCapacity ?: ""
                                 Text(
-                                    text = "Capacidad: ${uiState.currentTire?.loadingCapacity}",
+                                    text = stringResource(
+                                        R.string.capacidad_description,
+                                        loadingCapDescription
+                                    ),
                                     style = MaterialTheme.typography.labelLarge
                                 )
                             }
                         }
                     }
 
-                    SectionHeader(text = "Odometro", modifier = Modifier.fillMaxWidth())
+                    SectionHeader(
+                        text = stringResource(R.string.odometro),
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Text(
-                        "Registro actual: ${uiState.currentOdometer}",
+                        stringResource(R.string.registro_actual, uiState.currentOdometer),
                         modifier = Modifier.fillMaxWidth()
                     )
                     NumberField(
@@ -333,7 +373,7 @@ fun AssemblyTireViewPreview() {
                 axleList = emptyList(),
                 currentOdometer = "123456",
                 isOdometerValid = OdometerValidation.VALID,
-                screenLoadStatus = ScreenLoadStatus.Error
+                screenLoadStatus = ScreenLoadStatus.Success
             ),
             validateOdometer = {},
             onBack = {},

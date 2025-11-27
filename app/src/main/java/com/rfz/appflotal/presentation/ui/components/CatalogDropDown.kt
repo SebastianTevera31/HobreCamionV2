@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
 import kotlin.collections.forEach
 
@@ -45,11 +46,11 @@ fun CatalogDropdown(
             modifier = modifier
         ) {
             OutlinedTextField(
-                value = selected ?: "Ninguno",
+                value = selected ?: stringResource(R.string.ninguno),
                 onValueChange = {},
                 readOnly = true,
                 isError = selected == null,
-                label = { Text(label) },
+                label = { Text(label, style = MaterialTheme.typography.titleMedium) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                 modifier = Modifier
                     .menuAnchor(MenuAnchorType.PrimaryNotEditable)
@@ -68,7 +69,7 @@ fun CatalogDropdown(
                 onDismissRequest = { expanded = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text("Ninguno") },
+                    text = { Text(stringResource(R.string.ninguno)) },
                     onClick = {
                         onSelected(null)
                         expanded = false
