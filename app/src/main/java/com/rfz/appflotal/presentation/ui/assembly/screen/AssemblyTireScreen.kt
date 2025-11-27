@@ -64,6 +64,7 @@ fun AssemblyTireScreen(
     val snackbar = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.value.operationStatus) {
+        // Agregar mensaje de rueda montada con exito
         if (uiState.value.operationStatus is OperationStatus.Success) {
             viewModel.cleanUiState()
             onBack()

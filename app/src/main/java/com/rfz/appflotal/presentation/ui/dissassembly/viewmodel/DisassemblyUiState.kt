@@ -1,17 +1,12 @@
 package com.rfz.appflotal.presentation.ui.dissassembly.viewmodel
 
-sealed class ScreenLoadStatus {
-    object Loading : ScreenLoadStatus()
-    object Error : ScreenLoadStatus()
-    object Success : ScreenLoadStatus()
+sealed class OperationStatus {
+    object Loading : OperationStatus()
+    object Error : OperationStatus()
+    object Success : OperationStatus()
 }
 
 data class DisassemblyUiState(
-    val screenLoadStatus: ScreenLoadStatus = ScreenLoadStatus.Loading,
-    val disassemblyTire: List<Disassembly> = emptyList(),
-)
-
-data class Disassembly(
-    val id: String,
-    val name: String,
+    val screenLoadStatus: OperationStatus = OperationStatus.Loading,
+    val operationStatus: OperationStatus = OperationStatus.Loading,
 )
