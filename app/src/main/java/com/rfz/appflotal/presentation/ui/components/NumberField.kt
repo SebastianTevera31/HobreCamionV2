@@ -22,9 +22,10 @@ import com.rfz.appflotal.presentation.ui.inspection.viewmodel.filterNumericDot
 fun NumberField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
     errorText: Int?,
     modifier: Modifier = Modifier,
+    label: String = "",
+    placeHolderText: String = "",
     keyboardType: KeyboardType = KeyboardType.NumberPassword,
     imeAction: ImeAction = ImeAction.Next
 ) {
@@ -32,6 +33,7 @@ fun NumberField(
         OutlinedTextField(
             value = value,
             onValueChange = { onValueChange(it.filterNumericDot()) },
+            placeholder = { Text(placeHolderText) },
             label = { Text(label) },
             isError = errorText != null,
             keyboardOptions = KeyboardOptions(

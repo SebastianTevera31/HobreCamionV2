@@ -45,7 +45,7 @@ fun CatalogDropdown(
             modifier = modifier
         ) {
             OutlinedTextField(
-                value = selected ?: "",
+                value = selected ?: "Ninguno",
                 onValueChange = {},
                 readOnly = true,
                 isError = selected == null,

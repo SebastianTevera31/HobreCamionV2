@@ -45,7 +45,7 @@ fun ReportDropdown(
             modifier = modifier
         ) {
             OutlinedTextField(
-                value = selected?.description ?: "",
+                value = selected?.description ?: "Ninguno",
                 onValueChange = {},
                 readOnly = true,
                 isError = selected == null,

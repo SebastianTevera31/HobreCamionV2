@@ -3,6 +3,7 @@ package com.rfz.appflotal.presentation.ui.assembly.viewmodel
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.tire.toTire
@@ -56,6 +57,14 @@ class AssemblyTireViewModel @Inject constructor(
                         currentOdometer = odometer.toString(),
                         tireList = tiresList,
                         axleList = axleList,
+                        isOdometerValid = OdometerValidation.VALID,
+                        screenLoadStatus = ScreenLoadStatus.Success
+                    )
+                }
+            } else {
+                _uiState.update { currentUiState ->
+                    currentUiState.copy(
+                        screenLoadStatus = ScreenLoadStatus.Error
                     )
                 }
             }
@@ -122,11 +131,15 @@ class AssemblyTireViewModel @Inject constructor(
         }
     }
 
-    fun cleanUiState() {
+    fun restartOperationStatus() {
         _uiState.update { currentUiState ->
             currentUiState.copy(
                 operationStatus = null
             )
         }
+    }
+
+    fun cleanUiState() {
+        _uiState.value = AssemblyTireUiState()
     }
 }

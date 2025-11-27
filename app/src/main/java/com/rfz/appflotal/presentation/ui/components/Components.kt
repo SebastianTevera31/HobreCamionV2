@@ -49,11 +49,11 @@ fun AwaitDialog(@StringRes message: Int = R.string.espere_un_momento) {
 }
 
 @Composable
-fun SectionHeader(text: String) {
+fun SectionHeader(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-        modifier = Modifier.padding(top = 20.dp, bottom = 4.dp)
+        modifier = modifier.padding(top = 20.dp, bottom = 4.dp)
     )
 }
 

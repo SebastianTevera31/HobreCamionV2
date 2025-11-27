@@ -11,14 +11,20 @@ enum class OdometerValidation(@param:StringRes val message: Int? = null) {
     EMPTY(R.string.requerido)
 }
 
+sealed class ScreenLoadStatus {
+    object Loading : ScreenLoadStatus()
+    object Error : ScreenLoadStatus()
+    object Success : ScreenLoadStatus()
+}
 
 data class AssemblyTireUiState(
     val positionTire: String = "",
     val currentOdometer: String = "0",
     val currentTire: Tire? = null,
     val isOdometerValid: OdometerValidation = OdometerValidation.EMPTY,
-    val tireList: List<Tire>? = null,
-    val axleList: List<CatalogItem>? = null,
+    val tireList: List<Tire> = emptyList(),
+    val axleList: List<CatalogItem> = emptyList(),
+    val screenLoadStatus: ScreenLoadStatus = ScreenLoadStatus.Loading,
     val operationStatus: OperationStatus? = null,
 )
 
