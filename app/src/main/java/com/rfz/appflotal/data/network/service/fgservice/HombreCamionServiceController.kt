@@ -98,6 +98,7 @@ class HombreCamionServiceController @Inject constructor(
                         active = isActive
                     )
 
+                    // Actualiza el estado de alerta y disponibilidad de las ruedas
                     coordinatesTableUseCase.updateCoordinates(
                         monitorId,
                         tire,

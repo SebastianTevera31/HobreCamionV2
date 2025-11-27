@@ -4,8 +4,8 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.retreadbrand.dto.RetreadBrandDto
-import com.rfz.appflotal.domain.CatalogItem
 import com.rfz.appflotal.domain.retreadbrand.RetreadBrandCrudUseCase
 import com.rfz.appflotal.domain.retreadbrand.RetreadBrandListUseCase
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ListManagementUiState
@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class UploadingBrandItemMessage(@StringRes val message: Int) {
+enum class UploadingBrandItemMessage(@param:StringRes val message: Int) {
     SUCCESS(R.string.marca_de_renovado_guardada),
     GENERAL_ERROR(R.string.error_guardar_marca_renovado),
 }

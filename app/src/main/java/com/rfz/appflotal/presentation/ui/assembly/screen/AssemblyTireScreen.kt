@@ -1,18 +1,17 @@
 package com.rfz.appflotal.presentation.ui.assembly.screen
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,7 +19,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,11 +26,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
-import com.rfz.appflotal.domain.CatalogItem
+import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireUiState
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
+import com.rfz.appflotal.presentation.ui.assembly.viewmodel.OdometerValidation
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.OperationStatus
 import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
@@ -40,7 +39,6 @@ import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.NumberField
 import com.rfz.appflotal.presentation.ui.components.SectionHeader
 import com.rfz.appflotal.presentation.ui.utils.validate
-import kotlinx.coroutines.launch
 
 @Composable
 fun AssemblyTireScreen(
@@ -62,6 +60,8 @@ fun AssemblyTireScreen(
         tire = positionTire,
         modifier = modifier,
         uiState = uiState.value,
+        validateOdometer = { viewModel.validateOdometer(it) },
+        updateTire = { viewModel.updateTireField(it) },
         onBack = {
             viewModel.cleanUiState()
             onBack()
@@ -80,20 +80,21 @@ fun AssemblyTireView(
     title: String,
     tire: String,
     uiState: AssemblyTireUiState,
+    validateOdometer: (String) -> Unit,
+    updateTire: (Int?) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onAssembly: (odometer: String, idAxle: Int, idTire: Int) -> Unit
 ) {
-    var odometer by remember { mutableStateOf("") }
+    var odometer by remember { mutableStateOf(uiState.currentOdometer) }
     var axleSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 
-    val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
     val scroll = rememberScrollState()
 
     val areInputsValid = {
-        axleSelected != null && tireSelected != null && odometer.toIntOrNull() != null
+        axleSelected != null && tireSelected != null && uiState.isOdometerValid == OdometerValidation.VALID
     }
 
     val isFormValid by remember(odometer, axleSelected, tireSelected) {
@@ -104,7 +105,7 @@ fun AssemblyTireView(
 
     when (uiState.operationStatus) {
         is OperationStatus.Success -> {
-            scope.launch {
+            LaunchedEffect(uiState.operationStatus) {
                 onBack()
                 odometer = ""
                 axleSelected = null
@@ -113,7 +114,7 @@ fun AssemblyTireView(
         }
 
         is OperationStatus.Error -> {
-            scope.launch {
+            LaunchedEffect(uiState.operationStatus) {
                 odometer = ""
                 axleSelected = null
                 tireSelected = null
@@ -157,8 +158,8 @@ fun AssemblyTireView(
                 SectionHeader(text = "Eje")
                 CatalogDropdown(
                     catalog = uiState.axleList,
-                    selected = axleSelected?.description ?: "",
-                    errorText = axleSelected?.validate(),
+                    selected = axleSelected?.description,
+                    errorText = axleSelected.validate(),
                     onSelected = { axleSelected = it },
                     label = "Eje",
                     modifier = Modifier.fillMaxWidth()
@@ -167,28 +168,48 @@ fun AssemblyTireView(
                 SectionHeader(text = "Llantas")
                 CatalogDropdown(
                     catalog = uiState.tireList,
-                    selected = tireSelected?.description ?: "",
-                    errorText = tireSelected?.validate(),
-                    onSelected = { tireSelected = it },
+                    selected = tireSelected?.description,
+                    errorText = tireSelected.validate(),
+                    onSelected = {
+                        updateTire(it?.id)
+                        tireSelected = it
+                    },
                     label = "Llantas",
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.padding(8.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    SectionHeader(text = "Odometro")
-                    NumberField(
-                        value = odometer,
-                        onValueChange = { odometer = it },
-                        label = "",
-                        errorText = odometer.validate(),
-                    )
+                if (uiState.currentTire != null) {
+                    Card {
+                        Text("Tire: ${uiState.currentTire.id}")
+                        Text(
+                            text = "Marca: ${uiState.currentTire.brand}"
+                        )
+                        Text(
+                            text = "Modelo: ${uiState.currentTire.model}"
+                        )
+                        Text(
+                            text = "Tamaño: ${uiState.currentTire.size}"
+                        )
+                        Text(
+                            text = "Profundidad: ${uiState.currentTire.description}"
+                        )
+                        Text(
+                            text = "Capacidad: ${uiState.currentTire.loadingCapacity}"
+                        )
+                    }
                 }
+
+                SectionHeader(text = "Odometro")
+                Text("Registro actual: ${uiState.currentOdometer}")
+                NumberField(
+                    value = odometer,
+                    onValueChange = {
+                        validateOdometer(it)
+                        odometer = it
+                    },
+                    label = "",
+                    errorText = uiState.isOdometerValid.message,
+                )
             }
         } else {
             Box(
@@ -213,6 +234,9 @@ fun AssemblyTireViewPreview() {
                 tireList = emptyList(),
                 axleList = emptyList()
             ),
-            onBack = {}) { _, _, _ -> }
+            validateOdometer = {},
+            onBack = {},
+            updateTire = {},
+        ) { _, _, _ -> }
     }
 }

@@ -2,6 +2,7 @@ package com.rfz.appflotal.data.repository.assembly
 
 import android.util.Log
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
+import com.rfz.appflotal.data.model.assembly.toDomain
 import com.rfz.appflotal.data.model.assembly.toEntity
 import com.rfz.appflotal.data.network.service.assembly.AssemblySyncScheduler
 import com.rfz.appflotal.data.network.service.assembly.LocalAssemblyDataSource
@@ -11,6 +12,8 @@ import javax.inject.Inject
 
 interface AssemblyTireRepository {
     suspend fun addAssemblyTire(assemblyTire: AssemblyTire)
+    suspend fun getAssemblyTire(positionTire: String): AssemblyTire?
+    suspend fun confirmTireMounted(positionTire: String): Boolean
 }
 
 class AssemblyTireRepositoryImpl @Inject constructor(
@@ -26,5 +29,13 @@ class AssemblyTireRepositoryImpl @Inject constructor(
             Log.d("AddAssemblyTire", "Llamando a syncScheduler.enqueueCreate")
             syncScheduler.enqueueCreate(assemblyTire, userData.fld_token)
         }
+    }
+
+    override suspend fun getAssemblyTire(positionTire: String): AssemblyTire? {
+        return localAssemblyDataSource.getAssemblyTire(positionTire)?.toDomain()
+    }
+
+    override suspend fun confirmTireMounted(positionTire: String): Boolean {
+        return localAssemblyDataSource.getAssemblyTire(positionTire) != null
     }
 }

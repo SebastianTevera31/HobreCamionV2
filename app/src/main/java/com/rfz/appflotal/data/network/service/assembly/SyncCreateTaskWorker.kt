@@ -34,6 +34,8 @@ class SyncCreateAssemblyTireWorker @AssistedInject constructor(
             val record = local.getAssemblyTire(position)
             Log.d("SyncWorker", "Registro local obtenido para posición: $position")
 
+            if (record == null) return Result.failure()
+
             val result = remote.pushAssemblyTire(
                 token = token,
                 assemblyTire = record.toDto().copy(idMonitor = record.idMonitor)

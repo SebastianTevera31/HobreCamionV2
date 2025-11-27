@@ -1,6 +1,7 @@
 package com.rfz.appflotal.domain.tpmsUseCase
 
 import com.rfz.appflotal.core.util.Commons.convertDate
+import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
@@ -9,7 +10,8 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import javax.inject.Inject
 
 class GetSensorDataByWheelUseCase @Inject constructor(
-    private val sensorDataTableRepository: SensorDataTableRepository
+    private val sensorDataTableRepository: SensorDataTableRepository,
+    private val assemblyTireRepository: AssemblyTireRepository
 ) {
 
     data class Result(
@@ -47,7 +49,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             if (tire.sensorPosition == tireSelected) tire.copy(inAlert = inAlert) else tire
         }
 
-        val isAssembled = currentTires.find { it.sensorPosition == tireSelected }?.isAssembled == true
+        val isAssembled = assemblyTireRepository.confirmTireMounted(tireSelected)
 
         val newTireUiState = TireUiState(
             currentTire = data.tire,

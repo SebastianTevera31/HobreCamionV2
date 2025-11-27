@@ -1,7 +1,6 @@
 package com.rfz.appflotal.data.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.rfz.appflotal.data.model.database.AppHCEntity
@@ -37,11 +36,14 @@ interface AppHCDao {
     @Query("UPDATE user SET fld_token =:token WHERE idUser =:idUser")
     suspend fun updateToken(idUser: Int, token: String)
 
+    @Query("UPDATE user SET odometer =:odometer")
+    suspend fun updateOdometer(odometer: Int)
+
+    @Query("SELECT odometer FROM user")
+    suspend fun getOdometer(): Int
+
     @Query("DELETE FROM user")
     suspend fun deleteAllFlotalSoft()
-
-    @Delete
-    suspend fun deleteFlotalSoft(item: AppHCEntity)
 
     @Insert
     suspend fun addFlotalSoft(item: AppHCEntity)

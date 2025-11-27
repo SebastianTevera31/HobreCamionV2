@@ -16,7 +16,11 @@ class LocalAssemblyDataSource @Inject constructor(
         }
     }
 
-    suspend fun getAssemblyTire(position: String): AssemblyTireEntity {
-        return assemblyTireDao.getAssemblyTire(position = position)
+    suspend fun getAssemblyTire(position: String): AssemblyTireEntity? {
+        return try {
+            assemblyTireDao.getAssemblyTire(position = position)
+        } catch (_: Exception) {
+            null
+        }
     }
 }

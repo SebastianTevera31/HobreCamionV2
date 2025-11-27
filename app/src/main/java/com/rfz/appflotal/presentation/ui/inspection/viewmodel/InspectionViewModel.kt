@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class UploadingInspectionMessage(@StringRes val message: Int) {
+enum class UploadingInspectionMessage(@param:StringRes val message: Int) {
     SUCCESS(R.string.inspeccion_exitosa_mensaje),
     GENERAL_ERROR(R.string.error_registrar_inspeccion),
 }

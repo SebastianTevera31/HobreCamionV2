@@ -25,7 +25,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 @Singleton
 class HombreCamionRepository @Inject constructor(
     private val flotalDao: AppHCDao,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     suspend fun clearUserData() {
         flotalDao.deleteAllFlotalSoft()
@@ -129,5 +129,13 @@ class HombreCamionRepository @Inject constructor(
 
     suspend fun deleteAllTasks() {
         flotalDao.deleteAllFlotalSoft()
+    }
+
+    suspend fun getOdometer(): Int {
+        return flotalDao.getOdometer()
+    }
+
+    suspend fun updateOdometer(odometer: Int) {
+        flotalDao.updateOdometer(odometer)
     }
 }

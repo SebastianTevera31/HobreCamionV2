@@ -22,3 +22,14 @@ fun AssemblyTireEntity.toDto(): AssemblyTireDto {
         assemblyDate = assemblyDate
     )
 }
+
+fun AssemblyTireEntity.toDomain(): AssemblyTire {
+    return AssemblyTire(
+        idAxle = idAxle,
+        idTire = idTire,
+        positionTire = positionTire,
+        odometer = odometer,
+        assemblyDate = assemblyDate,
+        updatedAt = updatedAt
+    )
+}

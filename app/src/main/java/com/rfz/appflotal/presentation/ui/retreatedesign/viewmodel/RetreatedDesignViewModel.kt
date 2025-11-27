@@ -4,8 +4,9 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.retreaddesing.dto.RetreadDesignCrudDto
-import com.rfz.appflotal.domain.CatalogItem
+import com.rfz.appflotal.data.model.utilization.UtilizationItem
 import com.rfz.appflotal.domain.retreadbrand.RetreadBrandListUseCase
 import com.rfz.appflotal.domain.retreaddesign.RetreadDesign
 import com.rfz.appflotal.domain.retreaddesign.RetreadDesignCrudUseCase
@@ -219,9 +220,9 @@ class RetreatedDesignViewModel @Inject constructor(
             it.copy(
                 id = item.idBrand.toString().trim(),
                 description = item.description.trim(),
-                marcaRenovado = CatalogItem(item.idRetreadBrand, item.retreadBrand),
+                marcaRenovado = UtilizationItem(item.idRetreadBrand, item.retreadBrand),
                 profundidadPiso = item.treadDepth.toString().trim(),
-                utilizacion = CatalogItem(item.idUtilization, item.utilization)
+                utilizacion = UtilizationItem(item.idUtilization, item.utilization)
             )
         }
     }

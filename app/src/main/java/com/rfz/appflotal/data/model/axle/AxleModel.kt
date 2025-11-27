@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
-import com.rfz.appflotal.data.model.commons.Catalog
+import com.rfz.appflotal.data.model.CatalogItem
 
 data class GetAxleResponseDto(
     @SerializedName("id_axle") val idAxle: Int,
@@ -26,4 +26,4 @@ data class AxleEntity(
 data class Axle(
     override val id: Int,
     override val description: String,
-) : Catalog
+) : CatalogItem

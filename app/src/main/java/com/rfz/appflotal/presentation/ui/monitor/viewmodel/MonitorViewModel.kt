@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-enum class SensorAlerts(@StringRes val message: Int) {
+enum class SensorAlerts(@param:StringRes val message: Int) {
     HIGH_PRESSURE(R.string.presion_alta),
     LOW_PRESSURE(R.string.presion_baja),
     HIGH_TEMPERATURE(R.string.temperatura_alta),
@@ -126,6 +126,7 @@ class MonitorViewModel @Inject constructor(
                     )
                 }
 
+                // Traer información del servicio
                 getConfigData()
 
                 // Controlar si mostrar la vista

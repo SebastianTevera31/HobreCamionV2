@@ -1,12 +1,12 @@
 package com.rfz.appflotal.presentation.ui.assembly.viewmodel
 
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
-import com.rfz.appflotal.data.model.axle.toCatalogItem
-import com.rfz.appflotal.data.model.tire.toCatalogItem
-import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
+import com.rfz.appflotal.data.model.tire.toTire
+import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.assembly.AddAssemblyTire
 import com.rfz.appflotal.domain.axle.GetAxleDomain
 import com.rfz.appflotal.domain.tire.TireListUsecase
@@ -22,7 +22,8 @@ import javax.inject.Inject
 class AssemblyTireViewModel @Inject constructor(
     private val tireUseCase: TireListUsecase,
     private val addAssemblyTire: AddAssemblyTire,
-    private val getAxleUseCase: GetAxleDomain
+    private val getAxleUseCase: GetAxleDomain,
+    private val hombreCamionRepository: HombreCamionRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AssemblyTireUiState())
     val uiState = _uiState.asStateFlow()
@@ -35,28 +36,28 @@ class AssemblyTireViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            val odometerDeferred = async { hombreCamionRepository.getOdometer() }
             val tiresDeferred = async { tireUseCase() }
             val axleDeferred = async { getAxleUseCase() }
             val tiresResult = tiresDeferred.await()
             val axleResult = axleDeferred.await()
+            val odometer = odometerDeferred.await()
 
             if (tiresResult.isSuccess && axleResult.isSuccess) {
                 val tiresList = tiresResult.getOrThrow()
                     .filter { it.destination == "Almacen" }
-                    .map { it.toCatalogItem() }
+                    .map { it.toTire() }
 
                 val axleList = axleResult.getOrThrow()
-                    .map { it.toCatalogItem() }
 
                 // Actualizamos el estado de la UI una sola vez
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
+                        currentOdometer = odometer.toString(),
                         tireList = tiresList,
                         axleList = axleList,
                     )
                 }
-            } else {
-
             }
         }
     }
@@ -84,6 +85,9 @@ class AssemblyTireViewModel @Inject constructor(
                     updatedAt = System.currentTimeMillis()
                 )
             )
+
+            async { hombreCamionRepository.updateOdometer(odometer.toInt()) }
+
             _uiState.update { currentUiState ->
                 currentUiState.copy(
                     operationStatus = result.fold(
@@ -97,6 +101,26 @@ class AssemblyTireViewModel @Inject constructor(
         }
     }
 
+    fun updateTireField(tireId: Int?) {
+        val tire = if (tireId != null) uiState.value.tireList?.find { it.id == tireId } else null
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                currentTire = tire
+            )
+        }
+    }
+
+    fun validateOdometer(odometer: String) {
+        val validation = if (odometer.isDigitsOnly()) {
+            if (odometer.toInt() < uiState.value.currentOdometer.toInt()) OdometerValidation.INVALID
+            else OdometerValidation.VALID
+        } else OdometerValidation.EMPTY
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                isOdometerValid = validation
+            )
+        }
+    }
 
     fun cleanUiState() {
         _uiState.update { currentUiState ->

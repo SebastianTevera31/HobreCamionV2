@@ -24,8 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
-import com.rfz.appflotal.domain.CatalogItem
-import kotlin.collections.forEach
+import com.rfz.appflotal.data.model.CatalogItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

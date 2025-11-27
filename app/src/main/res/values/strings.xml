@@ -235,6 +235,7 @@
     <string name="numero_invalido">Número inválido</string>
     <string name="una_medidad_profundidad_mayor_0">Debe ingresar al menos los campos de los extremos laterales.</string>
     <string name="montaje">Montaje</string>
+    <string name="error_odometro_inferior">El odometro no puede ser menor al actual</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

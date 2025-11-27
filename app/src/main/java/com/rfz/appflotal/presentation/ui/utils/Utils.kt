@@ -3,8 +3,8 @@ package com.rfz.appflotal.presentation.ui.utils
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.network.service.ApiResult
-import com.rfz.appflotal.domain.CatalogItem
 
 
 enum class FormState {
@@ -70,12 +70,11 @@ fun String.toIntOrError(): Pair<Int?, Int?> {
 
 fun String.validate(): Int? {
     if (isBlank()) return R.string.requerido
-    val value = toDoubleOrNull() ?: return R.string.numero_invalido
     return null
 }
 
-fun CatalogItem.validate(): Int? {
-    if (description.isBlank()) return R.string.requerido
+fun CatalogItem?.validate(): Int? {
+    if (this == null) return R.string.requerido
     return null
 }
 

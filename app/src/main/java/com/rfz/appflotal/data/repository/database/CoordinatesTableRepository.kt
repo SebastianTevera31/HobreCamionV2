@@ -4,6 +4,7 @@ import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 class CoordinatesTableRepository @Inject constructor(private val coordinatesDao: CoordinatesDao) {
     suspend fun insertCoordinates(monitorId: Int, coordinatesList: List<Tire>) {

@@ -1,6 +1,6 @@
 package com.rfz.appflotal.presentation.ui.inspection.viewmodel
 
-import com.rfz.appflotal.domain.CatalogItem
+import com.rfz.appflotal.data.model.CatalogItem
 
 sealed interface InspectionUiState {
     data object Loading : InspectionUiState
