@@ -7,7 +7,7 @@ import javax.inject.Inject
 class DisassemblyCauseUseCase @Inject constructor(
     private val disassemblyCauseRepository: DisassemblyCauseRepository
 ) {
-    suspend operator fun invoke(token: String): Result<List<DisassemblyCauseResponse>> {
-        return disassemblyCauseRepository.doDisassemblyCause(token)
+    suspend operator fun invoke(): Result<List<DisassemblyCauseResponse>> {
+        return disassemblyCauseRepository.doDisassemblyCause()
     }
 }

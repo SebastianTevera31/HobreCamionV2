@@ -13,11 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -34,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,6 +50,7 @@ import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.NumberField
 import com.rfz.appflotal.presentation.ui.components.SectionHeader
+import com.rfz.appflotal.presentation.ui.components.TireInfoCard
 import com.rfz.appflotal.presentation.ui.utils.validate
 
 @Composable
@@ -245,77 +242,9 @@ fun AssemblyTireView(
                         exit = shrinkVertically() + fadeOut(),
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
-                        Card(
-                            modifier = Modifier.width(240.dp),
-                            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainerHigh),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .fillMaxSize()
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.detalles_de_llanta),
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                Text(
-                                    pluralStringResource(
-                                        R.plurals.llanta_tag,
-                                        1,
-                                        ": ${uiState.currentTire?.id}"
-                                    ),
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-
-                                val brandDescription = uiState.currentTire?.brand ?: ""
-                                Text(
-                                    text = stringResource(
-                                        R.string.marca_description,
-                                        brandDescription
-                                    ),
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-
-                                val modelDescription = uiState.currentTire?.model ?: ""
-                                Text(
-                                    text = stringResource(
-                                        R.string.modelo_description,
-                                        modelDescription
-                                    ),
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-
-                                val sizeDescription = uiState.currentTire?.size ?: ""
-                                Text(
-                                    text = stringResource(
-                                        R.string.size_description,
-                                        sizeDescription
-                                    ),
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-
-                                val threadDescription = uiState.currentTire?.thread ?: ""
-                                Text(
-                                    text = stringResource(
-                                        R.string.profundidad_description,
-                                        threadDescription
-                                    ),
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-
-                                val loadingCapDescription =
-                                    uiState.currentTire?.loadingCapacity ?: ""
-                                Text(
-                                    text = stringResource(
-                                        R.string.capacidad_description,
-                                        loadingCapDescription
-                                    ),
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                            }
-                        }
+                        TireInfoCard(
+                            tire = uiState.currentTire
+                        )
                     }
 
                     SectionHeader(

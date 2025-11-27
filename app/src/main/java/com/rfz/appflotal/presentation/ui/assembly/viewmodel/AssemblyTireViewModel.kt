@@ -7,7 +7,7 @@ import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.tire.toTire
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.assembly.AddAssemblyTire
-import com.rfz.appflotal.domain.axle.GetAxleDomain
+import com.rfz.appflotal.domain.axle.GetAxlesUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -21,7 +21,7 @@ import javax.inject.Inject
 class AssemblyTireViewModel @Inject constructor(
     private val tireUseCase: TireListUsecase,
     private val addAssemblyTire: AddAssemblyTire,
-    private val getAxleUseCase: GetAxleDomain,
+    private val getAxleUseCase: GetAxlesUseCase,
     private val hombreCamionRepository: HombreCamionRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AssemblyTireUiState())

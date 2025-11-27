@@ -237,6 +237,16 @@
     <string name="montaje">Montaje</string>
     <string name="error_odometro_inferior">El odometro no puede ser menor al actual</string>
     <string name="error_carga_datos">Hubo un error al cargar los datos</string>
+    <string name="montar">Montar</string>
+    <string name="eje">Eje</string>
+    <string name="detalles_de_llanta">Detalles de la Llanta</string>
+    <string name="marca_description">Marca: %1$s</string>
+    <string name="modelo_description">Modelo: %1$s</string>
+    <string name="size_description">Tamaño: %1$s</string>
+    <string name="profundidad_description">Profundidad: %1$s</string>
+    <string name="capacidad_description">Capacidad: %1$s</string>
+    <string name="registro_actual">Registro actual: %1$s</string>
+    <string name="ninguno">Ninguno</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

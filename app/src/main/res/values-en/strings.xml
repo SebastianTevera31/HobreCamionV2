@@ -226,9 +226,20 @@
     <string name="requerido">Required</string>
     <string name="numero_invalido">Invalid number</string>
     <string name="una_medidad_profundidad_mayor_0">You must fill in at least the fields at the lateral ends.</string>
-    <string name="montaje">Montaje</string>
-    <string name="error_odometro_inferior">El odometro no puede ser menor al actual</string>
-    <string name="error_carga_datos">Hubo un error al cargar los datos</string>
+
+    <string name="montaje">Mounting</string>
+    <string name="error_odometro_inferior">The odometer reading cannot be lower than the current one.</string>
+    <string name="error_carga_datos">An error occurred while loading the data.</string>
+    <string name="montar">Mount</string>
+    <string name="eje">Axle</string>
+    <string name="detalles_de_llanta">Tire Details</string>
+    <string name="marca_description">Brand: %1$s</string>
+    <string name="modelo_description">Model: %1$s</string>
+    <string name="size_description">Size: %1$s</string>
+    <string name="profundidad_description">Tread Depth: %1$s</string>
+    <string name="capacidad_description">Load Capacity: %1$s</string>
+    <string name="registro_actual">Current Record: %1$s</string>
+    <string name="ninguno">None</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
