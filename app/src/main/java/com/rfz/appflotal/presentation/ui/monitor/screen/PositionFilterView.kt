@@ -56,14 +56,14 @@ import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionFilterView(
-    tiresList: List<Tire>?,
+    tiresList: List<MonitorTire>?,
     modifier: Modifier = Modifier,
     onGetSensorData: (String, String) -> Unit
 ) {

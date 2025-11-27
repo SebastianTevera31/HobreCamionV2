@@ -18,7 +18,7 @@ data class MonitorUiState(
     val imageDimen: Pair<Int, Int> = Pair(0, 0),
     val imageBitmap: Bitmap? = null,
     val chassisImageUrl: String = "",
-    val listOfTires: List<Tire> = emptyList(),
+    val listOfTires: List<MonitorTire> = emptyList(),
     val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
     val showDialog: Boolean = false,
     val showView: Boolean = false,
@@ -37,7 +37,7 @@ data class TireUiState(
     val isAssembled: Boolean = false
 )
 
-data class Tire(
+data class MonitorTire(
     val sensorPosition: String,
     val inAlert: Boolean,
     val isAssembled: Boolean,
@@ -46,8 +46,8 @@ data class Tire(
     val yPosition: Int,
 )
 
-fun CoordinatesEntity.toTire(): Tire {
-    return Tire(
+fun CoordinatesEntity.toTire(): MonitorTire {
+    return MonitorTire(
         sensorPosition = idPosition,
         isAssembled = isAssembled,
         inAlert = inAlert,

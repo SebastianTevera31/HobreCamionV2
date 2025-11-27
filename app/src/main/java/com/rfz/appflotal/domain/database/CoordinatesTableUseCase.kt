@@ -2,11 +2,11 @@ package com.rfz.appflotal.domain.database
 
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.data.repository.database.CoordinatesTableRepository
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import jakarta.inject.Inject
 
 class CoordinatesTableUseCase @Inject constructor(private val coordinatesTableRepository: CoordinatesTableRepository) {
-    suspend fun insertCoordinates(monitorId: Int, listCoordinates: List<Tire>) {
+    suspend fun insertCoordinates(monitorId: Int, listCoordinates: List<MonitorTire>) {
         coordinatesTableRepository.insertCoordinates(monitorId, listCoordinates)
     }
 

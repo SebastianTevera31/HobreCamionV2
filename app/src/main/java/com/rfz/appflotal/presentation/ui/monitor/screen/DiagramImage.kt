@@ -36,12 +36,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import kotlin.math.max
 
 @Composable
 fun DiagramImage(
-    tires: List<Tire>,
+    tires: List<MonitorTire>,
     image: Bitmap,
     width: Int,
     height: Int,

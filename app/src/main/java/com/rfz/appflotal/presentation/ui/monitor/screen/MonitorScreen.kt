@@ -40,7 +40,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.BluetoothSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 
 enum class PositionView {
     RECIENTES, FILTRAR
@@ -239,7 +239,7 @@ private fun PositionScreenContent(
     monitorViewModel: MonitorViewModel,
     positionsUiState: ApiResult<List<MonitorTireByDateResponse>?>,
     monitorTireUiState: ApiResult<List<MonitorTireByDateResponse>?>,
-    listOfTires: List<Tire>?
+    listOfTires: List<MonitorTire>?
 ) {
     if (paymentPlan == PaymentPlanType.Complete) {
         var positionOptionSelected by remember { mutableStateOf(PositionView.RECIENTES) }
@@ -343,7 +343,7 @@ private fun LoadingView(modifier: Modifier = Modifier) {
 @Composable
 fun NavPositionMonitorScreen(
     selectedView: PositionView,
-    tiresList: List<Tire>?,
+    tiresList: List<MonitorTire>?,
     onSensorData: (String, String) -> Unit,
     onPositionOptionSelected: (PositionView) -> Unit,
     modifier: Modifier = Modifier

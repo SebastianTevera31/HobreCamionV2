@@ -8,6 +8,10 @@ import javax.inject.Inject
 class LocalAssemblyDataSource @Inject constructor(
     private val assemblyTireDao: AssemblyTireDao
 ) {
+
+    fun observeAssemblyTire(): Flow<List<AssemblyTireEntity>> =
+        assemblyTireDao.observeAssemblyTires()
+
     suspend fun saveAssemblyTire(assemblyTire: AssemblyTireEntity) {
         try {
             assemblyTireDao.upsertAssemblyTire(assemblyTire)

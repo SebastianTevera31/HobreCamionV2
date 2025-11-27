@@ -33,3 +33,15 @@ fun AssemblyTireEntity.toDomain(): AssemblyTire {
         updatedAt = updatedAt
     )
 }
+
+fun AssemblyTireResponse.toEntity(): AssemblyTireEntity {
+    return AssemblyTireEntity(
+        idAxle = axleId,
+        idTire = tireId,
+        idMonitor = 0,
+        positionTire = positionTire,
+        odometer = odometer,
+        assemblyDate = assemblyDate,
+        updatedAt = System.currentTimeMillis()
+    )
+}

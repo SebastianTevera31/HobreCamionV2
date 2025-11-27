@@ -14,6 +14,14 @@ data class AssemblyTireDto(
     @SerializedName("fld_assemblyDate") val assemblyDate: String,
 )
 
+data class AssemblyTireResponse(
+    @SerializedName("axleID") val axleId: Int,
+    @SerializedName("tireID") val tireId: Int,
+    @SerializedName("odometer") val odometer: Int,
+    @SerializedName("assemblyDate") val assemblyDate: String,
+    @SerializedName("tirePosition") val positionTire: String,
+)
+
 @Entity(tableName = "assembly_tire_table")
 data class AssemblyTireEntity(
     @PrimaryKey

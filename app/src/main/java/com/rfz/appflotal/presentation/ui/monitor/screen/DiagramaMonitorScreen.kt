@@ -61,7 +61,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.monitor.component.MonitorMenuButton
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 
 @Composable
@@ -74,7 +74,7 @@ fun DiagramaMonitorScreen(
     getSensorData: (String) -> Unit,
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,
-    tires: List<Tire>?,
+    tires: List<MonitorTire>?,
     modifier: Modifier = Modifier
 ) {
     var isLoading by remember { mutableStateOf(true) }
@@ -157,7 +157,7 @@ fun DiagramaMonitorScreen(
 
 @Composable
 fun PanelLlantas(
-    tiresList: List<Tire>?,
+    tiresList: List<MonitorTire>?,
     tireSelected: String,
     updateSelectedTire: (String) -> Unit,
     modifier: Modifier = Modifier,

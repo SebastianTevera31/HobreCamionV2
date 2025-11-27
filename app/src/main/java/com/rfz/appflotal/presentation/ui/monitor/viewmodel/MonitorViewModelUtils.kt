@@ -66,9 +66,9 @@ fun getBaseConfigImage(baseConfig: Int): BaseConfig {
 }
 
 suspend fun updateTiresStatus(
-    listTires: List<Tire>,
+    listTires: List<MonitorTire>,
     onGetSensorData: suspend () -> List<SensorDataEntity>,
-): List<Tire> = withContext(Dispatchers.IO) {
+): List<MonitorTire> = withContext(Dispatchers.IO) {
     val sensorData = onGetSensorData()
 
     val activeTire = sensorData.associate { it.tire to it.active }
@@ -76,7 +76,7 @@ suspend fun updateTiresStatus(
     listTires.toMutableList().filter { tire -> activeTire[tire.sensorPosition] == true }
 }
 
-fun updateTireState(currentTire: String, tires: List<Tire>, onUpdate: (tire: Tire) -> Unit) {
+fun updateTireState(currentTire: String, tires: List<MonitorTire>, onUpdate: (tire: MonitorTire) -> Unit) {
     if (currentTire.isEmpty()) return
     tires.find { it.sensorPosition == currentTire }.let { tire ->
         if (tire?.isActive == false) {

@@ -1,9 +1,7 @@
 package com.rfz.appflotal.presentation.ui.assembly.viewmodel
 
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.tire.toTire
@@ -40,13 +38,14 @@ class AssemblyTireViewModel @Inject constructor(
             val odometerDeferred = async { hombreCamionRepository.getOdometer() }
             val tiresDeferred = async { tireUseCase() }
             val axleDeferred = async { getAxleUseCase() }
+
             val tiresResult = tiresDeferred.await()
             val axleResult = axleDeferred.await()
             val odometer = odometerDeferred.await()
 
             if (tiresResult.isSuccess && axleResult.isSuccess) {
                 val tiresList = tiresResult.getOrThrow()
-                    .filter { it.destination == "Almacen" }
+                    .filter { it.destination == "Stock" }
                     .map { it.toTire() }
 
                 val axleList = axleResult.getOrThrow()
@@ -111,7 +110,7 @@ class AssemblyTireViewModel @Inject constructor(
     }
 
     fun updateTireField(tireId: Int?) {
-        val tire = if (tireId != null) uiState.value.tireList?.find { it.id == tireId } else null
+        val tire = if (tireId != null) uiState.value.tireList.find { it.id == tireId } else null
         _uiState.update { currentUiState ->
             currentUiState.copy(
                 currentTire = tire
@@ -120,7 +119,7 @@ class AssemblyTireViewModel @Inject constructor(
     }
 
     fun validateOdometer(odometer: String) {
-        val validation = if (odometer.isDigitsOnly()) {
+        val validation = if (odometer.isNotEmpty()) {
             if (odometer.toInt() < uiState.value.currentOdometer.toInt()) OdometerValidation.INVALID
             else OdometerValidation.VALID
         } else OdometerValidation.EMPTY

@@ -34,6 +34,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.savedstate.serialization.saved
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
@@ -396,6 +397,11 @@ class InicioActivity : ComponentActivity() {
                                         }
                                     }
                                 }
+
+                                val result = navController.currentBackStackEntry?.savedStateHandle?.getStateFlow(
+                                        "montaje_result",
+                                        false
+                                    )
 
                                 MonitorScreen(
                                     monitorViewModel = monitorViewModel,

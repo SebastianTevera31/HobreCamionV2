@@ -10,6 +10,7 @@ import com.rfz.appflotal.core.util.Commons.getBitmapFromDrawable
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
@@ -24,6 +25,7 @@ import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -56,6 +58,7 @@ class MonitorViewModel @Inject constructor(
     private val wifiUseCase: WifiUseCase,
     private val updateSensorDataUseCase: UpdateSensorDataUseCase,
     private val getSensorDataByWheelUseCase: GetSensorDataByWheelUseCase,
+    private val assemblyTireRepository: AssemblyTireRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
@@ -72,7 +75,6 @@ class MonitorViewModel @Inject constructor(
 
     private val _tireUiState = MutableStateFlow(TireUiState())
     val tireUiState = _tireUiState.asStateFlow()
-
 
     private var _wifiStatus: MutableStateFlow<NetworkStatus> =
         MutableStateFlow(NetworkStatus.Connected)
@@ -98,6 +100,10 @@ class MonitorViewModel @Inject constructor(
                     )
                 }
             }
+        }
+
+        viewModelScope.launch {
+            updateAssemblyStatus()
         }
 
         readBluetoothData()
@@ -140,16 +146,20 @@ class MonitorViewModel @Inject constructor(
             val uiState = monitorUiState.value
             val monitorId = uiState.monitorId
 
-            val sensorData = apiTpmsUseCase.doGetDiagramMonitor(monitorId)
-            val baseCoordinates = apiTpmsUseCase.doGetPositionCoordinates(monitorId)
+            val sensorDataDeferred = async { apiTpmsUseCase.doGetDiagramMonitor(monitorId) }
+            val baseCoordinatesDeferred =
+                async { apiTpmsUseCase.doGetPositionCoordinates(monitorId) }
+            val sensorData = sensorDataDeferred.await()
+            val baseCoordinates = baseCoordinatesDeferred.await()
 
             responseHelper(baseCoordinates) { coords ->
                 responseHelper(sensorData) { tireInfo ->
-                    val tireByPos = tireInfo.orEmpty().associateBy { it.sensorPosition.trim().uppercase() }
+                    val tireByPos =
+                        tireInfo.orEmpty().associateBy { it.sensorPosition.trim().uppercase() }
 
                     val tires = coords.orEmpty().map { info ->
                         val c = tireByPos[info.position]
-                        Tire(
+                        MonitorTire(
                             sensorPosition = c?.sensorPosition ?: info.position,
                             isAssembled = c?.isAssembled == true,
                             inAlert = getIsTireInAlertByApi(
@@ -186,6 +196,7 @@ class MonitorViewModel @Inject constructor(
         if (uiState.value.monitorId != 0) {
             if (_wifiStatus.value == NetworkStatus.Connected) {
                 coordinatesTableUseCase.deleteCoordinates(uiState.value.monitorId)
+                assemblyTireRepository.refreshMountedTires()
                 mapTires()
             } else {
                 val localCoordinates = coordinatesTableUseCase
@@ -203,6 +214,29 @@ class MonitorViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private suspend fun updateAssemblyStatus() {
+        assemblyTireRepository.observeAssemblyTire()
+            .collect { assembledTiresFromDb ->
+                val assembledPositions = assembledTiresFromDb.map { it.positionTire }.toSet()
+
+                _monitorUiState.update { currentUiState ->
+                    val updatedTireList = currentUiState.listOfTires.map { tire ->
+                        if (tire.sensorPosition in assembledPositions) {
+                            if (!tire.isAssembled) tire.copy(isAssembled = true) else tire
+                        } else {
+                            if (tire.isAssembled) tire.copy(isAssembled = false) else tire
+                        }
+                    }
+                    currentUiState.copy(listOfTires = updatedTireList)
+                }
+
+                val currentlySelectedTire = _tireUiState.value.currentTire
+                if (currentlySelectedTire.isNotBlank()) {
+                    getSensorDataByWheel(currentlySelectedTire)
+                }
+            }
     }
 
     private fun readBluetoothData() {

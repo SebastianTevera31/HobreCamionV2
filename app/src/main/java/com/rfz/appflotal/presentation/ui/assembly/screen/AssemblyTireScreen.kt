@@ -113,7 +113,7 @@ fun AssemblyTireView(
     modifier: Modifier = Modifier,
     onAssembly: (odometer: String, idAxle: Int, idTire: Int) -> Unit
 ) {
-    var odometer by remember { mutableStateOf(uiState.currentOdometer) }
+    var odometer by remember { mutableStateOf("") }
     var axleSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 

@@ -10,7 +10,7 @@ import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import javax.inject.Inject
@@ -19,12 +19,12 @@ class UpdateSensorDataUseCase @Inject constructor() {
 
     data class Result(
         val newTireUiState: TireUiState,
-        val updatedTireList: List<Tire>
+        val updatedTireList: List<MonitorTire>
     )
 
     operator fun invoke(
         dataFrame: String,
-        currentTires: List<Tire>,
+        currentTires: List<MonitorTire>,
         timestamp: String? = null
     ): Result {
         val pressure = getPressure(dataFrame)

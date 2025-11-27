@@ -2,12 +2,11 @@ package com.rfz.appflotal.data.repository.database
 
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import jakarta.inject.Inject
-import kotlinx.coroutines.flow.Flow
 
 class CoordinatesTableRepository @Inject constructor(private val coordinatesDao: CoordinatesDao) {
-    suspend fun insertCoordinates(monitorId: Int, coordinatesList: List<Tire>) {
+    suspend fun insertCoordinates(monitorId: Int, coordinatesList: List<MonitorTire>) {
         coordinatesList.forEach { coords ->
             coordinatesDao.insertCoordinates(coords.toEntity(monitorId))
         }
@@ -32,7 +31,7 @@ class CoordinatesTableRepository @Inject constructor(private val coordinatesDao:
     )
 }
 
-fun Tire.toEntity(monitorId: Int): CoordinatesEntity {
+fun MonitorTire.toEntity(monitorId: Int): CoordinatesEntity {
     return CoordinatesEntity(
         monitorId = monitorId,
         idPosition = sensorPosition,

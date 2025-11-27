@@ -4,7 +4,7 @@ import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.Tire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import javax.inject.Inject
@@ -16,13 +16,13 @@ class GetSensorDataByWheelUseCase @Inject constructor(
 
     data class Result(
         val newTireUiState: TireUiState,
-        val updatedTireList: List<Tire>
+        val updatedTireList: List<MonitorTire>
     )
 
     suspend operator fun invoke(
         monitorId: Int,
         tireSelected: String,
-        currentTires: List<Tire>
+        currentTires: List<MonitorTire>
     ): Result? {
         val data = sensorDataTableRepository.getLastDataByTire(monitorId, tireSelected) ?: return null
 
