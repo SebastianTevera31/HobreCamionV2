@@ -31,7 +31,7 @@ class SyncCreateAssemblyTireWorker @AssistedInject constructor(
             }
 
         return try {
-            val record = local.getAssemblyTire(position)
+            val record = local.getAssemblyTire(position).getOrNull()
             Log.d("SyncWorker", "Registro local obtenido para posición: $position")
 
             if (record == null) return Result.failure()
@@ -39,16 +39,13 @@ class SyncCreateAssemblyTireWorker @AssistedInject constructor(
             val result = remote.pushAssemblyTire(
                 token = token,
                 assemblyTire = record.toDto().copy(idMonitor = record.idMonitor)
-            )
+            ).getOrNull()
 
-            if (result.isSuccessful) {
-                Log.i("SyncWorker", "SUCCESS: Datos sincronizados exitosamente al servidor.")
-                if (result.body()?.get(0)?.id == 200) Result.success()
-                else Result.failure()
-            } else {
-                Log.e("SyncWorker", "FAILURE: Error en la respuesta del servidor: ${result.code()}")
-                Result.failure()
+            if (result != null) {
+                if (result[0].id == 200) return Result.success()
             }
+            return Result.failure()
+
         } catch (e: Exception) {
             // Capturar cualquier excepción de red o base de datos que no esté cubierta por 'Result'
             Log.e(

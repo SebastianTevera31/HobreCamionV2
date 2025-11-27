@@ -42,22 +42,26 @@ class AssemblyTireRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAssemblyTire(positionTire: String): AssemblyTire? {
-        return localAssemblyDataSource.getAssemblyTire(positionTire)?.toDomain()
+        val result = localAssemblyDataSource.getAssemblyTire(positionTire)
+        return if (result.isSuccess) result.getOrNull()?.toDomain() else null
     }
 
     override suspend fun confirmTireMounted(positionTire: String): Boolean {
-        return localAssemblyDataSource.getAssemblyTire(positionTire) != null
+        val result = localAssemblyDataSource.getAssemblyTire(positionTire)
+        return if (result.isSuccess) result.getOrNull()?.positionTire != null else false
     }
 
     override suspend fun refreshMountedTires() {
         val userData = getTasksUseCase().first()[0]
         val result =
             remoteAssemblyDataSource.fetchMountedTire(userData.fld_token, userData.id_monitor)
-        if (result.isSuccessful) {
-            result.body()?.forEach {
-                localAssemblyDataSource.saveAssemblyTire(
-                    it.toEntity().copy(idMonitor = userData.id_monitor)
-                )
+        if (result.isSuccess) {
+            result.onSuccess {
+                it.forEach { assemblyTire ->
+                    localAssemblyDataSource.saveAssemblyTire(
+                        assemblyTire.toEntity().copy(idMonitor = userData.id_monitor)
+                    )
+                }
             }
         }
     }

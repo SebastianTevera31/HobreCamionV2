@@ -48,7 +48,7 @@ class AssemblyTireViewModel @Inject constructor(
                     .filter { it.destination == "Stock" }
                     .map { it.toTire() }
 
-                val axleList = axleResult.getOrThrow()
+                val axleList = axleResult.getOrNull() ?: emptyList()
 
                 // Actualizamos el estado de la UI una sola vez
                 _uiState.update { currentUiState ->
