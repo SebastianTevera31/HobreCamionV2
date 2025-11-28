@@ -240,6 +240,14 @@
     <string name="capacidad_description">Load Capacity: %1$s</string>
     <string name="registro_actual">Current Record: %1$s</string>
     <string name="ninguno">None</string>
+    <string name="montaje_exitoso">Tire mounted successfully</string>
+    <string name="desmontaje_exitoso">Tire dismounted successfully</string>
+    <string name="error_montaje">An error occurred while performing the mounting</string>
+    <string name="error_desmontaje">An error occurred while trying to dismount the tyre</string>
+    <string name="motivo_de_desmontaje">Reason for Dismounting</string>
+    <string name="destino">Destination</string>
+    <string name="desmontar">Dismount</string>
+    <string name="desmontaje">Dismounting</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

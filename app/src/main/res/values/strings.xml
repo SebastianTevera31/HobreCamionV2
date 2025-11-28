@@ -247,6 +247,14 @@
     <string name="capacidad_description">Capacidad: %1$s</string>
     <string name="registro_actual">Registro actual: %1$s</string>
     <string name="ninguno">Ninguno</string>
+    <string name="montaje_exitoso">Rueda montada con éxito</string>
+    <string name="desmontaje_exitoso">Desmontaje exitoso</string>
+    <string name="error_montaje">Ocurrió un error al realizar el montaje</string>
+    <string name="error_desmontaje">Ocurrió un error al intentar desmontar la llantar</string>
+    <string name="motivo_de_desmontaje">Motivo de desmontaje</string>
+    <string name="destino">Destino</string>
+    <string name="desmontar">Desmontar</string>
+    <string name="desmontaje">Desmontaje</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

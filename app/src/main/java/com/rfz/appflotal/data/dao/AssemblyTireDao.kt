@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import com.rfz.appflotal.data.model.assembly.AssemblyTireEntity
@@ -16,4 +17,7 @@ interface AssemblyTireDao {
 
     @Upsert
     suspend fun upsertAssemblyTire(assemblyTire: AssemblyTireEntity)
+
+    @Query("DELETE FROM assembly_tire_table WHERE positionTire =:position")
+    suspend fun deleteAssemblyTire(position: String)
 }

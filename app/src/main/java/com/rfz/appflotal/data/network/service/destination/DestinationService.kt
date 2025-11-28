@@ -13,7 +13,7 @@ import javax.inject.Inject
 class DestinationService @Inject constructor(private val destinationClient: DestinationClient) {
     suspend fun doDestination(tok:String): Response<List<DestinationResponse>> {
         return withContext(Dispatchers.IO) {
-            destinationClient.doDestination(tok)
+            destinationClient.doDestination("bearer $tok")
         }
     }
 }

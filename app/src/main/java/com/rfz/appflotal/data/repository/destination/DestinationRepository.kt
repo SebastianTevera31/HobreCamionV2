@@ -1,19 +1,31 @@
 package com.rfz.appflotal.data.repository.destination
 
-import com.rfz.appflotal.data.model.destination.response.DestinationResponse
+import com.rfz.appflotal.core.util.AppLocale
+import com.rfz.appflotal.data.model.destination.Destination
+import com.rfz.appflotal.data.model.destination.toDomain
 import com.rfz.appflotal.data.network.service.destination.DestinationService
+import com.rfz.appflotal.domain.database.GetTasksUseCase
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 
-class DestinationRepository @Inject constructor(private val destinationService: DestinationService) {
+class DestinationRepository @Inject constructor(
+    private val destinationService: DestinationService, private val getTasksUseCase: GetTasksUseCase
+) {
 
-    suspend fun doDestination(tok: String): Result<List<DestinationResponse>> {
+    suspend fun doDestination(): Result<List<Destination>> {
         return try {
-            val response = destinationService.doDestination(tok)
+            val language = AppLocale.currentLocale.first().language
+            val token = getTasksUseCase().first().first().fld_token
+            val response = destinationService.doDestination(token)
             if (response.isSuccessful) {
-
                 response.body()?.let {
-                    Result.success(it)
+                    Result.success(it.map { destinationResponse ->
+                        destinationResponse.toDomain().copy(
+                            description = if (language.contains("es")) destinationResponse.fldDescription
+                            else destinationResponse.fldEsDescription
+                        )
+                    })
                 } ?: Result.failure(Throwable("Error: Cuerpo de la respuesta nulo"))
             } else {
 

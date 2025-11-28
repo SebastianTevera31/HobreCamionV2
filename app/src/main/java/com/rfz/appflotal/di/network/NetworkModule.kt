@@ -18,7 +18,7 @@ import com.rfz.appflotal.data.network.client.controltype.ControlTypeClient
 import com.rfz.appflotal.data.network.client.defaultparameter.DefaultParameterClient
 import com.rfz.appflotal.data.network.client.destination.DestinationClient
 import com.rfz.appflotal.data.network.client.diagram.DiagramClient
-import com.rfz.appflotal.data.network.client.disassembly.DisassemblyCauseClient
+import com.rfz.appflotal.data.network.client.disassembly.DisassemblyCauseService
 import com.rfz.appflotal.data.network.client.languaje.LanguajeClient
 import com.rfz.appflotal.data.network.client.login.LoginClient
 import com.rfz.appflotal.data.network.client.originaldesign.CrudOriginalDesignClient
@@ -238,8 +238,8 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    fun provideDisassemblyCauseClient(retrofit: Retrofit): DisassemblyCauseClient {
-        return retrofit.create(DisassemblyCauseClient::class.java)
+    fun provideDisassemblyCauseClient(retrofit: Retrofit): DisassemblyCauseService {
+        return retrofit.create(DisassemblyCauseService::class.java)
     }
 
 

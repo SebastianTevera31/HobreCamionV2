@@ -1,24 +1,21 @@
 package com.rfz.appflotal.presentation.ui.assembly.screen
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,21 +27,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.tire.Tire
+import com.rfz.appflotal.presentation.commons.CircularLoading
+import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireUiState
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.OdometerValidation
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.OperationStatus
-import com.rfz.appflotal.presentation.ui.assembly.viewmodel.ScreenLoadStatus
 import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
@@ -61,11 +58,11 @@ fun AssemblyTireScreen(
     modifier: Modifier = Modifier,
 ) {
     val uiState = viewModel.uiState.collectAsState()
-    val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(uiState.value.operationStatus) {
-        // Agregar mensaje de rueda montada con exito
         if (uiState.value.operationStatus is OperationStatus.Success) {
+            Toast.makeText(context, context.getString(R.string.montaje_exitoso), Toast.LENGTH_SHORT).show()
             viewModel.cleanUiState()
             onBack()
         }
@@ -85,7 +82,7 @@ fun AssemblyTireScreen(
         validateOdometer = { viewModel.validateOdometer(it) },
         updateTire = { viewModel.updateTireField(it) },
         onError = {
-            snackbar.showSnackbar((uiState.value.operationStatus as OperationStatus.Error).message)
+            Toast.makeText(context, context.getString(R.string.error_montaje), Toast.LENGTH_SHORT).show()
             viewModel.restartOperationStatus()
         },
         onBack = {
@@ -157,7 +154,7 @@ fun AssemblyTireView(
             )
         },
         bottomBar = {
-            if (uiState.screenLoadStatus == ScreenLoadStatus.Success) {
+            if (uiState.screenLoadStatus == OperationStatus.Success) {
                 CompleteFormButton(
                     textButton = stringResource(R.string.montar),
                     isValid = isFormValid
@@ -168,61 +165,32 @@ fun AssemblyTireView(
         }
     ) { innerPadding ->
         when (uiState.screenLoadStatus) {
-            ScreenLoadStatus.Error -> {
-                val errorMessage = stringResource(R.string.error_carga_datos)
-                Box(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Image(
-                            painter = painterResource(R.drawable.camion_descompuesto),
-                            contentDescription = null,
-                            modifier = Modifier.size(240.dp)
-                        )
-                        Text(
-                            errorMessage,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                    }
-                }
+            OperationStatus.Error -> {
+                ErrorView(modifier = Modifier.padding(innerPadding))
             }
 
-            ScreenLoadStatus.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize()
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
+            OperationStatus.Loading -> {
+                CircularLoading(modifier.padding(innerPadding))
             }
 
-            ScreenLoadStatus.Success -> {
+            OperationStatus.Success -> {
                 Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .padding(innerPadding)
                         .fillMaxSize()
                         .verticalScroll(scroll)
-                        .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                        .safeContentPadding()
                 ) {
-
-                    Spacer(modifier = Modifier.padding(top = 16.dp))
-
                     CatalogDropdown(
                         catalog = uiState.axleList,
                         selected = axleSelected?.description,
                         errorText = axleSelected.validate(),
                         onSelected = { axleSelected = it },
                         label = stringResource(R.string.eje),
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                     )
-
-                    Spacer(modifier = Modifier.padding(top = 16.dp))
 
                     CatalogDropdown(
                         catalog = uiState.tireList,
@@ -233,8 +201,7 @@ fun AssemblyTireView(
                             tireSelected = it
                         },
                         label = stringResource(R.string.llantas),
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     AnimatedVisibility(
@@ -244,28 +211,31 @@ fun AssemblyTireView(
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
                         TireInfoCard(
-                            tire = uiState.currentTire
+                            tire = uiState.currentTire,
+                            modifier.width(240.dp)
                         )
                     }
 
-                    SectionHeader(
-                        text = stringResource(R.string.odometro),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(
-                        stringResource(R.string.registro_actual, uiState.currentOdometer),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    NumberField(
-                        value = odometer,
-                        onValueChange = {
-                            validateOdometer(it)
-                            odometer = it
-                        },
-                        placeHolderText = uiState.currentOdometer,
-                        label = "",
-                        errorText = uiState.isOdometerValid.message,
-                    )
+                    Column {
+                        SectionHeader(
+                            text = stringResource(R.string.odometro),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Text(
+                            stringResource(R.string.registro_actual, uiState.currentOdometer),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        NumberField(
+                            value = odometer,
+                            onValueChange = {
+                                validateOdometer(it)
+                                odometer = it
+                            },
+                            placeHolderText = uiState.currentOdometer,
+                            label = "",
+                            errorText = uiState.isOdometerValid.message,
+                        )
+                    }
                 }
             }
         }
@@ -303,7 +273,7 @@ fun AssemblyTireViewPreview() {
                 axleList = emptyList(),
                 currentOdometer = "123456",
                 isOdometerValid = OdometerValidation.VALID,
-                screenLoadStatus = ScreenLoadStatus.Success
+                screenLoadStatus = OperationStatus.Success
             ),
             validateOdometer = {},
             onBack = {},

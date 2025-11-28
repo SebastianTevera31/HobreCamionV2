@@ -21,9 +21,8 @@ import com.rfz.appflotal.data.model.tire.Tire
 @Composable
 fun TireInfoCard(tire: Tire?, modifier: Modifier = Modifier) {
     if (tire != null) {
-
         Card(
-            modifier = modifier.width(240.dp),
+            modifier = modifier,
             colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainerHigh),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {

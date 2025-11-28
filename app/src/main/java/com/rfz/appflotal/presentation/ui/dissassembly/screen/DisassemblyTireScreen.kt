@@ -1,0 +1,204 @@
+package com.rfz.appflotal.presentation.ui.dissassembly.screen
+
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.CatalogItem
+import com.rfz.appflotal.data.model.tire.Tire
+import com.rfz.appflotal.presentation.commons.CircularLoading
+import com.rfz.appflotal.presentation.commons.ErrorView
+import com.rfz.appflotal.presentation.commons.SimpleTopBar
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
+import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
+import com.rfz.appflotal.presentation.ui.components.TireInfoCard
+import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyUiState
+import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
+import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.OperationStatus
+
+@Composable
+fun DisassemblyScreen(
+    positionTire: String,
+    viewModel: DisassemblyViewModel,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val uiState = viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.loadData(tirePosition = positionTire)
+    }
+
+    LaunchedEffect(uiState.value.operationStatus) {
+        if (uiState.value.operationStatus == OperationStatus.Success) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.desmontaje_exitoso), Toast.LENGTH_SHORT
+            ).show()
+            viewModel.cleanUiState()
+            onBack()
+        }
+    }
+
+    DisassemblyTireView(
+        uiState = uiState.value,
+        onBack = onBack,
+        onError = {
+            Toast.makeText(
+                context,
+                context.getString(R.string.error_desmontaje), Toast.LENGTH_SHORT
+            ).show()
+            viewModel.restartOperationStatus()
+        },
+        onDismount = { causeId, destinationId ->
+            viewModel.dismountTire(causeId, destinationId)
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+fun DisassemblyTireView(
+    uiState: DisassemblyUiState,
+    onBack: () -> Unit,
+    onDismount: (causeId: Int, destinationId: Int) -> Unit,
+    onError: suspend () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var causesSelected: CatalogItem? by remember { mutableStateOf(null) }
+    var destinationSelected: CatalogItem? by remember { mutableStateOf(null) }
+
+    val areInputsValid = {
+        causesSelected != null && destinationSelected != null
+    }
+
+    val isFormValid by remember(causesSelected, destinationSelected) {
+        derivedStateOf {
+            areInputsValid()
+        }
+    }
+
+    when (uiState.operationStatus) {
+        OperationStatus.Error -> {
+            LaunchedEffect(uiState.operationStatus) {
+                causesSelected = null
+                destinationSelected = null
+                onError()
+            }
+        }
+
+        OperationStatus.Loading -> {
+            AwaitDialog()
+        }
+
+        else -> {}
+    }
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            SimpleTopBar(
+                title = stringResource(R.string.desmontaje),
+                subTitle = uiState.positionTire,
+                onBack = onBack
+            )
+        },
+        bottomBar = {
+            CompleteFormButton(
+                textButton = stringResource(R.string.desmontar),
+                isValid = isFormValid
+            ) {
+                if (causesSelected != null && destinationSelected != null) {
+                    onDismount(causesSelected?.id ?: 0, destinationSelected?.id ?: 0)
+                }
+            }
+        }
+    ) { innerPadding ->
+        when (uiState.screenLoadStatus) {
+            OperationStatus.Error -> {
+                ErrorView(modifier.padding(innerPadding))
+            }
+
+            OperationStatus.Loading -> {
+                CircularLoading(modifier.padding(innerPadding))
+            }
+
+            OperationStatus.Success -> {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .safeContentPadding()
+                ) {
+                    TireInfoCard(
+                        uiState.tire, modifier = Modifier.height(140.dp)
+                    )
+                    CatalogDropdown(
+                        catalog = uiState.disassemblyCauseList,
+                        selected = causesSelected?.description,
+                        errorText = null,
+                        label = stringResource(R.string.motivo_de_desmontaje),
+                        onSelected = {},
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    CatalogDropdown(
+                        catalog = uiState.destinationList,
+                        selected = destinationSelected?.description,
+                        errorText = null,
+                        onSelected = {},
+                        label = stringResource(R.string.destino),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@Preview(showBackground = true, showSystemUi = true)
+fun DisassemblyTireViewPreview() {
+    HombreCamionTheme {
+        DisassemblyTireView(
+            onError = {},
+            onBack = {},
+            onDismount = { _, _ -> },
+            uiState = DisassemblyUiState(
+                positionTire = "P1",
+                tire = Tire(
+                    id = 101,
+                    description = "Michelin - size: 205/55R16",
+                    size = "205/55R16",
+                    brand = "Michelin",
+                    model = "Primacy 4",
+                    thread = 7.5,
+                    loadingCapacity = "615"
+                ),
+                screenLoadStatus = OperationStatus.Success
+            ),
+        )
+    }
+}

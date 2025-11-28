@@ -37,4 +37,14 @@ class LocalAssemblyDataSource @Inject constructor(
             Result.failure(DataError.Unknown())
         }
     }
+
+    suspend fun deleteAssemblyTire(position: String) = withContext(Dispatchers.IO) {
+        try {
+            Result.success(assemblyTireDao.deleteAssemblyTire(position = position))
+        } catch (e: SQLiteException) {
+            Result.failure(DataError.Local(e))
+        } catch (_: Exception) {
+            Result.failure(DataError.Unknown())
+        }
+    }
 }

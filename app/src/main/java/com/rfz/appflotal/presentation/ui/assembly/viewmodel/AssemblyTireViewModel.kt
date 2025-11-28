@@ -6,7 +6,7 @@ import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.tire.toTire
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
-import com.rfz.appflotal.domain.assembly.AddAssemblyTire
+import com.rfz.appflotal.domain.assembly.AddAssemblyTireUseCase
 import com.rfz.appflotal.domain.axle.GetAxlesUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AssemblyTireViewModel @Inject constructor(
     private val tireUseCase: TireListUsecase,
-    private val addAssemblyTire: AddAssemblyTire,
+    private val addAssemblyTire: AddAssemblyTireUseCase,
     private val getAxleUseCase: GetAxlesUseCase,
     private val hombreCamionRepository: HombreCamionRepository
 ) : ViewModel() {
@@ -44,9 +44,9 @@ class AssemblyTireViewModel @Inject constructor(
             val odometer = odometerDeferred.await()
 
             if (tiresResult.isSuccess && axleResult.isSuccess) {
-                val tiresList = tiresResult.getOrThrow()
-                    .filter { it.destination == "Stock" }
-                    .map { it.toTire() }
+                val tiresList = tiresResult.getOrNull()
+                    ?.filter { it.destination == "Stock" }
+                    ?.map { it.toTire() } ?: emptyList()
 
                 val axleList = axleResult.getOrNull() ?: emptyList()
 
@@ -57,13 +57,13 @@ class AssemblyTireViewModel @Inject constructor(
                         tireList = tiresList,
                         axleList = axleList,
                         isOdometerValid = OdometerValidation.VALID,
-                        screenLoadStatus = ScreenLoadStatus.Success
+                        screenLoadStatus = OperationStatus.Success
                     )
                 }
             } else {
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
-                        screenLoadStatus = ScreenLoadStatus.Error
+                        screenLoadStatus = OperationStatus.Error
                     )
                 }
             }
@@ -100,9 +100,9 @@ class AssemblyTireViewModel @Inject constructor(
                 currentUiState.copy(
                     operationStatus = result.fold(
                         onSuccess = {
-                            OperationStatus.Success("OK")
+                            OperationStatus.Success
                         },
-                        onFailure = { OperationStatus.Error("Error") }
+                        onFailure = { OperationStatus.Error }
                     )
                 )
             }
