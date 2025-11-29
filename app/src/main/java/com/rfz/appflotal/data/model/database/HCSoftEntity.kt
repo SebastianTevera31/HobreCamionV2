@@ -66,6 +66,8 @@ data class CoordinatesEntity(
     val xPosition: Int,
     @ColumnInfo(name = "yPosition")
     val yPosition: Int,
+    @ColumnInfo("lastInspection")
+    val lastInspection: String = "",
 )
 
 @Entity(tableName = "sensor_data")

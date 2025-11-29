@@ -128,7 +128,6 @@ fun MonitorScreen(
                         if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                             DiagramaMonitorScreen(
                                 paymentPlan = paymentPlan,
-                                isInspectionAvailable = monitorUiState.inspectionAvailable,
                                 tireUiState = tireUiState,
                                 image = monitorUiState.imageBitmap,
                                 updateSelectedTire = { selectedTire ->

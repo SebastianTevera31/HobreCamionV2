@@ -71,7 +71,6 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 @Composable
 fun DiagramaMonitorScreen(
     paymentPlan: PaymentPlanType,
-    isInspectionAvailable: Boolean,
     tireUiState: TireUiState,
     image: Bitmap?,
     imageDimens: Pair<Int, Int>,
@@ -86,7 +85,7 @@ fun DiagramaMonitorScreen(
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
-    val panelDimension = 380.dp
+    val panelDimension = if (tireUiState.isAssembled) 460.dp else 380.dp
 
     // Actualizar rueda
     tireSelected = tireUiState.currentTire
@@ -128,7 +127,6 @@ fun DiagramaMonitorScreen(
                 PanelSensor(
                     paymentPlan = paymentPlan,
                     isAssembled = tireUiState.isAssembled,
-                    isInspectionAvailable = isInspectionAvailable,
                     wheel = tireUiState.currentTire,
                     temperature = tireUiState.temperature.first,
                     pressure = tireUiState.pressure.first,
@@ -319,7 +317,6 @@ fun CeldaAlerta(wheel: String, alertMessage: String, modifier: Modifier = Modifi
 @Composable
 fun PanelSensor(
     paymentPlan: PaymentPlanType,
-    isInspectionAvailable: Boolean,
     isAssembled: Boolean,
     wheel: String,
     temperature: Float,
@@ -335,6 +332,8 @@ fun PanelSensor(
     onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val (tirePanelWeight, alertPanelWeight) = 0.65f to 0.35f
+
     val activeAlerts =
         remember(temperatureStatus, pressureStatus, flatTireStatus, tireRemovingStatus) {
             buildList {
@@ -362,7 +361,7 @@ fun PanelSensor(
             colors = CardDefaults.cardColors(Color.White),
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.75f),
+                .weight(tirePanelWeight),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(
@@ -414,6 +413,7 @@ fun PanelSensor(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(dimensionResource(R.dimen.thin_dimen))
                             .heightIn(min = 110.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
@@ -438,12 +438,10 @@ fun PanelSensor(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             if (isAssembled) {
-                                if (isInspectionAvailable) {
-                                    MonitorMenuButton(
-                                        text = stringResource(R.string.inspeccionar),
-                                        onClick = onInspectClick
-                                    )
-                                }
+                                MonitorMenuButton(
+                                    text = stringResource(R.string.inspeccionar),
+                                    onClick = onInspectClick
+                                )
                                 MonitorMenuButton(
                                     text = stringResource(R.string.desmontar),
                                     onClick = { onDisassemblyClick(wheel, temperature, pressure) }
@@ -476,7 +474,7 @@ fun PanelSensor(
             colors = CardDefaults.cardColors(Color.White),
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.25f),
+                .weight(alertPanelWeight),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(
@@ -603,8 +601,7 @@ fun PanelSensorViewPreview() {
             modifier = Modifier
                 .safeDrawingPadding()
                 .height(420.dp)
-                .padding(bottom = dimensionResource(R.dimen.small_dimen)),
-            isInspectionAvailable = false
+                .padding(bottom = dimensionResource(R.dimen.small_dimen))
         )
     }
 }

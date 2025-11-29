@@ -94,14 +94,13 @@ class MonitorViewModel @Inject constructor(
 
                     val lastOdometer = LocalDateTime.parse(user.dateLastOdometer)
                     val currentDate = LocalDateTime.now()
-                    val isAvailable = currentDate.isAfter(lastOdometer)
+
 
                     _monitorUiState.update { currentUiState ->
                         currentUiState.copy(
                             monitorId = user.id_monitor,
                             lastOdometer = user.odometer,
                             dateOdometer = user.dateLastOdometer,
-                            inspectionAvailable = isAvailable
                         )
                     }
                 }
