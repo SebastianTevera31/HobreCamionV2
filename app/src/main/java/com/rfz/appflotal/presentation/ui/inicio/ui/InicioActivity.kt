@@ -34,7 +34,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.savedstate.serialization.saved
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
@@ -69,6 +68,8 @@ import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.ui.assembly.screen.AssemblyTireScreen
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
 import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
+import com.rfz.appflotal.presentation.ui.dissassembly.screen.DisassemblyTireScreen
+import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
@@ -125,6 +126,8 @@ class InicioActivity : ComponentActivity() {
     private val marcaRenovadosScreen: MarcaRenovadosViewModel by viewModels()
 
     private val assemblyTireViewModel: AssemblyTireViewModel by viewModels()
+
+    private val disassemblyTireViewModel: DisassemblyViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -366,10 +369,24 @@ class InicioActivity : ComponentActivity() {
                                     homeViewModel = homeViewModel,
                                     registerMonitorViewModel = registerMonitorViewModel,
                                     onInspectClick = { tire, temp, pressure ->
-                                        navController.navigate("${NavScreens.INSPECCION}/$tire?temp=$temp&pressure=$pressure")
+                                        val route =
+                                            "${NavScreens.INSPECCION}/${HombreCamionScreens.MONITOR.name}?tire=$tire&temp=$temp&pressure=$pressure"
+                                        navController.navigate(route) {
+                                            launchSingleTop = true
+                                        }
                                     },
                                     onAssemblyClick = { tire ->
-                                        navController.navigate("${NavScreens.MONTAJE}/$tire")
+                                        navController.navigate("${NavScreens.MONTAJE}/$tire") {
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                    onDisassemblyClick = { tire, temp, pressure ->
+                                        val route =
+                                            "${NavScreens.INSPECCION}/${NavScreens.DESMONTAJE}?tire=$tire&temp=$temp&pressure=$pressure"
+                                        navController.navigate(route)
+                                        {
+                                            launchSingleTop = true
+                                        }
                                     },
                                     updateUserData = { selectedLanguage ->
                                         updateUserViewModel.fetchUserData(
@@ -398,7 +415,8 @@ class InicioActivity : ComponentActivity() {
                                     }
                                 }
 
-                                val result = navController.currentBackStackEntry?.savedStateHandle?.getStateFlow(
+                                val result =
+                                    navController.currentBackStackEntry?.savedStateHandle?.getStateFlow(
                                         "montaje_result",
                                         false
                                     )
@@ -418,10 +436,23 @@ class InicioActivity : ComponentActivity() {
                                     },
                                     modifier = Modifier.fillMaxSize(),
                                     onInspectClick = { tire, temp, pressure ->
-                                        navController.navigate("${NavScreens.INSPECCION}/$tire?temp=$temp&pressure=$pressure")
+                                        val route =
+                                            "${NavScreens.INSPECCION}/${HombreCamionScreens.MONITOR.name}?tire=$tire&temp=$temp&pressure=$pressure"
+                                        navController.navigate(route) {
+                                            launchSingleTop = true
+                                        }
                                     },
                                     onAssemblyClick = { tire ->
-                                        navController.navigate("${NavScreens.MONTAJE}/$tire")
+                                        navController.navigate("${NavScreens.MONTAJE}/$tire") {
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                    onDisassemblyClick = { tire, temp, pressure ->
+                                        val route =
+                                            "${NavScreens.INSPECCION}/${NavScreens.DESMONTAJE}?tire=$tire&temp=$temp&pressure=$pressure"
+                                        navController.navigate(route) {
+                                            launchSingleTop = true
+                                        }
                                     }
                                 )
                             }
@@ -618,8 +649,9 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             composable(
-                                route = "${NavScreens.INSPECCION}/{tire}?temp={temp}&pressure={pressure}",
+                                route = "${NavScreens.INSPECCION}/{destination}?tire={tire}&temp={temp}&pressure={pressure}",
                                 arguments = listOf(
+                                    navArgument("destination") { type = NavType.StringType },
                                     navArgument("tire") { type = NavType.StringType },
                                     navArgument("temp") {
                                         type = NavType.FloatType; defaultValue = 0
@@ -629,6 +661,8 @@ class InicioActivity : ComponentActivity() {
                                     }
                                 )) { backStackEntry ->
 
+                                val destination = backStackEntry.arguments?.getString("destination")
+                                    ?: HombreCamionScreens.MONITOR.name
                                 val tire = backStackEntry.arguments?.getString("tire") ?: ""
                                 val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
                                 val pressure = backStackEntry.arguments?.getFloat("pressure") ?: 0.0
@@ -637,10 +671,26 @@ class InicioActivity : ComponentActivity() {
                                     tire = tire,
                                     temperature = temp.toFloat(),
                                     pressure = pressure.toFloat(),
-                                    onBack = { navController.popBackStack() },
+                                    onBack = {
+                                        navController.navigate(HombreCamionScreens.MONITOR.name) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                            popUpTo(HombreCamionScreens.MONITOR.name)
+                                        }
+                                    },
                                     onFinish = { tire ->
-                                        navController.popBackStack()
-                                        monitorViewModel.getSensorDataByWheel(tire)
+                                        if (destination == NavScreens.DESMONTAJE) {
+                                            navController.navigate("${NavScreens.DESMONTAJE}/${tire}") {
+                                                launchSingleTop = true
+                                            }
+                                        } else {
+                                            navController.navigate(HombreCamionScreens.MONITOR.name) {
+                                                launchSingleTop = true
+                                                restoreState = true
+                                                popUpTo(HombreCamionScreens.MONITOR.name)
+                                            }
+                                            monitorViewModel.getSensorDataByWheel(tire)
+                                        }
                                     },
                                     viewModel = inspectionViewModel
                                 )
@@ -658,6 +708,29 @@ class InicioActivity : ComponentActivity() {
                                     viewModel = assemblyTireViewModel,
                                     onBack = {
                                         navController.popBackStack()
+                                    }
+                                )
+                            }
+
+                            composable(
+                                route = "${NavScreens.DESMONTAJE}/{tire}",
+                                arguments = listOf(
+                                    navArgument("tire") { type = NavType.StringType }
+                                )
+                            ) { backStackEntry ->
+                                val positionTire = backStackEntry.arguments?.getString("tire")
+                                DisassemblyTireScreen(
+                                    positionTire = positionTire ?: "",
+                                    viewModel = disassemblyTireViewModel,
+                                    onBack = {
+                                        navController.popBackStack()
+                                    },
+                                    onFinish = {
+                                        navController.navigate(HombreCamionScreens.MONITOR.name) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                            popUpTo(HombreCamionScreens.MONITOR.name)
+                                        }
                                     }
                                 )
                             }

@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.MonitorMenuButton
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
@@ -66,7 +67,8 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 
 @Composable
 fun DiagramaMonitorScreen(
-    isInspectionActive: Boolean,
+    paymentPlan: PaymentPlanType,
+    isInspectionAvailable: Boolean,
     tireUiState: TireUiState,
     image: Bitmap?,
     imageDimens: Pair<Int, Int>,
@@ -74,13 +76,15 @@ fun DiagramaMonitorScreen(
     getSensorData: (String) -> Unit,
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,
+    onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     tires: List<MonitorTire>?,
     modifier: Modifier = Modifier
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
-    val panelDimension = if (!isInspectionActive) 320.dp else 420.dp
+    val panelDimension = if (paymentPlan != PaymentPlanType.Complete) 320.dp else
+        if (tireUiState.isAssembled) 420.dp else 320.dp
 
     // Actualizar rueda
     tireSelected = tireUiState.currentTire
@@ -113,8 +117,9 @@ fun DiagramaMonitorScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 ) {
                     PanelSensor(
-                        isInspectionActive = isInspectionActive,
+                        paymentPlan = paymentPlan,
                         isAssembled = tireUiState.isAssembled,
+                        isInspectionAvailable = isInspectionAvailable,
                         wheel = tireUiState.currentTire,
                         temperature = tireUiState.temperature.first,
                         pressure = tireUiState.pressure.first,
@@ -132,6 +137,9 @@ fun DiagramaMonitorScreen(
                             )
                         },
                         onAssemblyClick = { onAssemblyClick(tireUiState.currentTire) },
+                        onDisassemblyClick = { tire, temperature, pressure ->
+                            onDisassemblyClick(tire, temperature, pressure)
+                        },
                         modifier = Modifier
                             .height(panelDimension)
                             .padding(bottom = dimensionResource(R.dimen.small_dimen))
@@ -307,7 +315,8 @@ fun CeldaAlerta(wheel: String, alertMessage: String, modifier: Modifier = Modifi
 
 @Composable
 fun PanelSensor(
-    isInspectionActive: Boolean,
+    paymentPlan: PaymentPlanType,
+    isInspectionAvailable: Boolean,
     isAssembled: Boolean,
     wheel: String,
     temperature: Float,
@@ -320,6 +329,7 @@ fun PanelSensor(
     batteryStatus: SensorAlerts,
     onInspectClick: () -> Unit,
     onAssemblyClick: () -> Unit,
+    onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val activeAlerts =
@@ -413,18 +423,24 @@ fun PanelSensor(
                         )
                     }
 
-                    if (isInspectionActive && isAssembled) {
-                        MonitorMenuButton(
-                            text = stringResource(R.string.inspeccionar),
-                            onClick = onInspectClick
-                        )
-                    }
-
-                    if (!isAssembled) {
-                        MonitorMenuButton(
-                            text = stringResource(R.string.montar),
-                            onClick = onAssemblyClick
-                        )
+                    if (paymentPlan == PaymentPlanType.Complete) {
+                        if (isAssembled) {
+                            if (isInspectionAvailable) {
+                                MonitorMenuButton(
+                                    text = stringResource(R.string.inspeccionar),
+                                    onClick = onInspectClick
+                                )
+                            }
+                            MonitorMenuButton(
+                                text = stringResource(R.string.desmontar),
+                                onClick = { onDisassemblyClick(wheel, temperature, pressure) }
+                            )
+                        } else {
+                            MonitorMenuButton(
+                                text = stringResource(R.string.montar),
+                                onClick = onAssemblyClick
+                            )
+                        }
                     }
                 } else {
                     Text(
@@ -558,12 +574,12 @@ fun BatteryAlertIcon(batteryStatus: SensorAlerts, modifier: Modifier = Modifier)
 fun PanelSensorViewPreview() {
     HombreCamionTheme {
         PanelSensor(
-            isInspectionActive = true,
+            paymentPlan = PaymentPlanType.Complete,
             wheel = "P1",
             temperature = 40.0f,
             pressure = 3f,
             timestamp = "",
-            isAssembled = false,
+            isAssembled = true,
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
             pressureStatus = SensorAlerts.LOW_PRESSURE,
             batteryStatus = SensorAlerts.NO_DATA,
@@ -571,10 +587,12 @@ fun PanelSensorViewPreview() {
             tireRemovingStatus = SensorAlerts.REMOVAL,
             onInspectClick = {},
             onAssemblyClick = {},
+            onDisassemblyClick = { _, _, _ -> },
             modifier = Modifier
                 .safeDrawingPadding()
                 .height(420.dp)
-                .padding(bottom = dimensionResource(R.dimen.small_dimen))
+                .padding(bottom = dimensionResource(R.dimen.small_dimen)),
+            isInspectionAvailable = true
         )
     }
 }

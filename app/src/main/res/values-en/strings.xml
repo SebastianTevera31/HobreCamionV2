@@ -248,6 +248,8 @@
     <string name="destino">Destination</string>
     <string name="desmontar">Dismount</string>
     <string name="desmontaje">Dismounting</string>
+    <string name="error_aceptar_terminos">Error accepting the terms: %1$s</string>
+    <string name="error_establecer_sesion">An error occurred while establishing your session. Please try again.</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

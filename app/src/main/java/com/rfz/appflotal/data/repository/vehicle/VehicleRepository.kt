@@ -7,16 +7,14 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 interface VehicleRepository {
-    suspend fun getLastOdometer(): LastOdometerResponseDto?
+    suspend fun getLastOdometer(token: String): LastOdometerResponseDto?
 }
 
 class VehicleRepositoryImpl @Inject constructor(
     private val remoteVehicleDataSource: RemoteVehicleDataSource,
-    private val getTasksUseCase: GetTasksUseCase,
 ) :
     VehicleRepository {
-    override suspend fun getLastOdometer(): LastOdometerResponseDto? {
-        val token = getTasksUseCase().first().first().fld_token
+    override suspend fun getLastOdometer(token: String): LastOdometerResponseDto? {
         val result = remoteVehicleDataSource.fetchLastService(token)
         return if (result.isSuccess) {
             result.getOrNull()?.ifEmpty { emptyList() }[0]

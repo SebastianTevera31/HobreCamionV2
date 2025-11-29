@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
@@ -54,6 +56,7 @@ fun MonitorScreen(
     navigateUp: () -> Unit,
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,
+    onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
 ) {
@@ -124,7 +127,8 @@ fun MonitorScreen(
                         monitorViewModel.getBitmapImage()
                         if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                             DiagramaMonitorScreen(
-                                isInspectionActive = paymentPlan == PaymentPlanType.Complete,
+                                paymentPlan = paymentPlan,
+                                isInspectionAvailable = monitorUiState.inspectionAvailable,
                                 tireUiState = tireUiState,
                                 image = monitorUiState.imageBitmap,
                                 updateSelectedTire = { selectedTire ->
@@ -144,6 +148,9 @@ fun MonitorScreen(
                                 },
                                 onAssemblyClick = { tire ->
                                     onAssemblyClick(tire)
+                                },
+                                onDisassemblyClick = { tire, temperature, pressure ->
+                                    onDisassemblyClick(tire, temperature, pressure)
                                 },
                                 modifier = Modifier.padding(8.dp),
                             )

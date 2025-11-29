@@ -92,6 +92,7 @@ fun HomeScreen(
     updateUserData: (String) -> Unit,
     onInspectClick: (tire: String, temp: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,
+    onDisassemblyClick: (tire: String, temp: Float, pressure: Float) -> Unit,
     monitorViewModel: MonitorViewModel,
 ) {
     val context = LocalContext.current
@@ -364,6 +365,13 @@ fun HomeScreen(
                         onInspectClick(tire, temp, pressure)
                     },
                     onAssemblyClick = { tire -> onAssemblyClick(tire) },
+                    onDisassemblyClick = { tire, temp, pressure ->
+                        onDisassemblyClick(
+                            tire,
+                            temp,
+                            pressure
+                        )
+                    },
                     onDialogCancel = { monitorId ->
                         if (monitorId == 0) {
                             CoroutineScope(Dispatchers.IO).launch {

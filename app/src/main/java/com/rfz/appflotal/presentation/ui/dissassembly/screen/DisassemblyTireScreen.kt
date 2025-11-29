@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -36,19 +37,27 @@ import com.rfz.appflotal.presentation.ui.components.TireInfoCard
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyUiState
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.OperationStatus
+import com.rfz.appflotal.presentation.ui.utils.validate
 
 @Composable
-fun DisassemblyScreen(
+fun DisassemblyTireScreen(
     positionTire: String,
     viewModel: DisassemblyViewModel,
     onBack: () -> Unit,
+    onFinish: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(positionTire) {
         viewModel.loadData(tirePosition = positionTire)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.cleanUiState()
+        }
     }
 
     LaunchedEffect(uiState.value.operationStatus) {
@@ -57,8 +66,7 @@ fun DisassemblyScreen(
                 context,
                 context.getString(R.string.desmontaje_exitoso), Toast.LENGTH_SHORT
             ).show()
-            viewModel.cleanUiState()
-            onBack()
+            onFinish()
         }
     }
 
@@ -138,11 +146,15 @@ fun DisassemblyTireView(
     ) { innerPadding ->
         when (uiState.screenLoadStatus) {
             OperationStatus.Error -> {
-                ErrorView(modifier.padding(innerPadding))
+                ErrorView(modifier
+                    .safeContentPadding()
+                    .padding(innerPadding))
             }
 
             OperationStatus.Loading -> {
-                CircularLoading(modifier.padding(innerPadding))
+                CircularLoading(modifier
+                    .safeContentPadding()
+                    .padding(innerPadding))
             }
 
             OperationStatus.Success -> {
@@ -150,8 +162,8 @@ fun DisassemblyTireView(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier
-                        .padding(innerPadding)
                         .safeContentPadding()
+                        .padding(innerPadding)
                 ) {
                     TireInfoCard(
                         uiState.tire, modifier = Modifier.height(140.dp)
@@ -159,16 +171,18 @@ fun DisassemblyTireView(
                     CatalogDropdown(
                         catalog = uiState.disassemblyCauseList,
                         selected = causesSelected?.description,
-                        errorText = null,
+                        errorText = causesSelected.validate(),
                         label = stringResource(R.string.motivo_de_desmontaje),
-                        onSelected = {},
+                        onSelected = {
+                            causesSelected = it
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                     CatalogDropdown(
                         catalog = uiState.destinationList,
                         selected = destinationSelected?.description,
-                        errorText = null,
-                        onSelected = {},
+                        errorText = destinationSelected.validate(),
+                        onSelected = { destinationSelected = it },
                         label = stringResource(R.string.destino),
                         modifier = Modifier.fillMaxWidth()
                     )

@@ -74,6 +74,13 @@ class DisassemblyViewModel @Inject constructor(
                         destinationList = destinationsList,
                         tire = tire,
                         disassemblyCauseList = disassemblyList,
+                        screenLoadStatus = OperationStatus.Success
+                    )
+                }
+            } else {
+                _uiState.update { currentUiState ->
+                    currentUiState.copy(
+                        screenLoadStatus = OperationStatus.Error
                     )
                 }
             }

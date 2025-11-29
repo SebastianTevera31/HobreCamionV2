@@ -22,7 +22,7 @@ import com.rfz.appflotal.data.model.database.SensorDataEntity
         AppHCEntity::class, DataframeEntity::class, CoordinatesEntity::class,
         SensorDataEntity::class, AssemblyTireEntity::class, AxleEntity::class,
     ],
-    version = 18,
+    version = 20,
     exportSchema = false
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {

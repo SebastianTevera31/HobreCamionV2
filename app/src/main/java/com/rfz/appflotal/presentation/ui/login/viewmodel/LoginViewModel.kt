@@ -24,12 +24,14 @@ import com.rfz.appflotal.data.model.login.response.LoginState.Idle
 import com.rfz.appflotal.data.model.login.response.LoginState.Loading
 import com.rfz.appflotal.data.model.login.response.LoginState.Success
 import com.rfz.appflotal.data.model.login.response.Result
+import com.rfz.appflotal.data.repository.vehicle.VehicleRepository
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.inicio.ui.arePermissionsGranted
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,7 +53,9 @@ class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val addTaskUseCase: AddTaskUseCase,
     private val getTasksUseCase: GetTasksUseCase,
-    private val mapper: AppFlotalMapper
+    private val vehicleRepository: VehicleRepository,
+    private val mapper: AppFlotalMapper,
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _navigateToHome = MutableLiveData<Triple<Boolean, PaymentPlanType, Boolean>>()
 
@@ -158,18 +162,24 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun handleLoginResponse(loginResponse: LoginResponse, ctx: Context) {
+    private suspend fun handleLoginResponse(loginResponse: LoginResponse, ctx: Context) {
         when (loginResponse.id) {
             200 -> {
-                val paymentPlan = when (loginResponse.paymentPlan) {
-                    PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
-                    PaymentPlanType.OnlyTPMS.planName -> PaymentPlanType.OnlyTPMS
-                    else -> PaymentPlanType.None
+                try {
+                    onTaskCreated(loginResponse)
+                    val paymentPlan = when (loginResponse.paymentPlan) {
+                        PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
+                        PaymentPlanType.OnlyTPMS.planName -> PaymentPlanType.OnlyTPMS
+                        else -> PaymentPlanType.None
+                    }
+                    _navigateToHome.value =
+                        Triple(true, paymentPlan, loginResponse.termsGranted)
+                    _loginState.value = Success(loginResponse)
+                } catch (e: Exception) {
+                    val errorMessage = context.getString(R.string.error_establecer_sesion)
+                    _loginState.value = Error(errorMessage)
+                    _loginMessage.value = errorMessage
                 }
-                onTaskCreated(loginResponse)
-                _navigateToHome.value =
-                    Triple(true, paymentPlan, loginResponse.termsGranted)
-                _loginState.value = Success(loginResponse)
             }
 
             -100 -> {
@@ -187,14 +197,16 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onTaskCreated(loginResponse: LoginResponse) {
+    private suspend fun onTaskCreated(loginResponse: LoginResponse) {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         loginResponse.fecha = dateFormat.format(Date())
 
-        viewModelScope.launch {
-            val entity = mapper.fromLoginResponseToEntity(loginResponse)
-            addTaskUseCase(entity)
-        }
+        val odometerData = vehicleRepository.getLastOdometer(loginResponse.fld_token)
+        loginResponse.odometer = odometerData?.lastOdometer ?: 0
+        loginResponse.dateLastOdometer = odometerData?.dateOdometer ?: ""
+
+        val entity = mapper.fromLoginResponseToEntity(loginResponse)
+        addTaskUseCase(entity)
     }
 
     fun onNavigateToHomeCompleted() {
@@ -218,7 +230,7 @@ class LoginViewModel @Inject constructor(
 
                 }
             } catch (e: Exception) {
-                _loginMessage.value = "Error al aceptar los términos: ${e.message}"
+                _loginMessage.value = context.getString(R.string.error_aceptar_terminos, e.message)
             }
         }
     }

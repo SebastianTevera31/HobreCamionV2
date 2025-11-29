@@ -5,8 +5,10 @@ import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getBitmapFromDrawable
+import com.rfz.appflotal.core.util.Commons.getDateObject
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -34,6 +36,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 enum class SensorAlerts(@param:StringRes val message: Int) {
@@ -85,20 +88,29 @@ class MonitorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val userData = getTasksUseCase().first()
+            getTasksUseCase().collect { data ->
+                if (data.isNotEmpty()) {
+                    val user = data[0]
 
+                    val lastOdometer = LocalDateTime.parse(user.dateLastOdometer)
+                    val currentDate = LocalDateTime.now()
+                    val isAvailable = currentDate.isAfter(lastOdometer)
+
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            monitorId = user.id_monitor,
+                            lastOdometer = user.odometer,
+                            dateOdometer = user.dateLastOdometer,
+                            inspectionAvailable = isAvailable
+                        )
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
             wifiUseCase().collect { status ->
                 _wifiStatus.update { status }
-            }
-
-            if (userData.isNotEmpty()) {
-                val user = userData[0]
-
-                _monitorUiState.update { currentUiState ->
-                    currentUiState.copy(
-                        monitorId = user.id_monitor,
-                    )
-                }
             }
         }
 
