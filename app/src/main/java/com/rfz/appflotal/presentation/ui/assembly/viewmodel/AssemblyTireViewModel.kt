@@ -94,7 +94,7 @@ class AssemblyTireViewModel @Inject constructor(
                 )
             )
 
-            async { hombreCamionRepository.updateOdometer(odometer.toInt()) }
+            async { hombreCamionRepository.updateOdometer(odometer.toInt(), getCurrentDate()) }
 
             _uiState.update { currentUiState ->
                 currentUiState.copy(

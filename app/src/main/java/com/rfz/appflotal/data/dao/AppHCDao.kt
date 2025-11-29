@@ -36,8 +36,8 @@ interface AppHCDao {
     @Query("UPDATE user SET fld_token =:token WHERE idUser =:idUser")
     suspend fun updateToken(idUser: Int, token: String)
 
-    @Query("UPDATE user SET odometer =:odometer")
-    suspend fun updateOdometer(odometer: Int)
+    @Query("UPDATE user SET odometer =:odometer, dateLastOdometer =:date")
+    suspend fun updateOdometer(odometer: Int, date: String)
 
     @Query("SELECT odometer FROM user")
     suspend fun getOdometer(): Int

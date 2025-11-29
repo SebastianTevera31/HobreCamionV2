@@ -135,7 +135,7 @@ class HombreCamionRepository @Inject constructor(
         return flotalDao.getOdometer()
     }
 
-    suspend fun updateOdometer(odometer: Int) {
-        flotalDao.updateOdometer(odometer)
+    suspend fun updateOdometer(odometer: Int, date: String) {
+        flotalDao.updateOdometer(odometer, date)
     }
 }
