@@ -10,9 +10,7 @@ import javax.inject.Inject
 
 class RemoteDisassemblyTireDataSource @Inject constructor(private val disassemblyCauseClient: DisassemblyCauseService) {
     suspend fun doDisassemblyCause(tok: String) = networkRequestHelper {
-        withContext(Dispatchers.IO) {
-            disassemblyCauseClient.doDisassemblyCause("Bearer $tok")
-        }
+        disassemblyCauseClient.doDisassemblyCause("Bearer $tok")
     }
 
     suspend fun createDisassemblyTire(tok: String, request: DisassemblyTireRequestDto) =

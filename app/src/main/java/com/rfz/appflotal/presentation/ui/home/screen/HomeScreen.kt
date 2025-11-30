@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.home.screen
 
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -116,6 +117,9 @@ fun HomeScreen(
         homeViewModel.loadInitialData()
         registerMonitorViewModel.stopScan()
     }
+
+    // BLOQUEAR BOTON DE RETROCESO DEL DISPOSITIVO
+    BackHandler { }
 
     LaunchedEffect(uiState.selectedLanguage) {
         if (uiState.selectedLanguage == "es" || uiState.selectedLanguage == "en") {

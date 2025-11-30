@@ -10,7 +10,7 @@ import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.theme.surfaceLight
 
 data class MenuItem(
-    @StringRes val title: Int,
+    @param:StringRes val title: Int,
     val route: String,
     val iconRes: Int
 )
@@ -66,6 +66,11 @@ val menuItems = listOf(
         route = HombreCamionScreens.MONITOR.name,
         iconRes = R.drawable.monitor
     ),
+    MenuItem(
+        title = R.string.pila_de_desescho,
+        route = NavScreens.DESECHO,
+        iconRes = R.drawable.modulo_desecho
+    )
 )
 
 val primaryColor = primaryLight

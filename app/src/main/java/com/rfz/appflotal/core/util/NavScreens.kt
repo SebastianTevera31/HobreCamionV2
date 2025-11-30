@@ -8,7 +8,6 @@ object NavScreens {
     const val NUEVA_MARCA = "nuevaMarca"
     const val RENOVADOS = "diseno_renovados_screen"
     const val ORIGINAL = "diseno_original_screen"
-    const val NUEVO_RENOVADO = "nuevoRenovado"
     const val MEDIDAS_LLANTAS = "medidasLlantasScreen"
     const val PRODUCTOS = "productoScreen"
     const val NUEVO_PRODUCTO = "producto_screen"
@@ -22,10 +21,8 @@ object NavScreens {
     const val PERMISOS = "permisos"
     const val MARCA_RENOVADA = "marca_renovada"
     const val TERMINOS = "terminos"
-
     const val INSPECCION = "inspeccion"
-
     const val MONTAJE = "montaje"
-
     const val DESMONTAJE = "desmontaje"
+    const val DESECHO = "desecho"
 }

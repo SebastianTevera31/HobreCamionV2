@@ -13,6 +13,7 @@ import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.destination.DestinationUseCase
 import com.rfz.appflotal.domain.disassembly.DisassemblyCauseUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
+import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,7 +67,7 @@ class DisassemblyViewModel @Inject constructor(
                 val disassemblyList = disassemblyCauses.getOrNull() ?: emptyList()
 
                 val tire = availableTireList.getOrNull()
-                    ?.find { it.idTire == tire.idTire }
+                    ?.find { it.idTire == tire.idTire && it.destination == "Montada" }
                     ?.toTire()
 
                 _uiState.update { currentUiState ->

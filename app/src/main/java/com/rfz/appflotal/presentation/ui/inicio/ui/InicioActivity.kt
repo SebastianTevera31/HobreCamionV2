@@ -101,6 +101,8 @@ import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewMod
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
 import com.rfz.appflotal.presentation.ui.retreatedesign.screens.RetreatedDesignScreen
 import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesignViewModel
+import com.rfz.appflotal.presentation.ui.tirewastepile.screens.TireWastePileScreen
+import com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel.TireWasteViewModel
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -128,6 +130,8 @@ class InicioActivity : ComponentActivity() {
     private val assemblyTireViewModel: AssemblyTireViewModel by viewModels()
 
     private val disassemblyTireViewModel: DisassemblyViewModel by viewModels()
+
+    private val tireWasteViewModel: TireWasteViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -732,6 +736,13 @@ class InicioActivity : ComponentActivity() {
                                             popUpTo(HombreCamionScreens.MONITOR.name)
                                         }
                                     }
+                                )
+                            }
+
+                            composable(route = NavScreens.INICIO) {
+                                TireWastePileScreen(
+                                    onBack = { navController.popBackStack() },
+                                    viewModel = tireWasteViewModel,
                                 )
                             }
                         }

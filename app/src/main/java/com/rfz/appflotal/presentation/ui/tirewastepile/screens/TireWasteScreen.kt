@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.assembly.screen
+package com.rfz.appflotal.presentation.ui.tirewastepile.screens
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -15,9 +15,7 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -30,9 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
@@ -42,27 +38,27 @@ import com.rfz.appflotal.presentation.commons.CircularLoading
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireUiState
-import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
-import com.rfz.appflotal.presentation.ui.assembly.viewmodel.OdometerValidation
 import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
-import com.rfz.appflotal.presentation.ui.components.NumberField
-import com.rfz.appflotal.presentation.ui.components.SectionHeader
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
+import com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel.TireWasteUiState
+import com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel.TireWasteViewModel
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import com.rfz.appflotal.presentation.ui.utils.validate
 
 @Composable
-fun AssemblyTireScreen(
-    positionTire: String,
-    viewModel: AssemblyTireViewModel,
+fun TireWastePileScreen(
     onBack: () -> Unit,
-    modifier: Modifier = Modifier,
+    viewModel: TireWasteViewModel,
+    modifier: Modifier = Modifier
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.loadData()
+    }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -70,75 +66,69 @@ fun AssemblyTireScreen(
         }
     }
 
+    // Apartado de la lógica "when()" por efecto visual
     LaunchedEffect(uiState.value.operationStatus) {
         if (uiState.value.operationStatus is OperationStatus.Success) {
-            Toast.makeText(context, context.getString(R.string.montaje_exitoso), Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.montaje_exitoso),
+                Toast.LENGTH_SHORT
+            ).show()
+
             viewModel.cleanUiState()
             onBack()
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadDataList(positionTire)
-    }
-
-    val title = stringResource(R.string.montaje)
-
-    AssemblyTireView(
-        title = title,
-        tire = positionTire,
-        modifier = modifier,
+    TireWasteView(
         uiState = uiState.value,
-        validateOdometer = { viewModel.validateOdometer(it) },
-        updateTire = { viewModel.updateTireField(it) },
-        onError = {
-            Toast.makeText(context, context.getString(R.string.error_montaje), Toast.LENGTH_SHORT)
-                .show()
-            viewModel.restartOperationStatus()
-        },
         onBack = {
             viewModel.cleanUiState()
             onBack()
-        }
-    ) { odometer, idAxle, idTire ->
-        viewModel.registerAssemblyTire(
-            odometer = odometer,
-            idAxle = idAxle,
-            idTire = idTire
+        },
+        onSelectedTire = { tireId ->
+            viewModel.updateSelectedTire(tireId)
+        },
+        onError = {
+            Toast.makeText(
+                context,
+                context.getString(R.string.error_enviar_desecho),
+                Toast.LENGTH_SHORT
+            ).show()
+            viewModel.cleanOperationStatus()
+        },
+        modifier = modifier
+    ) { wasteReportId, tireId ->
+        viewModel.sendTireToTireWastePile(
+            wasteReportId = wasteReportId,
+            tireId = tireId
         )
     }
 }
 
 @Composable
-fun AssemblyTireView(
-    title: String,
-    tire: String,
-    uiState: AssemblyTireUiState,
-    validateOdometer: (String) -> Unit,
-    updateTire: (Int?) -> Unit,
+fun TireWasteView(
+    uiState: TireWasteUiState,
     onBack: () -> Unit,
-    onError: suspend () -> Unit,
+    onError: () -> Unit,
+    onSelectedTire: (tireId: Int) -> Unit,
     modifier: Modifier = Modifier,
-    onAssembly: (odometer: String, idAxle: Int, idTire: Int) -> Unit
+    onSendTireToWastePile: (wasteReportId: Int, tireId: Int) -> Unit,
 ) {
-    var odometer by remember { mutableStateOf("") }
-    var axleSelected: CatalogItem? by remember { mutableStateOf(null) }
+    val scroll = rememberScrollState()
+    var wasteReportSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 
-    val scroll = rememberScrollState()
-
-    val isFormValid by remember {
+    val areFormValid by remember {
         derivedStateOf {
-            axleSelected != null && tireSelected != null && uiState.isOdometerValid == OdometerValidation.VALID
+            wasteReportSelected != null && tireSelected != null
         }
     }
 
     when (uiState.operationStatus) {
         is OperationStatus.Error -> {
             LaunchedEffect(uiState.operationStatus) {
-                odometer = uiState.currentOdometer
-                axleSelected = null
+                wasteReportSelected = null
                 tireSelected = null
                 onError()
             }
@@ -155,20 +145,21 @@ fun AssemblyTireView(
         modifier = modifier,
         topBar = {
             SimpleTopBar(
-                title = title,
-                subTitle = tire,
-                onBack = onBack
+                title = stringResource(R.string.pila_de_desescho),
+                onBack = onBack,
             )
         },
         bottomBar = {
-            if (uiState.screenLoadStatus == OperationStatus.Success) {
-                CompleteFormButton(
-                    textButton = stringResource(R.string.montar),
-                    isValid = isFormValid
-                ) {
-                    onAssembly(odometer, axleSelected!!.id, tireSelected!!.id)
+            CompleteFormButton(
+                textButton = stringResource(R.string.enviar_a_desecho),
+                isValid = areFormValid,
+                onFinish = {
+                    onSendTireToWastePile(
+                        wasteReportSelected!!.id,
+                        tireSelected!!.id
+                    )
                 }
-            }
+            )
         }
     ) { innerPadding ->
         when (uiState.screenLoadStatus) {
@@ -191,62 +182,37 @@ fun AssemblyTireView(
                         .safeContentPadding()
                 ) {
                     CatalogDropdown(
-                        catalog = uiState.axleList,
-                        selected = axleSelected?.description,
-                        errorText = axleSelected.validate(),
-                        onSelected = { axleSelected = it },
-                        label = stringResource(R.string.eje),
+                        catalog = uiState.wasteReportList,
+                        selected = wasteReportSelected?.description,
+                        onSelected = { wasteReportSelected = it },
+                        label = stringResource(R.string.reporte_de_desecho),
+                        errorText = wasteReportSelected.validate(),
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     CatalogDropdown(
-                        catalog = uiState.tireList,
+                        catalog = uiState.dismountedTireList,
                         selected = tireSelected?.description,
-                        errorText = tireSelected.validate(),
                         onSelected = {
-                            updateTire(it?.id)
+                            if (it != null) {
+                                onSelectedTire(it.id)
+                            }
                             tireSelected = it
                         },
                         label = stringResource(R.string.llantas),
-                        modifier = Modifier.fillMaxWidth()
+                        errorText = tireSelected.validate(),
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     AnimatedVisibility(
-                        visible = uiState.currentTire != null,
+                        visible = tireSelected != null,
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut(),
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
                         TireInfoCard(
-                            tire = uiState.currentTire,
+                            tire = uiState.selectedTire,
                             modifier.width(240.dp)
-                        )
-                    }
-
-                    Column {
-                        SectionHeader(
-                            text = stringResource(R.string.odometro),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        val odometerValue = uiState.currentOdometer.toIntOrNull() ?: 0
-                        Text(
-                            text = stringResource(
-                                R.string.advertencia_ingreso_odometro,
-                                odometerValue
-                            ),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                            modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
-                        )
-
-                        NumberField(
-                            value = odometer,
-                            onValueChange = {
-                                validateOdometer(it)
-                                odometer = it
-                            },
-                            placeHolderText = uiState.currentOdometer,
-                            label = "",
-                            errorText = uiState.isOdometerValid.message,
                         )
                     }
                 }
@@ -255,15 +221,15 @@ fun AssemblyTireView(
     }
 }
 
+@Preview(showBackground = true, showSystemUi = true, locale = "en")
 @Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun AssemblyTireViewPreview() {
+fun TireWasteViewPreview() {
     HombreCamionTheme {
-        AssemblyTireView(
-            title = "Montaje",
-            tire = "P1",
-            uiState = AssemblyTireUiState(
-                tireList = listOf(
+        TireWasteView(
+            onBack = {},
+            onSelectedTire = { _ -> },
+            uiState = TireWasteUiState(
+                dismountedTireList = listOf(
                     Tire(
                         id = 101,
                         description = "Michelin - size: 205/55R16",
@@ -274,7 +240,7 @@ fun AssemblyTireViewPreview() {
                         loadingCapacity = "615"
                     )
                 ),
-                currentTire = Tire(
+                selectedTire = Tire(
                     id = 101,
                     description = "Michelin - size: 205/55R16",
                     size = "205/55R16",
@@ -283,15 +249,10 @@ fun AssemblyTireViewPreview() {
                     thread = 7.5,
                     loadingCapacity = "615"
                 ),
-                axleList = emptyList(),
-                currentOdometer = "123456",
-                isOdometerValid = OdometerValidation.VALID,
                 screenLoadStatus = OperationStatus.Success
             ),
-            validateOdometer = {},
-            onBack = {},
-            updateTire = {},
-            onError = {}
-        ) { _, _, _ -> }
+            onError = {},
+            onSendTireToWastePile = { _, _ -> }
+        )
     }
 }

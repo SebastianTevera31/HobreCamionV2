@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.assembly.AddAssemblyTireUseCase
 import com.rfz.appflotal.domain.axle.GetAxlesUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
+import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +57,6 @@ class AssemblyTireViewModel @Inject constructor(
                         currentOdometer = odometer.odometer.toString(),
                         tireList = tiresList,
                         axleList = axleList,
-                        isOdometerValid = OdometerValidation.VALID,
                         screenLoadStatus = OperationStatus.Success
                     )
                 }

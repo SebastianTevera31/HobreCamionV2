@@ -39,7 +39,7 @@ import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyUiState
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
-import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.OperationStatus
+import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import com.rfz.appflotal.presentation.ui.utils.validate
 
 @Composable
@@ -75,7 +75,10 @@ fun DisassemblyTireScreen(
 
     DisassemblyTireView(
         uiState = uiState.value,
-        onBack = onBack,
+        onBack = {
+            viewModel.cleanUiState()
+            onBack()
+        },
         onError = {
             Toast.makeText(
                 context,
@@ -102,13 +105,9 @@ fun DisassemblyTireView(
     var destinationSelected: CatalogItem? by remember { mutableStateOf(null) }
     val scroll = rememberScrollState()
 
-    val areInputsValid = {
-        causesSelected != null && destinationSelected != null
-    }
-
-    val isFormValid by remember(causesSelected, destinationSelected) {
+    val isFormValid by remember {
         derivedStateOf {
-            areInputsValid()
+            causesSelected != null && destinationSelected != null
         }
     }
 
@@ -150,15 +149,19 @@ fun DisassemblyTireView(
     ) { innerPadding ->
         when (uiState.screenLoadStatus) {
             OperationStatus.Error -> {
-                ErrorView(modifier
-                    .safeContentPadding()
-                    .padding(innerPadding))
+                ErrorView(
+                    modifier
+                        .safeContentPadding()
+                        .padding(innerPadding)
+                )
             }
 
             OperationStatus.Loading -> {
-                CircularLoading(modifier
-                    .safeContentPadding()
-                    .padding(innerPadding))
+                CircularLoading(
+                    modifier
+                        .safeContentPadding()
+                        .padding(innerPadding)
+                )
             }
 
             OperationStatus.Success -> {

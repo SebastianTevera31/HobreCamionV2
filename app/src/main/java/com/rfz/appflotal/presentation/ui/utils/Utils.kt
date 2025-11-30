@@ -83,3 +83,9 @@ suspend fun SnackbarHostState.showMessage(
         duration = SnackbarDuration.Short
     )
 }
+
+sealed class OperationStatus {
+    object Loading : OperationStatus()
+    object Error : OperationStatus()
+    object Success : OperationStatus()
+}

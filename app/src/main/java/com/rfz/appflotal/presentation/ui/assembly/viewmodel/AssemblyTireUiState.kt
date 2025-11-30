@@ -4,17 +4,12 @@ import androidx.annotation.StringRes
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.axle.Axle
 import com.rfz.appflotal.data.model.tire.Tire
+import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 
 enum class OdometerValidation(@param:StringRes val message: Int? = null) {
     VALID,
     INVALID(R.string.error_odometro_inferior),
     EMPTY(R.string.requerido)
-}
-
-sealed class OperationStatus {
-    object Loading : OperationStatus()
-    object Error : OperationStatus()
-    object Success : OperationStatus()
 }
 
 data class AssemblyTireUiState(
