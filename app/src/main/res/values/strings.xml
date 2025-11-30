@@ -259,6 +259,10 @@
     <string name="error_establecer_sesion">Ocurrió un error al establecer su sesión. Por favor, inténtelo de nuevo.</string>
     <string name="valor_invalido">Valor invalido</string>
     <string name="advertencia_ingreso_odometro">* El odometro debe ser mayor o igual al ultimo valor registrado: %1$d</string>
+    <string name="error_enviar_desecho">Ocurrió un error al enviar la llanta a la pila de desecho</string>
+    <string name="reporte_de_desecho">Reporte de desecho</string>
+    <string name="enviar_a_desecho">Enviar a desecho</string>
+    <string name="pila_de_desescho">Pila de Desescho</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

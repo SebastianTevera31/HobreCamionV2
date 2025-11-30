@@ -252,6 +252,10 @@
     <string name="error_establecer_sesion">An error occurred while establishing your session. Please try again.</string>
     <string name="valor_invalido">Invalid value</string>
     <string name="advertencia_ingreso_odometro">* The odometer reading must be greater than or equal to the last recorded value: %1$d</string>
+    <string name="error_enviar_desecho">An error occurred while sending the tire to the scrap pile</string>
+    <string name="reporte_de_desecho">Scrap report</string>
+    <string name="enviar_a_desecho">Send to scrap</string>
+    <string name="pila_de_desecho">Scrap pile</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
