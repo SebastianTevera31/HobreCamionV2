@@ -61,6 +61,7 @@ import com.rfz.appflotal.presentation.ui.inspection.components.ReportDropdown
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUi
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUiState
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionViewModel
+import com.rfz.appflotal.presentation.ui.inspection.viewmodel.OperationState
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.rememberInspectionFormState
 import com.rfz.appflotal.presentation.ui.utils.showMessage
 import kotlinx.coroutines.flow.collectLatest
@@ -88,14 +89,26 @@ fun InspectionRoute(
         viewModel.loadData()
     }
 
+    when (requestState.value.operationState) {
+        OperationState.Error -> {
+            viewModel.clearInspectionUiState()
+        }
+        OperationState.Loading -> {
+            if (requestState.value.isSending) {
+                AwaitDialog()
+            }
+        }
+
+        OperationState.Success -> {
+            viewModel.clearInspectionUiState()
+            onFinish(tire)
+        }
+    }
+
     LaunchedEffect(true) {
         viewModel.eventFlow.collectLatest { event ->
             Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
         }
-    }
-
-    if (requestState.value.isSending) {
-        AwaitDialog()
     }
 
     InspectionScreen(
@@ -106,7 +119,6 @@ fun InspectionRoute(
         onBack = onBack,
         onFinish = { report ->
             viewModel.uploadInspection(tire, report)
-            onFinish(tire)
         }
     )
 }

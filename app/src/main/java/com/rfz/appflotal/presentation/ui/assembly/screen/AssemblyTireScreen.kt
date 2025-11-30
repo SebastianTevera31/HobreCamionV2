@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -59,6 +60,12 @@ fun AssemblyTireScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.cleanUiState()
+        }
+    }
 
     LaunchedEffect(uiState.value.operationStatus) {
         if (uiState.value.operationStatus is OperationStatus.Success) {

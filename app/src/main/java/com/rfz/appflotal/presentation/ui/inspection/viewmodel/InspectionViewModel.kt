@@ -9,8 +9,6 @@ import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
-import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
-import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ShowToast
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
@@ -81,7 +79,8 @@ class InspectionViewModel @Inject constructor(
     fun uploadInspection(positionTire: String, values: InspectionUi) = viewModelScope.launch {
         _requestState.update { currentUiState ->
             currentUiState.copy(
-                isSending = true
+                isSending = true,
+                operationState = OperationState.Loading
             )
         }
 
@@ -103,12 +102,6 @@ class InspectionViewModel @Inject constructor(
             )
         )
 
-        _requestState.update { currentUiState ->
-            currentUiState.copy(
-                isSending = false
-            )
-        }
-
         // Registrar registro de odometro
         async { hombreCamionRepository.updateOdometer(values.odometer, lastOdometerMeasurement) }
 
@@ -118,8 +111,20 @@ class InspectionViewModel @Inject constructor(
                 temperature = values.temperature,
                 pressure = values.adjustedPressure
             )
+            _requestState.update { currentUiState ->
+                currentUiState.copy(
+                    isSending = false,
+                    operationState = OperationState.Success
+                )
+            }
             _eventFlow.emit(ShowToast(UploadingInspectionMessage.SUCCESS.message))
         } else {
+            _requestState.update { currentUiState ->
+                currentUiState.copy(
+                    isSending = false,
+                    operationState = OperationState.Error
+                )
+            }
             _eventFlow.emit(ShowToast(UploadingInspectionMessage.GENERAL_ERROR.message))
         }
     }

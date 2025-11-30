@@ -13,9 +13,16 @@ sealed interface InspectionUiState {
     ) : InspectionUiState
 }
 
+sealed class OperationState {
+    object Loading : OperationState()
+    object Error : OperationState()
+    object Success : OperationState()
+}
+
 data class InspectionRequestState(
     val isSending: Boolean = false,
     val message: String? = null,
+    val operationState: OperationState = OperationState.Loading
 )
 
 data class InspectionUi(

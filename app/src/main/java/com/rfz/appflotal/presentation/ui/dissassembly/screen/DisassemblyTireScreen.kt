@@ -3,10 +3,13 @@ package com.rfz.appflotal.presentation.ui.dissassembly.screen
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -97,6 +100,7 @@ fun DisassemblyTireView(
 ) {
     var causesSelected: CatalogItem? by remember { mutableStateOf(null) }
     var destinationSelected: CatalogItem? by remember { mutableStateOf(null) }
+    val scroll = rememberScrollState()
 
     val areInputsValid = {
         causesSelected != null && destinationSelected != null
@@ -162,8 +166,10 @@ fun DisassemblyTireView(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier
-                        .safeContentPadding()
                         .padding(innerPadding)
+                        .fillMaxSize()
+                        .verticalScroll(scroll)
+                        .safeContentPadding()
                 ) {
                     TireInfoCard(
                         uiState.tire, modifier = Modifier.height(140.dp)
