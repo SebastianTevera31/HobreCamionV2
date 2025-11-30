@@ -25,5 +25,5 @@ data class AssemblyTireUiState(
     val tireList: List<Tire> = emptyList(),
     val axleList: List<Axle> = emptyList(),
     val screenLoadStatus: OperationStatus = OperationStatus.Loading,
-    val operationStatus: OperationStatus? = null,
+    val operationStatus: OperationStatus? = null
 )

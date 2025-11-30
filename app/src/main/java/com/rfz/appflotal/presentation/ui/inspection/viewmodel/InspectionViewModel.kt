@@ -85,6 +85,8 @@ class InspectionViewModel @Inject constructor(
             )
         }
 
+        val lastOdometerMeasurement = getCurrentDate()
+
         val result = inspectionTireCrudUseCase(
             requestBody = InspectionTireDto(
                 positionTire = positionTire,
@@ -94,7 +96,7 @@ class InspectionViewModel @Inject constructor(
                 treadDepth4 = values.treadDepth4,
                 tireInspectionReportId = values.reportId?.toIntOrNull() ?: 0,
                 pressureInspected = values.pressure,
-                dateInspection = getCurrentDate(),
+                dateInspection = lastOdometerMeasurement,
                 odometer = values.odometer,
                 temperatureInspected = values.temperature,
                 pressureAdjusted = values.adjustedPressure
@@ -106,6 +108,9 @@ class InspectionViewModel @Inject constructor(
                 isSending = false
             )
         }
+
+        // Registrar registro de odometro
+        async { hombreCamionRepository.updateOdometer(values.odometer, lastOdometerMeasurement) }
 
         if (result.isSuccess) {
             sensorDataTableRepository.updateTireRecord(
