@@ -258,6 +258,7 @@
     <string name="error_aceptar_terminos">Error al aceptar los términos: %1$s</string>
     <string name="error_establecer_sesion">Ocurrió un error al establecer su sesión. Por favor, inténtelo de nuevo.</string>
     <string name="valor_invalido">Valor invalido</string>
+    <string name="advertencia_ingreso_odometro">* El odometro debe ser mayor o igual al ultimo valor registrado: %1$d</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

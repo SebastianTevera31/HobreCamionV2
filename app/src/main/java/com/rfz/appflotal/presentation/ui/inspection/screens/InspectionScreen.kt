@@ -286,7 +286,10 @@ fun InspectionScreen(
 
                     if (uiState.isOdometerEditable) {
                         Text(
-                            text = "* El odometro debe ser mayor o igual al ultimo valor registrado: ${uiState.lastOdometer}",
+                            text = stringResource(
+                                R.string.advertencia_ingreso_odometro,
+                                uiState.lastOdometer
+                            ),
                             style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
                             modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
                         )

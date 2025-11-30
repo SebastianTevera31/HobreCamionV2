@@ -250,7 +250,8 @@
     <string name="desmontaje">Dismounting</string>
     <string name="error_aceptar_terminos">Error accepting the terms: %1$s</string>
     <string name="error_establecer_sesion">An error occurred while establishing your session. Please try again.</string>
-    <string name="valor_invalido">Valor invalido</string>
+    <string name="valor_invalido">Invalid value</string>
+    <string name="advertencia_ingreso_odometro">* The odometer reading must be greater than or equal to the last recorded value: %1$d</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
