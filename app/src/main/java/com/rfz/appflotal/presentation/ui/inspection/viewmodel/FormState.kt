@@ -10,6 +10,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.utils.toIntOrError
+import com.rfz.appflotal.presentation.ui.utils.validateOdometer
 
 @Stable
 class InspectionFormState(
@@ -23,6 +24,7 @@ class InspectionFormState(
     treadDepth4: String = "0",
     selectedReportId: String? = null
 ) {
+    val lastOdometer = odometer
     var odometer by mutableStateOf(odometer)
     var temperature by mutableStateOf(temperature)
     var pressureMeasured by mutableStateOf(pressureMeasured)
@@ -56,7 +58,7 @@ class InspectionFormState(
         )
         selectedReportIdError = reportErr
 
-        val (odoInt, odoErr) = odometer.toIntOrError()
+        val (odoInt, odoErr) = odometer.validateOdometer(lastOdometer.toInt())
         odometerError = odoErr
 
         val (tempInt, tempErr) = temperature.toIntOrError()
@@ -150,12 +152,14 @@ class InspectionFormState(
 @Composable
 fun rememberInspectionFormState(
     initialTemperature: Int,
-    initialPressure: Int
+    initialPressure: Int,
+    lastOdometer: Int
 ): InspectionFormState {
     return rememberSaveable(saver = InspectionFormState.Saver) {
         InspectionFormState(
             temperature = initialTemperature.toString(),
-            pressureMeasured = initialPressure.toString()
+            pressureMeasured = initialPressure.toString(),
+            odometer = lastOdometer.toString()
         )
     }
 }

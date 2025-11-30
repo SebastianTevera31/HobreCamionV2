@@ -6,18 +6,23 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
+import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
+import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
+import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ShowToast
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 enum class UploadingInspectionMessage(@param:StringRes val message: Int) {
@@ -29,7 +34,8 @@ enum class UploadingInspectionMessage(@param:StringRes val message: Int) {
 class InspectionViewModel @Inject constructor(
     private val catalogUseCase: CatalogUseCase,
     private val inspectionTireCrudUseCase: InspectionTireCrudUseCase,
-    private val sensorDataTableRepository: SensorDataTableRepository
+    private val sensorDataTableRepository: SensorDataTableRepository,
+    private val hombreCamionRepository: HombreCamionRepository,
 ) : ViewModel() {
     private var _uiState: MutableStateFlow<InspectionUiState> =
         MutableStateFlow(InspectionUiState.Empty)
@@ -42,14 +48,28 @@ class InspectionViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<ShowToast>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    fun load() = viewModelScope.launch {
+    fun loadData() = viewModelScope.launch {
         _uiState.value = InspectionUiState.Loading
-        val tireResponse = catalogUseCase.onGetTireReport()
+        val tireResponseDeferred = async { catalogUseCase.onGetTireReport() }
+        val lastOdometerDeferred = async { hombreCamionRepository.getOdometer() }
+
+        val tireResponse = tireResponseDeferred.await()
+        val lastOdometer = lastOdometerDeferred.await()
+
+        val isOdometerEditable = if (!lastOdometer.dateLastOdometer.isEmpty()) {
+            val dateLastOdometer = LocalDateTime.parse(lastOdometer.dateLastOdometer)
+            val currentDate = LocalDateTime.now()
+            currentDate.isAfter(dateLastOdometer)
+        } else false
+
+
         responseHelper(tireResponse) { opciones ->
             _uiState.value =
                 InspectionUiState.Success(
                     inspectionList = opciones?.map { it.toCatalog() }
-                        ?: emptyList()
+                        ?: emptyList(),
+                    lastOdometer = lastOdometer.odometer,
+                    isOdometerEditable = isOdometerEditable
                 )
         }
     }

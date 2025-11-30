@@ -26,6 +26,7 @@ fun NumberField(
     modifier: Modifier = Modifier,
     label: String = "",
     placeHolderText: String = "",
+    isEditable: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.NumberPassword,
     imeAction: ImeAction = ImeAction.Next
 ) {
@@ -40,6 +41,7 @@ fun NumberField(
                 keyboardType = keyboardType,
                 imeAction = imeAction
             ),
+            enabled = isEditable,
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(

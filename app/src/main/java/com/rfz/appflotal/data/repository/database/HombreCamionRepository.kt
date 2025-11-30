@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.dao.AppHCDao
+import com.rfz.appflotal.data.model.OdometerData
 import com.rfz.appflotal.data.model.database.AppHCEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 
@@ -131,7 +132,7 @@ class HombreCamionRepository @Inject constructor(
         flotalDao.deleteAllFlotalSoft()
     }
 
-    suspend fun getOdometer(): Int {
+    suspend fun getOdometer(): OdometerData{
         return flotalDao.getOdometer()
     }
 

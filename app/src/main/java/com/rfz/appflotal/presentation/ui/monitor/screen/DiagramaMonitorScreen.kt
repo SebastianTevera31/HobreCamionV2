@@ -600,7 +600,7 @@ fun PanelSensorViewPreview() {
             onDisassemblyClick = { _, _, _ -> },
             modifier = Modifier
                 .safeDrawingPadding()
-                .height(420.dp)
+                .height(460.dp)
                 .padding(bottom = dimensionResource(R.dimen.small_dimen))
         )
     }

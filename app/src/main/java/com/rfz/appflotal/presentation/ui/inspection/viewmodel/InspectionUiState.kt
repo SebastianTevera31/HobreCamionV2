@@ -6,7 +6,11 @@ sealed interface InspectionUiState {
     data object Loading : InspectionUiState
     data class Error(val message: String) : InspectionUiState
     data object Empty : InspectionUiState
-    data class Success(val inspectionList: List<CatalogItem>) : InspectionUiState
+    data class Success(
+        val inspectionList: List<CatalogItem>,
+        val lastOdometer: Int,
+        val isOdometerEditable: Boolean
+    ) : InspectionUiState
 }
 
 data class InspectionRequestState(

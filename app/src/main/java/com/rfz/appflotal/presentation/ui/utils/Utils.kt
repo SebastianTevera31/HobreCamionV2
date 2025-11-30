@@ -6,13 +6,6 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.network.service.ApiResult
 
-
-enum class FormState {
-    COMPLETE,
-    INCOMPLETE,
-    ERROR
-}
-
 fun <T> responseHelper(
     response: ApiResult<T>,
     onError: () -> Unit = {},
@@ -68,9 +61,11 @@ fun String.toIntOrError(): Pair<Int?, Int?> {
     return value.toInt() to null
 }
 
-fun String.validate(): Int? {
-    if (isBlank()) return R.string.requerido
-    return null
+fun String.validateOdometer(lastOdometer: Int): Pair<Int?, Int?> {
+    if (isBlank()) return null to R.string.requerido
+    val value = toDoubleOrNull() ?: return null to R.string.numero_invalido
+    if (value.toInt() < lastOdometer) return null to R.string.valor_invalido
+    return value.toInt() to null
 }
 
 fun CatalogItem?.validate(): Int? {

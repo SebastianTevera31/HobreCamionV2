@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.rfz.appflotal.data.model.OdometerData
 import com.rfz.appflotal.data.model.database.AppHCEntity
 
 import kotlinx.coroutines.flow.Flow
@@ -39,8 +40,8 @@ interface AppHCDao {
     @Query("UPDATE user SET odometer =:odometer, dateLastOdometer =:date")
     suspend fun updateOdometer(odometer: Int, date: String)
 
-    @Query("SELECT odometer FROM user")
-    suspend fun getOdometer(): Int
+    @Query("SELECT odometer, dateLastOdometer FROM user")
+    suspend fun getOdometer(): OdometerData
 
     @Query("DELETE FROM user")
     suspend fun deleteAllFlotalSoft()

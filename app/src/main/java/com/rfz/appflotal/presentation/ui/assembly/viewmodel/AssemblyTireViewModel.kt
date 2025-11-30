@@ -53,7 +53,7 @@ class AssemblyTireViewModel @Inject constructor(
                 // Actualizamos el estado de la UI una sola vez
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
-                        currentOdometer = odometer.toString(),
+                        currentOdometer = odometer.odometer.toString(),
                         tireList = tiresList,
                         axleList = axleList,
                         isOdometerValid = OdometerValidation.VALID,

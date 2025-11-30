@@ -257,6 +257,7 @@
     <string name="desmontaje">Desmontaje</string>
     <string name="error_aceptar_terminos">Error al aceptar los términos: %1$s</string>
     <string name="error_establecer_sesion">Ocurrió un error al establecer su sesión. Por favor, inténtelo de nuevo.</string>
+    <string name="valor_invalido">Valor invalido</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

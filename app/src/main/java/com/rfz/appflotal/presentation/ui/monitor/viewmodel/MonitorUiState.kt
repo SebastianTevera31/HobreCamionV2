@@ -23,8 +23,6 @@ data class MonitorUiState(
     val showDialog: Boolean = false,
     val showView: Boolean = false,
     val isBluetoothOn: Boolean = false,
-    val lastOdometer: Int = 0,
-    val dateOdometer: String = "",
 )
 
 data class TireUiState(

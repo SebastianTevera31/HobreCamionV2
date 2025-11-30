@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -84,7 +85,7 @@ fun InspectionRoute(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.load()
+        viewModel.loadData()
     }
 
     LaunchedEffect(true) {
@@ -122,10 +123,13 @@ fun InspectionScreen(
 ) {
     val context = LocalContext.current
     val scroll = rememberScrollState()
+
     val form = rememberInspectionFormState(
         initialTemperature = initialTemperature,
-        initialPressure = initialPressure
+        initialPressure = initialPressure,
+        lastOdometer = 0
     )
+
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -161,7 +165,7 @@ fun InspectionScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary),
-                // Mantengo el gradiente como en tu versión
+
                 modifier = Modifier
                     .background(
                         Brush.horizontalGradient(
@@ -245,6 +249,8 @@ fun InspectionScreen(
             }
 
             is InspectionUiState.Success -> {
+                form.odometer = uiState.lastOdometer.toString()
+
                 Column(
                     modifier = Modifier
                         .padding(inner)
@@ -265,6 +271,15 @@ fun InspectionScreen(
 
                     // Bloque: Temperatura y Odometro
                     SectionHeader(stringResource(R.string.lecturas))
+
+                    if (uiState.isOdometerEditable) {
+                        Text(
+                            text = "* El odometro debe ser mayor o igual al ultimo valor registrado: ${uiState.lastOdometer}",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                            modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
+                        )
+                    }
+
                     Row(
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(
@@ -283,7 +298,8 @@ fun InspectionScreen(
                             onValueChange = { form.odometer = it },
                             label = stringResource(R.string.odometro),
                             errorText = form.odometerError,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            isEditable = uiState.isOdometerEditable
                         )
                     }
 
@@ -386,7 +402,7 @@ fun InspectionScreen(
                     }
 
 
-                    Spacer(Modifier.height(80.dp)) // espacio para que no lo tape la bottomBar
+                    Spacer(Modifier.height(80.dp))
                 }
             }
         }
@@ -402,7 +418,11 @@ private fun PreviewInspection() {
             tireLabel = "P2",
             initialTemperature = 2,
             initialPressure = 2,
-            uiState = InspectionUiState.Success(inspectionList = emptyList()),
+            uiState = InspectionUiState.Success(
+                inspectionList = emptyList(),
+                lastOdometer = 1000,
+                isOdometerEditable = true
+            ),
             onBack = {},
             onFinish = {}
         )
