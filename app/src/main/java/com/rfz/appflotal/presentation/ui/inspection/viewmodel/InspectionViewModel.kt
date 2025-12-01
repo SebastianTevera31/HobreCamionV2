@@ -1,9 +1,7 @@
 package com.rfz.appflotal.presentation.ui.inspection.viewmodel
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
@@ -11,6 +9,7 @@ import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ShowToast
+import com.rfz.appflotal.presentation.ui.inspection.components.UploadingInspectionMessage
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -20,13 +19,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
+import java.time.Instant
 import javax.inject.Inject
-
-enum class UploadingInspectionMessage(@param:StringRes val message: Int) {
-    SUCCESS(R.string.inspeccion_exitosa_mensaje),
-    GENERAL_ERROR(R.string.error_registrar_inspeccion),
-}
 
 @HiltViewModel
 class InspectionViewModel @Inject constructor(
@@ -48,20 +42,19 @@ class InspectionViewModel @Inject constructor(
 
     fun loadData() = viewModelScope.launch {
         _uiState.value = InspectionUiState.Loading
-        val tireResponseDeferred = async { catalogUseCase.onGetTireReport() }
+        val tireReportDeferred = async { catalogUseCase.onGetTireReport() }
         val lastOdometerDeferred = async { hombreCamionRepository.getOdometer() }
 
-        val tireResponse = tireResponseDeferred.await()
+        val tireReport = tireReportDeferred.await()
         val lastOdometer = lastOdometerDeferred.await()
 
         val isOdometerEditable = if (!lastOdometer.dateLastOdometer.isEmpty()) {
-            val dateLastOdometer = LocalDateTime.parse(lastOdometer.dateLastOdometer)
-            val currentDate = LocalDateTime.now()
+            val dateLastOdometer = Instant.parse(lastOdometer.dateLastOdometer)
+            val currentDate = Instant.now()
             currentDate.isAfter(dateLastOdometer)
         } else false
 
-
-        responseHelper(tireResponse) { opciones ->
+        responseHelper(tireReport) { opciones ->
             _uiState.value =
                 InspectionUiState.Success(
                     inspectionList = opciones?.map { it.toCatalog() }

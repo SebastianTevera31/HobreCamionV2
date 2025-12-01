@@ -26,15 +26,15 @@ data class InspectionRequestState(
 )
 
 data class InspectionUi(
-    val reportId: String?,
-    val odometer: Int,
-    val temperature: Int,
-    val pressure: Int,
-    val adjustedPressure: Int,
-    val treadDepth1: Float,
-    val treadDepth2: Float,
-    val treadDepth3: Float,
-    val treadDepth4: Float,
+    val reportId: String? = null,
+    val odometer: Int = -1,
+    val temperature: Int = -1,
+    val pressure: Int = -1,
+    val adjustedPressure: Int = -1,
+    val treadDepth1: Float = -1f,
+    val treadDepth2: Float = -1f,
+    val treadDepth3: Float = -1f,
+    val treadDepth4: Float = -1f,
 )
 
 fun String.filterNumericDot(): String {

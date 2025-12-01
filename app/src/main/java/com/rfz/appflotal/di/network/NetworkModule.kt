@@ -50,7 +50,7 @@ import com.rfz.appflotal.data.network.client.vehicle.VehicleByIdClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleCrudClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleListClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleTypeClient
-import com.rfz.appflotal.data.network.client.waster.WasteReportListClient
+import com.rfz.appflotal.data.network.client.waster.WasteService
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepository
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepositoryImp
 import com.rfz.appflotal.data.repository.wifi.WifiRepository
@@ -372,8 +372,8 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    fun provideWasteReportListClient(retrofit: Retrofit): WasteReportListClient {
-        return retrofit.create(WasteReportListClient::class.java)
+    fun provideWasteReportListClient(retrofit: Retrofit): WasteService {
+        return retrofit.create(WasteService::class.java)
     }
 
 

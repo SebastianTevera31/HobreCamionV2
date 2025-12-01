@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.filterNumericDot
 
@@ -23,6 +25,7 @@ fun NumberField(
     value: String,
     onValueChange: (String) -> Unit,
     errorText: Int?,
+    style: TextStyle = MaterialTheme.typography.titleMedium,
     modifier: Modifier = Modifier,
     label: String = "",
     placeHolderText: String = "",
@@ -35,7 +38,15 @@ fun NumberField(
             value = value,
             onValueChange = { onValueChange(it.filterNumericDot()) },
             placeholder = { Text(placeHolderText) },
-            label = { Text(label) },
+            label = {
+                Text(
+                    text = label,
+                    style = style,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
             isError = errorText != null,
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,

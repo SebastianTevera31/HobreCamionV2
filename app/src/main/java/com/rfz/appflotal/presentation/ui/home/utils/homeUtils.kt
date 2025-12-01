@@ -67,7 +67,7 @@ val menuItems = listOf(
         iconRes = R.drawable.monitor
     ),
     MenuItem(
-        title = R.string.pila_de_desescho,
+        title = R.string.pila_de_desecho,
         route = NavScreens.DESECHO,
         iconRes = R.drawable.modulo_desecho
     )

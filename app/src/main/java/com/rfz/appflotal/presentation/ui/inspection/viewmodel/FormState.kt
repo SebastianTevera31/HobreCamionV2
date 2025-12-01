@@ -22,9 +22,12 @@ class InspectionFormState(
     treadDepth2: String = "0",
     treadDepth3: String = "0",
     treadDepth4: String = "0",
-    selectedReportId: String? = null
+    selectedReportId: String? = null,
+    isValidatingReports: Boolean = true
 ) {
     val lastOdometer = odometer
+    val validatingReports = isValidatingReports
+
     var odometer by mutableStateOf(odometer)
     var temperature by mutableStateOf(temperature)
     var pressureMeasured by mutableStateOf(pressureMeasured)
@@ -49,13 +52,18 @@ class InspectionFormState(
     var oneTreadDepthAtLeast by mutableStateOf<Boolean?>(false)
 
     fun validate(): Boolean {
-        val (reportInt, reportErr) = if (selectedReportId != null) Pair(
-            selectedReportId,
-            null
-        ) else Pair(
-            null,
-            R.string.requerido
-        )
+
+        val (reportInt, reportErr) = if (validatingReports) {
+            if (selectedReportId != null) Pair(
+                selectedReportId,
+                null
+            ) else Pair(
+                null,
+                R.string.requerido
+            )
+
+        } else 0 to null
+
         selectedReportIdError = reportErr
 
         val (odoInt, odoErr) = odometer.validateOdometer(lastOdometer.toInt())
@@ -142,7 +150,8 @@ class InspectionFormState(
                     treadDepth2 = list.getOrNull(5) ?: "",
                     treadDepth3 = list.getOrNull(6) ?: "",
                     treadDepth4 = list.getOrNull(7) ?: "",
-                    selectedReportId = list.getOrNull(8).orEmpty().ifBlank { null }
+                    selectedReportId = list.getOrNull(8).orEmpty().ifBlank { null },
+
                 )
             }
         )
@@ -153,13 +162,15 @@ class InspectionFormState(
 fun rememberInspectionFormState(
     initialTemperature: Int,
     initialPressure: Int,
-    lastOdometer: Int
+    lastOdometer: Int,
+    isValidatingReports: Boolean
 ): InspectionFormState {
     return rememberSaveable(saver = InspectionFormState.Saver) {
         InspectionFormState(
             temperature = initialTemperature.toString(),
             pressureMeasured = initialPressure.toString(),
-            odometer = lastOdometer.toString()
+            odometer = lastOdometer.toString(),
+            isValidatingReports = isValidatingReports
         )
     }
 }

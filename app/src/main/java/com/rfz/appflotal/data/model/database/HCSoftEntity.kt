@@ -25,7 +25,7 @@ data class AppHCEntity(
     val fecha: String,
     val termsGranted: Boolean,
     val odometer: Int = 0,
-    val dateLastOdometer: String = ""
+    val dateLastOdometer: String = "",
 )
 
 @Entity(tableName = "dataframe")

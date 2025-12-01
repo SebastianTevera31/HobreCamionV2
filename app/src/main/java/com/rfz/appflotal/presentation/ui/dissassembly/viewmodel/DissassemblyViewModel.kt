@@ -2,18 +2,24 @@ package com.rfz.appflotal.presentation.ui.dissassembly.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
-import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.disassembly.tire.DisassemblyTire
+import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
 import com.rfz.appflotal.data.model.tire.toTire
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
+import com.rfz.appflotal.data.repository.database.HombreCamionRepository
+import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.data.repository.disassembly.SetDisassemblyTireUseCase
+import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.destination.DestinationUseCase
 import com.rfz.appflotal.domain.disassembly.DisassemblyCauseUseCase
+import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
+import com.rfz.appflotal.presentation.ui.dissassembly.screen.NavigationScreen
+import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUi
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
+import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,15 +37,21 @@ class DisassemblyViewModel @Inject constructor(
     private val disassemblyCauseUseCase: DisassemblyCauseUseCase,
     private val setDisassemblyTireUseCase: SetDisassemblyTireUseCase,
     private val assemblyTireRepository: AssemblyTireRepository,
+    private val inspectionTireCrudUseCase: InspectionTireCrudUseCase,
+    private val catalogUseCase: CatalogUseCase,
+    private val hombreCamionRepository: HombreCamionRepository,
+    private val sensorDataTableRepository: SensorDataTableRepository,
     private val getTasksUseCase: GetTasksUseCase,
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(DisassemblyUiState())
     val uiState: StateFlow<DisassemblyUiState> = _uiState.asStateFlow()
 
-    fun loadData(tirePosition: String) {
+    fun loadData(tirePosition: String, initialPressure: Int, initialTemperature: Int) {
         _uiState.update { currentUiState ->
             currentUiState.copy(
-                positionTire = tirePosition
+                positionTire = tirePosition,
+                initialPressure = initialPressure,
+                initialTemperature = initialTemperature
             )
         }
 
@@ -49,47 +61,66 @@ class DisassemblyViewModel @Inject constructor(
             val getMountedTireDeferred =
                 async { assemblyTireRepository.getAssemblyTire(tirePosition) }
             val getDisassemblyCauseDeferred = async { disassemblyCauseUseCase() }
+            val tireReportDeferred = async { catalogUseCase.onGetTireReport() }
+            val lastOdometerDeferred = async { hombreCamionRepository.getOdometer() }
 
             val destinations = getDestinationDeferred.await()
             val tire = getMountedTireDeferred.await()
             val availableTireList = tiresDeferred.await()
             val disassemblyCauses = getDisassemblyCauseDeferred.await()
+            val tireReportList = tireReportDeferred.await()
+            val lastOdometer = lastOdometerDeferred.await()
 
-            if (destinations.isSuccess
-                && tire != null
-                && disassemblyCauses.isSuccess
-                && availableTireList.isSuccess
-            ) {
-                val destinationsList =
-                    destinations.getOrNull()?.filter { it.id == 1 || it.id == 3 || it.id == 6 }
-                        ?: emptyList()
-
-                val disassemblyList = disassemblyCauses.getOrNull() ?: emptyList()
-
-                val tire = availableTireList.getOrNull()
-                    ?.find { it.idTire == tire.idTire && it.destination == "Montada" }
-                    ?.toTire()
-
-                _uiState.update { currentUiState ->
-                    currentUiState.copy(
-                        destinationList = destinationsList,
-                        tire = tire,
-                        disassemblyCauseList = disassemblyList,
-                        screenLoadStatus = OperationStatus.Success
-                    )
-                }
-            } else {
+            responseHelper(tireReportList, onError = {
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
                         screenLoadStatus = OperationStatus.Error
                     )
                 }
+            }) { options ->
+                if (destinations.isSuccess
+                    && tire != null
+                    && disassemblyCauses.isSuccess
+                    && availableTireList.isSuccess
+                ) {
+                    val destinationsList =
+                        destinations.getOrNull()?.filter { it.id == 1 || it.id == 3 || it.id == 6 }
+                            ?: emptyList()
+
+                    val disassemblyList = disassemblyCauses.getOrNull() ?: emptyList()
+
+                    val tire = availableTireList.getOrNull()
+                        ?.find { it.idTire == tire.idTire && it.destination == "Montada" }
+                        ?.toTire()
+
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            destinationList = destinationsList,
+                            tire = tire,
+                            disassemblyCauseList = disassemblyList,
+                            screenLoadStatus = OperationStatus.Success,
+                            lastOdometer = lastOdometer.odometer,
+                            tireReportList = options?.map { it.toCatalog() } ?: emptyList()
+                        )
+                    }
+                } else {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            screenLoadStatus = OperationStatus.Error
+                        )
+                    }
+                }
             }
         }
     }
 
-    fun dismountTire(causeId: Int, destinationId: Int) {
-        viewModelScope.launch {
+    fun dismountTire(causeId: Int, destinationId: Int) = viewModelScope.launch {
+        val lastOdometerMeasurement = getCurrentDate()
+
+        // Publicamos camibios
+        val inspectionResult = uploadInspection(lastOdometerMeasurement)
+
+        if (inspectionResult) {
             val odometer = getTasksUseCase().first()[0].odometer
             val result = setDisassemblyTireUseCase(
                 DisassemblyTire(
@@ -101,6 +132,14 @@ class DisassemblyViewModel @Inject constructor(
                 )
             )
 
+            // Registrar registro de odometro
+            async {
+                hombreCamionRepository.updateOdometer(
+                    _uiState.value.inspectionForm.odometer,
+                    lastOdometerMeasurement
+                )
+            }
+
             _uiState.update { currentUiState ->
                 currentUiState.copy(
                     operationStatus = result.fold(
@@ -109,10 +148,61 @@ class DisassemblyViewModel @Inject constructor(
                         },
                         onFailure = { OperationStatus.Error }
                     )
-
+                )
+            }
+        } else {
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    operationStatus = OperationStatus.Error
                 )
             }
         }
+    }
+
+
+    fun updateInspection(values: InspectionUi) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                inspectionForm = values
+            )
+        }
+    }
+
+    fun updateNavigation(navigationScreen: NavigationScreen) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                navigationScreen = navigationScreen
+            )
+        }
+    }
+
+    private suspend fun uploadInspection(lastOdometerMeasurement: String): Boolean {
+        val uiState = _uiState.value
+
+        val result = inspectionTireCrudUseCase(
+            requestBody = InspectionTireDto(
+                positionTire = uiState.positionTire,
+                treadDepth = uiState.inspectionForm.treadDepth1,
+                treadDepth2 = uiState.inspectionForm.treadDepth2,
+                treadDepth3 = uiState.inspectionForm.treadDepth3,
+                treadDepth4 = uiState.inspectionForm.treadDepth4,
+                tireInspectionReportId = 3, // 3 = Enviar a "desechar"
+                pressureInspected = uiState.inspectionForm.pressure,
+                dateInspection = lastOdometerMeasurement,
+                odometer = uiState.inspectionForm.odometer,
+                temperatureInspected = uiState.inspectionForm.temperature,
+                pressureAdjusted = uiState.inspectionForm.adjustedPressure
+            )
+        )
+
+        return if (result.isSuccess) {
+            sensorDataTableRepository.updateTireRecord(
+                tire = uiState.positionTire,
+                temperature = uiState.inspectionForm.temperature,
+                pressure = uiState.inspectionForm.adjustedPressure
+            )
+            result.isSuccess
+        } else false
     }
 
     fun restartOperationStatus() {

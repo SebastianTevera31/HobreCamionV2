@@ -144,7 +144,11 @@ fun DiagramaMonitorScreen(
                         )
                     },
                     onAssemblyClick = { onAssemblyClick(tireUiState.currentTire) },
-                    onDisassemblyClick = onDisassemblyClick,
+                    onDisassemblyClick = {
+                        onDisassemblyClick(tireUiState.currentTire,
+                            tireUiState.temperature.first,
+                            tireUiState.pressure.first)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
@@ -329,7 +333,7 @@ fun PanelSensor(
     batteryStatus: SensorAlerts,
     onInspectClick: () -> Unit,
     onAssemblyClick: () -> Unit,
-    onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
+    onDisassemblyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val (tirePanelWeight, alertPanelWeight) = 0.65f to 0.35f
@@ -444,7 +448,7 @@ fun PanelSensor(
                                 )
                                 MonitorMenuButton(
                                     text = stringResource(R.string.desmontar),
-                                    onClick = { onDisassemblyClick(wheel, temperature, pressure) }
+                                    onClick = { onDisassemblyClick() }
                                 )
                             } else {
                                 MonitorMenuButton(
@@ -597,7 +601,7 @@ fun PanelSensorViewPreview() {
             tireRemovingStatus = SensorAlerts.REMOVAL,
             onInspectClick = {},
             onAssemblyClick = {},
-            onDisassemblyClick = { _, _, _ -> },
+            onDisassemblyClick = {},
             modifier = Modifier
                 .safeDrawingPadding()
                 .height(460.dp)

@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.safeGesturesPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -71,7 +73,7 @@ fun TireWastePileScreen(
         if (uiState.value.operationStatus is OperationStatus.Success) {
             Toast.makeText(
                 context,
-                context.getString(R.string.montaje_exitoso),
+                context.getString(R.string.llanta_enviada_desecho),
                 Toast.LENGTH_SHORT
             ).show()
 
@@ -145,7 +147,7 @@ fun TireWasteView(
         modifier = modifier,
         topBar = {
             SimpleTopBar(
-                title = stringResource(R.string.pila_de_desescho),
+                title = stringResource(R.string.pila_de_desecho),
                 onBack = onBack,
             )
         },
@@ -179,7 +181,7 @@ fun TireWasteView(
                         .padding(innerPadding)
                         .fillMaxSize()
                         .verticalScroll(scroll)
-                        .safeContentPadding()
+                        .padding(16.dp)
                 ) {
                     CatalogDropdown(
                         catalog = uiState.wasteReportList,

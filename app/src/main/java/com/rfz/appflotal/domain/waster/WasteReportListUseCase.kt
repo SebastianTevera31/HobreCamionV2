@@ -1,13 +1,12 @@
 package com.rfz.appflotal.domain.waster
 
 import com.rfz.appflotal.data.model.waster.WasteReport
-import com.rfz.appflotal.data.model.waster.response.WasteReportListResponse
 import com.rfz.appflotal.data.model.waster.toDomain
-import com.rfz.appflotal.data.repository.waster.WasteReportListRepository
+import com.rfz.appflotal.data.repository.waster.WasteRepository
 import javax.inject.Inject
 
 class WasteReportListUseCase @Inject constructor(
-    private val wasteReportListRepository: WasteReportListRepository
+    private val wasteReportListRepository: WasteRepository
 ) {
     suspend operator fun invoke(): Result<List<WasteReport>> {
         return wasteReportListRepository.doWasteReportList().map { list ->
