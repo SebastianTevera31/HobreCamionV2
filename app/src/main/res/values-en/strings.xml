@@ -256,6 +256,7 @@
     <string name="reporte_de_desecho">Scrap report</string>
     <string name="enviar_a_desecho">Send to scrap</string>
     <string name="pila_de_desecho">Scrap pile</string>
+    <string name="llanta_enviada_desecho">Tire sent to scrap</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
