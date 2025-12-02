@@ -3,6 +3,7 @@ package com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.model.tire.toTire
+import com.rfz.appflotal.data.repository.waster.WasteRepository
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import com.rfz.appflotal.domain.waster.WasteReportListUseCase
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TireWasteViewModel @Inject constructor(
     private val tireUseCase: TireListUsecase,
-    private val wasteReportListUseCase: WasteReportListUseCase
+    private val wasteReportListUseCase: WasteReportListUseCase,
+    private val wasteRepository: WasteRepository
 ) :
     ViewModel() {
     private var _uiState = MutableStateFlow(TireWasteUiState())
@@ -55,8 +57,29 @@ class TireWasteViewModel @Inject constructor(
         }
     }
 
-    fun sendTireToTireWastePile(wasteReportId: Int, tireId: Int) {
+    fun sendTireToTireWastePile(wasteReportId: Int, tireId: Int) = viewModelScope.launch {
+        val result = runCatching {
+            wasteRepository.sendTireToScrap()
+        }
 
+        if (result.isSuccess) {
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    operationStatus = result.fold(
+                        onSuccess = {
+                            OperationStatus.Success
+                        },
+                        onFailure = { OperationStatus.Error }
+                    )
+                )
+            }
+        } else {
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    operationStatus = OperationStatus.Error
+                )
+            }
+        }
     }
 
     fun updateSelectedTire(catalogItemId: Int) {
