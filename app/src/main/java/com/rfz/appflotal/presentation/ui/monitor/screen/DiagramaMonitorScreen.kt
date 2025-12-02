@@ -85,7 +85,8 @@ fun DiagramaMonitorScreen(
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
-    val panelDimension = if (tireUiState.isAssembled) 460.dp else 380.dp
+    val panelDimension =
+        if (tireUiState.isAssembled && tireUiState.isInspectionAvailable) 460.dp else 380.dp
 
     // Actualizar rueda
     tireSelected = tireUiState.currentTire

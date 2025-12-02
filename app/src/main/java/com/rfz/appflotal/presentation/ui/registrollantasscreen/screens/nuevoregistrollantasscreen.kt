@@ -88,8 +88,12 @@ fun NuevoRegistroLlantasScreen(
     modifier: Modifier = Modifier,
     viewModel: NuevoRegistroLlantasViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.loadData()
+    }
 
     Scaffold(
         topBar = {
@@ -147,7 +151,7 @@ fun NuevoRegistroLlantasScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     SearchBar(
-                        uiState.searchQuery,
+                        uiState.value.searchQuery,
                         onClearSearchQuery = viewModel::onClearQuery,
                         onQueryChanged = viewModel::onSearchQueryChanged,
                         modifier = Modifier
@@ -178,23 +182,23 @@ fun NuevoRegistroLlantasScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiState.isLoading && uiState.tires.isEmpty()) {
+            if (uiState.value.isLoading && uiState.value.tires.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else {
                 TireList(
-                    tires = uiState.displayedTires,
+                    tires = uiState.value.displayedTires,
                     onEdit = viewModel::onEditTireClicked,
                     modifier = Modifier
                 )
             }
         }
 
-        if (uiState.isDialogShown) {
-            TireDialog(uiState = uiState, viewModel = viewModel, onShowMessage = {
-                if (uiState.isSending) {
-                    uiState.errorMessage?.let {
+        if (uiState.value.isDialogShown) {
+            TireDialog(uiState = uiState.value, viewModel = viewModel, onShowMessage = {
+                if (uiState.value.isSending) {
+                    uiState.value.errorMessage?.let {
                         Toast.makeText(context, it, Toast.LENGTH_LONG).show()
                     }
                 }

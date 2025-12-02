@@ -21,6 +21,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,11 +52,24 @@ class InspectionViewModel @Inject constructor(
 
         val tireReport = tireReportDeferred.await()
         val lastOdometer = lastOdometerDeferred.await()
+        val odometerInspectionDate = lastOdometer.dateLastOdometer
 
-        val isOdometerEditable = if (!lastOdometer.dateLastOdometer.isEmpty()) {
-            val dateLastOdometer = Instant.parse(lastOdometer.dateLastOdometer)
-            val currentDate = Instant.now()
-            currentDate.isAfter(dateLastOdometer)
+        val isOdometerEditable = if (odometerInspectionDate.isNotEmpty()) {
+            try {
+                val lastOdometerInspection = Instant.parse(odometerInspectionDate)
+                val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
+                lastOdometerInspection.isBefore(oneDayAgo)
+            } catch (_: DateTimeParseException) {
+                try {
+                    val dateLastOdometer = LocalDateTime.parse(odometerInspectionDate)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                    val currentDate = Instant.now()
+                    currentDate.isAfter(dateLastOdometer)
+                } catch (_: DateTimeParseException) {
+                    false
+                }
+            }
         } else false
 
         responseHelper(tireReport) { opciones ->

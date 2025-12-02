@@ -68,7 +68,7 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
 
     private var token: String? = null
 
-    init {
+    fun loadData() {
         viewModelScope.launch {
             token = getTasksUseCase().first().firstOrNull()?.fld_token
             loadTires()
