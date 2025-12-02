@@ -2,7 +2,9 @@ package com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.tire.toTire
+import com.rfz.appflotal.data.model.waster.ScrapTirePile
 import com.rfz.appflotal.data.repository.waster.WasteRepository
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import com.rfz.appflotal.domain.waster.WasteReportListUseCase
@@ -14,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import javax.inject.Inject
 
 @HiltViewModel
@@ -58,8 +62,17 @@ class TireWasteViewModel @Inject constructor(
     }
 
     fun sendTireToTireWastePile(wasteReportId: Int, tireId: Int) = viewModelScope.launch {
+        val nowUtc: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC)
         val result = runCatching {
-            wasteRepository.sendTireToScrap()
+            wasteRepository.sendTireToScrap(
+                response = ScrapTirePile(
+                    id = 0, // 0 = Crea un nuevo registro
+                    tireId = tireId,
+                    date = nowUtc,
+                    scrapReportId = wasteReportId,
+                    treadDepth = _uiState.value.selectedTire?.thread?.toInt() ?: 0
+                )
+            )
         }
 
         if (result.isSuccess) {

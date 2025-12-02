@@ -296,10 +296,10 @@ fun DisassemblyTireView(
 fun DisassemblyTireContent(
     causesSelected: CatalogItem?,
     uiState: DisassemblyUiState,
+    modifier: Modifier = Modifier,
     destinationSelected: CatalogItem? = null,
     onCauseSelected: (CatalogItem?) -> Unit = {},
     onDestinationSelected: (CatalogItem?) -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

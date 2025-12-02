@@ -262,7 +262,7 @@
     <string name="error_enviar_desecho">Ocurrió un error al enviar la llanta a la pila de desecho</string>
     <string name="reporte_de_desecho">Reporte de desecho</string>
     <string name="enviar_a_desecho">Enviar a desecho</string>
-    <string name="pila_de_desecho">Pila de desecho</string>
+    <string name="pila_de_desecho">Pila de Desecho</string>
     <string name="llanta_enviada_desecho">Llanta enviada a desecho</string>
 
     <plurals name="description_field">

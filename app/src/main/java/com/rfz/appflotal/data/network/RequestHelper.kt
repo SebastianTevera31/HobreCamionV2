@@ -43,7 +43,6 @@ suspend fun <T> networkRequestHelper(request: suspend () -> Response<T>) =
     withContext(Dispatchers.IO) {
         try {
             val res = request()
-
             if (res.isSuccessful && res.body() != null) {
                 Result.success(res.body()!!)
             } else {
