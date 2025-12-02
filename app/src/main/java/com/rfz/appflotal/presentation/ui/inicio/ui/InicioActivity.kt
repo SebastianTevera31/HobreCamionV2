@@ -99,6 +99,8 @@ import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
+import com.rfz.appflotal.presentation.ui.repararrenovar.screen.RepararRenovarScreen
+import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.RepararRenovarViewModel
 import com.rfz.appflotal.presentation.ui.retreatedesign.screens.RetreatedDesignScreen
 import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesignViewModel
 import com.rfz.appflotal.presentation.ui.tirewastepile.screens.TireWastePileScreen
@@ -132,6 +134,8 @@ class InicioActivity : ComponentActivity() {
     private val disassemblyTireViewModel: DisassemblyViewModel by viewModels()
 
     private val tireWasteViewModel: TireWasteViewModel by viewModels()
+
+    private val repararRenovarViewModel: RepararRenovarViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -567,7 +571,8 @@ class InicioActivity : ComponentActivity() {
                                         type = NavType.StringType
                                         nullable = true
                                         defaultValue = null
-                                    })) { backStackEntry ->
+                                    })
+                            ) { backStackEntry ->
                                 val brandId = backStackEntry.arguments?.getInt("brandId") ?: 0
                                 val description = backStackEntry.arguments?.getString("desc")
                             }
@@ -645,7 +650,8 @@ class InicioActivity : ComponentActivity() {
                                     },
                                     navArgument("pressure") {
                                         type = NavType.FloatType; defaultValue = 0
-                                    })) { backStackEntry ->
+                                    })
+                            ) { backStackEntry ->
                                 val tire = backStackEntry.arguments?.getString("tire") ?: ""
                                 val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
                                 val pressure = backStackEntry.arguments?.getFloat("pressure") ?: 0.0
@@ -675,9 +681,10 @@ class InicioActivity : ComponentActivity() {
 
                             composable(
                                 route = "${NavScreens.MONTAJE}/{tire}", arguments = listOf(
-                                navArgument("tire") {
-                                    type = NavType.StringType
-                                })) { backStackEntry ->
+                                    navArgument("tire") {
+                                        type = NavType.StringType
+                                    })
+                            ) { backStackEntry ->
                                 val positionTire = backStackEntry.arguments?.getString("tire") ?: ""
                                 AssemblyTireScreen(
                                     positionTire = positionTire,
@@ -698,7 +705,8 @@ class InicioActivity : ComponentActivity() {
                                     },
                                     navArgument("pressure") {
                                         type = NavType.FloatType; defaultValue = 0
-                                    })) { backStackEntry ->
+                                    })
+                            ) { backStackEntry ->
                                 val tire = backStackEntry.arguments?.getString("tire") ?: ""
                                 val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
                                 val pressure = backStackEntry.arguments?.getFloat("pressure") ?: 0.0
@@ -723,6 +731,13 @@ class InicioActivity : ComponentActivity() {
                                 TireWastePileScreen(
                                     onBack = { navController.popBackStack() },
                                     viewModel = tireWasteViewModel,
+                                )
+                            }
+
+                            composable(route = NavScreens.REPARARRENOVAR) {
+                                RepararRenovarScreen(
+                                    onBack = { navController.popBackStack() },
+                                    viewModel = repararRenovarViewModel,
                                 )
                             }
                         }

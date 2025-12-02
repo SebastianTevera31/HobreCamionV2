@@ -7,14 +7,14 @@ fun RepairedTire.toDto() = RepairedTireDto(
     tireId = tireId,
     cost = cost,
     repairId = repairId,
-    dateOperation = dateOperation
+    dateOperation = dateOperation.toString()
 )
 
 fun RetreatedTire.toDto() = RetreatedTireDto(
     idRetreadedTire = id,
     tireId = tireId,
     cost = cost,
-    dateOperation = dateOperation,
+    dateOperation = dateOperation.toString(),
     retreadDesignId = retreadDesignId
 )
 

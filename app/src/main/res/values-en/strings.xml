@@ -72,7 +72,7 @@
     <string name="temperatura">Temp.</string>
     <string name="presion">Pressure</string>
     <string name="actualizado">Last updated: \n%1$s</string>
-    <string name="llantas">Wheels</string>
+    <string name="llantas">Tires</string>
     <string name="alertas_activas">Active alerts</string>
     <string name="presion_alta">High pressure</string>
     <string name="presion_baja">Low pressure</string>
@@ -257,6 +257,11 @@
     <string name="enviar_a_desecho">Send to scrap</string>
     <string name="pila_de_desecho">Scrap Pile</string>
     <string name="llanta_enviada_desecho">Tire sent to scrap</string>
+    <string name="renovar_reparar">Renovar - Reparar</string>
+    <string name="enviar_rueda">ENVIAR RUEDA</string>
+    <string name="motivo_de_reparacion">Motivo de Reparacion</string>
+    <string name="error_enviar_destino">Ocurrió un error al enviar la llanta al destino seleccionado</string>
+    <string name="llanta_enviada_al_destino">Llanta enviada al destino</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

@@ -38,6 +38,7 @@ fun ListItemContent(
     title: String,
     modifier: Modifier = Modifier,
     onEditClick: () -> Unit,
+    isEditable: Boolean = true,
     itemContent: @Composable () -> Unit = {},
 ) {
     Card(
@@ -74,29 +75,31 @@ fun ListItemContent(
                 itemContent()
             }
 
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f))
-                    .clickable { onEditClick() }
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+            if (isEditable) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f))
+                        .clickable { onEditClick() }
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = pluralStringResource(R.plurals.editar_elemento, 1),
-                        tint = MaterialTheme.colorScheme.secondaryContainer,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        pluralStringResource(R.plurals.editar_elemento, 1),
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        fontWeight = FontWeight.Medium,
-                        style = MaterialTheme.typography.labelLarge
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = pluralStringResource(R.plurals.editar_elemento, 1),
+                            tint = MaterialTheme.colorScheme.secondaryContainer,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            pluralStringResource(R.plurals.editar_elemento, 1),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
                 }
             }
         }

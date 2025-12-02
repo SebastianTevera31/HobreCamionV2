@@ -25,4 +25,6 @@ object NavScreens {
     const val MONTAJE = "montaje"
     const val DESMONTAJE = "desmontaje"
     const val DESECHO = "desecho"
+
+    const val REPARARRENOVAR = "reparar-renovar"
 }

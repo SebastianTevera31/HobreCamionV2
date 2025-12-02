@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.model.tire
 import com.google.gson.annotations.SerializedName
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
+import java.time.OffsetDateTime
 
 data class Tire(
     override val id: Int,
@@ -53,13 +54,13 @@ data class RepairedTire(
     val tireId: Int,
     val cost: Double,
     val repairId: Int,
-    val dateOperation: String
+    val dateOperation: OffsetDateTime
 )
 
 data class RetreatedTire(
     val id: Int,
     val tireId: Int,
     val cost: Double,
-    val dateOperation: String,
+    val dateOperation: OffsetDateTime,
     val retreadDesignId: Int
 )
