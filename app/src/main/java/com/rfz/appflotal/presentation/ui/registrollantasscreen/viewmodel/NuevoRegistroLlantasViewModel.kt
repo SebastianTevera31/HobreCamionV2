@@ -201,9 +201,8 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
     private fun loadTireDetails(tireId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingDialogData = true) }
-            val bearerToken = "Bearer ${token ?: ""}"
             try {
-                val result = tireGetUseCase(tireId, bearerToken)
+                val result = tireGetUseCase(tireId)
                 if (result.isSuccess) {
                     result.getOrNull()?.firstOrNull()?.let { details ->
                         _uiState.update {

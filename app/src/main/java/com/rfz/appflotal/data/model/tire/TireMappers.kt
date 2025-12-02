@@ -1,17 +1,22 @@
 package com.rfz.appflotal.data.model.tire
 
-import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
 
-data class Tire(
-    override val id: Int,
-    override val description: String,
-    val size: String,
-    val brand: String,
-    val model: String,
-    val thread: Double,
-    val loadingCapacity: String
-) : CatalogItem
+fun RepairedTire.toDto() = RepairedTireDto(
+    idRepairedTire = id,
+    tireId = tireId,
+    cost = cost,
+    repairId = repairId,
+    dateOperation = dateOperation
+)
+
+fun RetreatedTire.toDto() = RetreatedTireDto(
+    idRetreadedTire = id,
+    tireId = tireId,
+    cost = cost,
+    dateOperation = dateOperation,
+    retreadDesignId = retreadDesignId
+)
 
 fun TireListResponse.toTire(): Tire {
     return Tire(

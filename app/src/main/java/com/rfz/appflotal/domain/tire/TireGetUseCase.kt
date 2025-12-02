@@ -7,7 +7,7 @@ import javax.inject.Inject
 class TireGetUseCase @Inject constructor(
     private val tireGetRepository: TireGetRepository
 ) {
-    suspend operator fun invoke(idTire: Int, token: String): Result<List<TirexIdResponse>> {
-        return tireGetRepository.doTireGet(idTire, token)
+    suspend operator fun invoke(idTire: Int): Result<List<TirexIdResponse>> {
+        return tireGetRepository.doTireGet(idTire)
     }
 }

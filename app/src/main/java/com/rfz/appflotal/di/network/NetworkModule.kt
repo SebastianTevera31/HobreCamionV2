@@ -42,6 +42,7 @@ import com.rfz.appflotal.data.network.client.tire.LoadingCapacityClient
 import com.rfz.appflotal.data.network.client.tire.TireCrudClient
 import com.rfz.appflotal.data.network.client.tire.TireGetClient
 import com.rfz.appflotal.data.network.client.tire.TireListClient
+import com.rfz.appflotal.data.network.client.tire.TireService
 import com.rfz.appflotal.data.network.client.tire.TireSizeClient
 import com.rfz.appflotal.data.network.client.tire.TireSizeCrudClient
 import com.rfz.appflotal.data.network.client.tpms.ApiTpmsClient
@@ -401,6 +402,11 @@ class NetworkModule {
         return retrofit.create(AxleService::class.java)
     }
 
+    @Singleton
+    @Provides
+    fun provideTireService(retrofit: Retrofit): TireService {
+        return retrofit.create(TireService::class.java)
+    }
 }
 
 @Module

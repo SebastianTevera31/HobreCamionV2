@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.work.WorkManager
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepositoryImpl
+import com.rfz.appflotal.data.repository.tire.TireRepository
+import com.rfz.appflotal.data.repository.tire.TireRepositoryImpl
 import com.rfz.appflotal.data.repository.vehicle.VehicleRepository
 import com.rfz.appflotal.data.repository.vehicle.VehicleRepositoryImpl
 import dagger.Binds
@@ -25,6 +27,10 @@ abstract class AssemblyTireRepository {
     @Binds
     @Singleton
     abstract fun bindVehicleRepository(impl: VehicleRepositoryImpl): VehicleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTireRepository(impl: TireRepositoryImpl): TireRepository
 }
 
 @Module
