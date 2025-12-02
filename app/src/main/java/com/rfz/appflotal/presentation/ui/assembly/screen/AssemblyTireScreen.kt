@@ -125,11 +125,7 @@ fun AssemblyTireView(
     var axleSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 
-    val isFormValid by remember(axleSelected, tireSelected, uiState.isOdometerValid) {
-        derivedStateOf {
-            axleSelected != null && tireSelected != null && uiState.isOdometerValid == OdometerValidation.VALID
-        }
-    }
+    val isFormValid = axleSelected != null && tireSelected != null && uiState.isOdometerValid == OdometerValidation.VALID
 
     when (uiState.operationStatus) {
         is OperationStatus.Error -> {
