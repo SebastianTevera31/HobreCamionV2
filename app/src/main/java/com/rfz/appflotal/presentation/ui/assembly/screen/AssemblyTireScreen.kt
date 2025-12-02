@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -126,9 +125,7 @@ fun AssemblyTireView(
     var axleSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 
-    val scroll = rememberScrollState()
-
-    val isFormValid by remember {
+    val isFormValid by remember(axleSelected, tireSelected, uiState.isOdometerValid) {
         derivedStateOf {
             axleSelected != null && tireSelected != null && uiState.isOdometerValid == OdometerValidation.VALID
         }
@@ -187,8 +184,8 @@ fun AssemblyTireView(
                     modifier = Modifier
                         .padding(innerPadding)
                         .fillMaxSize()
-                        .verticalScroll(scroll)
-                        .safeContentPadding()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
                 ) {
                     CatalogDropdown(
                         catalog = uiState.axleList,
