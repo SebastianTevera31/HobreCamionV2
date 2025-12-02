@@ -7,6 +7,8 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
+import java.time.Instant
+import java.time.format.DateTimeParseException
 import javax.inject.Inject
 
 class GetSensorDataByWheelUseCase @Inject constructor(
@@ -24,7 +26,8 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         tireSelected: String,
         currentTires: List<MonitorTire>
     ): Result? {
-        val data = sensorDataTableRepository.getLastDataByTire(monitorId, tireSelected) ?: return null
+        val data =
+            sensorDataTableRepository.getLastDataByTire(monitorId, tireSelected) ?: return null
 
         val pressureStatus = if (data.lowPressureAlert) SensorAlerts.LOW_PRESSURE
         else if (data.highPressureAlert) SensorAlerts.HIGH_PRESSURE
@@ -36,7 +39,8 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         val batteryStatus = if (data.lowBatteryAlert) SensorAlerts.LOW_BATTERY
         else SensorAlerts.NO_DATA
 
-        val flatTireStatus = if (data.punctureAlert) SensorAlerts.FAST_LEAKAGE else SensorAlerts.NO_DATA
+        val flatTireStatus =
+            if (data.punctureAlert) SensorAlerts.FAST_LEAKAGE else SensorAlerts.NO_DATA
 
         val inAlert = getIsTireInAlert(
             temperatureStatus = temperatureStatus,
@@ -49,6 +53,20 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             if (tire.sensorPosition == tireSelected) tire.copy(inAlert = inAlert) else tire
         }
 
+        val lastInspection = data.lastInspection
+        val isInspectionAvailable = if (lastInspection != null) {
+            try {
+                val inspectionDate = Instant.parse(lastInspection)
+                Instant.now().isAfter(inspectionDate)
+            } catch (_: DateTimeParseException) {
+                // Log.e("GetSensorDataUseCase", "Formato de fecha inválido para lastInspection: $lastInspection")
+                false
+            }
+        } else {
+            false
+        }
+
+
         val isAssembled = assemblyTireRepository.confirmTireMounted(tireSelected)
 
         val newTireUiState = TireUiState(
@@ -59,7 +77,8 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             batteryStatus = batteryStatus,
             tireRemovingStatus = if (data.pressure == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
-            flatTireStatus = flatTireStatus
+            flatTireStatus = flatTireStatus,
+            isInspectionAvailable = isInspectionAvailable
         )
 
         return Result(

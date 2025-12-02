@@ -111,6 +111,7 @@ fun SensorDataEntity.toDiagram(): DiagramMonitorResponse {
         highPressure = highPressureAlert,
         lowBattery = lowBatteryAlert,
         puncture = punctureAlert,
-        ultimalectura = timestamp
+        ultimalectura = timestamp,
+        ultimaInspeccion = lastInspection ?: "",
     )
 }

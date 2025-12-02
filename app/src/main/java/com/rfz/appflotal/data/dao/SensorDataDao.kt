@@ -39,4 +39,34 @@ interface SensorDataDao {
 
     @Query("UPDATE sensor_data SET temperature =:temperature, pressure =:pressure WHERE monitor_id =:monitorId AND tire =:tire")
     suspend fun updateSensorRecord(monitorId: Int, tire: String, temperature: Int, pressure: Int)
+
+    @Query(
+        """
+    UPDATE sensor_data
+    SET temperature = :temperature,
+        pressure = :pressure,
+        high_temperature_alert = :highTemperatureAlert,
+        high_pressure_alert = :highPressureAlert,
+        low_pressure_alert = :lowPressureAlert,
+        low_battery_alert = :lowBatteryAlert,
+        puncture_alert = :punctureAlert,
+        active = :active
+    WHERE monitor_id = :idMonitor
+      AND tire_number = :tireNumber"""
+    )
+    suspend fun updateSensor(
+        idMonitor: Int,
+        tireNumber: String,
+        temperature: Int,
+        pressure: Int,
+        highTemperatureAlert: Boolean,
+        highPressureAlert: Boolean,
+        lowPressureAlert: Boolean,
+        lowBatteryAlert: Boolean,
+        punctureAlert: Boolean,
+        active: Boolean
+    )
+
+    @Query("UPDATE sensor_data SET last_inspection =:lastInspection WHERE monitor_id =:monitorId AND tire =:tire")
+    suspend fun updateLastInspection(monitorId: Int, tire: String, lastInspection: String)
 }

@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.inspection.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
@@ -95,10 +96,17 @@ class InspectionViewModel @Inject constructor(
             )
         )
 
-        // Registrar registro de odometro
-        async { hombreCamionRepository.updateOdometer(values.odometer, lastOdometerMeasurement) }
-
         if (result.isSuccess) {
+            // Registrar registro de odometro
+            hombreCamionRepository.updateOdometer(values.odometer, lastOdometerMeasurement)
+            sensorDataTableRepository.updateLastInspection(
+                tire = positionTire,
+                lastInspection = convertDate(
+                    date = lastOdometerMeasurement,
+                    initialFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                    convertFormat = "yyyy-MM-dd'T'HH:mm:ss",
+                )
+            )
             sensorDataTableRepository.updateTireRecord(
                 tire = positionTire,
                 temperature = values.temperature,

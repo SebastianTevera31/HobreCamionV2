@@ -141,6 +141,31 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
+    private suspend fun getConfigData() {
+        val uiState = _monitorUiState
+        if (uiState.value.monitorId != 0) {
+            if (_wifiStatus.value == NetworkStatus.Connected) {
+                coordinatesTableUseCase.deleteCoordinates(uiState.value.monitorId)
+                assemblyTireRepository.refreshMountedTires()
+                mapTires()
+            } else {
+                val localCoordinates = coordinatesTableUseCase
+                    .getCoordinates(uiState.value.monitorId)
+                uiState.update { currentUiState ->
+                    currentUiState.copy(
+                        listOfTires = localCoordinates.map { it.toTire() }
+                    )
+                }
+            }
+        } else {
+            _monitorUiState.update { currentUiState ->
+                currentUiState.copy(
+                    showDialog = true
+                )
+            }
+        }
+    }
+
     private fun mapTires() {
         viewModelScope.launch {
             val uiState = monitorUiState.value
@@ -171,7 +196,7 @@ class MonitorViewModel @Inject constructor(
                             ),
                             isActive = c?.sensorId != 0,
                             xPosition = info.fldPositionX,
-                            yPosition = info.fldPositionY
+                            yPosition = info.fldPositionY,
                         )
                     }.sortedBy {
                         it.sensorPosition.removePrefix("P").trim().toIntOrNull() ?: Int.MAX_VALUE
@@ -188,31 +213,6 @@ class MonitorViewModel @Inject constructor(
 
             // Insertar registro de ruedas en la base de datos.
             coordinatesTableUseCase.insertCoordinates(monitorId, _monitorUiState.value.listOfTires)
-        }
-    }
-
-    private suspend fun getConfigData() {
-        val uiState = _monitorUiState
-        if (uiState.value.monitorId != 0) {
-            if (_wifiStatus.value == NetworkStatus.Connected) {
-                coordinatesTableUseCase.deleteCoordinates(uiState.value.monitorId)
-                assemblyTireRepository.refreshMountedTires()
-                mapTires()
-            } else {
-                val localCoordinates = coordinatesTableUseCase
-                    .getCoordinates(uiState.value.monitorId)
-                uiState.update { currentUiState ->
-                    currentUiState.copy(
-                        listOfTires = localCoordinates.map { it.toTire() }
-                    )
-                }
-            }
-        } else {
-            _monitorUiState.update { currentUiState ->
-                currentUiState.copy(
-                    showDialog = true
-                )
-            }
         }
     }
 

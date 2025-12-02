@@ -2,6 +2,7 @@ package com.rfz.appflotal.data.repository.database
 
 import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.model.database.SensorDataEntity
+import com.rfz.appflotal.data.model.database.SensorDataUpdate
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import jakarta.inject.Inject
@@ -23,7 +24,8 @@ class SensorDataTableRepository @Inject constructor(
         lowPressureAlert: Boolean,
         lowBatteryAlert: Boolean,
         punctureAlert: Boolean,
-        active: Boolean
+        active: Boolean,
+        lastInspection: String?
     ) {
         sensorData.insertSensorData(
             SensorDataEntity(
@@ -38,7 +40,8 @@ class SensorDataTableRepository @Inject constructor(
                 highPressureAlert = highPressureAlert,
                 lowPressureAlert = lowPressureAlert,
                 lowBatteryAlert = lowBatteryAlert,
-                punctureAlert = punctureAlert
+                punctureAlert = punctureAlert,
+                lastInspection = lastInspection
             )
         )
     }
@@ -87,6 +90,26 @@ class SensorDataTableRepository @Inject constructor(
     suspend fun isTireActive(monitorId: Int, tire: String): Boolean {
         val data = sensorData.getLastRecordByTire(monitorId, tire)
         return data?.active ?: false
+    }
+
+    suspend fun updateSensorDataExceptLastInspection(update: SensorDataUpdate) {
+        sensorData.updateSensor(
+            idMonitor = update.idMonitor,
+            tireNumber = update.tireNumber,
+            temperature = update.temperature,
+            pressure = update.pressure,
+            highTemperatureAlert = update.highTemperatureAlert,
+            highPressureAlert = update.highPressureAlert,
+            lowPressureAlert = update.lowPressureAlert,
+            lowBatteryAlert = update.lowBatteryAlert,
+            punctureAlert = update.punctureAlert,
+            active = update.active
+        )
+    }
+
+    suspend fun updateLastInspection(tire: String, lastInspection: String) {
+        val monitorId = getTasksUseCase.invoke().first()[0].id_monitor
+        sensorData.updateLastInspection(monitorId, tire, lastInspection)
     }
 }
 

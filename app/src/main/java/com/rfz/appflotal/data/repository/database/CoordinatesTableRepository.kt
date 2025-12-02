@@ -39,6 +39,6 @@ fun MonitorTire.toEntity(monitorId: Int): CoordinatesEntity {
         inAlert = inAlert,
         isActive = isActive,
         xPosition = xPosition,
-        yPosition = yPosition
+        yPosition = yPosition,
     )
 }

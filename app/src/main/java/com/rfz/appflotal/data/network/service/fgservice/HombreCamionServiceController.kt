@@ -75,6 +75,11 @@ class HombreCamionServiceController @Inject constructor(
                         "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
                     )
 
+                    val lastInspection = convertDate(
+                        it.ultimaInspeccion, "yyyy-MM-dd'T'HH:mm:ss",
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                    )
+
                     val localInstance =
                         LocalDateTime.ofInstant(
                             Instant.now(), ZoneId.systemDefault()
@@ -95,7 +100,8 @@ class HombreCamionServiceController @Inject constructor(
                         lowPressureAlert = it.lowPressure,
                         lowBatteryAlert = it.lowBattery,
                         punctureAlert = it.puncture,
-                        active = isActive
+                        active = isActive,
+                        lastInspection = lastInspection
                     )
 
                     // Actualiza el estado de alerta y disponibilidad de las ruedas

@@ -128,6 +128,7 @@ fun DiagramaMonitorScreen(
                     paymentPlan = paymentPlan,
                     isAssembled = tireUiState.isAssembled,
                     wheel = tireUiState.currentTire,
+                    isInspectionAvailable = tireUiState.isInspectionAvailable,
                     temperature = tireUiState.temperature.first,
                     pressure = tireUiState.pressure.first,
                     timestamp = tireUiState.timestamp,
@@ -145,9 +146,11 @@ fun DiagramaMonitorScreen(
                     },
                     onAssemblyClick = { onAssemblyClick(tireUiState.currentTire) },
                     onDisassemblyClick = {
-                        onDisassemblyClick(tireUiState.currentTire,
+                        onDisassemblyClick(
+                            tireUiState.currentTire,
                             tireUiState.temperature.first,
-                            tireUiState.pressure.first)
+                            tireUiState.pressure.first
+                        )
                     },
                     modifier = Modifier
                         .weight(1f)
@@ -322,6 +325,7 @@ fun CeldaAlerta(wheel: String, alertMessage: String, modifier: Modifier = Modifi
 fun PanelSensor(
     paymentPlan: PaymentPlanType,
     isAssembled: Boolean,
+    isInspectionAvailable: Boolean,
     wheel: String,
     temperature: Float,
     pressure: Float,
@@ -442,10 +446,12 @@ fun PanelSensor(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             if (isAssembled) {
-                                MonitorMenuButton(
-                                    text = stringResource(R.string.inspeccionar),
-                                    onClick = onInspectClick
-                                )
+                                if (isInspectionAvailable) {
+                                    MonitorMenuButton(
+                                        text = stringResource(R.string.inspeccionar),
+                                        onClick = onInspectClick
+                                    )
+                                }
                                 MonitorMenuButton(
                                     text = stringResource(R.string.desmontar),
                                     onClick = { onDisassemblyClick() }
@@ -593,6 +599,7 @@ fun PanelSensorViewPreview() {
             temperature = 40.0f,
             pressure = 3f,
             timestamp = "",
+            isInspectionAvailable = false,
             isAssembled = true,
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
             pressureStatus = SensorAlerts.LOW_PRESSURE,

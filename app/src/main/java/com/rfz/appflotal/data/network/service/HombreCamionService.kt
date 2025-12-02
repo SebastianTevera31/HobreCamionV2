@@ -33,6 +33,7 @@ import com.rfz.appflotal.core.util.tpms.getTemperature
 import com.rfz.appflotal.core.util.tpms.getTire
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.database.DataframeEntity
+import com.rfz.appflotal.data.model.database.SensorDataUpdate
 import com.rfz.appflotal.data.network.service.fgservice.HombreCamionServiceController
 import com.rfz.appflotal.data.network.service.fgservice.currentAppLocaleFromAppCompat
 import com.rfz.appflotal.data.network.service.fgservice.localized
@@ -351,19 +352,21 @@ class HombreCamionService : Service() {
 
                         val tire = getTire(dataFrame)
 
-                        sensorDataTableRepository.insertSensorData(
-                            idMonitor = monitorId,
-                            tire = tire,
-                            tireNumber = "",
-                            timestamp = timestamp,
-                            temperature = getTemperature(dataFrame).toInt(),
-                            pressure = getPressure(dataFrame).toInt(),
-                            active = true,
-                            highTemperatureAlert = highTemperatureAlert,
-                            highPressureAlert = highPressureAlert,
-                            lowPressureAlert = lowPressureAlert,
-                            lowBatteryAlert = lowBatteryAlert,
-                            punctureAlert = puncture
+                        sensorDataTableRepository.updateSensorDataExceptLastInspection(
+                            update = SensorDataUpdate(
+                                idMonitor = monitorId,
+                                tire = tire,
+                                tireNumber = "",
+                                timestamp = timestamp,
+                                temperature = getTemperature(dataFrame).toInt(),
+                                pressure = getPressure(dataFrame).toInt(),
+                                highTemperatureAlert = highTemperatureAlert,
+                                highPressureAlert = highPressureAlert,
+                                lowPressureAlert = lowPressureAlert,
+                                lowBatteryAlert = lowBatteryAlert,
+                                punctureAlert = puncture,
+                                active = true
+                            )
                         )
 
                         val inAlert = highTemperatureAlert || highPressureAlert

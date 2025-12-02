@@ -57,11 +57,6 @@ val menuItems = listOf(
         R.drawable.ic_truck
     ),
     MenuItem(
-        R.string.tire_change,
-        NavScreens.MONTAJE_DESMONTAJE,
-        R.drawable.ic_tire_change
-    ),
-    MenuItem(
         title = R.string.monitoreo,
         route = HombreCamionScreens.MONITOR.name,
         iconRes = R.drawable.monitor

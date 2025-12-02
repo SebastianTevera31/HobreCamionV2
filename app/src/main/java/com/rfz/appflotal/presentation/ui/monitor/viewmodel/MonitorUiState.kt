@@ -34,7 +34,8 @@ data class TireUiState(
     val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val flatTireStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val tireRemovingStatus: SensorAlerts = SensorAlerts.NO_DATA,
-    val isAssembled: Boolean = false
+    val isAssembled: Boolean = false,
+    val isInspectionAvailable: Boolean = false,
 )
 
 data class MonitorTire(

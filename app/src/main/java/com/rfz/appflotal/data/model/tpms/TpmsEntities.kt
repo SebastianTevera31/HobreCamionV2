@@ -83,6 +83,7 @@ data class DiagramMonitorResponse(
     @SerializedName("lowBattery") val lowBattery: Boolean,
     @SerializedName("puncture") val puncture: Boolean,
     @SerializedName("ultimalectura") val ultimalectura: String,
+    @SerializedName("ultimainspeccion") val ultimaInspeccion: String,
 )
 
 data class PositionCoordinatesResponse(

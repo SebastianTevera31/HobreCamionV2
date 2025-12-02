@@ -80,6 +80,8 @@ data class SensorDataEntity(
     val tireNumber: String,
     @ColumnInfo(name = "timestamp")
     val timestamp: String,
+    @ColumnInfo(name = "last_inspection")
+    val lastInspection: String? = null,
     @ColumnInfo(name = "temperature")
     val temperature: Int,
     @ColumnInfo(name = "pressure")
@@ -95,5 +97,20 @@ data class SensorDataEntity(
     @ColumnInfo(name = "puncture_alert")
     val punctureAlert: Boolean,
     @ColumnInfo(name = "active")
+    val active: Boolean
+)
+
+data class SensorDataUpdate(
+    val idMonitor: Int,
+    val tire: String,
+    val tireNumber: String,
+    val timestamp: String,
+    val temperature: Int,
+    val pressure: Int,
+    val highTemperatureAlert: Boolean,
+    val highPressureAlert: Boolean,
+    val lowPressureAlert: Boolean,
+    val lowBatteryAlert: Boolean,
+    val punctureAlert: Boolean,
     val active: Boolean
 )
