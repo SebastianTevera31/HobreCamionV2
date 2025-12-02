@@ -3,12 +3,15 @@ package com.rfz.appflotal.domain.tpmsUseCase
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 class GetSensorDataByWheelUseCase @Inject constructor(
@@ -54,16 +57,23 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         }
 
         val lastInspection = data.lastInspection
-        val isInspectionAvailable = if (lastInspection != null) {
+        val isInspectionAvailable = if (lastInspection.isNullOrEmpty()) true else {
             try {
-                val inspectionDate = Instant.parse(lastInspection)
-                Instant.now().isAfter(inspectionDate)
+                val lastInspection = Instant.parse(lastInspection)
+                val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
+                lastInspection.isBefore(oneDayAgo)
             } catch (_: DateTimeParseException) {
-                // Log.e("GetSensorDataUseCase", "Formato de fecha inválido para lastInspection: $lastInspection")
-                false
+                try {
+                    val lastInspection = LocalDateTime.parse(lastInspection)
+                        .atZone(ZoneId.systemDefault()) // Asume la zona horaria del dispositivo
+                        .toInstant()
+                    val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
+                    lastInspection.isBefore(oneDayAgo)
+                } catch (_: Exception) {
+                    // Si el formato es completamente inesperado, es más seguro permitir la inspección.
+                    true
+                }
             }
-        } else {
-            false
         }
 
 
