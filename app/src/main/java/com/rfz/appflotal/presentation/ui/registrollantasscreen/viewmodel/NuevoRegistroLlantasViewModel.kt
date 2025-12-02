@@ -139,7 +139,7 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
                 registrationDate = LocalDateTime.now().toString(),
                 isActive = true,
                 retreadDesignId = 0,
-                destination = 7,
+                destination = 2,
                 lifecycle = 0,
             )
 
