@@ -1,8 +1,7 @@
-package com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel
+package com.rfz.appflotal.presentation.ui.scrap.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.tire.toTire
 import com.rfz.appflotal.data.model.waster.ScrapTirePile
 import com.rfz.appflotal.data.repository.waster.WasteRepository

@@ -12,7 +12,8 @@ data class Tire(
     val brand: String,
     val model: String,
     val thread: Double,
-    val loadingCapacity: String
+    val loadingCapacity: String,
+    val destination: String
 ) : CatalogItem
 
 data class RepairedTireDto(
@@ -49,6 +50,20 @@ data class RetreatedTireDto(
     val retreadDesignId: Int
 )
 
+data class ChangeDestinationDto(
+    @SerializedName("id_tire")
+    val tireId: Int,
+
+    @SerializedName("id_destination")
+    val destinationId: Int,
+
+    @SerializedName("changeMotive")
+    val changeMotive: String,
+
+    @SerializedName("fld_dateOperation")
+    val dateOperation: String,
+)
+
 data class RepairedTire(
     val id: Int,
     val tireId: Int,
@@ -63,4 +78,11 @@ data class RetreatedTire(
     val cost: Double,
     val dateOperation: OffsetDateTime,
     val retreadDesignId: Int
+)
+
+data class ChangeDestination(
+    val tireId: Int,
+    val destinationId: Int,
+    val changeMotive: String,
+    val dateOperation: OffsetDateTime,
 )

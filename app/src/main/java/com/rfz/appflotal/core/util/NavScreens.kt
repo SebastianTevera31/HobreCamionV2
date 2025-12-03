@@ -27,4 +27,6 @@ object NavScreens {
     const val DESECHO = "desecho"
 
     const val REPARARRENOVAR = "reparar-renovar"
+
+    const val CAMBIO_DESTINO = "cambio_destino"
 }

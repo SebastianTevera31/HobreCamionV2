@@ -26,6 +26,15 @@ fun TireListResponse.toTire(): Tire {
         brand = brand,
         model = model,
         thread = treadDepthAssembly,
-        loadingCapacity = loadingCapacity
+        loadingCapacity = loadingCapacity,
+        destination = destination
     )
 }
+
+fun ChangeDestination.toDto() =
+    ChangeDestinationDto(
+        tireId = tireId,
+        destinationId = destinationId,
+        changeMotive = changeMotive,
+        dateOperation = dateOperation.toString()
+    )

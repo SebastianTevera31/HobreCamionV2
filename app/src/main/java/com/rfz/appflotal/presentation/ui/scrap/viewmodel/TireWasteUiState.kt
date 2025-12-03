@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel
+package com.rfz.appflotal.presentation.ui.scrap.viewmodel
 
 import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.data.model.waster.WasteReport

@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.tirewastepile.screens
+package com.rfz.appflotal.presentation.ui.scrap.screens
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -41,8 +41,8 @@ import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
-import com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel.TireWasteUiState
-import com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel.TireWasteViewModel
+import com.rfz.appflotal.presentation.ui.scrap.viewmodel.TireWasteUiState
+import com.rfz.appflotal.presentation.ui.scrap.viewmodel.TireWasteViewModel
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import com.rfz.appflotal.presentation.ui.utils.validate
 
@@ -232,7 +232,8 @@ fun TireWasteViewPreview() {
                         brand = "Michelin",
                         model = "Primacy 4",
                         thread = 7.5,
-                        loadingCapacity = "615"
+                        loadingCapacity = "615",
+                        destination = "Oficina"
                     )
                 ),
                 selectedTire = Tire(
@@ -242,7 +243,8 @@ fun TireWasteViewPreview() {
                     brand = "Michelin",
                     model = "Primacy 4",
                     thread = 7.5,
-                    loadingCapacity = "615"
+                    loadingCapacity = "615",
+                    destination = "Oficina"
                 ),
                 screenLoadStatus = OperationStatus.Success
             ),

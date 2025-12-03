@@ -258,7 +258,7 @@
     <string name="pila_de_desecho">Scrap Pile</string>
     <string name="llanta_enviada_desecho">Tire sent to scrap</string>
     <string name="mover_a_almacen">Move to Stock</string>
-    <string name="enviar_rueda">SEND TIRE TO STOCK</string>
+    <string name="enviar_rueda_almacen">MOVE TIRE TO STOCK</string>
     <string name="motivo_de_reparacion">Repair reason</string>
     <string name="error_enviar_almacen">An error occurred while sending the tire to stock</string>
     <string name="llanta_enviada_al_almacen">Tire sent to stock</string>
@@ -267,6 +267,11 @@
     <string name="selected_retread_design">Selected Retread Design</string>
     <string name="llantas_en">Tires in %1$s</string>
     <string name="seleccione_un_origen">Select an Origin</string>
+    <string name="debe_escribir_el_motivo">You need to enter the reason</string>
+    <string name="cambio_de_destino">Destination Change</string>
+    <string name="enviar_rueda">MOVE TIRE</string>
+    <string name="error_al_mover_la_llanta">Error moving the tire</string>
+    <string name="llanta_movida_a">Tire moved to %1$s</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

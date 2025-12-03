@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.network.service.tire
 
+import com.rfz.appflotal.data.model.tire.ChangeDestinationDto
 import com.rfz.appflotal.data.model.tire.RepairedTireDto
 import com.rfz.appflotal.data.model.tire.RetreatedTireDto
 import com.rfz.appflotal.data.network.client.tire.TireService
@@ -14,4 +15,9 @@ class RemoteTireDataSource @Inject constructor(private val tireService: TireServ
     suspend fun postRepairedTire(token: String, body: RepairedTireDto) = networkRequestHelper {
         tireService.postRepairedTire("Bearer $token", body)
     }
+
+    suspend fun postChangeDestination(token: String, body: ChangeDestinationDto) =
+        networkRequestHelper {
+            tireService.postChangeDestination("Bearer $token", body)
+        }
 }

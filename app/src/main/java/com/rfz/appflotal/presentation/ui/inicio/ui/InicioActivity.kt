@@ -68,6 +68,8 @@ import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.ui.assembly.screen.AssemblyTireScreen
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
 import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
+import com.rfz.appflotal.presentation.ui.cambiodestino.screen.CambioDestinoScreen
+import com.rfz.appflotal.presentation.ui.cambiodestino.viewmodel.CambioDestinoViewModel
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.DisassemblyTireScreen
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
@@ -103,8 +105,8 @@ import com.rfz.appflotal.presentation.ui.repararrenovar.screen.RepararRenovarScr
 import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.RepararRenovarViewModel
 import com.rfz.appflotal.presentation.ui.retreatedesign.screens.RetreatedDesignScreen
 import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesignViewModel
-import com.rfz.appflotal.presentation.ui.tirewastepile.screens.TireWastePileScreen
-import com.rfz.appflotal.presentation.ui.tirewastepile.viewmodel.TireWasteViewModel
+import com.rfz.appflotal.presentation.ui.scrap.screens.TireWastePileScreen
+import com.rfz.appflotal.presentation.ui.scrap.viewmodel.TireWasteViewModel
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -136,6 +138,9 @@ class InicioActivity : ComponentActivity() {
     private val tireWasteViewModel: TireWasteViewModel by viewModels()
 
     private val repararRenovarViewModel: RepararRenovarViewModel by viewModels()
+
+    private val cambioDestinoViewModel: CambioDestinoViewModel by viewModels()
+
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -733,6 +738,13 @@ class InicioActivity : ComponentActivity() {
                                 RepararRenovarScreen(
                                     onBack = { navController.popBackStack() },
                                     viewModel = repararRenovarViewModel,
+                                )
+                            }
+
+                            composable(route = NavScreens.CAMBIO_DESTINO) {
+                                CambioDestinoScreen(
+                                    onBack = { navController.popBackStack() },
+                                    viewModel = cambioDestinoViewModel,
                                 )
                             }
                         }

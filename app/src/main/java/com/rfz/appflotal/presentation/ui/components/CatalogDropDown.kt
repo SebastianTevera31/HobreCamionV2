@@ -62,7 +62,7 @@ fun CatalogDropdown(
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black
                 ),
-                shape = RoundedCornerShape(14.dp),
+                shape = MaterialTheme.shapes.large,
             )
             ExposedDropdownMenu(
                 expanded = expanded,

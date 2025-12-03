@@ -1,5 +1,7 @@
 package com.rfz.appflotal.data.repository.tire
 
+import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.tire.ChangeDestination
 import com.rfz.appflotal.data.model.tire.RepairedTire
 import com.rfz.appflotal.data.model.tire.RetreatedTire
 import com.rfz.appflotal.data.model.tire.toDto
@@ -9,8 +11,10 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 interface TireRepository {
-    suspend fun postRetreatedTire(retreatedTire: RetreatedTire)
-    suspend fun postRepairedTire(repairedTire: RepairedTire)
+    suspend fun postRetreatedTire(retreatedTire: RetreatedTire): Result<List<MessageResponse>>
+    suspend fun postRepairedTire(repairedTire: RepairedTire): Result<List<MessageResponse>>
+
+    suspend fun saveDestinationChange(changeDestination: ChangeDestination): Result<List<MessageResponse>>
 }
 
 class TireRepositoryImpl @Inject constructor(
@@ -18,13 +22,18 @@ class TireRepositoryImpl @Inject constructor(
     private val getTasksUseCase: GetTasksUseCase
 ) :
     TireRepository {
-    override suspend fun postRetreatedTire(retreatedTire: RetreatedTire) {
+    override suspend fun postRetreatedTire(retreatedTire: RetreatedTire): Result<List<MessageResponse>> {
         val token = getTasksUseCase().first().first().fld_token
-        remoteDataSource.postRetreatedTire(token, retreatedTire.toDto())
+        return remoteDataSource.postRetreatedTire(token, retreatedTire.toDto())
     }
 
-    override suspend fun postRepairedTire(repairedTire: RepairedTire) {
+    override suspend fun postRepairedTire(repairedTire: RepairedTire): Result<List<MessageResponse>> {
         val token = getTasksUseCase().first().first().fld_token
-        remoteDataSource.postRepairedTire(token, repairedTire.toDto())
+        return remoteDataSource.postRepairedTire(token, repairedTire.toDto())
+    }
+
+    override suspend fun saveDestinationChange(changeDestination: ChangeDestination): Result<List<MessageResponse>> {
+        val token = getTasksUseCase().first().first().fld_token
+        return remoteDataSource.postChangeDestination(token, changeDestination.toDto())
     }
 }

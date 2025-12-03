@@ -48,7 +48,6 @@ import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ListIt
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.NumberField
-import com.rfz.appflotal.presentation.ui.components.SectionHeader
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
 import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.DestinationSelection
 import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.RepararRenovarUiState
@@ -178,7 +177,7 @@ fun RepararRenovarView(
         },
         bottomBar = {
             CompleteFormButton(
-                textButton = stringResource(R.string.enviar_rueda),
+                textButton = stringResource(R.string.enviar_rueda_almacen),
                 isValid = areFormValid,
                 onFinish = {
                     onSendTireToDestination()
@@ -255,7 +254,7 @@ fun RepararRenovarView(
                                         }
                                     },
                                     label = stringResource(R.string.origen),
-                                    errorText = uiState.selectedDestination?.validate(),
+                                    errorText = uiState.selectedDestination.validate(),
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -387,7 +386,8 @@ fun RepararRenovarPreview() {
                     brand = "Michelin",
                     model = "Primacy 4",
                     thread = 7.5,
-                    loadingCapacity = "615"
+                    loadingCapacity = "615",
+                    destination = "Oficina"
                 )
             ),
             onBack = {},

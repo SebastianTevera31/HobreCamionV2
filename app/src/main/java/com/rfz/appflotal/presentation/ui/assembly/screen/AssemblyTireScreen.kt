@@ -264,7 +264,8 @@ fun AssemblyTireViewPreview() {
                         brand = "Michelin",
                         model = "Primacy 4",
                         thread = 7.5,
-                        loadingCapacity = "615"
+                        loadingCapacity = "615",
+                        destination = "Oficina"
                     )
                 ),
                 currentTire = Tire(
@@ -274,7 +275,8 @@ fun AssemblyTireViewPreview() {
                     brand = "Michelin",
                     model = "Primacy 4",
                     thread = 7.5,
-                    loadingCapacity = "615"
+                    loadingCapacity = "615",
+                    destination = "Oficina"
                 ),
                 axleList = emptyList(),
                 currentOdometer = "123456",
