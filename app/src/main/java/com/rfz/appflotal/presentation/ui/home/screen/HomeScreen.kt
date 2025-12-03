@@ -64,9 +64,11 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.network.service.HombreCamionService
+import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.home.utils.cardBackground
 import com.rfz.appflotal.presentation.ui.home.utils.menuItems
 import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
@@ -77,6 +79,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
+import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -141,270 +144,282 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Box(
-                        modifier = Modifier
-                            .height(120.dp)
-                            .clip(CircleShape)
-                            .background(Color.White)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.logo),
-                            contentDescription = stringResource(R.string.logo_description),
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .height(54.dp)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = primaryColor,
-                    titleContentColor = Color.White
-                ),
-                actions = {
-                    Box(
-                        modifier = Modifier
-                            .width(80.dp)
-                            .height(40.dp)
-                            .padding(end = 8.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color.White.copy(alpha = 0.2f))
-                            .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(20.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(horizontal = 4.dp)
-                        ) {
-                            languages.forEach { (code, display) ->
-                                Box(
+    when (uiState.screenLoadStatus) {
+        OperationStatus.Error -> {
+            ErrorView(modifier = Modifier.padding())
+        }
+
+        OperationStatus.Loading -> {
+            AwaitDialog()
+        }
+
+        OperationStatus.Success -> {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Box(
+                                modifier = Modifier
+                                    .height(120.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.logo),
+                                    contentDescription = stringResource(R.string.logo_description),
+                                    contentScale = ContentScale.Fit,
                                     modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable {
-                                            scope.launch {
-                                                homeViewModel.changeLanguage(code)
+                                        .padding(8.dp)
+                                        .height(54.dp)
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = primaryColor,
+                            titleContentColor = Color.White
+                        ),
+                        actions = {
+                            Box(
+                                modifier = Modifier
+                                    .width(80.dp)
+                                    .height(40.dp)
+                                    .padding(end = 8.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(Color.White.copy(alpha = 0.2f))
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color.White.copy(alpha = 0.5f),
+                                        shape = RoundedCornerShape(20.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                ) {
+                                    languages.forEach { (code, display) ->
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(CircleShape)
+                                                .clickable {
+                                                    scope.launch {
+                                                        homeViewModel.changeLanguage(code)
+                                                    }
+                                                }
+                                                .background(
+                                                    if (uiState.selectedLanguage == code)
+                                                        Color.White.copy(alpha = 0.3f)
+                                                    else
+                                                        Color.Transparent
+                                                )
+                                                .padding(horizontal = 4.dp)
+                                        ) {
+                                            Text(
+                                                text = display,
+                                                color = Color.White,
+                                                fontSize = 14.sp,
+                                                fontWeight = if (uiState.selectedLanguage == code) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                        }
+                                        if (code != languages.last().first) {
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                        }
+                                    }
+                                }
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    CoroutineScope(Dispatchers.IO).launch {
+
+                                        HombreCamionService.stopService(context)
+                                        homeViewModel.logout()
+                                        registerMonitorViewModel.clearMonitorConfiguration()
+                                        registerMonitorViewModel.stopScan()
+                                        monitorViewModel.clearMonitorData()
+
+                                        withContext(Dispatchers.Main) {
+                                            navController.navigate(NavScreens.LOGIN) {
+                                                // Pop-up hasta la raíz del grafo de navegación (ID 0)
+                                                // y elimina TODO lo que hay en el back stack.
+                                                popUpTo(0) {
+                                                    inclusive = true
+                                                }
+                                                launchSingleTop = true
                                             }
                                         }
-                                        .background(
-                                            if (uiState.selectedLanguage == code)
-                                                Color.White.copy(alpha = 0.3f)
-                                            else
-                                                Color.Transparent
-                                        )
-                                        .padding(horizontal = 4.dp)
-                                ) {
-                                    Text(
-                                        text = display,
-                                        color = Color.White,
-                                        fontSize = 14.sp,
-                                        fontWeight = if (uiState.selectedLanguage == code) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                }
-                                if (code != languages.last().first) {
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                }
-                            }
-                        }
-                    }
-
-                    IconButton(
-                        onClick = {
-                            CoroutineScope(Dispatchers.IO).launch {
-
-                                HombreCamionService.stopService(context)
-                                homeViewModel.logout()
-                                registerMonitorViewModel.clearMonitorConfiguration()
-                                registerMonitorViewModel.stopScan()
-                                monitorViewModel.clearMonitorData()
-
-                                withContext(Dispatchers.Main) {
-                                    navController.navigate(NavScreens.LOGIN) {
-                                        // Pop-up hasta la raíz del grafo de navegación (ID 0)
-                                        // y elimina TODO lo que hay en el back stack.
-                                        popUpTo(0) {
-                                            inclusive = true
-                                        }
-                                        launchSingleTop = true
                                     }
                                 }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                    contentDescription = stringResource(R.string.logout),
+                                    tint = Color.White
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    updateUserData(uiState.selectedLanguage)
+                                    navController.navigate(NavScreens.INFORMACION_USUARIO)
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.AccountCircle,
+                                    contentDescription = stringResource(R.string.profile),
+                                    tint = Color.White
+                                )
                             }
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = stringResource(R.string.logout),
-                            tint = Color.White
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            updateUserData(uiState.selectedLanguage)
-                            navController.navigate(NavScreens.INFORMACION_USUARIO)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.AccountCircle,
-                            contentDescription = stringResource(R.string.profile),
-                            tint = Color.White
-                        )
-                    }
-                }
-            )
-        },
-
-        ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(primaryColor, primaryLight),
-                            startY = 0f,
-                            endY = 500f
-                        )
                     )
-                    .shadow(
-                        elevation = 12.dp,
-                        shape = RoundedCornerShape(
-                            bottomStart = 48.dp,
-                            bottomEnd = 48.dp
-                        ),
-                        spotColor = primaryColor.copy(alpha = 0.3f)
-                    )
-            ) {
-                UserHeader(
-                    paymentPlan = paymentPlan,
-                    userName = userName,
-                    plates = plates
-                ) {
-                    if (wifiStatus.value == NetworkStatus.Connected) monitorViewModel.showMonitorDialog(
-                        true
-                    )
-                    else Toast.makeText(
-                        context,
-                        R.string.error_conexion_internet,
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
+                },
 
-            // PANTALLAS
-            if (paymentPlan == PaymentPlanType.Complete) {
-                Box(
+                ) { innerPadding ->
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .weight(1f)
-                        .background(surfaceColor)
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = 32.dp,
-                                topEnd = 32.dp
-                            )
-                        )
+                        .padding(innerPadding)
                 ) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(menuItems) { item ->
-                            ElegantMenuCard(
-                                title = stringResource(item.title),
-                                iconRes = item.iconRes,
-                                onClick = { navController.navigate(item.route) },
-                                primaryColor = primaryColor,
-                                secondaryColor = secondaryColor,
-                                cardBackground = cardBackground
-                            )
-                        }
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(
-                                    primaryColor.copy(alpha = 0.9f),
-                                    secondaryColor.copy(alpha = 0.9f)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(primaryColor, primaryLight),
+                                    startY = 0f,
+                                    endY = 500f
                                 )
                             )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.copyright, LocalDate.now().year),
-                        color = Color.White.copy(alpha = 0.95f),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-            } else {
-                MonitorScreen(
-                    monitorViewModel = monitorViewModel,
-                    registerMonitorViewModel = registerMonitorViewModel,
-                    navigateUp = { navController.navigateUp() },
-                    paymentPlan = paymentPlan,
-                    modifier = Modifier.fillMaxSize(),
-                    onInspectClick = { tire, temp, pressure ->
-                        onInspectClick(tire, temp, pressure)
-                    },
-                    onAssemblyClick = { tire -> onAssemblyClick(tire) },
-                    onDisassemblyClick = { tire, temp, pressure ->
-                        onDisassemblyClick(
-                            tire,
-                            temp,
-                            pressure
-                        )
-                    },
-                    onDialogCancel = { monitorId ->
-                        if (monitorId == 0) {
-                            CoroutineScope(Dispatchers.IO).launch {
-
-                                HombreCamionService.stopService(context)
-
-                                homeViewModel.logout()
-
-                                registerMonitorViewModel.clearMonitorConfiguration()
-
-                                registerMonitorViewModel.stopScan()
-
-                                monitorViewModel.clearMonitorData()
-
-                                withContext(Dispatchers.Main) {
-                                    // navController.clearBackStack(NavScreens.LOGIN)
-                                    navController.navigate(NavScreens.LOGIN) {
-                                        popUpTo(navController.graph.startDestinationId) {
-                                            inclusive = true
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            registerMonitorViewModel.stopScan()
-                            monitorViewModel.showMonitorDialog(false)
+                            .shadow(
+                                elevation = 12.dp,
+                                shape = RoundedCornerShape(
+                                    bottomStart = 48.dp,
+                                    bottomEnd = 48.dp
+                                ),
+                                spotColor = primaryColor.copy(alpha = 0.3f)
+                            )
+                    ) {
+                        UserHeader(
+                            paymentPlan = paymentPlan,
+                            userName = userName,
+                            plates = plates
+                        ) {
+                            if (wifiStatus.value == NetworkStatus.Connected) monitorViewModel.showMonitorDialog(
+                                true
+                            )
+                            else Toast.makeText(
+                                context,
+                                R.string.error_conexion_internet,
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
-                )
+
+                    // PANTALLAS
+                    if (paymentPlan == PaymentPlanType.Complete) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f)
+                                .background(surfaceColor)
+                                .clip(
+                                    RoundedCornerShape(
+                                        topStart = 32.dp,
+                                        topEnd = 32.dp
+                                    )
+                                )
+                        ) {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                contentPadding = PaddingValues(20.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(menuItems) { item ->
+                                    ElegantMenuCard(
+                                        title = stringResource(item.title),
+                                        iconRes = item.iconRes,
+                                        onClick = { navController.navigate(item.route) },
+                                        primaryColor = primaryColor,
+                                        secondaryColor = secondaryColor,
+                                        cardBackground = cardBackground
+                                    )
+                                }
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            primaryColor.copy(alpha = 0.9f),
+                                            secondaryColor.copy(alpha = 0.9f)
+                                        )
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.copyright, LocalDate.now().year),
+                                color = Color.White.copy(alpha = 0.95f),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    } else {
+                        MonitorScreen(
+                            monitorViewModel = monitorViewModel,
+                            registerMonitorViewModel = registerMonitorViewModel,
+                            navigateUp = { navController.navigateUp() },
+                            paymentPlan = paymentPlan,
+                            modifier = Modifier.fillMaxSize(),
+                            onInspectClick = { tire, temp, pressure ->
+                                onInspectClick(tire, temp, pressure)
+                            },
+                            onAssemblyClick = { tire -> onAssemblyClick(tire) },
+                            onDisassemblyClick = { tire, temp, pressure ->
+                                onDisassemblyClick(
+                                    tire,
+                                    temp,
+                                    pressure
+                                )
+                            },
+                            onDialogCancel = { monitorId ->
+                                if (monitorId == 0) {
+                                    CoroutineScope(Dispatchers.IO).launch {
+
+                                        HombreCamionService.stopService(context)
+
+                                        homeViewModel.logout()
+
+                                        registerMonitorViewModel.clearMonitorConfiguration()
+
+                                        registerMonitorViewModel.stopScan()
+
+                                        monitorViewModel.clearMonitorData()
+
+                                        withContext(Dispatchers.Main) {
+                                            // navController.clearBackStack(NavScreens.LOGIN)
+                                            navController.navigate(NavScreens.LOGIN) {
+                                                popUpTo(navController.graph.startDestinationId) {
+                                                    inclusive = true
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    registerMonitorViewModel.stopScan()
+                                    monitorViewModel.showMonitorDialog(false)
+                                }
+                            }
+                        )
+                    }
+                }
             }
         }
     }

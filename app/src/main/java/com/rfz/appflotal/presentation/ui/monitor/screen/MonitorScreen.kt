@@ -75,9 +75,7 @@ fun MonitorScreen(
         } else stringResource(R.string.logout)
 
     LaunchedEffect(monitorUiState.monitorId) {
-        if (monitorUiState.monitorId == 0) {
-            monitorViewModel.initMonitorData()
-        }
+        monitorViewModel.initMonitorData()
     }
 
     if (monitorUiState.showView && monitorUiState.showDialog) {

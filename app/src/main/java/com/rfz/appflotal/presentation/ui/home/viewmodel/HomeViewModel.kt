@@ -10,6 +10,7 @@ import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.model.languaje.LanguageResponse
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
+import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
@@ -49,18 +50,31 @@ class HomeViewModel @Inject constructor(
                     hombreCamionRepository.getSavedLanguage()
                         ?: AppLocale.currentLocale.value.language
                 }
+                val user = deferredUserData.await()
+                val language = deferredLanguage.await()
 
+                if (user != null && language != null) {
+                    languageUseCase("Bearer ${user.fld_token}", language)
+                    
+                    // Notificar a la API el idioma de la app
+                    changeLanguage(AppLocale.currentLocale.value.language)
+
+                    _uiState.update {
+                        it.copy(
+                            userData = deferredUserData.await(),
+                            selectedLanguage = deferredLanguage.await(),
+                            isLoading = false,
+                            screenLoadStatus = OperationStatus.Success
+                        )
+                    }
+                }
+            } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        userData = deferredUserData.await(),
-                        selectedLanguage = deferredLanguage.await(),
-                        isLoading = false
+                        isLoading = false,
+                        screenLoadStatus = OperationStatus.Error
                     )
                 }
-
-                changeLanguage(AppLocale.currentLocale.value.language)
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false) }
                 _homeCheckInMessage.value = "Error loading data: ${e.message}"
             }
         }
@@ -105,10 +119,4 @@ class HomeViewModel @Inject constructor(
             Result.failure(Exception("Invalid language selection"))
         }
     }
-
-    data class HomeUiState(
-        val userData: AppHCEntity? = null,
-        val selectedLanguage: String = "en",
-        val isLoading: Boolean = false
-    )
 }

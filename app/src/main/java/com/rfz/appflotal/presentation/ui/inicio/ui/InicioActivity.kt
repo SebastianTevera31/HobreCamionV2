@@ -414,11 +414,6 @@ class InicioActivity : ComponentActivity() {
                                     }
                                 }
 
-                                val result =
-                                    navController.currentBackStackEntry?.savedStateHandle?.getStateFlow(
-                                        "montaje_result", false
-                                    )
-
                                 MonitorScreen(
                                     monitorViewModel = monitorViewModel,
                                     registerMonitorViewModel = registerMonitorViewModel,
