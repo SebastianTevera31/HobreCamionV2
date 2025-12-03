@@ -85,12 +85,12 @@ fun RepararRenovarScreen(
         if (status is OperationStatus.Success) {
             Toast.makeText(
                 context,
-                context.getString(R.string.llanta_enviada_al_destino),
+                context.getString(R.string.llanta_enviada_al_almacen),
                 Toast.LENGTH_SHORT
             ).show()
             onBack()
         } else if (status is OperationStatus.Error) {
-            Toast.makeText(context, R.string.error_enviar_destino, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.error_enviar_almacen, Toast.LENGTH_SHORT).show()
             viewModel.cleanOperationStatus()
         }
     }
@@ -247,7 +247,7 @@ fun RepararRenovarView(
                                             onRepairCauseSelected(null)
                                         }
                                     },
-                                    label = stringResource(R.string.destino),
+                                    label = stringResource(R.string.origen),
                                     errorText = uiState.selectedDestination?.validate(),
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -306,7 +306,7 @@ fun RepararRenovarView(
                                             .height(52.dp),
                                         shape = MaterialTheme.shapes.large
                                     ) {
-                                        Text(text = "Seleccione modelo de renovado")
+                                        Text(text = stringResource(R.string.seleccione_modelo_de_renovado))
                                     }
 
                                     if (uiState.selectedRetreadedDesign != null) {

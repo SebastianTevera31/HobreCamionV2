@@ -64,7 +64,7 @@ val menuItems = listOf(
     MenuItem(
         title = R.string.pila_de_desecho,
         route = NavScreens.DESECHO,
-        iconRes = R.drawable.modulo_desecho
+        iconRes = R.drawable.llanta_desecho
     ),
     MenuItem(
         title = R.string.renovar_reparar,
