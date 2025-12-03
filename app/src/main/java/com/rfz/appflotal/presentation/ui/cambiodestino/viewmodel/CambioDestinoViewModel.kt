@@ -18,13 +18,6 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import javax.inject.Inject
 
-enum class DestinationsDescriptions(val id: Int, val descriptions: String) {
-    REPARAR(1, "Reparar"),
-    DESECHAR(3, "Desechar"),
-    RENOVAR(6, "Renovar"),
-}
-
-
 @HiltViewModel
 class CambioDestinoViewModel @Inject constructor(
     private val tireUseCase: TireListUsecase,
