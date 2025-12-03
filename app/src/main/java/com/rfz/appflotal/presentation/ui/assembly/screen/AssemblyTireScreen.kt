@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.assembly.screen
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -10,10 +11,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
@@ -50,7 +53,9 @@ import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.NumberField
 import com.rfz.appflotal.presentation.ui.components.SectionHeader
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
+import com.rfz.appflotal.presentation.ui.components.TireListScreen
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
+import com.rfz.appflotal.presentation.ui.utils.SubScreens
 import com.rfz.appflotal.presentation.ui.utils.validate
 
 @Composable
@@ -125,7 +130,16 @@ fun AssemblyTireView(
     var axleSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 
-    val isFormValid = axleSelected != null && tireSelected != null && uiState.isOdometerValid == OdometerValidation.VALID
+    var navScreens by remember { mutableStateOf(SubScreens.HOME) }
+
+    if (navScreens == SubScreens.LIST) {
+        BackHandler {
+            navScreens = SubScreens.HOME
+        }
+    }
+
+    val isFormValid =
+        axleSelected != null && tireSelected != null && uiState.isOdometerValid == OdometerValidation.VALID
 
     when (uiState.operationStatus) {
         is OperationStatus.Error -> {
@@ -150,7 +164,10 @@ fun AssemblyTireView(
             SimpleTopBar(
                 title = title,
                 subTitle = tire,
-                onBack = onBack
+                onBack = {
+                    if (navScreens == SubScreens.HOME) onBack()
+                    else navScreens = SubScreens.HOME
+                }
             )
         },
         bottomBar = {
@@ -174,73 +191,96 @@ fun AssemblyTireView(
             }
 
             OperationStatus.Success -> {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp)
-                ) {
-                    CatalogDropdown(
-                        catalog = uiState.axleList,
-                        selected = axleSelected?.description,
-                        errorText = axleSelected.validate(),
-                        onSelected = { axleSelected = it },
-                        label = stringResource(R.string.eje),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    CatalogDropdown(
-                        catalog = uiState.tireList,
-                        selected = tireSelected?.description,
-                        errorText = tireSelected.validate(),
-                        onSelected = {
-                            updateTire(it?.id)
+                when (navScreens) {
+                    SubScreens.LIST -> {
+                        TireListScreen(
+                            tires = uiState.tireList,
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .fillMaxSize()
+                                .padding(16.dp)
+                        ) {
+                            updateTire(it.id)
                             tireSelected = it
-                        },
-                        label = stringResource(R.string.llantas),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    AnimatedVisibility(
-                        visible = uiState.currentTire != null,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut(),
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        TireInfoCard(
-                            tire = uiState.currentTire,
-                            modifier.width(240.dp)
-                        )
+                            navScreens = SubScreens.HOME
+                        }
                     }
 
-                    Column {
-                        SectionHeader(
-                            text = stringResource(R.string.odometro),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        val odometerValue = uiState.currentOdometer.toIntOrNull() ?: 0
-                        Text(
-                            text = stringResource(
-                                R.string.advertencia_ingreso_odometro,
-                                odometerValue
-                            ),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                            modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
-                        )
+                    SubScreens.HOME -> {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp)
+                        ) {
+                            CatalogDropdown(
+                                catalog = uiState.axleList,
+                                selected = axleSelected?.description,
+                                errorText = axleSelected.validate(),
+                                onSelected = { axleSelected = it },
+                                label = stringResource(R.string.eje),
+                                modifier = Modifier.fillMaxWidth()
+                            )
 
-                        NumberField(
-                            value = odometer,
-                            onValueChange = {
-                                validateOdometer(it)
-                                odometer = it
-                            },
-                            placeHolderText = uiState.currentOdometer,
-                            label = "",
-                            errorText = uiState.isOdometerValid.message,
-                        )
+                            Button(
+                                onClick = {
+                                    navScreens = SubScreens.LIST
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp),
+                                shape = MaterialTheme.shapes.large
+                            ) {
+                                Text(text = stringResource(R.string.seleccione_una_llanta))
+                            }
+
+                            Text(
+                                text = stringResource(R.string.llanta_seleccionada),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            )
+
+                            AnimatedVisibility(
+                                visible = uiState.currentTire != null,
+                                enter = expandVertically() + fadeIn(),
+                                exit = shrinkVertically() + fadeOut(),
+                                modifier = Modifier.padding(top = 16.dp)
+                            ) {
+                                TireInfoCard(
+                                    tire = uiState.currentTire,
+                                    modifier.width(240.dp)
+                                )
+                            }
+
+                            Column {
+                                SectionHeader(
+                                    text = stringResource(R.string.odometro),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                val odometerValue = uiState.currentOdometer.toIntOrNull() ?: 0
+                                Text(
+                                    text = stringResource(
+                                        R.string.advertencia_ingreso_odometro,
+                                        odometerValue
+                                    ),
+                                    style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                                    modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
+                                )
+
+                                NumberField(
+                                    value = odometer,
+                                    onValueChange = {
+                                        validateOdometer(it)
+                                        odometer = it
+                                    },
+                                    placeHolderText = uiState.currentOdometer,
+                                    label = "",
+                                    errorText = uiState.isOdometerValid.message,
+                                )
+                            }
+                        }
                     }
                 }
             }

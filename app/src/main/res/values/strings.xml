@@ -279,6 +279,13 @@
     <string name="enviar_rueda">ENVIAR RUEDA</string>
     <string name="error_al_mover_la_llanta">Error al mover la llanta</string>
     <string name="llanta_movida_a">Llanta movida a %1$s</string>
+    <string name="single_id">ID</string>
+    <string name="marca">Marca</string>
+    <string name="single_size">Tamaño</string>
+    <string name="single_profundidad">Profundidad</string>
+    <string name="capacidad">Capacidad</string>
+    <string name="single_modelo">Modelo</string>
+    <string name="llanta_seleccionada">Llanta seleccionada</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

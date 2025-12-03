@@ -69,7 +69,7 @@ val menuItems = listOf(
     MenuItem(
         title = R.string.mover_a_almacen,
         route = NavScreens.REPARARRENOVAR,
-        iconRes = R.drawable.renovar_reparar
+        iconRes = R.drawable.ingreso_llantas
     ),
     MenuItem(
         title = R.string.cambio_de_destino,

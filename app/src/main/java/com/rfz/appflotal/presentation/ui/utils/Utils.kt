@@ -89,3 +89,8 @@ sealed class OperationStatus {
     object Error : OperationStatus()
     object Success : OperationStatus()
 }
+
+enum class SubScreens {
+    LIST,
+    HOME
+}
