@@ -276,7 +276,6 @@
     <string name="seleccione_un_origen">Seleccione un Origen</string>
     <string name="debe_escribir_el_motivo">Debe escribir el motivo</string>
     <string name="cambio_de_destino">Cambio de Destino</string>
-    <string name="seleccione_un_origen">Seleccione un destino</string>
     <string name="enviar_rueda">ENVIAR RUEDA</string>
     <string name="error_al_mover_la_llanta">Error al mover la llanta</string>
     <string name="llanta_movida_a">Llanta movida a %1$s</string>
