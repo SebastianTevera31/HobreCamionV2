@@ -239,16 +239,16 @@ fun AssemblyTireView(
 
                             if (uiState.currentTire != null){
                                 Text(
-                                    text = stringResource(R.string.llanta_seleccionada),
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                    text = stringResource(R.string.detalles_de_llanta),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
 
                             AnimatedVisibility(
                                 visible = uiState.currentTire != null,
                                 enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut(),
-                                modifier = Modifier.padding(top = 16.dp)
+                                exit = shrinkVertically() + fadeOut()
                             ) {
                                 TireInfoCard(
                                     tire = uiState.currentTire,
