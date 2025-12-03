@@ -264,13 +264,16 @@
     <string name="enviar_a_desecho">Enviar a desecho</string>
     <string name="pila_de_desecho">Pila de Desecho</string>
     <string name="llanta_enviada_desecho">Llanta enviada a desecho</string>
-    <string name="renovar_reparar">Renovar - Reparar</string>
+    <string name="mover_a_almacen">Mover a Almacen</string>
     <string name="enviar_rueda">ENVIAR RUEDA AL ALMACEN</string>
     <string name="motivo_de_reparacion">Motivo de Reparacion</string>
     <string name="error_enviar_almacen">Ocurrió un error al enviar la llanta al destino seleccionado</string>
     <string name="llanta_enviada_al_almacen">Llanta enviada al almacen</string>
     <string name="seleccione_modelo_de_renovado">Seleccione modelo de renovado</string>
     <string name="origen">Origen</string>
+    <string name="selected_retread_design">Diseño de Renovado Seleccionado</string>
+    <string name="llantas_en">Llantas en %1$s</string>
+    <string name="seleccione_un_origen">Seleccione un Origen</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

@@ -188,7 +188,7 @@ class RepararRenovarViewModel @Inject constructor(
             it.copy(
                 selectedDestination = destination,
                 selectedTire = null,
-                tireCost = "0",
+                tireCost = "",
                 selectedRepairCause = if (destination?.id != DestinationSelection.REPARAR.id) null else it.selectedRepairCause,
                 selectedRetreadedDesign = if (destination?.id != DestinationSelection.RENOVAR.id) null else it.selectedRetreadedDesign
             )

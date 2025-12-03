@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
@@ -47,6 +48,7 @@ import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ListIt
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.NumberField
+import com.rfz.appflotal.presentation.ui.components.SectionHeader
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
 import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.DestinationSelection
 import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.RepararRenovarUiState
@@ -156,7 +158,7 @@ fun RepararRenovarView(
         else -> emptyList()
     }
 
-    val tireCost = uiState.tireCost.toString()
+    val tireCost = uiState.tireCost
 
     val areFormValid = uiState.selectedDestination != null &&
             uiState.selectedTire != null &&
@@ -167,7 +169,7 @@ fun RepararRenovarView(
         modifier = modifier,
         topBar = {
             SimpleTopBar(
-                title = stringResource(R.string.renovar_reparar),
+                title = stringResource(R.string.mover_a_almacen),
                 onBack = {
                     if (navScreens == RepararRenovarScreens.HOME) onBack()
                     else navScreens = RepararRenovarScreens.HOME
@@ -235,7 +237,12 @@ fun RepararRenovarView(
                         }
 
                         RepararRenovarScreens.HOME -> {
+
                             item {
+                                Text(
+                                    text = stringResource(R.string.seleccione_un_origen),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                )
                                 CatalogDropdown(
                                     catalog = uiState.destinationList,
                                     selected = uiState.selectedDestination?.description,
@@ -253,98 +260,110 @@ fun RepararRenovarView(
                                 )
                             }
 
-                            item {
-                                CatalogDropdown(
-                                    catalog = tireList,
-                                    selected = uiState.selectedTire?.description,
-                                    onSelected = {
-                                        if (it != null) {
-                                            onSelectedTire(
-                                                it.id,
-                                                uiState.selectedDestination?.id ?: 0
-                                            )
-                                        }
-                                    },
-                                    label = stringResource(R.string.llantas),
-                                    errorText = uiState.selectedTire.validate(),
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                            }
-
-                            item {
-                                NumberField(
-                                    value = tireCost,
-                                    onValueChange = { onCostChange(it) },
-                                    label = stringResource(R.string.costo),
-                                    errorText = tireCost.toIntOrError().second,
-                                    isEditable = DestinationSelection.REPARAR.id == uiState.selectedDestination?.id,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-                            item {
-                                AnimatedVisibility(
-                                    visible = uiState.selectedTire != null,
-                                    enter = fadeIn() + expandVertically(),
-                                    exit = fadeOut() + shrinkVertically()
-                                ) {
-                                    TireInfoCard(
-                                        tire = uiState.selectedTire,
-                                        modifier = Modifier.width(240.dp)
+                            if (uiState.selectedDestination != null) {
+                                item {
+                                    CatalogDropdown(
+                                        catalog = tireList,
+                                        selected = uiState.selectedTire?.description,
+                                        onSelected = {
+                                            if (it != null) {
+                                                onSelectedTire(
+                                                    it.id,
+                                                    uiState.selectedDestination.id
+                                                )
+                                            }
+                                        },
+                                        label = stringResource(
+                                            R.string.llantas_en,
+                                            uiState.selectedDestination.description
+                                        ),
+                                        errorText = uiState.selectedTire.validate(),
+                                        modifier = Modifier.fillMaxWidth(),
                                     )
                                 }
-                            }
 
-                            if (DestinationSelection.RENOVAR.id == uiState.selectedDestination?.id) {
                                 item {
-                                    Button(
-                                        onClick = {
-                                            navScreens = RepararRenovarScreens.RETREADED_DESIGN
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(52.dp),
-                                        shape = MaterialTheme.shapes.large
-                                    ) {
-                                        Text(text = stringResource(R.string.seleccione_modelo_de_renovado))
-                                    }
+                                    NumberField(
+                                        value = tireCost,
+                                        onValueChange = { onCostChange(it) },
+                                        label = stringResource(R.string.costo),
+                                        errorText = tireCost.toIntOrError().second,
+                                        isEditable = DestinationSelection.REPARAR.id == uiState.selectedDestination.id,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
 
-                                    if (uiState.selectedRetreadedDesign != null) {
-                                        val item = uiState.selectedRetreadedDesign
-                                        ListItemContent(
-                                            title = item.description,
-                                            isEditable = false,
-                                            onEditClick = {},
-                                            itemContent = {
-                                                DescriptionText(
-                                                    title = stringResource(R.string.profundidad_de_piso),
-                                                    description = item.treadDepth.toString()
-                                                )
-                                                DescriptionText(
-                                                    title = stringResource(R.string.utilizacion),
-                                                    description = item.utilization
-                                                )
-                                                DescriptionText(
-                                                    title = pluralStringResource(
-                                                        R.plurals.marca_renovado_tag,
-                                                        1
-                                                    )
-                                                )
-                                                Text(text = item.retreadBrand)
-                                            }
+                                item {
+                                    AnimatedVisibility(
+                                        visible = uiState.selectedTire != null,
+                                        enter = fadeIn() + expandVertically(),
+                                        exit = fadeOut() + shrinkVertically()
+                                    ) {
+                                        TireInfoCard(
+                                            tire = uiState.selectedTire,
+                                            modifier = Modifier.width(240.dp)
                                         )
                                     }
                                 }
-                            } else if (DestinationSelection.REPARAR.id == uiState.selectedDestination?.id) {
-                                item {
-                                    CatalogDropdown(
-                                        catalog = uiState.repairCauseList,
-                                        selected = uiState.selectedRepairCause?.description,
-                                        onSelected = { onRepairCauseSelected(it) },
-                                        label = stringResource(R.string.motivo_de_reparacion),
-                                        errorText = uiState.selectedRepairCause.validate(),
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
+
+                                if (DestinationSelection.RENOVAR.id == uiState.selectedDestination.id) {
+                                    item {
+                                        Button(
+                                            onClick = {
+                                                navScreens = RepararRenovarScreens.RETREADED_DESIGN
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(52.dp),
+                                            shape = MaterialTheme.shapes.large
+                                        ) {
+                                            Text(text = stringResource(R.string.seleccione_modelo_de_renovado))
+                                        }
+
+                                        if (uiState.selectedRetreadedDesign != null) {
+                                            val item = uiState.selectedRetreadedDesign
+
+                                            Text(
+                                                text = stringResource(R.string.selected_retread_design),
+                                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                                modifier = Modifier.padding(top = 16.dp)
+                                            )
+
+                                            ListItemContent(
+                                                title = item.description,
+                                                isEditable = false,
+                                                onEditClick = {},
+                                                itemContent = {
+                                                    DescriptionText(
+                                                        title = stringResource(R.string.profundidad_de_piso),
+                                                        description = item.treadDepth.toString()
+                                                    )
+                                                    DescriptionText(
+                                                        title = stringResource(R.string.utilizacion),
+                                                        description = item.utilization
+                                                    )
+                                                    DescriptionText(
+                                                        title = pluralStringResource(
+                                                            R.plurals.marca_renovado_tag,
+                                                            1
+                                                        )
+                                                    )
+                                                    Text(text = item.retreadBrand)
+                                                }
+                                            )
+                                        }
+                                    }
+                                } else if (DestinationSelection.REPARAR.id == uiState.selectedDestination.id) {
+                                    item {
+                                        CatalogDropdown(
+                                            catalog = uiState.repairCauseList,
+                                            selected = uiState.selectedRepairCause?.description,
+                                            onSelected = { onRepairCauseSelected(it) },
+                                            label = stringResource(R.string.motivo_de_reparacion),
+                                            errorText = uiState.selectedRepairCause.validate(),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
                                 }
                             }
                         }

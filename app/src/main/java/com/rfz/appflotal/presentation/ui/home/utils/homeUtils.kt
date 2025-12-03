@@ -67,7 +67,7 @@ val menuItems = listOf(
         iconRes = R.drawable.llanta_desecho
     ),
     MenuItem(
-        title = R.string.renovar_reparar,
+        title = R.string.mover_a_almacen,
         route = NavScreens.REPARARRENOVAR,
         iconRes = R.drawable.renovar_reparar
     )
