@@ -15,7 +15,7 @@ data class RetreadDesignListResponse(
 ) {
     fun toDomain(): RetreadDesign {
         return RetreadDesign(
-            idBrand = idRetreadDesign,
+            idDesign = idRetreadDesign,
             description = description,
             retreadBrand = retreadBrand,
             idRetreadBrand = idRetreadBrand,

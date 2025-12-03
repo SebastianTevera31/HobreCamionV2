@@ -218,7 +218,7 @@ class RetreatedDesignViewModel @Inject constructor(
         onEditing(true)
         _dialogState.update {
             it.copy(
-                id = item.idBrand.toString().trim(),
+                id = item.idDesign.toString().trim(),
                 description = item.description.trim(),
                 marcaRenovado = UtilizationItem(item.idRetreadBrand, item.retreadBrand),
                 profundidadPiso = item.treadDepth.toString().trim(),

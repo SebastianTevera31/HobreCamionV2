@@ -69,7 +69,7 @@ fun ReportDropdown(
                 onDismissRequest = { expanded = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text("Ninguno") },
+                    text = { Text(stringResource(R.string.ninguno)) },
                     onClick = {
                         onSelected(null)
                         expanded = false

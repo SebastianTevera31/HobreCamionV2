@@ -14,11 +14,11 @@ interface TireService {
     suspend fun postRetreatedTire(
         @Header("Authorization") token: String,
         @Body request: RetreatedTireDto
-    ): Response<MessageResponse>
+    ): Response<List<MessageResponse>>
 
     @POST("api/Tire/RepairedTire")
     suspend fun postRepairedTire(
         @Header("Authorization") token: String,
         @Body body: RepairedTireDto
-    ): Response<MessageResponse>
+    ): Response<List<MessageResponse>>
 }

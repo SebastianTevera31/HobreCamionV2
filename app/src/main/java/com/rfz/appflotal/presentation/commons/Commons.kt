@@ -80,6 +80,7 @@ fun SimpleTopBar(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = true,
     subTitle: String = "",
 ) {
     TopAppBar(
@@ -105,16 +106,18 @@ fun SimpleTopBar(
             }
         },
         navigationIcon = {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.regresar),
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
+            if (showBackButton) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.regresar),
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.repair.toDomain
 import com.rfz.appflotal.data.model.tire.RepairedTire
 import com.rfz.appflotal.data.model.tire.RetreatedTire
@@ -37,6 +38,7 @@ class RepararRenovarViewModel @Inject constructor(
 
     fun loadData() {
         viewModelScope.launch {
+            _uiState.update { it.copy(screenLoadStatus = OperationStatus.Loading) }
             val destinationsDeferred = async { destinationUseCase() }
             val tiresDeferred = async { tireUseCase() }
             val retreadDesignDeferred = async { retreadedDesignListUseCase() }
@@ -66,7 +68,7 @@ class RepararRenovarViewModel @Inject constructor(
                 val retreadDesignList = retreadDesign.getOrNull()?.map { it.toDomain() }
                     ?: emptyList()
 
-                val repairCauseList =
+                val repairCauseListDomain =
                     repairCauseList.getOrNull()?.map { it.toDomain() } ?: emptyList()
 
                 _uiState.update { currentUiState ->
@@ -75,7 +77,7 @@ class RepararRenovarViewModel @Inject constructor(
                         repairedTireList = repairedTires,
                         retreadedTireList = retreadedTires,
                         retreadDesignList = retreadDesignList,
-                        repairCauseList = repairCauseList,
+                        repairCauseList = repairCauseListDomain,
                         screenLoadStatus = OperationStatus.Success
                     )
                 }
@@ -91,81 +93,127 @@ class RepararRenovarViewModel @Inject constructor(
 
     fun updateSelectedTire(catalogItemId: Int, destinationId: Int) {
         viewModelScope.launch {
-            val tireData = tireGetUseCase(catalogItemId)
+            val tireDataResult = tireGetUseCase(catalogItemId)
 
-            tireData.onSuccess { tireData ->
-                if (destinationId == DestinationSelection.REPARAR.id) { // DestinationId == 1 -> Reparar
-                    _uiState.value.repairedTireList.find { it.id == catalogItemId }?.let { tire ->
-                        _uiState.update { currentUiState ->
-                            currentUiState.copy(
-                                selectedTire = tire,
-                                tireCost = tireData.first().unitCost
-                            )
-                        }
-                    }
-                } else { // DestinationId == 6 -> Renovar
-                    _uiState.value.retreadedTireList.find { it.id == catalogItemId }?.let { tire ->
-                        _uiState.update { currentUiState ->
-                            currentUiState.copy(
-                                selectedTire = tire
-                            )
-                        }
+            tireDataResult.onSuccess { tireData ->
+                val tire = if (destinationId == DestinationSelection.REPARAR.id) {
+                    _uiState.value.repairedTireList.find { it.id == catalogItemId }
+                } else { // Renovar
+                    _uiState.value.retreadedTireList.find { it.id == catalogItemId }
+                }
+
+                tire?.let { foundTire ->
+                    val cost = tireData.firstOrNull()?.unitCost ?: 0
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            selectedTire = foundTire,
+                            tireCost = cost.toString()
+                        )
                     }
                 }
             }
         }
     }
 
-    fun sendTire(destinationId: Int, tireId: Int, cost: Int, idSelection: Int) =
+    fun sendTire() =
         viewModelScope.launch {
+            _uiState.update { it.copy(operationStatus = OperationStatus.Loading) }
             val nowUtc: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC)
+            val uiState = _uiState.value
 
-            val result = if (destinationId == 1) {
+            val tireId = uiState.selectedTire?.id
+            val cost = uiState.tireCost.toDouble()
+            val destinationId = uiState.selectedDestination?.id
+            val repairCauseId = uiState.selectedRepairCause?.id
+            val retreadDesignId = uiState.selectedRetreadedDesign?.idDesign
+
+            if (tireId == null || destinationId == null) {
+                _uiState.update { it.copy(operationStatus = OperationStatus.Error) }
+                return@launch
+            }
+
+            val result = if (destinationId == DestinationSelection.REPARAR.id) {
+                if (repairCauseId == null) {
+                    _uiState.update { it.copy(operationStatus = OperationStatus.Error) }
+                    return@launch
+                }
                 runCatching {
                     tireRepository.postRepairedTire(
                         repairedTire = RepairedTire(
                             id = 0,
                             tireId = tireId,
-                            cost = cost.toDouble(),
-                            repairId = idSelection,
+                            cost = cost,
+                            repairId = repairCauseId,
                             dateOperation = nowUtc
                         )
                     )
                 }
-            } else {
+            } else { // Renovar
+                if (retreadDesignId == null) {
+                    _uiState.update { it.copy(operationStatus = OperationStatus.Error) }
+                    return@launch
+                }
                 runCatching {
                     tireRepository.postRetreatedTire(
                         retreatedTire = RetreatedTire(
                             id = 0,
                             tireId = tireId,
-                            cost = cost.toDouble(),
+                            cost = cost,
                             dateOperation = nowUtc,
-                            retreadDesignId = idSelection
+                            retreadDesignId = retreadDesignId
                         )
                     )
                 }
             }
 
-
-            if (result.isSuccess) {
-                _uiState.update { currentUiState ->
-                    currentUiState.copy(
-                        operationStatus = result.fold(
-                            onSuccess = {
-                                OperationStatus.Success
-                            },
-                            onFailure = { OperationStatus.Error }
-                        )
-                    )
-                }
-            } else {
-                _uiState.update { currentUiState ->
-                    currentUiState.copy(
-                        operationStatus = OperationStatus.Error
-                    )
-                }
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    operationStatus = if (result.isSuccess) OperationStatus.Success else OperationStatus.Error
+                )
             }
         }
+
+    fun updateRetreadedDesign(retreadBrandId: Int) {
+        val retreadDesign =
+            _uiState.value.retreadDesignList.find { it.idDesign == retreadBrandId }
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                selectedRetreadedDesign = retreadDesign
+            )
+        }
+    }
+
+    fun onSelectedDestination(destination: CatalogItem?) {
+        _uiState.update {
+            it.copy(
+                selectedDestination = destination,
+                selectedTire = null,
+                tireCost = "0",
+                selectedRepairCause = if (destination?.id != DestinationSelection.REPARAR.id) null else it.selectedRepairCause,
+                selectedRetreadedDesign = if (destination?.id != DestinationSelection.RENOVAR.id) null else it.selectedRetreadedDesign
+            )
+        }
+    }
+
+    fun onSelectedRepairCause(cause: CatalogItem?) {
+        _uiState.update { it.copy(selectedRepairCause = cause) }
+    }
+
+    fun updateCost(cost: String) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                tireCost = cost
+            )
+        }
+    }
+
+    fun deleteRetreadedDesign() {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                selectedRetreadedDesign = null
+            )
+        }
+    }
 
     fun cleanOperationStatus() {
         _uiState.update { currentUiState ->

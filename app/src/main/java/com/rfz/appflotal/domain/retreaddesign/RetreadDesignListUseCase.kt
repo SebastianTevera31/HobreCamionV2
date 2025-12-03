@@ -5,7 +5,7 @@ import com.rfz.appflotal.data.repository.retreaddesign.RetreadDesignListReposito
 import javax.inject.Inject
 
 data class RetreadDesign(
-    val idBrand: Int,
+    val idDesign: Int,
     val description: String,
     val retreadBrand: String,
     val idRetreadBrand: Int,

@@ -69,7 +69,7 @@ val menuItems = listOf(
     MenuItem(
         title = R.string.renovar_reparar,
         route = NavScreens.REPARARRENOVAR,
-        iconRes = R.drawable.modulo_desecho
+        iconRes = R.drawable.renovar_reparar
     )
 )
 
