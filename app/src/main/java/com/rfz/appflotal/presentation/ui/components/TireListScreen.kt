@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -52,32 +53,38 @@ fun TireCard(tire: Tire, modifier: Modifier = Modifier, onSelectTire: (tire: Tir
                 Column {
                     DescriptionText(
                         title = stringResource(R.string.single_id),
-                        description = tire.id.toString()
+                        description = tire.id.toString(),
+                        style = MaterialTheme.typography.labelMedium
                     )
                     DescriptionText(
                         title = stringResource(R.string.marca),
-                        description = tire.brand
+                        description = tire.brand,
+                        style = MaterialTheme.typography.labelMedium
                     )
 
                     DescriptionText(
                         title = stringResource(R.string.single_modelo),
-                        description = tire.model
+                        description = tire.model,
+                        style = MaterialTheme.typography.labelMedium
                     )
                 }
                 Column {
                     DescriptionText(
                         title = stringResource(R.string.single_size),
                         description = tire.size,
+                        style = MaterialTheme.typography.labelMedium
                     )
 
                     DescriptionText(
                         title = stringResource(R.string.single_profundidad),
-                        description = " ${tire.thread} mm"
+                        description = " ${tire.thread} mm",
+                        style = MaterialTheme.typography.labelMedium
                     )
 
                     DescriptionText(
                         title = stringResource(R.string.capacidad),
-                        description = tire.loadingCapacity
+                        description = tire.loadingCapacity,
+                        style = MaterialTheme.typography.labelMedium
                     )
                 }
             }

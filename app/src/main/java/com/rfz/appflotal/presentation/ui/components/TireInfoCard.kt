@@ -37,11 +37,7 @@ fun TireInfoCard(tire: Tire?, modifier: Modifier = Modifier) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    pluralStringResource(
-                        R.plurals.llanta_tag,
-                        1,
-                        ": ${tire.id}"
-                    ),
+                    stringResource(R.string.id, tire.id),
                     style = MaterialTheme.typography.labelLarge
                 )
 
