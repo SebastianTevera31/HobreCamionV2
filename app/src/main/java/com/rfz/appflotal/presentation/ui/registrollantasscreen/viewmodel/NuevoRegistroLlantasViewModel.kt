@@ -1,7 +1,9 @@
 package com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.acquisitiontype.response.AcquisitionTypeResponse
 import com.rfz.appflotal.data.model.product.response.ProductResponse
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
@@ -13,6 +15,7 @@ import com.rfz.appflotal.domain.tire.TireCrudUseCase
 import com.rfz.appflotal.domain.tire.TireGetUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,7 +63,8 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
     private val tireCrudUseCase: TireCrudUseCase,
     private val acquisitionTypeUseCase: AcquisitionTypeUseCase,
     private val productListUseCase: ProductListUseCase,
-    private val getTasksUseCase: GetTasksUseCase
+    private val getTasksUseCase: GetTasksUseCase,
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NuevoRegistroLlantasUiState())
     val uiState: StateFlow<NuevoRegistroLlantasUiState> = _uiState.asStateFlow()
@@ -117,7 +121,17 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
 
         val currentState = _uiState.value.dialogState
         if (isDialogStateInvalid(currentState)) {
-            _uiState.update { it.copy(errorMessage = "Todos los campos requeridos deben estar completos") }
+            _uiState.update { it.copy(errorMessage = context.getString(R.string.Campos_requeridos_por_completar)) }
+            return
+        }
+
+        if (_uiState.value.dialogState.dot.trim().length > 10) {
+            _uiState.update { it.copy(errorMessage = context.getString(R.string.dot_excedio_caracteres)) }
+            return
+        }
+
+        if (_uiState.value.dialogState.tireNumber.trim().length > 15) {
+            _uiState.update { it.copy(errorMessage = context.getString(R.string.numero_llanta_excedio_caracteres)) }
             return
         }
 

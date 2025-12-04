@@ -165,7 +165,7 @@ fun NuevoRegistroLlantasScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = viewModel::onAddNewTireClicked,
-                modifier = Modifier.shadow(elevation = 8.dp, shape = CircleShape)
+                modifier = Modifier.shadow(elevation = 8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -343,6 +343,12 @@ private fun TireDialog(
     val acquisitionType = uiState.dialogState.selectedAcquisitionType?.idAcquisitionType
         ?: 0
 
+    val dotWarning =
+        if (uiState.dialogState.dot.trim().length > 10) stringResource(R.string.dot_excedio_caracteres) else ""
+
+    val tireNumber =
+        if (uiState.dialogState.tireNumber.trim().length > 15) stringResource(R.string.numero_llanta_excedio_caracteres) else ""
+
     val currentLanguage = AppLocale.currentLocale.collectAsState().value.language
     AddItemDialog(
         title = if (uiState.isEditing) stringResource(R.string.editar_llanta) else stringResource(R.string.nueva_llanta),
@@ -416,12 +422,14 @@ private fun TireDialog(
 
             DialogTextField(
                 label = stringResource(R.string.numero_de_llanta),
-                value = uiState.dialogState.tireNumber
+                value = uiState.dialogState.tireNumber,
+                warningMessage = tireNumber
             ) { value -> viewModel.onDialogFieldChange { it.copy(tireNumber = value) } }
 
             DialogTextField(
                 label = stringResource(R.string.dot),
-                value = uiState.dialogState.dot
+                value = uiState.dialogState.dot,
+                warningMessage = dotWarning
             ) { value -> viewModel.onDialogFieldChange { it.copy(dot = value) } }
         },
         onConfirm = viewModel::saveTire,
@@ -437,18 +445,28 @@ private fun DialogTextField(
     value: String,
     modifier: Modifier = Modifier,
     isEditable: Boolean = true,
+    warningMessage: String = "",
     keyboardType: KeyboardType = KeyboardType.Text,
     onValueChange: (String) -> Unit,
 ) {
-    ItemDialog(
-        label = label,
-        value = value,
-        isEmpty = false,
-        isEditable = isEditable,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        keyboardType = keyboardType
-    )
+    Column {
+        ItemDialog(
+            label = label,
+            value = value,
+            isEmpty = false,
+            isEditable = isEditable,
+            onValueChange = onValueChange,
+            modifier = modifier,
+            keyboardType = keyboardType
+        )
+        if (warningMessage.isNotEmpty()) {
+            Text(
+                text = warningMessage,
+                color = Color.Red,
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

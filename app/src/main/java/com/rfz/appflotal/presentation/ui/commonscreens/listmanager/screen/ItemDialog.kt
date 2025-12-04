@@ -41,9 +41,9 @@ fun ItemDialog(
             isError = isEmpty,
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFF6A5DD9),
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = Color(0xFFAAAAAA),
-                focusedLabelColor = Color(0xFF6A5DD9),
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black
             ),
