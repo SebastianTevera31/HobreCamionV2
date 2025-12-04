@@ -394,16 +394,25 @@ fun OriginalScreen(
                             color = Color.White.copy(alpha = 0.6f)
                         )
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(4.dp, RoundedCornerShape(16.dp)),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-                        cursorColor = Color.White,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color.White.copy(alpha = 0.1f),
-                        unfocusedContainerColor = Color.White.copy(alpha = 0.1f)
+                        focusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+                            alpha = 0.4f
+                        ),
+                        cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        focusedContainerColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+                            alpha = 0.1f
+                        ),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+                            alpha = 0.1f
+                        )
                     ),
+                    singleLine = true,
                     shape = RoundedCornerShape(16.dp),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })

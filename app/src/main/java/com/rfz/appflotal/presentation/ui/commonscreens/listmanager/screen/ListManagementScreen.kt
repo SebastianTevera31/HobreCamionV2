@@ -113,7 +113,8 @@ fun <T> ListManagementScreen(
                                     MaterialTheme.colorScheme.primaryContainer
                                 )
                             )
-                        ).shadow(4.dp)
+                        )
+                        .shadow(4.dp)
                 )
 
                 Box(

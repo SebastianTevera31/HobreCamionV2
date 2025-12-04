@@ -63,7 +63,7 @@
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
     <string name="logo_description">Flotal logo</string>
-    <string name="only_languages_allowed">Only 'es' and 'en' are allowed.</string>
+    <string name="only_languages_allowed">Only \'es\' and \'en\' are allowed.</string>
     <string name="diagrama">Diagram</string>
 
     <plurals name="posicion_tag">
