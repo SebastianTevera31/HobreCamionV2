@@ -119,6 +119,7 @@ fun TireWasteView(
     onSendTireToWastePile: (wasteReportId: Int, tireId: Int) -> Unit,
 ) {
     val scroll = rememberScrollState()
+    val context = LocalContext.current
     var wasteReportSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 
@@ -223,7 +224,13 @@ fun TireWasteView(
 
                             Button(
                                 onClick = {
-                                    navScreens = SubScreens.LIST
+                                    if (uiState.dismountedTireList.isEmpty()) {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.no_se_encontraron_llantas),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else navScreens = SubScreens.LIST
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
