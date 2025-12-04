@@ -129,7 +129,7 @@
     <string name="direcci_n_mac">Dirección MAC</string>
     <string name="configuraci_n">Configuración</string>
     <string name="monitor">Monitor</string>
-    <string name="save">Guardar</string>
+    <string name="guardar">Guardar</string>
     <string name="cerrar">Cerrar</string>
     <string name="ingresar_datos_monitor">Ingresa los datos del monitor</string>
     <string name="escaneando">Escaneando...</string>
@@ -288,6 +288,18 @@
     <string name="llanta_seleccionada">Llanta seleccionada</string>
     <string name="motivo">Motivo</string>
     <string name="no_encontrado_diseno_renovado">No se ha seleccionado un diseño de renovado</string>
+    <string name="error_cargar_disenos_originales">Error al cargar los diseños originales</string>
+    <string name="error_deben_completarse_campos">Todos los campos requeridos deben estar completos</string>
+    <string name="error_loading_design_details">Error loading design details</string>
+    <string name="diseno_guardado_exitosamente">Diseño guardado exitosamente</string>
+    <string name="error_al_guardar_el_diseno">Error al guardar el diseño</string>
+    <string name="buscar_disenos">Buscar diseños...</string>
+    <string name="no_hay_disenos_registrados">No hay diseños registrados</string>
+    <string name="no_se_encontraron_resultados">No se encontraron resultados</string>
+    <string name="registrar_diseno_original">Registrar Diseño Original</string>
+    <string name="editar_diseno_original">Editar Diseño Original</string>
+    <string name="descripcion">Descripción</string>
+    <string name="notas">Notas</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

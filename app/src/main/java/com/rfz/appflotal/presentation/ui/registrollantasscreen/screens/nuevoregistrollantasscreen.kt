@@ -538,7 +538,7 @@ fun DatePickerField(selectedDate: String, onDateSelected: (String) -> Unit) {
                 ) {
                     LocalizedApp {
                         Text(
-                            stringResource(R.string.save)
+                            stringResource(R.string.guardar)
                         )
                     }
                 }

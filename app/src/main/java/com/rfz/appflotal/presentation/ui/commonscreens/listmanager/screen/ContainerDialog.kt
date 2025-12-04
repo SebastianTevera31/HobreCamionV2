@@ -100,7 +100,7 @@ fun AddItemDialog(
                 shape = RoundedCornerShape(14.dp)
             ) {
                 LocalizedApp {
-                    Text(stringResource(R.string.save).uppercase(), fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.guardar).uppercase(), fontWeight = FontWeight.Bold)
                 }
 
             }

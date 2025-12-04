@@ -48,19 +48,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rfz.appflotal.R
 
 import com.rfz.appflotal.data.model.brand.response.BranListResponse
 import com.rfz.appflotal.data.model.originaldesign.dto.CrudOriginalDesignDto
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
 import com.rfz.appflotal.data.model.utilization.response.UtilizationResponse
 import com.rfz.appflotal.domain.originaldesign.OriginalDesignByIdUseCase
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,8 +80,8 @@ fun OriginalScreen(
     homeViewModel: HomeViewModel
 ) {
 
-    val primaryColor = Color(0xFF4A3DAD)
-    val secondaryColor = Color(0xFF5C4EC9)
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
     val backgroundColor = Color(0xFFF8F7FF)
     val textColor = Color(0xFF333333)
     val lightTextColor = Color.White
@@ -85,15 +90,18 @@ fun OriginalScreen(
 
     val userData = uiState.userData
 
-
-
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
 
     var allOriginalDesigns by remember { mutableStateOf<List<OriginalDesignResponse>>(emptyList()) }
-    var displayedOriginalDesigns by remember { mutableStateOf<List<OriginalDesignResponse>>(emptyList()) }
+    var displayedOriginalDesigns by remember {
+        mutableStateOf<List<OriginalDesignResponse>>(
+            emptyList()
+        )
+    }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -129,7 +137,6 @@ fun OriginalScreen(
         }
     }
 
-
     fun loadOriginalDesigns() {
         scope.launch {
             isLoading = true
@@ -140,10 +147,12 @@ fun OriginalScreen(
                     allOriginalDesigns = result.getOrNull() ?: emptyList()
                     displayedOriginalDesigns = allOriginalDesigns
                 } else {
-                    errorMessage = result.exceptionOrNull()?.message ?: "Error loading original designs"
+                    errorMessage =
+                        result.exceptionOrNull()?.message
+                            ?: context.getString(R.string.error_cargar_disenos_originales)
                 }
             } catch (e: Exception) {
-                errorMessage = e.message ?: "Unknown error"
+                errorMessage = e.message ?: context.getString(R.string.error_desconocido)
             } finally {
                 isLoading = false
             }
@@ -162,7 +171,7 @@ fun OriginalScreen(
                 utilizations.clear()
 
 
-                val brandsResult = brandUseCase(bearerToken,userData?.idUser!!)
+                val brandsResult = brandUseCase(bearerToken, userData?.idUser!!)
                 if (brandsResult.isSuccess) {
                     brands.addAll(brandsResult.getOrNull() ?: emptyList())
                 }
@@ -176,7 +185,7 @@ fun OriginalScreen(
                 onComplete(true)
             } catch (e: Exception) {
                 onComplete(false)
-                errorMessage = "Error loading combo data: ${e.message}"
+                errorMessage = context.getString(R.string.error_carga_datos)
             } finally {
                 isLoadingCombos = false
             }
@@ -188,21 +197,25 @@ fun OriginalScreen(
         scope.launch {
             isLoadingDesignDetails = true
             try {
-                val result = originalDesignByIdUseCase(designId, "Bearer ${userData?.fld_token}" ?: "")
+                val result =
+                    originalDesignByIdUseCase(designId, "Bearer ${userData?.fld_token}" ?: "")
                 if (result.isSuccess) {
                     val design = result.getOrNull()?.firstOrNull()
                     design?.let {
                         model = it.fld_model
                         description = it.fld_description
                         selectedBrand = brands.find { brand -> brand.idBrand == it.c_brands_fk_1 }
-                        selectedUtilization = utilizations.find { util -> util.id_utilization == it.c_utilization_fk_2 }
+                        selectedUtilization =
+                            utilizations.find { util -> util.id_utilization == it.c_utilization_fk_2 }
                         notes = it.fld_notes
                     }
                 } else {
-                    errorMessage = result.exceptionOrNull()?.message ?: "Error loading design details"
+                    errorMessage =
+                        result.exceptionOrNull()?.message
+                            ?: context.getString(R.string.error_loading_design_details)
                 }
             } catch (e: Exception) {
-                errorMessage = "Error loading design details: ${e.message}"
+                errorMessage = context.getString(R.string.error_loading_design_details)
             } finally {
                 isLoadingDesignDetails = false
             }
@@ -213,7 +226,7 @@ fun OriginalScreen(
     fun saveDesign() {
         scope.launch {
             if (model.isBlank() || description.isBlank() || selectedBrand == null || selectedUtilization == null) {
-                errorMessage = "Todos los campos requeridos deben estar completos"
+                errorMessage = context.getString(R.string.error_deben_completarse_campos)
                 return@launch
             }
 
@@ -227,16 +240,19 @@ fun OriginalScreen(
                     fld_notes = notes,
                 )
 
-                val result = crudOriginalDesignUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
+                val result =
+                    crudOriginalDesignUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
                 if (result.isSuccess) {
-                    snackbarHostState.showSnackbar(
-                        message = result.getOrNull()?.firstOrNull()?.message ?: "Diseño guardado exitosamente",
-                        duration = SnackbarDuration.Short
-                    )
                     showDialog = false
                     loadOriginalDesigns()
+                    snackbarHostState.showSnackbar(
+                        message = result.getOrNull()?.firstOrNull()?.message
+                            ?: context.getString(R.string.diseno_guardado_exitosamente),
+                        duration = SnackbarDuration.Short
+                    )
                 } else {
-                    errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar el diseño"
+                    errorMessage = result.exceptionOrNull()?.message
+                        ?: context.getString(R.string.error_al_guardar_el_diseno)
                 }
             } catch (e: Exception) {
                 errorMessage = "Error: ${e.message}"
@@ -287,7 +303,7 @@ fun OriginalScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Diseños Originales",
+                        stringResource(R.string.original_design),
                         style = MaterialTheme.typography.titleLarge.copy(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -311,7 +327,10 @@ fun OriginalScreen(
                 modifier = Modifier
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                     )
                     .shadow(4.dp)
@@ -330,14 +349,21 @@ fun OriginalScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF6A5DD9), Color(0xFF6D66CB))
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                     )
                     .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -345,15 +371,30 @@ fun OriginalScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.White.copy(alpha = 0.9f)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            null,
+                            tint = Color.White.copy(alpha = 0.9f)
+                        )
+                    },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Close, null, tint = Color.White.copy(alpha = 0.8f))
+                                Icon(
+                                    Icons.Default.Close,
+                                    null,
+                                    tint = Color.White.copy(alpha = 0.8f)
+                                )
                             }
                         }
                     },
-                    placeholder = { Text("Buscar diseños...", color = Color.White.copy(alpha = 0.6f)) },
+                    placeholder = {
+                        Text(
+                            stringResource(R.string.buscar_disenos),
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.White,
@@ -371,20 +412,32 @@ fun OriginalScreen(
             }
 
 
-            Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundColor)
+            ) {
                 when {
                     isLoading && displayedOriginalDesigns.isEmpty() -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
+
                     displayedOriginalDesigns.isEmpty() -> {
                         Text(
-                            text = if (searchQuery.isBlank()) "No hay diseños registrados" else "No se encontraron resultados",
+                            text = if (searchQuery.isBlank()) stringResource(R.string.no_hay_disenos_registrados) else stringResource(
+                                R.string.no_se_encontraron_resultados
+                            ),
                             modifier = Modifier.align(Alignment.Center),
                             color = textColor.copy(alpha = 0.6f)
                         )
                     }
+
                     else -> {
-                        LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp)
+                        ) {
                             items(displayedOriginalDesigns) { design ->
                                 OriginalDesignItem(
                                     design = design,
@@ -410,230 +463,269 @@ fun OriginalScreen(
                 shape = RoundedCornerShape(20.dp),
                 containerColor = Color.White,
                 title = {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
+                    LocalizedApp {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                MaterialTheme.colorScheme.primary,
+                                                MaterialTheme.colorScheme.primaryContainer
+                                            )
+                                        )
                                     )
-                                )
-                                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Text(
-                            text = if (editingDesign == null) "Registrar Diseño Original" else "Editar Diseño Original",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                color = primaryColor,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            textAlign = TextAlign.Center
-                        )
+                                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                text = if (editingDesign == null) stringResource(R.string.registrar_diseno_original) else stringResource(
+                                    R.string.editar_diseno_original
+                                ),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    color = primaryColor,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 },
                 text = {
-                    if (isLoadingCombos || (editingDesign != null && isLoadingDesignDetails)) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = primaryColor)
-                        }
-                    } else {
-                        Column {
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Text(
-                                    "Modelo",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        color = primaryColor,
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                                )
-                                OutlinedTextField(
-                                    value = model,
-                                    onValueChange = { model = it },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = primaryColor,
-                                        unfocusedBorderColor = Color.Gray
-                                    ),
-                                    shape = RoundedCornerShape(14.dp)
-                                )
+                    LocalizedApp {
+                        if (isLoadingCombos || (editingDesign != null && isLoadingDesignDetails)) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = primaryColor)
                             }
-
-
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Text(
-                                    "Descripción",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        color = primaryColor,
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                                )
-                                OutlinedTextField(
-                                    value = description,
-                                    onValueChange = { description = it },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = primaryColor,
-                                        unfocusedBorderColor = Color.Gray
-                                    ),
-                                    shape = RoundedCornerShape(14.dp)
-                                )
-                            }
-
-
-                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Column {
+                        } else {
+                            Column {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
                                     Text(
-                                        "Marca",
+                                        stringResource(R.string.single_modelo),
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             color = primaryColor,
                                             fontWeight = FontWeight.SemiBold
                                         ),
                                         modifier = Modifier.padding(bottom = 4.dp)
                                     )
-                                    ExposedDropdownMenuBox(
-                                        expanded = showBrandMenu,
-                                        onExpandedChange = { showBrandMenu = !showBrandMenu }
-                                    ) {
-                                        OutlinedTextField(
-                                            value = selectedBrand?.description ?: "",
-                                            onValueChange = {},
-                                            readOnly = true,
-                                            trailingIcon = {
-                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showBrandMenu)
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .menuAnchor(),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = primaryColor,
-                                                unfocusedBorderColor = Color.Gray
+                                    OutlinedTextField(
+                                        value = model,
+                                        onValueChange = { model = it },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = primaryColor,
+                                            unfocusedBorderColor = Color.Gray
+                                        ),
+                                        shape = RoundedCornerShape(14.dp)
+                                    )
+                                }
+
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        stringResource(R.string.descripcion),
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            color = primaryColor,
+                                            fontWeight = FontWeight.SemiBold
+                                        ),
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                    OutlinedTextField(
+                                        value = description,
+                                        onValueChange = { description = it },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = primaryColor,
+                                            unfocusedBorderColor = Color.Gray
+                                        ),
+                                        shape = RoundedCornerShape(14.dp)
+                                    )
+                                }
+
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Column {
+                                        Text(
+                                            stringResource(R.string.marca),
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                color = primaryColor,
+                                                fontWeight = FontWeight.SemiBold
                                             ),
-                                            shape = RoundedCornerShape(14.dp)
+                                            modifier = Modifier.padding(bottom = 4.dp)
                                         )
-                                        ExposedDropdownMenu(
+                                        ExposedDropdownMenuBox(
                                             expanded = showBrandMenu,
-                                            onDismissRequest = { showBrandMenu = false }
+                                            onExpandedChange = { showBrandMenu = !showBrandMenu }
                                         ) {
-                                            brands.forEach { brand ->
-                                                DropdownMenuItem(
-                                                    text = { Text(brand.description) },
-                                                    onClick = {
-                                                        selectedBrand = brand
-                                                        showBrandMenu = false
-                                                    }
-                                                )
+                                            OutlinedTextField(
+                                                value = selectedBrand?.description ?: "",
+                                                onValueChange = {},
+                                                readOnly = true,
+                                                trailingIcon = {
+                                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = showBrandMenu)
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .menuAnchor(),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    focusedBorderColor = primaryColor,
+                                                    unfocusedBorderColor = Color.Gray
+                                                ),
+                                                shape = RoundedCornerShape(14.dp)
+                                            )
+                                            ExposedDropdownMenu(
+                                                expanded = showBrandMenu,
+                                                onDismissRequest = { showBrandMenu = false }
+                                            ) {
+                                                brands.forEach { brand ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(brand.description) },
+                                                        onClick = {
+                                                            selectedBrand = brand
+                                                            showBrandMenu = false
+                                                        }
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Column {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Column {
+                                        Text(
+                                            stringResource(R.string.utilizacion),
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                color = primaryColor,
+                                                fontWeight = FontWeight.SemiBold
+                                            ),
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        ExposedDropdownMenuBox(
+                                            expanded = showUtilizationMenu,
+                                            onExpandedChange = {
+                                                showUtilizationMenu = !showUtilizationMenu
+                                            }
+                                        ) {
+                                            OutlinedTextField(
+                                                value = selectedUtilization?.fld_description ?: "",
+                                                onValueChange = {},
+                                                readOnly = true,
+                                                trailingIcon = {
+                                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = showUtilizationMenu)
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .menuAnchor(),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    focusedBorderColor = primaryColor,
+                                                    unfocusedBorderColor = Color.Gray
+                                                ),
+                                                shape = RoundedCornerShape(14.dp)
+                                            )
+                                            ExposedDropdownMenu(
+                                                expanded = showUtilizationMenu,
+                                                onDismissRequest = { showUtilizationMenu = false }
+                                            ) {
+                                                utilizations.forEach { utilization ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(utilization.fld_description) },
+                                                        onClick = {
+                                                            selectedUtilization = utilization
+                                                            showUtilizationMenu = false
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
                                     Text(
-                                        "Utilización",
+                                        stringResource(R.string.notas),
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             color = primaryColor,
                                             fontWeight = FontWeight.SemiBold
                                         ),
                                         modifier = Modifier.padding(bottom = 4.dp)
                                     )
-                                    ExposedDropdownMenuBox(
-                                        expanded = showUtilizationMenu,
-                                        onExpandedChange = { showUtilizationMenu = !showUtilizationMenu }
-                                    ) {
-                                        OutlinedTextField(
-                                            value = selectedUtilization?.fld_description ?: "",
-                                            onValueChange = {},
-                                            readOnly = true,
-                                            trailingIcon = {
-                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showUtilizationMenu)
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .menuAnchor(),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = primaryColor,
-                                                unfocusedBorderColor = Color.Gray
-                                            ),
-                                            shape = RoundedCornerShape(14.dp)
-                                        )
-                                        ExposedDropdownMenu(
-                                            expanded = showUtilizationMenu,
-                                            onDismissRequest = { showUtilizationMenu = false }
-                                        ) {
-                                            utilizations.forEach { utilization ->
-                                                DropdownMenuItem(
-                                                    text = { Text(utilization.fld_description) },
-                                                    onClick = {
-                                                        selectedUtilization = utilization
-                                                        showUtilizationMenu = false
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
+                                    OutlinedTextField(
+                                        value = notes,
+                                        onValueChange = { notes = it },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = primaryColor,
+                                            unfocusedBorderColor = Color.Gray
+                                        ),
+                                        shape = RoundedCornerShape(14.dp),
+                                        maxLines = 3
+                                    )
                                 }
-                            }
-
-
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Text(
-                                    "Notas",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        color = primaryColor,
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                                )
-                                OutlinedTextField(
-                                    value = notes,
-                                    onValueChange = { notes = it },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = primaryColor,
-                                        unfocusedBorderColor = Color.Gray
-                                    ),
-                                    shape = RoundedCornerShape(14.dp),
-                                    maxLines = 3
-                                )
                             }
                         }
                     }
                 },
                 confirmButton = {
-                    Button(
-                        onClick = { saveDesign() },
-                        enabled = !isLoadingCombos && !isLoadingDesignDetails &&
-                                model.isNotBlank() &&
-                                description.isNotBlank() &&
-                                selectedBrand != null &&
-                                selectedUtilization != null,
-                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text("GUARDAR", fontWeight = FontWeight.Bold)
+                    LocalizedApp {
+                        Button(
+                            onClick = { saveDesign() },
+                            enabled = !isLoadingCombos && !isLoadingDesignDetails &&
+                                    model.isNotBlank() &&
+                                    description.isNotBlank() &&
+                                    selectedBrand != null &&
+                                    selectedUtilization != null,
+                            colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(stringResource(R.string.guardar), fontWeight = FontWeight.Bold)
+                        }
                     }
                 },
                 dismissButton = {
-                    OutlinedButton(
-                        onClick = { showDialog = false },
-                        border = BorderStroke(1.dp, primaryColor),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text("CANCELAR", color = primaryColor, fontWeight = FontWeight.Bold)
+                    LocalizedApp {
+                        OutlinedButton(
+                            onClick = { showDialog = false },
+                            border = BorderStroke(1.dp, primaryColor),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.cancelar),
+                                color = primaryColor,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             )
@@ -679,7 +771,7 @@ fun OriginalDesignItem(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Marca: ${design.brandId} | Utilización: ${design.fld_utilization}",
+                text = "${stringResource(R.string.marca)}: ${design.brandId} | ${stringResource(R.string.utilizacion)}: ${design.fld_utilization}",
                 style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray)
             )
             Spacer(Modifier.height(16.dp))
@@ -700,7 +792,7 @@ fun OriginalDesignItem(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        "Editar",
+                        pluralStringResource(R.plurals.editar_elemento, 1),
                         color = secondaryColor,
                         fontWeight = FontWeight.Medium
                     )

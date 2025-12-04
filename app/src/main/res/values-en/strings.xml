@@ -121,7 +121,7 @@
     <string name="direcci_n_mac">MAC Address</string>
     <string name="configuraci_n">Configuration</string>
     <string name="monitor">Monitor</string>
-    <string name="save">Save</string>
+    <string name="guardar">Save</string>
     <string name="cerrar">Close</string>
     <string name="ingresar_datos_monitor">Enter monitor information</string>
     <string name="escaneando">Scanning...</string>
@@ -281,6 +281,29 @@
     <string name="llanta_seleccionada">Selected tire</string>
     <string name="motivo">Reason</string>
     <string name="no_encontrado_diseno_renovado">No retread design has been selected</string>
+    <string name="error_cargar_disenos_originales">Error loading original designs</string>
+
+    <string name="error_deben_completarse_campos">All required fields must be completed</string>
+
+    <string name="error_loading_design_details">Error loading design details</string>
+
+    <string name="diseno_guardado_exitosamente">Design saved successfully</string>
+
+    <string name="error_al_guardar_el_diseno">Error saving the design</string>
+
+    <string name="buscar_disenos">Search designs...</string>
+
+    <string name="no_hay_disenos_registrados">No designs registered</string>
+
+    <string name="no_se_encontraron_resultados">No results found</string>
+
+    <string name="registrar_diseno_original">Register Original Design</string>
+
+    <string name="editar_diseno_original">Edit Original Design</string>
+
+    <string name="descripcion">Description</string>
+
+    <string name="notas">Notes</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

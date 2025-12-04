@@ -131,7 +131,7 @@ fun UpdateUserScreen(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.width(160.dp)
                 ) {
-                    Text(text = stringResource(R.string.save))
+                    Text(text = stringResource(R.string.guardar))
                 }
             }
         }
