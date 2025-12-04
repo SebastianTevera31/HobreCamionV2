@@ -300,6 +300,16 @@
     <string name="editar_diseno_original">Editar Diseño Original</string>
     <string name="descripcion">Descripción</string>
     <string name="notas">Notas</string>
+    <string name="error_al_guardar">Error al guardar</string>
+    <string name="error_al_cargar_marcas">Error al cargar marcas</string>
+    <string name="marcas">Marcas</string>
+    <string name="nueva_marca">Nueva Marca</string>
+    <string name="buscar_marcas">Buscar marcas...</string>
+    <string name="cargar_mas_marcas">Cargar más marcas</string>
+    <string name="registrar_marca">Registrar Marca</string>
+    <string name="editar_marca">Editar Marca</string>
+    <string name="nombre_de_la_marca">Nombre de la marca</string>
+    <string name="el_nombre_es_requerido">El nombre es requerido</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

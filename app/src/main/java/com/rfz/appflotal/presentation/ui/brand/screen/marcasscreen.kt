@@ -57,6 +57,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -64,11 +67,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
 import com.rfz.appflotal.data.model.brand.response.BranListResponse
 import com.rfz.appflotal.domain.brand.BrandCrudUseCase
 import com.rfz.appflotal.domain.brand.BrandListUseCase
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import kotlinx.coroutines.launch
 
 private const val ITEMS_PER_PAGE = 10
@@ -82,16 +87,13 @@ fun MarcasScreen(
     brandCrudUseCase: BrandCrudUseCase
 ) {
 
-    val primaryColor = Color(0xFF4A3DAD)
-    val secondaryColor = Color(0xFF5C4EC9)
-    val tertiaryColor = Color(0xFF7F77EA)
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
     val backgroundColor = Color(0xFFF8F7FF)
-    val cardColor = Color.White
-    val textColor = Color(0xFF333333)
     val lightTextColor = Color.White
 
     val uiState by homeViewModel.uiState.collectAsState()
-
+    val context = LocalContext.current
 
     val userData = uiState.userData
 
@@ -140,10 +142,11 @@ fun MarcasScreen(
                     allMarcas = result.getOrNull() ?: emptyList()
                     resetPagination()
                 } else {
-                    errorMessage = result.exceptionOrNull()?.message ?: "Error al cargar marcas"
+                    errorMessage = result.exceptionOrNull()?.message
+                        ?: context.getString(R.string.error_al_cargar_marcas)
                 }
             } catch (e: Exception) {
-                errorMessage = e.message ?: "Error desconocido"
+                errorMessage = e.message ?: context.getString(R.string.error_desconocido)
             } finally {
                 isLoading = false
             }
@@ -165,7 +168,8 @@ fun MarcasScreen(
                 showDialog = false
                 loadBrands()
             } else {
-                errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar"
+                errorMessage = result.exceptionOrNull()?.message
+                    ?: context.getString(R.string.error_al_guardar)
             }
         }
     }
@@ -179,7 +183,7 @@ fun MarcasScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Marcas",
+                        stringResource(R.string.marcas),
                         style = MaterialTheme.typography.titleLarge.copy(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -207,7 +211,10 @@ fun MarcasScreen(
                 modifier = Modifier
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                     )
                     .shadow(4.dp)
@@ -225,7 +232,7 @@ fun MarcasScreen(
             ) {
                 Icon(
                     Icons.Default.Add,
-                    contentDescription = "Nueva Marca",
+                    contentDescription = stringResource(R.string.nueva_marca),
                     tint = lightTextColor,
                     modifier = Modifier.size(28.dp)
                 )
@@ -243,7 +250,10 @@ fun MarcasScreen(
                     .fillMaxWidth()
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF6A5DD9), Color(0xFF6D66CB))
+                            listOf(
+                                MaterialTheme.colorScheme.secondaryContainer,
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            )
                         )
                     )
                     .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -254,7 +264,7 @@ fun MarcasScreen(
                     leadingIcon = {
                         Icon(
                             Icons.Default.Search,
-                            contentDescription = "Buscar",
+                            contentDescription = stringResource(R.string.buscar),
                             tint = Color.White.copy(alpha = 0.9f)
                         )
                     },
@@ -271,7 +281,7 @@ fun MarcasScreen(
                     },
                     placeholder = {
                         Text(
-                            "Buscar marcas...",
+                            stringResource(R.string.buscar_marcas),
                             color = Color.White.copy(alpha = 0.6f)
                         )
                     },
@@ -342,7 +352,7 @@ fun MarcasScreen(
                                 )
                             ) {
                                 Text(
-                                    "Cargar más marcas",
+                                    stringResource(R.string.cargar_mas_marcas),
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -360,84 +370,103 @@ fun MarcasScreen(
                 containerColor = Color.White,
                 tonalElevation = 12.dp,
                 title = {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
-                                    )
-                                )
-                                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = if (editingBrand == null) "Registrar Marca" else "Editar Marca",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                color = Color(0xFF4A3DAD),
-                                fontWeight = FontWeight.Bold
-                            ),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                },
-                text = {
-                    Column {
-                        OutlinedTextField(
-                            value = newBrandName,
-                            onValueChange = { newBrandName = it },
-                            label = {
-                                Text(
-                                    "Nombre de la marca",
-                                    color = Color.Gray
-                                )
-                            },
-                            isError = newBrandName.isBlank(),
+                    LocalizedApp {
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF6A5DD9),
-                                unfocusedBorderColor = Color(0xFFAAAAAA),
-                                focusedLabelColor = Color(0xFF6A5DD9),
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black
-                            ),
-                            shape = RoundedCornerShape(14.dp)
-                        )
-                        if (newBrandName.isBlank()) {
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                MaterialTheme.colorScheme.primary,
+                                                MaterialTheme.colorScheme.primaryContainer
+                                            )
+                                        )
+                                    )
+                                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                "El nombre es requerido",
-                                color = Color.Red,
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.padding(top = 4.dp)
+                                text = if (editingBrand == null) stringResource(R.string.registrar_marca) else stringResource(
+                                    R.string.editar_marca
+                                ),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
                 },
-                confirmButton = {
-                    Button(
-                        onClick = { saveBrand() },
-                        enabled = newBrandName.isNotBlank(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF6A5DD9),
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text("GUARDAR", fontWeight = FontWeight.Bold)
+                text = {
+                    LocalizedApp {
+                        Column {
+                            OutlinedTextField(
+                                value = newBrandName,
+                                onValueChange = { newBrandName = it },
+                                label = {
+                                    Text(
+                                        stringResource(R.string.nombre_de_la_marca),
+                                        color = Color.Gray
+                                    )
+                                },
+                                isError = newBrandName.isBlank(),
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = primaryColor,
+                                    unfocusedBorderColor = Color(0xFFAAAAAA),
+                                    focusedLabelColor = primaryColor,
+                                    focusedTextColor = Color.Black,
+                                    unfocusedTextColor = Color.Black
+                                ),
+                                shape = RoundedCornerShape(14.dp)
+                            )
+                            if (newBrandName.isBlank()) {
+                                Text(
+                                    stringResource(R.string.el_nombre_es_requerido),
+                                    color = Color.Red,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                        }
                     }
+
+                },
+                confirmButton = {
+                    LocalizedApp {
+                        Button(
+                            onClick = { saveBrand() },
+                            enabled = newBrandName.isNotBlank(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(stringResource(R.string.guardar), fontWeight = FontWeight.Bold)
+                        }
+                    }
+
                 },
                 dismissButton = {
-                    OutlinedButton(
-                        onClick = { showDialog = false },
-                        border = BorderStroke(1.dp, Color(0xFF6A5DD9)),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text("CANCELAR", color = Color(0xFF6A5DD9), fontWeight = FontWeight.Bold)
+                    LocalizedApp {
+                        OutlinedButton(
+                            onClick = { showDialog = false },
+                            border = BorderStroke(1.dp, primaryColor),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.cancelar),
+                                color = primaryColor,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             )
@@ -502,7 +531,7 @@ fun BrandItem(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Editar",
+                        pluralStringResource(R.plurals.editar_elemento, 1),
                         color = secondaryColor,
                         fontWeight = FontWeight.Medium,
                         style = MaterialTheme.typography.labelLarge

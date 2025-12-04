@@ -361,8 +361,8 @@ fun OriginalScreen(
                     .background(
                         Brush.horizontalGradient(
                             listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primaryContainer
+                                MaterialTheme.colorScheme.secondaryContainer,
+                                MaterialTheme.colorScheme.tertiaryContainer
                             )
                         )
                     )

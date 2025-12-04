@@ -304,6 +304,25 @@
     <string name="descripcion">Description</string>
 
     <string name="notas">Notes</string>
+    <string name="error_al_guardar">Error saving</string>
+
+    <string name="error_al_cargar_marcas">Error loading brands</string>
+
+    <string name="marcas">Brands</string>
+
+    <string name="nueva_marca">New brand</string>
+
+    <string name="buscar_marcas">Search brands...</string>
+
+    <string name="cargar_mas_marcas">Load more brands</string>
+
+    <string name="registrar_marca">Register brand</string>
+
+    <string name="editar_marca">Edit brand</string>
+
+    <string name="nombre_de_la_marca">Brand name</string>
+
+    <string name="el_nombre_es_requerido">The name is required</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
