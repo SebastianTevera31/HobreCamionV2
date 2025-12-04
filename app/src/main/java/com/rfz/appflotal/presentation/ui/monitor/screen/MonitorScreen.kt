@@ -322,7 +322,16 @@ private fun FilteredPositionsView(
             )
         }
 
-        is ApiResult.Error -> {}
+        is ApiResult.Error -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 48.dp),
+            ) {
+                NoPositionDataView(R.string.error_carga_datos)
+            }
+        }
+
         is ApiResult.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()

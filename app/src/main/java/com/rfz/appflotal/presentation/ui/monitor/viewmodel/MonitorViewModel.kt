@@ -394,7 +394,7 @@ class MonitorViewModel @Inject constructor(
                     _filteredTiresUiState.update { tireData }
                 }
 
-                is ApiResult.Error -> {}
+                is ApiResult.Error -> { _filteredTiresUiState.update { ApiResult.Error() } }
                 ApiResult.Loading -> {}
             }
         }
