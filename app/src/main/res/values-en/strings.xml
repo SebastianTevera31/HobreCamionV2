@@ -323,6 +323,23 @@
     <string name="nombre_de_la_marca">Brand name</string>
 
     <string name="el_nombre_es_requerido">The name is required</string>
+    <string name="error_al_cargar_medidas_de_llantas">Error loading tire sizes</string>
+
+    <string name="medidas_de_llantas">Tire Sizes</string>
+
+    <string name="buscar_medidas">Search sizes...</string>
+
+    <string name="cargar_mas_medidas">Load more sizes</string>
+
+    <string name="registrar_medida">Register Size</string>
+
+    <string name="editar_medida">Edit Size</string>
+
+    <string name="medida_de_la_llanta">Tire size</string>
+
+    <string name="la_medida_es_requerida">Size is required</string>
+
+    <string name="nota_opcional">Note (optional)</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

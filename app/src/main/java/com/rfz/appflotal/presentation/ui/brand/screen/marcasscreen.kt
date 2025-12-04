@@ -228,7 +228,7 @@ fun MarcasScreen(
                     showDialog = true
                 },
                 containerColor = primaryColor,
-                modifier = Modifier.shadow(elevation = 8.dp, shape = CircleShape)
+                modifier = Modifier.shadow(elevation = 8.dp)
             ) {
                 Icon(
                     Icons.Default.Add,

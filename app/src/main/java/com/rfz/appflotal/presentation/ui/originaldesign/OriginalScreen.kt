@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.originaldesign
 
+import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
@@ -237,7 +238,7 @@ fun OriginalScreen(
                     fld_description = description,
                     c_brands_fk_1 = selectedBrand!!.idBrand,
                     c_utilization_fk_2 = selectedUtilization!!.id_utilization,
-                    fld_notes = notes,
+                    fld_notes = notes ?: "",
                 )
 
                 val result =
@@ -246,16 +247,14 @@ fun OriginalScreen(
                     showDialog = false
                     loadOriginalDesigns()
                     snackbarHostState.showSnackbar(
-                        message = result.getOrNull()?.firstOrNull()?.message
-                            ?: context.getString(R.string.diseno_guardado_exitosamente),
+                        message = context.getString(R.string.diseno_guardado_exitosamente),
                         duration = SnackbarDuration.Short
                     )
                 } else {
-                    errorMessage = result.exceptionOrNull()?.message
-                        ?: context.getString(R.string.error_al_guardar_el_diseno)
+                    errorMessage = context.getString(R.string.error_al_guardar_el_diseno)
                 }
             } catch (e: Exception) {
-                errorMessage = "Error: ${e.message}"
+                errorMessage = context.getString(R.string.error_al_guardar_el_diseno)
             }
         }
     }
@@ -271,7 +270,7 @@ fun OriginalScreen(
 
     LaunchedEffect(errorMessage) {
         errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             errorMessage = null
         }
     }
@@ -584,7 +583,9 @@ fun OriginalScreen(
                                                 onValueChange = {},
                                                 readOnly = true,
                                                 trailingIcon = {
-                                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = showBrandMenu)
+                                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                                        expanded = showBrandMenu
+                                                    )
                                                 },
                                                 modifier = Modifier
                                                     .fillMaxWidth()
@@ -638,7 +639,9 @@ fun OriginalScreen(
                                                 onValueChange = {},
                                                 readOnly = true,
                                                 trailingIcon = {
-                                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = showUtilizationMenu)
+                                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                                        expanded = showUtilizationMenu
+                                                    )
                                                 },
                                                 modifier = Modifier
                                                     .fillMaxWidth()

@@ -310,6 +310,15 @@
     <string name="editar_marca">Editar Marca</string>
     <string name="nombre_de_la_marca">Nombre de la marca</string>
     <string name="el_nombre_es_requerido">El nombre es requerido</string>
+    <string name="error_al_cargar_medidas_de_llantas">Error al cargar medidas de llantas</string>
+    <string name="medidas_de_llantas">Medidas de Llantas</string>
+    <string name="buscar_medidas">Buscar medidas...</string>
+    <string name="cargar_mas_medidas">Cargar más medidas</string>
+    <string name="registrar_medida">Registrar Medida</string>
+    <string name="editar_medida">Editar Medida</string>
+    <string name="medida_de_la_llanta">Medida de la llanta</string>
+    <string name="la_medida_es_requerida">La medida es requerida</string>
+    <string name="nota_opcional">Nota (opcional)</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

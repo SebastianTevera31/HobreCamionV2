@@ -184,7 +184,7 @@ fun <T> ListManagementScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onShowDialog, containerColor = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.shadow(elevation = 8.dp, shape = CircleShape)
+                modifier = Modifier.shadow(elevation = 8.dp)
             ) {
                 Icon(
                     Icons.Default.Add,

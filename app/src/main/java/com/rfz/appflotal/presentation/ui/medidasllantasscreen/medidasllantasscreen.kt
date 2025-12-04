@@ -57,12 +57,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.tire.dto.TireSizeDto
 import com.rfz.appflotal.data.model.tire.response.TireSizeResponse
 import com.rfz.appflotal.domain.tire.TireSizeCrudUseCase
@@ -71,8 +75,10 @@ import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.theme.onPrimaryContainerLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
 
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import kotlinx.coroutines.launch
 
 private const val ITEMS_PER_PAGE = 10
@@ -86,7 +92,7 @@ fun MedidasLlantasScreen(
     tireSizeCrudUseCase: TireSizeCrudUseCase
 ) {
     val uiState by homeViewModel.uiState.collectAsState()
-
+    val context = LocalContext.current
     val userData = uiState.userData
 
     val scope = rememberCoroutineScope()
@@ -138,10 +144,11 @@ fun MedidasLlantasScreen(
                     allMedidas = result.body() ?: emptyList()
                     resetPagination()
                 } else {
-                    errorMessage = result.message() ?: "Error al cargar medidas de llantas"
+                    errorMessage = result.message()
+                        ?: context.getString(R.string.error_al_cargar_medidas_de_llantas)
                 }
             } catch (e: Exception) {
-                errorMessage = e.message ?: "Error desconocido"
+                errorMessage = e.message ?: context.getString(R.string.error_desconocido)
             } finally {
                 isLoading = false
             }
@@ -163,7 +170,8 @@ fun MedidasLlantasScreen(
                 showDialog = false
                 loadMedidas()
             } else {
-                errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar"
+                errorMessage = result.exceptionOrNull()?.message
+                    ?: context.getString(R.string.error_al_guardar)
             }
         }
     }
@@ -177,7 +185,7 @@ fun MedidasLlantasScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Medidas de Llantas",
+                        stringResource(R.string.medidas_de_llantas),
                         style = MaterialTheme.typography.titleLarge.copy(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -205,7 +213,10 @@ fun MedidasLlantasScreen(
                 modifier = Modifier
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                     )
                     .shadow(4.dp)
@@ -219,13 +230,13 @@ fun MedidasLlantasScreen(
                     newNota = ""
                     showDialog = true
                 },
-                containerColor = primaryLight,
-                modifier = Modifier.shadow(elevation = 8.dp, shape = CircleShape)
+                containerColor = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.shadow(elevation = 8.dp)
             ) {
                 Icon(
                     Icons.Default.Add,
                     contentDescription = "Nueva Medida",
-                    tint = onPrimaryContainerLight,
+                    tint = Color.White,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -242,7 +253,10 @@ fun MedidasLlantasScreen(
                     .fillMaxWidth()
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF6A5DD9), Color(0xFF6D66CB))
+                            listOf(
+                                MaterialTheme.colorScheme.secondaryContainer,
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            )
                         )
                     )
                     .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -270,7 +284,7 @@ fun MedidasLlantasScreen(
                     },
                     placeholder = {
                         Text(
-                            "Buscar medidas...",
+                            stringResource(R.string.buscar_medidas),
                             color = Color.White.copy(alpha = 0.6f)
                         )
                     },
@@ -300,7 +314,7 @@ fun MedidasLlantasScreen(
                 if (isLoading && displayedMedidas.isEmpty()) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = primaryLight,
+                        color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 3.dp
                     )
                 }
@@ -342,7 +356,7 @@ fun MedidasLlantasScreen(
                                 )
                             ) {
                                 Text(
-                                    "Cargar más medidas",
+                                    stringResource(R.string.cargar_mas_medidas),
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -360,104 +374,118 @@ fun MedidasLlantasScreen(
                 containerColor = Color.White,
                 tonalElevation = 12.dp,
                 title = {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
+                    LocalizedApp {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(primaryLight, secondaryLight)
+                                        )
                                     )
-                                )
-                                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = if (editingMedida == null) "Registrar Medida" else "Editar Medida",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                color = Color(0xFF4A3DAD),
-                                fontWeight = FontWeight.Bold
-                            ),
-                            textAlign = TextAlign.Center
-                        )
+                                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = if (editingMedida == null) stringResource(R.string.registrar_medida) else stringResource(
+                                    R.string.editar_medida
+                                ),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    color = primaryColor,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 },
                 text = {
-                    Column {
-                        OutlinedTextField(
-                            value = newMedida,
-                            onValueChange = { newMedida = it },
-                            label = {
+                    LocalizedApp {
+                        Column {
+                            OutlinedTextField(
+                                value = newMedida,
+                                onValueChange = { newMedida = it },
+                                label = {
+                                    Text(
+                                        stringResource(R.string.medida_de_la_llanta),
+                                        color = Color.Gray
+                                    )
+                                },
+                                isError = newMedida.isBlank(),
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = primaryColor,
+                                    unfocusedBorderColor = Color(0xFFAAAAAA),
+                                    focusedLabelColor = primaryColor,
+                                    focusedTextColor = Color.Black,
+                                    unfocusedTextColor = Color.Black
+                                ),
+                                shape = RoundedCornerShape(14.dp)
+                            )
+                            if (newMedida.isBlank()) {
                                 Text(
-                                    "Medida de la llanta",
-                                    color = Color.Gray
+                                    stringResource(R.string.la_medida_es_requerida),
+                                    color = Color.Red,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(top = 4.dp)
                                 )
-                            },
-                            isError = newMedida.isBlank(),
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF6A5DD9),
-                                unfocusedBorderColor = Color(0xFFAAAAAA),
-                                focusedLabelColor = Color(0xFF6A5DD9),
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black
-                            ),
-                            shape = RoundedCornerShape(14.dp)
-                        )
-                        if (newMedida.isBlank()) {
-                            Text(
-                                "La medida es requerida",
-                                color = Color.Red,
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.padding(top = 4.dp)
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            OutlinedTextField(
+                                value = newNota,
+                                onValueChange = { newNota = it },
+                                label = {
+                                    Text(
+                                        stringResource(R.string.nota_opcional),
+                                        color = Color.Gray
+                                    )
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = primaryColor,
+                                    unfocusedBorderColor = Color(0xFFAAAAAA),
+                                    focusedLabelColor = primaryColor,
+                                    focusedTextColor = Color.Black,
+                                    unfocusedTextColor = Color.Black
+                                ),
+                                shape = RoundedCornerShape(14.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        OutlinedTextField(
-                            value = newNota,
-                            onValueChange = { newNota = it },
-                            label = {
-                                Text(
-                                    "Nota (opcional)",
-                                    color = Color.Gray
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF6A5DD9),
-                                unfocusedBorderColor = Color(0xFFAAAAAA),
-                                focusedLabelColor = Color(0xFF6A5DD9),
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black
-                            ),
-                            shape = RoundedCornerShape(14.dp)
-                        )
                     }
                 },
                 confirmButton = {
-                    Button(
-                        onClick = { saveMedida() },
-                        enabled = newMedida.isNotBlank(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF6A5DD9),
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text("GUARDAR", fontWeight = FontWeight.Bold)
+                    LocalizedApp {
+                        Button(
+                            onClick = { saveMedida() },
+                            enabled = newMedida.isNotBlank(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = primaryColor,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(stringResource(R.string.guardar), fontWeight = FontWeight.Bold)
+                        }
                     }
                 },
                 dismissButton = {
-                    OutlinedButton(
-                        onClick = { showDialog = false },
-                        border = BorderStroke(1.dp, Color(0xFF6A5DD9)),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text("CANCELAR", color = Color(0xFF6A5DD9), fontWeight = FontWeight.Bold)
+                    LocalizedApp {
+                        OutlinedButton(
+                            onClick = { showDialog = false },
+                            border = BorderStroke(1.dp, primaryColor),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.cancelar),
+                                color = primaryColor,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             )
@@ -521,7 +549,7 @@ fun MedidaItem(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "Editar",
+                            pluralStringResource(R.plurals.editar_elemento, 1),
                             color = secondaryColor,
                             fontWeight = FontWeight.Medium,
                             style = MaterialTheme.typography.labelLarge
