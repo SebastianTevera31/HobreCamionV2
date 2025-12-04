@@ -2,14 +2,15 @@
 <resources>
     <string name="app_name">App Flotal</string>
     <string name="internet_connection_required">Internet connection required</string>
+
     <string name="welcome">Welcome, %1$s</string>
     <string name="brands">Brands</string>
-    <string name="original_design">Original Design</string>
-    <string name="tire_sizes">Tire Sizes</string>
+    <string name="original_design">Original design</string>
+    <string name="tire_sizes">Tire sizes</string>
     <string name="products">Products</string>
-    <string name="tire_register">Tire Register</string>
-    <string name="vehicle_register">Vehicle Register</string>
-    <string name="tire_change">Tire Change</string>
+    <string name="tire_register">Tire register</string>
+    <string name="vehicle_register">Vehicle register</string>
+    <string name="tire_change">Tire change</string>
     <string name="copyright">© %1$d Flotal Control</string>
 
     <string name="title_activity_login">LoginActivity</string>
@@ -18,39 +19,43 @@
     <string name="title_activity_nueva_contrasenia">NuevaContraseniaActivity</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_activity_home_dactivity">HomeDActivity</string>
+
     <string name="title_user">User</string>
-    <string name="error_invalid_email">Enter a valid email</string>
+    <string name="error_invalid_email">Enter a valid email address</string>
     <string name="title_contraseña">Password</string>
     <string name="title_bienvenida">Welcome</string>
+
     <string name="error_empty_email">Email is required</string>
     <string name="title_forget">Forgot your password?</string>
     <string name="title_ingresar">Login</string>
     <string name="title_inicio">Home</string>
-    <string name="content_description_logo">Imglogo</string>
+    <string name="content_description_logo">Logo image</string>
     <string name="content_description_icon_password">Show password</string>
-    <string name="content_description_pane">Open pane</string>
+    <string name="content_description_pane">Open panel</string>
     <string name="title_restablecer_password">Reset password</string>
     <string name="title_new_password">New password</string>
     <string name="title_confirmarcontraseña">Confirm password</string>
     <string name="content_description_back_arrow">Back arrow</string>
     <string name="title_newpassword">Create new password</string>
-    <string name="title_subtitlepassword">Your new password must be different from previously used ones</string>
-    <string name="title_rembember_password">"Remembered your password?"</string>
+    <string name="title_subtitlepassword">Your new password must be different from previously used ones.</string>
+    <string name="title_rembember_password">Remembered your password?</string>
     <string name="title_sendcode">Send code</string>
-    <string name="title_enter_email">Enter email</string>
+    <string name="title_enter_email">Enter your email</string>
     <string name="title_recover">Don’t worry! Please enter the email address associated with your account.</string>
     <string name="title_buttoninicio">Home</string>
+
     <string name="title_enviar">Send</string>
-    <string name="content_description_home_close">homeclose</string>
+    <string name="content_description_home_close">Close home screen</string>
+
     <string name="title_contentdescription">eva:pin-fill</string>
     <string name="title_gasolinerasautorizadas">Authorized gas stations</string>
     <string name="title_activity_inicio">InicioActivity</string>
     <string name="title_activity_change_data">ChangeDataActivity</string>
-    <string name="title_otp">OTP Verification</string>
-    <string name="title_otpdispositov">Device Verification</string>
+    <string name="title_otp">OTP verification</string>
+    <string name="title_otpdispositov">Device verification</string>
     <string name="title_bodydispositivo">Enter the verification code we sent to your email to authorize this login.</string>
     <string name="title_verificar">Verify</string>
-    <string name="title_subtitle_verificar">Enter the verification code we just sent to your email address</string>
+    <string name="title_subtitle_verificar">Enter the verification code we just sent to your email address.</string>
     <string name="title_activity_verify_code">VerifyCodeActivity</string>
     <string name="title_activity_veriy_code_device">VerifyCodeDeviceActivity</string>
 
@@ -58,37 +63,40 @@
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
     <string name="logo_description">Flotal logo</string>
-    <string name="only_languages_allowed">Only \'es\' and \'en\' are allowed.</string>
+    <string name="only_languages_allowed">Only 'es' and 'en' are allowed.</string>
     <string name="diagrama">Diagram</string>
+
     <plurals name="posicion_tag">
         <item quantity="one">Position</item>
         <item quantity="other">Positions</item>
     </plurals>
+
     <plurals name="llanta_tag">
         <item quantity="one">Tire %1$s</item>
         <item quantity="other">Tires</item>
     </plurals>
+
     <string name="monitoreo">Monitoring</string>
     <string name="temperatura">Temp.</string>
     <string name="presion">Pressure</string>
-    <string name="actualizado">Last updated: \n%1$s</string>
+    <string name="actualizado">Last updated:\n%1$s</string>
     <string name="llantas">Tires</string>
     <string name="alertas_activas">Active alerts</string>
     <string name="presion_alta">High pressure</string>
     <string name="presion_baja">Low pressure</string>
     <string name="temperatura_alta">High temperature</string>
-    <string name="sin_datos">No Data</string>
+    <string name="sin_datos">No data</string>
     <string name="fecha">Date</string>
     <string name="buscar_registros">Search records</string>
     <string name="filtrar">Filter</string>
     <string name="recientes">Recent</string>
-    <string name="no_ruedas_activas">No active tires were found</string>
+    <string name="no_ruedas_activas">No active tires found</string>
     <string name="buscar">Search</string>
     <string name="flotal">Flotal</string>
     <string name="seleccionar_fecha">Select date</string>
     <string name="confirmar">OK</string>
     <string name="cancelar">Cancel</string>
-    <string name="registrarse">Sign Up</string>
+    <string name="registrarse">Sign up</string>
     <string name="siguiente">Next</string>
     <string name="regresar">Back</string>
     <string name="no_tienes_cuenta_registrate">Don’t have an account? Sign up</string>
@@ -99,10 +107,11 @@
     <string name="pa_s">Country</string>
     <string name="sector">Industry</string>
     <string name="seleccionar">Select %1$s</string>
-    <string name="registrar_vehiculo">Register Vehicle</string>
-    <string name="tipo_vehiculo">Vehicle Type</string>
-    <string name="placas">License Plate</string>
-    <string name="registro">Sign Up</string>
+    <string name="registrar_vehiculo">Register vehicle</string>
+    <string name="tipo_vehiculo">Vehicle type</string>
+    <string name="placas">License plate</string>
+    <string name="registro">Sign up</string>
+
     <string name="signup_name_alert">Enter your name</string>
     <string name="signup_email_alert">Enter a valid email</string>
     <string name="signup_password_alert">Enter a password with at least 8 characters</string>
@@ -118,7 +127,7 @@
     <string name="buscar_valor">Search %1$s...</string>
     <string name="error_desconocido_del_servidor">Unknown server error</string>
     <string name="cuerpo_de_la_respuesta_vac_o">Empty response body</string>
-    <string name="direcci_n_mac">MAC Address</string>
+    <string name="direcci_n_mac">MAC address</string>
     <string name="configuraci_n">Configuration</string>
     <string name="monitor">Monitor</string>
     <string name="guardar">Save</string>
@@ -127,86 +136,87 @@
     <string name="escaneando">Scanning...</string>
     <string name="ingrese_la_mac_del_monitor">Enter the monitor MAC address</string>
     <string name="seleccione_tipo_monitor">Select the monitor type</string>
-    <string name="monitor_registrado_correctamente">Monitor successfully registered</string>
+    <string name="monitor_registrado_correctamente">Monitor registered successfully</string>
     <string name="error_desconocido">Unknown error</string>
     <string name="connection_error">Connection error</string>
-    <string name="mac_no_disponible">MAC not found</string>
+    <string name="mac_no_disponible">MAC address not found</string>
     <string name="escanear">Pair monitor</string>
     <string name="vehiculo">Vehicle</string>
     <string name="perfil">Profile</string>
     <string name="chofer">Driver</string>
-    <string name="info_de_usuario">User Info</string>
+
+    <string name="info_de_usuario">User info</string>
     <string name="error_actualizar_datos">Failed to update data</string>
     <string name="datos_actualizados_correctamente">Data updated successfully</string>
     <string name="credenciales_incorrectas">Incorrect username or password</string>
-    <string name="permiso_bluetooth_notificaciones">Bluetooth and Notifications Permission</string>
+    <string name="permiso_bluetooth_notificaciones">Bluetooth and notifications permission</string>
     <string name="conceder_permisos_btn">Grant permissions</string>
-    <string name="texto_permisos_app">Bluetooth and Notifications access are required to connect to your HawksHead TPMS monitor.</string>
+    <string name="texto_permisos_app">Bluetooth and notification access is required to connect to your HawksHead TPMS monitor.</string>
     <string name="no_se_ha_asignado_ningun_monitor">No monitor has been assigned</string>
-    <string name="hombrecamion_conexion_tpms">Flotal - TPMS Connection</string>
-    <string name="recibiendo_datos_monitor">Receiving TPMS data</string>
+    <string name="hombrecamion_conexion_tpms">Flotal - TPMS connection</string>
+    <string name="recibiendo_datos_monitor">Receiving TPMS data...</string>
     <string name="excelente">Excellent</string>
     <string name="aceptable">Fair</string>
     <string name="pobre">Poor</string>
     <string name="conexion_status">Connection: %1$s</string>
-    <string name="conexion_perdidad_monitor">No connection with monitor</string>
+    <string name="conexion_perdidad_monitor">No connection with the monitor</string>
     <string name="seleccione_una_llanta">Select a tire</string>
     <string name="posiciones">Positions</string>
     <string name="sin_alertas">No alerts</string>
     <string name="bateria_baja">Low battery</string>
     <string name="sin_conexi_n">Not connected</string>
-    <string name="no_registros">Results no found</string>
-    <string name="fuga_rapida">Fast leakage</string>
-    <string name="fuga_lenta">Slow air leak</string>
-    <string name="terminos_condiciones">Terms and Conditions"</string>
-    <string name="aceptar_terminos_condiciones">I agree to the Terms and Conditions</string>
-    <string name="invitacion_terminos">"See our full Privacy Policy at: "</string>
+    <string name="no_registros">No records found</string>
+    <string name="fuga_rapida">Fast leak</string>
+    <string name="fuga_lenta">Slow leak</string>
+    <string name="terminos_condiciones">Terms and conditions</string>
+    <string name="aceptar_terminos_condiciones">I agree to the terms and conditions</string>
+    <string name="invitacion_terminos">You can view our full Privacy Policy at:</string>
     <string name="salir">Logout</string>
     <string name="aviso_conexion_blueotooth">Monitor data not available. Please check your connection.</string>
     <string name="main_term_text">IMPORTANT \\ CONFIDENTIAL: This message contains information from the company CENTRO CAMIONERO MONTAJES, S.A. DE C.V., located at Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, Mexico, C.P. 29020. The information is privileged, confidential, and access is restricted in accordance with applicable law.</string>
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. is responsible for the processing (use) of your personal data, which will be used to respond to communications generated through this channel and to provide you with the products or services entrusted to us.</string>
     <string name="en_extraccion">Being removed</string>
 
-    <string name="registro_de_llantas">Tire Registration</string>
-
-    <string name="dise_os_renovados">Retread Designs</string>
+    <string name="registro_de_llantas">Tire registration</string>
+    <string name="dise_os_renovados">Retread designs</string>
 
     <string name="marca_de_renovado_guardada">Retread brand saved successfully</string>
-    <string name="error_guardar_marca_renovado">Couldn’t save the retread brand. Please try again</string>
-    <string name="error_id_no_valida">Only numbers are allowed in the ID field</string>
+    <string name="error_guardar_marca_renovado">Couldn’t save the retread brand. Please try again.</string>
+    <string name="error_id_no_valida">Only numbers are allowed in the ID field.</string>
 
     <string name="agregar_elemento">Add %1$s</string>
 
     <plurals name="editar_elemento">
         <item quantity="one">Edit</item>
-        <item quantity="other">Edit %1$d</item>
+        <item quantity="other">Edit %1$s</item>
     </plurals>
 
-    <string name="editar_elemento">Edit %s</string>
+    <string name="editar_elemento">Edit %1$s</string>
 
-    <string name="marca_renovado">Retread Brand</string>
-    <string name="limpiar">Clean</string>
-    <string name="add_item">Add ítem</string>
+    <string name="marca_renovado">Retread brands</string>
+    <string name="limpiar">Clear</string>
+    <string name="add_item">Add item</string>
 
     <string name="guardado_retreated_design_exito">Retread design saved successfully</string>
-    <string name="error_guardar_retreated_design">Failed to save retread design. Please try again</string>
+    <string name="error_guardar_retreated_design">Failed to save retread design. Please try again.</string>
     <string name="es_requerido_message">%1$s is required</string>
     <string name="utilizacion">Usage</string>
-    <string name="profundidad_de_piso">Tread Depth</string>
-    <string name="fecha_de_adquisicion">Acquisition Date</string>
-    <string name="agregar_llanta">Add Tyre</string>
-    <string name="no_se_encontraron_llantas">No tyres found.</string>
+    <string name="profundidad_de_piso">Tread depth</string>
+    <string name="fecha_de_adquisicion">Acquisition date</string>
+    <string name="agregar_llanta">Add tire</string>
+    <string name="no_se_encontraron_llantas">No tires found.</string>
     <string name="modelo">Model: %1$s</string>
     <string name="tama_o">Size: %1$s</string>
     <string name="adquisici_n">Acquisition: %1$s</string>
     <string name="id">ID: %1$d</string>
-    <string name="editar_llanta">Edit Tyre</string>
-    <string name="nueva_llanta">New Tyre</string>
-    <string name="tipo_de_adquisici_n">Type of Acquisition</string>
+
+    <string name="editar_llanta">Edit tire</string>
+    <string name="nueva_llanta">New tire</string>
+    <string name="tipo_de_adquisici_n">Acquisition type</string>
     <string name="costo">Cost</string>
-    <string name="folio_factura">Invoice Number</string>
+    <string name="folio_factura">Invoice number</string>
     <string name="profundidad">Depth (mm)</string>
-    <string name="numero_de_llanta">Tire Number</string>
+    <string name="numero_de_llanta">Tire number</string>
     <string name="dot">DOT</string>
     <string name="sin_llantas">No active tires</string>
     <string name="inspeccionar">Inspect</string>
@@ -216,13 +226,13 @@
     <string name="corregir_campos_marcados">Correct the highlighted fields.</string>
     <string name="terminar_inspeccion">FINISH INSPECTION</string>
     <string name="sin_informacion">No information available.</string>
-    <string name="tipo_de_reporte">Report Type</string>
+    <string name="tipo_de_reporte">Report type</string>
     <string name="lecturas">Readings</string>
     <string name="temperatura_c">Temperature (°C)</string>
     <string name="odometro">Odometer</string>
-    <string name="presion_medida">Measured Pressure</string>
-    <string name="presion_ajustada">Adjusted Pressure</string>
-    <string name="profundidad_de_piso_mm">Tread Depth (mm)</string>
+    <string name="presion_medida">Measured pressure</string>
+    <string name="presion_ajustada">Adjusted pressure</string>
+    <string name="profundidad_de_piso_mm">Tread depth (mm)</string>
     <string name="requerido">Required</string>
     <string name="numero_invalido">Invalid number</string>
     <string name="una_medidad_profundidad_mayor_0">You must fill in at least the fields at the lateral ends.</string>
@@ -230,23 +240,23 @@
     <string name="montaje">Mounting</string>
     <string name="error_odometro_inferior">The odometer reading cannot be lower than the current one.</string>
     <string name="error_carga_datos">An error occurred while loading the data.</string>
-    <string name="montar">Mount</string>
+    <string name="montar">MOUNT</string>
     <string name="eje">Axle</string>
-    <string name="detalles_de_llanta">Tire Details</string>
+    <string name="detalles_de_llanta">Tire details</string>
     <string name="marca_description">Brand: %1$s</string>
     <string name="modelo_description">Model: %1$s</string>
     <string name="size_description">Size: %1$s</string>
-    <string name="profundidad_description">Tread Depth: %1$s</string>
-    <string name="capacidad_description">Load Capacity: %1$s</string>
-    <string name="registro_actual">Current Record: %1$s</string>
+    <string name="profundidad_description">Tread depth: %1$s</string>
+    <string name="capacidad_description">Load capacity: %1$s</string>
+    <string name="registro_actual">Current record: %1$s</string>
     <string name="ninguno">None</string>
     <string name="montaje_exitoso">Tire mounted successfully</string>
     <string name="desmontaje_exitoso">Tire dismounted successfully</string>
     <string name="error_montaje">An error occurred while performing the mounting</string>
-    <string name="error_desmontaje">An error occurred while trying to dismount the tyre</string>
-    <string name="motivo_de_desmontaje">Reason for Dismounting</string>
+    <string name="error_desmontaje">An error occurred while trying to dismount the tire</string>
+    <string name="motivo_de_desmontaje">Reason for dismounting</string>
     <string name="destino">Destination</string>
-    <string name="desmontar">Dismount</string>
+    <string name="desmontar">DISMOUNT</string>
     <string name="desmontaje">Dismounting</string>
     <string name="error_aceptar_terminos">Error accepting the terms: %1$s</string>
     <string name="error_establecer_sesion">An error occurred while establishing your session. Please try again.</string>
@@ -254,21 +264,21 @@
     <string name="advertencia_ingreso_odometro">* The odometer reading must be greater than or equal to the last recorded value: %1$d</string>
     <string name="error_enviar_desecho">An error occurred while sending the tire to the scrap pile</string>
     <string name="reporte_de_desecho">Scrap report</string>
-    <string name="enviar_a_desecho">Send to scrap</string>
-    <string name="pila_de_desecho">Scrap Pile</string>
+    <string name="enviar_a_desecho">SEND TO SCRAP</string>
+    <string name="pila_de_desecho">Scrap pile</string>
     <string name="llanta_enviada_desecho">Tire sent to scrap</string>
-    <string name="mover_a_almacen">Move to Stock</string>
-    <string name="enviar_rueda_almacen">MOVE TIRE TO STOCK</string>
+    <string name="mover_a_almacen">Move to warehouse</string>
+    <string name="enviar_rueda_almacen">MOVE TIRE TO WAREHOUSE</string>
     <string name="motivo_de_reparacion">Repair reason</string>
-    <string name="error_enviar_almacen">An error occurred while sending the tire to stock</string>
-    <string name="llanta_enviada_al_almacen">Tire sent to stock</string>
+    <string name="error_enviar_almacen">An error occurred while sending the tire to the selected destination</string>
+    <string name="llanta_enviada_al_almacen">Tire sent to warehouse</string>
     <string name="seleccione_modelo_de_renovado">Select retread model</string>
     <string name="origen">Origin</string>
-    <string name="selected_retread_design">Selected Retread Design</string>
+    <string name="selected_retread_design">Selected retread design</string>
     <string name="llantas_en">Tires in %1$s</string>
-    <string name="seleccione_un_origen">Select an Origin</string>
+    <string name="seleccione_un_origen">Select an origin</string>
     <string name="debe_escribir_el_motivo">You need to enter the reason</string>
-    <string name="cambio_de_destino">Destination Change</string>
+    <string name="cambio_de_destino">Destination change</string>
     <string name="enviar_rueda">MOVE TIRE</string>
     <string name="error_al_mover_la_llanta">Error moving the tire</string>
     <string name="llanta_movida_a">Tire moved to %1$s</string>
@@ -284,89 +294,57 @@
     <string name="error_cargar_disenos_originales">Error loading original designs</string>
 
     <string name="error_deben_completarse_campos">All required fields must be completed</string>
-
     <string name="error_loading_design_details">Error loading design details</string>
-
     <string name="diseno_guardado_exitosamente">Design saved successfully</string>
-
     <string name="error_al_guardar_el_diseno">Error saving the design</string>
-
     <string name="buscar_disenos">Search designs...</string>
-
     <string name="no_hay_disenos_registrados">No designs registered</string>
-
     <string name="no_se_encontraron_resultados">No results found</string>
-
-    <string name="registrar_diseno_original">Register Original Design</string>
-
-    <string name="editar_diseno_original">Edit Original Design</string>
-
+    <string name="registrar_diseno_original">Register original design</string>
+    <string name="editar_diseno_original">Edit original design</string>
     <string name="descripcion">Description</string>
-
     <string name="notas">Notes</string>
     <string name="error_al_guardar">Error saving</string>
 
     <string name="error_al_cargar_marcas">Error loading brands</string>
-
     <string name="marcas">Brands</string>
-
     <string name="nueva_marca">New brand</string>
-
     <string name="buscar_marcas">Search brands...</string>
-
     <string name="cargar_mas_marcas">Load more brands</string>
-
     <string name="registrar_marca">Register brand</string>
-
     <string name="editar_marca">Edit brand</string>
-
     <string name="nombre_de_la_marca">Brand name</string>
-
     <string name="el_nombre_es_requerido">The name is required</string>
+
     <string name="error_al_cargar_medidas_de_llantas">Error loading tire sizes</string>
-
-    <string name="medidas_de_llantas">Tire Sizes</string>
-
+    <string name="medidas_de_llantas">Tire sizes</string>
     <string name="buscar_medidas">Search sizes...</string>
-
     <string name="cargar_mas_medidas">Load more sizes</string>
-
-    <string name="registrar_medida">Register Size</string>
-
-    <string name="editar_medida">Edit Size</string>
-
+    <string name="registrar_medida">Register size</string>
+    <string name="editar_medida">Edit size</string>
     <string name="medida_de_la_llanta">Tire size</string>
-
     <string name="la_medida_es_requerida">Size is required</string>
-
     <string name="nota_opcional">Note (optional)</string>
+
     <string name="error_loading_products">Error loading products</string>
-
     <string name="error_loading_product_details">Error loading product details</string>
-
     <string name="producto_guardado_exitosamente">Product saved successfully</string>
-
     <string name="error_al_guardar_el_producto">Error saving the product</string>
-
     <string name="buscar_productos">Search products...</string>
-
     <string name="no_hay_productos_registrados">No products registered</string>
-
-    <string name="registrar_producto">Register Product</string>
-
-    <string name="editar_producto">Edit Product</string>
-
-    <string name="tamano_de_llanta">Tire Size</string>
-
-    <string name="capacidad_de_carga">Load Capacity</string>
-
-    <string name="profundidad_de_la_banda_mm">Tread Depth (mm)</string>
-
+    <string name="registrar_producto">Register product</string>
+    <string name="editar_producto">Edit product</string>
+    <string name="tamano_de_llanta">Tire size</string>
+    <string name="capacidad_de_carga">Load capacity</string>
+    <string name="profundidad_de_la_banda_mm">Tread depth (mm)</string>
     <string name="profundidad_mm">Depth: %1$d mm</string>
+    <string name="Campos_requeridos_por_completar">All required fields must be completed</string>
+    <string name="dot_excedio_caracteres">The DOT must be 10 characters or fewer</string>
+    <string name="numero_llanta_excedio_caracteres">The tire number must be 15 characters or fewer</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
-        <item quantity="other">Description: %1$d</item>
+        <item quantity="other">Description: %1$s</item>
     </plurals>
 
     <plurals name="codigo_field">
@@ -375,12 +353,12 @@
     </plurals>
 
     <plurals name="marca_renovado_tag">
-        <item quantity="one">Retread Brand</item>
-        <item quantity="other">Retread Brands</item>
+        <item quantity="one">Retread brand</item>
+        <item quantity="other">Retread brands</item>
     </plurals>
 
-    <plurals name="disenio_renovado_tag">"
-        <item quantity="one">Retread Design</item>
-        <item quantity="other">Retread Designs</item>
+    <plurals name="disenio_renovado_tag">
+        <item quantity="one">Retread design</item>
+        <item quantity="other">Retread designs</item>
     </plurals>
 </resources>

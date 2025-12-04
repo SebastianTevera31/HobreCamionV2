@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">App Flotal</string>
-    <string name="internet_connection_required" translatable="false">Se necesita conexión a Internet</string>
+    <string name="internet_connection_required" translatable="false">Se necesita conexión a internet</string>
 
     <string name="welcome" translatable="false">Bienvenido, %1$s</string>
     <string name="brands" translatable="false">Marcas</string>
@@ -61,7 +61,7 @@
     <string name="logout">Cerrar sesión</string>
     <string name="profile">Perfil</string>
     <string name="logo_description">Logotipo Flotal</string>
-    <string name="only_languages_allowed">Solo se permiten  \'es\' y \'en\'.</string>
+    <string name="only_languages_allowed">Solo se permiten \'es\' y \'en\'.</string>
     <string name="diagrama">Diagrama</string>
 
     <plurals name="posicion_tag">
@@ -78,7 +78,7 @@
 
     <string name="temperatura">Temp.</string>
     <string name="presion">Presión</string>
-    <string name="actualizado">Ultima lectura: \n%1$s</string>
+    <string name="actualizado">Última lectura: \n%1$s</string>
     <string name="llantas">Llantas</string>
     <string name="alertas_activas">Alertas activas</string>
     <string name="presion_alta">Presión alta</string>
@@ -168,12 +168,12 @@
     <string name="fuga_rapida">Fuga rápida</string>
     <string name="fuga_lenta">Fuga lenta</string>
     <string name="terminos_condiciones">Términos y Condiciones</string>
-    <string name="aceptar_terminos_condiciones">Estoy deacuerdo con los Términos y Condiciones</string>
-    <string name="invitacion_terminos">"Usted puede conocer nuestro Aviso de Privacidad integral en: "</string>
+    <string name="aceptar_terminos_condiciones">Estoy de acuerdo con los Términos y Condiciones</string>
+    <string name="invitacion_terminos">Usted puede conocer nuestro Aviso de Privacidad integral en:</string>
     <string name="salir">Salir</string>
-    <string name="aviso_conexion_blueotooth">Datos del monitor no disponibles. Verifica tu conexión.</string>
-    <string name="main_term_text">IMPORTANTE \\ CONFIDENCIAL: Este mensaje contiene información de la compañía CENTRO CAMIONERO MONTAJES, S.A. DE C.V., con domicilio en Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, México, C.P. 29020. La cual es de carácter privilegiado, confidencial, y de acceso restringido conforme a la Ley aplicable.</string>
-    <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. es Responsable del tratamiento (uso) de sus datos personales, los cuales serán usados a efecto de dar contestación a las comunicaciones generadas por esta vía y para proveerle los productos o prestarle los servicios que se nos encomienden.</string>
+    <string name="aviso_conexion_blueotooth">Datos del monitor no disponibles. Verifique su conexión.</string>
+    <string name="main_term_text">IMPORTANTE \\ CONFIDENCIAL: Este mensaje contiene información de la compañía CENTRO CAMIONERO MONTAJES, S.A. DE C.V., con domicilio en Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, México, C.P. 29020, la cual es de carácter privilegiado, confidencial y de acceso restringido conforme a la Ley aplicable.</string>
+    <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. es responsable del tratamiento (uso) de sus datos personales, los cuales serán usados a efecto de dar contestación a las comunicaciones generadas por esta vía y para proveerle los productos o prestarle los servicios que se nos encomienden.</string>
     <string name="en_extraccion">En extracción</string>
 
     <string name="registro_de_llantas">Registro de llantas</string>
@@ -181,7 +181,7 @@
 
     <string name="marca_de_renovado_guardada">Marca de renovado guardada con éxito</string>
     <string name="error_guardar_marca_renovado">No se pudo guardar la marca de renovado. Inténtalo de nuevo.</string>
-    <string name="error_id_no_valida">Solo se permiten números en el campo ID</string>
+    <string name="error_id_no_valida">Solo se permiten números en el campo ID.</string>
 
     <string name="agregar_elemento">Agregar %s</string>
 
@@ -235,11 +235,11 @@
     <string name="numero_invalido">Número inválido</string>
     <string name="una_medidad_profundidad_mayor_0">Debe ingresar al menos los campos de los extremos laterales.</string>
     <string name="montaje">Montaje</string>
-    <string name="error_odometro_inferior">El odometro no puede ser menor al actual</string>
+    <string name="error_odometro_inferior">El odómetro no puede ser menor al actual.</string>
     <string name="error_carga_datos">Hubo un error al cargar los datos</string>
-    <string name="montar">Montar</string>
+    <string name="montar">MONTAR</string>
     <string name="eje">Eje</string>
-    <string name="detalles_de_llanta">Detalles de la Llanta</string>
+    <string name="detalles_de_llanta">Detalles de la llanta</string>
     <string name="marca_description">Marca: %1$s</string>
     <string name="modelo_description">Modelo: %1$s</string>
     <string name="size_description">Tamaño: %1$s</string>
@@ -250,32 +250,32 @@
     <string name="montaje_exitoso">Rueda montada con éxito</string>
     <string name="desmontaje_exitoso">Desmontaje exitoso</string>
     <string name="error_montaje">Ocurrió un error al realizar el montaje</string>
-    <string name="error_desmontaje">Ocurrió un error al intentar desmontar la llantar</string>
+    <string name="error_desmontaje">Ocurrió un error al intentar desmontar la llanta</string>
     <string name="motivo_de_desmontaje">Motivo de desmontaje</string>
     <string name="destino">Destino</string>
-    <string name="desmontar">Desmontar</string>
+    <string name="desmontar">DESMONTAR</string>
     <string name="desmontaje">Desmontaje</string>
     <string name="error_aceptar_terminos">Error al aceptar los términos: %1$s</string>
     <string name="error_establecer_sesion">Ocurrió un error al establecer su sesión. Por favor, inténtelo de nuevo.</string>
-    <string name="valor_invalido">Valor invalido</string>
-    <string name="advertencia_ingreso_odometro">* El odometro debe ser mayor o igual al ultimo valor registrado: %1$d</string>
+    <string name="valor_invalido">Valor inválido</string>
+    <string name="advertencia_ingreso_odometro">* El odómetro debe ser mayor o igual al último valor registrado: %1$d</string>
     <string name="error_enviar_desecho">Ocurrió un error al enviar la llanta a la pila de desecho</string>
     <string name="reporte_de_desecho">Reporte de desecho</string>
-    <string name="enviar_a_desecho">Enviar a desecho</string>
-    <string name="pila_de_desecho">Pila de Desecho</string>
+    <string name="enviar_a_desecho">ENVIAR A DESECHO</string>
+    <string name="pila_de_desecho">Pila de desecho</string>
     <string name="llanta_enviada_desecho">Llanta enviada a desecho</string>
-    <string name="mover_a_almacen">Mover a Almacen</string>
-    <string name="enviar_rueda_almacen">ENVIAR RUEDA AL ALMACEN</string>
-    <string name="motivo_de_reparacion">Motivo de Reparacion</string>
+    <string name="mover_a_almacen">Mover a almacén</string>
+    <string name="enviar_rueda_almacen">ENVIAR RUEDA AL ALMACÉN</string>
+    <string name="motivo_de_reparacion">Motivo de reparación</string>
     <string name="error_enviar_almacen">Ocurrió un error al enviar la llanta al destino seleccionado</string>
-    <string name="llanta_enviada_al_almacen">Llanta enviada al almacen</string>
+    <string name="llanta_enviada_al_almacen">Llanta enviada al almacén</string>
     <string name="seleccione_modelo_de_renovado">Seleccione modelo de renovado</string>
     <string name="origen">Origen</string>
-    <string name="selected_retread_design">Diseño de Renovado Seleccionado</string>
+    <string name="selected_retread_design">Diseño de renovado seleccionado</string>
     <string name="llantas_en">Llantas en %1$s</string>
-    <string name="seleccione_un_origen">Seleccione un Origen</string>
+    <string name="seleccione_un_origen">Seleccione un origen</string>
     <string name="debe_escribir_el_motivo">Debe escribir el motivo</string>
-    <string name="cambio_de_destino">Cambio de Destino</string>
+    <string name="cambio_de_destino">Cambio de destino</string>
     <string name="enviar_rueda">ENVIAR RUEDA</string>
     <string name="error_al_mover_la_llanta">Error al mover la llanta</string>
     <string name="llanta_movida_a">Llanta movida a %1$s</string>
@@ -290,47 +290,50 @@
     <string name="no_encontrado_diseno_renovado">No se ha seleccionado un diseño de renovado</string>
     <string name="error_cargar_disenos_originales">Error al cargar los diseños originales</string>
     <string name="error_deben_completarse_campos">Todos los campos requeridos deben estar completos</string>
-    <string name="error_loading_design_details">Error loading design details</string>
+    <string name="error_loading_design_details">Error al cargar los detalles del diseño</string>
     <string name="diseno_guardado_exitosamente">Diseño guardado exitosamente</string>
     <string name="error_al_guardar_el_diseno">Error al guardar el diseño</string>
     <string name="buscar_disenos">Buscar diseños...</string>
     <string name="no_hay_disenos_registrados">No hay diseños registrados</string>
     <string name="no_se_encontraron_resultados">No se encontraron resultados</string>
-    <string name="registrar_diseno_original">Registrar Diseño Original</string>
-    <string name="editar_diseno_original">Editar Diseño Original</string>
+    <string name="registrar_diseno_original">Registrar diseño original</string>
+    <string name="editar_diseno_original">Editar diseño original</string>
     <string name="descripcion">Descripción</string>
     <string name="notas">Notas</string>
     <string name="error_al_guardar">Error al guardar</string>
     <string name="error_al_cargar_marcas">Error al cargar marcas</string>
     <string name="marcas">Marcas</string>
-    <string name="nueva_marca">Nueva Marca</string>
+    <string name="nueva_marca">Nueva marca</string>
     <string name="buscar_marcas">Buscar marcas...</string>
     <string name="cargar_mas_marcas">Cargar más marcas</string>
-    <string name="registrar_marca">Registrar Marca</string>
-    <string name="editar_marca">Editar Marca</string>
+    <string name="registrar_marca">Registrar marca</string>
+    <string name="editar_marca">Editar marca</string>
     <string name="nombre_de_la_marca">Nombre de la marca</string>
     <string name="el_nombre_es_requerido">El nombre es requerido</string>
     <string name="error_al_cargar_medidas_de_llantas">Error al cargar medidas de llantas</string>
-    <string name="medidas_de_llantas">Medidas de Llantas</string>
+    <string name="medidas_de_llantas">Medidas de llantas</string>
     <string name="buscar_medidas">Buscar medidas...</string>
     <string name="cargar_mas_medidas">Cargar más medidas</string>
-    <string name="registrar_medida">Registrar Medida</string>
-    <string name="editar_medida">Editar Medida</string>
+    <string name="registrar_medida">Registrar medida</string>
+    <string name="editar_medida">Editar medida</string>
     <string name="medida_de_la_llanta">Medida de la llanta</string>
     <string name="la_medida_es_requerida">La medida es requerida</string>
     <string name="nota_opcional">Nota (opcional)</string>
-    <string name="error_loading_products">Error loading products</string>
-    <string name="error_loading_product_details">Error loading product details</string>
+    <string name="error_loading_products">Error al cargar los productos</string>
+    <string name="error_loading_product_details">Error al cargar los detalles del producto</string>
     <string name="producto_guardado_exitosamente">Producto guardado exitosamente</string>
     <string name="error_al_guardar_el_producto">Error al guardar el producto</string>
     <string name="buscar_productos">Buscar productos...</string>
     <string name="no_hay_productos_registrados">No hay productos registrados</string>
-    <string name="registrar_producto">Registrar Producto</string>
-    <string name="editar_producto">Editar Producto</string>
-    <string name="tamano_de_llanta">Tamaño de Llanta</string>
-    <string name="capacidad_de_carga">Capacidad de Carga</string>
-    <string name="profundidad_de_la_banda_mm">Profundidad de la Banda (mm)</string>
+    <string name="registrar_producto">Registrar producto</string>
+    <string name="editar_producto">Editar producto</string>
+    <string name="tamano_de_llanta">Tamaño de llanta</string>
+    <string name="capacidad_de_carga">Capacidad de carga</string>
+    <string name="profundidad_de_la_banda_mm">Profundidad de la banda (mm)</string>
     <string name="profundidad_mm">Profundidad: %1$d mm</string>
+    <string name="Campos_requeridos_por_completar">Todos los campos requeridos deben estar completos</string>
+    <string name="dot_excedio_caracteres">El DOT debe ser menor o igual a 10 caracteres</string>
+    <string name="numero_llanta_excedio_caracteres">El número de llanta debe ser menor o igual a 15 caracteres</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>
