@@ -297,7 +297,9 @@ fun RepararRenovarView(
                                             style = MaterialTheme.typography.titleMedium.copy(
                                                 fontWeight = FontWeight.Bold
                                             ),
-                                            modifier = Modifier.fillMaxWidth()
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = dimensionResource(R.dimen.small_dimen))
                                         )
                                     }
 
