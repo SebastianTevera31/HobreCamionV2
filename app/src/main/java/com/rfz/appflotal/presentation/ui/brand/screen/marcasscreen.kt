@@ -424,7 +424,8 @@ fun MarcasScreen(
                                     focusedTextColor = Color.Black,
                                     unfocusedTextColor = Color.Black
                                 ),
-                                shape = RoundedCornerShape(14.dp)
+                                shape = RoundedCornerShape(14.dp),
+                                singleLine = true
                             )
                             if (newBrandName.isBlank()) {
                                 Text(

@@ -51,6 +51,7 @@ fun ItemDialog(
             keyboardOptions = KeyboardOptions().copy(
                 keyboardType = keyboardType
             ),
+            singleLine = true,
             enabled = isEditable
         )
 

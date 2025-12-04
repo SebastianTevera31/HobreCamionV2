@@ -416,6 +416,7 @@ fun MedidasLlantasScreen(
                                         color = Color.Gray
                                     )
                                 },
+                                singleLine = true,
                                 isError = newMedida.isBlank(),
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = OutlinedTextFieldDefaults.colors(

@@ -532,6 +532,7 @@ fun OriginalScreen(
                                     )
                                     OutlinedTextField(
                                         value = model,
+                                        singleLine = true,
                                         onValueChange = { model = it },
                                         modifier = Modifier.fillMaxWidth(),
                                         colors = OutlinedTextFieldDefaults.colors(
@@ -558,6 +559,7 @@ fun OriginalScreen(
                                     )
                                     OutlinedTextField(
                                         value = description,
+                                        singleLine = true,
                                         onValueChange = { description = it },
                                         modifier = Modifier.fillMaxWidth(),
                                         colors = OutlinedTextFieldDefaults.colors(

@@ -267,11 +267,11 @@
     <string name="enviar_a_desecho">SEND TO SCRAP</string>
     <string name="pila_de_desecho">Scrap pile</string>
     <string name="llanta_enviada_desecho">Tire sent to scrap</string>
-    <string name="mover_a_almacen">Move to warehouse</string>
-    <string name="enviar_rueda_almacen">MOVE TIRE TO WAREHOUSE</string>
+    <string name="mover_a_almacen">Move to storage</string>
+    <string name="enviar_rueda_almacen">MOVE TIRE TO STORAGE</string>
     <string name="motivo_de_reparacion">Repair reason</string>
     <string name="error_enviar_almacen">An error occurred while sending the tire to the selected destination</string>
-    <string name="llanta_enviada_al_almacen">Tire sent to warehouse</string>
+    <string name="llanta_enviada_al_almacen">Tire sent to storage</string>
     <string name="seleccione_modelo_de_renovado">Select retread model</string>
     <string name="origen">Origin</string>
     <string name="selected_retread_design">Selected retread design</string>

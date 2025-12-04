@@ -505,7 +505,10 @@ fun NuevoProductoScreen(
                                     .height(6.dp)
                                     .background(
                                         Brush.horizontalGradient(
-                                            listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
+                                            listOf(
+                                                MaterialTheme.colorScheme.primary,
+                                                MaterialTheme.colorScheme.primaryContainer
+                                            )
                                         )
                                     )
                                     .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
