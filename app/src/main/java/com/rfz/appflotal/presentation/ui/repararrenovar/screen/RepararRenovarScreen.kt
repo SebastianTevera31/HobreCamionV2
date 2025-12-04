@@ -142,6 +142,7 @@ fun RepararRenovarView(
     modifier: Modifier = Modifier
 ) {
     var navScreens by remember { mutableStateOf(RepararRenovarScreens.HOME) }
+    val context = LocalContext.current
 
     if (navScreens != RepararRenovarScreens.HOME) {
         BackHandler {
@@ -266,7 +267,13 @@ fun RepararRenovarView(
                                 item {
                                     Button(
                                         onClick = {
-                                            navScreens = RepararRenovarScreens.TIRE_LIST
+                                            if (tireList.isEmpty()) {
+                                                Toast.makeText(
+                                                    context,
+                                                    context.getString(R.string.no_se_encontraron_llantas),
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            } else navScreens = RepararRenovarScreens.TIRE_LIST
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -318,16 +325,24 @@ fun RepararRenovarView(
 
                                 if (DestinationSelection.RENOVAR.id == uiState.selectedOrigin.id) {
                                     item {
-                                        Button(
-                                            onClick = {
-                                                navScreens = RepararRenovarScreens.RETREADED_DESIGN
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(52.dp),
-                                            shape = MaterialTheme.shapes.large
-                                        ) {
-                                            Text(text = stringResource(R.string.seleccione_modelo_de_renovado))
+                                        if (uiState.selectedTire != null){
+                                            Button(
+                                                onClick = {
+                                                   if (uiState.retreadDesignList.isEmpty()) {
+                                                       Toast.makeText(
+                                                           context,
+                                                           context.getString(R.string.no_encontrado_diseno_renovado),
+                                                           Toast.LENGTH_SHORT
+                                                       ).show()
+                                                   } else navScreens = RepararRenovarScreens.RETREADED_DESIGN
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(52.dp),
+                                                shape = MaterialTheme.shapes.large
+                                            ) {
+                                                Text(text = stringResource(R.string.seleccione_modelo_de_renovado))
+                                            }
                                         }
 
                                         if (uiState.selectedRetreadedDesign != null) {
@@ -367,14 +382,16 @@ fun RepararRenovarView(
                                     }
                                 } else if (DestinationSelection.REPARAR.id == uiState.selectedOrigin.id) {
                                     item {
-                                        CatalogDropdown(
-                                            catalog = uiState.repairCauseList,
-                                            selected = uiState.selectedRepairCause?.description,
-                                            onSelected = { onRepairCauseSelected(it) },
-                                            label = stringResource(R.string.motivo_de_reparacion),
-                                            errorText = uiState.selectedRepairCause.validate(),
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
+                                        if (uiState.selectedTire != null){
+                                            CatalogDropdown(
+                                                catalog = uiState.repairCauseList,
+                                                selected = uiState.selectedRepairCause?.description,
+                                                onSelected = { onRepairCauseSelected(it) },
+                                                label = stringResource(R.string.motivo_de_reparacion),
+                                                errorText = uiState.selectedRepairCause.validate(),
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
                                     }
                                 }
                             }

@@ -120,7 +120,7 @@ fun CambioDestinoView(
     modifier: Modifier = Modifier
 ) {
     val scroll = rememberScrollState()
-
+    val context = LocalContext.current
     var navScreens by remember { mutableStateOf(SubScreens.HOME) }
 
     if (navScreens == SubScreens.LIST) {
@@ -164,7 +164,7 @@ fun CambioDestinoView(
                 when (navScreens) {
                     SubScreens.LIST -> {
                         TireListScreen(
-                            tires = uiState.tireList,
+                            tires = uiState.selectedTireList,
                             modifier = Modifier
                                 .padding(innerPadding)
                                 .fillMaxSize()
@@ -202,7 +202,13 @@ fun CambioDestinoView(
                             if (uiState.form.selectedOrigin != null) {
                                 Button(
                                     onClick = {
-                                        navScreens = SubScreens.LIST
+                                        if (uiState.selectedTireList.isEmpty()) {
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.no_se_encontraron_llantas),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } else navScreens = SubScreens.LIST
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -218,57 +224,57 @@ fun CambioDestinoView(
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                         modifier = Modifier.fillMaxWidth()
                                     )
-                                }
 
-                                AnimatedVisibility(
-                                    visible = uiState.form.selectedTire != null,
-                                    enter = expandVertically() + fadeIn(),
-                                    exit = shrinkVertically() + fadeOut(),
-                                    modifier = Modifier.padding(bottom = dimensionResource(R.dimen.small_dimen))
-                                ) {
-                                    TireInfoCard(
-                                        tire = uiState.form.selectedTire,
-                                        modifier.width(240.dp)
-                                    )
-                                }
-
-                                CatalogDropdown(
-                                    catalog = uiState.destinationList,
-                                    selected = uiState.form.selectedDestination?.description,
-                                    errorText = uiState.form.selectedDestination.validate(),
-                                    onSelected = { onSelectedDestination(it?.id) },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    label = stringResource(R.string.destino)
-                                )
-
-                                OutlinedTextField(
-                                    label = {
-                                        Text(
-                                            text = stringResource(R.string.motivo),
-                                            style = MaterialTheme.typography.titleMedium
+                                    AnimatedVisibility(
+                                        visible = true,
+                                        enter = expandVertically() + fadeIn(),
+                                        exit = shrinkVertically() + fadeOut(),
+                                        modifier = Modifier.padding(bottom = dimensionResource(R.dimen.small_dimen))
+                                    ) {
+                                        TireInfoCard(
+                                            tire = uiState.form.selectedTire,
+                                            modifier.width(240.dp)
                                         )
-                                    },
-                                    value = uiState.form.reason,
-                                    onValueChange = { onReasonChange(it) },
-                                    singleLine = true,
-                                    isError = uiState.form.reason.isBlank(),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color(MaterialTheme.colorScheme.primary.value),
-                                        unfocusedBorderColor = Color(MaterialTheme.colorScheme.scrim.value),
-                                        focusedLabelColor = Color(MaterialTheme.colorScheme.primary.value),
-                                        focusedTextColor = Color.Black,
-                                        unfocusedTextColor = Color.Black
-                                    ),
-                                    shape = MaterialTheme.shapes.large
-                                )
-                                if (uiState.form.reason.isBlank()) {
-                                    Text(
-                                        text = stringResource(R.string.debe_escribir_el_motivo),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.align(Alignment.Start)
+                                    }
+
+                                    CatalogDropdown(
+                                        catalog = uiState.destinationList,
+                                        selected = uiState.form.selectedDestination?.description,
+                                        errorText = uiState.form.selectedDestination.validate(),
+                                        onSelected = { onSelectedDestination(it?.id) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        label = stringResource(R.string.destino)
                                     )
+
+                                    OutlinedTextField(
+                                        label = {
+                                            Text(
+                                                text = stringResource(R.string.motivo),
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                        },
+                                        value = uiState.form.reason,
+                                        onValueChange = { onReasonChange(it) },
+                                        singleLine = true,
+                                        isError = uiState.form.reason.isBlank(),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = Color(MaterialTheme.colorScheme.primary.value),
+                                            unfocusedBorderColor = Color(MaterialTheme.colorScheme.scrim.value),
+                                            focusedLabelColor = Color(MaterialTheme.colorScheme.primary.value),
+                                            focusedTextColor = Color.Black,
+                                            unfocusedTextColor = Color.Black
+                                        ),
+                                        shape = MaterialTheme.shapes.large
+                                    )
+                                    if (uiState.form.reason.isBlank()) {
+                                        Text(
+                                            text = stringResource(R.string.debe_escribir_el_motivo),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.align(Alignment.Start)
+                                        )
+                                    }
                                 }
                             }
                         }

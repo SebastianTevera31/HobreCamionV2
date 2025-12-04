@@ -6,9 +6,10 @@ import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 
 data class CambioDestinoUiState(
+    val tires: List<Tire> = emptyList(),
     val originList: List<Destination> = emptyList(),
     val destinationList: List<Destination> = emptyList(),
-    val tireList: List<Tire> = emptyList(),
+    val selectedTireList: List<Tire> = emptyList(),
     val screenLoadStatus: OperationStatus = OperationStatus.Loading,
     val operationStatus: OperationStatus? = null,
     val form: CambioDestinoFormState = CambioDestinoFormState(),

@@ -287,6 +287,7 @@
     <string name="single_modelo">Modelo</string>
     <string name="llanta_seleccionada">Llanta seleccionada</string>
     <string name="motivo">Motivo</string>
+    <string name="no_encontrado_diseno_renovado">No se ha seleccionado un diseño de renovado</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

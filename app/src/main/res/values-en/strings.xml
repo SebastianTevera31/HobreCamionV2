@@ -279,7 +279,8 @@
     <string name="capacidad">Capacity</string>
     <string name="single_modelo">Model</string>
     <string name="llanta_seleccionada">Selected tire</string>
-    <string name="motivo">Motive</string>
+    <string name="motivo">Reason</string>
+    <string name="no_encontrado_diseno_renovado">No retread design has been selected</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

@@ -43,7 +43,8 @@ class CambioDestinoViewModel @Inject constructor(
 
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
-                        tireList = tireList,
+                        tires = tireList,
+                        selectedTireList = tireList,
                         originList = destinationList,
                         destinationList = destinationList,
                         screenLoadStatus = OperationStatus.Success
@@ -74,7 +75,7 @@ class CambioDestinoViewModel @Inject constructor(
 
     fun onSelectedOrigin(destinationId: Int?) {
         val uiState = _uiState.value
-        uiState.destinationList.find { it.id == destinationId }?.let {
+        uiState.originList.find { it.id == destinationId }?.let {
             val description = when (it.id) {
                 1 -> "Reparar"
                 3 -> "Desechar"
@@ -83,9 +84,9 @@ class CambioDestinoViewModel @Inject constructor(
             }
 
             val newDestinationList =
-                uiState.destinationList.filter { destination -> destination.id != destinationId }
+                uiState.originList.filter { destination -> destination.id != destinationId }
 
-            val selectedTire = uiState.tireList.filter { tire ->
+            val selectedTire = uiState.tires.filter { tire ->
                 tire.destination == description
             }
 
@@ -95,14 +96,14 @@ class CambioDestinoViewModel @Inject constructor(
                         selectedOrigin = it
                     ),
                     destinationList = newDestinationList,
-                    tireList = selectedTire
+                    selectedTireList = selectedTire
                 )
             }
         }
     }
 
     fun onSelectedTire(tireId: Int?) {
-        _uiState.value.tireList.find { it.id == tireId }?.let {
+        _uiState.value.selectedTireList.find { it.id == tireId }?.let {
             _uiState.update { currentUiState ->
                 currentUiState.copy(
                     form = currentUiState.form.copy(

@@ -127,6 +127,7 @@ fun AssemblyTireView(
     onAssembly: (odometer: String, idAxle: Int, idTire: Int) -> Unit
 ) {
     var odometer by remember { mutableStateOf("") }
+    val context = LocalContext.current
     var axleSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 
@@ -227,7 +228,13 @@ fun AssemblyTireView(
 
                             Button(
                                 onClick = {
-                                    navScreens = SubScreens.LIST
+                                    if (uiState.tireList.isEmpty()) {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.no_se_encontraron_llantas),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else navScreens = SubScreens.LIST
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -237,50 +244,50 @@ fun AssemblyTireView(
                                 Text(text = stringResource(R.string.seleccione_una_llanta))
                             }
 
-                            if (uiState.currentTire != null){
+                            if (uiState.currentTire != null) {
                                 Text(
                                     text = stringResource(R.string.detalles_de_llanta),
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     modifier = Modifier.fillMaxWidth()
                                 )
-                            }
 
-                            AnimatedVisibility(
-                                visible = uiState.currentTire != null,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                TireInfoCard(
-                                    tire = uiState.currentTire,
-                                    modifier.width(240.dp)
-                                )
-                            }
+                                AnimatedVisibility(
+                                    visible = true,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
+                                    TireInfoCard(
+                                        tire = uiState.currentTire,
+                                        modifier.width(240.dp)
+                                    )
+                                }
 
-                            Column {
-                                SectionHeader(
-                                    text = stringResource(R.string.odometro),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                val odometerValue = uiState.currentOdometer.toIntOrNull() ?: 0
-                                Text(
-                                    text = stringResource(
-                                        R.string.advertencia_ingreso_odometro,
-                                        odometerValue
-                                    ),
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                                    modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
-                                )
+                                Column {
+                                    SectionHeader(
+                                        text = stringResource(R.string.odometro),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    val odometerValue = uiState.currentOdometer.toIntOrNull() ?: 0
+                                    Text(
+                                        text = stringResource(
+                                            R.string.advertencia_ingreso_odometro,
+                                            odometerValue
+                                        ),
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                                        modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
+                                    )
 
-                                NumberField(
-                                    value = odometer,
-                                    onValueChange = {
-                                        validateOdometer(it)
-                                        odometer = it
-                                    },
-                                    placeHolderText = uiState.currentOdometer,
-                                    label = "",
-                                    errorText = uiState.isOdometerValid.message,
-                                )
+                                    NumberField(
+                                        value = odometer,
+                                        onValueChange = {
+                                            validateOdometer(it)
+                                            odometer = it
+                                        },
+                                        placeHolderText = uiState.currentOdometer,
+                                        label = "",
+                                        errorText = uiState.isOdometerValid.message,
+                                    )
+                                }
                             }
                         }
                     }
