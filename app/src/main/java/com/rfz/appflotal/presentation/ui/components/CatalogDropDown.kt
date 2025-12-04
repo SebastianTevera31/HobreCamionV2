@@ -38,6 +38,7 @@ fun CatalogDropdown(
     label: String = "Catalog"
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val defaultText = stringResource(R.string.ninguno)
 
     Column(modifier = modifier) {
         ExposedDropdownMenuBox(
@@ -46,7 +47,7 @@ fun CatalogDropdown(
             modifier = modifier
         ) {
             OutlinedTextField(
-                value = selected ?: stringResource(R.string.ninguno),
+                value = selected ?: defaultText,
                 onValueChange = {},
                 readOnly = true,
                 isError = selected == null,
@@ -69,7 +70,7 @@ fun CatalogDropdown(
                 onDismissRequest = { expanded = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.ninguno)) },
+                    text = { Text(defaultText) },
                     onClick = {
                         onSelected(null)
                         expanded = false

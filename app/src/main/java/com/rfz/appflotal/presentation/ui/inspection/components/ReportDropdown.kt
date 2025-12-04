@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +39,7 @@ fun ReportDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selected = reports.firstOrNull { it.id.toString() == selectedId }
+    val defaultText = stringResource(R.string.ninguno)
 
     Column(modifier = modifier) {
         ExposedDropdownMenuBox(
@@ -46,7 +48,7 @@ fun ReportDropdown(
             modifier = modifier
         ) {
             OutlinedTextField(
-                value = selected?.description ?: stringResource(R.string.ninguno),
+                value = selected?.description ?: defaultText,
                 onValueChange = {},
                 readOnly = true,
                 isError = selected == null,
@@ -69,12 +71,13 @@ fun ReportDropdown(
                 onDismissRequest = { expanded = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.ninguno)) },
+                    text = { Text(defaultText) },
                     onClick = {
                         onSelected(null)
                         expanded = false
                     }
                 )
+
                 reports.forEach { item ->
                     DropdownMenuItem(
                         text = {
