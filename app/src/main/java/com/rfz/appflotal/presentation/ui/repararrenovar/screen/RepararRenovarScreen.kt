@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
+import com.rfz.appflotal.data.model.destination.Destination
 import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.presentation.commons.CircularLoading
 import com.rfz.appflotal.presentation.commons.ErrorView
@@ -48,6 +50,7 @@ import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ListIt
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.NumberField
+import com.rfz.appflotal.presentation.ui.components.TireCard
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
 import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.DestinationSelection
 import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.RepararRenovarUiState
@@ -59,6 +62,7 @@ import com.rfz.appflotal.presentation.ui.utils.validate
 
 enum class RepararRenovarScreens {
     RETREADED_DESIGN,
+    TIRE_LIST,
     HOME
 }
 
@@ -139,19 +143,19 @@ fun RepararRenovarView(
 ) {
     var navScreens by remember { mutableStateOf(RepararRenovarScreens.HOME) }
 
-    if (navScreens == RepararRenovarScreens.RETREADED_DESIGN) {
+    if (navScreens != RepararRenovarScreens.HOME) {
         BackHandler {
             navScreens = RepararRenovarScreens.HOME
         }
     }
 
-    val selectionId = if (uiState.selectedDestination?.id == DestinationSelection.REPARAR.id) {
+    val selectionId = if (uiState.selectedOrigin?.id == DestinationSelection.REPARAR.id) {
         uiState.selectedRepairCause?.id
     } else {
         uiState.selectedRetreadedDesign?.idDesign
     }
 
-    val tireList = when (uiState.selectedDestination?.id) {
+    val tireList = when (uiState.selectedOrigin?.id) {
         DestinationSelection.REPARAR.id -> uiState.repairedTireList
         DestinationSelection.RENOVAR.id -> uiState.retreadedTireList
         else -> emptyList()
@@ -159,7 +163,7 @@ fun RepararRenovarView(
 
     val tireCost = uiState.tireCost
 
-    val areFormValid = uiState.selectedDestination != null &&
+    val areFormValid = uiState.selectedOrigin != null &&
             uiState.selectedTire != null &&
             tireCost.toIntOrError().second == null &&
             selectionId != null
@@ -236,15 +240,14 @@ fun RepararRenovarView(
                         }
 
                         RepararRenovarScreens.HOME -> {
-
                             item {
                                 Text(
                                     text = stringResource(R.string.seleccione_un_origen),
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                                 )
                                 CatalogDropdown(
-                                    catalog = uiState.destinationList,
-                                    selected = uiState.selectedDestination?.description,
+                                    catalog = uiState.originList,
+                                    selected = uiState.selectedOrigin?.description,
                                     onSelected = {
                                         onDestinationSelected(it)
                                         if (it?.id == DestinationSelection.REPARAR.id) {
@@ -254,58 +257,64 @@ fun RepararRenovarView(
                                         }
                                     },
                                     label = stringResource(R.string.origen),
-                                    errorText = uiState.selectedDestination.validate(),
+                                    errorText = uiState.selectedOrigin.validate(),
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
 
-                            if (uiState.selectedDestination != null) {
+                            if (uiState.selectedOrigin != null) {
                                 item {
-                                    CatalogDropdown(
-                                        catalog = tireList,
-                                        selected = uiState.selectedTire?.description,
-                                        onSelected = {
-                                            if (it != null) {
-                                                onSelectedTire(
-                                                    it.id,
-                                                    uiState.selectedDestination.id
-                                                )
-                                            }
+                                    Button(
+                                        onClick = {
+                                            navScreens = RepararRenovarScreens.TIRE_LIST
                                         },
-                                        label = stringResource(
-                                            R.string.llantas_en,
-                                            uiState.selectedDestination.description
-                                        ),
-                                        errorText = uiState.selectedTire.validate(),
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                }
-
-                                item {
-                                    NumberField(
-                                        value = tireCost,
-                                        onValueChange = { onCostChange(it) },
-                                        label = stringResource(R.string.costo),
-                                        errorText = tireCost.toIntOrError().second,
-                                        isEditable = DestinationSelection.REPARAR.id == uiState.selectedDestination.id,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-
-                                item {
-                                    AnimatedVisibility(
-                                        visible = uiState.selectedTire != null,
-                                        enter = fadeIn() + expandVertically(),
-                                        exit = fadeOut() + shrinkVertically()
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(52.dp),
+                                        shape = MaterialTheme.shapes.large
                                     ) {
-                                        TireInfoCard(
-                                            tire = uiState.selectedTire,
-                                            modifier = Modifier.width(240.dp)
+                                        Text(text = stringResource(R.string.seleccione_una_llanta))
+                                    }
+                                }
+
+                                item {
+                                    if (uiState.selectedTire != null) {
+                                        NumberField(
+                                            value = tireCost,
+                                            onValueChange = { onCostChange(it) },
+                                            label = stringResource(R.string.costo),
+                                            errorText = tireCost.toIntOrError().second,
+                                            isEditable = DestinationSelection.REPARAR.id == uiState.selectedOrigin.id,
+                                            modifier = Modifier.fillMaxWidth()
                                         )
                                     }
                                 }
 
-                                if (DestinationSelection.RENOVAR.id == uiState.selectedDestination.id) {
+                                item {
+                                    if (uiState.selectedTire != null) {
+                                        Text(
+                                            text = stringResource(R.string.detalles_de_llanta),
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+
+                                    AnimatedVisibility(
+                                        visible = uiState.selectedTire != null,
+                                        enter = expandVertically() + fadeIn(),
+                                        exit = shrinkVertically() + fadeOut(),
+                                        modifier = Modifier.padding(bottom = dimensionResource(R.dimen.small_dimen))
+                                    ) {
+                                        TireInfoCard(
+                                            tire = uiState.selectedTire,
+                                            modifier.width(240.dp)
+                                        )
+                                    }
+                                }
+
+                                if (DestinationSelection.RENOVAR.id == uiState.selectedOrigin.id) {
                                     item {
                                         Button(
                                             onClick = {
@@ -324,7 +333,9 @@ fun RepararRenovarView(
 
                                             Text(
                                                 text = stringResource(R.string.selected_retread_design),
-                                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.SemiBold
+                                                ),
                                                 modifier = Modifier.padding(top = 16.dp)
                                             )
 
@@ -352,7 +363,7 @@ fun RepararRenovarView(
                                             )
                                         }
                                     }
-                                } else if (DestinationSelection.REPARAR.id == uiState.selectedDestination.id) {
+                                } else if (DestinationSelection.REPARAR.id == uiState.selectedOrigin.id) {
                                     item {
                                         CatalogDropdown(
                                             catalog = uiState.repairCauseList,
@@ -363,6 +374,18 @@ fun RepararRenovarView(
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                     }
+                                }
+                            }
+                        }
+
+                        RepararRenovarScreens.TIRE_LIST -> {
+                            items(tireList) { tire ->
+                                TireCard(tire = tire, modifier = Modifier.fillMaxWidth()) {
+                                    onSelectedTire(
+                                        it.id,
+                                        uiState.selectedOrigin?.id ?: 0
+                                    )
+                                    navScreens = RepararRenovarScreens.HOME
                                 }
                             }
                         }
@@ -388,7 +411,8 @@ fun RepararRenovarPreview() {
                     thread = 7.5,
                     loadingCapacity = "615",
                     destination = "Oficina"
-                )
+                ),
+                selectedOrigin = Destination(1, "")
             ),
             onBack = {},
             onSelectedTire = { _, _ -> },

@@ -286,6 +286,7 @@
     <string name="capacidad">Capacidad</string>
     <string name="single_modelo">Modelo</string>
     <string name="llanta_seleccionada">Llanta seleccionada</string>
+    <string name="motivo">Motivo</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

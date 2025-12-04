@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.scrap.screens
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -10,11 +11,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
@@ -41,9 +47,11 @@ import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
+import com.rfz.appflotal.presentation.ui.components.TireListScreen
 import com.rfz.appflotal.presentation.ui.scrap.viewmodel.TireWasteUiState
 import com.rfz.appflotal.presentation.ui.scrap.viewmodel.TireWasteViewModel
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
+import com.rfz.appflotal.presentation.ui.utils.SubScreens
 import com.rfz.appflotal.presentation.ui.utils.validate
 
 @Composable
@@ -114,6 +122,15 @@ fun TireWasteView(
     var wasteReportSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 
+    var navScreens by remember { mutableStateOf(SubScreens.HOME) }
+
+    if (navScreens == SubScreens.LIST) {
+        BackHandler {
+            navScreens = SubScreens.HOME
+        }
+    }
+
+
     val areFormValid by remember {
         derivedStateOf {
             wasteReportSelected != null && tireSelected != null
@@ -141,7 +158,10 @@ fun TireWasteView(
         topBar = {
             SimpleTopBar(
                 title = stringResource(R.string.pila_de_desecho),
-                onBack = onBack,
+                onBack = {
+                    if (navScreens == SubScreens.HOME) onBack()
+                    else navScreens = SubScreens.HOME
+                }
             )
         },
         bottomBar = {
@@ -167,48 +187,71 @@ fun TireWasteView(
             }
 
             OperationStatus.Success -> {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize()
-                        .verticalScroll(scroll)
-                        .padding(16.dp)
-                ) {
-                    CatalogDropdown(
-                        catalog = uiState.wasteReportList,
-                        selected = wasteReportSelected?.description,
-                        onSelected = { wasteReportSelected = it },
-                        label = stringResource(R.string.reporte_de_desecho),
-                        errorText = wasteReportSelected.validate(),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    CatalogDropdown(
-                        catalog = uiState.dismountedTireList,
-                        selected = tireSelected?.description,
-                        onSelected = {
-                            if (it != null) {
-                                onSelectedTire(it.id)
-                            }
+                when (navScreens) {
+                    SubScreens.LIST -> {
+                        TireListScreen(
+                            tires = uiState.dismountedTireList,
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .fillMaxSize()
+                                .padding(16.dp)
+                        ) {
+                            onSelectedTire(it.id)
                             tireSelected = it
-                        },
-                        label = stringResource(R.string.llantas),
-                        errorText = tireSelected.validate(),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                            navScreens = SubScreens.HOME
+                        }
+                    }
 
-                    AnimatedVisibility(
-                        visible = tireSelected != null,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut(),
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        TireInfoCard(
-                            tire = uiState.selectedTire,
-                            modifier.width(240.dp)
-                        )
+                    SubScreens.HOME -> {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .fillMaxSize()
+                                .verticalScroll(scroll)
+                                .padding(16.dp)
+                        ) {
+                            CatalogDropdown(
+                                catalog = uiState.wasteReportList,
+                                selected = wasteReportSelected?.description,
+                                onSelected = { wasteReportSelected = it },
+                                label = stringResource(R.string.reporte_de_desecho),
+                                errorText = wasteReportSelected.validate(),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Button(
+                                onClick = {
+                                    navScreens = SubScreens.LIST
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp),
+                                shape = MaterialTheme.shapes.large
+                            ) {
+                                Text(text = stringResource(R.string.seleccione_una_llanta))
+                            }
+
+                            if (uiState.selectedTire != null) {
+                                Text(
+                                    text = stringResource(R.string.detalles_de_llanta),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            AnimatedVisibility(
+                                visible = uiState.selectedTire != null,
+                                enter = expandVertically() + fadeIn(),
+                                exit = shrinkVertically() + fadeOut()
+                            ) {
+                                TireInfoCard(
+                                    tire = uiState.selectedTire,
+                                    modifier.width(240.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

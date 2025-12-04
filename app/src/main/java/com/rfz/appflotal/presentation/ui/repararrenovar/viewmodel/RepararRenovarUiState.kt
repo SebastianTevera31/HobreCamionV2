@@ -10,7 +10,7 @@ import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 data class RepararRenovarUiState(
     val repairedTireList: List<Tire> = emptyList(),
     val retreadedTireList: List<Tire> = emptyList(),
-    val destinationList: List<Destination> = emptyList(),
+    val originList: List<Destination> = emptyList(),
     val retreadDesignList: List<RetreadDesign> = emptyList(),
     val repairCauseList: List<RepairCause> = emptyList(),
     val tireCost: String = "",
@@ -18,7 +18,7 @@ data class RepararRenovarUiState(
     val screenLoadStatus: OperationStatus = OperationStatus.Loading,
     val operationStatus: OperationStatus? = null,
     val selectedRetreadedDesign: RetreadDesign? = null,
-    val selectedDestination: CatalogItem? = null,
+    val selectedOrigin: CatalogItem? = null,
     val selectedRepairCause: CatalogItem? = null
 )
 

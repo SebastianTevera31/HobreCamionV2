@@ -73,7 +73,7 @@ class RepararRenovarViewModel @Inject constructor(
 
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
-                        destinationList = repairRetreadDestinations,
+                        originList = repairRetreadDestinations,
                         repairedTireList = repairedTires,
                         retreadedTireList = retreadedTires,
                         retreadDesignList = retreadDesignList,
@@ -123,7 +123,7 @@ class RepararRenovarViewModel @Inject constructor(
 
             val tireId = uiState.selectedTire?.id
             val cost = uiState.tireCost.toDouble()
-            val destinationId = uiState.selectedDestination?.id
+            val destinationId = uiState.selectedOrigin?.id
             val repairCauseId = uiState.selectedRepairCause?.id
             val retreadDesignId = uiState.selectedRetreadedDesign?.idDesign
 
@@ -186,7 +186,7 @@ class RepararRenovarViewModel @Inject constructor(
     fun onSelectedDestination(destination: CatalogItem?) {
         _uiState.update {
             it.copy(
-                selectedDestination = destination,
+                selectedOrigin = destination,
                 selectedTire = null,
                 tireCost = "",
                 selectedRepairCause = if (destination?.id != DestinationSelection.REPARAR.id) null else it.selectedRepairCause,
