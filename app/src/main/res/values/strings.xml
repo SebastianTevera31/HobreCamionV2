@@ -319,6 +319,18 @@
     <string name="medida_de_la_llanta">Medida de la llanta</string>
     <string name="la_medida_es_requerida">La medida es requerida</string>
     <string name="nota_opcional">Nota (opcional)</string>
+    <string name="error_loading_products">Error loading products</string>
+    <string name="error_loading_product_details">Error loading product details</string>
+    <string name="producto_guardado_exitosamente">Producto guardado exitosamente</string>
+    <string name="error_al_guardar_el_producto">Error al guardar el producto</string>
+    <string name="buscar_productos">Buscar productos...</string>
+    <string name="no_hay_productos_registrados">No hay productos registrados</string>
+    <string name="registrar_producto">Registrar Producto</string>
+    <string name="editar_producto">Editar Producto</string>
+    <string name="tamano_de_llanta">Tamaño de Llanta</string>
+    <string name="capacidad_de_carga">Capacidad de Carga</string>
+    <string name="profundidad_de_la_banda_mm">Profundidad de la Banda (mm)</string>
+    <string name="profundidad_mm">Profundidad: %1$d mm</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

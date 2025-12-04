@@ -340,6 +340,29 @@
     <string name="la_medida_es_requerida">Size is required</string>
 
     <string name="nota_opcional">Note (optional)</string>
+    <string name="error_loading_products">Error loading products</string>
+
+    <string name="error_loading_product_details">Error loading product details</string>
+
+    <string name="producto_guardado_exitosamente">Product saved successfully</string>
+
+    <string name="error_al_guardar_el_producto">Error saving the product</string>
+
+    <string name="buscar_productos">Search products...</string>
+
+    <string name="no_hay_productos_registrados">No products registered</string>
+
+    <string name="registrar_producto">Register Product</string>
+
+    <string name="editar_producto">Edit Product</string>
+
+    <string name="tamano_de_llanta">Tire Size</string>
+
+    <string name="capacidad_de_carga">Load Capacity</string>
+
+    <string name="profundidad_de_la_banda_mm">Tread Depth (mm)</string>
+
+    <string name="profundidad_mm">Depth: %1$d mm</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

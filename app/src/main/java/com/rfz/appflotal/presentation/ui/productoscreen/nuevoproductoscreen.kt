@@ -3,23 +3,70 @@ package com.rfz.appflotal.presentation.ui.productoscreen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -28,6 +75,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
 import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
 import com.rfz.appflotal.data.model.product.response.ProductResponse
@@ -40,6 +88,7 @@ import com.rfz.appflotal.domain.product.ProductListUseCase
 import com.rfz.appflotal.domain.tire.LoadingCapacityUseCase
 import com.rfz.appflotal.domain.tire.TireSizeUseCase
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,8 +104,8 @@ fun NuevoProductoScreen(
     homeViewModel: HomeViewModel
 ) {
 
-    val primaryColor = Color(0xFF4A3DAD)
-    val secondaryColor = Color(0xFF5C4EC9)
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
     val backgroundColor = Color(0xFFF8F7FF)
     val textColor = Color(0xFF333333)
     val lightTextColor = Color.White
@@ -95,6 +144,8 @@ fun NuevoProductoScreen(
     var selectedLoadCapacity by remember { mutableStateOf<LoadingCapacityResponse?>(null) }
     var treadDepth by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
+
 
     fun applyFilter() {
         displayedProducts = if (searchQuery.isBlank()) {
@@ -117,10 +168,10 @@ fun NuevoProductoScreen(
                     allProducts = result.getOrNull() ?: emptyList()
                     displayedProducts = allProducts
                 } else {
-                    errorMessage = result.exceptionOrNull()?.message ?: "Error loading products"
+                    errorMessage = context.getString(R.string.error_loading_products)
                 }
             } catch (e: Exception) {
-                errorMessage = e.message ?: "Unknown error"
+                errorMessage = context.getString(R.string.error_desconocido)
             } finally {
                 isLoading = false
             }
@@ -160,13 +211,12 @@ fun NuevoProductoScreen(
                 onComplete(true)
             } catch (e: Exception) {
                 onComplete(false)
-                errorMessage = "Error loading combo data: ${e.message}"
+                errorMessage = context.getString(R.string.error_carga_datos)
             } finally {
                 isLoadingCombos = false
             }
         }
     }
-
 
 
     fun loadProductDetails(productId: Int) {
@@ -190,7 +240,7 @@ fun NuevoProductoScreen(
                     }
                 }
             } catch (e: Exception) {
-                errorMessage = "Error loading product details: ${e.message}"
+                errorMessage = context.getString(R.string.error_loading_product_details)
             } finally {
                 isLoadingProductDetails = false
             }
@@ -200,7 +250,7 @@ fun NuevoProductoScreen(
     fun saveProduct() {
         scope.launch {
             if (selectedOriginalDesign == null || selectedTireSize == null || selectedLoadCapacity == null || treadDepth.isBlank()) {
-                errorMessage = "Todos los campos son requeridos"
+                errorMessage = context.getString(R.string.error_deben_completarse_campos)
                 return@launch
             }
 
@@ -216,13 +266,15 @@ fun NuevoProductoScreen(
                 val result = productCrudUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
                 if (result.isSuccess) {
                     snackbarHostState.showSnackbar(
-                        message = result.getOrNull()?.firstOrNull()?.message ?: "Producto guardado exitosamente",
+                        message = result.getOrNull()?.firstOrNull()?.message
+                            ?: context.getString(R.string.producto_guardado_exitosamente),
                         duration = SnackbarDuration.Short
                     )
                     showDialog = false
                     loadProducts()
                 } else {
-                    errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar el producto"
+                    errorMessage = result.exceptionOrNull()?.message
+                        ?: context.getString(R.string.error_al_guardar_el_producto)
                 }
             } catch (e: Exception) {
                 errorMessage = "Error: ${e.message}"
@@ -269,7 +321,7 @@ fun NuevoProductoScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Productos",
+                        stringResource(R.string.products),
                         style = MaterialTheme.typography.titleLarge.copy(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -293,7 +345,10 @@ fun NuevoProductoScreen(
                 modifier = Modifier
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                     )
                     .shadow(4.dp)
@@ -313,14 +368,21 @@ fun NuevoProductoScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF6A5DD9), Color(0xFF6D66CB))
+                            listOf(
+                                MaterialTheme.colorScheme.secondaryContainer,
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            )
                         )
                     )
                     .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -328,15 +390,30 @@ fun NuevoProductoScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.White.copy(alpha = 0.9f)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            null,
+                            tint = Color.White.copy(alpha = 0.9f)
+                        )
+                    },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Close, null, tint = Color.White.copy(alpha = 0.8f))
+                                Icon(
+                                    Icons.Default.Close,
+                                    null,
+                                    tint = Color.White.copy(alpha = 0.8f)
+                                )
                             }
                         }
                     },
-                    placeholder = { Text("Buscar productos...", color = Color.White.copy(alpha = 0.6f)) },
+                    placeholder = {
+                        Text(
+                            stringResource(R.string.buscar_productos),
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.White,
@@ -354,20 +431,32 @@ fun NuevoProductoScreen(
             }
 
 
-            Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundColor)
+            ) {
                 when {
                     isLoading && displayedProducts.isEmpty() -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
+
                     displayedProducts.isEmpty() -> {
                         Text(
-                            text = if (searchQuery.isBlank()) "No hay productos registrados" else "No se encontraron resultados",
+                            text = if (searchQuery.isBlank()) stringResource(R.string.no_hay_productos_registrados) else stringResource(
+                                R.string.no_se_encontraron_resultados
+                            ),
                             modifier = Modifier.align(Alignment.Center),
                             color = textColor.copy(alpha = 0.6f)
                         )
                     }
+
                     else -> {
-                        LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp)
+                        ) {
                             items(displayedProducts) { product ->
                                 ProductItem(
                                     product = product,
@@ -396,30 +485,34 @@ fun NuevoProductoScreen(
                 shape = RoundedCornerShape(20.dp),
                 containerColor = Color.White,
                 title = {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
+                    LocalizedApp {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(Color(0xFF6A5DD9), Color(0xFF8E85FF))
+                                        )
                                     )
-                                )
-                                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Text(
-                            text = if (editingProduct == null) "Registrar Producto" else "Editar Producto",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                color = primaryColor,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            textAlign = TextAlign.Center
-                        )
+                                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                text = if (editingProduct == null) stringResource(R.string.registrar_producto) else stringResource(
+                                    R.string.editar_producto
+                                ),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    color = primaryColor,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 },
                 text = {
@@ -433,201 +526,243 @@ fun NuevoProductoScreen(
                             CircularProgressIndicator(color = primaryColor)
                         }
                     } else {
-                        Column {
-
-                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Column {
-                                    Text(
-                                        "Diseño Original",
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            color = primaryColor,
-                                            fontWeight = FontWeight.SemiBold
-                                        ),
-                                        modifier = Modifier.padding(bottom = 4.dp)
-                                    )
-                                    ExposedDropdownMenuBox(
-                                        expanded = showOriginalDesignMenu,
-                                        onExpandedChange = { showOriginalDesignMenu = !showOriginalDesignMenu }
-                                    ) {
-                                        OutlinedTextField(
-                                            value = selectedOriginalDesign?.let { "${it.description} - ${it.model}" } ?: "",
-                                            onValueChange = {},
-                                            readOnly = true,
-                                            trailingIcon = {
-                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showOriginalDesignMenu)
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .menuAnchor(),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = primaryColor,
-                                                unfocusedBorderColor = Color.Gray
+                        LocalizedApp {
+                            Column {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Column {
+                                        Text(
+                                            stringResource(R.string.original_design),
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                color = primaryColor,
+                                                fontWeight = FontWeight.SemiBold
                                             ),
-                                            shape = RoundedCornerShape(14.dp)
+                                            modifier = Modifier.padding(bottom = 4.dp)
                                         )
-                                        ExposedDropdownMenu(
+                                        ExposedDropdownMenuBox(
                                             expanded = showOriginalDesignMenu,
-                                            onDismissRequest = { showOriginalDesignMenu = false }
+                                            onExpandedChange = {
+                                                showOriginalDesignMenu = !showOriginalDesignMenu
+                                            }
                                         ) {
-                                            originalDesigns.forEach { design ->
-                                                DropdownMenuItem(
-                                                    text = { Text("${design.description} - ${design.model}") },
-                                                    onClick = {
-                                                        selectedOriginalDesign = design
-                                                        showOriginalDesignMenu = false
-                                                    }
-                                                )
+                                            OutlinedTextField(
+                                                value = selectedOriginalDesign?.let { "${it.description} - ${it.model}" }
+                                                    ?: "",
+                                                onValueChange = {},
+                                                readOnly = true,
+                                                trailingIcon = {
+                                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                                        expanded = showOriginalDesignMenu
+                                                    )
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .menuAnchor(),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    focusedBorderColor = primaryColor,
+                                                    unfocusedBorderColor = Color.Gray
+                                                ),
+                                                shape = RoundedCornerShape(14.dp)
+                                            )
+                                            ExposedDropdownMenu(
+                                                expanded = showOriginalDesignMenu,
+                                                onDismissRequest = {
+                                                    showOriginalDesignMenu = false
+                                                }
+                                            ) {
+                                                originalDesigns.forEach { design ->
+                                                    DropdownMenuItem(
+                                                        text = { Text("${design.description} - ${design.model}") },
+                                                        onClick = {
+                                                            selectedOriginalDesign = design
+                                                            showOriginalDesignMenu = false
+                                                        }
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Column {
-                                    Text(
-                                        "Tamaño de Llanta",
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            color = primaryColor,
-                                            fontWeight = FontWeight.SemiBold
-                                        ),
-                                        modifier = Modifier.padding(bottom = 4.dp)
-                                    )
-                                    ExposedDropdownMenuBox(
-                                        expanded = showTireSizeMenu,
-                                        onExpandedChange = { showTireSizeMenu = !showTireSizeMenu }
-                                    ) {
-                                        OutlinedTextField(
-                                            value = selectedTireSize?.fld_size ?: "",
-                                            onValueChange = {},
-                                            readOnly = true,
-                                            trailingIcon = {
-                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showTireSizeMenu)
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .menuAnchor(),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = primaryColor,
-                                                unfocusedBorderColor = Color.Gray
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Column {
+                                        Text(
+                                            stringResource(R.string.tamano_de_llanta),
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                color = primaryColor,
+                                                fontWeight = FontWeight.SemiBold
                                             ),
-                                            shape = RoundedCornerShape(14.dp)
+                                            modifier = Modifier.padding(bottom = 4.dp)
                                         )
-                                        ExposedDropdownMenu(
+                                        ExposedDropdownMenuBox(
                                             expanded = showTireSizeMenu,
-                                            onDismissRequest = { showTireSizeMenu = false }
+                                            onExpandedChange = {
+                                                showTireSizeMenu = !showTireSizeMenu
+                                            }
                                         ) {
-                                            tireSizes.forEach { size ->
-                                                DropdownMenuItem(
-                                                    text = { Text(size.fld_size) },
-                                                    onClick = {
-                                                        selectedTireSize = size
-                                                        showTireSizeMenu = false
-                                                    }
-                                                )
+                                            OutlinedTextField(
+                                                value = selectedTireSize?.fld_size ?: "",
+                                                onValueChange = {},
+                                                readOnly = true,
+                                                trailingIcon = {
+                                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                                        expanded = showTireSizeMenu
+                                                    )
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .menuAnchor(),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    focusedBorderColor = primaryColor,
+                                                    unfocusedBorderColor = Color.Gray
+                                                ),
+                                                shape = RoundedCornerShape(14.dp)
+                                            )
+                                            ExposedDropdownMenu(
+                                                expanded = showTireSizeMenu,
+                                                onDismissRequest = { showTireSizeMenu = false }
+                                            ) {
+                                                tireSizes.forEach { size ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(size.fld_size) },
+                                                        onClick = {
+                                                            selectedTireSize = size
+                                                            showTireSizeMenu = false
+                                                        }
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
 
-                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Column {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Column {
+                                        Text(
+                                            stringResource(R.string.capacidad_de_carga),
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                color = primaryColor,
+                                                fontWeight = FontWeight.SemiBold
+                                            ),
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        ExposedDropdownMenuBox(
+                                            expanded = showLoadCapacityMenu,
+                                            onExpandedChange = {
+                                                showLoadCapacityMenu = !showLoadCapacityMenu
+                                            }
+                                        ) {
+                                            OutlinedTextField(
+                                                value = selectedLoadCapacity?.fld_description ?: "",
+                                                onValueChange = {},
+                                                readOnly = true,
+                                                trailingIcon = {
+                                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                                        expanded = showLoadCapacityMenu
+                                                    )
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .menuAnchor(),
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    focusedBorderColor = primaryColor,
+                                                    unfocusedBorderColor = Color.Gray
+                                                ),
+                                                shape = RoundedCornerShape(14.dp)
+                                            )
+                                            ExposedDropdownMenu(
+                                                expanded = showLoadCapacityMenu,
+                                                onDismissRequest = { showLoadCapacityMenu = false }
+                                            ) {
+                                                loadCapacities.forEach { capacity ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(capacity.fld_description) },
+                                                        onClick = {
+                                                            selectedLoadCapacity = capacity
+                                                            showLoadCapacityMenu = false
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
                                     Text(
-                                        "Capacidad de Carga",
+                                        stringResource(R.string.profundidad_de_la_banda_mm),
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             color = primaryColor,
                                             fontWeight = FontWeight.SemiBold
                                         ),
                                         modifier = Modifier.padding(bottom = 4.dp)
                                     )
-                                    ExposedDropdownMenuBox(
-                                        expanded = showLoadCapacityMenu,
-                                        onExpandedChange = { showLoadCapacityMenu = !showLoadCapacityMenu }
-                                    ) {
-                                        OutlinedTextField(
-                                            value = selectedLoadCapacity?.fld_description ?: "",
-                                            onValueChange = {},
-                                            readOnly = true,
-                                            trailingIcon = {
-                                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showLoadCapacityMenu)
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .menuAnchor(),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = primaryColor,
-                                                unfocusedBorderColor = Color.Gray
-                                            ),
-                                            shape = RoundedCornerShape(14.dp)
-                                        )
-                                        ExposedDropdownMenu(
-                                            expanded = showLoadCapacityMenu,
-                                            onDismissRequest = { showLoadCapacityMenu = false }
-                                        ) {
-                                            loadCapacities.forEach { capacity ->
-                                                DropdownMenuItem(
-                                                    text = { Text(capacity.fld_description) },
-                                                    onClick = {
-                                                        selectedLoadCapacity = capacity
-                                                        showLoadCapacityMenu = false
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
+                                    OutlinedTextField(
+                                        value = treadDepth,
+                                        onValueChange = {
+                                            treadDepth = it.filter { c -> c.isDigit() }
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        keyboardOptions = KeyboardOptions(
+                                            keyboardType = KeyboardType.Number,
+                                            imeAction = ImeAction.Done
+                                        ),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = primaryColor,
+                                            unfocusedBorderColor = Color.Gray
+                                        ),
+                                        shape = RoundedCornerShape(14.dp)
+                                    )
                                 }
-                            }
-
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                Text(
-                                    "Profundidad de la Banda (mm)",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        color = primaryColor,
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                                )
-                                OutlinedTextField(
-                                    value = treadDepth,
-                                    onValueChange = { treadDepth = it.filter { c -> c.isDigit() } },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    keyboardOptions = KeyboardOptions(
-                                        keyboardType = KeyboardType.Number,
-                                        imeAction = ImeAction.Done
-                                    ),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = primaryColor,
-                                        unfocusedBorderColor = Color.Gray
-                                    ),
-                                    shape = RoundedCornerShape(14.dp)
-                                )
                             }
                         }
                     }
                 },
                 confirmButton = {
-                    Button(
-                        onClick = { saveProduct() },
-                        enabled = !isLoadingCombos && !isLoadingProductDetails &&
-                                selectedOriginalDesign != null &&
-                                selectedTireSize != null &&
-                                selectedLoadCapacity != null &&
-                                treadDepth.isNotBlank(),
-                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text("GUARDAR", fontWeight = FontWeight.Bold)
+                    LocalizedApp {
+                        Button(
+                            onClick = { saveProduct() },
+                            enabled = !isLoadingCombos && !isLoadingProductDetails &&
+                                    selectedOriginalDesign != null &&
+                                    selectedTireSize != null &&
+                                    selectedLoadCapacity != null &&
+                                    treadDepth.isNotBlank(),
+                            colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(stringResource(R.string.guardar), fontWeight = FontWeight.Bold)
+                        }
                     }
                 },
                 dismissButton = {
-                    OutlinedButton(
-                        onClick = { showDialog = false },
-                        border = BorderStroke(1.dp, primaryColor),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text("CANCELAR", color = primaryColor, fontWeight = FontWeight.Bold)
+                    LocalizedApp {
+                        OutlinedButton(
+                            onClick = { showDialog = false },
+                            border = BorderStroke(1.dp, primaryColor),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.cancelar),
+                                color = primaryColor,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             )
@@ -669,7 +804,7 @@ fun ProductItem(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Profundidad: ${product.treadDepth} mm",
+                text = stringResource(R.string.profundidad_mm, product.treadDepth),
                 style = MaterialTheme.typography.bodyMedium.copy(color = Color.DarkGray)
             )
             Spacer(Modifier.height(16.dp))
@@ -690,7 +825,7 @@ fun ProductItem(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        "Editar",
+                        pluralStringResource(R.plurals.editar_elemento, 1),
                         color = secondaryColor,
                         fontWeight = FontWeight.Medium
                     )
