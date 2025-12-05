@@ -1,6 +1,8 @@
 package com.rfz.appflotal.presentation.ui.retreatedesign.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -9,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -18,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -62,6 +67,14 @@ fun RetreatedDesignScreen(
 
     if (state.value.isSending) {
         AwaitDialog()
+    }
+
+    val treadWarning = dialogState.value.profundidadPiso.trim().toIntOrNull()?.let { number ->
+        if (number <= 0) {
+            stringResource(R.string.error_valor_inferior_0)
+        } else {
+            null
+        }
     }
 
     ListManagementScreen(
@@ -122,18 +135,30 @@ fun RetreatedDesignScreen(
                             value = selectedBrand
                         )
                     }
-                    ItemDialog(
-                        label = " ${stringResource(R.string.profundidad_de_piso)} (mm)",
-                        value = dialogState.value.profundidadPiso,
-                        isEmpty = dialogState.value.profundidadPiso.isBlank(),
-                        keyboardType = KeyboardType.NumberPassword,
-                        onValueChange = { description ->
-                            viewModel.onDialogFieldChanged(
-                                field = RetreadDesignFields.PROFUNDIDAD_PISO,
-                                value = description
+
+                    Column {
+                        ItemDialog(
+                            label = " ${stringResource(R.string.profundidad_de_piso)} (mm)",
+                            value = dialogState.value.profundidadPiso,
+                            isEmpty = dialogState.value.profundidadPiso.isBlank(),
+                            keyboardType = KeyboardType.NumberPassword,
+                            onValueChange = { description ->
+                                viewModel.onDialogFieldChanged(
+                                    field = RetreadDesignFields.PROFUNDIDAD_PISO,
+                                    value = description
+                                )
+                            },
+                        )
+                        if (treadWarning != null) {
+                            Text(
+                                stringResource(R.string.error_valor_inferior_0),
+                                color = Color.Red,
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(top = 4.dp)
                             )
-                        },
-                    )
+                        }
+                    }
+
                     FieldSpinner(
                         label = stringResource(R.string.utilizacion),
                         selectedValue = dialogState.value.utilizacion?.description ?: "",
@@ -150,6 +175,7 @@ fun RetreatedDesignScreen(
                 onDismiss = viewModel::onDismissDialog,
                 isEntryValid = dialogState.value.description.isNotBlank()
                         && dialogState.value.profundidadPiso.isNotBlank()
+                        && treadWarning == null
                         && dialogState.value.utilizacion != null
                         && dialogState.value.marcaRenovado != null
             )

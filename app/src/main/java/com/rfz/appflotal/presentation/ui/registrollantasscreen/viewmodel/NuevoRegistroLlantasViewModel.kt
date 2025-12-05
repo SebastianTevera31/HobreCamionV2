@@ -125,6 +125,14 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
             return
         }
 
+        val treadDepthValue = _uiState.value.dialogState.treadDepth.toIntOrNull()
+        val costValue = _uiState.value.dialogState.cost.toDoubleOrNull()
+
+        if (treadDepthValue == null || costValue == null || treadDepthValue <= 0 || costValue <= 0) {
+            _uiState.update { it.copy(errorMessage = context.getString(R.string.error_solo_numeros_profunidad_costo)) }
+            return
+        }
+
         if (_uiState.value.dialogState.dot.trim().length > 10) {
             _uiState.update { it.copy(errorMessage = context.getString(R.string.dot_excedio_caracteres)) }
             return
@@ -160,7 +168,7 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
                 val result = tireCrudUseCase(bearerToken, tireDto)
                 if (result.isSuccess) {
                     onDismissDialog()
-                    loadTires() // Refresh list
+                    loadTires()
                 } else {
                     _uiState.update { it.copy(errorMessage = result.exceptionOrNull()?.message) }
                 }

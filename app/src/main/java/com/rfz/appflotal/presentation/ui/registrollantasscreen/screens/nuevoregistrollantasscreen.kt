@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -418,7 +419,7 @@ private fun TireDialog(
                 label = stringResource(R.string.profundidad),
                 value = uiState.dialogState.treadDepth,
                 keyboardType = KeyboardType.NumberPassword,
-                isEditable = acquisitionType != 1 && acquisitionType != 2
+                isEditable = false
             ) { value -> viewModel.onDialogFieldChange { it.copy(treadDepth = value.filter { c -> c.isDigit() }) } }
 
             DialogTextField(
