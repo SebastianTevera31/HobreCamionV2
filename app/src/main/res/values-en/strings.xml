@@ -341,8 +341,10 @@
     <string name="Campos_requeridos_por_completar">All required fields must be completed</string>
     <string name="dot_excedio_caracteres">The DOT must be 10 characters or fewer</string>
     <string name="numero_llanta_excedio_caracteres">The tire number must be 15 characters or fewer</string>
-    <string name="solo_puedes_ingresar_numeros">Solo puedes ingresar números</string>
-    <string name="reporte">Reporte</string>
+    <string name="solo_puedes_ingresar_numeros">Numbers only</string>
+    <string name="reporte">Report</string>
+    <string name="error_valor_inferior_0">The value cannot be less than 0</string>
+    <string name="error_solo_numeros_profunidad_costo">You can only enter numbers in the depth and cost fields</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

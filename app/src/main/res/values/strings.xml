@@ -336,6 +336,8 @@
     <string name="numero_llanta_excedio_caracteres">El número de llanta debe ser menor o igual a 15 caracteres</string>
     <string name="solo_puedes_ingresar_numeros">Solo puedes ingresar números</string>
     <string name="reporte">Reporte</string>
+    <string name="error_valor_inferior_0">El valor no puede ser menor o igual a 0</string>
+    <string name="error_solo_numeros_profunidad_costo">Solo puede ingresar números en los campos de profundidad y costo</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>
