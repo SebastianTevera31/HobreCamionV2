@@ -17,7 +17,9 @@ class VehicleRepositoryImpl @Inject constructor(
     override suspend fun getLastOdometer(token: String): LastOdometerResponseDto? {
         val result = remoteVehicleDataSource.fetchLastService(token)
         return if (result.isSuccess) {
-            result.getOrNull()?.ifEmpty { emptyList() }[0]
+            if (result.getOrNull()?.isNotEmpty() == true) {
+                result.getOrNull()?.first()
+            } else null
         } else null
     }
 }
