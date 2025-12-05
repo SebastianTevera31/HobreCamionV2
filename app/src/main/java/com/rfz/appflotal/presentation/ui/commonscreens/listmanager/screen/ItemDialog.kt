@@ -52,7 +52,7 @@ fun ItemDialog(
                 keyboardType = keyboardType
             ),
             singleLine = true,
-            enabled = isEditable
+            enabled = isEditable,
         )
 
         if (isEmpty) {

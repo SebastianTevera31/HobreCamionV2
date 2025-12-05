@@ -145,7 +145,7 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
                 productId = currentState.selectedProduct!!.idProduct,
                 acquisitionDate = formatAcquisitionDate(currentState.acquisitionDate),
                 document = currentState.folioFactura,
-                unitCost = currentState.cost.toInt(),
+                unitCost = currentState.cost.toDouble().toInt(),
                 dot = currentState.dot,
                 tireNumber = currentState.tireNumber,
                 treadDepth = currentState.treadDepth.toInt(),

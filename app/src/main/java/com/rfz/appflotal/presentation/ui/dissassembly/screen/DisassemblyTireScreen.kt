@@ -210,7 +210,7 @@ fun DisassemblyTireView(
             }
 
             CompleteFormButton(
-                textButton = stringResource(buttonText),
+                textButton = stringResource(buttonText).uppercase(),
                 isValid = isValid
             ) {
                 when (uiState.navigationScreen) {

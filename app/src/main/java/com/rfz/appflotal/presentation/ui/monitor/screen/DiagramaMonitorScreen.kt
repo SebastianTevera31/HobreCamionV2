@@ -85,8 +85,10 @@ fun DiagramaMonitorScreen(
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
-    val panelDimension =
-        if (tireUiState.isAssembled && tireUiState.isInspectionAvailable) 460.dp else 380.dp
+    val panelDimension = if (paymentPlan == PaymentPlanType.Complete)
+        if (tireUiState.isAssembled && tireUiState.isInspectionAvailable) 460.dp
+        else 380.dp
+    else 400.dp
 
     // Actualizar rueda
     tireSelected = tireUiState.currentTire
@@ -341,7 +343,10 @@ fun PanelSensor(
     onDisassemblyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val (tirePanelWeight, alertPanelWeight) = 0.65f to 0.35f
+    val (tirePanelWeight, alertPanelWeight) =
+        if (paymentPlan == PaymentPlanType.Complete) 0.65f to 0.35f
+        else 1f to 1f
+
 
     val activeAlerts =
         remember(temperatureStatus, pressureStatus, flatTireStatus, tireRemovingStatus) {

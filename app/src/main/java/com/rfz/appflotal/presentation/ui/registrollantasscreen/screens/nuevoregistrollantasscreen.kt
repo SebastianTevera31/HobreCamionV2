@@ -80,6 +80,7 @@ import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRe
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.text.filter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -410,15 +411,15 @@ private fun TireDialog(
             DialogTextField(
                 label = stringResource(R.string.costo),
                 value = uiState.dialogState.cost,
-                keyboardType = KeyboardType.Number
-            ) { value -> viewModel.onDialogFieldChange { it.copy(cost = value) } }
+                keyboardType = KeyboardType.NumberPassword
+            ) { value -> viewModel.onDialogFieldChange { it.copy(cost = value.filter { c -> c.isDigit() || c == '.' }) } }
 
             DialogTextField(
                 label = stringResource(R.string.profundidad),
                 value = uiState.dialogState.treadDepth,
-                keyboardType = KeyboardType.Number,
+                keyboardType = KeyboardType.NumberPassword,
                 isEditable = acquisitionType != 1 && acquisitionType != 2
-            ) { value -> viewModel.onDialogFieldChange { it.copy(treadDepth = value) } }
+            ) { value -> viewModel.onDialogFieldChange { it.copy(treadDepth = value.filter { c -> c.isDigit() }) } }
 
             DialogTextField(
                 label = stringResource(R.string.numero_de_llanta),
@@ -497,6 +498,11 @@ private fun FieldSpinner(
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.Gray
+                )
             )
             ExposedDropdownMenu(
                 expanded = isExpanded,

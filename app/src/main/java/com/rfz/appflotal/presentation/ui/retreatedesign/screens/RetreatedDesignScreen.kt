@@ -51,6 +51,7 @@ fun RetreatedDesignScreen(
 
     LaunchedEffect(Unit) {
         viewModel.setTitle(title)
+        viewModel.loadItems()
     }
 
     LaunchedEffect(true) {
@@ -81,7 +82,7 @@ fun RetreatedDesignScreen(
             ) {
                 DescriptionText(
                     title = stringResource(R.string.profundidad_de_piso),
-                    description = item.treadDepth.toString()
+                    description = "${item.treadDepth} mm"
                 )
                 DescriptionText(
                     title = stringResource(R.string.utilizacion),
@@ -122,10 +123,10 @@ fun RetreatedDesignScreen(
                         )
                     }
                     ItemDialog(
-                        label = stringResource(R.string.profundidad_de_piso),
+                        label = " ${stringResource(R.string.profundidad_de_piso)} (mm)",
                         value = dialogState.value.profundidadPiso,
                         isEmpty = dialogState.value.profundidadPiso.isBlank(),
-                        keyboardType = KeyboardType.Decimal,
+                        keyboardType = KeyboardType.NumberPassword,
                         onValueChange = { description ->
                             viewModel.onDialogFieldChanged(
                                 field = RetreadDesignFields.PROFUNDIDAD_PISO,

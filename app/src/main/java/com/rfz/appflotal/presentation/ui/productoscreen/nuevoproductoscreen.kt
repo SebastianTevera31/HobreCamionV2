@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.productoscreen
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -74,6 +75,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
@@ -265,13 +267,13 @@ fun NuevoProductoScreen(
 
                 val result = productCrudUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
                 if (result.isSuccess) {
+                    showDialog = false
+                    loadProducts()
                     snackbarHostState.showSnackbar(
                         message = result.getOrNull()?.firstOrNull()?.message
                             ?: context.getString(R.string.producto_guardado_exitosamente),
                         duration = SnackbarDuration.Short
                     )
-                    showDialog = false
-                    loadProducts()
                 } else {
                     errorMessage = result.exceptionOrNull()?.message
                         ?: context.getString(R.string.error_al_guardar_el_producto)
@@ -291,12 +293,11 @@ fun NuevoProductoScreen(
     }
 
     LaunchedEffect(errorMessage) {
-        errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
+        if (errorMessage != null) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
             errorMessage = null
         }
     }
-
 
     LaunchedEffect(showDialog) {
         if (showDialog) {
@@ -561,7 +562,7 @@ fun NuevoProductoScreen(
                                             }
                                         ) {
                                             OutlinedTextField(
-                                                value = selectedOriginalDesign?.let { "${it.description} - ${it.model}" }
+                                                value = selectedOriginalDesign?.model
                                                     ?: "",
                                                 onValueChange = {},
                                                 readOnly = true,
@@ -587,7 +588,7 @@ fun NuevoProductoScreen(
                                             ) {
                                                 originalDesigns.forEach { design ->
                                                     DropdownMenuItem(
-                                                        text = { Text("${design.description} - ${design.model}") },
+                                                        text = { Text(design.model) },
                                                         onClick = {
                                                             selectedOriginalDesign = design
                                                             showOriginalDesignMenu = false
@@ -597,6 +598,42 @@ fun NuevoProductoScreen(
                                             }
                                         }
                                     }
+                                }
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        stringResource(R.string.descripcion),
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            color = primaryColor,
+                                            fontWeight = FontWeight.SemiBold
+                                        ),
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+
+                                    OutlinedTextField(
+                                        value = selectedOriginalDesign?.description ?: "",
+                                        onValueChange = { },
+                                        label = { },
+                                        readOnly = true,
+                                        enabled = false,
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = Color.Gray,
+                                            unfocusedBorderColor = Color.LightGray,
+                                            disabledBorderColor = Color.LightGray,
+                                            focusedLabelColor = Color.Gray,
+                                            unfocusedLabelColor = Color.Gray,
+                                            disabledLabelColor = Color.Gray,
+                                            cursorColor = Color.Transparent,
+                                            focusedTextColor = Color.DarkGray,
+                                            unfocusedTextColor = Color.DarkGray,
+                                            disabledTextColor = Color.DarkGray
+                                        ),
+                                        shape = RoundedCornerShape(14.dp)
+                                    )
                                 }
 
                                 Box(

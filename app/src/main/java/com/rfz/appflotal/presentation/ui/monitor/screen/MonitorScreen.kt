@@ -115,56 +115,16 @@ fun MonitorScreen(
     ) { innerPadding ->
         Surface(modifier = Modifier.padding(innerPadding)) {
             if (monitorUiState.showView) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        monitorViewModel.getBitmapImage()
-                        if (selectedOption == MonitorScreenViews.DIAGRAMA) {
-                            DiagramaMonitorScreen(
-                                paymentPlan = paymentPlan,
-                                tireUiState = tireUiState,
-                                image = monitorUiState.imageBitmap,
-                                updateSelectedTire = { selectedTire ->
-                                    monitorViewModel.updateSelectedTire(selectedTire)
-                                },
-                                getSensorData = { sensorId ->
-                                    monitorViewModel.getSensorDataByWheel(sensorId)
-                                },
-                                tires = monitorUiState.listOfTires,
-                                imageDimens = monitorUiState.imageDimen,
-                                onInspectClick = { tire, temp, press ->
-                                    onInspectClick(
-                                        tire,
-                                        temp,
-                                        press
-                                    )
-                                },
-                                onAssemblyClick = { tire ->
-                                    onAssemblyClick(tire)
-                                },
-                                onDisassemblyClick = { tire, temperature, pressure ->
-                                    onDisassemblyClick(tire, temperature, pressure)
-                                },
-                                modifier = Modifier.padding(8.dp),
-                            )
-                        } else {
-                            PositionScreenContent(
-                                paymentPlan = paymentPlan,
-                                monitorViewModel = monitorViewModel,
-                                positionsUiState = positionsUiState,
-                                monitorTireUiState = monitorTireUiState,
-                                listOfTires = monitorUiState.listOfTires
-                            )
-                        }
-                    }
-
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     val isSignalUnknown =
                         monitorUiState.signalIntensity.first == BluetoothSignalQuality.Desconocida
                                 && monitorUiState.monitorId != 0
+                    monitorViewModel.getBitmapImage()
+
                     if (isSignalUnknown) {
                         val text = stringResource(
                             monitorUiState.signalIntensity.first.alertMessage!!
@@ -172,8 +132,44 @@ fun MonitorScreen(
 
                         BluetoothSnackBanner(
                             visible = true,
-                            message = text,
-                            modifier = Modifier.align(Alignment.TopStart)
+                            message = text
+                        )
+                    }
+                    if (selectedOption == MonitorScreenViews.DIAGRAMA) {
+                        DiagramaMonitorScreen(
+                            paymentPlan = paymentPlan,
+                            tireUiState = tireUiState,
+                            image = monitorUiState.imageBitmap,
+                            updateSelectedTire = { selectedTire ->
+                                monitorViewModel.updateSelectedTire(selectedTire)
+                            },
+                            getSensorData = { sensorId ->
+                                monitorViewModel.getSensorDataByWheel(sensorId)
+                            },
+                            tires = monitorUiState.listOfTires,
+                            imageDimens = monitorUiState.imageDimen,
+                            onInspectClick = { tire, temp, press ->
+                                onInspectClick(
+                                    tire,
+                                    temp,
+                                    press
+                                )
+                            },
+                            onAssemblyClick = { tire ->
+                                onAssemblyClick(tire)
+                            },
+                            onDisassemblyClick = { tire, temperature, pressure ->
+                                onDisassemblyClick(tire, temperature, pressure)
+                            },
+                            modifier = Modifier.padding(8.dp),
+                        )
+                    } else {
+                        PositionScreenContent(
+                            paymentPlan = paymentPlan,
+                            monitorViewModel = monitorViewModel,
+                            positionsUiState = positionsUiState,
+                            monitorTireUiState = monitorTireUiState,
+                            listOfTires = monitorUiState.listOfTires
                         )
                     }
                 }

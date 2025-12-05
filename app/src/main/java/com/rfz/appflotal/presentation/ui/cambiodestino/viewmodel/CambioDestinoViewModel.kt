@@ -37,7 +37,7 @@ class CambioDestinoViewModel @Inject constructor(
 
             if (tire.isSuccess && destination.isSuccess) {
                 val destinationList = destination.getOrNull()?.filter {
-                    it.id == 1 || it.id == 3 || it.id == 6
+                    it.id == 1 || it.id == 2 || it.id == 3 || it.id == 6
                 } ?: emptyList()
                 val tireList = tire.getOrNull()?.map { it.toTire() } ?: emptyList()
 
@@ -78,13 +78,14 @@ class CambioDestinoViewModel @Inject constructor(
         uiState.originList.find { it.id == destinationId }?.let {
             val description = when (it.id) {
                 1 -> "Reparar"
+                2 -> "Stock"
                 3 -> "Desechar"
                 6 -> "Renovar"
                 else -> ""
             }
 
             val newDestinationList =
-                uiState.originList.filter { destination -> destination.id != destinationId }
+                uiState.originList.filter { destination -> destination.id != destinationId || destination.id != 2 }
 
             val selectedTire = uiState.tires.filter { tire ->
                 tire.destination == description

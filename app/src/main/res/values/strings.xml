@@ -237,7 +237,7 @@
     <string name="montaje">Montaje</string>
     <string name="error_odometro_inferior">El odómetro no puede ser menor al actual.</string>
     <string name="error_carga_datos">Hubo un error al cargar los datos</string>
-    <string name="montar">MONTAR</string>
+    <string name="montar">Montar</string>
     <string name="eje">Eje</string>
     <string name="detalles_de_llanta">Detalles de la llanta</string>
     <string name="marca_description">Marca: %1$s</string>
@@ -253,7 +253,7 @@
     <string name="error_desmontaje">Ocurrió un error al intentar desmontar la llanta</string>
     <string name="motivo_de_desmontaje">Motivo de desmontaje</string>
     <string name="destino">Destino</string>
-    <string name="desmontar">DESMONTAR</string>
+    <string name="desmontar">Desmontar</string>
     <string name="desmontaje">Desmontaje</string>
     <string name="error_aceptar_terminos">Error al aceptar los términos: %1$s</string>
     <string name="error_establecer_sesion">Ocurrió un error al establecer su sesión. Por favor, inténtelo de nuevo.</string>
@@ -334,6 +334,8 @@
     <string name="Campos_requeridos_por_completar">Todos los campos requeridos deben estar completos</string>
     <string name="dot_excedio_caracteres">El DOT debe ser menor o igual a 10 caracteres</string>
     <string name="numero_llanta_excedio_caracteres">El número de llanta debe ser menor o igual a 15 caracteres</string>
+    <string name="solo_puedes_ingresar_numeros">Solo puedes ingresar números</string>
+    <string name="reporte">Reporte</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

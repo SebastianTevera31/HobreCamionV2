@@ -47,10 +47,10 @@ class InspectionViewModel @Inject constructor(
 
     fun loadData() = viewModelScope.launch {
         _uiState.value = InspectionUiState.Loading
-        val tireReportDeferred = async { catalogUseCase.onGetTireReport() }
+        val tireReportTypeCatalogDeferred = async { catalogUseCase.onGetTireReport() }
         val lastOdometerDeferred = async { hombreCamionRepository.getOdometer() }
 
-        val tireReport = tireReportDeferred.await()
+        val tireReportType = tireReportTypeCatalogDeferred.await()
         val lastOdometer = lastOdometerDeferred.await()
         val odometerInspectionDate = lastOdometer.dateLastOdometer
 
@@ -72,11 +72,24 @@ class InspectionViewModel @Inject constructor(
             }
         } else false
 
-        responseHelper(tireReport) { opciones ->
+        responseHelper(tireReportType) { opciones ->
+
+            val mainOrder = listOf(1, 27, 6, 38, 9)
+            val mainIds = mainOrder.toSet()
+
+            val (mainPriority, secondaryPriority) = opciones
+                .orEmpty()
+                .partition { it.idTireInspectionReport in mainIds }
+
+            val orderedMain = mainPriority.sortedBy { option ->
+                mainOrder.indexOf(option.idTireInspectionReport)
+            }
+
+            val list = orderedMain + secondaryPriority
+
             _uiState.value =
                 InspectionUiState.Success(
-                    inspectionList = opciones?.map { it.toCatalog() }
-                        ?: emptyList(),
+                    inspectionList = list.map { it.toCatalog() },
                     lastOdometer = lastOdometer.odometer,
                     isOdometerEditable = isOdometerEditable
                 )

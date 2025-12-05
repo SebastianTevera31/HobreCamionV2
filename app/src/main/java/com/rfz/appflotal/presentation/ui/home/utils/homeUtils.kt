@@ -47,16 +47,6 @@ val menuItems = listOf(
         iconRes = R.drawable.llanta_desecho
     ),
     MenuItem(
-        title = R.string.mover_a_almacen,
-        route = NavScreens.REPARARRENOVAR,
-        iconRes = R.drawable.ingreso_llantas
-    ),
-    MenuItem(
-        title = R.string.cambio_de_destino,
-        route = NavScreens.CAMBIO_DESTINO,
-        iconRes = R.drawable.cambiar_destino
-    ),
-    MenuItem(
         R.string.products,
         NavScreens.PRODUCTOS,
         R.drawable.ic_products
@@ -66,6 +56,17 @@ val menuItems = listOf(
         NavScreens.REGISTRO_LLANTAS,
         R.drawable.ic_tire_register
     ),
+    MenuItem(
+        title = R.string.mover_a_almacen,
+        route = NavScreens.REPARARRENOVAR,
+        iconRes = R.drawable.ingreso_llantas
+    ),
+    MenuItem(
+        title = R.string.cambio_de_destino,
+        route = NavScreens.CAMBIO_DESTINO,
+        iconRes = R.drawable.cambiar_destino
+    ),
+
     MenuItem(
         title = R.string.monitoreo,
         route = HombreCamionScreens.MONITOR.name,

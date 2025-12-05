@@ -3,7 +3,6 @@ package com.rfz.appflotal.data.model.tire.response
 import com.google.gson.annotations.SerializedName
 
 data class TireListResponse(
-
     @SerializedName("id_tire") val idTire: Int,
     @SerializedName("fld_provider") val provider: String,
     @SerializedName("fld_size") val size: String,

@@ -44,7 +44,8 @@ fun InspectionContent(
                 selectedId = form.selectedReportId,
                 onSelected = { form.selectedReportId = it },
                 errorText = form.selectedReportIdError,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                label = stringResource(R.string.reporte)
             )
             Spacer(Modifier.height(dimensionResource(R.dimen.thin_dimen)))
         }
@@ -132,7 +133,7 @@ fun InspectionContent(
                         .widthIn(min = 220.dp)
                         .heightIn(min = 56.dp)
                         .weight(1f),
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.NumberPassword
                 )
 
                 NumberField(
@@ -144,7 +145,7 @@ fun InspectionContent(
                         .widthIn(min = 220.dp)
                         .heightIn(min = 56.dp)
                         .weight(1f),
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.NumberPassword
                 )
 
                 NumberField(
@@ -156,7 +157,7 @@ fun InspectionContent(
                         .widthIn(min = 220.dp)
                         .heightIn(min = 56.dp)
                         .weight(1f),
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.NumberPassword
                 )
 
                 NumberField(
@@ -168,7 +169,7 @@ fun InspectionContent(
                         .widthIn(min = 220.dp)
                         .heightIn(min = 56.dp)
                         .weight(1f),
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.NumberPassword
                 )
             }
             if (form.oneTreadDepthAtLeast != null) {

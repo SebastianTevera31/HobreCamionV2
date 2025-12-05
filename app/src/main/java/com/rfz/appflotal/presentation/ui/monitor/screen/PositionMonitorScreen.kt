@@ -58,7 +58,7 @@ fun CurrentPositionDataView(
                                 .fillMaxWidth()
                                 .height(32.dp),
                             verticalAlignment = Alignment.CenterVertically
-                       ) {
+                        ) {
                             Text(
                                 text = pluralStringResource(R.plurals.posicion_tag, 1),
                                 style = MaterialTheme.typography.titleSmall,
@@ -107,10 +107,10 @@ fun CurrentPositionDataView(
                     }
                 }
             } else {
-                NoPositionDataView(R.string.no_ruedas_activas)
+                NoPositionDataView(R.string.no_se_encontraron_resultados)
             }
         } else {
-            NoPositionDataView(R.string.no_ruedas_activas)
+            NoPositionDataView(R.string.no_se_encontraron_resultados)
         }
     }
 }
