@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -75,6 +76,15 @@ android {
 
 
 dependencies {
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+
+    // Import the Firebase Messaging
+    implementation("com.google.firebase:firebase-messaging")
+
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation("com.google.firebase:firebase-analytics")
+
     implementation("androidx.hilt:hilt-work:1.3.0")
     implementation("androidx.hilt:hilt-compiler:1.3.0")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
@@ -177,5 +187,4 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
 }

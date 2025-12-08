@@ -38,13 +38,3 @@ abstract class AssemblyTireRepository {
     @Singleton
     abstract fun bindRepairRepository(impl: RepairRepositoryImpl): RepairRepository
 }
-
-@Module
-@InstallIn(SingletonComponent::class)
-object WorkManagerModule {
-    @Provides
-    @Singleton
-    fun provideWorkManager(@ApplicationContext contex: Context): WorkManager {
-        return WorkManager.getInstance(contex)
-    }
-}

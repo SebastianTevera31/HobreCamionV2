@@ -343,6 +343,8 @@
     <string name="share_feedback">Enviar comentarios</string>
     <string name="error_enviar_comentarios">Ocurrio un error al enviar sus comentarios</string>
     <string name="gracias_por_su_comentario">Gracias por su comentario</string>
+    <string name="app_fcm_channel">app_fcm_channel</string>
+    <string name="app_fcm_flotal_channel">app_fcm_flotal_channel</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

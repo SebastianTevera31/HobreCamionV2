@@ -2,6 +2,8 @@ package com.rfz.appflotal.presentation.ui.inicio.ui
 
 import android.Manifest
 import android.app.ActivityManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
 import android.content.pm.ActivityInfo
@@ -11,6 +13,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -32,12 +35,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.Firebase
+import com.google.firebase.messaging.messaging
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
@@ -223,15 +230,52 @@ class InicioActivity : ComponentActivity() {
     @Inject
     lateinit var baseUseCase: BaseUseCase
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Toast.makeText(this, "Notifications permission granted", Toast.LENGTH_SHORT)
+                .show()
+        } else {
+            Toast.makeText(
+                this,
+                "FCM can't post notifications without POST_NOTIFICATIONS permission",
+                Toast.LENGTH_LONG,
+            ).show()
+        }
+    }
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create channel to show notifications.
+            val channelId = getString(R.string.app_fcm_channel)
+            val channelName = getString(R.string.app_fcm_flotal_channel)
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager?.createNotificationChannel(
+                NotificationChannel(
+                    channelId,
+                    channelName,
+                    NotificationManager.IMPORTANCE_LOW,
+                ),
+            )
+        }
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         setContent {
             var allGranted by remember { mutableStateOf(false) }
             val navController = rememberNavController()
+            val context = LocalContext.current
+
+            val postNotificationGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
 
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -247,6 +291,44 @@ class InicioActivity : ComponentActivity() {
                     Log.d("Permiso", "❌ Permiso denegado")
                 }
             }
+
+            intent.extras?.let {
+                for (key in it.keySet()) {
+                    val value = intent.extras?.getString(key)
+                    Log.d("SERVICIO ENLINEA", "Key: $key Value: $value")
+                }
+            }
+
+            Firebase.messaging.token.addOnCompleteListener(
+                OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        Log.w(
+                            "INICIO_ACTIVITY",
+                            "Fetching FCM registration token failed",
+                            task.exception
+                        )
+                        return@OnCompleteListener
+                    }
+
+                    // Get new FCM registration token
+                    val token = task.result
+
+                    // Log and toast
+                    val msg = "Messaging Token $token"
+                    Log.d("INICIO_ACTIVITY", msg)
+                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                },
+            )
+
+            Firebase.messaging.subscribeToTopic("weather")
+                .addOnCompleteListener { task ->
+                    var msg = "Messaging Suscribed"
+                    if (!task.isSuccessful) {
+                        msg = "Messaging Suscribed Failed"
+                    }
+                    Log.d("INICIO_ACTIVITY", msg)
+                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                }
 
             HombreCamionTheme {
                 LocalizedApp {
@@ -264,6 +346,10 @@ class InicioActivity : ComponentActivity() {
                             false
                         )
                         val userData by inicioScreenViewModel.userData.observeAsState()
+
+                        if (!postNotificationGranted) {
+                            askNotificationPermission()
+                        }
 
                         LaunchedEffect(Unit) {
                             loginViewModel.navigationEvent.collect { event ->
@@ -779,7 +865,8 @@ class InicioActivity : ComponentActivity() {
 
 
                             composable(route = NavScreens.COMENTARIOS) {
-                                val msgOperationState = homeViewModel.messageOperationState.collectAsState()
+                                val msgOperationState =
+                                    homeViewModel.messageOperationState.collectAsState()
                                 ShareFeedbackScreen(
                                     onShare = { feedback -> homeViewModel.onSendFeedback(feedback) },
                                     onBack = { navController.popBackStack() },
@@ -792,6 +879,20 @@ class InicioActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun askNotificationPermission() {
+        // This is only necessary for API Level > 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // FCM SDK (and your app) can post notifications.
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
 }
 
 fun getRequiredPermissions(): Array<String> {
@@ -799,10 +900,12 @@ fun getRequiredPermissions(): Array<String> {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         // Android 12+
+        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         permissions.add(Manifest.permission.BLUETOOTH_SCAN)
         permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
     } else {
         // Android 11 o menor
+        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 

@@ -51,6 +51,10 @@
         android:theme="@style/Theme.ProyectoFscSoft"
         tools:targetApi="31">
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/app_fcm_channel" />
+
         <activity
             android:name=".presentation.ui.inicio.ui.InicioActivity"
             android:exported="true"
@@ -67,8 +71,11 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="connectedDevice"
-            android:stopWithTask="false"
-            />
+            android:stopWithTask="false" />
+
+        <service
+            android:name=".data.network.Messaging.MyFirebaseMessagingService"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -84,8 +91,7 @@
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
-            tools:node="remove">
-        </provider>
+            tools:node="remove" />
 
         <activity
             android:name="com.canhub.cropper.CropImageActivity"

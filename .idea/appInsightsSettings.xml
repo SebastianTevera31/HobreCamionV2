@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.rfz.appflotal.debug" />
+                  <option name="mobileSdkAppId" value="1:129041447418:android:51a8dead8d00c900fb8c43" />
+                  <option name="projectId" value="flotal-a1199" />
+                  <option name="projectNumber" value="129041447418" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
