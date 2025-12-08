@@ -345,6 +345,12 @@
     <string name="reporte">Report</string>
     <string name="error_valor_inferior_0">The value cannot be less than 0</string>
     <string name="error_solo_numeros_profunidad_costo">You can only enter numbers in the depth and cost fields</string>
+    <string name="enter_your_feedback_here">Enter your feedback here...</string>
+    <string name="submit">Submit</string>
+    <string name="share_feedback">Share feedback</string>
+    <string name="error_enviar_comentarios">An error occurred while sending your feedback</string>
+    <string name="gracias_por_su_comentario">Thank you for your feedback</string>
+
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

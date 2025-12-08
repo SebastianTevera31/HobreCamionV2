@@ -118,7 +118,7 @@ class RepararRenovarViewModel @Inject constructor(
     fun sendTire() =
         viewModelScope.launch {
             _uiState.update { it.copy(operationStatus = OperationStatus.Loading) }
-            val nowUtc: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC)
+            val nowUtc: OffsetDateTime = OffsetDateTime.now()
             val uiState = _uiState.value
 
             val tireId = uiState.selectedTire?.id

@@ -182,7 +182,7 @@ fun RepararRenovarView(
         },
         bottomBar = {
             CompleteFormButton(
-                textButton = stringResource(R.string.enviar_rueda_almacen),
+                text = stringResource(R.string.enviar_rueda_almacen),
                 isValid = areFormValid,
                 onFinish = {
                     onSendTireToDestination()

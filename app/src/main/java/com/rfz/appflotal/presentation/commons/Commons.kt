@@ -115,7 +115,7 @@ fun SimpleTopBar(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.regresar),
                         tint = Color.White,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(40.dp)
                     )
                 }
             }

@@ -17,6 +17,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Surface
@@ -73,6 +77,7 @@ import com.rfz.appflotal.presentation.ui.cambiodestino.viewmodel.CambioDestinoVi
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.DisassemblyTireScreen
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
+import com.rfz.appflotal.presentation.ui.home.screen.ShareFeedbackScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
 import com.rfz.appflotal.presentation.ui.inicio.viewmodel.InicioScreenViewModel
@@ -353,7 +358,31 @@ class InicioActivity : ComponentActivity() {
                         }
 
                         NavHost(
-                            navController = navController, startDestination = NavScreens.LOADING
+                            navController = navController, startDestination = NavScreens.LOADING,
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    animationSpec = tween(700)
+                                ) + fadeIn(animationSpec = tween(700))
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    animationSpec = tween(700)
+                                ) + fadeOut(animationSpec = tween(700))
+                            },
+                            popEnterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    animationSpec = tween(700)
+                                ) + fadeIn(animationSpec = tween(700))
+                            },
+                            popExitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    animationSpec = tween(700)
+                                ) + fadeOut(animationSpec = tween(700))
+                            }
                         ) {
                             composable(NavScreens.HOME) {
                                 // Efecto: si ya están concedidos, arrancar servicio automáticamente
@@ -745,6 +774,16 @@ class InicioActivity : ComponentActivity() {
                                 CambioDestinoScreen(
                                     onBack = { navController.popBackStack() },
                                     viewModel = cambioDestinoViewModel,
+                                )
+                            }
+
+
+                            composable(route = NavScreens.COMENTARIOS) {
+                                val msgOperationState = homeViewModel.messageOperationState.collectAsState()
+                                ShareFeedbackScreen(
+                                    onShare = { feedback -> homeViewModel.onSendFeedback(feedback) },
+                                    onBack = { navController.popBackStack() },
+                                    messageOperationState = msgOperationState.value,
                                 )
                             }
                         }

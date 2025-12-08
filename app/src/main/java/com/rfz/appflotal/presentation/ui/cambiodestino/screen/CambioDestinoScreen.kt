@@ -144,7 +144,7 @@ fun CambioDestinoView(
         },
         bottomBar = {
             CompleteFormButton(
-                textButton = stringResource(R.string.enviar_rueda),
+                text = stringResource(R.string.enviar_rueda),
                 isValid = isValid,
                 onFinish = onSendTireToDestination
             )

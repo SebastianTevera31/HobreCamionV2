@@ -14,7 +14,7 @@ android {
         applicationId = "com.rfz.appflotal"
         minSdk = 28
         targetSdk = 35
-        versionCode = 8
+        versionCode = 7
         versionName = "2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -115,6 +115,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-saveable:1.9.4")
     implementation("androidx.compose.foundation:foundation:1.9.4")
     implementation("androidx.compose.foundation:foundation:1.9.5")
+    implementation("androidx.compose.animation:animation:1.10.0")
 
     kapt("androidx.room:room-compiler:2.7.2")
 

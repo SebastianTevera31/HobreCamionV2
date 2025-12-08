@@ -167,7 +167,7 @@ fun TireWasteView(
         },
         bottomBar = {
             CompleteFormButton(
-                textButton = stringResource(R.string.enviar_a_desecho),
+                text = stringResource(R.string.enviar_a_desecho),
                 isValid = areFormValid,
                 onFinish = {
                     onSendTireToWastePile(

@@ -61,7 +61,7 @@ class TireWasteViewModel @Inject constructor(
     }
 
     fun sendTireToTireWastePile(wasteReportId: Int, tireId: Int) = viewModelScope.launch {
-        val nowUtc: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC)
+        val nowUtc: OffsetDateTime = OffsetDateTime.now()
         val result = runCatching {
             wasteRepository.sendTireToScrap(
                 response = ScrapTirePile(

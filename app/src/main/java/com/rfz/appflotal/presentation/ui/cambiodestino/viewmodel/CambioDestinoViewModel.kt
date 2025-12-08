@@ -27,6 +27,7 @@ class CambioDestinoViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(CambioDestinoUiState())
     val uiState = _uiState.asStateFlow()
 
+
     fun loadData() {
         viewModelScope.launch {
             val tireDeferred = async { tireUseCase() }
@@ -127,7 +128,7 @@ class CambioDestinoViewModel @Inject constructor(
 
     fun onSendTireToDestination() {
         viewModelScope.launch {
-            val nowUtc: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC)
+            val nowUtc: OffsetDateTime = OffsetDateTime.now()
             val tireId = _uiState.value.form.selectedTire?.id
             val destinationId = _uiState.value.form.selectedDestination?.id
             val reason = _uiState.value.form.reason

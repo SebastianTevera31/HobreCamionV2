@@ -59,7 +59,7 @@ fun SectionHeader(text: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun CompleteFormButton(
-    textButton: String,
+    text: String,
     modifier: Modifier = Modifier,
     isValid: Boolean,
     onFinish: () -> Unit,
@@ -72,7 +72,5 @@ fun CompleteFormButton(
             .fillMaxWidth()
             .height(52.dp),
         shape = MaterialTheme.shapes.large
-    ) {
-        Text(textButton)
-    }
+    ) { Text(text) }
 }

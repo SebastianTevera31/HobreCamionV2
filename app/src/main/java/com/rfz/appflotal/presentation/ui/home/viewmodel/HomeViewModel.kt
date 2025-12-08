@@ -6,8 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.AppLocale
-import com.rfz.appflotal.data.model.database.AppHCEntity
+import com.rfz.appflotal.data.model.app_utilities.UserOpinion
 import com.rfz.appflotal.data.model.languaje.LanguageResponse
+import com.rfz.appflotal.data.repository.app_utilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
 import java.util.Locale
 import javax.inject.Inject
 
@@ -26,17 +28,23 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val hombreCamionRepository: HombreCamionRepository,
     private val languageUseCase: LanguajeUseCase,
-    @ApplicationContext private val context: Context
+    private val appUtilitiesRepository: AppUtilitiesRepositoryImpl,
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    private val _messageOperationState: MutableStateFlow<OperationStatus> =
+        MutableStateFlow(OperationStatus.Loading)
+    val messageOperationState = _messageOperationState.asStateFlow()
 
     private val _homeCheckInMessage = MutableLiveData<String>()
     val homeCheckInMessage: LiveData<String> = _homeCheckInMessage
 
     suspend fun logout() {
         hombreCamionRepository.clearUserData()
+        _messageOperationState.value = OperationStatus.Loading
         _uiState.value = HomeUiState()
     }
 
@@ -55,7 +63,7 @@ class HomeViewModel @Inject constructor(
 
                 if (user != null && language != null) {
                     languageUseCase("Bearer ${user.fld_token}", language)
-                    
+
                     // Notificar a la API el idioma de la app
                     changeLanguage(AppLocale.currentLocale.value.language)
 
@@ -118,5 +126,26 @@ class HomeViewModel @Inject constructor(
         } else {
             Result.failure(Exception("Invalid language selection"))
         }
+    }
+
+    fun onSendFeedback(feedback: String) {
+        viewModelScope.launch {
+            val result = appUtilitiesRepository.sendFeedback(
+                UserOpinion(
+                    opinion = feedback,
+                    registerDate = OffsetDateTime.now()
+                )
+            )
+
+            result.onSuccess {
+                _messageOperationState.value = OperationStatus.Success
+            }.onFailure {
+                _messageOperationState.value = OperationStatus.Error
+            }
+        }
+    }
+
+    fun cleanMessageStatus() {
+        _messageOperationState.value = OperationStatus.Loading
     }
 }

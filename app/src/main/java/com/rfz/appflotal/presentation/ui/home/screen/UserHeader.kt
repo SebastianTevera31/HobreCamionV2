@@ -102,3 +102,11 @@ fun UserTitlePreview() {
         UserHeader(paymentPlan = PaymentPlanType.Free, userName = "FK", plates = "KFKFFK") {}
     }
 }
+
+@Composable
+@Preview(showSystemUi = true, showBackground = true)
+fun UserTitleCompletePreview() {
+    HombreCamionTheme {
+        UserHeader(paymentPlan = PaymentPlanType.Complete, userName = "FK", plates = "KFKFFK") {}
+    }
+}

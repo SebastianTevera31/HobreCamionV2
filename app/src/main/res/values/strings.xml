@@ -338,6 +338,11 @@
     <string name="reporte">Reporte</string>
     <string name="error_valor_inferior_0">El valor no puede ser menor o igual a 0</string>
     <string name="error_solo_numeros_profunidad_costo">Solo puede ingresar números en los campos de profundidad y costo</string>
+    <string name="enter_your_feedback_here">Escribe tu opinión aquí...</string>
+    <string name="submit">Enviar</string>
+    <string name="share_feedback">Enviar comentarios</string>
+    <string name="error_enviar_comentarios">Ocurrio un error al enviar sus comentarios</string>
+    <string name="gracias_por_su_comentario">Gracias por su comentario</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

@@ -174,7 +174,7 @@ fun AssemblyTireView(
         bottomBar = {
             if (uiState.screenLoadStatus == OperationStatus.Success) {
                 CompleteFormButton(
-                    textButton = stringResource(R.string.montar).uppercase(),
+                    text = stringResource(R.string.montar).uppercase(),
                     isValid = isFormValid
                 ) {
                     onAssembly(odometer, axleSelected!!.id, tireSelected!!.id)
