@@ -1,4 +1,4 @@
-package com.rfz.appflotal.data.repository.app_utilities
+package com.rfz.appflotal.data.repository.apputilities
 
 import com.rfz.appflotal.data.model.app_utilities.UserOpinion
 import com.rfz.appflotal.data.model.app_utilities.toDto

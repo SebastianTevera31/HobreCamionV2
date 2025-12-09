@@ -2,7 +2,6 @@ package com.rfz.appflotal.di.workers
 
 import android.content.Context
 import androidx.work.WorkManager
-import com.rfz.appflotal.data.network.Messaging.MessagingWorker
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

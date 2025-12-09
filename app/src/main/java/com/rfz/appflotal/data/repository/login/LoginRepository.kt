@@ -12,8 +12,8 @@ import retrofit2.Response
 import javax.inject.Inject
 
 class LoginRepository @Inject constructor(private val loginService: LoginService) {
-    suspend fun doLogin(user: String, password: String): Response<List<LoginResponse>> {
-        return loginService.doLogin(LoginDto(user, password))
+    suspend fun doLogin(user: String, password: String, fcmToken: String): Response<List<LoginResponse>> {
+        return loginService.doLogin(LoginDto(user, password, fcmToken))
     }
 
     suspend fun doRegisterUser(

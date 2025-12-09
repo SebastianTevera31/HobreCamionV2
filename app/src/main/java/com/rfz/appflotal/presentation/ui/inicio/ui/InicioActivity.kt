@@ -271,11 +271,13 @@ class InicioActivity : ComponentActivity() {
             val navController = rememberNavController()
             val context = LocalContext.current
 
-            val postNotificationGranted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-
+            val postNotificationGranted =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                } else false
 
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -292,46 +294,32 @@ class InicioActivity : ComponentActivity() {
                 }
             }
 
-            intent.extras?.let {
-                for (key in it.keySet()) {
-                    val value = intent.extras?.getString(key)
-                    Log.d("SERVICIO ENLINEA", "Key: $key Value: $value")
-                }
-            }
+//            intent.extras?.let {
+//                for (key in it.keySet()) {
+//                    val value = intent.extras?.getString(key)
+//                    Log.d("SERVICIO ENLINEA", "Key: $key Value: $value")
+//                }
+//            }
 
-            Firebase.messaging.token.addOnCompleteListener(
-                OnCompleteListener { task ->
-                    if (!task.isSuccessful) {
-                        Log.w(
-                            "INICIO_ACTIVITY",
-                            "Fetching FCM registration token failed",
-                            task.exception
-                        )
-                        return@OnCompleteListener
-                    }
+            val appVersionData = homeViewModel.updateMessage.collectAsState()
 
-                    // Get new FCM registration token
-                    val token = task.result
-
-                    // Log and toast
-                    val msg = "Messaging Token $token"
-                    Log.d("INICIO_ACTIVITY", msg)
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                },
-            )
-
-            Firebase.messaging.subscribeToTopic("weather")
-                .addOnCompleteListener { task ->
-                    var msg = "Messaging Suscribed"
-                    if (!task.isSuccessful) {
-                        msg = "Messaging Suscribed Failed"
-                    }
-                    Log.d("INICIO_ACTIVITY", msg)
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                }
 
             HombreCamionTheme {
                 LocalizedApp {
+                    if (!postNotificationGranted) {
+                        askNotificationPermission()
+                    }
+
+                    appVersionData.value?.let { msg ->
+                        when (msg.tipo) {
+                            0 -> {}
+                            1 -> {}
+                            2 -> {}
+                            3 -> {}
+                            else -> {}
+                        }
+                    }
+
                     Surface(
                         modifier = Modifier.fillMaxWidth(), color = backgroundLight
                     ) {
@@ -346,10 +334,6 @@ class InicioActivity : ComponentActivity() {
                             false
                         )
                         val userData by inicioScreenViewModel.userData.observeAsState()
-
-                        if (!postNotificationGranted) {
-                            askNotificationPermission()
-                        }
 
                         LaunchedEffect(Unit) {
                             loginViewModel.navigationEvent.collect { event ->

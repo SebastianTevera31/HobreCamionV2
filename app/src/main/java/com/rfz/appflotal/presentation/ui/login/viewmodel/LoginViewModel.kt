@@ -6,7 +6,6 @@ import android.content.Context
 import android.os.Build
 import android.util.Patterns
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.copy
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,6 +13,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Firebase
+import com.google.firebase.messaging.messaging
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.LBEncryptionUtils
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
@@ -29,7 +30,6 @@ import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
-import com.rfz.appflotal.presentation.ui.inicio.ui.arePermissionsGranted
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -121,43 +121,57 @@ class LoginViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("HardwareIds")
     fun onLoginSelected(ctx: Context) {
-        viewModelScope.launch {
-            showProgressDialog()
-            _isLoading.value = true
-            _loginState.value = Loading
+        showProgressDialog()
+        _isLoading.value = true
+        _loginState.value = Loading
 
-            try {
-                if (!Patterns.EMAIL_ADDRESS.matcher(usuario.value!!).matches()) {
-                    _loginState.value = Error(ctx.getString(R.string.error_invalid_email))
-                    _loginMessage.value = ctx.getString(R.string.error_invalid_email)
-                } else {
-
-                    val user = LBEncryptionUtils.encrypt(usuario.value!!)
-                    val pass = LBEncryptionUtils.encrypt(password.value!!)
-
-                    when (val result = loginUseCase.doLogin(user, pass, ctx)) {
-                        is Result.Success -> {
-                            handleLoginResponse(
-                                result.data,
-                                ctx = ctx
-                            )
-                        }
-
-                        is Result.Failure -> {
+        try {
+            if (!Patterns.EMAIL_ADDRESS.matcher(usuario.value!!).matches()) {
+                _loginState.value = Error(ctx.getString(R.string.error_invalid_email))
+                _loginMessage.value = ctx.getString(R.string.error_invalid_email)
+            } else {
+                Firebase.messaging.token
+                    .addOnCompleteListener { task ->
+                        if (!task.isSuccessful) {
                             _loginState.value =
-                                Error("Unexpected error")
-                            _loginMessage.value = "Authentication error"
+                                Error(context.getString(R.string.error_en_el_servidor))
+                            return@addOnCompleteListener
                         }
 
-                        Result.Loading -> {}
+                        val token = task.result
+                        loginRequest(token)
                     }
+            }
+        } catch (e: Exception) {
+            _loginState.value = Error("Unexpected error")
+            _loginMessage.value = "Connection error"
+        } finally {
+            _isLoading.value = false
+            dismissProgressDialog()
+        }
+    }
+
+    private fun loginRequest(fcmToken: String) {
+        viewModelScope.launch {
+
+            val user = LBEncryptionUtils.encrypt(usuario.value!!)
+            val pass = LBEncryptionUtils.encrypt(password.value!!)
+
+            when (val result = loginUseCase.doLogin(user, pass, fcmToken, context)) {
+                is Result.Success -> {
+                    handleLoginResponse(
+                        result.data,
+                        ctx = context
+                    )
                 }
-            } catch (e: Exception) {
-                _loginState.value = Error("Unexpected error")
-                _loginMessage.value = "Connection error"
-            } finally {
-                _isLoading.value = false
-                dismissProgressDialog()
+
+                is Result.Failure -> {
+                    _loginState.value =
+                        Error("Unexpected error")
+                    _loginMessage.value = "Authentication error"
+                }
+
+                Result.Loading -> {}
             }
         }
     }

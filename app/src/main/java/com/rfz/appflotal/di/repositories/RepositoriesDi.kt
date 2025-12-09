@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.work.WorkManager
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepositoryImpl
+import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepository
+import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
 import com.rfz.appflotal.data.repository.repair.RepairRepository
 import com.rfz.appflotal.data.repository.repair.RepairRepositoryImpl
 import com.rfz.appflotal.data.repository.tire.TireRepository
@@ -37,4 +39,8 @@ abstract class AssemblyTireRepository {
     @Binds
     @Singleton
     abstract fun bindRepairRepository(impl: RepairRepositoryImpl): RepairRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRepositoryFscMessaging(impl: AppUpdateMessageRepositoryImpl): AppUpdateMessageRepository
 }

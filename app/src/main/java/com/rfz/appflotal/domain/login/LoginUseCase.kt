@@ -18,10 +18,11 @@ class LoginUseCase @Inject constructor(
     suspend fun doLogin(
         usuario: String,
         password: String,
+        fcmToken: String,
         ctx: Context,
     ): Result<LoginResponse> {
         return try {
-            val response = repository.doLogin(usuario, password)
+            val response = repository.doLogin(usuario, password, fcmToken)
             if (response.isSuccessful) {
                 response.body()?.firstOrNull()?.let { loginResponse ->
                     Result.Success(loginResponse)

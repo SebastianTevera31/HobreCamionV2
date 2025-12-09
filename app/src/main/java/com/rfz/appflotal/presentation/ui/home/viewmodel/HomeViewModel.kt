@@ -8,16 +8,19 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.app_utilities.UserOpinion
 import com.rfz.appflotal.data.model.languaje.LanguageResponse
-import com.rfz.appflotal.data.repository.app_utilities.AppUtilitiesRepositoryImpl
+import com.rfz.appflotal.data.repository.apputilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
+import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -29,6 +32,7 @@ class HomeViewModel @Inject constructor(
     private val hombreCamionRepository: HombreCamionRepository,
     private val languageUseCase: LanguajeUseCase,
     private val appUtilitiesRepository: AppUtilitiesRepositoryImpl,
+    private val appUpdateRepository: AppUpdateMessageRepositoryImpl,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -38,6 +42,10 @@ class HomeViewModel @Inject constructor(
     private val _messageOperationState: MutableStateFlow<OperationStatus> =
         MutableStateFlow(OperationStatus.Loading)
     val messageOperationState = _messageOperationState.asStateFlow()
+
+    val updateMessage = appUpdateRepository.updateFlow.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(), null
+    )
 
     private val _homeCheckInMessage = MutableLiveData<String>()
     val homeCheckInMessage: LiveData<String> = _homeCheckInMessage
@@ -125,6 +133,12 @@ class HomeViewModel @Inject constructor(
             }
         } else {
             Result.failure(Exception("Invalid language selection"))
+        }
+    }
+
+    fun consumeMessage() {
+        viewModelScope.launch {
+            appUpdateRepository.clear()
         }
     }
 

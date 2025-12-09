@@ -1,4 +1,4 @@
-package com.rfz.appflotal.data.network.Messaging
+package com.rfz.appflotal.data.network.messaging
 
 import android.content.Context
 import android.util.Log
