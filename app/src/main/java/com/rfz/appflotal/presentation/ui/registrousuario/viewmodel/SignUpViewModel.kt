@@ -11,11 +11,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Firebase
+import com.google.firebase.messaging.messaging
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.LBEncryptionUtils
 import com.rfz.appflotal.data.model.forms.VehicleFormModel
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
+import com.rfz.appflotal.data.model.login.response.LoginState.Error
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -26,6 +30,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpViews
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -40,7 +45,8 @@ class SignUpViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val catalogUseCase: CatalogUseCase,
     private val addTaskUseCase: AddTaskUseCase,
-    private val mapper: AppFlotalMapper
+    private val mapper: AppFlotalMapper,
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private var _signUpUiState: MutableStateFlow<SignUpUiState> = MutableStateFlow(SignUpUiState())
@@ -188,34 +194,48 @@ class SignUpViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("HardwareIds")
     fun onLogin(ctx: Context) {
-        viewModelScope.launch {
-            loginRequestStatus = Result.Loading
-            try {
-                val email = signUpUiState.value.profileData.email
-                val password = signUpUiState.value.profileData.password
+        loginRequestStatus = Result.Loading
+        try {
 
-                // Vaciar estado
-                cleanSignUpData()
+            // Vaciar estado
+            cleanSignUpData()
 
-                when (val result = loginUseCase.doLogin(
-                    LBEncryptionUtils.encrypt(email),
-                    LBEncryptionUtils.encrypt(password),
-                    ctx
-                )) {
-                    is Result.Success -> {
-                        handleLoginResponse(result.data)
-                        loginRequestStatus = result
-                    }
-
-                    is Result.Failure -> {
+            Firebase.messaging.token
+                .addOnCompleteListener { task ->
+                    if (!task.isSuccessful) {
                         loginRequestStatus = Result.Failure(Exception("Authentication error"))
+                        return@addOnCompleteListener
                     }
 
-                    Result.Loading -> Result.Loading
+                    val token = task.result
+                    loginRequest(token)
                 }
-            } catch (e: Exception) {
-                Log.e("SignUpViewModel", "${e.message}")
-                loginRequestStatus = Result.Failure(Exception("Error de conexion"))
+        } catch (e: Exception) {
+            Log.e("SignUpViewModel", "${e.message}")
+            loginRequestStatus = Result.Failure(Exception("Error de conexion"))
+        }
+    }
+
+    private fun loginRequest(token: String){
+        viewModelScope.launch {
+            val email = signUpUiState.value.profileData.email
+            val password = signUpUiState.value.profileData.password
+            when (val result = loginUseCase.doLogin(
+                LBEncryptionUtils.encrypt(email),
+                LBEncryptionUtils.encrypt(password),
+                token,
+                context
+            )) {
+                is Result.Success -> {
+                    handleLoginResponse(result.data)
+                    loginRequestStatus = result
+                }
+
+                is Result.Failure -> {
+                    loginRequestStatus = Result.Failure(Exception("Authentication error"))
+                }
+
+                Result.Loading -> Result.Loading
             }
         }
     }

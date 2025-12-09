@@ -8,6 +8,7 @@ import com.rfz.appflotal.data.model.fcmessaging.AppUpdateMessage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -40,7 +41,7 @@ class AppUpdateMessageRepositoryImpl @Inject constructor(@param:ApplicationConte
     }
 
     companion object {
-        private val APP_UPDATE_KEY = stringPreferencesKey("update_message")
+        private val APP_UPDATE_KEY = stringPreferencesKey("payload")
     }
 
 }

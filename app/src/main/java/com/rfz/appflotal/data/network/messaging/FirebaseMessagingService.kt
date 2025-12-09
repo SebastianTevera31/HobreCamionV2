@@ -15,8 +15,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MyFirebaseMessagingService @Inject constructor(private val appUpdateMessageRepository: AppUpdateMessageRepositoryImpl) :
-    FirebaseMessagingService() {
+class MyFirebaseMessagingService: FirebaseMessagingService() {
+    @Inject
+    lateinit var appUpdateMessageRepository: AppUpdateMessageRepositoryImpl
 
     private val fcmScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -48,7 +49,7 @@ class MyFirebaseMessagingService @Inject constructor(private val appUpdateMessag
         // message, here is where that should be initiated. See sendNotification method below.
     }
 
-    private fun isLongRunningJob() = true
+    private fun isLongRunningJob() = false
 
     /**
      * Called if the FCM registration token is updated. This may occur if the security of

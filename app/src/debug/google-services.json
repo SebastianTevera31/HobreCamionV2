@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "129041447418",
+    "project_id": "flotal-a1199",
+    "storage_bucket": "flotal-a1199.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:129041447418:android:a60932ddad2d519afb8c43",
+        "android_client_info": {
+          "package_name": "com.rfz.appflotal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCU0CcnleWtNTfkDrvpE7orIgGeVjZTOho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:129041447418:android:51a8dead8d00c900fb8c43",
+        "android_client_info": {
+          "package_name": "com.rfz.appflotal.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCU0CcnleWtNTfkDrvpE7orIgGeVjZTOho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

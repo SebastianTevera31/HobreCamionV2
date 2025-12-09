@@ -55,6 +55,14 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/app_fcm_channel" />
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/flotal" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/main_blue_color" />
+
         <activity
             android:name=".presentation.ui.inicio.ui.InicioActivity"
             android:exported="true"
