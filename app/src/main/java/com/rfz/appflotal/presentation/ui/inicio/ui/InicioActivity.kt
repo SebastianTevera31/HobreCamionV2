@@ -301,7 +301,7 @@ class InicioActivity : ComponentActivity() {
 //                }
 //            }
 
-            val appVersionData = homeViewModel.updateMessage.collectAsState()
+            val appVersionData = inicioScreenViewModel.updateMessage.collectAsState()
 
 
             HombreCamionTheme {

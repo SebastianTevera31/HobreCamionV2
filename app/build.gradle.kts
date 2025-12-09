@@ -5,6 +5,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.gms.google-services")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -34,6 +35,7 @@ android {
             )
             buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
         }
+
         release {
             isMinifyEnabled = false
             isShrinkResources = false
@@ -50,22 +52,25 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
-
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
     }
-    composeOptions {
 
+    composeOptions {
         kotlinCompilerExtensionVersion = "2.1.0"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -77,7 +82,7 @@ android {
 
 dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))

@@ -37,7 +37,7 @@ fun BluetoothSnackBanner(
     visible: Boolean,
     message: String,
     modifier: Modifier = Modifier,
-    containerColor: Color = Color("#FFF3E0".toColorInt()), // puedes personalizar
+    containerColor: Color = Color("#FFF3E0".toColorInt()),
     contentColor: Color = Color("#D84315".toColorInt())
 ) {
     val density = LocalDensity.current
