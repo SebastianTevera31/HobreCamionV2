@@ -1,7 +1,6 @@
 package com.rfz.appflotal.presentation.commons
 
 import android.content.Intent
-import android.graphics.fonts.FontFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -38,7 +37,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,6 +46,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.presentation.theme.FiraMono
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.theme.Montserrat
 
 @Composable
 fun UpdateAppScreen(modifier: Modifier = Modifier) {
@@ -68,7 +67,8 @@ fun UpdateAppScreen(modifier: Modifier = Modifier) {
         Text(
             text = "Actualizacion disponible".uppercase(),
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat
         )
         Image(painter = painterResource(id = R.drawable.update_icon), contentDescription = null)
         Text(
@@ -101,7 +101,7 @@ fun UpdateAppScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun MaintenanceAppScreen(date: String, modifier: Modifier = Modifier) {
+fun MaintenanceAppScreen(horaFinal: String, modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -196,7 +196,7 @@ fun UpdateAppScreenPreview() {
 fun MaintenanceScreenPreview() {
     HombreCamionTheme {
         MaintenanceAppScreen(
-            date = "",
+            horaFinal = "",
         )
     }
 }

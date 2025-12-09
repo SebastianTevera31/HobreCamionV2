@@ -41,7 +41,6 @@ class AppUpdateMessageRepositoryImpl @Inject constructor(@param:ApplicationConte
     }
 
     companion object {
-        private val APP_UPDATE_KEY = stringPreferencesKey("payload")
+        private val APP_UPDATE_KEY = stringPreferencesKey("app_message")
     }
-
 }

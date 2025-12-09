@@ -4,11 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AppUpdateMessage(
-    val newAppVersion: String,
-    val versionLogs: String,
-    val tipo: Int,
-    val prioridad: Boolean,
-    val fechaImplementacion: String,
-    val horaInicial: String,
-    val horaFinal: String
+    val tipo: String,
+    val fecha: String,
+    val horaInicio: String,
+    val horaFinal: String,
 )

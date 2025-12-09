@@ -81,13 +81,10 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
      */
     private fun handleNow(payload: Map<String, String>) {
         val update = AppUpdateMessage(
-            newAppVersion = payload["newAppVersion"] ?: "",
-            versionLogs = payload["versionLogs"] ?: "",
-            tipo = payload["tipo"]?.toIntOrNull() ?: 0,
-            prioridad = payload["prioridad"]?.toBoolean() ?: false,
-            fechaImplementacion = payload["fechaImplementacion"] ?: "",
-            horaInicial = payload["horaInicial"] ?: "",
-            horaFinal = payload["horaFinal"] ?: ""
+            tipo = payload["tipo"] ?: "",
+            fecha = payload["fecha"] ?: "",
+            horaInicio = payload["hora_inicio"] ?: "",
+            horaFinal = payload["hora_final"] ?: ""
         )
 
         fcmScope.launch {

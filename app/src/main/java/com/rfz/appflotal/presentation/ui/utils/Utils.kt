@@ -94,3 +94,12 @@ enum class SubScreens {
     LIST,
     HOME
 }
+
+enum class FireCloudMessagingType(val value: String) {
+    ACTUALIZACION("Actualizacion"),
+    TERMINOS("Terminos y Condiciones"),
+    CAMBIO_DE_PLAN("Cambio de Plan"),
+    SERVICIO_AUTO("Servicio de Auto"),
+    MANTENIMIENTO("Mantenimiento"),
+    ARREGLO_URGENTE("Arreglo Urgente")
+}

@@ -12,6 +12,11 @@ val FiraMono = FontFamily(
     Font(R.font.fira_mono_bold)
 )
 
+val Montserrat = FontFamily(
+    Font(R.font.montserrat)
+)
+
+
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
