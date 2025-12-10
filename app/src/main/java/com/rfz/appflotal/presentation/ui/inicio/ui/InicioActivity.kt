@@ -917,17 +917,21 @@ fun NotificationComponent(
             FireCloudMessagingType.CAMBIO_DE_PLAN.value -> onChangePlan
             FireCloudMessagingType.SERVICIO_AUTO.value -> {}
             FireCloudMessagingType.MANTENIMIENTO.value -> {
-                val fechaInstance = getDateFromNotification(msg.fecha, msg.horaInicio)?.toInstant()
-                val horaFinalInstance = getDateFromNotification(msg.fecha, msg.horaFinal)
-
-                val zonaLocal = ZoneId.systemDefault()
-
-
+                val fechaInicioUTC = getDateFromNotification(msg.fecha, msg.horaInicio)?.toInstant()
+                val fechaFinUTC = getDateFromNotification(msg.fecha, msg.horaFinal)?.toInstant()
                 val ahoraUTC = Instant.now()
-                if (fechaInstance != null && horaFinalInstance != null) {
-                    val userFinalDate =
-                        horaFinalInstance.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-                    if (ahoraUTC.equals(fechaInstance)) {
+
+                if (fechaInicioUTC != null && fechaFinUTC != null) {
+
+                    val userFinalDate = fechaFinUTC
+                        .atZone(ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+
+                    // Verifica si el momento actual está dentro del intervalo
+                    val enMantenimiento =
+                        !ahoraUTC.isBefore(fechaInicioUTC) && ahoraUTC.isBefore(fechaFinUTC)
+
+                    if (enMantenimiento) {
                         MaintenanceAppScreen(modifier = modifier, horaFinal = userFinalDate)
                     }
                 }
