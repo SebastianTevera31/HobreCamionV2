@@ -5,17 +5,21 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.icu.text.TimeZoneFormat
 import android.os.Build
 import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 
 object Commons {
     private const val TAG = "CameraXCompose"
@@ -83,5 +87,13 @@ object Commons {
 
     fun getBitmapFromDrawable(@DrawableRes image: Int, context: Context): Bitmap? {
         return BitmapFactory.decodeResource(context.resources, image)
+    }
+
+    fun getDateFromNotification(fecha: String, hora: String): ZonedDateTime? {
+        val localDate = LocalDate.parse(fecha)
+        val localHour = LocalTime.parse(hora.chunked(2).joinToString(":"))
+        val horaFinal = LocalDateTime.of(localDate, localHour)
+        val zonaLocal = ZoneId.systemDefault()
+        return horaFinal.atZone(zonaLocal)
     }
 }

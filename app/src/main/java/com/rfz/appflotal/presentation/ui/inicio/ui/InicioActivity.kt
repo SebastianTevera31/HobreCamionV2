@@ -46,6 +46,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
+import com.rfz.appflotal.core.util.Commons.getDateFromNotification
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.model.fcmessaging.AppUpdateMessage
@@ -126,9 +127,7 @@ import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserVi
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -918,16 +917,19 @@ fun NotificationComponent(
             FireCloudMessagingType.CAMBIO_DE_PLAN.value -> onChangePlan
             FireCloudMessagingType.SERVICIO_AUTO.value -> {}
             FireCloudMessagingType.MANTENIMIENTO.value -> {
-                val fecha = LocalDate.parse(msg.fecha)
-                val hora = LocalTime.parse(msg.horaInicio.chunked(2).joinToString(":"))
+                val fechaInstance = getDateFromNotification(msg.fecha, msg.horaInicio)?.toInstant()
+                val horaFinalInstance = getDateFromNotification(msg.fecha, msg.horaFinal)
 
-                val horaFinal = LocalDateTime.of(fecha, hora)
                 val zonaLocal = ZoneId.systemDefault()
-                val horaLocal = horaFinal.atZone(zonaLocal)
-                val ahoraUTC = Instant.now()
 
-                if (ahoraUTC.equals(horaLocal)) {
-                    MaintenanceAppScreen(modifier = modifier, horaFinal = msg.horaFinal)
+
+                val ahoraUTC = Instant.now()
+                if (fechaInstance != null && horaFinalInstance != null) {
+                    val userFinalDate =
+                        horaFinalInstance.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                    if (ahoraUTC.equals(fechaInstance)) {
+                        MaintenanceAppScreen(modifier = modifier, horaFinal = userFinalDate)
+                    }
                 }
             }
 
