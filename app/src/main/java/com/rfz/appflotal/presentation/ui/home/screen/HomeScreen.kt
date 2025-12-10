@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.automirrored.filled.ScreenShare
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
@@ -112,8 +111,10 @@ fun HomeScreen(
     val languages = listOf("es" to "ES", "en" to "EN")
 
     val userName = uiState.userData?.fld_name ?: stringResource(R.string.operator)
-    val paymentPlan =
-        PaymentPlanType.valueOf(uiState.userData?.paymentPlan?.replace(" ", "") ?: "None")
+
+    val paymentPlanState = homeViewModel.observerPaymentPlan(uiState.userData?.idUser ?: 0)
+
+    val paymentPlan = PaymentPlanType.valueOf(paymentPlanState.value.replace(" ", "").ifEmpty { "None" })
     val plates = uiState.userData?.vehiclePlates ?: ""
 
     val scope = rememberCoroutineScope()

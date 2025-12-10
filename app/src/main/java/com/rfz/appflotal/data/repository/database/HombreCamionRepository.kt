@@ -28,6 +28,11 @@ class HombreCamionRepository @Inject constructor(
     private val flotalDao: AppHCDao,
     @param:ApplicationContext private val context: Context
 ) {
+
+    fun observePaymentPlan(userId: Int): Flow<String> {
+        return flotalDao.getPaymentPlan(userId)
+    }
+
     suspend fun clearUserData() {
         flotalDao.deleteAllFlotalSoft()
         val data = AppLocale.getSystemLocale()
@@ -133,10 +138,14 @@ class HombreCamionRepository @Inject constructor(
     }
 
     suspend fun getOdometer(): OdometerData{
-        return flotalDao.getOdometer()
+        return flotalDao.getOdometer() ?: OdometerData(0, "")
     }
 
     suspend fun updateOdometer(odometer: Int, date: String) {
         flotalDao.updateOdometer(odometer, date)
+    }
+
+    suspend fun updateUserPlan(idUser: Int, plan: String) {
+        flotalDao.updateUserPlan(idUser, plan)
     }
 }

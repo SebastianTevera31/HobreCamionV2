@@ -125,7 +125,11 @@ import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScree
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -869,7 +873,10 @@ class InicioActivity : ComponentActivity() {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 },
-                                notificationData = appVersionData.value
+                                notificationData = appVersionData.value,
+                                onChangePlan = {
+                                    inicioScreenViewModel.updateUserPlan()
+                                }
                             )
                         }
                     }
@@ -897,24 +904,37 @@ class InicioActivity : ComponentActivity() {
 fun NotificationComponent(
     notificationData: AppUpdateMessage?,
     onTerms: () -> Unit,
+    onChangePlan: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     notificationData?.let { msg ->
         when (msg.tipo) {
             FireCloudMessagingType.ACTUALIZACION.value -> {
-                UpdateAppScreen(modifier = Modifier.fillMaxSize())
+                UpdateAppScreen(modifier = modifier.fillMaxSize())
             }
 
             FireCloudMessagingType.TERMINOS.value -> onTerms
 
-            FireCloudMessagingType.CAMBIO_DE_PLAN.value -> {}
+            FireCloudMessagingType.CAMBIO_DE_PLAN.value -> onChangePlan
             FireCloudMessagingType.SERVICIO_AUTO.value -> {}
             FireCloudMessagingType.MANTENIMIENTO.value -> {
-                MaintenanceAppScreen(msg.horaFinal)
+                val fecha = LocalDate.parse(msg.fecha)
+                val hora = LocalTime.parse(msg.horaInicio.chunked(2).joinToString(":"))
+
+                val horaFinal = LocalDateTime.of(fecha, hora)
+                val zonaLocal = ZoneId.systemDefault()
+                val horaLocal = horaFinal.atZone(zonaLocal)
+                val ahoraUTC = Instant.now()
+
+                if (ahoraUTC.equals(horaLocal)) {
+                    MaintenanceAppScreen(modifier = modifier, horaFinal = msg.horaFinal)
+                }
             }
+
             FireCloudMessagingType.ARREGLO_URGENTE.value -> {
-                MaintenanceAppScreen(msg.horaFinal)
+                MaintenanceAppScreen(modifier = modifier, horaFinal = msg.horaFinal)
             }
+
             else -> {}
         }
     }
@@ -925,12 +945,10 @@ fun getRequiredPermissions(): Array<String> {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         // Android 12+
-        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         permissions.add(Manifest.permission.BLUETOOTH_SCAN)
         permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
     } else {
         // Android 11 o menor
-        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 

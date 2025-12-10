@@ -12,8 +12,8 @@ val FiraMono = FontFamily(
     Font(R.font.fira_mono_bold)
 )
 
-val Montserrat = FontFamily(
-    Font(R.font.montserrat)
+val ChangoOne = FontFamily(
+    Font(R.font.changa_one)
 )
 
 

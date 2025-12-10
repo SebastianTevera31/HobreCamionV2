@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.app_utilities.UserOpinion
@@ -18,6 +19,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -41,6 +43,14 @@ class HomeViewModel @Inject constructor(
 
     private val _homeCheckInMessage = MutableLiveData<String>()
     val homeCheckInMessage: LiveData<String> = _homeCheckInMessage
+
+    fun observerPaymentPlan(userId: Int): StateFlow<String> =
+        hombreCamionRepository.observePaymentPlan(userId).stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = ""
+        )
+
 
     suspend fun logout() {
         hombreCamionRepository.clearUserData()

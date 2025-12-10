@@ -10,6 +10,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -44,9 +46,9 @@ import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLocale
+import com.rfz.appflotal.presentation.theme.ChangoOne
 import com.rfz.appflotal.presentation.theme.FiraMono
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.theme.Montserrat
 
 @Composable
 fun UpdateAppScreen(modifier: Modifier = Modifier) {
@@ -62,19 +64,30 @@ fun UpdateAppScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF213DF3), // Blue
+                        Color(0xFF4CAF50)  // Green
+                    )
+                )
+            )
             .padding(dimensionResource(R.dimen.medium_dimen))
     ) {
         Text(
             text = "Actualizacion disponible".uppercase(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            fontFamily = Montserrat
+            color = Color.White,
+            fontFamily = ChangoOne
         )
         Image(painter = painterResource(id = R.drawable.update_icon), contentDescription = null)
         Text(
-            text = "Hay una nueva version disponible. Actualiza para continuar usando la app.",
+            text = "Hay una nueva versión disponible. Por favor actualiza para seguir usando la app.",
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            fontFamily = FiraMono
         )
 
         Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.large_dimen)))
@@ -107,25 +120,42 @@ fun MaintenanceAppScreen(horaFinal: String, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF213DF3), // Blue
+                        Color(0xFF4CAF50)  // Green
+                    )
+                )
+            )
             .padding(dimensionResource(R.dimen.medium_dimen))
     ) {
         Text(
             text = "En Mantenimiento".uppercase(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            fontFamily = FiraMono
+            color = Color.White,
+            fontFamily = ChangoOne
         )
         Image(
             painter = painterResource(id = R.drawable.maintenance_icon),
             contentDescription = null
         )
         Text(
-            text = "Sentimos los incovenientes. Estamos atendiendo mantenciones al sistema para garantizar un buen funcionamiento de la app.",
+            text = "Lamentamos los inconvenientes. El servicio se restablecerá el $horaFinal.",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
+            color = Color.White,
             fontFamily = FiraMono
         )
-
+        Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen)))
+        Text(
+            text = "Estamos realizando tareas de mantenimiento para garantizar el buen funcionamiento de la app.",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            fontFamily = FiraMono
+        )
     }
 }
 
@@ -196,7 +226,7 @@ fun UpdateAppScreenPreview() {
 fun MaintenanceScreenPreview() {
     HombreCamionTheme {
         MaintenanceAppScreen(
-            horaFinal = "",
+            horaFinal = "2025-12-10 14:30",
         )
     }
 }
