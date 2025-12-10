@@ -867,16 +867,8 @@ class InicioActivity : ComponentActivity() {
                             }
 
                             NotificationComponent(
-                                onTerms = {
-                                    navController.navigate(NavScreens.TERMINOS) {
-                                        popUpTo(0) { inclusive = true }
-                                    }
-                                },
                                 notificationData = appVersionData.value,
-                                onChangePlan = {
-                                    inicioScreenViewModel.updateUserPlan()
-                                }
-                            )
+                                onCleanState = { inicioScreenViewModel.cleanNotificationsState() })
                         }
                     }
                 }
@@ -902,8 +894,7 @@ class InicioActivity : ComponentActivity() {
 @Composable
 fun NotificationComponent(
     notificationData: AppUpdateMessage?,
-    onTerms: () -> Unit,
-    onChangePlan: () -> Unit,
+    onCleanState: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     notificationData?.let { msg ->
@@ -912,13 +903,12 @@ fun NotificationComponent(
                 UpdateAppScreen(modifier = modifier.fillMaxSize())
             }
 
-            FireCloudMessagingType.TERMINOS.value -> onTerms
-
-            FireCloudMessagingType.CAMBIO_DE_PLAN.value -> onChangePlan
             FireCloudMessagingType.SERVICIO_AUTO.value -> {}
             FireCloudMessagingType.MANTENIMIENTO.value -> {
-                val fechaInicioUTC = getDateFromNotification(msg.fecha, msg.horaInicio)?.toInstant()
-                val fechaFinUTC = getDateFromNotification(msg.fecha, msg.horaFinal)?.toInstant()
+                val fechaInicioUTC =
+                    getDateFromNotification(msg.fecha.split(" ")[0], msg.horaInicio)?.toInstant()
+                val fechaFinUTC =
+                    getDateFromNotification(msg.fecha.split(" ")[0], msg.horaFinal)?.toInstant()
                 val ahoraUTC = Instant.now()
 
                 if (fechaInicioUTC != null && fechaFinUTC != null) {
@@ -927,13 +917,12 @@ fun NotificationComponent(
                         .atZone(ZoneId.systemDefault())
                         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
 
-                    // Verifica si el momento actual está dentro del intervalo
                     val enMantenimiento =
-                        !ahoraUTC.isBefore(fechaInicioUTC) && ahoraUTC.isBefore(fechaFinUTC)
+                        ahoraUTC.isAfter(fechaInicioUTC) && ahoraUTC.isBefore(fechaFinUTC)
 
                     if (enMantenimiento) {
                         MaintenanceAppScreen(modifier = modifier, horaFinal = userFinalDate)
-                    }
+                    } else if (ahoraUTC.isAfter(fechaFinUTC)) onCleanState()
                 }
             }
 

@@ -19,7 +19,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,14 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
-import com.rfz.appflotal.presentation.ui.monitor.component.BluetoothSnackBanner
+import com.rfz.appflotal.presentation.ui.monitor.component.AdvertisementSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
@@ -117,7 +115,8 @@ fun MonitorScreen(
             if (monitorUiState.showView) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     val isSignalUnknown =
@@ -125,12 +124,19 @@ fun MonitorScreen(
                                 && monitorUiState.monitorId != 0
                     monitorViewModel.getBitmapImage()
 
-                    if (isSignalUnknown) {
-                        val text = stringResource(
-                            monitorUiState.signalIntensity.first.alertMessage!!
-                        )
+                    if (isSignalUnknown || monitorUiState.isMaintenanceSoon) {
+                        val text = if (monitorUiState.isMaintenanceSoon) {
+                            stringResource(
+                                R.string.mensaje_mantenimiento_programado,
+                                monitorUiState.maintenanceDate
+                            )
+                        } else {
+                            stringResource(
+                                monitorUiState.signalIntensity.first.alertMessage!!
+                            )
+                        }
 
-                        BluetoothSnackBanner(
+                        AdvertisementSnackBanner(
                             visible = true,
                             message = text
                         )
@@ -259,7 +265,7 @@ private fun PositionScreenContent(
             if (positionOptionSelected == PositionView.RECIENTES) {
                 RecentPositionsView(
                     positionsUiState = positionsUiState,
-                    onClearFilteredTire = { monitorViewModel.clearFilteredTire() }
+                    onClearFilteredTire = { monitorViewModel.cleanFilteredTire() }
                 )
             } else {
                 FilteredPositionsView(monitorTireUiState = monitorTireUiState)
@@ -272,7 +278,7 @@ private fun PositionScreenContent(
         ) {
             RecentPositionsView(
                 positionsUiState = positionsUiState,
-                onClearFilteredTire = { monitorViewModel.clearFilteredTire() }
+                onClearFilteredTire = { monitorViewModel.cleanFilteredTire() }
             )
         }
     }

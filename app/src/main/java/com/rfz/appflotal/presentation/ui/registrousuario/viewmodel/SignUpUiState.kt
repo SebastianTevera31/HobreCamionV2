@@ -32,5 +32,6 @@ data class SignUpUiState(
     val countries: Map<Int, String> = emptyMap(),
     val sectors: Map<Int, String> = emptyMap(),
     val currentScreen: SignUpViews = SignUpViews.USER_DATA_VIEW,
-    val paymentPlan: PaymentPlanType = PaymentPlanType.None
+    val paymentPlan: PaymentPlanType = PaymentPlanType.None,
+    val isFromNotification: Boolean = false
 )

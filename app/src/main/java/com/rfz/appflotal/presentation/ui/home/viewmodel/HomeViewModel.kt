@@ -4,21 +4,28 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.AppLocale
-import com.rfz.appflotal.data.model.app_utilities.UserOpinion
+import com.rfz.appflotal.data.model.apputilities.UserOpinion
+import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.model.languaje.LanguageResponse
 import com.rfz.appflotal.data.repository.apputilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
+import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
+import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
+import com.rfz.appflotal.domain.login.LoginUseCase
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
+import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -30,7 +37,10 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val hombreCamionRepository: HombreCamionRepository,
     private val languageUseCase: LanguajeUseCase,
+    private val loginUseCase: LoginUseCase,
     private val appUtilitiesRepository: AppUtilitiesRepositoryImpl,
+    private val appUpdateRepository: AppUpdateMessageRepositoryImpl,
+    private val getTasksUseCase: GetTasksUseCase,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -41,13 +51,17 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(OperationStatus.Loading)
     val messageOperationState = _messageOperationState.asStateFlow()
 
+    val appVersionData = appUpdateRepository.updateFlow.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(), null
+    )
+
     private val _homeCheckInMessage = MutableLiveData<String>()
     val homeCheckInMessage: LiveData<String> = _homeCheckInMessage
 
     fun observerPaymentPlan(userId: Int): StateFlow<String> =
         hombreCamionRepository.observePaymentPlan(userId).stateIn(
             scope = viewModelScope,
-            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(5000),
             initialValue = ""
         )
 
@@ -77,14 +91,7 @@ class HomeViewModel @Inject constructor(
                     // Notificar a la API el idioma de la app
                     changeLanguage(AppLocale.currentLocale.value.language)
 
-                    _uiState.update {
-                        it.copy(
-                            userData = deferredUserData.await(),
-                            selectedLanguage = deferredLanguage.await(),
-                            isLoading = false,
-                            screenLoadStatus = OperationStatus.Success
-                        )
-                    }
+                    updatePaymentPlan(user, language)
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -94,6 +101,22 @@ class HomeViewModel @Inject constructor(
                     )
                 }
                 _homeCheckInMessage.value = "Error loading data: ${e.message}"
+            }
+        }
+    }
+
+    private suspend fun updatePaymentPlan(user: AppHCEntity, language: String) {
+        observerPaymentPlan(user.idUser).collect { data ->
+            if (data.isNotEmpty()) {
+                _uiState.update {
+                    it.copy(
+                        userData = user,
+                        selectedLanguage = language,
+                        isLoading = false,
+                        screenLoadStatus = OperationStatus.Success,
+                        paymentPlanType = PaymentPlanType.valueOf(data.replace(" ", ""))
+                    )
+                }
             }
         }
     }
@@ -155,7 +178,35 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun cleanMessageStatus() {
+    fun updateUserPlan() {
+        viewModelScope.launch {
+            val paymentPlan = getTasksUseCase().first().first().paymentPlan.replace(" ", "")
+            if (paymentPlan != PaymentPlanType.Complete.name && paymentPlan != PaymentPlanType.None.name) {
+                hombreCamionRepository.updateUserPlan(
+                    idUser = _uiState.value.userData?.idUser ?: 0,
+                    plan = PaymentPlanType.Complete.name
+                )
+
+            } else if (paymentPlan == PaymentPlanType.Complete.name) {
+                hombreCamionRepository.updateUserPlan(
+                    idUser = _uiState.value.userData?.idUser ?: 0,
+                    plan = PaymentPlanType.Free.name
+                )
+            }
+            appUpdateRepository.clear()
+        }
+    }
+
+    fun acceptNewTermsAndConditions() {
+        viewModelScope.launch {
+            val result = loginUseCase.doAcceptTermsAndConditions()
+            asyncResponseHelper(result) {
+                appUpdateRepository.clear()
+            }
+        }
+    }
+
+    fun cleanOperationStatus() {
         _messageOperationState.value = OperationStatus.Loading
     }
 }

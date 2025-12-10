@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,7 +76,7 @@ fun UpdateAppScreen(modifier: Modifier = Modifier) {
             .padding(dimensionResource(R.dimen.medium_dimen))
     ) {
         Text(
-            text = "Actualizacion disponible".uppercase(),
+            text = stringResource(R.string.actualizacion_disponible).uppercase(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -83,7 +84,7 @@ fun UpdateAppScreen(modifier: Modifier = Modifier) {
         )
         Image(painter = painterResource(id = R.drawable.update_icon), contentDescription = null)
         Text(
-            text = "Hay una nueva versión disponible. Por favor actualiza para seguir usando la app.",
+            text = stringResource(R.string.aviso_actualizacion),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -131,7 +132,7 @@ fun MaintenanceAppScreen(horaFinal: String, modifier: Modifier = Modifier) {
             .padding(dimensionResource(R.dimen.medium_dimen))
     ) {
         Text(
-            text = "En Mantenimiento".uppercase(),
+            text = stringResource(R.string.en_mantenimiento).uppercase(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -142,7 +143,7 @@ fun MaintenanceAppScreen(horaFinal: String, modifier: Modifier = Modifier) {
             contentDescription = null
         )
         Text(
-            text = "Lamentamos los inconvenientes. El servicio se restablecerá el $horaFinal.",
+            text = stringResource(R.string.aviso_mantenimiento, horaFinal),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -150,7 +151,7 @@ fun MaintenanceAppScreen(horaFinal: String, modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen)))
         Text(
-            text = "Estamos realizando tareas de mantenimiento para garantizar el buen funcionamiento de la app.",
+            text = stringResource(R.string.aviso_mantenimiento_ii),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             color = Color.White,

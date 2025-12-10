@@ -90,10 +90,10 @@ object Commons {
     }
 
     fun getDateFromNotification(fecha: String, hora: String): ZonedDateTime? {
-        val localDate = LocalDate.parse(fecha)
+        val formattedDate = convertDate(date = fecha, initialFormat = "dd/MM/yyyy", convertFormat = "yyyy-MM-dd")
+        val localDate = LocalDate.parse( formattedDate)
         val localHour = LocalTime.parse(hora.chunked(2).joinToString(":"))
         val horaFinal = LocalDateTime.of(localDate, localHour)
-        val zonaLocal = ZoneId.systemDefault()
-        return horaFinal.atZone(zonaLocal)
+        return horaFinal.atZone(ZoneId.of("UTC"))
     }
 }

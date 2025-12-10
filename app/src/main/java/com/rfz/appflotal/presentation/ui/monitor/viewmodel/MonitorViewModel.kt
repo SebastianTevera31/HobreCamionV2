@@ -7,12 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getBitmapFromDrawable
+import com.rfz.appflotal.core.util.Commons.getDateFromNotification
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
+import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
 import com.rfz.appflotal.domain.database.DataframeTableUseCase
@@ -21,6 +23,7 @@ import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.GetSensorDataByWheelUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.UpdateSensorDataUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
+import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,12 +31,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 enum class SensorAlerts(@param:StringRes val message: Int) {
@@ -59,11 +67,16 @@ class MonitorViewModel @Inject constructor(
     private val updateSensorDataUseCase: UpdateSensorDataUseCase,
     private val getSensorDataByWheelUseCase: GetSensorDataByWheelUseCase,
     private val assemblyTireRepository: AssemblyTireRepository,
+    private val appUpdateRepository: AppUpdateMessageRepositoryImpl,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
         MutableStateFlow(MonitorUiState())
     val monitorUiState = _monitorUiState.asStateFlow()
+
+    val appVersionData = appUpdateRepository.updateFlow.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(), null
+    )
 
     private val _positionsUiState =
         MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Loading)
@@ -104,6 +117,38 @@ class MonitorViewModel @Inject constructor(
 
         viewModelScope.launch {
             updateAssemblyStatus()
+        }
+
+        viewModelScope.launch {
+            appVersionData.collect { msg ->
+                msg?.let {
+                    if (it.tipo == FireCloudMessagingType.MANTENIMIENTO.value){
+                        val fechaInicioUTC = getDateFromNotification(
+                            it.fecha.split(" ")[0],
+                            it.horaInicio
+                        )?.toInstant()
+                        if (fechaInicioUTC != null) {
+                            val ahoraInstace = Instant.now()
+
+                            val uiDate = fechaInicioUTC.atZone(ZoneId.systemDefault())
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+
+                            if (ahoraInstace.isBefore(fechaInicioUTC)) {
+                                _monitorUiState.update { currentUiState ->
+                                    currentUiState.copy(
+                                        isMaintenanceSoon = true,
+                                        maintenanceDate = uiDate
+                                    )
+                                }
+                            } else {
+                                _monitorUiState.update { currentUiState ->
+                                    currentUiState.copy(isMaintenanceSoon = false, maintenanceDate = "")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         readBluetoothData()
@@ -394,27 +439,32 @@ class MonitorViewModel @Inject constructor(
                     _filteredTiresUiState.update { tireData }
                 }
 
-                is ApiResult.Error -> { _filteredTiresUiState.update { ApiResult.Error() } }
+                is ApiResult.Error -> {
+                    _filteredTiresUiState.update { ApiResult.Error() }
+                }
+
                 ApiResult.Loading -> {}
             }
         }
     }
 
-    fun clearMonitorData() {
+    fun cleanMonitorData() {
         _monitorUiState.value = MonitorUiState()
         _positionsUiState.value = ApiResult.Loading
-        clearFilteredTire()
+        cleanFilteredTire()
     }
 
-    fun clearFilteredTire() {
+    fun cleanFilteredTire() {
         _filteredTiresUiState.value = ApiResult.Success(emptyList())
     }
+
 
     fun showMonitorDialog(show: Boolean) {
         _monitorUiState.update { currentUiState ->
             currentUiState.copy(showDialog = show)
         }
     }
+
 
     // Corregir funcion
     fun getBitmapImage() {

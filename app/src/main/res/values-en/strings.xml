@@ -350,6 +350,14 @@
     <string name="share_feedback">Share feedback</string>
     <string name="error_enviar_comentarios">An error occurred while sending your feedback</string>
     <string name="gracias_por_su_comentario">Thank you for your feedback</string>
+    <string name="mensaje_mantenimiento_programado">The application will undergo maintenance at %1$s hrs. Thank you for your understanding.</string>
+
+    <string name="notificacion_nueva">New notification</string>
+    <string name="actualizacion_disponible">Update available</string>
+    <string name="aviso_actualizacion">A new version is available. Please update to continue using the app.</string>
+    <string name="en_mantenimiento">Under maintenance</string>
+    <string name="aviso_mantenimiento">We apologize for the inconvenience. Service will be restored at %1$s hrs.</string>
+    <string name="aviso_mantenimiento_ii">We are performing maintenance to ensure the app functions properly.</string>
 
 
     <plurals name="description_field">

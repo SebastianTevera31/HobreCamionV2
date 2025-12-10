@@ -345,6 +345,13 @@
     <string name="gracias_por_su_comentario">Gracias por su comentario</string>
     <string name="app_fcm_channel">app_fcm_channel</string>
     <string name="app_fcm_flotal_channel">app_fcm_flotal_channel</string>
+    <string name="mensaje_mantenimiento_programado">La aplicación entrará en mantenimiento el %1$s hrs. Gracias por tu comprensión.</string>
+    <string name="notificacion_nueva">Notificacion nueva</string>
+    <string name="actualizacion_disponible">Actualización disponible</string>
+    <string name="aviso_actualizacion">Hay una nueva versión disponible. Por favor actualiza para seguir usando la app.</string>
+    <string name="en_mantenimiento">En Mantenimiento</string>
+    <string name="aviso_mantenimiento">Lamentamos los inconvenientes. El servicio se restablecerá el %1$s hrs.</string>
+    <string name="aviso_mantenimiento_ii">Estamos realizando tareas de mantenimiento para garantizar el buen funcionamiento de la app.</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

@@ -30,6 +30,7 @@ import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -227,20 +228,23 @@ class LoginViewModel @Inject constructor(
         _navigateToHome.value = Triple(false, PaymentPlanType.None, false)
     }
 
-    fun acceptTermsConditions(onPermissionsGranted: () -> Boolean) {
+    fun acceptTermsConditions(onSuccess: () -> Unit = {}, onPermissionsGranted: () -> Boolean) {
         viewModelScope.launch {
             val user = getTasksUseCase.invoke().first()
 
             try {
                 if (user.isNotEmpty()) {
-                    loginUseCase.doAcceptTermsAndConditions()
-                    addTaskUseCase.updateTermsFlag(user.first().idUser, true)
-
-                    if (onPermissionsGranted()) {
-                        _navigationEvent.emit(NavigationEvent.NavigateToPermissions)
-                    } else {
-                        _navigationEvent.emit(NavigationEvent.NavigateToHome)
+                    val result = loginUseCase.doAcceptTermsAndConditions()
+                    asyncResponseHelper(result) {
+                        addTaskUseCase.updateTermsFlag(user.first().idUser, true)
+                        onSuccess()
+                        if (onPermissionsGranted()) {
+                            _navigationEvent.emit(NavigationEvent.NavigateToPermissions)
+                        } else {
+                            _navigationEvent.emit(NavigationEvent.NavigateToHome)
+                        }
                     }
+
 
                 }
             } catch (e: Exception) {

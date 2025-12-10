@@ -8,32 +8,25 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.data.model.app_utilities.UserOpinion
 import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
 import com.rfz.appflotal.domain.database.DeleteTasksUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
-import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.OffsetDateTime
 import javax.inject.Inject
-import kotlin.text.clear
 
 @HiltViewModel
 class InicioScreenViewModel @Inject constructor(
     private val getTasksUseCase: GetTasksUseCase,
     private val deleteTasksUseCase: DeleteTasksUseCase,
     private val appUpdateRepository: AppUpdateMessageRepositoryImpl,
-    private val hombreCamionRepository: HombreCamionRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -66,23 +59,6 @@ class InicioScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateUserPlan() {
-        viewModelScope.launch {
-            val paymentPlan = getTasksUseCase().first().first().paymentPlan.replace(" ", "")
-            if (paymentPlan != PaymentPlanType.Complete.name && paymentPlan != PaymentPlanType.None.name) {
-                hombreCamionRepository.updateUserPlan(
-                    idUser = _userData.value?.idUser ?: 0,
-                    plan = PaymentPlanType.Complete.name
-                )
-            } else if (paymentPlan == PaymentPlanType.Complete.name) {
-                hombreCamionRepository.updateUserPlan(
-                    idUser = _userData.value?.idUser ?: 0,
-                    plan = PaymentPlanType.Free.name
-                )
-            }
-        }
-    }
-
     fun deleteUserData() {
         viewModelScope.launch {
             try {
@@ -98,7 +74,7 @@ class InicioScreenViewModel @Inject constructor(
         blePermissionGranted = hasPermission
     }
 
-    fun consumeMessage() {
+    fun cleanNotificationsState() {
         viewModelScope.launch {
             appUpdateRepository.clear()
         }

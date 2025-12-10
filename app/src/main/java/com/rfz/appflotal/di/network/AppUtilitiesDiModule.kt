@@ -1,6 +1,6 @@
 package com.rfz.appflotal.di.network
 
-import com.rfz.appflotal.data.network.client.app_utilities.AppUtilitiesService
+import com.rfz.appflotal.data.network.client.apputilities.AppUtilitiesService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
