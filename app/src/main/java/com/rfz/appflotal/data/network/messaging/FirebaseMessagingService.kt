@@ -19,6 +19,7 @@ import com.rfz.appflotal.data.model.fcmessaging.AppUpdateMessage
 import com.rfz.appflotal.data.network.service.fgservice.currentAppLocaleFromAppCompat
 import com.rfz.appflotal.data.network.service.fgservice.localized
 import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
+import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.InicioActivity
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,6 +36,10 @@ import javax.inject.Inject
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var appUpdateMessageRepository: AppUpdateMessageRepositoryImpl
+
+    @Inject
+    lateinit var getTasksUseCase: GetTasksUseCase
+
 
     lateinit var notificationManager: NotificationManager
 
@@ -122,13 +127,17 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val appLocale = currentAppLocaleFromAppCompat() ?: Locale.getDefault()
         val lctx = this.localized(appLocale)
         fcmScope.launch {
-            val (title, messageBody) = getNotificationMessage(lctx)
+            val user = getTasksUseCase().first()
+            val (title, messageBody) = getNotificationMessage(lctx, !user.isNullOrEmpty())
             if (title.isEmpty()) return@launch
             createNotification(title, messageBody)
         }
     }
 
-    private suspend fun getNotificationMessage(lctx: Context): Pair<String, String> {
+    private suspend fun getNotificationMessage(
+        lctx: Context,
+        isThereUser: Boolean
+    ): Pair<String, String> {
         val tipo = appUpdateMessageRepository.updateFlow.first()?.tipo
         if (tipo != null) {
             val title = when (tipo) {
@@ -137,7 +146,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 )
 
                 FireCloudMessagingType.TERMINOS.value -> lctx.getString(R.string.actualizacion_de_terminos_y_condiciones)
-                FireCloudMessagingType.CAMBIO_DE_PLAN.value -> lctx.getString(R.string.actualizacion_de_plan)
+                FireCloudMessagingType.CAMBIO_DE_PLAN.value -> {
+                    if (isThereUser) lctx.getString(R.string.actualizacion_de_plan) else ""
+                }
+
                 FireCloudMessagingType.SERVICIO_AUTO.value -> ""
                 FireCloudMessagingType.ACTUALIZACION.value -> lctx.getString(R.string.actualizacion_disponible)
                 else -> tipo
@@ -152,8 +164,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 FireCloudMessagingType.TERMINOS.value ->
                     lctx.getString(R.string.terms_message)
 
-                FireCloudMessagingType.CAMBIO_DE_PLAN.value ->
-                    lctx.getString(R.string.paymentplan_message)
+                FireCloudMessagingType.CAMBIO_DE_PLAN.value -> {
+                    if (isThereUser) lctx.getString(R.string.paymentplan_message) else ""
+                }
 
                 FireCloudMessagingType.SERVICIO_AUTO.value ->
                     lctx.getString(R.string.autoservice_message)
@@ -210,7 +223,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val appLocale = currentAppLocaleFromAppCompat() ?: Locale.getDefault()
         val lctx = this.localized(appLocale)
         fcmScope.launch {
-            val (title, content) = getNotificationMessage(lctx)
+            val user = getTasksUseCase().first()
+            val (title, content) = getNotificationMessage(lctx, user.isNullOrEmpty())
             if (title.isEmpty()) return@launch
             if (::notificationCompactBuilder.isInitialized) {
                 notificationCompactBuilder.setContentTitle(title).setContentText(content)
