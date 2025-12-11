@@ -107,7 +107,7 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun updatePaymentPlan(user: AppHCEntity, language: String) {
         observerPaymentPlan(user.idUser).collect { data ->
-            if (data.isNotEmpty()) {
+            if (!data.isNullOrEmpty()) {
                 _uiState.update {
                     it.copy(
                         userData = user,
@@ -170,8 +170,7 @@ class HomeViewModel @Inject constructor(
                 )
             )
 
-            result.onSuccess {
-                _messageOperationState.value = OperationStatus.Success
+            result.onSuccess {_messageOperationState.value = OperationStatus.Success
             }.onFailure {
                 _messageOperationState.value = OperationStatus.Error
             }

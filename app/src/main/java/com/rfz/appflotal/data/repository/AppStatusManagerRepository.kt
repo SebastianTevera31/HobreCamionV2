@@ -81,39 +81,42 @@ class AppStatusManagerRepository @Inject constructor(
             // Lanzar un único loop que revisa el horario cada X tiempo
             launch {
                 while (isActive) {
-                    val ahoraUTC = Instant.now()
+                    try {
+                        val ahoraUTC = Instant.now()
 
-                    val status =
-                        when {
-                            ahoraUTC.isBefore(fechaInicioUTC) -> MaintenanceStatus.SCHEDULED
-                            ahoraUTC.isAfter(fechaInicioUTC) && ahoraUTC.isBefore(fechaFinUTC) ->
-                                MaintenanceStatus.MAINTENANCE
+                        val status =
+                            when {
+                                ahoraUTC.isBefore(fechaInicioUTC) -> MaintenanceStatus.SCHEDULED
+                                ahoraUTC.isAfter(fechaInicioUTC) && ahoraUTC.isBefore(fechaFinUTC) ->
+                                    MaintenanceStatus.MAINTENANCE
 
-                            else -> MaintenanceStatus.NOT_MAINTENANCE
+                                else -> MaintenanceStatus.NOT_MAINTENANCE
+                            }
+
+                        val finalUserDate = fechaFinUTC
+                            .atZone(ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                        val initialUserDate = fechaInicioUTC
+                            .atZone(ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+
+
+                        _mainUiState.update {
+                            it.copy(
+                                isMaintenance = status,
+                                finalUpdateDataForUser = finalUserDate,
+                                initialUpdateDataForUser = initialUserDate
+                            )
                         }
 
-                    val finalUserDate = fechaFinUTC
-                        .atZone(ZoneId.systemDefault())
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-                    val initialUserDate = fechaInicioUTC
-                        .atZone(ZoneId.systemDefault())
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                        if (status == MaintenanceStatus.NOT_MAINTENANCE) {
+                            _mainUiState.value = MainUiState()
+                            // rompes SOLO el loop, NO el scope completo
+                            break
+                        }
 
-
-                    _mainUiState.update {
-                        it.copy(
-                            isMaintenance = status,
-                            finalUpdateDataForUser = finalUserDate,
-                            initialUpdateDataForUser = initialUserDate
-                        )
-                    }
-
-                    if (status == MaintenanceStatus.NOT_MAINTENANCE) {
-                        // rompes SOLO el loop, NO el scope completo
-                        break
-                    }
-
-                    delay(10_000)
+                        delay(10_000)
+                    } catch (_: Exception) { }
                 }
             }
         }
