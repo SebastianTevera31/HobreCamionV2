@@ -58,7 +58,7 @@ class HomeViewModel @Inject constructor(
     private val _homeCheckInMessage = MutableLiveData<String>()
     val homeCheckInMessage: LiveData<String> = _homeCheckInMessage
 
-    fun observerPaymentPlan(userId: Int): StateFlow<String> =
+    fun observerPaymentPlan(userId: Int): StateFlow<String?> =
         hombreCamionRepository.observePaymentPlan(userId).stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

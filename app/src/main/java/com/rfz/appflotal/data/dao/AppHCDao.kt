@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AppHCDao {
     @Query("SELECT paymentPlan from user WHERE idUser =:userId")
-    fun getPaymentPlan(userId: Int): Flow<String>
+    fun getPaymentPlan(userId: Int): Flow<String?>
 
     @Query("SELECT * from user")
     fun getData(): Flow<List<AppHCEntity>>

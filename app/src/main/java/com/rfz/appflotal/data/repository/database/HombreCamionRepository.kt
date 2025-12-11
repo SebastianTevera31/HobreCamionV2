@@ -29,7 +29,7 @@ class HombreCamionRepository @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
 
-    fun observePaymentPlan(userId: Int): Flow<String> {
+    fun observePaymentPlan(userId: Int): Flow<String?> {
         return flotalDao.getPaymentPlan(userId)
     }
 
