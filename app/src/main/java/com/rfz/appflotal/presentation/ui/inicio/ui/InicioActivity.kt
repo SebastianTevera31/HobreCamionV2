@@ -940,9 +940,10 @@ fun NotificationComponent(
     notificationData?.let { msg ->
         when (msg.tipo) {
             FireCloudMessagingType.ACTUALIZACION.value -> {
-                if (50 < AppVersionUtil.getVersionCode(context)) {
-                    UpdateAppScreen(modifier = modifier.fillMaxSize())
-                } else onCleanState()
+//                if (7 < AppVersionUtil.getVersionCode(context)) {
+////
+////                } else onCleanState()
+                UpdateAppScreen(modifier = modifier.fillMaxSize())
             }
 
             FireCloudMessagingType.SERVICIO_AUTO.value -> {}

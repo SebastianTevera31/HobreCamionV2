@@ -445,10 +445,6 @@ fun HomeScreen(
 
                 appVersionData.value?.let { msg ->
                     when (msg.tipo) {
-                        FireCloudMessagingType.CAMBIO_DE_PLAN.value -> {
-                            homeViewModel.updateUserPlan()
-                        }
-
                         FireCloudMessagingType.TERMINOS.value -> {
                             TerminosScreen(
                                 context = context,
