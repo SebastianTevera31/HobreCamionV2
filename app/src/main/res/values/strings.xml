@@ -352,6 +352,15 @@
     <string name="en_mantenimiento">En Mantenimiento</string>
     <string name="aviso_mantenimiento">Lamentamos los inconvenientes. El servicio se restablecerá el %1$s hrs.</string>
     <string name="aviso_mantenimiento_ii">Estamos realizando tareas de mantenimiento para garantizar el buen funcionamiento de la app.</string>
+    <string name="mantenimiento_programado">Mantenimiento Programado</string>
+    <string name="actualizacion_de_terminos_y_condiciones">Actualizacion de terminos y condiciones</string>
+    <string name="actualizacion_de_plan">Actualizacion de Plan</string>
+    <string name="mantenimiento_message">El servicio no estara disponible por un momento.</string>
+    <string name="terms_message">Hemos actualizado nuestros términos y condiciones. Revísalos para continuar.</string>
+    <string name="paymentplan_message">Tu plan ha sido actualizado.</string>
+    <string name="autoservice_message">Tu servicio automático ha sido procesado correctamente.</string>
+    <string name="update_message">Hay una nueva versión disponible. Actualiza para mejorar tu experiencia.</string>
+    <string name="generic_message">Tienes una nueva notificación.</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

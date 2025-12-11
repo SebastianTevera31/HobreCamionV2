@@ -134,6 +134,8 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:1.9.4")
     implementation("androidx.compose.foundation:foundation:1.9.5")
     implementation("androidx.compose.animation:animation:1.10.0")
+    implementation("androidx.compose.ui:ui:1.10.0")
+    implementation("androidx.compose.foundation:foundation:1.10.0")
 
     kapt("androidx.room:room-compiler:2.7.2")
 

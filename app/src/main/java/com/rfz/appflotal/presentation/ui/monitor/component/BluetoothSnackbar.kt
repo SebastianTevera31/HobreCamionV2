@@ -9,6 +9,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +35,7 @@ fun AdvertisementSnackBanner(
     visible: Boolean,
     message: String,
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(8.dp),
     containerColor: Color = Color("#FFF3E0".toColorInt()),
     contentColor: Color = Color("#D84315".toColorInt())
 ) {
@@ -51,7 +53,7 @@ fun AdvertisementSnackBanner(
             exit = slideOutVertically(animationSpec = tween(2000)) { with(density) { -40.dp.roundToPx() } } + shrinkVertically() + fadeOut(),
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .padding(paddingValues)
         ) {
             Surface(
                 color = containerColor,

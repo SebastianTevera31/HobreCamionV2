@@ -8,4 +8,5 @@ data class AppUpdateMessage(
     val fecha: String,
     val horaInicio: String,
     val horaFinal: String,
+    val version: String
 )

@@ -38,9 +38,9 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.AdvertisementSnackBanner
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 
 enum class PositionView {
     RECIENTES, FILTRAR
@@ -124,17 +124,10 @@ fun MonitorScreen(
                                 && monitorUiState.monitorId != 0
                     monitorViewModel.getBitmapImage()
 
-                    if (isSignalUnknown || monitorUiState.isMaintenanceSoon) {
-                        val text = if (monitorUiState.isMaintenanceSoon) {
-                            stringResource(
-                                R.string.mensaje_mantenimiento_programado,
-                                monitorUiState.maintenanceDate
-                            )
-                        } else {
-                            stringResource(
-                                monitorUiState.signalIntensity.first.alertMessage!!
-                            )
-                        }
+                    if (isSignalUnknown) {
+                        val text = stringResource(
+                            monitorUiState.signalIntensity.first.alertMessage!!
+                        )
 
                         AdvertisementSnackBanner(
                             visible = true,

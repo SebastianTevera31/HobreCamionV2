@@ -67,16 +67,11 @@ class MonitorViewModel @Inject constructor(
     private val updateSensorDataUseCase: UpdateSensorDataUseCase,
     private val getSensorDataByWheelUseCase: GetSensorDataByWheelUseCase,
     private val assemblyTireRepository: AssemblyTireRepository,
-    private val appUpdateRepository: AppUpdateMessageRepositoryImpl,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
         MutableStateFlow(MonitorUiState())
     val monitorUiState = _monitorUiState.asStateFlow()
-
-    val appVersionData = appUpdateRepository.updateFlow.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(), null
-    )
 
     private val _positionsUiState =
         MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Loading)
@@ -117,38 +112,6 @@ class MonitorViewModel @Inject constructor(
 
         viewModelScope.launch {
             updateAssemblyStatus()
-        }
-
-        viewModelScope.launch {
-            appVersionData.collect { msg ->
-                msg?.let {
-                    if (it.tipo == FireCloudMessagingType.MANTENIMIENTO.value){
-                        val fechaInicioUTC = getDateFromNotification(
-                            it.fecha.split(" ")[0],
-                            it.horaInicio
-                        )?.toInstant()
-                        if (fechaInicioUTC != null) {
-                            val ahoraInstace = Instant.now()
-
-                            val uiDate = fechaInicioUTC.atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-
-                            if (ahoraInstace.isBefore(fechaInicioUTC)) {
-                                _monitorUiState.update { currentUiState ->
-                                    currentUiState.copy(
-                                        isMaintenanceSoon = true,
-                                        maintenanceDate = uiDate
-                                    )
-                                }
-                            } else {
-                                _monitorUiState.update { currentUiState ->
-                                    currentUiState.copy(isMaintenanceSoon = false, maintenanceDate = "")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         readBluetoothData()

@@ -358,7 +358,21 @@
     <string name="en_mantenimiento">Under maintenance</string>
     <string name="aviso_mantenimiento">We apologize for the inconvenience. Service will be restored at %1$s hrs.</string>
     <string name="aviso_mantenimiento_ii">We are performing maintenance to ensure the app functions properly.</string>
+    <string name="mantenimiento_programado">Scheduled Maintenance</string>
 
+    <string name="actualizacion_de_terminos_y_condiciones">Terms and Conditions Update</string>
+
+    <string name="actualizacion_de_plan">Plan Update</string>
+
+    <string name="mantenimiento_message">The service will be unavailable for a moment.</string>
+
+    <string name="terms_message">We have updated our terms and conditions. Please review them to continue.</string>
+
+    <string name="paymentplan_message">Your plan has been updated.</string>
+
+    <string name="autoservice_message">Your automatic service has been processed successfully.</string>
+
+    <string name="generic_message">You have a new notification.</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
