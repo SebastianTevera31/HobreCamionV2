@@ -16,7 +16,7 @@ android {
         applicationId = "com.rfz.appflotal"
         minSdk = 28
         targetSdk = 35
-        versionCode = 8
+        versionCode = 9
         versionName = "3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -89,9 +89,6 @@ dependencies {
 
     // Import the Firebase Messaging
     implementation("com.google.firebase:firebase-messaging")
-
-    // When using the BoM, don't specify versions in Firebase dependencies
-    implementation("com.google.firebase:firebase-analytics")
 
     implementation("androidx.hilt:hilt-work:1.3.0")
     implementation("androidx.hilt:hilt-compiler:1.3.0")
