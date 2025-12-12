@@ -18,6 +18,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLocale
@@ -164,10 +165,20 @@ class HombreCamionService : Service() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
+        val serviceIntent = Intent(this, InicioActivity::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent)
+
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
             notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val deleteIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            serviceIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -185,6 +196,7 @@ class HombreCamionService : Service() {
         notificationCompactBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.logo)
             .setContentIntent(pendingIntent)
+            .setDeleteIntent(deleteIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
