@@ -921,7 +921,6 @@ class InicioActivity : ComponentActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                // FCM SDK (and your app) can post notifications.
             } else {
                 // Directly ask for the permission
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -939,7 +938,7 @@ fun NotificationComponent(
 ) {
     when (inicioUiState.eventType) {
         FireCloudMessagingType.CAMBIO_DE_PLAN -> {
-            onPlanChange()
+            onPlanChange() // Navigation
         }
 
         FireCloudMessagingType.ACTUALIZACION -> {
@@ -956,6 +955,7 @@ fun NotificationComponent(
                 }
 
                 MaintenanceStatus.NOT_MAINTENANCE -> {
+                    onCleanState()
                 }
 
                 MaintenanceStatus.SCHEDULED -> {}

@@ -14,7 +14,6 @@ import androidx.work.WorkManager
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.fcmessaging.AppUpdateMessage
 import com.rfz.appflotal.data.network.service.fgservice.currentAppLocaleFromAppCompat
 import com.rfz.appflotal.data.network.service.fgservice.localized
@@ -26,7 +25,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -40,22 +38,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var getTasksUseCase: GetTasksUseCase
 
-
-    lateinit var notificationManager: NotificationManager
-
     private val fcmScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    private lateinit var notificationCompactBuilder: NotificationCompat.Builder
-
-    override fun onCreate() {
-        super.onCreate()
-        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        fcmScope.launch {
-            AppLocale.currentLocale.distinctUntilChangedBy { it.language }.collect {
-                rebuildNotification()
-            }
-        }
-    }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         Log.d(TAG, "From: ${remoteMessage.from}")
@@ -111,11 +94,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             fecha = payload["fecha"] ?: "",
             horaInicio = payload["hora_inicio"] ?: "",
             horaFinal = payload["hora_final"] ?: "",
-            version = "",
+            version = payload["version"] ?: "",
         )
 
         fcmScope.launch {
-            appUpdateMessageRepository.saveMessage(update)
+            appUpdateMessageRepository.enqueueMessage(update)
         }
 
         Log.d(TAG, "Short lived task is done.")
@@ -138,7 +121,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         lctx: Context,
         isThereUser: Boolean
     ): Pair<String, String> {
-        val tipo = appUpdateMessageRepository.updateFlow.first()?.tipo
+        val tipo = appUpdateMessageRepository.pendingMessagesFlow.first().firstOrNull()?.tipo
         if (tipo != null) {
             val title = when (tipo) {
                 FireCloudMessagingType.MANTENIMIENTO.value, FireCloudMessagingType.ARREGLO_URGENTE.value -> lctx.getString(
@@ -183,27 +166,27 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun createNotification(title: String, messageBody: String) {
-        val requestCode = 0
         val intent = Intent(this, InicioActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(
             this,
-            requestCode,
+            0,
             intent,
             PendingIntent.FLAG_IMMUTABLE,
         )
 
         val channelId = getString(R.string.app_fcm_channel)
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        notificationCompactBuilder = NotificationCompat.Builder(this, channelId)
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.logo)
-            .setContentTitle(title ?: "Flotal")
-            .setContentText(messageBody ?: getString(R.string.notificacion_nueva))
+            .setContentTitle(title)
+            .setContentText(messageBody)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
 
-        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Since android Oreo notification channel is needed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -215,23 +198,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        val notificationId = 0
-        notificationManager.notify(notificationId, notificationCompactBuilder.build())
-    }
-
-    private fun rebuildNotification() {
-        val appLocale = currentAppLocaleFromAppCompat() ?: Locale.getDefault()
-        val lctx = this.localized(appLocale)
-        fcmScope.launch {
-            val user = getTasksUseCase().first()
-            val (title, content) = getNotificationMessage(lctx, user.isNullOrEmpty())
-            if (title.isEmpty()) return@launch
-            if (::notificationCompactBuilder.isInitialized) {
-                notificationCompactBuilder.setContentTitle(title).setContentText(content)
-                val notificationId = 0
-                notificationManager.notify(notificationId, notificationCompactBuilder.build())
-            }
-        }
+        notificationManager.notify(0, notificationBuilder.build())
     }
 
     private fun sendRegistrationToServer(token: String?) {
@@ -240,8 +207,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
     companion object {
-
         private const val TAG = "MyFirebaseMsgService"
     }
-
 }

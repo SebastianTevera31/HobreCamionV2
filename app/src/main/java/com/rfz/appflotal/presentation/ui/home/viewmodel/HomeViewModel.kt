@@ -21,8 +21,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -49,19 +52,22 @@ class HomeViewModel @Inject constructor(
     private val _homeCheckInMessage = MutableLiveData<String>()
     val homeCheckInMessage: LiveData<String> = _homeCheckInMessage
 
+    val notificationState = appStatusManagerRepository.appState.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000), null
+    )
+
     suspend fun logout() {
         hombreCamionRepository.clearUserData()
         _messageOperationState.value = OperationStatus.Loading
         _uiState.value = HomeUiState()
     }
 
-    init {
-        listenToAppStatusChanges()
-        listenUserPlan()
-    }
 
     fun loadInitialData() {
         _uiState.update { it.copy(isLoading = true) }
+        listenToAppStatusChanges()
+        //listenUserPlan()
         viewModelScope.launch {
             try {
                 val deferredUserData = async { hombreCamionRepository.getUserData() }
@@ -103,22 +109,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun listenUserPlan() {
-        viewModelScope.launch {
-            val userId = _uiState.value.userData?.idUser ?: return@launch
-            hombreCamionRepository.observePaymentPlan(userId).collect { paymentPlan ->
-                if (paymentPlan.isNullOrEmpty()) return@collect
-                _uiState.update { currentUiState ->
-                    currentUiState.copy(
-                        paymentPlanType = PaymentPlanType.valueOf(paymentPlan.replace(" ", "")),
-                        screenLoadStatus = OperationStatus.Success
-                    )
-                }
-                appStatusManagerRepository.cleanNotificationsState()
-            }
-        }
-    }
-
     private fun listenToAppStatusChanges() {
         viewModelScope.launch {
             appStatusManagerRepository.appState.collect { notificationState ->
@@ -131,7 +121,9 @@ class HomeViewModel @Inject constructor(
                         _uiState.update { it.copy(showTermsAndConditions = true) }
                     }
 
-                    else -> {}
+                    else -> {
+                        _uiState.update { it.copy(showTermsAndConditions = false) }
+                    }
                 }
             }
         }
@@ -199,7 +191,6 @@ class HomeViewModel @Inject constructor(
             val result = loginUseCase.doAcceptTermsAndConditions()
             asyncResponseHelper(result) {
                 appStatusManagerRepository.cleanNotificationsState()
-                _uiState.update { it.copy(showTermsAndConditions = false) }
             }
         }
     }

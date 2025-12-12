@@ -94,11 +94,10 @@ class AppStatusManagerRepository @Inject constructor(
     private fun observeNotifications() = scope.launch {
         appUpdateRepository.pendingMessagesFlow.collect { notifications ->
             if (notifications.isEmpty()) {
-                cleanNotificationsStateInternal()
                 return@collect
             }
 
-            val message = notifications.first()
+            val message = notifications.last()
 
             processingMutex.withLock {
                 val currentEvent = _appState.value.eventType
@@ -110,40 +109,35 @@ class AppStatusManagerRepository @Inject constructor(
                     }
 
                     FireCloudMessagingType.CAMBIO_DE_PLAN.value -> {
-                        val isAppBusy =
-                            currentEvent == FireCloudMessagingType.MANTENIMIENTO ||
+                        val isAppBusy = currentEvent == FireCloudMessagingType.MANTENIMIENTO ||
                                     currentEvent == FireCloudMessagingType.ACTUALIZACION
 
-                        if (isAppBusy) {
-                            appUpdateRepository.enqueueMessage(message)
-                        } else {
+                        if (!isAppBusy) {
                             _appState.update {
                                 it.copy(
                                     eventType = FireCloudMessagingType.CAMBIO_DE_PLAN,
                                 )
                             }
                             updateUserPlan()
-                            appUpdateRepository.dequeueMessage()
                         }
                     }
 
                     FireCloudMessagingType.ACTUALIZACION.value -> {
-                        if (currentEvent == FireCloudMessagingType.NONE) {
-                            val version = message.version
-                            if (isRemoteVersionGreater(version)) {
-                                _appState.update { it.copy(eventType = FireCloudMessagingType.ACTUALIZACION) }
-                                appUpdateRepository.dequeueMessage()
-                            } else {
-                                cleanNotificationsStateInternal()
-                            }
+                        val version = message.version
+                        if (isRemoteVersionGreater(version)) {
+                            _appState.update { it.copy(eventType = FireCloudMessagingType.ACTUALIZACION) }
                         } else {
-                            appUpdateRepository.enqueueMessage(message)
+                            cleanNotificationsStateInternal()
                         }
                     }
 
                     FireCloudMessagingType.TERMINOS.value -> {
-                        _appState.update { it.copy(eventType = FireCloudMessagingType.TERMINOS) }
-                        appUpdateRepository.dequeueMessage()
+                        val isAppBusy = currentEvent == FireCloudMessagingType.MANTENIMIENTO ||
+                                currentEvent == FireCloudMessagingType.ACTUALIZACION
+
+                        if (!isAppBusy){
+                            _appState.update { it.copy(eventType = FireCloudMessagingType.TERMINOS) }
+                        }
                     }
 
                     else -> {
@@ -195,8 +189,7 @@ class AppStatusManagerRepository @Inject constructor(
                     }
 
                     if (status == MaintenanceStatus.NOT_MAINTENANCE) {
-                        cleanNotificationsStateInternal()
-                        break
+                       break
                     }
 
                     delay(10_000L)
@@ -224,8 +217,11 @@ class AppStatusManagerRepository @Inject constructor(
                     idUser = userData.idUser,
                     plan = newPlan.name
                 )
+
             } catch (_: Exception) {
                 // Manejo de error: registrar (o exponer al logger del proyecto)
+            }finally {
+                cleanNotificationsState()
             }
         }
     }
@@ -234,7 +230,7 @@ class AppStatusManagerRepository @Inject constructor(
         val localVersion = BuildConfig.VERSION_NAME.split(".").map { it.toIntOrNull() ?: 0 }
         val remoteVersion = minRemoteVersion.split(".").map { it.toIntOrNull() ?: 0 }
 
-        val max = maxOf(localVersion.size, remoteVersion.size)
+         val max = maxOf(localVersion.size, remoteVersion.size)
 
         for (i in 0 until max) {
             val localPart = localVersion.getOrNull(i) ?: 0
