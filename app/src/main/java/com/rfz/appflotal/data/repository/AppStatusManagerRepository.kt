@@ -18,17 +18,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// Kotlin — versión refinada de AppStatusManagerRepository
+
 data class AppNotificationState(
     val isMaintenance: MaintenanceStatus = MaintenanceStatus.NOT_MAINTENANCE,
     val eventType: FireCloudMessagingType = FireCloudMessagingType.NONE,
-    val isUpdate: Boolean = false,
-    val wasAPlanChange: Boolean = false,
     val paymentPlanType: PaymentPlanType = PaymentPlanType.None,
     val userId: Int? = 0,
     val finalUpdateDataForUser: String = "",
@@ -41,6 +43,13 @@ enum class MaintenanceStatus {
     SCHEDULED
 }
 
+fun String.toSafePaymentPlanType(): PaymentPlanType =
+    try {
+        PaymentPlanType.valueOf(this.replace(" ", ""))
+    } catch (_: Exception) {
+        PaymentPlanType.None
+    }
+
 @Singleton
 class AppStatusManagerRepository @Inject constructor(
     private val appUpdateRepository: AppUpdateMessageRepositoryImpl,
@@ -48,6 +57,9 @@ class AppStatusManagerRepository @Inject constructor(
     private val hombreCamionRepository: HombreCamionRepository
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private val processingMutex = Mutex()
+
     private var maintenanceJob: Job? = null
 
     private val _appState = MutableStateFlow(AppNotificationState())
@@ -59,20 +71,18 @@ class AppStatusManagerRepository @Inject constructor(
     }
 
     private fun observeUserData() = scope.launch {
-        getTasksUseCase().collect { observeUserData ->
-            if (observeUserData.isNotEmpty()) {
-                _appState.update { currentState ->
-                    val userData = observeUserData.first()
-                    currentState.copy(
+        getTasksUseCase().collect { tasks ->
+            if (tasks.isNotEmpty()) {
+                val userData = tasks.first()
+                _appState.update { current ->
+                    current.copy(
                         userId = userData.id,
-                        paymentPlanType = PaymentPlanType.valueOf(
-                            userData.paymentPlan.replace(" ", "")
-                        )
+                        paymentPlanType = userData.paymentPlan.toSafePaymentPlanType()
                     )
                 }
             } else {
-                _appState.update { currentState ->
-                    currentState.copy(
+                _appState.update { current ->
+                    current.copy(
                         userId = null,
                         paymentPlanType = PaymentPlanType.None
                     )
@@ -82,46 +92,62 @@ class AppStatusManagerRepository @Inject constructor(
     }
 
     private fun observeNotifications() = scope.launch {
-        appUpdateRepository.updateFlow.collect { notification ->
-            if (notification == null) return@collect
+        appUpdateRepository.pendingMessagesFlow.collect { notifications ->
+            if (notifications.isEmpty()) {
+                cleanNotificationsStateInternal()
+                return@collect
+            }
 
-            when (notification.tipo) {
-                FireCloudMessagingType.MANTENIMIENTO.value, FireCloudMessagingType.ARREGLO_URGENTE.value -> {
-                    _appState.update { currentUiState ->
-                        currentUiState.copy(
-                            eventType = FireCloudMessagingType.MANTENIMIENTO
-                        )
+            val message = notifications.first()
+
+            processingMutex.withLock {
+                val currentEvent = _appState.value.eventType
+                when (message.tipo) {
+                    FireCloudMessagingType.MANTENIMIENTO.value,
+                    FireCloudMessagingType.ARREGLO_URGENTE.value -> {
+                        _appState.update { it.copy(eventType = FireCloudMessagingType.MANTENIMIENTO) }
+                        handleMaintenance(message)
                     }
-                    handleMaintenance(notification)
-                }
 
-                FireCloudMessagingType.CAMBIO_DE_PLAN.value -> {
-                    if (_appState.value.isMaintenance == MaintenanceStatus.MAINTENANCE || _appState.value.eventType ==
-                        FireCloudMessagingType.ACTUALIZACION
-                    ) {
-                        _appState.update { currentState ->
-                            currentState.copy(wasAPlanChange = true)
+                    FireCloudMessagingType.CAMBIO_DE_PLAN.value -> {
+                        val isAppBusy =
+                            currentEvent == FireCloudMessagingType.MANTENIMIENTO ||
+                                    currentEvent == FireCloudMessagingType.ACTUALIZACION
+
+                        if (isAppBusy) {
+                            appUpdateRepository.enqueueMessage(message)
+                        } else {
+                            _appState.update {
+                                it.copy(
+                                    eventType = FireCloudMessagingType.CAMBIO_DE_PLAN,
+                                )
+                            }
+                            updateUserPlan()
+                            appUpdateRepository.dequeueMessage()
                         }
-                    } else {
-                        _appState.update { currentUiState ->
-                            currentUiState.copy(
-                                eventType = FireCloudMessagingType.CAMBIO_DE_PLAN,
-                                wasAPlanChange = false
-                            )
-                        }
-                        updateUserPlan()
                     }
-                }
 
-                FireCloudMessagingType.ACTUALIZACION.value -> {
-                    isRemoteVersionDifferent(notification.version)
-                }
+                    FireCloudMessagingType.ACTUALIZACION.value -> {
+                        if (currentEvent == FireCloudMessagingType.NONE) {
+                            val version = message.version
+                            if (isRemoteVersionGreater(version)) {
+                                _appState.update { it.copy(eventType = FireCloudMessagingType.ACTUALIZACION) }
+                                appUpdateRepository.dequeueMessage()
+                            } else {
+                                cleanNotificationsStateInternal()
+                            }
+                        } else {
+                            appUpdateRepository.enqueueMessage(message)
+                        }
+                    }
 
-                FireCloudMessagingType.TERMINOS.value -> {
-                    _appState.update { currentUiState ->
-                        currentUiState.copy(
-                            eventType = FireCloudMessagingType.TERMINOS
-                        )
+                    FireCloudMessagingType.TERMINOS.value -> {
+                        _appState.update { it.copy(eventType = FireCloudMessagingType.TERMINOS) }
+                        appUpdateRepository.dequeueMessage()
+                    }
+
+                    else -> {
+                        appUpdateRepository.dequeueMessage()
                     }
                 }
             }
@@ -129,82 +155,82 @@ class AppStatusManagerRepository @Inject constructor(
     }
 
     private fun handleMaintenance(notification: AppUpdateMessage) {
-        // Cancelar cualquier trabajo de mantenimiento anterior
+        // Cancelar cualquier trabajo de mantenimiento anterior de forma segura
         maintenanceJob?.cancel()
 
-        val fechaInicioUTC = getDateFromNotification(
-            notification.fecha.split(" ")[0],
-            notification.horaInicio
-        )?.toInstant()
+        val datePart = notification.fecha.split(" ").firstOrNull() ?: ""
+        val fechaInicioUTC = getDateFromNotification(datePart, notification.horaInicio)?.toInstant()
+        val fechaFinUTC = getDateFromNotification(datePart, notification.horaFinal)?.toInstant()
 
-        val fechaFinUTC = getDateFromNotification(
-            notification.fecha.split(" ")[0],
-            notification.horaFinal
-        )?.toInstant()
+        if (fechaInicioUTC == null || fechaFinUTC == null) {
+            // Datos no válidos -> limpiar y salir
+            scope.launch { cleanNotificationsStateInternal() }
+            return
+        }
 
-        if (fechaInicioUTC == null || fechaFinUTC == null) return
-
-        // Lanzar el nuevo trabajo de monitoreo
+        // Crear un nuevo job que monitoree el estado de mantenimiento
         maintenanceJob = scope.launch {
-            CoroutineScope(Dispatchers.IO + SupervisorJob())
-            while (isActive) {
-                val ahoraUTC = Instant.now()
+            try {
+                while (isActive) {
+                    val ahoraUTC = Instant.now()
 
-                val status = when {
-                    ahoraUTC.isBefore(fechaInicioUTC) -> MaintenanceStatus.SCHEDULED
-                    ahoraUTC.isAfter(fechaInicioUTC) && ahoraUTC.isBefore(fechaFinUTC) -> MaintenanceStatus.MAINTENANCE
-                    else -> MaintenanceStatus.NOT_MAINTENANCE
-                }
+                    val status = when {
+                        ahoraUTC.isBefore(fechaInicioUTC) -> MaintenanceStatus.SCHEDULED
+                        ahoraUTC.isAfter(fechaInicioUTC) && ahoraUTC.isBefore(fechaFinUTC) -> MaintenanceStatus.MAINTENANCE
+                        else -> MaintenanceStatus.NOT_MAINTENANCE
+                    }
 
-                _appState.update {
-                    it.copy(
-                        isMaintenance = status,
-                        finalUpdateDataForUser = fechaFinUTC.atZone(ZoneId.systemDefault())
-                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-                        initialUpdateDataForUser = fechaInicioUTC.atZone(ZoneId.systemDefault())
-                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-                    )
-                }
-
-                if (status == MaintenanceStatus.NOT_MAINTENANCE) {
-                    // Al terminar, solo reseteamos el estado de mantenimiento, no el de usuario
                     _appState.update {
                         it.copy(
-                            isMaintenance = MaintenanceStatus.NOT_MAINTENANCE,
-                            finalUpdateDataForUser = "",
-                            initialUpdateDataForUser = ""
+                            isMaintenance = status,
+                            finalUpdateDataForUser = if (status != MaintenanceStatus.NOT_MAINTENANCE)
+                                fechaFinUTC.atZone(ZoneId.systemDefault())
+                                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                            else "",
+                            initialUpdateDataForUser = if (status != MaintenanceStatus.NOT_MAINTENANCE)
+                                fechaInicioUTC.atZone(ZoneId.systemDefault())
+                                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                            else ""
                         )
                     }
-                    break // Rompe el loop de este trabajo
-                }
 
-                delay(10_000)
+                    if (status == MaintenanceStatus.NOT_MAINTENANCE) {
+                        cleanNotificationsStateInternal()
+                        break
+                    }
+
+                    delay(10_000L)
+                }
+            } finally {
+                maintenanceJob = null
             }
         }
     }
 
-    fun updateUserPlan() {
+    private fun updateUserPlan() {
+        // Procesamiento en background; no bloqueante
         scope.launch {
-            val paymentPlan = _appState.value.paymentPlanType
-            val userId = _appState.value.userId
-            if (userId != null) {
-                if (paymentPlan != PaymentPlanType.Complete && paymentPlan != PaymentPlanType.None) {
-                    hombreCamionRepository.updateUserPlan(
-                        idUser = userId,
-                        plan = PaymentPlanType.Complete.name
-                    )
+            try {
+                val userData = hombreCamionRepository.getUserData() ?: return@launch
+                val currentPlan = userData.paymentPlan.toSafePaymentPlanType()
 
-                } else if (paymentPlan == PaymentPlanType.Complete) {
-                    hombreCamionRepository.updateUserPlan(
-                        idUser = userId,
-                        plan = PaymentPlanType.Free.name
-                    )
+                val newPlan = when (currentPlan) {
+                    PaymentPlanType.Complete -> PaymentPlanType.Free
+                    PaymentPlanType.Free -> PaymentPlanType.Complete
+                    else -> PaymentPlanType.Complete // comportamiento por defecto
                 }
+
+                hombreCamionRepository.updateUserPlan(
+                    idUser = userData.idUser,
+                    plan = newPlan.name
+                )
+            } catch (_: Exception) {
+                // Manejo de error: registrar (o exponer al logger del proyecto)
             }
         }
     }
 
-    private fun isRemoteVersionDifferent(minRemoteVersion: String) {
+    private fun isRemoteVersionGreater(minRemoteVersion: String): Boolean {
         val localVersion = BuildConfig.VERSION_NAME.split(".").map { it.toIntOrNull() ?: 0 }
         val remoteVersion = minRemoteVersion.split(".").map { it.toIntOrNull() ?: 0 }
 
@@ -213,36 +239,33 @@ class AppStatusManagerRepository @Inject constructor(
         for (i in 0 until max) {
             val localPart = localVersion.getOrNull(i) ?: 0
             val remotePart = remoteVersion.getOrNull(i) ?: 0
-            if (remotePart > localPart) {
-                _appState.update { it.copy(eventType = FireCloudMessagingType.ACTUALIZACION) }
-                return
-            }
-            if (remotePart < localPart) {
-                cleanNotificationsState()
-                return
-            }
+            if (remotePart > localPart) return true
+            if (remotePart < localPart) return false
+        }
+        return false
+    }
+
+    // Internal clean function para ser llamado desde coroutines internas (sin lanzar una nueva coroutine innecesaria)
+    private suspend fun cleanNotificationsStateInternal() {
+        maintenanceJob?.let {
+            if (it.isActive) it.cancel()
+            maintenanceJob = null
+        }
+
+        _appState.update { it.copy(eventType = FireCloudMessagingType.NONE) }
+
+        try {
+            appUpdateRepository.dequeueMessage()
+        } catch (_: Exception) {
+            // Manejo de error: registrar (o exponer al logger del proyecto)
         }
     }
 
     fun cleanNotificationsState() {
         scope.launch {
-            appUpdateRepository.clear()
-            maintenanceJob?.let {
-                if (it.isActive) it?.cancel()
-            }
-            _appState.update { it.copy(eventType = FireCloudMessagingType.NONE) }
-
-            // Verificacion de Evento Pendiente
-            if (_appState.value.wasAPlanChange) {
-                appUpdateRepository.saveMessage(
-                    AppUpdateMessage(
-                        tipo = FireCloudMessagingType.CAMBIO_DE_PLAN.value,
-                        fecha = "",
-                        horaInicio = "",
-                        horaFinal = "",
-                        version = ""
-                    )
-                )
+            // Serializar para evitar race conditions con observeNotifications
+            processingMutex.withLock {
+                cleanNotificationsStateInternal()
             }
         }
     }
