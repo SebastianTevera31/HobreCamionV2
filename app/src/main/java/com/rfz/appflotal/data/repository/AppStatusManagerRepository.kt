@@ -217,7 +217,7 @@ class AppStatusManagerRepository @Inject constructor(
                 val newPlan = when (currentPlan) {
                     PaymentPlanType.Complete -> PaymentPlanType.Free
                     PaymentPlanType.Free -> PaymentPlanType.Complete
-                    else -> PaymentPlanType.Complete // comportamiento por defecto
+                    else -> PaymentPlanType.Free // comportamiento por defecto
                 }
 
                 hombreCamionRepository.updateUserPlan(
