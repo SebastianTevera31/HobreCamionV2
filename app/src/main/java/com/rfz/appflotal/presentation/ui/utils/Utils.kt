@@ -101,5 +101,6 @@ enum class FireCloudMessagingType(val value: String) {
     CAMBIO_DE_PLAN("Cambio de Plan"),
     SERVICIO_AUTO("Servicio de Auto"),
     MANTENIMIENTO("Mantenimiento"),
-    ARREGLO_URGENTE("Arreglo Urgente")
+    ARREGLO_URGENTE("Arreglo Urgente"),
+    NONE("Sin evento")
 }

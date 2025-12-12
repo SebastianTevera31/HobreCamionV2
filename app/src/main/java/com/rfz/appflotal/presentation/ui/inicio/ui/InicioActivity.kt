@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,13 +52,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
-import com.rfz.appflotal.core.util.AppVersionUtil
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens
-import com.rfz.appflotal.data.model.fcmessaging.AppUpdateMessage
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.data.repository.AppStatusManagerRepository
-import com.rfz.appflotal.data.repository.MainUiState
+import com.rfz.appflotal.data.repository.AppNotificationState
 import com.rfz.appflotal.data.repository.MaintenanceStatus
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.base.BaseUseCase
@@ -177,7 +173,7 @@ class InicioActivity : ComponentActivity() {
     lateinit var providerListUseCase: ProviderListUseCase
 
     @Inject
-    lateinit var appStatusManagerrRepository: AppStatusManagerRepository
+    lateinit var appStatusManagerRepository: AppStatusManagerRepository
 
     @Inject
     lateinit var tireCrudUseCase: TireCrudUseCase
@@ -291,8 +287,7 @@ class InicioActivity : ComponentActivity() {
 
             val context = LocalContext.current
 
-            val inicioState = appStatusManagerrRepository.mainUiState.collectAsState()
-            val appVersionData = appStatusManagerrRepository.updateMessage.collectAsState()
+            val inicioState = appStatusManagerRepository.appState.collectAsState()
 
             val postNotificationGranted =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -902,9 +897,15 @@ class InicioActivity : ComponentActivity() {
 
                                 NotificationComponent(
                                     inicioUiState = inicioState.value,
-                                    notificationData = appVersionData.value,
-                                    onCleanState = { inicioScreenViewModel.cleanNotificationsState() },
-                                    context = this@InicioActivity
+                                    onPlanChange = {
+                                        // Estar logueado garantiza existe un userId y navegacion al menu principal
+                                        if (inicioState.value.userId != null) {
+                                            navController.navigate(NavScreens.HOME){
+                                                launchSingleTop = true
+                                            }
+                                        }
+                                    },
+                                    onCleanState = { appStatusManagerRepository.cleanNotificationsState() },
                                 )
                             }
                         }
@@ -931,43 +932,36 @@ class InicioActivity : ComponentActivity() {
 
 @Composable
 fun NotificationComponent(
-    inicioUiState: MainUiState,
-    notificationData: AppUpdateMessage?,
+    inicioUiState: AppNotificationState,
+    onPlanChange: () -> Unit,
     onCleanState: () -> Unit,
     modifier: Modifier = Modifier,
-    context: Context
 ) {
-    notificationData?.let { msg ->
-        when (msg.tipo) {
-            FireCloudMessagingType.ACTUALIZACION.value -> {
-//                if (7 < AppVersionUtil.getVersionCode(context)) {
-////
-////                } else onCleanState()
-                UpdateAppScreen(modifier = modifier.fillMaxSize())
-            }
-
-            FireCloudMessagingType.SERVICIO_AUTO.value -> {}
-            FireCloudMessagingType.MANTENIMIENTO.value -> {
-                when (inicioUiState.isMaintenance) {
-                    MaintenanceStatus.MAINTENANCE -> {
-                        MaintenanceAppScreen(
-                            modifier = modifier,
-                            horaFinal = inicioUiState.finalUpdateDataForUser
-                        )
-                    }
-
-                    MaintenanceStatus.NOT_MAINTENANCE -> {
-                        onCleanState()
-                    }
-
-                    MaintenanceStatus.SCHEDULED -> {
-
-                    }
-                }
-            }
-
-            FireCloudMessagingType.ARREGLO_URGENTE.value -> {}
+    when(inicioUiState.eventType) {
+        FireCloudMessagingType.CAMBIO_DE_PLAN -> {
+            onPlanChange()
+            onCleanState()
         }
+        FireCloudMessagingType.ACTUALIZACION -> {
+            UpdateAppScreen(modifier = modifier.fillMaxSize())
+        }
+        FireCloudMessagingType.ARREGLO_URGENTE, FireCloudMessagingType.MANTENIMIENTO -> {
+            when (inicioUiState.isMaintenance) {
+                MaintenanceStatus.MAINTENANCE -> {
+                    MaintenanceAppScreen(
+                        modifier = modifier,
+                        horaFinal = inicioUiState.finalUpdateDataForUser
+                    )
+                }
+
+                MaintenanceStatus.NOT_MAINTENANCE -> {
+                    onCleanState()
+                }
+
+                MaintenanceStatus.SCHEDULED -> {}
+            }
+        }
+        else -> {}
     }
 }
 

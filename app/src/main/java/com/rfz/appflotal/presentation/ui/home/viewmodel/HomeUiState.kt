@@ -9,5 +9,6 @@ data class HomeUiState(
     val selectedLanguage: String = "en",
     val isLoading: Boolean = false,
     val screenLoadStatus: OperationStatus = OperationStatus.Loading,
+    val showTermsAndConditions: Boolean = false,
     val paymentPlanType: PaymentPlanType = PaymentPlanType.None
 )

@@ -111,8 +111,6 @@ fun HomeScreen(
     val uiState by homeViewModel.uiState.collectAsState()
     val wifiStatus = monitorViewModel.wifiStatus.collectAsState()
 
-    val appVersionData = homeViewModel.appVersionData.collectAsState()
-
     val onlyLanguagesAllowedText = stringResource(R.string.only_languages_allowed)
     val languages = listOf("es" to "ES", "en" to "EN")
 
@@ -443,17 +441,13 @@ fun HomeScreen(
                     }
                 }
 
-                appVersionData.value?.let { msg ->
-                    when (msg.tipo) {
-                        FireCloudMessagingType.TERMINOS.value -> {
-                            TerminosScreen(
-                                context = context,
-                                buttonText = R.string.confirmar,
-                                onBack = {}
-                            ) {
-                                homeViewModel.acceptNewTermsAndConditions()
-                            }
-                        }
+                if (uiState.showTermsAndConditions) {
+                    TerminosScreen(
+                        context = context,
+                        buttonText = R.string.confirmar,
+                        onBack = {}
+                    ) {
+                        homeViewModel.acceptNewTermsAndConditions()
                     }
                 }
             }

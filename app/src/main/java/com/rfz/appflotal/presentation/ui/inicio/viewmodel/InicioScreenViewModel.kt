@@ -33,8 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class InicioScreenViewModel @Inject constructor(
     private val getTasksUseCase: GetTasksUseCase,
-    private val deleteTasksUseCase: DeleteTasksUseCase,
-    private val appUpdateRepository: AppUpdateMessageRepositoryImpl
+    private val deleteTasksUseCase: DeleteTasksUseCase
 ) : ViewModel() {
 
     private val _initialValidationCompleted = MutableLiveData<Boolean>(false)
@@ -74,11 +73,5 @@ class InicioScreenViewModel @Inject constructor(
 
     fun updateBlePermissions(hasPermission: Boolean) {
         blePermissionGranted = hasPermission
-    }
-
-    fun cleanNotificationsState() {
-        viewModelScope.launch {
-            appUpdateRepository.clear()
-        }
     }
 }

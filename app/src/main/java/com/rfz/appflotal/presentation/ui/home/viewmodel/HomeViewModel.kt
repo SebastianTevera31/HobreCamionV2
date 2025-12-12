@@ -8,10 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.apputilities.UserOpinion
 import com.rfz.appflotal.data.model.languaje.LanguageResponse
+import com.rfz.appflotal.data.repository.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.apputilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
-import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
-import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
@@ -22,10 +21,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -38,8 +36,7 @@ class HomeViewModel @Inject constructor(
     private val languageUseCase: LanguajeUseCase,
     private val loginUseCase: LoginUseCase,
     private val appUtilitiesRepository: AppUtilitiesRepositoryImpl,
-    private val appUpdateRepository: AppUpdateMessageRepositoryImpl,
-    private val getTasksUseCase: GetTasksUseCase,
+    private val appStatusManagerRepository: AppStatusManagerRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -50,10 +47,6 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(OperationStatus.Loading)
     val messageOperationState = _messageOperationState.asStateFlow()
 
-    val appVersionData = appUpdateRepository.updateFlow.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(), null
-    )
-
     private val _homeCheckInMessage = MutableLiveData<String>()
     val homeCheckInMessage: LiveData<String> = _homeCheckInMessage
 
@@ -63,9 +56,13 @@ class HomeViewModel @Inject constructor(
         _uiState.value = HomeUiState()
     }
 
+    init {
+        listenToAppStatusChanges()
+        listenUserPlan()
+    }
+
     fun loadInitialData() {
         _uiState.update { it.copy(isLoading = true) }
-        updatePaymentPlan()
         viewModelScope.launch {
             try {
                 val deferredUserData = async { hombreCamionRepository.getUserData() }
@@ -107,11 +104,34 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun updatePaymentPlan() = viewModelScope.launch {
-        appVersionData.collect { notification ->
-            if (notification != null) {
-                if (notification.tipo == FireCloudMessagingType.CAMBIO_DE_PLAN.value) {
-                    updateUserPlan()
+    private fun listenUserPlan() {
+        viewModelScope.launch {
+            val userId = _uiState.value.userData?.idUser ?: return@launch
+            hombreCamionRepository.observePaymentPlan(userId).collect { paymentPlan ->
+                if (paymentPlan.isNullOrEmpty()) return@collect
+                _uiState.update { currentUiState ->
+                    currentUiState.copy(
+                        paymentPlanType = PaymentPlanType.valueOf(paymentPlan.replace(" ", "")),
+                        screenLoadStatus = OperationStatus.Success
+                    )
+                }
+            }
+        }
+    }
+
+    private fun listenToAppStatusChanges() {
+        viewModelScope.launch {
+            appStatusManagerRepository.appState.collect { notificationState ->
+                when (notificationState.eventType) {
+                    FireCloudMessagingType.CAMBIO_DE_PLAN -> {
+                        _uiState.update { it.copy(screenLoadStatus = OperationStatus.Loading) }
+                    }
+
+                    FireCloudMessagingType.TERMINOS -> {
+                        _uiState.update { it.copy(showTermsAndConditions = true) }
+                    }
+
+                    else -> {}
                 }
             }
         }
@@ -174,32 +194,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun updateUserPlan() {
-        viewModelScope.launch {
-            val paymentPlan = _uiState.value.paymentPlanType
-            if (paymentPlan != PaymentPlanType.Complete && paymentPlan != PaymentPlanType.None) {
-                hombreCamionRepository.updateUserPlan(
-                    idUser = _uiState.value.userData?.idUser ?: 0,
-                    plan = PaymentPlanType.Complete.name
-                )
-                _uiState.update { it.copy(paymentPlanType = PaymentPlanType.Complete) }
-
-            } else if (paymentPlan == PaymentPlanType.Complete) {
-                hombreCamionRepository.updateUserPlan(
-                    idUser = _uiState.value.userData?.idUser ?: 0,
-                    plan = PaymentPlanType.Free.name
-                )
-                _uiState.update { it.copy(paymentPlanType = PaymentPlanType.Free) }
-            }
-            appUpdateRepository.clear()
-        }
-    }
-
     fun acceptNewTermsAndConditions() {
         viewModelScope.launch {
             val result = loginUseCase.doAcceptTermsAndConditions()
             asyncResponseHelper(result) {
-                appUpdateRepository.clear()
+                appStatusManagerRepository.cleanNotificationsState()
+                _uiState.update { it.copy(showTermsAndConditions = false) }
             }
         }
     }
