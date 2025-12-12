@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.Commons.getDateFromNotification
 import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.network.service.HombreCamionService
@@ -82,13 +81,11 @@ import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
-import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.Instant
 import java.time.LocalDate
 import java.util.Locale
 

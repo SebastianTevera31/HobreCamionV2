@@ -55,8 +55,8 @@ import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
-import com.rfz.appflotal.data.repository.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.AppNotificationState
+import com.rfz.appflotal.data.repository.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.MaintenanceStatus
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.base.BaseUseCase
@@ -900,7 +900,7 @@ class InicioActivity : ComponentActivity() {
                                     onPlanChange = {
                                         // Estar logueado garantiza existe un userId y navegacion al menu principal
                                         if (inicioState.value.userId != null) {
-                                            navController.navigate(NavScreens.HOME){
+                                            navController.navigate(NavScreens.HOME) {
                                                 launchSingleTop = true
                                             }
                                         }
@@ -937,14 +937,15 @@ fun NotificationComponent(
     onCleanState: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    when(inicioUiState.eventType) {
+    when (inicioUiState.eventType) {
         FireCloudMessagingType.CAMBIO_DE_PLAN -> {
             onPlanChange()
-            onCleanState()
         }
+
         FireCloudMessagingType.ACTUALIZACION -> {
             UpdateAppScreen(modifier = modifier.fillMaxSize())
         }
+
         FireCloudMessagingType.ARREGLO_URGENTE, FireCloudMessagingType.MANTENIMIENTO -> {
             when (inicioUiState.isMaintenance) {
                 MaintenanceStatus.MAINTENANCE -> {
@@ -955,12 +956,12 @@ fun NotificationComponent(
                 }
 
                 MaintenanceStatus.NOT_MAINTENANCE -> {
-                    onCleanState()
                 }
 
                 MaintenanceStatus.SCHEDULED -> {}
             }
         }
+
         else -> {}
     }
 }
