@@ -24,6 +24,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -942,14 +943,14 @@ fun NotificationComponent(
         }
 
         FireCloudMessagingType.ACTUALIZACION -> {
-            UpdateAppScreen(modifier = modifier.fillMaxSize())
+            UpdateAppScreen(modifier = modifier.fillMaxSize().clickable{})
         }
 
         FireCloudMessagingType.ARREGLO_URGENTE, FireCloudMessagingType.MANTENIMIENTO -> {
             when (inicioUiState.isMaintenance) {
                 MaintenanceStatus.MAINTENANCE -> {
                     MaintenanceAppScreen(
-                        modifier = modifier,
+                        modifier = modifier.clickable{},
                         horaFinal = inicioUiState.finalUpdateDataForUser
                     )
                 }

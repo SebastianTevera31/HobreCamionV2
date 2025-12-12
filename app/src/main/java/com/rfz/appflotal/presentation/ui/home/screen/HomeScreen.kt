@@ -442,7 +442,8 @@ fun HomeScreen(
                     TerminosScreen(
                         context = context,
                         buttonText = R.string.confirmar,
-                        onBack = {}
+                        onBack = {},
+                        modifier = Modifier.clickable {}
                     ) {
                         homeViewModel.acceptNewTermsAndConditions()
                     }
