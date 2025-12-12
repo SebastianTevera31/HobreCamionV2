@@ -358,7 +358,11 @@ fun HomeScreen(
                                         ElegantMenuCard(
                                             title = stringResource(item.title),
                                             iconRes = item.iconRes,
-                                            onClick = { navController.navigate(item.route) },
+                                            onClick = {
+                                                navController.navigate(item.route) {
+                                                    launchSingleTop = true
+                                                }
+                                            },
                                             primaryColor = primaryColor,
                                             secondaryColor = secondaryColor,
                                             cardBackground = cardBackground
