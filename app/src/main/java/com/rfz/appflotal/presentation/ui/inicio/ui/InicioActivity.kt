@@ -24,12 +24,16 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +44,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -319,10 +324,18 @@ class InicioActivity : ComponentActivity() {
                         askNotificationPermission()
                     }
                     Surface(
-                        modifier = Modifier.fillMaxWidth(), color = backgroundLight
+                        modifier = Modifier.fillMaxWidth().background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF213DF3), // Blue
+                                    Color(0xFF4CAF50)  // Green
+                                )
+                            )
+                        ),
+                        color = MaterialTheme.colorScheme.primary
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize().safeDrawingPadding()
                         ) {
                             AdvertisementSnackBanner(
                                 visible = inicioState.value.isMaintenance == MaintenanceStatus.SCHEDULED,
@@ -332,7 +345,7 @@ class InicioActivity : ComponentActivity() {
                                 ),
                                 containerColor = Color("#A6D4F2".toColorInt()),
                                 contentColor = Color.Black,
-                                paddingValues = PaddingValues(0.dp)
+                                paddingValues = PaddingValues(0.dp),
                             )
 
                             Box {
