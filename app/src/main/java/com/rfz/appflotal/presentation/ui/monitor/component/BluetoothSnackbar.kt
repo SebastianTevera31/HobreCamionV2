@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 
 @Composable
-fun AdvertisementSnackBanner(
+fun WarningSnackBanner(
     visible: Boolean,
     message: String,
     modifier: Modifier = Modifier,

@@ -27,12 +27,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,7 +40,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,6 +56,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
@@ -92,7 +93,6 @@ import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.commons.MaintenanceAppScreen
 import com.rfz.appflotal.presentation.commons.UpdateAppScreen
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.ui.assembly.screen.AssemblyTireScreen
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
 import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
@@ -115,7 +115,7 @@ import com.rfz.appflotal.presentation.ui.login.viewmodel.NavigationEvent
 import com.rfz.appflotal.presentation.ui.marcarenovados.screens.MarcaRenovadosScreen
 import com.rfz.appflotal.presentation.ui.marcarenovados.viewmodel.MarcaRenovadosViewModel
 import com.rfz.appflotal.presentation.ui.medidasllantasscreen.MedidasLlantasScreen
-import com.rfz.appflotal.presentation.ui.monitor.component.AdvertisementSnackBanner
+import com.rfz.appflotal.presentation.ui.monitor.component.WarningSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
@@ -252,6 +252,8 @@ class InicioActivity : ComponentActivity() {
     @Inject
     lateinit var baseUseCase: BaseUseCase
 
+    private var adView: AdView? = null
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
@@ -272,6 +274,9 @@ class InicioActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Inicializar anuncios
+        MobileAds.initialize(this) {}
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
             val channelId = getString(R.string.app_fcm_channel)
@@ -287,6 +292,7 @@ class InicioActivity : ComponentActivity() {
         }
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
         enableEdgeToEdge()
 
         setContent {
@@ -296,6 +302,10 @@ class InicioActivity : ComponentActivity() {
             val context = LocalContext.current
 
             val inicioState = appStatusManagerRepository.appState.collectAsState()
+
+            val uiState = inicioScreenViewModel.uiState.collectAsState()
+            val userData = uiState.value.userData
+            val hasInitialValidation = uiState.value.initialValidationCompleted
 
             val postNotificationGranted =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -320,26 +330,33 @@ class InicioActivity : ComponentActivity() {
                 }
             }
 
+            inicioScreenViewModel.loadBannerAd(context)
+
             HombreCamionTheme {
                 LocalizedApp {
                     if (!postNotificationGranted) {
                         askNotificationPermission()
                     }
+
                     Surface(
-                        modifier = Modifier.fillMaxWidth().background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color(0xFF213DF3), // Blue
-                                    Color(0xFF4CAF50)  // Green
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color(0xFF213DF3), // Blue
+                                        Color(0xFF4CAF50)  // Green
+                                    )
                                 )
-                            )
-                        ),
+                            ),
                         color = MaterialTheme.colorScheme.primary
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxSize().safeDrawingPadding()
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .safeDrawingPadding()
                         ) {
-                            AdvertisementSnackBanner(
+                            WarningSnackBanner(
                                 visible = inicioState.value.isMaintenance == MaintenanceStatus.SCHEDULED,
                                 message = stringResource(
                                     R.string.mensaje_mantenimiento_programado,
@@ -349,6 +366,18 @@ class InicioActivity : ComponentActivity() {
                                 contentColor = Color.Black,
                                 paddingValues = PaddingValues(0.dp),
                             )
+
+                            if (uiState.value.adView != null) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Bottom
+                                ) {
+                                    Box(modifier = Modifier.fillMaxWidth()) {
+
+                                    }
+                                }
+                            }
+
 
                             Box {
                                 NetworkConfig.imei =
@@ -362,11 +391,6 @@ class InicioActivity : ComponentActivity() {
                                             getSystemService(TELEPHONY_SERVICE) as TelephonyManager
                                         tel.imei
                                     }
-
-                                val hasInitialValidation by inicioScreenViewModel.initialValidationCompleted.observeAsState(
-                                    false
-                                )
-                                val userData by inicioScreenViewModel.userData.observeAsState()
 
                                 LaunchedEffect(Unit) {
                                     loginViewModel.navigationEvent.collect { event ->
@@ -958,14 +982,17 @@ fun NotificationComponent(
         }
 
         FireCloudMessagingType.ACTUALIZACION -> {
-            UpdateAppScreen(modifier = modifier.fillMaxSize().clickable{})
+            UpdateAppScreen(
+                modifier = modifier
+                    .fillMaxSize()
+                    .clickable {})
         }
 
         FireCloudMessagingType.ARREGLO_URGENTE, FireCloudMessagingType.MANTENIMIENTO -> {
             when (inicioUiState.isMaintenance) {
                 MaintenanceStatus.MAINTENANCE -> {
                     MaintenanceAppScreen(
-                        modifier = modifier.clickable{},
+                        modifier = modifier.clickable {},
                         horaFinal = inicioUiState.finalUpdateDataForUser
                     )
                 }
