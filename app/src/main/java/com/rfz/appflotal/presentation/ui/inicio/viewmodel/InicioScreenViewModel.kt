@@ -1,21 +1,12 @@
 package com.rfz.appflotal.presentation.ui.inicio.viewmodel
 
-import android.content.Context
-import android.util.Log
-import android.view.ViewGroup
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.LoadAdError
 import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.domain.database.DeleteTasksUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first

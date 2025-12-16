@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -44,11 +45,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.navigation.NavType
@@ -56,6 +59,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.rfz.appflotal.R
@@ -330,8 +335,6 @@ class InicioActivity : ComponentActivity() {
                 }
             }
 
-            inicioScreenViewModel.loadBannerAd(context)
-
             HombreCamionTheme {
                 LocalizedApp {
                     if (!postNotificationGranted) {
@@ -365,6 +368,17 @@ class InicioActivity : ComponentActivity() {
                                 containerColor = Color("#A6D4F2".toColorInt()),
                                 contentColor = Color.Black,
                                 paddingValues = PaddingValues(0.dp),
+                            )
+
+                            AndroidView(
+                                modifier = Modifier.clip(RoundedCornerShape(10)),
+                                factory = { context ->
+                                    AdView(context).apply {
+                                        setAdSize(AdSize.FULL_BANNER)
+                                        adUnitId = "ca-app-pub-3940256099942544/9214589741"
+                                        loadAd(AdRequest.Builder().build())
+                                    }
+                                }
                             )
 
                             if (uiState.value.adView != null) {
