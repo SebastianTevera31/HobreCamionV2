@@ -82,7 +82,7 @@ android {
 
 dependencies {
     // Anuncios
-    implementation("com.google.android.gms:play-services-ads:24.9.0")
+    implementation("com.google.android.gms:play-services-ads:24.8.0")
 
     // Preferencias
     implementation("androidx.datastore:datastore-preferences:1.1.1")
