@@ -83,12 +83,14 @@ fun PermissionScreen(
             stringResource(R.string.permiso_bluetooth_notificaciones),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = Color.Black
         )
 
         Text(
             stringResource(R.string.texto_permisos_app),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = Color.Black
         )
         Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen)))
         Button(
