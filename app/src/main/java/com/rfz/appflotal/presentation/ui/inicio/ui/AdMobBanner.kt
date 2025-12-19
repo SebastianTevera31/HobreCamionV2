@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.inicio.ui
 
+import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -15,25 +16,28 @@ fun GlobalAdMobBanner(
     adUnitId: String,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-
-    val adView = remember {
-        AdView(context).apply {
-            AdSize.BANNER
-            this.adUnitId = adUnitId
-            loadAd(AdRequest.Builder().build())
-        }
-    }
-
+    var adView: AdView? = remember { null }
     AndroidView(
         modifier = modifier,
-        factory = { adView }
+        factory = { context ->
+            AdView(context).apply {
+                setAdSize(AdSize.BANNER)
+                this.adUnitId = adUnitId
+                loadAd(AdRequest.Builder().build())
+
+            }.also {
+                adView = it
+            }
+        }
     )
 
     DisposableEffect(Unit) {
         onDispose {
-            // SOLO cuando la app se cierra
-            adView.destroy()
+            // liberar cuando el Composable sale de composición
+            adView?.let { view ->
+                (view.parent as? ViewGroup)?.removeView(view)
+                view.destroy()
+            }
         }
     }
 }

@@ -303,7 +303,7 @@ class InicioActivity : ComponentActivity() {
             val navController = rememberNavController()
             val backStackEntry by navController.currentBackStackEntryAsState()
             val showBanner = when (backStackEntry?.destination?.route) {
-                NavScreens.LOGIN, NavScreens.TERMINOS, NavScreens.INFORMACION_USUARIO -> false
+                NavScreens.LOGIN, NavScreens.TERMINOS, NavScreens.INFORMACION_USUARIO, NavScreens.PERMISOS -> false
                 else -> true
             }
 
@@ -346,12 +346,7 @@ class InicioActivity : ComponentActivity() {
 
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
-                        bottomBar = {
-                            GlobalAdMobBanner(
-                                adUnitId = "ca-app-pub-3940256099942544/9214589741",
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }) {
+                    ) { paddingValues ->
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -370,6 +365,13 @@ class InicioActivity : ComponentActivity() {
                                     .fillMaxSize()
                                     .safeDrawingPadding()
                             ) {
+                                //ca-app-pub-3415237437138959/2146418588
+                                if (showBanner) {
+                                    GlobalAdMobBanner(
+                                        adUnitId = "ca-app-pub-3940256099942544/9214589741",
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
 
                                 WarningSnackBanner(
                                     visible = inicioState.value.isMaintenance == MaintenanceStatus.SCHEDULED,
