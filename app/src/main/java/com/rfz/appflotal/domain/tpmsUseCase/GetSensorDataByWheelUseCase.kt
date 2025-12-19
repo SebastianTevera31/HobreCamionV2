@@ -1,6 +1,8 @@
 package com.rfz.appflotal.domain.tpmsUseCase
 
 import com.rfz.appflotal.core.util.Commons.convertDate
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
@@ -16,7 +18,8 @@ import javax.inject.Inject
 
 class GetSensorDataByWheelUseCase @Inject constructor(
     private val sensorDataTableRepository: SensorDataTableRepository,
-    private val assemblyTireRepository: AssemblyTireRepository
+    private val assemblyTireRepository: AssemblyTireRepository,
+    private val monitorUnitConversionUseCase: MonitorUnitConversionUseCase
 ) {
 
     data class Result(
@@ -27,7 +30,9 @@ class GetSensorDataByWheelUseCase @Inject constructor(
     suspend operator fun invoke(
         monitorId: Int,
         tireSelected: String,
-        currentTires: List<MonitorTire>
+        currentTires: List<MonitorTire>,
+        tempUnit: UnidadTemperatura,
+        pressureUnit: UnidadPresion
     ): Result? {
         val data =
             sensorDataTableRepository.getLastDataByTire(monitorId, tireSelected) ?: return null
@@ -44,6 +49,13 @@ class GetSensorDataByWheelUseCase @Inject constructor(
 
         val flatTireStatus =
             if (data.punctureAlert) SensorAlerts.FAST_LEAKAGE else SensorAlerts.NO_DATA
+
+        val sensorValues = monitorUnitConversionUseCase(
+            temp = data.temperature.toFloat(),
+            tempUnit = tempUnit,
+            pressure = data.pressure.toFloat(),
+            pressureUnit = pressureUnit
+        )
 
         val inAlert = getIsTireInAlert(
             temperatureStatus = temperatureStatus,
@@ -81,12 +93,12 @@ class GetSensorDataByWheelUseCase @Inject constructor(
 
         val newTireUiState = TireUiState(
             currentTire = data.tire,
-            pressure = Pair(data.pressure.toFloat(), pressureStatus),
+            pressure = Pair(sensorValues.pressure, pressureStatus),
             isAssembled = isAssembled,
-            temperature = Pair(data.temperature.toFloat(), temperatureStatus),
+            temperature = Pair(sensorValues.temperature, temperatureStatus),
             timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             batteryStatus = batteryStatus,
-            tireRemovingStatus = if (data.pressure == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
+            tireRemovingStatus = if (sensorValues.pressure == 0f) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
             flatTireStatus = flatTireStatus,
             isInspectionAvailable = isInspectionAvailable
         )

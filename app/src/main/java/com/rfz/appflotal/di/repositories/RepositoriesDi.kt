@@ -1,5 +1,7 @@
 package com.rfz.appflotal.di.repositories
 
+import com.rfz.appflotal.data.repository.UserPreferencesRepository
+import com.rfz.appflotal.data.repository.UserPreferencesRepositoryImpl
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepositoryImpl
 import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepository
@@ -39,4 +41,8 @@ abstract class DiRepository {
     @Binds
     @Singleton
     abstract fun bindRepositoryFscMessaging(impl: AppUpdateMessageRepositoryImpl): AppUpdateMessageRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRepositoryUserPreferences(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
 }

@@ -5,17 +5,21 @@ import com.rfz.appflotal.core.util.Commons.getDateObject
 import com.rfz.appflotal.core.util.Positions.findOutPosition
 import com.rfz.appflotal.core.util.tpms.getPressure
 import com.rfz.appflotal.core.util.tpms.getTemperature
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import javax.inject.Inject
 
-class UpdateSensorDataUseCase @Inject constructor() {
+class UpdateSensorDataUseCase @Inject constructor(
+    private val monitorUnitConversionUseCase: MonitorUnitConversionUseCase
+) {
 
     data class Result(
         val newTireUiState: TireUiState,
@@ -25,13 +29,19 @@ class UpdateSensorDataUseCase @Inject constructor() {
     operator fun invoke(
         dataFrame: String,
         currentTires: List<MonitorTire>,
-        timestamp: String? = null
+        timestamp: String? = null,
+        tempUnit: UnidadTemperatura,
+        pressureUnit: UnidadPresion
     ): Result {
-        val pressure = getPressure(dataFrame)
+
+        val sensorValues = monitorUnitConversionUseCase(
+            temp = getTemperature(dataFrame),
+            tempUnit = tempUnit,
+            pressure = getPressure(dataFrame),
+            pressureUnit = pressureUnit
+        )
 
         val pressureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
-
-        val temperature = getTemperature(dataFrame)
 
         val temperatureStatus =
             decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
@@ -42,7 +52,9 @@ class UpdateSensorDataUseCase @Inject constructor() {
 
         val tire = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
         val realTire =
-            if (pressure.toInt() != 0 || temperature.toInt() != 0) findOutPosition("P${tire}") else ""
+            if (sensorValues.pressure.toInt() != 0 || sensorValues.temperature.toInt() != 0) findOutPosition(
+                "P${tire}"
+            ) else ""
 
 
         val time = if (timestamp != null) {
@@ -65,12 +77,12 @@ class UpdateSensorDataUseCase @Inject constructor() {
         val newTireState = TireUiState(
             currentTire = realTire,
             isAssembled = isAssembled,
-            pressure = Pair(pressure, pressureStatus),
-            temperature = Pair(temperature, temperatureStatus),
+            pressure = Pair(sensorValues.pressure, pressureStatus),
+            temperature = Pair(sensorValues.temperature, temperatureStatus),
             timestamp = time,
             batteryStatus = batteryStatus,
             flatTireStatus = flatTireStatus,
-            tireRemovingStatus = if (pressure.toInt() == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA
+            tireRemovingStatus = if (sensorValues.pressure.toInt() == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA
         )
 
         return Result(

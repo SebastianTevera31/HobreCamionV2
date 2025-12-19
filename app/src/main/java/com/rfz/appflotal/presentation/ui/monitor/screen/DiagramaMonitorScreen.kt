@@ -31,11 +31,15 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,6 +75,8 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 @Composable
 fun DiagramaMonitorScreen(
     paymentPlan: PaymentPlanType,
+    temperatureUnit: String,
+    pressureUnit: String,
     tireUiState: TireUiState,
     image: Bitmap?,
     imageDimens: Pair<Int, Int>,
@@ -79,6 +85,8 @@ fun DiagramaMonitorScreen(
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,
     onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
+    onSwitchTempUnit: () -> Unit,
+    onSwitchPressureUnit: () -> Unit,
     tires: List<MonitorTire>?,
     modifier: Modifier = Modifier
 ) {
@@ -132,8 +140,8 @@ fun DiagramaMonitorScreen(
                     isAssembled = tireUiState.isAssembled,
                     wheel = tireUiState.currentTire,
                     isInspectionAvailable = tireUiState.isInspectionAvailable,
-                    temperature = tireUiState.temperature.first,
-                    pressure = tireUiState.pressure.first,
+                    temperature = "${tireUiState.temperature.first} $temperatureUnit",
+                    pressure = "${tireUiState.pressure.first.toInt()} $pressureUnit",
                     timestamp = tireUiState.timestamp,
                     temperatureStatus = tireUiState.temperature.second,
                     pressureStatus = tireUiState.pressure.second,
@@ -147,6 +155,8 @@ fun DiagramaMonitorScreen(
                             tireUiState.pressure.first
                         )
                     },
+                    onSwitchTempUnit = onSwitchTempUnit,
+                    onSwitchPressureUnit = onSwitchPressureUnit,
                     onAssemblyClick = { onAssemblyClick(tireUiState.currentTire) },
                     onDisassemblyClick = {
                         onDisassemblyClick(
@@ -283,6 +293,7 @@ fun CeldaDatosSensor(
     title: String,
     @DrawableRes img: Int,
     value: String,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -307,6 +318,15 @@ fun CeldaDatosSensor(
             Text(title, fontSize = 12.sp, color = Color("#3C3C3C".toColorInt()))
             Text(value, fontSize = 16.sp, color = Color("#3C3C3C".toColorInt()))
         }
+        if (onClick != {}) {
+            IconButton(onClick = onClick) {
+                Icon(
+                    imageVector = Icons.Default.SyncAlt,
+                    contentDescription = null,
+                    tint = Color("#2E3192".toColorInt())
+                )
+            }
+        }
     }
 }
 
@@ -330,8 +350,8 @@ fun PanelSensor(
     isAssembled: Boolean,
     isInspectionAvailable: Boolean,
     wheel: String,
-    temperature: Float,
-    pressure: Float,
+    temperature: String,
+    pressure: String,
     timestamp: String?,
     temperatureStatus: SensorAlerts,
     pressureStatus: SensorAlerts,
@@ -340,6 +360,8 @@ fun PanelSensor(
     batteryStatus: SensorAlerts,
     onInspectClick: () -> Unit,
     onAssemblyClick: () -> Unit,
+    onSwitchTempUnit: () -> Unit,
+    onSwitchPressureUnit: () -> Unit,
     onDisassemblyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -434,15 +456,17 @@ fun PanelSensor(
                         CeldaDatosSensor(
                             title = stringResource(R.string.temperatura),
                             img = R.drawable.temperature__1_,
-                            value = "${temperature.toInt()} ℃",
-                            modifier = Modifier.fillMaxWidth()
+                            value = temperature,
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onSwitchTempUnit
                         )
 
                         CeldaDatosSensor(
                             title = stringResource(R.string.presion),
                             img = R.drawable.tire_pressure,
-                            value = "${pressure.toInt()} PSI",
-                            modifier = Modifier.fillMaxWidth()
+                            value = pressure,
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onSwitchPressureUnit
                         )
                     }
 
@@ -602,8 +626,8 @@ fun PanelSensorViewPreview() {
         PanelSensor(
             paymentPlan = PaymentPlanType.Complete,
             wheel = "P1",
-            temperature = 40.0f,
-            pressure = 3f,
+            temperature = "40 C",
+            pressure = "3 PSI",
             timestamp = "",
             isInspectionAvailable = false,
             isAssembled = true,
@@ -614,6 +638,8 @@ fun PanelSensorViewPreview() {
             tireRemovingStatus = SensorAlerts.REMOVAL,
             onInspectClick = {},
             onAssemblyClick = {},
+            onSwitchTempUnit = {},
+            onSwitchPressureUnit = {},
             onDisassemblyClick = {},
             modifier = Modifier
                 .safeDrawingPadding()

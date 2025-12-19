@@ -7,23 +7,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getBitmapFromDrawable
-import com.rfz.appflotal.core.util.Commons.getDateFromNotification
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
-import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
 import com.rfz.appflotal.domain.database.DataframeTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.GetSensorDataByWheelUseCase
+import com.rfz.appflotal.domain.tpmsUseCase.MonitorUnitConversionUseCase
 import com.rfz.appflotal.domain.tpmsUseCase.UpdateSensorDataUseCase
+import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.SwitchPressureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.SwitchTemperatureUnitUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
-import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -39,9 +43,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 enum class SensorAlerts(@param:StringRes val message: Int) {
@@ -67,11 +68,28 @@ class MonitorViewModel @Inject constructor(
     private val updateSensorDataUseCase: UpdateSensorDataUseCase,
     private val getSensorDataByWheelUseCase: GetSensorDataByWheelUseCase,
     private val assemblyTireRepository: AssemblyTireRepository,
+    observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
+    observePressureUnitUseCase: ObservePressureUnitUseCase,
+    private val switchTemperatureUnitUseCase: SwitchTemperatureUnitUseCase,
+    private val switchPressureUnitUseCase: SwitchPressureUnitUseCase,
+    private val monitorUnitConversionUseCase: MonitorUnitConversionUseCase,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
         MutableStateFlow(MonitorUiState())
     val monitorUiState = _monitorUiState.asStateFlow()
+
+    private val temperatureUnit = observeTemperatureUnitUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UnidadTemperatura.CELCIUS
+    )
+
+    private val pressureUnit = observePressureUnitUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UnidadPresion.PSI
+    )
 
     private val _positionsUiState =
         MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Loading)
@@ -114,6 +132,7 @@ class MonitorViewModel @Inject constructor(
             updateAssemblyStatus()
         }
 
+        setUnits()
         readBluetoothData()
         statusObserver()
     }
@@ -170,6 +189,24 @@ class MonitorViewModel @Inject constructor(
                 currentUiState.copy(
                     showDialog = true
                 )
+            }
+        }
+    }
+
+    private fun setUnits() {
+        viewModelScope.launch {
+            pressureUnit.collect {
+                _monitorUiState.update { currentUiState ->
+                    currentUiState.copy(pressureUnit = it)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            temperatureUnit.collect {
+                _monitorUiState.update { currentUiState ->
+                    currentUiState.copy(temperatureUnit = it)
+                }
             }
         }
     }
@@ -329,7 +366,9 @@ class MonitorViewModel @Inject constructor(
         val result = updateSensorDataUseCase(
             dataFrame = dataFrame,
             currentTires = _monitorUiState.value.listOfTires,
-            timestamp = timestamp
+            timestamp = timestamp,
+            tempUnit = _monitorUiState.value.temperatureUnit,
+            pressureUnit = _monitorUiState.value.pressureUnit
         )
 
         _monitorUiState.update { it.copy(listOfTires = result.updatedTireList) }
@@ -343,7 +382,9 @@ class MonitorViewModel @Inject constructor(
             val result = getSensorDataByWheelUseCase(
                 monitorId = monitorUiState.monitorId,
                 tireSelected = tireSelected,
-                currentTires = monitorUiState.listOfTires
+                currentTires = monitorUiState.listOfTires,
+                tempUnit = monitorUiState.temperatureUnit,
+                pressureUnit = monitorUiState.pressureUnit
             )
 
             if (result != null) {
@@ -373,7 +414,18 @@ class MonitorViewModel @Inject constructor(
             val sensorData = sensorDataTableRepository.getLastData(uiState.monitorId)
 
             val filterData = sensorData.filter { tires[it.tire]?.isActive ?: false }
-            val sortedData = filterData.map { it.toTireData() }.sortedBy {
+            val sortedData = filterData.map {
+                val sensorValue = monitorUnitConversionUseCase(
+                    temp = it.temperature.toFloat(),
+                    tempUnit = _monitorUiState.value.temperatureUnit,
+                    pressure = it.pressure.toFloat(),
+                    pressureUnit = _monitorUiState.value.pressureUnit
+                )
+                it.toTireData().copy(
+                    temperature = sensorValue.temperature.toInt(),
+                    psi = sensorValue.pressure.toInt()
+                )
+            }.sortedBy {
                 it.tirePosition.replace("P", "").toInt()
             }
 
@@ -397,9 +449,12 @@ class MonitorViewModel @Inject constructor(
                 position,
                 date
             )
+
             when (tireData) {
                 is ApiResult.Success -> {
-                    _filteredTiresUiState.update { tireData }
+                    _filteredTiresUiState.update {
+                        ApiResult.Success(tireData.data.map { it })
+                    }
                 }
 
                 is ApiResult.Error -> {
@@ -425,6 +480,18 @@ class MonitorViewModel @Inject constructor(
     fun showMonitorDialog(show: Boolean) {
         _monitorUiState.update { currentUiState ->
             currentUiState.copy(showDialog = show)
+        }
+    }
+
+    fun switchPressureUnit() {
+        viewModelScope.launch {
+            switchPressureUnitUseCase()
+        }
+    }
+
+    fun switchTemperatureUnit() {
+        viewModelScope.launch {
+            switchTemperatureUnitUseCase()
         }
     }
 

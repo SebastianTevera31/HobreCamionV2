@@ -2,7 +2,6 @@ package com.rfz.appflotal.data.repository.bluetooth
 
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import java.math.MathContext
-import java.math.RoundingMode
 
 enum class MonitorDataFrame {
     SENSOR_ID,
@@ -29,8 +28,7 @@ fun decodeDataFrame(dataFrame: String?, typeData: MonitorDataFrame): String {
                 val lowBits = dataFrame.substring(20, 22)
                 val highBits = dataFrame.substring(18, 20)
                 val refValue = Integer.parseInt(highBits + lowBits, 16)
-                val pression = refValue * 0.025 * 14.5038
-                return pression.toBigDecimal().round(MathContext.DECIMAL32)
+                return refValue.toBigDecimal().round(MathContext.DECIMAL32)
                     .toDouble()
                     .toString()
             }

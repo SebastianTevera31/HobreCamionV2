@@ -138,6 +138,8 @@ fun MonitorScreen(
                         DiagramaMonitorScreen(
                             paymentPlan = paymentPlan,
                             tireUiState = tireUiState,
+                            temperatureUnit = monitorUiState.temperatureUnit.symbol,
+                            pressureUnit = monitorUiState.pressureUnit.symbol,
                             image = monitorUiState.imageBitmap,
                             updateSelectedTire = { selectedTire ->
                                 monitorViewModel.updateSelectedTire(selectedTire)
@@ -160,7 +162,13 @@ fun MonitorScreen(
                             onDisassemblyClick = { tire, temperature, pressure ->
                                 onDisassemblyClick(tire, temperature, pressure)
                             },
-                            modifier = Modifier.padding(8.dp),
+                            onSwitchPressureUnit = {
+                                monitorViewModel.switchPressureUnit()
+                            },
+                            onSwitchTempUnit = {
+                                monitorViewModel.switchTemperatureUnit()
+                            },
+                            modifier = Modifier.padding(8.dp)
                         )
                     } else {
                         PositionScreenContent(

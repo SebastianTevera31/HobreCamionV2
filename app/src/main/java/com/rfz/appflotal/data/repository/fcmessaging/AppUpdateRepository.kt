@@ -1,6 +1,8 @@
 package com.rfz.appflotal.data.repository.fcmessaging
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -13,6 +15,9 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 val Context.appUpdateMessageDataStore by preferencesDataStore("appUpdateMessage")
+val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "user_preferences"
+)
 
 interface AppUpdateMessageRepository {
     val pendingMessagesFlow: Flow<List<AppUpdateMessage>>
@@ -24,18 +29,19 @@ interface AppUpdateMessageRepository {
     suspend fun clearAll()
 }
 
+
 class AppUpdateMessageRepositoryImpl @Inject constructor(@param:ApplicationContext private val context: Context) :
     AppUpdateMessageRepository {
-    private val dataStore = context.appUpdateMessageDataStore
+    private val versionerDataStore = context.appUpdateMessageDataStore
 
-    override val pendingMessagesFlow = dataStore.data.map { prefs ->
+    override val pendingMessagesFlow = versionerDataStore.data.map { prefs ->
         prefs[APP_UPDATE_KEY]?.let { json ->
             Json.decodeFromString<List<AppUpdateMessage>>(json)
         } ?: emptyList()
     }
 
     override suspend fun enqueueMessage(msg: AppUpdateMessage) {
-        dataStore.edit { prefs ->
+        versionerDataStore.edit { prefs ->
             val currentMessagesJson = prefs[APP_UPDATE_KEY]
             val currentMessages = if (currentMessagesJson != null) {
                 Json.decodeFromString<MutableList<AppUpdateMessage>>(currentMessagesJson)
@@ -49,9 +55,10 @@ class AppUpdateMessageRepositoryImpl @Inject constructor(@param:ApplicationConte
 
     override suspend fun dequeueMessage(): AppUpdateMessage? {
         var dequeuedMessage: AppUpdateMessage? = null
-        dataStore.edit { prefs ->
+        versionerDataStore.edit { prefs ->
             val currentMessagesJson = prefs[APP_UPDATE_KEY] ?: return@edit
-            val currentMessages = Json.decodeFromString<MutableList<AppUpdateMessage>>(currentMessagesJson)
+            val currentMessages =
+                Json.decodeFromString<MutableList<AppUpdateMessage>>(currentMessagesJson)
 
             if (currentMessages.isNotEmpty()) {
                 dequeuedMessage = currentMessages.removeAt(0)
@@ -62,7 +69,7 @@ class AppUpdateMessageRepositoryImpl @Inject constructor(@param:ApplicationConte
     }
 
     override suspend fun clearAll() {
-        dataStore.edit { prefs -> prefs.clear() }
+        versionerDataStore.edit { prefs -> prefs.clear() }
     }
 
     companion object {

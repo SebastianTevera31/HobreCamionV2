@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.apputilities.UserOpinion
 import com.rfz.appflotal.data.model.languaje.LanguageResponse
-import com.rfz.appflotal.data.repository.AppStatusManagerRepository
+import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.apputilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch

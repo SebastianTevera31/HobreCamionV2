@@ -5,6 +5,8 @@ import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 
 data class MonitorUiState(
@@ -23,6 +25,8 @@ data class MonitorUiState(
     val showDialog: Boolean = false,
     val showView: Boolean = false,
     val isBluetoothOn: Boolean = false,
+    val temperatureUnit: UnidadTemperatura = UnidadTemperatura.CELCIUS,
+    val pressureUnit: UnidadPresion = UnidadPresion.PSI
 )
 
 data class TireUiState(

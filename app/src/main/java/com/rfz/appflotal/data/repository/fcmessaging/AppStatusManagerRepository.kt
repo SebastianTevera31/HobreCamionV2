@@ -1,10 +1,9 @@
-package com.rfz.appflotal.data.repository
+package com.rfz.appflotal.data.repository.fcmessaging
 
 import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.core.util.Commons.getDateFromNotification
 import com.rfz.appflotal.data.model.fcmessaging.AppUpdateMessage
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
-import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
