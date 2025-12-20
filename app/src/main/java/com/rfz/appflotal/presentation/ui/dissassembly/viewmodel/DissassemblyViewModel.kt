@@ -6,6 +6,7 @@ import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.disassembly.tire.DisassemblyTire
 import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
 import com.rfz.appflotal.data.model.tire.toTire
+import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
@@ -16,6 +17,10 @@ import com.rfz.appflotal.domain.destination.DestinationUseCase
 import com.rfz.appflotal.domain.disassembly.DisassemblyCauseUseCase
 import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
+import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.SwitchOdometerUnitUseCase
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.NavigationScreen
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUi
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
@@ -23,9 +28,11 @@ import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -42,9 +49,19 @@ class DisassemblyViewModel @Inject constructor(
     private val hombreCamionRepository: HombreCamionRepository,
     private val sensorDataTableRepository: SensorDataTableRepository,
     private val getTasksUseCase: GetTasksUseCase,
+    private val observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
+    private val observePressureUnitUseCase: ObservePressureUnitUseCase,
+    private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
+    private val switchOdometerUnitUseCase: SwitchOdometerUnitUseCase
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(DisassemblyUiState())
     val uiState: StateFlow<DisassemblyUiState> = _uiState.asStateFlow()
+
+    private val odometerUnit = observeOdometerUnitUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UnidadOdometro.KILOMETROS
+    )
 
     fun loadData(tirePosition: String, initialPressure: Int, initialTemperature: Int) {
         _uiState.update { currentUiState ->
@@ -70,6 +87,10 @@ class DisassemblyViewModel @Inject constructor(
             val disassemblyCauses = getDisassemblyCauseDeferred.await()
             val tireReportList = tireReportDeferred.await()
             val lastOdometer = lastOdometerDeferred.await()
+
+            val temperatureUnit = observeTemperatureUnitUseCase().first()
+            val pressureUnit = observePressureUnitUseCase().first()
+            val odometerUnit = observeOdometerUnitUseCase().first()
 
             responseHelper(tireReportList, onError = {
                 _uiState.update { currentUiState ->
@@ -100,7 +121,10 @@ class DisassemblyViewModel @Inject constructor(
                             disassemblyCauseList = disassemblyList,
                             screenLoadStatus = OperationStatus.Success,
                             lastOdometer = lastOdometer.odometer,
-                            tireReportList = options?.map { it.toCatalog() } ?: emptyList()
+                            tireReportList = options?.map { it.toCatalog() } ?: emptyList(),
+                            temperatureUnit = temperatureUnit,
+                            pressureUnit = pressureUnit,
+                            odometerUnit = odometerUnit
                         )
                     }
                 } else {
@@ -110,6 +134,18 @@ class DisassemblyViewModel @Inject constructor(
                         )
                     }
                 }
+            }
+
+            observeOdometerChange()
+        }
+    }
+
+    fun observeOdometerChange() = viewModelScope.launch {
+        odometerUnit.collect {
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    odometerUnit = it
+                )
             }
         }
     }
@@ -203,6 +239,12 @@ class DisassemblyViewModel @Inject constructor(
             )
             result.isSuccess
         } else false
+    }
+
+    fun switchOdometerUnit() {
+        viewModelScope.launch {
+            switchOdometerUnitUseCase()
+        }
     }
 
     fun restartOperationStatus() {

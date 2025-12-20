@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
-import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.presentation.theme.primaryLight
 
@@ -35,6 +34,8 @@ fun CurrentPositionDataView(
     @StringRes message: Int,
     sensorDataList: List<MonitorTireByDateResponse>?,
     isOnSearch: Boolean,
+    pressureUnit: String,
+    temperatureUnit: String,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -63,7 +64,7 @@ fun CurrentPositionDataView(
                                 text = pluralStringResource(R.plurals.posicion_tag, 1),
                                 style = MaterialTheme.typography.titleSmall,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.weight(2f)
+                                modifier = Modifier.weight(1f)
                             )
                             Text(
                                 text = stringResource(R.string.fecha),
@@ -72,7 +73,7 @@ fun CurrentPositionDataView(
                                 modifier = Modifier.weight(2f)
                             )
                             Text(
-                                text = "PSI", style = MaterialTheme.typography.titleSmall,
+                                text = pressureUnit, style = MaterialTheme.typography.titleSmall,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.weight(1f)
                             )
@@ -98,7 +99,7 @@ fun CurrentPositionDataView(
                                     convertFormat = "HH:mm:ss"
                                 ) else convertDate(data.sensorDate),
                                 psi = data.psi,
-                                temperatura = data.temperature,
+                                temperatura = "%s $temperatureUnit".format(data.temperature.toString()),
                                 color = color
                             )
                         }
@@ -120,7 +121,7 @@ fun SensorDataRow(
     position: String,
     fecha: String,
     psi: Int,
-    temperatura: Int,
+    temperatura: String,
     color: Color,
     modifier: Modifier = Modifier
 ) {
@@ -135,7 +136,7 @@ fun SensorDataRow(
             text = position,
             style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center,
-            modifier = Modifier.weight(2f)
+            modifier = Modifier.weight(1f)
         )
         Text(
             text = fecha, style = MaterialTheme.typography.titleSmall,
@@ -148,7 +149,7 @@ fun SensorDataRow(
             modifier = Modifier.weight(1f)
         )
         Text(
-            text = "$temperatura", style = MaterialTheme.typography.titleSmall,
+            text = temperatura, style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
@@ -167,72 +168,38 @@ fun NoPositionDataView(@StringRes message: Int, modifier: Modifier = Modifier) {
 }
 
 
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun PreviewPositionMonitorScreen() {
-//    val mockSensorDataList = listOf(
-//        DiagramMonitorResponse(
-//            1,
-//            101,
-//            "AA:BB:CC:DD:EE:01",
-//            1,
-//            "Eje delantero",
-//            "P1",
-//            "Lado izquierdo",
-//            501,
-//            "Sensor A",
-//            1001,
-//            "Config estándar",
-//            32.5f,
-//            "RR01",
-//            28.0f,
-//            false,
-//            lowPressure = false,
-//            highPressure = false,
-//            ultimalectura = "2025-08-12'T'10:30:00",
-//            lowBattery = false,
-//        ),
-//        DiagramMonitorResponse(
-//            2,
-//            102,
-//            "AA:BB:CC:DD:EE:02",
-//            1,
-//            "Eje delantero",
-//            "Derecha",
-//            "Lado derecho",
-//            502,
-//            "Sensor B",
-//            1002,
-//            "Config alta presión",
-//            36.0f,
-//            "RR02",
-//            30.5f,
-//            highTemperature = false,
-//            lowPressure = false,
-//            highPressure = true,
-//            ultimalectura = "2025-08-12'T'10:35:00",
-//            lowBattery = true,
-//        ),
-//        DiagramMonitorResponse(
-//            3,
-//            103,
-//            "AA:BB:CC:DD:EE:03",
-//            2,
-//            "Eje trasero",
-//            "Izquierda",
-//            "Lado izquierdo",
-//            503,
-//            "Sensor C",
-//            1003,
-//            "Config alta temperatura",
-//            29.0f,
-//            "RR03",
-//            45.0f,
-//            highTemperature = true,
-//            lowPressure = true,
-//            highPressure = false,
-//            ultimalectura = "2025-08-12'T'10:40:00",
-//            lowBattery = false
-//        )
-//    )
-//}
+@Preview(showBackground = true)
+@Composable
+fun PreviewPositionMonitorScreen() {
+    val mockSensorDataList = listOf(
+        MonitorTireByDateResponse(
+            tirePosition = "P1",
+            tireNumber = "TIRE-001",
+            sensorDate = "2025-12-18T10:30:00",
+            psi = 34,
+            temperature = 28
+        ),
+        MonitorTireByDateResponse(
+            tirePosition = "P1",
+            tireNumber = "TIRE-001",
+            sensorDate = "2025-12-18T10:30:00",
+            psi = 34,
+            temperature = 28
+        ),
+        MonitorTireByDateResponse(
+            tirePosition = "P1",
+            tireNumber = "TIRE-001",
+            sensorDate = "2025-12-18T10:30:00",
+            psi = 34,
+            temperature = 28
+        )
+    )
+
+    CurrentPositionDataView(
+        message = R.string.no_se_encontraron_resultados,
+        sensorDataList = mockSensorDataList,
+        isOnSearch = false,
+        pressureUnit = "psi",
+        temperatureUnit = "C"
+    )
+}

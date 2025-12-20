@@ -44,6 +44,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.repository.UnidadOdometro
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.inspection.components.InspectionContent
@@ -109,6 +112,9 @@ fun InspectionRoute(
         onBack = onBack,
         onFinish = { report ->
             viewModel.uploadInspection(tire, report)
+        },
+        onSwitchOdometerUnit = {
+            viewModel.switchOdometerUnit()
         }
     )
 }
@@ -121,6 +127,7 @@ fun InspectionScreen(
     initialPressure: Int,
     uiState: InspectionUiState,
     onBack: () -> Unit,
+    onSwitchOdometerUnit: () -> Unit,
     onFinish: (InspectionUi) -> Unit
 ) {
     val context = LocalContext.current
@@ -270,7 +277,11 @@ fun InspectionScreen(
                     form = form,
                     isOdometerEditable = uiState.isOdometerEditable,
                     lastOdometer = uiState.lastOdometer,
-                    inspectionList = uiState.inspectionList
+                    inspectionList = uiState.inspectionList,
+                    temperatureUnit = uiState.temperatureUnit.symbol,
+                    pressureUnit = uiState.pressureUnit.symbol,
+                    odometerUnit = uiState.odometerUnit.symbol,
+                    onSwitchOdometer = onSwitchOdometerUnit,
                 )
             }
         }
@@ -288,10 +299,14 @@ private fun PreviewInspection() {
             uiState = InspectionUiState.Success(
                 inspectionList = emptyList(),
                 lastOdometer = 1000,
-                isOdometerEditable = true
+                isOdometerEditable = true,
+                pressureUnit = UnidadPresion.PSI,
+                temperatureUnit = UnidadTemperatura.CELCIUS,
+                odometerUnit = UnidadOdometro.KILOMETROS
             ),
             onBack = {},
-            onFinish = {}
+            onFinish = {},
+            onSwitchOdometerUnit = {}
         )
     }
 }

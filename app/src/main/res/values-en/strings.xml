@@ -228,10 +228,9 @@
     <string name="sin_informacion">No information available.</string>
     <string name="tipo_de_reporte">Report type</string>
     <string name="lecturas">Readings</string>
-    <string name="temperatura_c">Temperature (°C)</string>
     <string name="odometro">Odometer</string>
-    <string name="presion_medida">Measured pressure</string>
-    <string name="presion_ajustada">Adjusted pressure</string>
+    <string name="presion_medida">Measured</string>
+    <string name="presion_ajustada">Adjusted</string>
     <string name="profundidad_de_piso_mm">Tread depth (mm)</string>
     <string name="requerido">Required</string>
     <string name="numero_invalido">Invalid number</string>

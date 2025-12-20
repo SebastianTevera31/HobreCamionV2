@@ -1,6 +1,9 @@
 package com.rfz.appflotal.presentation.ui.inspection.viewmodel
 
 import com.rfz.appflotal.data.model.CatalogItem
+import com.rfz.appflotal.data.repository.UnidadOdometro
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 
 sealed interface InspectionUiState {
     data object Loading : InspectionUiState
@@ -9,7 +12,10 @@ sealed interface InspectionUiState {
     data class Success(
         val inspectionList: List<CatalogItem>,
         val lastOdometer: Int,
-        val isOdometerEditable: Boolean
+        val isOdometerEditable: Boolean,
+        val pressureUnit: UnidadPresion,
+        val temperatureUnit: UnidadTemperatura,
+        val odometerUnit: UnidadOdometro
     ) : InspectionUiState
 }
 

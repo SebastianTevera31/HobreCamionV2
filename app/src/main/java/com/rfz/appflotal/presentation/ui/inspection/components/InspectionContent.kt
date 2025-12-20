@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
@@ -31,8 +34,12 @@ import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionFormStat
 fun InspectionContent(
     modifier: Modifier = Modifier,
     form: InspectionFormState,
+    temperatureUnit: String,
+    pressureUnit: String,
+    odometerUnit: String,
     lastOdometer: Int,
     inspectionList: List<CatalogItem> = emptyList(),
+    onSwitchOdometer: () -> Unit,
     isOdometerEditable: Boolean = true,
     showReportList: Boolean = true
 ) {
@@ -73,19 +80,39 @@ fun InspectionContent(
             NumberField(
                 value = form.temperature,
                 onValueChange = { form.temperature = it },
-                label = stringResource(R.string.temperatura_c),
+                label = "${stringResource(R.string.temperatura)} ($temperatureUnit)",
                 errorText = form.temperatureError,
                 modifier = Modifier.weight(1f)
             )
-            NumberField(
-                value = form.odometer,
-                onValueChange = { form.odometer = it },
-                label = stringResource(R.string.odometro),
-                errorText = form.odometerError,
-                modifier = Modifier.weight(1f),
-                isEditable = isOdometerEditable
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    dimensionResource(id = R.dimen.thin_dimen)
+                ),
+                modifier = Modifier.weight(2f)
+            ) {
+                NumberField(
+                    value = form.odometer,
+                    onValueChange = { form.odometer = it },
+                    label = stringResource(R.string.odometro),
+                    errorText = form.odometerError,
+                    modifier = Modifier.weight(1f),
+                    isEditable = isOdometerEditable
+                )
+                Button(
+                    onClick = onSwitchOdometer,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = odometerUnit, style = MaterialTheme.typography.labelMedium)
+                }
+            }
         }
+
+        Text(
+            text = " ${stringResource(R.string.presion)} ($pressureUnit)",
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.padding(top = 8.dp)
+        )
 
         Spacer(Modifier.height(12.dp))
         Row(

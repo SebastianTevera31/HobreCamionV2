@@ -1,5 +1,6 @@
 package com.rfz.appflotal.domain.userpreferences
 
+import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.UserPreferencesRepository
@@ -24,6 +25,14 @@ class ObserveTemperatureUnitUseCase @Inject constructor(
     }
 }
 
+class ObserveOdometerUnitUseCase @Inject constructor(
+    private val repository: UserPreferencesRepository
+) {
+    operator fun invoke(): Flow<UnidadOdometro> = repository.odometerUnitPreference.map {
+        if (it == UnidadOdometro.KILOMETROS.name) UnidadOdometro.KILOMETROS else UnidadOdometro.MILLAS
+    }
+}
+
 
 class SwitchPressureUnitUseCase @Inject constructor(
     private val repository: UserPreferencesRepository
@@ -45,5 +54,17 @@ class SwitchTemperatureUnitUseCase @Inject constructor(
             if (currentUnit == UnidadTemperatura.CELCIUS.name) UnidadTemperatura.FAHRENHEIT
             else UnidadTemperatura.CELCIUS
         repository.setTemperatureUnitPreference(newUnit)
+    }
+}
+
+class SwitchOdometerUnitUseCase @Inject constructor(
+    private val repository: UserPreferencesRepository
+) {
+    suspend operator fun invoke() {
+        val currentUnit = repository.odometerUnitPreference.first()
+        val newUnit =
+            if (currentUnit == UnidadOdometro.KILOMETROS.name) UnidadOdometro.MILLAS
+            else UnidadOdometro.KILOMETROS
+        repository.setOdometerUnitPreference(newUnit)
     }
 }

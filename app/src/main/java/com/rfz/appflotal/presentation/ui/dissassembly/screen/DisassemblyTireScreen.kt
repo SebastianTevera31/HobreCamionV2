@@ -129,6 +129,7 @@ fun DisassemblyTireScreen(
             viewModel.updateInspection(it)
             viewModel.updateNavigation(NavigationScreen.DISASSEMBLY)
         },
+        onSwitchOdometerUnit = viewModel::switchOdometerUnit,
         modifier = modifier,
     )
 }
@@ -140,6 +141,7 @@ fun DisassemblyTireView(
     onBack: () -> Unit,
     onDismount: (causeId: Int, destinationId: Int) -> Unit,
     onInspectionFinish: (form: InspectionUi) -> Unit,
+    onSwitchOdometerUnit: () -> Unit,
     onError: suspend () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -283,7 +285,11 @@ fun DisassemblyTireView(
                             form = form,
                             lastOdometer = uiState.lastOdometer,
                             isOdometerEditable = true,
-                            showReportList = false
+                            showReportList = false,
+                            temperatureUnit = uiState.temperatureUnit.symbol,
+                            pressureUnit = uiState.pressureUnit.symbol,
+                            odometerUnit = uiState.odometerUnit.symbol,
+                            onSwitchOdometer = onSwitchOdometerUnit
                         )
                     }
                 }
@@ -332,7 +338,7 @@ fun DisassemblyTireContent(
 
 
 @Composable
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 fun DisassemblyTireViewPreview() {
     HombreCamionTheme {
         DisassemblyTireContent(

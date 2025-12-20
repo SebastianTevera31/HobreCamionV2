@@ -226,10 +226,9 @@
     <string name="sin_informacion">Sin información.</string>
     <string name="tipo_de_reporte">Tipo de reporte</string>
     <string name="lecturas">Lecturas</string>
-    <string name="temperatura_c">Temperatura (°C)</string>
     <string name="odometro">Odómetro</string>
-    <string name="presion_medida">Presión medida</string>
-    <string name="presion_ajustada">Presión ajustada</string>
+    <string name="presion_medida">Medida</string>
+    <string name="presion_ajustada">Ajustada</string>
     <string name="profundidad_de_piso_mm">Profundidad de piso (mm)</string>
     <string name="requerido">Requerido</string>
     <string name="numero_invalido">Número inválido</string>

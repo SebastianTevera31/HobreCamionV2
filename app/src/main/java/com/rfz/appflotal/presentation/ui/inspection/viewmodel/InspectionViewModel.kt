@@ -5,10 +5,17 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
+import com.rfz.appflotal.data.repository.UnidadOdometro
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
+import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.SwitchOdometerUnitUseCase
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ShowToast
 import com.rfz.appflotal.presentation.ui.inspection.components.UploadingInspectionMessage
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
@@ -16,8 +23,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -33,6 +43,10 @@ class InspectionViewModel @Inject constructor(
     private val inspectionTireCrudUseCase: InspectionTireCrudUseCase,
     private val sensorDataTableRepository: SensorDataTableRepository,
     private val hombreCamionRepository: HombreCamionRepository,
+    private val observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
+    private val observePressureUnitUseCase: ObservePressureUnitUseCase,
+    private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
+    private val switchOdometerUnitUseCase: SwitchOdometerUnitUseCase
 ) : ViewModel() {
     private var _uiState: MutableStateFlow<InspectionUiState> =
         MutableStateFlow(InspectionUiState.Empty)
@@ -45,6 +59,12 @@ class InspectionViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<ShowToast>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    private val odometerUnit = observeOdometerUnitUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UnidadOdometro.KILOMETROS
+    )
+
     fun loadData() = viewModelScope.launch {
         _uiState.value = InspectionUiState.Loading
         val tireReportTypeCatalogDeferred = async { catalogUseCase.onGetTireReport() }
@@ -53,6 +73,10 @@ class InspectionViewModel @Inject constructor(
         val tireReportType = tireReportTypeCatalogDeferred.await()
         val lastOdometer = lastOdometerDeferred.await()
         val odometerInspectionDate = lastOdometer.dateLastOdometer
+
+        val temperatureUnit = observeTemperatureUnitUseCase().first()
+        val pressureUnit = observePressureUnitUseCase().first()
+        val odometerUnit = observeOdometerUnitUseCase().first()
 
         val isOdometerEditable = if (odometerInspectionDate.isNotEmpty()) {
             try {
@@ -91,8 +115,25 @@ class InspectionViewModel @Inject constructor(
                 InspectionUiState.Success(
                     inspectionList = list.map { it.toCatalog() },
                     lastOdometer = lastOdometer.odometer,
-                    isOdometerEditable = isOdometerEditable
+                    isOdometerEditable = isOdometerEditable,
+                    pressureUnit = pressureUnit,
+                    temperatureUnit = temperatureUnit,
+                    odometerUnit = odometerUnit
                 )
+
+            observeOdometerChange()
+        }
+    }
+
+    fun observeOdometerChange() = viewModelScope.launch {
+        odometerUnit.collect {
+            if (_uiState.value is InspectionUiState.Success) {
+                _uiState.update { currentUiState ->
+                    (currentUiState as InspectionUiState.Success).copy(
+                        odometerUnit = it
+                    )
+                }
+            }
         }
     }
 
@@ -110,6 +151,24 @@ class InspectionViewModel @Inject constructor(
 
         val lastOdometerMeasurement = getCurrentDate()
 
+        val state = _uiState.value as InspectionUiState.Success
+
+        val temperatureValue = if (state.temperatureUnit == UnidadTemperatura.FAHRENHEIT) {
+            ((values.temperature - 32) / 1.8).toInt()
+        } else values.temperature
+
+        val pressureValue = if (state.pressureUnit == UnidadPresion.BAR) {
+            (values.pressure * 14.5038).toInt()
+        } else values.pressure
+
+        val odometerValue = if (state.odometerUnit == UnidadOdometro.MILLAS) {
+            (values.odometer * 1.60934).toInt()
+        } else values.odometer
+
+        val adjustedPressureValue = if (state.pressureUnit == UnidadPresion.BAR) {
+            (values.adjustedPressure * 14.5038).toInt()
+        } else values.adjustedPressure
+
         val result = inspectionTireCrudUseCase(
             requestBody = InspectionTireDto(
                 positionTire = positionTire,
@@ -118,17 +177,17 @@ class InspectionViewModel @Inject constructor(
                 treadDepth3 = values.treadDepth3,
                 treadDepth4 = values.treadDepth4,
                 tireInspectionReportId = values.reportId?.toIntOrNull() ?: 0,
-                pressureInspected = values.pressure,
+                pressureInspected = pressureValue,
                 dateInspection = lastOdometerMeasurement,
-                odometer = values.odometer,
-                temperatureInspected = values.temperature,
-                pressureAdjusted = values.adjustedPressure
+                odometer = odometerValue,
+                temperatureInspected = temperatureValue,
+                pressureAdjusted = adjustedPressureValue
             )
         )
 
         if (result.isSuccess) {
             // Registrar registro de odometro
-            hombreCamionRepository.updateOdometer(values.odometer, lastOdometerMeasurement)
+            hombreCamionRepository.updateOdometer(odometerValue, lastOdometerMeasurement)
             sensorDataTableRepository.updateLastInspection(
                 tire = positionTire,
                 lastInspection = convertDate(
@@ -139,8 +198,8 @@ class InspectionViewModel @Inject constructor(
             )
             sensorDataTableRepository.updateTireRecord(
                 tire = positionTire,
-                temperature = values.temperature,
-                pressure = values.adjustedPressure
+                temperature = temperatureValue,
+                pressure = adjustedPressureValue
             )
             _requestState.update { currentUiState ->
                 currentUiState.copy(
@@ -157,6 +216,12 @@ class InspectionViewModel @Inject constructor(
                 )
             }
             _eventFlow.emit(ShowToast(UploadingInspectionMessage.GENERAL_ERROR.message))
+        }
+    }
+
+    fun switchOdometerUnit() {
+        viewModelScope.launch {
+            switchOdometerUnitUseCase()
         }
     }
 }

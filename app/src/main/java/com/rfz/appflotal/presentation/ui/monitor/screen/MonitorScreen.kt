@@ -176,7 +176,9 @@ fun MonitorScreen(
                             monitorViewModel = monitorViewModel,
                             positionsUiState = positionsUiState,
                             monitorTireUiState = monitorTireUiState,
-                            listOfTires = monitorUiState.listOfTires
+                            listOfTires = monitorUiState.listOfTires,
+                            pressureUnit = monitorUiState.pressureUnit.symbol,
+                            temperatureUnit = monitorUiState.temperatureUnit.symbol
                         )
                     }
                 }
@@ -244,6 +246,8 @@ private fun ShowMonitorRegisterDialog(
 private fun PositionScreenContent(
     paymentPlan: PaymentPlanType,
     monitorViewModel: MonitorViewModel,
+    pressureUnit: String,
+    temperatureUnit: String,
     positionsUiState: ApiResult<List<MonitorTireByDateResponse>?>,
     monitorTireUiState: ApiResult<List<MonitorTireByDateResponse>?>,
     listOfTires: List<MonitorTire>?
@@ -266,10 +270,16 @@ private fun PositionScreenContent(
             if (positionOptionSelected == PositionView.RECIENTES) {
                 RecentPositionsView(
                     positionsUiState = positionsUiState,
-                    onClearFilteredTire = { monitorViewModel.cleanFilteredTire() }
+                    onClearFilteredTire = { monitorViewModel.cleanFilteredTire() },
+                    pressureUnit = pressureUnit,
+                    temperatureUnit = temperatureUnit
                 )
             } else {
-                FilteredPositionsView(monitorTireUiState = monitorTireUiState)
+                FilteredPositionsView(
+                    monitorTireUiState = monitorTireUiState,
+                    pressureUnit = pressureUnit,
+                    temperatureUnit = temperatureUnit
+                )
             }
         }
     } else {
@@ -279,7 +289,9 @@ private fun PositionScreenContent(
         ) {
             RecentPositionsView(
                 positionsUiState = positionsUiState,
-                onClearFilteredTire = { monitorViewModel.cleanFilteredTire() }
+                onClearFilteredTire = { monitorViewModel.cleanFilteredTire() },
+                pressureUnit = pressureUnit,
+                temperatureUnit = temperatureUnit
             )
         }
     }
@@ -288,7 +300,9 @@ private fun PositionScreenContent(
 @Composable
 private fun RecentPositionsView(
     positionsUiState: ApiResult<List<MonitorTireByDateResponse>?>,
-    onClearFilteredTire: () -> Unit
+    onClearFilteredTire: () -> Unit,
+    pressureUnit: String,
+    temperatureUnit: String
 ) {
     onClearFilteredTire()
     when (positionsUiState) {
@@ -305,6 +319,8 @@ private fun RecentPositionsView(
                 message = R.string.no_ruedas_activas,
                 sensorDataList = data,
                 isOnSearch = false,
+                pressureUnit = pressureUnit,
+                temperatureUnit = temperatureUnit,
             )
         }
     }
@@ -312,7 +328,9 @@ private fun RecentPositionsView(
 
 @Composable
 private fun FilteredPositionsView(
-    monitorTireUiState: ApiResult<List<MonitorTireByDateResponse>?>
+    monitorTireUiState: ApiResult<List<MonitorTireByDateResponse>?>,
+    pressureUnit: String,
+    temperatureUnit: String
 ) {
     when (monitorTireUiState) {
         is ApiResult.Success -> {
@@ -321,7 +339,9 @@ private fun FilteredPositionsView(
             CurrentPositionDataView(
                 message = R.string.no_registros,
                 sensorDataList = data,
-                isOnSearch = true
+                isOnSearch = true,
+                pressureUnit = pressureUnit,
+                temperatureUnit = temperatureUnit,
             )
         }
 
