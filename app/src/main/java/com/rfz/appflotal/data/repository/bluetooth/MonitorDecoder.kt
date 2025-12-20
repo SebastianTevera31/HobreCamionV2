@@ -28,7 +28,8 @@ fun decodeDataFrame(dataFrame: String?, typeData: MonitorDataFrame): String {
                 val lowBits = dataFrame.substring(20, 22)
                 val highBits = dataFrame.substring(18, 20)
                 val refValue = Integer.parseInt(highBits + lowBits, 16)
-                return refValue.toBigDecimal().round(MathContext.DECIMAL32)
+                val pressure = refValue * 0.025f * 14.5038f // PSI
+                return pressure.toBigDecimal().round(MathContext.DECIMAL32)
                     .toDouble()
                     .toString()
             }

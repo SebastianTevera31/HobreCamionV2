@@ -53,6 +53,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -141,7 +142,7 @@ fun DiagramaMonitorScreen(
                     wheel = tireUiState.currentTire,
                     isInspectionAvailable = tireUiState.isInspectionAvailable,
                     temperature = "${tireUiState.temperature.first} $temperatureUnit",
-                    pressure = "${tireUiState.pressure.first.toInt()} $pressureUnit",
+                    pressure = "${tireUiState.pressure.first} $pressureUnit",
                     timestamp = tireUiState.timestamp,
                     temperatureStatus = tireUiState.temperature.second,
                     pressureStatus = tireUiState.pressure.second,
@@ -293,11 +294,12 @@ fun CeldaDatosSensor(
     title: String,
     @DrawableRes img: Int,
     value: String,
-    onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(Color(0x402E3192))
@@ -308,18 +310,20 @@ fun CeldaDatosSensor(
             painter = painterResource(img),
             colorFilter = ColorFilter.tint(color = Color("#2E3192".toColorInt())),
             contentDescription = null,
+            contentScale = ContentScale.Fit,
             modifier = Modifier
-                .weight(1f)
-                .size(28.dp)
+                .weight(0.8f)
+                .size(height = 28.dp, width = 1.dp)
         )
         Column(
-            modifier = Modifier.weight(2f)
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(2.5f)
         ) {
             Text(title, fontSize = 12.sp, color = Color("#3C3C3C".toColorInt()))
             Text(value, fontSize = 16.sp, color = Color("#3C3C3C".toColorInt()))
         }
         if (onClick != {}) {
-            IconButton(onClick = onClick) {
+            IconButton(onClick = onClick, modifier = Modifier.weight(0.8f)) {
                 Icon(
                     imageVector = Icons.Default.SyncAlt,
                     contentDescription = null,

@@ -40,7 +40,7 @@ class SwitchTemperatureUnitUseCase @Inject constructor(
     private val repository: UserPreferencesRepository
 ) {
     suspend operator fun invoke() {
-        val currentUnit = repository.pressureUnitPreference.first()
+        val currentUnit = repository.temperatureUnitPreference.first()
         val newUnit =
             if (currentUnit == UnidadTemperatura.CELCIUS.name) UnidadTemperatura.FAHRENHEIT
             else UnidadTemperatura.CELCIUS

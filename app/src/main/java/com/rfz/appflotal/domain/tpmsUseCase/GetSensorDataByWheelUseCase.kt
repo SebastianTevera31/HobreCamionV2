@@ -18,8 +18,7 @@ import javax.inject.Inject
 
 class GetSensorDataByWheelUseCase @Inject constructor(
     private val sensorDataTableRepository: SensorDataTableRepository,
-    private val assemblyTireRepository: AssemblyTireRepository,
-    private val monitorUnitConversionUseCase: MonitorUnitConversionUseCase
+    private val assemblyTireRepository: AssemblyTireRepository
 ) {
 
     data class Result(
@@ -50,12 +49,8 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         val flatTireStatus =
             if (data.punctureAlert) SensorAlerts.FAST_LEAKAGE else SensorAlerts.NO_DATA
 
-        val sensorValues = monitorUnitConversionUseCase(
-            temp = data.temperature.toFloat(),
-            tempUnit = tempUnit,
-            pressure = data.pressure.toFloat(),
-            pressureUnit = pressureUnit
-        )
+        val rawTemp = data.temperature.toFloat()
+        val rawPressure = data.pressure.toFloat()
 
         val inAlert = getIsTireInAlert(
             temperatureStatus = temperatureStatus,
@@ -77,28 +72,28 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             } catch (_: DateTimeParseException) {
                 try {
                     val lastInspection = LocalDateTime.parse(lastInspection)
-                        .atZone(ZoneId.systemDefault()) // Asume la zona horaria del dispositivo
+                        .atZone(ZoneId.systemDefault())
                         .toInstant()
                     val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
                     lastInspection.isBefore(oneDayAgo)
                 } catch (_: Exception) {
-                    // Si el formato es completamente inesperado, es más seguro permitir la inspección.
                     true
                 }
             }
         }
 
-
         val isAssembled = assemblyTireRepository.confirmTireMounted(tireSelected)
 
         val newTireUiState = TireUiState(
             currentTire = data.tire,
-            pressure = Pair(sensorValues.pressure, pressureStatus),
             isAssembled = isAssembled,
-            temperature = Pair(sensorValues.temperature, temperatureStatus),
+            pressure = Pair(rawPressure, pressureStatus),
+            rawPressure = rawPressure,
+            temperature = Pair(rawTemp, temperatureStatus),
+            rawTemperature = rawTemp,
             timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             batteryStatus = batteryStatus,
-            tireRemovingStatus = if (sensorValues.pressure == 0f) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
+            tireRemovingStatus = if (rawPressure == 0f) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
             flatTireStatus = flatTireStatus,
             isInspectionAvailable = isInspectionAvailable
         )

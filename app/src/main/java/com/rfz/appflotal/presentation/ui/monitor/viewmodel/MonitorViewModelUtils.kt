@@ -2,8 +2,12 @@ package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.database.SensorDataEntity
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 data class ImageConfig(val dimen: Pair<Int, Int>, val image: Int)
 
@@ -76,7 +80,11 @@ suspend fun updateTiresStatus(
     listTires.toMutableList().filter { tire -> activeTire[tire.sensorPosition] == true }
 }
 
-fun updateTireState(currentTire: String, tires: List<MonitorTire>, onUpdate: (tire: MonitorTire) -> Unit) {
+fun updateTireState(
+    currentTire: String,
+    tires: List<MonitorTire>,
+    onUpdate: (tire: MonitorTire) -> Unit
+) {
     if (currentTire.isEmpty()) return
     tires.find { it.sensorPosition == currentTire }.let { tire ->
         if (tire?.isActive == false) {
@@ -84,3 +92,30 @@ fun updateTireState(currentTire: String, tires: List<MonitorTire>, onUpdate: (ti
         }
     }
 }
+
+/**
+ * Convierte de Celsius (unidad base) a la unidad destino
+ */
+fun convertTemperatureValue(tempCelsius: Float, targetUnit: UnidadTemperatura): Float {
+    return if (targetUnit == UnidadTemperatura.FAHRENHEIT) {
+        ((tempCelsius * 1.8f) + 32).round2()
+    } else {
+        tempCelsius.round2()
+    }
+}
+
+/**
+ * Convierte de PSI (unidad base) a la unidad destino
+ */
+fun convertPressureValue(pressurePsi: Float, targetUnit: UnidadPresion): Float {
+    return if (targetUnit == UnidadPresion.BAR) {
+        (pressurePsi * 0.0689476f).round2()
+    } else {
+        pressurePsi.round2()
+    }
+}
+
+fun Float.round2(): Float =
+    BigDecimal(this.toString())
+        .setScale(2, RoundingMode.HALF_UP)
+        .toFloat()

@@ -37,6 +37,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -100,7 +101,28 @@ class MonitorViewModel @Inject constructor(
     val filteredTiresUiState = _filteredTiresUiState.asStateFlow()
 
     private val _tireUiState = MutableStateFlow(TireUiState())
-    val tireUiState = _tireUiState.asStateFlow()
+
+    // Estado para la UI con valores convertidos dinámicamente
+    val tireUiState = combine(
+        _tireUiState,
+        pressureUnit,
+        temperatureUnit
+    ) { state, pUnit, tUnit ->
+        val converted = monitorUnitConversionUseCase(
+            state.rawTemperature,
+            tUnit,
+            state.rawPressure,
+            pUnit
+        )
+        state.copy(
+            pressure = state.pressure.copy(first = converted.pressure),
+            temperature = state.temperature.copy(first = converted.temperature)
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        TireUiState()
+    )
 
     private var _wifiStatus: MutableStateFlow<NetworkStatus> =
         MutableStateFlow(NetworkStatus.Connected)
@@ -195,17 +217,17 @@ class MonitorViewModel @Inject constructor(
 
     private fun setUnits() {
         viewModelScope.launch {
-            pressureUnit.collect {
+            pressureUnit.collect { unit ->
                 _monitorUiState.update { currentUiState ->
-                    currentUiState.copy(pressureUnit = it)
+                    currentUiState.copy(pressureUnit = unit)
                 }
             }
         }
 
         viewModelScope.launch {
-            temperatureUnit.collect {
+            temperatureUnit.collect { unit ->
                 _monitorUiState.update { currentUiState ->
-                    currentUiState.copy(temperatureUnit = it)
+                    currentUiState.copy(temperatureUnit = unit)
                 }
             }
         }
@@ -346,7 +368,9 @@ class MonitorViewModel @Inject constructor(
                                 currentTire = "",
                                 batteryStatus = SensorAlerts.NO_DATA,
                                 pressure = Pair(0f, SensorAlerts.NO_DATA),
+                                rawPressure = 0f,
                                 temperature = Pair(0f, SensorAlerts.NO_DATA),
+                                rawTemperature = 0f,
                                 timestamp = "",
                             )
                         }
@@ -372,7 +396,12 @@ class MonitorViewModel @Inject constructor(
         )
 
         _monitorUiState.update { it.copy(listOfTires = result.updatedTireList) }
-        _tireUiState.update { result.newTireUiState }
+        _tireUiState.update {
+            result.newTireUiState.copy(
+                rawPressure = result.newTireUiState.pressure.first,
+                rawTemperature = result.newTireUiState.temperature.first
+            )
+        }
     }
 
     fun getSensorDataByWheel(tireSelected: String) {
@@ -388,7 +417,12 @@ class MonitorViewModel @Inject constructor(
             )
 
             if (result != null) {
-                _tireUiState.update { result.newTireUiState }
+                _tireUiState.update {
+                    result.newTireUiState.copy(
+                        rawPressure = result.newTireUiState.pressure.first,
+                        rawTemperature = result.newTireUiState.temperature.first
+                    )
+                }
                 _monitorUiState.update { currentState ->
                     currentState.copy(listOfTires = result.updatedTireList)
                 }
@@ -453,7 +487,19 @@ class MonitorViewModel @Inject constructor(
             when (tireData) {
                 is ApiResult.Success -> {
                     _filteredTiresUiState.update {
-                        ApiResult.Success(tireData.data.map { it })
+                        ApiResult.Success(tireData.data?.map {
+                            val sensorValue = monitorUnitConversionUseCase(
+                                it.temperature.toFloat(),
+                                _monitorUiState.value.temperatureUnit,
+                                it.psi.toFloat(),
+                                _monitorUiState.value.pressureUnit
+                            )
+
+                            it.copy(
+                                temperature = sensorValue.temperature.toInt(),
+                                psi = sensorValue.pressure.toInt()
+                            )
+                        })
                     }
                 }
 

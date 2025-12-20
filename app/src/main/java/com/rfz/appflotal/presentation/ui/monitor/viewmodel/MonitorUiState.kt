@@ -32,7 +32,9 @@ data class MonitorUiState(
 data class TireUiState(
     val currentTire: String = "",
     val pressure: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
+    val rawPressure: Float = 0f,
     val temperature: Pair<Float, SensorAlerts> = Pair(0f, SensorAlerts.NO_DATA),
+    val rawTemperature: Float = 0f,
     val depth: Float = 0f,
     val timestamp: String = "",
     val batteryStatus: SensorAlerts = SensorAlerts.NO_DATA,

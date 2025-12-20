@@ -17,9 +17,7 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import javax.inject.Inject
 
-class UpdateSensorDataUseCase @Inject constructor(
-    private val monitorUnitConversionUseCase: MonitorUnitConversionUseCase
-) {
+class UpdateSensorDataUseCase @Inject constructor() {
 
     data class Result(
         val newTireUiState: TireUiState,
@@ -33,28 +31,18 @@ class UpdateSensorDataUseCase @Inject constructor(
         tempUnit: UnidadTemperatura,
         pressureUnit: UnidadPresion
     ): Result {
-
-        val sensorValues = monitorUnitConversionUseCase(
-            temp = getTemperature(dataFrame),
-            tempUnit = tempUnit,
-            pressure = getPressure(dataFrame),
-            pressureUnit = pressureUnit
-        )
+        val rawTemp = getTemperature(dataFrame)
+        val rawPressure = getPressure(dataFrame)
 
         val pressureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
-
-        val temperatureStatus =
-            decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
-
+        val temperatureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
         val flatTireStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.FLAT_TIRE)
-
         val batteryStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
 
         val tire = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
-        val realTire =
-            if (sensorValues.pressure.toInt() != 0 || sensorValues.temperature.toInt() != 0) findOutPosition(
-                "P${tire}"
-            ) else ""
+        val realTire = if (rawPressure.toInt() != 0 || rawTemp.toInt() != 0) {
+            findOutPosition("P${tire}")
+        } else ""
 
 
         val time = if (timestamp != null) {
@@ -62,8 +50,7 @@ class UpdateSensorDataUseCase @Inject constructor(
             getCurrentDate(date = getDate, pattern = "dd/MM/yyyy HH:mm:ss")
         } else getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss")
 
-        val inAlert =
-            getIsTireInAlert(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
+        val inAlert = getIsTireInAlert(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
 
         val newList = currentTires.map { tireData ->
             if (tireData.sensorPosition == realTire) tireData.copy(
@@ -77,12 +64,14 @@ class UpdateSensorDataUseCase @Inject constructor(
         val newTireState = TireUiState(
             currentTire = realTire,
             isAssembled = isAssembled,
-            pressure = Pair(sensorValues.pressure, pressureStatus),
-            temperature = Pair(sensorValues.temperature, temperatureStatus),
+            pressure = Pair(rawPressure, pressureStatus),
+            rawPressure = rawPressure,
+            temperature = Pair(rawTemp, temperatureStatus),
+            rawTemperature = rawTemp,
             timestamp = time,
             batteryStatus = batteryStatus,
             flatTireStatus = flatTireStatus,
-            tireRemovingStatus = if (sensorValues.pressure.toInt() == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA
+            tireRemovingStatus = if (rawPressure.toInt() == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA
         )
 
         return Result(

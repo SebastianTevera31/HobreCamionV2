@@ -2,6 +2,8 @@ package com.rfz.appflotal.domain.tpmsUseCase
 
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.convertPressureValue
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.convertTemperatureValue
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,18 +20,9 @@ class MonitorUnitConversionUseCase @Inject constructor() {
         pressure: Float,
         pressureUnit: UnidadPresion
     ): Result {
-        val temperatureValue = if (tempUnit == UnidadTemperatura.FAHRENHEIT) {
-            (temp * 1.8f) + 32
-        } else {
-            temp
-        }
-
-        val pressureInBar = pressure * 0.025f
-        val pressureValue = if (pressureUnit == UnidadPresion.BAR) {
-            pressureInBar
-        } else {
-            pressureInBar * 14.5038f
-        }
+        // Las funciones de conversión ahora esperan unidades base: Celsius y PSI
+        val temperatureValue = convertTemperatureValue(temp, tempUnit)
+        val pressureValue = convertPressureValue(pressure, pressureUnit)
 
         return Result(
             temperature = temperatureValue,
