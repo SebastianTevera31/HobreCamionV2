@@ -67,6 +67,8 @@ fun DisassemblyTireScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val errorMessage = stringResource(R.string.error_desmontaje)
+    val successMessage = stringResource(R.string.desmontaje_exitoso)
 
     val form = rememberInspectionFormState(
         initialTemperature = 0,
@@ -86,8 +88,7 @@ fun DisassemblyTireScreen(
     LaunchedEffect(uiState.value.operationStatus) {
         if (uiState.value.operationStatus == OperationStatus.Success) {
             Toast.makeText(
-                context,
-                context.getString(R.string.desmontaje_exitoso), Toast.LENGTH_SHORT
+                context, successMessage, Toast.LENGTH_SHORT
             ).show()
             onFinish()
         }
@@ -118,7 +119,7 @@ fun DisassemblyTireScreen(
         onError = {
             Toast.makeText(
                 context,
-                context.getString(R.string.error_desmontaje), Toast.LENGTH_SHORT
+                errorMessage, Toast.LENGTH_SHORT
             ).show()
             viewModel.restartOperationStatus()
         },
@@ -129,7 +130,6 @@ fun DisassemblyTireScreen(
             viewModel.updateInspection(it)
             viewModel.updateNavigation(NavigationScreen.DISASSEMBLY)
         },
-        onSwitchOdometerUnit = viewModel::switchOdometerUnit,
         modifier = modifier,
     )
 }
@@ -141,15 +141,14 @@ fun DisassemblyTireView(
     onBack: () -> Unit,
     onDismount: (causeId: Int, destinationId: Int) -> Unit,
     onInspectionFinish: (form: InspectionUi) -> Unit,
-    onSwitchOdometerUnit: () -> Unit,
     onError: suspend () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var causesSelected: CatalogItem? by remember { mutableStateOf(null) }
     var destinationSelected: CatalogItem? by remember { mutableStateOf(null) }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
+    val errorMessage = stringResource(R.string.corregir_campos_marcados)
 
     LaunchedEffect(uiState) {
         if (uiState.screenLoadStatus == OperationStatus.Success) {
@@ -228,8 +227,7 @@ fun DisassemblyTireView(
                         if (ui != null) {
                             onInspectionFinish(ui)
                         } else scope.launch {
-                            val message = context.getString(R.string.corregir_campos_marcados)
-                            snackbar.showMessage(message)
+                            snackbar.showMessage(errorMessage)
                         }
                     }
                 }
@@ -288,8 +286,7 @@ fun DisassemblyTireView(
                             showReportList = false,
                             temperatureUnit = uiState.temperatureUnit.symbol,
                             pressureUnit = uiState.pressureUnit.symbol,
-                            odometerUnit = uiState.odometerUnit.symbol,
-                            onSwitchOdometer = onSwitchOdometerUnit
+                            odometerUnit = uiState.odometerUnit.symbol
                         )
                     }
                 }

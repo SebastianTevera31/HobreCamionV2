@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +37,6 @@ fun InspectionContent(
     odometerUnit: String,
     lastOdometer: Int,
     inspectionList: List<CatalogItem> = emptyList(),
-    onSwitchOdometer: () -> Unit,
     isOdometerEditable: Boolean = true,
     showReportList: Boolean = true
 ) {
@@ -64,7 +61,7 @@ fun InspectionContent(
             Text(
                 text = stringResource(
                     R.string.advertencia_ingreso_odometro,
-                    lastOdometer
+                    "$lastOdometer $odometerUnit"
                 ),
                 style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
                 modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
@@ -75,37 +72,26 @@ fun InspectionContent(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(
                 dimensionResource(id = R.dimen.small_dimen)
-            )
+            ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             NumberField(
                 value = form.temperature,
                 onValueChange = { form.temperature = it },
                 label = "${stringResource(R.string.temperatura)} ($temperatureUnit)",
+                style = MaterialTheme.typography.bodyMedium,
                 errorText = form.temperatureError,
                 modifier = Modifier.weight(1f)
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(
-                    dimensionResource(id = R.dimen.thin_dimen)
-                ),
-                modifier = Modifier.weight(2f)
-            ) {
-                NumberField(
-                    value = form.odometer,
-                    onValueChange = { form.odometer = it },
-                    label = stringResource(R.string.odometro),
-                    errorText = form.odometerError,
-                    modifier = Modifier.weight(1f),
-                    isEditable = isOdometerEditable
-                )
-                Button(
-                    onClick = onSwitchOdometer,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(text = odometerUnit, style = MaterialTheme.typography.labelMedium)
-                }
-            }
+            NumberField(
+                value = form.odometer,
+                onValueChange = { form.odometer = it },
+                label = "${stringResource(R.string.odometro)} ($odometerUnit)",
+                errorText = form.odometerError,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+                isEditable = isOdometerEditable
+            )
         }
 
         Text(

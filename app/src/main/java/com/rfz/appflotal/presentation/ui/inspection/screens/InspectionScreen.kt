@@ -112,9 +112,6 @@ fun InspectionRoute(
         onBack = onBack,
         onFinish = { report ->
             viewModel.uploadInspection(tire, report)
-        },
-        onSwitchOdometerUnit = {
-            viewModel.switchOdometerUnit()
         }
     )
 }
@@ -127,10 +124,8 @@ fun InspectionScreen(
     initialPressure: Int,
     uiState: InspectionUiState,
     onBack: () -> Unit,
-    onSwitchOdometerUnit: () -> Unit,
     onFinish: (InspectionUi) -> Unit
 ) {
-    val context = LocalContext.current
     val scroll = rememberScrollState()
 
     val form = rememberInspectionFormState(
@@ -139,7 +134,7 @@ fun InspectionScreen(
         lastOdometer = 0,
         isValidatingReports = true
     )
-
+    val message = stringResource(R.string.corregir_campos_marcados)
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -213,7 +208,7 @@ fun InspectionScreen(
                             if (ui != null) {
                                 onFinish(ui)
                             } else scope.launch {
-                                val message = context.getString(R.string.corregir_campos_marcados)
+
                                 snackbar.showMessage(message)
                             }
                         },
@@ -280,8 +275,7 @@ fun InspectionScreen(
                     inspectionList = uiState.inspectionList,
                     temperatureUnit = uiState.temperatureUnit.symbol,
                     pressureUnit = uiState.pressureUnit.symbol,
-                    odometerUnit = uiState.odometerUnit.symbol,
-                    onSwitchOdometer = onSwitchOdometerUnit,
+                    odometerUnit = uiState.odometerUnit.symbol
                 )
             }
         }
@@ -302,11 +296,10 @@ private fun PreviewInspection() {
                 isOdometerEditable = true,
                 pressureUnit = UnidadPresion.PSI,
                 temperatureUnit = UnidadTemperatura.CELCIUS,
-                odometerUnit = UnidadOdometro.KILOMETROS
+                odometerUnit = UnidadOdometro.KILOMETROS,
             ),
             onBack = {},
-            onFinish = {},
-            onSwitchOdometerUnit = {}
+            onFinish = {}
         )
     }
 }

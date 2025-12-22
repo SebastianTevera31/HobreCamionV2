@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.axle.Axle
 import com.rfz.appflotal.data.model.tire.Tire
+import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 
 enum class OdometerValidation(@param:StringRes val message: Int? = null) {
@@ -20,5 +21,6 @@ data class AssemblyTireUiState(
     val tireList: List<Tire> = emptyList(),
     val axleList: List<Axle> = emptyList(),
     val screenLoadStatus: OperationStatus = OperationStatus.Loading,
-    val operationStatus: OperationStatus? = null
+    val operationStatus: OperationStatus? = null,
+    val odometerUnit: UnidadOdometro = UnidadOdometro.KILOMETROS
 )

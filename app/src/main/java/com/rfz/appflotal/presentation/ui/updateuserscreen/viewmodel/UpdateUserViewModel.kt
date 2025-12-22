@@ -11,18 +11,29 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.repository.UnidadOdometro
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
+import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.SwitchOdometerUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.SwitchPressureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.SwitchTemperatureUnitUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,6 +45,12 @@ class UpdateUserViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
     private val getTasksUseCase: GetTasksUseCase,
     private val wifiUseCase: WifiUseCase,
+    observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
+    observePressureUnitUseCase: ObservePressureUnitUseCase,
+    observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
+    private val switchTemperatureUnitUseCase: SwitchTemperatureUnitUseCase,
+    private val switchPressureUnitUseCase: SwitchPressureUnitUseCase,
+    private val switchOdometerUnitUseCase: SwitchOdometerUnitUseCase
 ) : ViewModel() {
 
     private var _updateUserUiState: MutableStateFlow<UpdateUserUiState> =
@@ -45,6 +62,25 @@ class UpdateUserViewModel @Inject constructor(
 
     private val _wifiStatus: MutableStateFlow<NetworkStatus> =
         MutableStateFlow(NetworkStatus.Connected)
+
+    private val temperatureUnit = observeTemperatureUnitUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UnidadTemperatura.CELCIUS
+    )
+
+    private val pressureUnit = observePressureUnitUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UnidadPresion.PSI
+    )
+
+    private val odometerUnit = observeOdometerUnitUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UnidadOdometro.KILOMETROS
+    )
+
     val wifiStatus = _wifiStatus.asStateFlow()
 
     init {
@@ -73,6 +109,8 @@ class UpdateUserViewModel @Inject constructor(
             val idCountry = driverData.country
             val idIndustry = driverData.industry
 
+            setUnits()
+
             responseHelper(response = countriesResponse) { response ->
                 if (response != null) {
                     _updateUserUiState.update { currentUiState ->
@@ -95,6 +133,32 @@ class UpdateUserViewModel @Inject constructor(
 
             getDefaultCountry(idCountry)
             getDefaultIndustry(idIndustry)
+        }
+    }
+
+    private fun setUnits() {
+        viewModelScope.launch {
+            pressureUnit.collect { unit ->
+                _updateUserUiState.update { currentUiState ->
+                    currentUiState.copy(userData = currentUiState.userData.copy(pressureUnit = unit))
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            temperatureUnit.collect { unit ->
+                _updateUserUiState.update { currentUiState ->
+                    currentUiState.copy(userData = currentUiState.userData.copy(temperatureUnit = unit))
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            odometerUnit.collect { unit ->
+                _updateUserUiState.update { currentUiState ->
+                    currentUiState.copy(userData = currentUiState.userData.copy(odometerUnit = unit))
+                }
+            }
         }
     }
 
@@ -213,7 +277,7 @@ class UpdateUserViewModel @Inject constructor(
 
             asyncResponseHelper(
                 response = response,
-                onError = {  updateUserStatus = ApiResult.Error() }
+                onError = { updateUserStatus = ApiResult.Error() }
             ) { data ->
                 updateUserStatus = ApiResult.Success(data)
                 _updateUserUiState.update { currentUiState ->
@@ -235,6 +299,18 @@ class UpdateUserViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun changeOdometerUnit() = viewModelScope.launch {
+        switchOdometerUnitUseCase()
+    }
+
+    fun changePressureUnit() = viewModelScope.launch {
+        switchPressureUnitUseCase()
+    }
+
+    fun changeTemperatureUnit() = viewModelScope.launch {
+        switchTemperatureUnitUseCase()
     }
 
     fun cleanUpdateUserStatus() {

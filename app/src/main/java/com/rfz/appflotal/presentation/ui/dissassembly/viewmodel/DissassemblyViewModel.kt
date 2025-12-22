@@ -52,7 +52,6 @@ class DisassemblyViewModel @Inject constructor(
     private val observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
     private val observePressureUnitUseCase: ObservePressureUnitUseCase,
     private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
-    private val switchOdometerUnitUseCase: SwitchOdometerUnitUseCase
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(DisassemblyUiState())
     val uiState: StateFlow<DisassemblyUiState> = _uiState.asStateFlow()
@@ -239,12 +238,6 @@ class DisassemblyViewModel @Inject constructor(
             )
             result.isSuccess
         } else false
-    }
-
-    fun switchOdometerUnit() {
-        viewModelScope.launch {
-            switchOdometerUnitUseCase()
-        }
     }
 
     fun restartOperationStatus() {

@@ -67,6 +67,7 @@ fun AssemblyTireScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val successMessage = stringResource(R.string.montaje_exitoso)
 
     DisposableEffect(Unit) {
         onDispose {
@@ -76,7 +77,7 @@ fun AssemblyTireScreen(
 
     LaunchedEffect(uiState.value.operationStatus) {
         if (uiState.value.operationStatus is OperationStatus.Success) {
-            Toast.makeText(context, context.getString(R.string.montaje_exitoso), Toast.LENGTH_SHORT)
+            Toast.makeText(context, successMessage, Toast.LENGTH_SHORT)
                 .show()
             viewModel.cleanUiState()
             onBack()
@@ -88,6 +89,7 @@ fun AssemblyTireScreen(
     }
 
     val title = stringResource(R.string.montaje)
+    val assemblyError = R.string.error_montaje
 
     AssemblyTireView(
         title = title,
@@ -97,7 +99,7 @@ fun AssemblyTireScreen(
         validateOdometer = { viewModel.validateOdometer(it) },
         updateTire = { viewModel.updateTireField(it) },
         onError = {
-            Toast.makeText(context, context.getString(R.string.error_montaje), Toast.LENGTH_SHORT)
+            Toast.makeText(context, assemblyError, Toast.LENGTH_SHORT)
                 .show()
             viewModel.restartOperationStatus()
         },
@@ -132,6 +134,8 @@ fun AssemblyTireView(
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
 
     var navScreens by remember { mutableStateOf(SubScreens.HOME) }
+
+    val notFoundTiresError = stringResource(R.string.no_se_encontraron_llantas)
 
     if (navScreens == SubScreens.LIST) {
         BackHandler {
@@ -231,7 +235,7 @@ fun AssemblyTireView(
                                     if (uiState.tireList.isEmpty()) {
                                         Toast.makeText(
                                             context,
-                                            context.getString(R.string.no_se_encontraron_llantas),
+                                            notFoundTiresError,
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     } else navScreens = SubScreens.LIST
@@ -271,7 +275,7 @@ fun AssemblyTireView(
                                     Text(
                                         text = stringResource(
                                             R.string.advertencia_ingreso_odometro,
-                                            odometerValue
+                                            "$odometerValue ${uiState.odometerUnit.symbol}"
                                         ),
                                         style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
                                         modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))

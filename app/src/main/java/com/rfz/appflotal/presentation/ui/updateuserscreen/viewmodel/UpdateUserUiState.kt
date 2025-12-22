@@ -1,6 +1,9 @@
 package com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel
 
 import com.rfz.appflotal.data.model.database.AppHCEntity
+import com.rfz.appflotal.data.repository.UnidadOdometro
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import kotlin.String
 
 data class UpdateUserUiState(
@@ -20,7 +23,10 @@ data class UserData(
     val country: Pair<Int, String>? = null,
     val industry: Pair<Int, String>? = null,
     val typeVehicle: String = "",
-    val plates: String = ""
+    val plates: String = "",
+    val temperatureUnit: UnidadTemperatura = UnidadTemperatura.CELCIUS,
+    val pressureUnit: UnidadPresion = UnidadPresion.PSI,
+    val odometerUnit: UnidadOdometro = UnidadOdometro.KILOMETROS
 )
 
 fun AppHCEntity.toUserData(): UserData {

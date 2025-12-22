@@ -5,15 +5,20 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.tire.toTire
+import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.assembly.AddAssemblyTireUseCase
 import com.rfz.appflotal.domain.axle.GetAxlesUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
+import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,10 +28,17 @@ class AssemblyTireViewModel @Inject constructor(
     private val tireUseCase: TireListUsecase,
     private val addAssemblyTire: AddAssemblyTireUseCase,
     private val getAxleUseCase: GetAxlesUseCase,
-    private val hombreCamionRepository: HombreCamionRepository
+    private val hombreCamionRepository: HombreCamionRepository,
+    private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AssemblyTireUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val odometerUnit = observeOdometerUnitUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UnidadOdometro.KILOMETROS
+    )
 
     fun loadDataList(positionTire: String) {
         _uiState.update { currentUiState ->
@@ -39,6 +51,7 @@ class AssemblyTireViewModel @Inject constructor(
             val odometerDeferred = async { hombreCamionRepository.getOdometer() }
             val tiresDeferred = async { tireUseCase() }
             val axleDeferred = async { getAxleUseCase() }
+            val odometerUnit = odometerUnit.first()
 
             val tiresResult = tiresDeferred.await()
             val axleResult = axleDeferred.await()
@@ -57,7 +70,8 @@ class AssemblyTireViewModel @Inject constructor(
                         currentOdometer = odometer.odometer.toString(),
                         tireList = tiresList,
                         axleList = axleList,
-                        screenLoadStatus = OperationStatus.Success
+                        screenLoadStatus = OperationStatus.Success,
+                        odometerUnit = odometerUnit
                     )
                 }
             } else {
@@ -66,6 +80,18 @@ class AssemblyTireViewModel @Inject constructor(
                         screenLoadStatus = OperationStatus.Error
                     )
                 }
+            }
+        }
+
+        observeOdometerChange()
+    }
+
+    fun observeOdometerChange() = viewModelScope.launch {
+        odometerUnit.collect {
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    odometerUnit = it
+                )
             }
         }
     }

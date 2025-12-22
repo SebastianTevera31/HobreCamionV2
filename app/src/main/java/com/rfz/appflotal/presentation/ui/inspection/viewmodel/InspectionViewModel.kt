@@ -46,7 +46,6 @@ class InspectionViewModel @Inject constructor(
     private val observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
     private val observePressureUnitUseCase: ObservePressureUnitUseCase,
     private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
-    private val switchOdometerUnitUseCase: SwitchOdometerUnitUseCase
 ) : ViewModel() {
     private var _uiState: MutableStateFlow<InspectionUiState> =
         MutableStateFlow(InspectionUiState.Empty)
@@ -118,7 +117,7 @@ class InspectionViewModel @Inject constructor(
                     isOdometerEditable = isOdometerEditable,
                     pressureUnit = pressureUnit,
                     temperatureUnit = temperatureUnit,
-                    odometerUnit = odometerUnit
+                    odometerUnit = odometerUnit,
                 )
 
             observeOdometerChange()
@@ -216,12 +215,6 @@ class InspectionViewModel @Inject constructor(
                 )
             }
             _eventFlow.emit(ShowToast(UploadingInspectionMessage.GENERAL_ERROR.message))
-        }
-    }
-
-    fun switchOdometerUnit() {
-        viewModelScope.launch {
-            switchOdometerUnitUseCase()
         }
     }
 }

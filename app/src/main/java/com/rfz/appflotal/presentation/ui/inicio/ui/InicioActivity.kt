@@ -257,14 +257,11 @@ class InicioActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
         if (isGranted) {
-            Toast.makeText(this, "Notifications permission granted", Toast.LENGTH_SHORT)
-                .show()
-        } else {
             Toast.makeText(
                 this,
-                "FCM can't post notifications without POST_NOTIFICATIONS permission",
-                Toast.LENGTH_LONG,
-            ).show()
+                getString(R.string.notifications_permission_granted), Toast.LENGTH_SHORT
+            )
+                .show()
         }
     }
 

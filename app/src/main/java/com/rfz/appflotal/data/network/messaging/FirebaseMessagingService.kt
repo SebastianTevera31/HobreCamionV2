@@ -1,14 +1,17 @@
 package com.rfz.appflotal.data.network.messaging
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -41,6 +44,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     private val fcmScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        if (!applicationContext.hasNotificationPermission()) {
+            return
+        }
+
         Log.d(TAG, "From: ${remoteMessage.from}")
 
         // Check if message contains a data payload.
@@ -185,8 +192,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
 
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         // Since android Oreo notification channel is needed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -205,6 +211,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         Log.d(TAG, "sendRegistrationTokenToServer($token)")
     }
 
+    fun Context.hasNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+    }
 
     companion object {
         private const val TAG = "MyFirebaseMsgService"
