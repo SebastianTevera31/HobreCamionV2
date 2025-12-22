@@ -257,7 +257,7 @@
     <string name="error_aceptar_terminos">Error al aceptar los términos: %1$s</string>
     <string name="error_establecer_sesion">Ocurrió un error al establecer su sesión. Por favor, inténtelo de nuevo.</string>
     <string name="valor_invalido">Valor inválido</string>
-    <string name="advertencia_ingreso_odometro">* El odómetro debe ser mayor o igual al último valor registrado: %1$d</string>
+    <string name="advertencia_ingreso_odometro">* El odómetro debe ser mayor o igual al último valor registrado: %1$s</string>
     <string name="error_enviar_desecho">Ocurrió un error al enviar la llanta a la pila de desecho</string>
     <string name="reporte_de_desecho">Reporte de desecho</string>
     <string name="enviar_a_desecho">ENVIAR A DESECHO</string>
@@ -360,6 +360,9 @@
     <string name="autoservice_message">Tu servicio automático ha sido procesado correctamente.</string>
     <string name="update_message">Hay una nueva versión disponible. Actualiza para mejorar tu experiencia.</string>
     <string name="generic_message">Tienes una nueva notificación.</string>
+    <string name="notifications_permission_granted">Permiso de notificaciones aceptados</string>
+    <string name="permiso_de_notificacion">Permiso de notificación</string>
+    <string name="texto_permiso_de_notification">Permiso requerido para mantenerlo informado de actualizaciones y posibles mantenimientos</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

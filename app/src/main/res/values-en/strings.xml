@@ -260,7 +260,7 @@
     <string name="error_aceptar_terminos">Error accepting the terms: %1$s</string>
     <string name="error_establecer_sesion">An error occurred while establishing your session. Please try again.</string>
     <string name="valor_invalido">Invalid value</string>
-    <string name="advertencia_ingreso_odometro">* The odometer reading must be greater than or equal to the last recorded value: %1$d</string>
+    <string name="advertencia_ingreso_odometro">* The odometer reading must be greater than or equal to the last recorded value: %1$s</string>
     <string name="error_enviar_desecho">An error occurred while sending the tire to the scrap pile</string>
     <string name="reporte_de_desecho">Scrap report</string>
     <string name="enviar_a_desecho">SEND TO SCRAP</string>
@@ -324,6 +324,7 @@
     <string name="medida_de_la_llanta">Tire size</string>
     <string name="la_medida_es_requerida">Size is required</string>
     <string name="nota_opcional">Note (optional)</string>
+    <string name="update_message">A new version is available. Update to improve your experience.</string>
 
     <string name="error_loading_products">Error loading products</string>
     <string name="error_loading_product_details">Error loading product details</string>
@@ -359,6 +360,9 @@
     <string name="aviso_mantenimiento_ii">We are performing maintenance to ensure the app functions properly.</string>
     <string name="mantenimiento_programado">Scheduled Maintenance</string>
 
+    <string name="app_fcm_channel">app_fcm_channel</string>
+    <string name="app_fcm_flotal_channel">app_fcm_flotal_channel</string>
+
     <string name="actualizacion_de_terminos_y_condiciones">Terms and Conditions Update</string>
 
     <string name="actualizacion_de_plan">Plan Update</string>
@@ -372,6 +376,9 @@
     <string name="autoservice_message">Your automatic service has been processed successfully.</string>
 
     <string name="generic_message">You have a new notification.</string>
+    <string name="notifications_permission_granted">Notifications permission granted</string>
+    <string name="permiso_de_notificacion">Notification permission</string>
+    <string name="texto_permiso_de_notification">Permission required to keep you informed about updates and possible maintenance.</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

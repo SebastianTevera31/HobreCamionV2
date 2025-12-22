@@ -333,7 +333,9 @@ class InicioActivity : ComponentActivity() {
             HombreCamionTheme {
                 LocalizedApp {
                     if (!postNotificationGranted) {
-                        askNotificationPermission()
+                        NotificationPermissionDialog(onDismiss = { finish() }, onConfirmation = {
+                            askNotificationPermission()
+                        })
                     }
 
                     Scaffold(
@@ -386,7 +388,6 @@ class InicioActivity : ComponentActivity() {
                                         }
                                     }
                                 }
-
 
                                 Box {
                                     NetworkConfig.imei =
