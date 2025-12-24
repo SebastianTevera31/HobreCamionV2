@@ -142,7 +142,8 @@ fun DiagramaMonitorScreen(
                     wheel = tireUiState.currentTire,
                     isInspectionAvailable = tireUiState.isInspectionAvailable,
                     temperature = "${tireUiState.temperature.first} $temperatureUnit",
-                    pressure = "${tireUiState.pressure.first} $pressureUnit",
+                    pressureUnit = pressureUnit,
+                    pressure = "${tireUiState.pressure.first}",
                     timestamp = tireUiState.timestamp,
                     temperatureStatus = tireUiState.temperature.second,
                     pressureStatus = tireUiState.pressure.second,
@@ -355,6 +356,7 @@ fun PanelSensor(
     isInspectionAvailable: Boolean,
     wheel: String,
     temperature: String,
+    pressureUnit: String,
     pressure: String,
     timestamp: String?,
     temperatureStatus: SensorAlerts,
@@ -466,7 +468,7 @@ fun PanelSensor(
                         )
 
                         CeldaDatosSensor(
-                            title = stringResource(R.string.presion),
+                            title = "${stringResource(R.string.presion)} ($pressureUnit)",
                             img = R.drawable.tire_pressure,
                             value = pressure,
                             modifier = Modifier.fillMaxWidth(),
@@ -631,7 +633,8 @@ fun PanelSensorViewPreview() {
             paymentPlan = PaymentPlanType.Complete,
             wheel = "P1",
             temperature = "40 C",
-            pressure = "3 PSI",
+            pressureUnit = "PSI",
+            pressure = "3",
             timestamp = "",
             isInspectionAvailable = false,
             isAssembled = true,
