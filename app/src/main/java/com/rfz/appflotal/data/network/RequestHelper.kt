@@ -48,12 +48,12 @@ suspend fun <T> networkRequestHelper(request: suspend () -> Response<T>) =
             } else {
                 Result.failure(DataError.Http(res.code(), res.errorBody()?.string()))
             }
-
         } catch (e: IOException) {
             Result.failure(DataError.Network(e))
         } catch (e: HttpException) {
             Result.failure(DataError.Http(e.code(), e.message()))
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.d(e.message.toString(), e.message.toString())
             Result.failure(DataError.Unknown())
         }
     }

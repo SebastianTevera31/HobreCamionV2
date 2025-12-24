@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 interface VehicleRepository {
     suspend fun getLastOdometer(token: String): LastOdometerResponseDto?
-    suspend fun updateVehicleData(request: UpdateVehicle): Result<List<GeneralResponse>>
+    suspend fun updateVehicleData(request: UpdateVehicle): Result<GeneralResponse>
 }
 
 class VehicleRepositoryImpl @Inject constructor(
@@ -31,7 +31,7 @@ class VehicleRepositoryImpl @Inject constructor(
 
     override suspend fun updateVehicleData(
         request: UpdateVehicle
-    ): Result<List<GeneralResponse>> {
+    ): Result<GeneralResponse> {
         val token = getTasksUseCase().first()[0].fld_token
         val result = remoteVehicleDataSource.updateVehicleDate(token, request.toDto())
         return if (result.isSuccess) {

@@ -11,6 +11,6 @@ class RemoteVehicleDataSource @Inject constructor(private val vehicleService: Ve
     }
 
     suspend fun updateVehicleDate(token: String, request: UpdateVehicleDto) = networkRequestHelper {
-        vehicleService.updateVehicleDate("Bearer $token", request)
+        vehicleService.updateVehicleData("Bearer $token", request)
     }
 }

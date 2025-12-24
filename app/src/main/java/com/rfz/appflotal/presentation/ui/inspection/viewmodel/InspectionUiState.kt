@@ -34,9 +34,9 @@ data class InspectionRequestState(
 data class InspectionUi(
     val reportId: String? = null,
     val odometer: Int = -1,
-    val temperature: Int = -1,
-    val pressure: Int = -1,
-    val adjustedPressure: Int = -1,
+    val temperature: Float = -1f,
+    val pressure: Float = -1f,
+    val adjustedPressure: Float = -1f,
     val treadDepth1: Float = -1f,
     val treadDepth2: Float = -1f,
     val treadDepth3: Float = -1f,

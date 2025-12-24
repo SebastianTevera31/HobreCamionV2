@@ -11,9 +11,6 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.ApiResult
-import com.rfz.appflotal.data.repository.UnidadOdometro
-import com.rfz.appflotal.data.repository.UnidadPresion
-import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.UnitProvider
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.AddTaskUseCase
@@ -29,10 +26,8 @@ import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -44,9 +39,9 @@ class UpdateUserViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
     private val getTasksUseCase: GetTasksUseCase,
     private val wifiUseCase: WifiUseCase,
-    observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
-    observePressureUnitUseCase: ObservePressureUnitUseCase,
-    observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
+    private val observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
+    private val observePressureUnitUseCase: ObservePressureUnitUseCase,
+    private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
     private val updateVehicleDataUseCase: UpdateVehicleDataUseCase,
 ) : ViewModel() {
 
@@ -59,24 +54,6 @@ class UpdateUserViewModel @Inject constructor(
 
     private val _wifiStatus: MutableStateFlow<NetworkStatus> =
         MutableStateFlow(NetworkStatus.Connected)
-
-    private val temperatureUnit = observeTemperatureUnitUseCase().stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        UnidadTemperatura.CELCIUS
-    )
-
-    private val pressureUnit = observePressureUnitUseCase().stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        UnidadPresion.PSI
-    )
-
-    private val odometerUnit = observeOdometerUnitUseCase().stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        UnidadOdometro.KILOMETROS
-    )
 
     val wifiStatus = _wifiStatus.asStateFlow()
 
@@ -91,9 +68,9 @@ class UpdateUserViewModel @Inject constructor(
     fun fetchUserData(selectedLanguage: String) {
         viewModelScope.launch {
             val driverData = getTasksUseCase().first()[0]
-            val currentPressureUnit = pressureUnit.first()
-            val currentTemperatureUnit = temperatureUnit.first()
-            val currentOdometerUnit = odometerUnit.first()
+            val currentPressureUnit = observePressureUnitUseCase().first()
+            val currentTemperatureUnit = observeTemperatureUnitUseCase().first()
+            val currentOdometerUnit = observeOdometerUnitUseCase().first()
 
             val userData = driverData.toUserData()
             val vehicleData = driverData.toVehicleData().copy(
@@ -326,15 +303,24 @@ class UpdateUserViewModel @Inject constructor(
     }
 
     private suspend fun updateVehicleData() {
+        val newData = _updateUserUiState.value.newVehicleData
+        val currentData = _updateUserUiState.value.vehicleData
+
+        newData.temperatureUnit != currentData.temperatureUnit ||
+                newData.odometerUnit != currentData.odometerUnit
+
         val response = updateVehicleDataUseCase(
             idUser = _updateUserUiState.value.newUserData.idUser,
             vehicleId = _updateUserUiState.value.idVehicle,
             vehicleType = _updateUserUiState.value.newVehicleData.typeVehicle,
-            vehiclePlates = _updateUserUiState.value.newVehicleData.plates
+            vehiclePlates = _updateUserUiState.value.newVehicleData.plates,
+            switchTemperature = newData.temperatureUnit != currentData.temperatureUnit,
+            switchPressure = newData.pressureUnit != currentData.pressureUnit,
+            switchOdometer = newData.odometerUnit != currentData.odometerUnit
         )
 
         response.onSuccess { data ->
-            updateUserStatus = ApiResult.Success(data)
+            updateUserStatus = ApiResult.Success(listOf(data))
             _updateUserUiState.update { currentUiState ->
                 currentUiState.copy(
                     isNewUserData = false,

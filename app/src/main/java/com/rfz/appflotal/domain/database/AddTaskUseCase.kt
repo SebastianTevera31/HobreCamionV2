@@ -56,12 +56,15 @@ class UpdateVehicleDataUseCase @Inject constructor(
         idUser: Int,
         vehicleId: Int,
         vehicleType: String,
-        vehiclePlates: String
-    ): Result<List<GeneralResponse>> {
+        vehiclePlates: String,
+        switchTemperature: Boolean,
+        switchPressure: Boolean,
+        switchOdometer: Boolean
+    ): Result<GeneralResponse> {
 
-        switchTemperatureUnitUseCase()
-        switchPressureUnitUseCase()
-        switchOdometerUnitUseCase()
+        if (switchTemperature) switchTemperatureUnitUseCase()
+        if (switchPressure) switchPressureUnitUseCase()
+        if (switchOdometer) switchOdometerUnitUseCase()
 
         val result = vehicleRepository.updateVehicleData(
             request = UpdateVehicle(

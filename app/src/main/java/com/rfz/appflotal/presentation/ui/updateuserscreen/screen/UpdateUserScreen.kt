@@ -4,7 +4,9 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -62,6 +64,7 @@ fun UpdateUserScreen(
                     errorMessage,
                     Toast.LENGTH_SHORT
                 ).show()
+                updateUserViewModel.cleanUpdateUserStatus()
             }
 
             ApiResult.Loading -> {}
@@ -86,6 +89,33 @@ fun UpdateUserScreen(
                     navigateUp()
                 }
             )
+        },
+        bottomBar = {
+            Button(
+                onClick = {
+                    if (wifiStatus.value == NetworkStatus.Connected) {
+                        if (updateUserStaus != ApiResult.Error()) {
+                            updateUserViewModel.saveUserData()
+                        }
+                    } else {
+                        Toast.makeText(
+                            context,
+                            R.string.error_conexion_internet,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                },
+                enabled = updateUserUiState.value.isNewUserData || updateUserUiState.value.isNewVehicleData,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .safeContentPadding()
+                    .padding(dimensionResource(R.dimen.medium_dimen))
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.guardar),
+                )
+            }
         },
         modifier = modifier
     ) { innerPadding ->
@@ -122,27 +152,8 @@ fun UpdateUserScreen(
                             odometerUnit,
                             context
                         )
-                    })
-                Button(
-                    onClick = {
-                        if (wifiStatus.value == NetworkStatus.Connected) {
-                            if (updateUserStaus != ApiResult.Error()) {
-                                updateUserViewModel.saveUserData()
-                            }
-                        } else {
-                            Toast.makeText(
-                                context,
-                                R.string.error_conexion_internet,
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    },
-                    enabled = updateUserUiState.value.isNewUserData || updateUserUiState.value.isNewVehicleData,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.width(160.dp)
-                ) {
-                    Text(text = stringResource(R.string.guardar))
-                }
+                    }
+                )
             }
         }
     }

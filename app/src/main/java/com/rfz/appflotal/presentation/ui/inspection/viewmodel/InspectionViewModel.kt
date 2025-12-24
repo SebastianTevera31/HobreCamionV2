@@ -15,7 +15,6 @@ import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
-import com.rfz.appflotal.domain.userpreferences.SwitchOdometerUnitUseCase
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ShowToast
 import com.rfz.appflotal.presentation.ui.inspection.components.UploadingInspectionMessage
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
@@ -138,7 +137,17 @@ class InspectionViewModel @Inject constructor(
 
     fun clearInspectionUiState() {
         _uiState.value = InspectionUiState.Empty
+        _requestState.value = InspectionRequestState()
     }
+
+    fun clearInspectionRequestState() {
+        _requestState.update { currentUiState ->
+            currentUiState.copy(
+                operationState = OperationState.Loading
+            )
+        }
+    }
+
 
     fun uploadInspection(positionTire: String, values: InspectionUi) = viewModelScope.launch {
         _requestState.update { currentUiState ->
@@ -176,11 +185,11 @@ class InspectionViewModel @Inject constructor(
                 treadDepth3 = values.treadDepth3,
                 treadDepth4 = values.treadDepth4,
                 tireInspectionReportId = values.reportId?.toIntOrNull() ?: 0,
-                pressureInspected = pressureValue,
+                pressureInspected = pressureValue.toInt(),
                 dateInspection = lastOdometerMeasurement,
                 odometer = odometerValue,
-                temperatureInspected = temperatureValue,
-                pressureAdjusted = adjustedPressureValue
+                temperatureInspected = temperatureValue.toInt(),
+                pressureAdjusted = adjustedPressureValue.toInt()
             )
         )
 
@@ -197,8 +206,8 @@ class InspectionViewModel @Inject constructor(
             )
             sensorDataTableRepository.updateTireRecord(
                 tire = positionTire,
-                temperature = temperatureValue,
-                pressure = adjustedPressureValue
+                temperature = temperatureValue.toInt(),
+                pressure = adjustedPressureValue.toInt()
             )
             _requestState.update { currentUiState ->
                 currentUiState.copy(
