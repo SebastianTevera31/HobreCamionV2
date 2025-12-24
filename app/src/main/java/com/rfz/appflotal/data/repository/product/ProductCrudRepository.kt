@@ -1,6 +1,6 @@
 package com.rfz.appflotal.data.repository.product
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
 import com.rfz.appflotal.data.network.service.product.ProductCrudService
 import javax.inject.Inject
@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class ProductCrudRepository @Inject constructor(private val productCrudService: ProductCrudService) {
 
-    suspend fun doCrudProduct(requestBody: ProductCrudDto, tok: String): Result<List<MessageResponse>> {
+    suspend fun doCrudProduct(requestBody: ProductCrudDto, tok: String): Result<List<GeneralResponse>> {
         return try {
             val response = productCrudService.doCrudProduct(requestBody,tok)
             if (response.isSuccessful) {

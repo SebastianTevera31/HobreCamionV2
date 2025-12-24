@@ -2,12 +2,11 @@ package com.rfz.appflotal.domain.login
 
 import android.content.Context
 import android.util.Patterns
-import com.google.gson.Gson
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.login.LoginRepository
 import javax.inject.Inject
@@ -49,7 +48,7 @@ class LoginUseCase @Inject constructor(
         idSector: Int,
         typeVehicle: String,
         plates: String
-    ): ApiResult<List<MessageResponse>?> {
+    ): ApiResult<List<GeneralResponse>?> {
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches())
             return ApiResult.Error(message = "Introduzca un correo valido")
 
@@ -75,21 +74,17 @@ class LoginUseCase @Inject constructor(
         password: String,
         idCountry: Int,
         idSector: Int,
-        typeVehicle: String,
-        plates: String
-    ): ApiResult<List<MessageResponse>?> {
+    ): ApiResult<List<GeneralResponse>?> {
         return repository.doUpdateUser(
             name,
             email,
             password,
             idCountry,
             idSector,
-            typeVehicle,
-            plates
         )
     }
 
-    suspend fun doAcceptTermsAndConditions(): ApiResult<List<MessageResponse>?> {
+    suspend fun doAcceptTermsAndConditions(): ApiResult<List<GeneralResponse>?> {
         return repository.doAcceptTermsAndConditions()
     }
 }

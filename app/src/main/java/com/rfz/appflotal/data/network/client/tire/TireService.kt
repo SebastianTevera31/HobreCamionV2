@@ -1,9 +1,8 @@
 package com.rfz.appflotal.data.network.client.tire
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.tire.ChangeDestinationDto
 import com.rfz.appflotal.data.model.tire.RepairedTireDto
-import com.rfz.appflotal.data.model.tire.RetreatedTire
 import com.rfz.appflotal.data.model.tire.RetreatedTireDto
 import retrofit2.Response
 import retrofit2.http.Body
@@ -15,17 +14,17 @@ interface TireService {
     suspend fun postRetreatedTire(
         @Header("Authorization") token: String,
         @Body request: RetreatedTireDto
-    ): Response<List<MessageResponse>>
+    ): Response<List<GeneralResponse>>
 
     @POST("api/Tire/RepairedTire")
     suspend fun postRepairedTire(
         @Header("Authorization") token: String,
         @Body body: RepairedTireDto
-    ): Response<List<MessageResponse>>
+    ): Response<List<GeneralResponse>>
 
     @POST("api/Tire/ChangeDestination")
     suspend fun postChangeDestination(
         @Header("Authorization") token: String,
         @Body body: ChangeDestinationDto
-    ): Response<List<MessageResponse>>
+    ): Response<List<GeneralResponse>>
 }

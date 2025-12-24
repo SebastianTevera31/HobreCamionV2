@@ -76,8 +76,6 @@ data class UpdateUserBody(
     @SerializedName("fld_password") val fldPassword: String,
     @SerializedName("id_country") val idCountry: Int,
     @SerializedName("id_sector") val idSector: Int,
-    @SerializedName("typeVehicle") val typeVehicle: String,
-    @SerializedName("plates") val plates: String,
 )
 
 

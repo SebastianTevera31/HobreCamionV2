@@ -9,31 +9,25 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.NetworkStatus
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.ApiResult
-import com.rfz.appflotal.data.repository.UnidadOdometro
-import com.rfz.appflotal.data.repository.UnidadPresion
-import com.rfz.appflotal.data.repository.UnidadTemperatura
+import com.rfz.appflotal.data.repository.UnitProvider
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
+import com.rfz.appflotal.domain.database.UpdateVehicleDataUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
-import com.rfz.appflotal.domain.userpreferences.SwitchOdometerUnitUseCase
-import com.rfz.appflotal.domain.userpreferences.SwitchPressureUnitUseCase
-import com.rfz.appflotal.domain.userpreferences.SwitchTemperatureUnitUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -45,41 +39,21 @@ class UpdateUserViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
     private val getTasksUseCase: GetTasksUseCase,
     private val wifiUseCase: WifiUseCase,
-    observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
-    observePressureUnitUseCase: ObservePressureUnitUseCase,
-    observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
-    private val switchTemperatureUnitUseCase: SwitchTemperatureUnitUseCase,
-    private val switchPressureUnitUseCase: SwitchPressureUnitUseCase,
-    private val switchOdometerUnitUseCase: SwitchOdometerUnitUseCase
+    private val observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
+    private val observePressureUnitUseCase: ObservePressureUnitUseCase,
+    private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
+    private val updateVehicleDataUseCase: UpdateVehicleDataUseCase,
 ) : ViewModel() {
 
     private var _updateUserUiState: MutableStateFlow<UpdateUserUiState> =
         MutableStateFlow(UpdateUserUiState())
     val updateUserUiState = _updateUserUiState.asStateFlow()
 
-    var updateUserStatus: ApiResult<List<MessageResponse>?> by mutableStateOf(ApiResult.Loading)
+    var updateUserStatus: ApiResult<List<GeneralResponse>?> by mutableStateOf(ApiResult.Loading)
         private set
 
     private val _wifiStatus: MutableStateFlow<NetworkStatus> =
         MutableStateFlow(NetworkStatus.Connected)
-
-    private val temperatureUnit = observeTemperatureUnitUseCase().stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        UnidadTemperatura.CELCIUS
-    )
-
-    private val pressureUnit = observePressureUnitUseCase().stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        UnidadPresion.PSI
-    )
-
-    private val odometerUnit = observeOdometerUnitUseCase().stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        UnidadOdometro.KILOMETROS
-    )
 
     val wifiStatus = _wifiStatus.asStateFlow()
 
@@ -94,12 +68,27 @@ class UpdateUserViewModel @Inject constructor(
     fun fetchUserData(selectedLanguage: String) {
         viewModelScope.launch {
             val driverData = getTasksUseCase().first()[0]
+            val currentPressureUnit = observePressureUnitUseCase().first()
+            val currentTemperatureUnit = observeTemperatureUnitUseCase().first()
+            val currentOdometerUnit = observeOdometerUnitUseCase().first()
+
+            val userData = driverData.toUserData()
+            val vehicleData = driverData.toVehicleData().copy(
+                temperatureUnit = currentTemperatureUnit,
+                pressureUnit = currentPressureUnit,
+                odometerUnit = currentOdometerUnit
+            )
+
 
             _updateUserUiState.update { currentUiState ->
                 currentUiState.copy(
-                    userData = driverData.toUserData(),
-                    newData = driverData.toUserData(),
-                    isNewData = false
+                    idVehicle = driverData.idVehicle,
+                    userData = userData,
+                    vehicleData = vehicleData,
+                    newUserData = userData,
+                    newVehicleData = vehicleData,
+                    isNewUserData = false,
+                    isNewVehicleData = false
                 )
             }
 
@@ -108,8 +97,6 @@ class UpdateUserViewModel @Inject constructor(
 
             val idCountry = driverData.country
             val idIndustry = driverData.industry
-
-            setUnits()
 
             responseHelper(response = countriesResponse) { response ->
                 if (response != null) {
@@ -136,32 +123,6 @@ class UpdateUserViewModel @Inject constructor(
         }
     }
 
-    private fun setUnits() {
-        viewModelScope.launch {
-            pressureUnit.collect { unit ->
-                _updateUserUiState.update { currentUiState ->
-                    currentUiState.copy(userData = currentUiState.userData.copy(pressureUnit = unit))
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            temperatureUnit.collect { unit ->
-                _updateUserUiState.update { currentUiState ->
-                    currentUiState.copy(userData = currentUiState.userData.copy(temperatureUnit = unit))
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            odometerUnit.collect { unit ->
-                _updateUserUiState.update { currentUiState ->
-                    currentUiState.copy(userData = currentUiState.userData.copy(odometerUnit = unit))
-                }
-            }
-        }
-    }
-
     fun getDefaultCountry(idCountry: Int) {
         val countries = _updateUserUiState.value.countries
         if (countries.isNotEmpty()) {
@@ -173,7 +134,7 @@ class UpdateUserViewModel @Inject constructor(
                         userData = currentUiState.userData.copy(
                             country = currentCountry[0],
                         ),
-                        newData = currentUiState.newData.copy(
+                        newUserData = currentUiState.newUserData.copy(
                             country = currentCountry[0]
                         )
                     )
@@ -193,7 +154,7 @@ class UpdateUserViewModel @Inject constructor(
                         userData = currentUiState.userData.copy(
                             industry = currentIndustry[0],
                         ),
-                        newData = currentUiState.newData.copy(
+                        newUserData = currentUiState.newUserData.copy(
                             industry = currentIndustry[0]
                         )
                     )
@@ -213,7 +174,7 @@ class UpdateUserViewModel @Inject constructor(
     ) {
         _updateUserUiState.update { currentUiState ->
             currentUiState.copy(
-                newData = currentUiState.newData.copy(
+                newUserData = currentUiState.newUserData.copy(
                     name = name,
                     username = username,
                     email = email,
@@ -223,7 +184,7 @@ class UpdateUserViewModel @Inject constructor(
                 )
             )
         }
-        verifyIsNewData()
+        verifyIsNewUserData()
 
         if (name.isEmpty()) showMessage(context, SignUpAlerts.NAME_ALERT.message)
 
@@ -234,12 +195,22 @@ class UpdateUserViewModel @Inject constructor(
 //            showMessage(context, SignUpAlerts.PASSWORD_ALERT.message)
     }
 
-    fun updateVehicleData(typeVehicle: String, plates: String, context: Context) {
+    fun updateVehicleData(
+        typeVehicle: String,
+        plates: String,
+        temperatureUnit: UnitProvider,
+        pressureUnit: UnitProvider,
+        odometerUnit: UnitProvider,
+        context: Context
+    ) {
         _updateUserUiState.update { currentUiState ->
             currentUiState.copy(
-                newData = currentUiState.newData.copy(
+                newVehicleData = currentUiState.newVehicleData.copy(
                     typeVehicle = typeVehicle,
-                    plates = plates
+                    plates = plates,
+                    temperatureUnit = temperatureUnit,
+                    pressureUnit = pressureUnit,
+                    odometerUnit = odometerUnit
                 )
             )
         }
@@ -249,15 +220,39 @@ class UpdateUserViewModel @Inject constructor(
         if (plates.isEmpty())
             showMessage(context, SignUpAlerts.PLATES_ALERT.message)
 
-        verifyIsNewData()
+        verifyIsNewVehicleData()
     }
 
-    fun verifyIsNewData() {
-        val newData = _updateUserUiState.value.newData
-        val currentData = _updateUserUiState.value.userData
+    private fun verifyIsNewVehicleData() {
+        val newData = _updateUserUiState.value.newVehicleData
+        val currentData = _updateUserUiState.value.vehicleData
+        val isNewVehicleData = listOf(
+            newData.typeVehicle != currentData.typeVehicle ||
+                    newData.plates != currentData.plates ||
+                    newData.pressureUnit != currentData.pressureUnit ||
+                    newData.temperatureUnit != currentData.temperatureUnit ||
+                    newData.odometerUnit != currentData.odometerUnit
+        ).any { it }
         _updateUserUiState.update { currentUiState ->
             currentUiState.copy(
-                isNewData = newData != currentData
+                isNewVehicleData = isNewVehicleData
+            )
+        }
+    }
+
+    private fun verifyIsNewUserData() {
+        val newData = _updateUserUiState.value.newUserData
+        val currentData = _updateUserUiState.value.userData
+        val isNewUserData = listOf(
+            newData.name != currentData.name,
+            newData.email != currentData.email,
+            newData.password != currentData.password,
+            newData.country != currentData.country,
+            newData.industry != currentData.industry
+        ).any { it }
+        _updateUserUiState.update { currentUiState ->
+            currentUiState.copy(
+                isNewUserData = isNewUserData
             )
         }
     }
@@ -265,52 +260,85 @@ class UpdateUserViewModel @Inject constructor(
     fun saveUserData() {
         updateUserStatus = ApiResult.Loading
         viewModelScope.launch {
-            val response = loginUseCase.doUpdateUser(
-                name = _updateUserUiState.value.newData.name.trim(),
-                email = _updateUserUiState.value.newData.email.trim(),
-                password = _updateUserUiState.value.newData.password.trim(),
-                idCountry = _updateUserUiState.value.newData.country?.first ?: 0,
-                idSector = _updateUserUiState.value.newData.industry?.first ?: 0,
-                typeVehicle = _updateUserUiState.value.newData.typeVehicle.trim(),
-                plates = _updateUserUiState.value.newData.plates.trim()
-            )
+            if (_updateUserUiState.value.isNewUserData) {
+                updateOperatorData()
+            }
 
-            asyncResponseHelper(
-                response = response,
-                onError = { updateUserStatus = ApiResult.Error() }
-            ) { data ->
-                updateUserStatus = ApiResult.Success(data)
-                _updateUserUiState.update { currentUiState ->
-                    currentUiState.copy(
-                        isNewData = false
-                    )
-                }
-
-                if (updateUserStatus != ApiResult.Loading || updateUserStatus != ApiResult.Error()) {
-                    addTaskUseCase.updateUserData(
-                        idUser = _updateUserUiState.value.newData.idUser,
-                        fldName = _updateUserUiState.value.newData.name,
-                        fldEmail = _updateUserUiState.value.newData.email,
-                        vehiclePlates = _updateUserUiState.value.newData.plates,
-                        country = _updateUserUiState.value.newData.country?.first ?: 0,
-                        industry = _updateUserUiState.value.newData.industry?.first ?: 0,
-                        vehicleType = _updateUserUiState.value.newData.typeVehicle
-                    )
-                }
+            if (_updateUserUiState.value.isNewVehicleData) {
+                updateVehicleData()
             }
         }
     }
 
-    fun changeOdometerUnit() = viewModelScope.launch {
-        switchOdometerUnitUseCase()
+    private suspend fun updateOperatorData() {
+        val response = loginUseCase.doUpdateUser(
+            name = _updateUserUiState.value.newUserData.name.trim(),
+            email = _updateUserUiState.value.newUserData.email.trim(),
+            password = _updateUserUiState.value.newUserData.password.trim(),
+            idCountry = _updateUserUiState.value.newUserData.country?.first ?: 0,
+            idSector = _updateUserUiState.value.newUserData.industry?.first ?: 0,
+        )
+
+        asyncResponseHelper(
+            response = response,
+            onError = { updateUserStatus = ApiResult.Error() }
+        ) { data ->
+            updateUserStatus = ApiResult.Success(data)
+            _updateUserUiState.update { currentUiState ->
+                currentUiState.copy(
+                    isNewUserData = false,
+                )
+            }
+
+            if (updateUserStatus != ApiResult.Loading || updateUserStatus != ApiResult.Error()) {
+                addTaskUseCase.updateUserData(
+                    idUser = _updateUserUiState.value.newUserData.idUser,
+                    fldName = _updateUserUiState.value.newUserData.name,
+                    fldEmail = _updateUserUiState.value.newUserData.email,
+                    country = _updateUserUiState.value.newUserData.country?.first ?: 0,
+                    industry = _updateUserUiState.value.newUserData.industry?.first ?: 0,
+                )
+            }
+        }
     }
 
-    fun changePressureUnit() = viewModelScope.launch {
-        switchPressureUnitUseCase()
-    }
+    private suspend fun updateVehicleData() {
+        val newData = _updateUserUiState.value.newVehicleData
+        val currentData = _updateUserUiState.value.vehicleData
 
-    fun changeTemperatureUnit() = viewModelScope.launch {
-        switchTemperatureUnitUseCase()
+        newData.temperatureUnit != currentData.temperatureUnit ||
+                newData.odometerUnit != currentData.odometerUnit
+
+        val response = updateVehicleDataUseCase(
+            idUser = _updateUserUiState.value.newUserData.idUser,
+            vehicleId = _updateUserUiState.value.idVehicle,
+            vehicleType = _updateUserUiState.value.newVehicleData.typeVehicle,
+            vehiclePlates = _updateUserUiState.value.newVehicleData.plates,
+            switchTemperature = newData.temperatureUnit != currentData.temperatureUnit,
+            switchPressure = newData.pressureUnit != currentData.pressureUnit,
+            switchOdometer = newData.odometerUnit != currentData.odometerUnit
+        )
+
+        response.onSuccess { data ->
+            updateUserStatus = ApiResult.Success(listOf(data))
+            _updateUserUiState.update { currentUiState ->
+                currentUiState.copy(
+                    isNewUserData = false,
+                )
+            }
+
+            if (updateUserStatus != ApiResult.Loading || updateUserStatus != ApiResult.Error()) {
+                addTaskUseCase.updateUserData(
+                    idUser = _updateUserUiState.value.newUserData.idUser,
+                    fldName = _updateUserUiState.value.newUserData.name,
+                    fldEmail = _updateUserUiState.value.newUserData.email,
+                    country = _updateUserUiState.value.newUserData.country?.first ?: 0,
+                    industry = _updateUserUiState.value.newUserData.industry?.first ?: 0,
+                )
+            }
+        }.onFailure {
+            updateUserStatus = ApiResult.Error()
+        }
     }
 
     fun cleanUpdateUserStatus() {

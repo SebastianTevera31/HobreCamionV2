@@ -21,8 +21,7 @@ interface AppHCDao {
 
     @Query(
         "UPDATE user SET fld_name =:fldName, fld_email =:fldEmail, " +
-                "country =:country, industry =:industry, vehiclePlates =:vehiclePlates, " +
-                "vehicleType =:vehicleType  WHERE idUser =:idUser"
+                "country =:country, industry =:industry WHERE idUser =:idUser"
     )
     suspend fun updateUserData(
         idUser: Int,
@@ -30,9 +29,10 @@ interface AppHCDao {
         fldEmail: String,
         industry: Int,
         country: Int,
-        vehiclePlates: String,
-        vehicleType: String,
     )
+
+    @Query("UPDATE user SET vehicleType =:vehicleType, vehiclePlates =:vehiclePlates WHERE idUser =:idUser")
+    suspend fun updateVehicleData(vehicleType: String, vehiclePlates: String, idUser: Int)
 
     @Query("UPDATE user SET termsGranted =:flag WHERE idUser =:idUser")
     suspend fun updateTermsFlag(idUser: Int, flag: Boolean)

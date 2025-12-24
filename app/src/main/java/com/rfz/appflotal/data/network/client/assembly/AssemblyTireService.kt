@@ -2,7 +2,7 @@ package com.rfz.appflotal.data.network.client.assembly
 
 import com.rfz.appflotal.data.model.assembly.AssemblyTireDto
 import com.rfz.appflotal.data.model.assembly.AssemblyTireResponse
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -16,7 +16,7 @@ interface AssemblyTireService {
     suspend fun createAssemblyTire(
         @Header("Authorization") token: String,
         @Body assemblyTire: AssemblyTireDto
-    ): Response<List<MessageResponse>>
+    ): Response<List<GeneralResponse>>
 
     @GET("api/AssemblyTire/GetAssemblyTire")
     suspend fun getMountedTires(

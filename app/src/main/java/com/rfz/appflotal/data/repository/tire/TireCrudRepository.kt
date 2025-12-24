@@ -1,6 +1,6 @@
 package com.rfz.appflotal.data.repository.tire
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
 import com.rfz.appflotal.data.network.service.tire.TireCrudService
 import javax.inject.Inject
@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class TireCrudRepository @Inject constructor(private val tireCrudService: TireCrudService) {
 
-    suspend fun doTireCrud(requestBody: TireCrudDto, tok: String): Result<MessageResponse> {
+    suspend fun doTireCrud(requestBody: TireCrudDto, tok: String): Result<GeneralResponse> {
         return try {
             val response = tireCrudService.doTireCrud(requestBody,tok)
             if (response.isSuccessful) {

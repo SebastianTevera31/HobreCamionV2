@@ -1,6 +1,6 @@
 package com.rfz.appflotal.data.repository.vehicle
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.vehicle.dto.VehicleCrudDto
 import com.rfz.appflotal.data.network.service.vehicle.VehicleCrudService
 import javax.inject.Inject
@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class VehicleCrudRepository @Inject constructor(private val vehicleCrudService: VehicleCrudService) {
 
-    suspend fun doCrudVehicle(requestBody: VehicleCrudDto, tok:String): Result<MessageResponse> {
+    suspend fun doCrudVehicle(requestBody: VehicleCrudDto, tok:String): Result<GeneralResponse> {
         return try {
             val response = vehicleCrudService.doCrudVehicle(requestBody,tok)
             if (response.isSuccessful) {

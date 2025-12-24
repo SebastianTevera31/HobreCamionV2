@@ -379,6 +379,7 @@
     <string name="notifications_permission_granted">Notifications permission granted</string>
     <string name="permiso_de_notificacion">Notification permission</string>
     <string name="texto_permiso_de_notification">Permission required to keep you informed about updates and possible maintenance.</string>
+    <string name="unidades_de_medida">Measurement units</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

@@ -1,6 +1,6 @@
 package com.rfz.appflotal.data.network.client.tire
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
 import retrofit2.Response
@@ -14,5 +14,5 @@ interface TireCrudClient {
     suspend fun doTireCrud(
         @Header("Authorization") token: String,
         @Body requestBody: TireCrudDto,
-    ): Response<MessageResponse>
+    ): Response<GeneralResponse>
 }

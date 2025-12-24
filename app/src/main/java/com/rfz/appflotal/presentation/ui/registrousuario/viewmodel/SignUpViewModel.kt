@@ -13,15 +13,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
-import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.LBEncryptionUtils
 import com.rfz.appflotal.data.model.forms.VehicleFormModel
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
-import com.rfz.appflotal.data.model.login.response.LoginState.Error
 import com.rfz.appflotal.data.model.login.response.Result
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.AddTaskUseCase
@@ -52,7 +50,7 @@ class SignUpViewModel @Inject constructor(
     private var _signUpUiState: MutableStateFlow<SignUpUiState> = MutableStateFlow(SignUpUiState())
     val signUpUiState = _signUpUiState.asStateFlow()
 
-    var signUpRequestStatus: ApiResult<List<MessageResponse>?> by mutableStateOf(
+    var signUpRequestStatus: ApiResult<List<GeneralResponse>?> by mutableStateOf(
         ApiResult.Loading
     )
         private set

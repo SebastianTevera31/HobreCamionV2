@@ -71,8 +71,8 @@ fun DisassemblyTireScreen(
     val successMessage = stringResource(R.string.desmontaje_exitoso)
 
     val form = rememberInspectionFormState(
-        initialTemperature = 0,
-        initialPressure = 0,
+        initialTemperature = 0f,
+        initialPressure = 0f,
         lastOdometer = 0,
         isValidatingReports = false
     )

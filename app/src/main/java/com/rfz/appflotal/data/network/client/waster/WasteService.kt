@@ -1,6 +1,6 @@
 package com.rfz.appflotal.data.network.client.waster
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.waster.ScrapTirePileDto
 import com.rfz.appflotal.data.model.waster.response.WasteReportListResponse
 import retrofit2.Response
@@ -18,5 +18,5 @@ interface WasteService {
     suspend fun postTireToScrap(
         @Header("Authorization") token: String,
         @Body scrapTirePileDto: ScrapTirePileDto
-    ): Response<List<MessageResponse>>
+    ): Response<List<GeneralResponse>>
 }

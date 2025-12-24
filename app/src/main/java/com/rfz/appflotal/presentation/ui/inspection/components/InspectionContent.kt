@@ -81,6 +81,7 @@ fun InspectionContent(
                 label = "${stringResource(R.string.temperatura)} ($temperatureUnit)",
                 style = MaterialTheme.typography.bodyMedium,
                 errorText = form.temperatureError,
+                keyboardType = KeyboardType.Decimal,
                 modifier = Modifier.weight(1f)
             )
             NumberField(
@@ -113,6 +114,7 @@ fun InspectionContent(
                 label = stringResource(R.string.presion_medida),
                 style = MaterialTheme.typography.bodyMedium,
                 errorText = form.pressureMeasuredError,
+                keyboardType = KeyboardType.Decimal,
                 modifier = Modifier.weight(1f)
             )
 
@@ -122,6 +124,7 @@ fun InspectionContent(
                 style = MaterialTheme.typography.bodyMedium,
                 label = stringResource(R.string.presion_ajustada),
                 errorText = form.adjustedPressureError,
+                keyboardType = KeyboardType.Decimal,
                 modifier = Modifier.weight(1f)
             )
         }

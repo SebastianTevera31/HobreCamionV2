@@ -4,15 +4,28 @@ import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
-import kotlin.String
+import com.rfz.appflotal.data.repository.UnitProvider
 
 data class UpdateUserUiState(
+    val idVehicle: Int = 0,
     val countries: Map<Int, String> = emptyMap(),
     val industries: Map<Int, String> = emptyMap(),
     val userData: UserData = UserData(),
-    val newData: UserData = UserData(),
-    val isNewData: Boolean = false
+    val newUserData: UserData = UserData(),
+    val vehicleData: VehicleData = VehicleData(),
+    val newVehicleData: VehicleData = VehicleData(),
+    val isNewUserData: Boolean = false,
+    val isNewVehicleData: Boolean = false
 )
+
+data class VehicleData(
+    val typeVehicle: String = "",
+    val plates: String = "",
+    val temperatureUnit: UnitProvider = UnidadTemperatura.CELCIUS,
+    val pressureUnit: UnitProvider = UnidadPresion.PSI,
+    val odometerUnit: UnitProvider = UnidadOdometro.KILOMETROS
+)
+
 
 data class UserData(
     val idUser: Int = -1,
@@ -21,12 +34,7 @@ data class UserData(
     val email: String = "",
     val password: String = "",
     val country: Pair<Int, String>? = null,
-    val industry: Pair<Int, String>? = null,
-    val typeVehicle: String = "",
-    val plates: String = "",
-    val temperatureUnit: UnidadTemperatura = UnidadTemperatura.CELCIUS,
-    val pressureUnit: UnidadPresion = UnidadPresion.PSI,
-    val odometerUnit: UnidadOdometro = UnidadOdometro.KILOMETROS
+    val industry: Pair<Int, String>? = null
 )
 
 fun AppHCEntity.toUserData(): UserData {
@@ -35,7 +43,12 @@ fun AppHCEntity.toUserData(): UserData {
         name = fld_name,
         username = fld_username,
         email = fld_email,
-        plates = vehiclePlates,
-        typeVehicle = vehicleType
+    )
+}
+
+fun AppHCEntity.toVehicleData(): VehicleData {
+    return VehicleData(
+        typeVehicle = vehicleType,
+        plates = vehiclePlates
     )
 }

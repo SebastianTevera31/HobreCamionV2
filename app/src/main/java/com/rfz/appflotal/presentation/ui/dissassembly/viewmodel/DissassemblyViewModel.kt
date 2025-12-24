@@ -7,6 +7,8 @@ import com.rfz.appflotal.data.model.disassembly.tire.DisassemblyTire
 import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
 import com.rfz.appflotal.data.model.tire.toTire
 import com.rfz.appflotal.data.repository.UnidadOdometro
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
@@ -20,9 +22,10 @@ import com.rfz.appflotal.domain.tire.TireListUsecase
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
-import com.rfz.appflotal.domain.userpreferences.SwitchOdometerUnitUseCase
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.NavigationScreen
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUi
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.convertPressureValue
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.convertTemperatureValue
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -214,6 +217,24 @@ class DisassemblyViewModel @Inject constructor(
     private suspend fun uploadInspection(lastOdometerMeasurement: String): Boolean {
         val uiState = _uiState.value
 
+        val pressure = if (_uiState.value.pressureUnit == UnidadPresion.BAR) {
+            convertPressureValue(uiState.inspectionForm.pressure, UnidadPresion.PSI)
+        } else {
+            uiState.inspectionForm.pressure
+        }
+
+        val temperature = if (_uiState.value.temperatureUnit == UnidadTemperatura.FAHRENHEIT) {
+            convertTemperatureValue(uiState.inspectionForm.temperature, UnidadTemperatura.CELCIUS)
+        } else {
+            uiState.inspectionForm.temperature
+        }
+
+        val pressureAdjusted = if (_uiState.value.temperatureUnit == UnidadTemperatura.FAHRENHEIT) {
+            convertPressureValue(uiState.inspectionForm.pressure, UnidadPresion.PSI)
+        } else {
+            uiState.inspectionForm.pressure
+        }
+
         val result = inspectionTireCrudUseCase(
             requestBody = InspectionTireDto(
                 positionTire = uiState.positionTire,
@@ -222,19 +243,19 @@ class DisassemblyViewModel @Inject constructor(
                 treadDepth3 = uiState.inspectionForm.treadDepth3,
                 treadDepth4 = uiState.inspectionForm.treadDepth4,
                 tireInspectionReportId = 3, // 3 = Enviar a "desechar"
-                pressureInspected = uiState.inspectionForm.pressure,
+                pressureInspected = pressure.toInt(),
                 dateInspection = lastOdometerMeasurement,
                 odometer = uiState.inspectionForm.odometer,
-                temperatureInspected = uiState.inspectionForm.temperature,
-                pressureAdjusted = uiState.inspectionForm.adjustedPressure
+                temperatureInspected = temperature.toInt(),
+                pressureAdjusted = pressureAdjusted.toInt()
             )
         )
 
         return if (result.isSuccess) {
             sensorDataTableRepository.updateTireRecord(
                 tire = uiState.positionTire,
-                temperature = uiState.inspectionForm.temperature,
-                pressure = uiState.inspectionForm.adjustedPressure
+                temperature = temperature.toInt(),
+                pressure = pressure.toInt()
             )
             result.isSuccess
         } else false

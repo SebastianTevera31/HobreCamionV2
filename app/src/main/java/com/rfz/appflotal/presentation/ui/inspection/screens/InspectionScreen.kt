@@ -83,7 +83,7 @@ fun InspectionRoute(
 
     when (requestState.value.operationState) {
         OperationState.Error -> {
-            viewModel.clearInspectionUiState()
+            viewModel.clearInspectionRequestState()
         }
 
         OperationState.Loading -> {
@@ -106,8 +106,8 @@ fun InspectionRoute(
 
     InspectionScreen(
         tireLabel = tire,
-        initialTemperature = temperature.toInt(),
-        initialPressure = pressure.toInt(),
+        initialTemperature = temperature,
+        initialPressure = pressure,
         uiState = uiState.value,
         onBack = onBack,
         onFinish = { report ->
@@ -120,8 +120,8 @@ fun InspectionRoute(
 @Composable
 fun InspectionScreen(
     tireLabel: String,
-    initialTemperature: Int,
-    initialPressure: Int,
+    initialTemperature: Float,
+    initialPressure: Float,
     uiState: InspectionUiState,
     onBack: () -> Unit,
     onFinish: (InspectionUi) -> Unit
@@ -288,8 +288,8 @@ private fun PreviewInspection() {
     HombreCamionTheme {
         InspectionScreen(
             tireLabel = "P2",
-            initialTemperature = 2,
-            initialPressure = 2,
+            initialTemperature = 2.0f,
+            initialPressure = 2.0f,
             uiState = InspectionUiState.Success(
                 inspectionList = emptyList(),
                 lastOdometer = 1000,

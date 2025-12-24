@@ -1,10 +1,8 @@
 package com.rfz.appflotal.data.network.service.originaldesign
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.originaldesign.dto.CrudOriginalDesignDto
-import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
 import com.rfz.appflotal.data.network.client.originaldesign.CrudOriginalDesignClient
-import com.rfz.appflotal.data.network.client.product.ProductCrudClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response
@@ -15,7 +13,7 @@ class CrudOriginalDesignService @Inject constructor(private val crudOriginalDesi
     suspend fun doCrudOriginalDesign(
         requestBody: CrudOriginalDesignDto,
         tok: String
-    ): Response<List<MessageResponse>> {
+    ): Response<List<GeneralResponse>> {
         return withContext(Dispatchers.IO) {
             crudOriginalDesignClient.doCrudOriginalDesign(requestBody, tok)
         }

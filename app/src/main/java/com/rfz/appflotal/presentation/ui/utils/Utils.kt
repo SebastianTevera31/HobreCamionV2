@@ -61,6 +61,13 @@ fun String.toIntOrError(): Pair<Int?, Int?> {
     return value.toInt() to null
 }
 
+fun String.toFloatOrError(): Pair<Float?, Int?> {
+    // Devuelve el Int (si se puede) y un posible mensaje de error
+    if (isBlank()) return null to R.string.requerido
+    val value = toDoubleOrNull() ?: return null to R.string.numero_invalido
+    return value.toFloat() to null
+}
+
 fun String.validateOdometer(lastOdometer: Int): Pair<Int?, Int?> {
     if (isBlank()) return null to R.string.requerido
     val value = toDoubleOrNull() ?: return null to R.string.numero_invalido

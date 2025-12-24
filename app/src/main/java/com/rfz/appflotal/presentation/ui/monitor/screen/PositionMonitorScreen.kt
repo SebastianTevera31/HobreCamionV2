@@ -28,11 +28,12 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.presentation.theme.primaryLight
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.ListOfTireData
 
 @Composable
 fun CurrentPositionDataView(
     @StringRes message: Int,
-    sensorDataList: List<MonitorTireByDateResponse>?,
+    sensorDataList: List<ListOfTireData>?,
     isOnSearch: Boolean,
     pressureUnit: String,
     temperatureUnit: String,
@@ -98,7 +99,7 @@ fun CurrentPositionDataView(
                                     date = data.sensorDate,
                                     convertFormat = "HH:mm:ss"
                                 ) else convertDate(data.sensorDate),
-                                psi = data.psi,
+                                psi = String.format("%.2f", data.psi),
                                 temperatura = "%s $temperatureUnit".format(data.temperature.toString()),
                                 color = color
                             )
@@ -120,7 +121,7 @@ fun CurrentPositionDataView(
 fun SensorDataRow(
     position: String,
     fecha: String,
-    psi: Int,
+    psi: String,
     temperatura: String,
     color: Color,
     modifier: Modifier = Modifier
@@ -144,7 +145,7 @@ fun SensorDataRow(
             modifier = Modifier.weight(2f)
         )
         Text(
-            text = "$psi", style = MaterialTheme.typography.titleSmall,
+            text = psi, style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
@@ -172,26 +173,26 @@ fun NoPositionDataView(@StringRes message: Int, modifier: Modifier = Modifier) {
 @Composable
 fun PreviewPositionMonitorScreen() {
     val mockSensorDataList = listOf(
-        MonitorTireByDateResponse(
+        ListOfTireData(
             tirePosition = "P1",
             tireNumber = "TIRE-001",
             sensorDate = "2025-12-18T10:30:00",
-            psi = 34,
-            temperature = 28
+            psi = 34f,
+            temperature = 28f
         ),
-        MonitorTireByDateResponse(
+        ListOfTireData(
             tirePosition = "P1",
             tireNumber = "TIRE-001",
             sensorDate = "2025-12-18T10:30:00",
-            psi = 34,
-            temperature = 28
+            psi = 34f,
+            temperature = 28f
         ),
-        MonitorTireByDateResponse(
+        ListOfTireData(
             tirePosition = "P1",
             tireNumber = "TIRE-001",
             sensorDate = "2025-12-18T10:30:00",
-            psi = 34,
-            temperature = 28
+            psi = 34f,
+            temperature = 28f
         )
     )
 

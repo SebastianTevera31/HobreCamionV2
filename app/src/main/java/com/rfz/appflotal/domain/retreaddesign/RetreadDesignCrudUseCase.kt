@@ -1,6 +1,6 @@
 package com.rfz.appflotal.domain.retreaddesign
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.retreaddesing.dto.RetreadDesignCrudDto
 import com.rfz.appflotal.data.repository.retreaddesign.RetreadDesignCrudRepository
 import javax.inject.Inject
@@ -10,7 +10,7 @@ class RetreadDesignCrudUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         requestBody: RetreadDesignCrudDto,
-    ): Result<List<MessageResponse>> {
+    ): Result<List<GeneralResponse>> {
         return retreadDesignCrudRepository.doBrandCrud(requestBody)
     }
 }

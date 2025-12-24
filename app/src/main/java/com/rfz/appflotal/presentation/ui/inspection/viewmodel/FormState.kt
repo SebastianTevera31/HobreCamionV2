@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.ui.utils.toFloatOrError
 import com.rfz.appflotal.presentation.ui.utils.toIntOrError
 import com.rfz.appflotal.presentation.ui.utils.validateOdometer
 
@@ -69,13 +70,13 @@ class InspectionFormState(
         val (odoInt, odoErr) = odometer.validateOdometer(lastOdometer.toInt())
         odometerError = odoErr
 
-        val (tempInt, tempErr) = temperature.toIntOrError()
+        val (tempInt, tempErr) = temperature.toFloatOrError()
         temperatureError = tempErr
 
-        val (pressInt, pressErr) = pressureMeasured.toIntOrError()
+        val (pressInt, pressErr) = pressureMeasured.toFloatOrError()
         pressureMeasuredError = pressErr
 
-        val (adjInt, adjErr) = adjustedPressure.toIntOrError()
+        val (adjInt, adjErr) = adjustedPressure.toFloatOrError()
         adjustedPressureError = adjErr
 
         val (td1Int, td1Err) = treadDepth1.toIntOrError()
@@ -119,9 +120,9 @@ class InspectionFormState(
 
         return InspectionUi(
             odometer = odometer.toInt(),
-            temperature = temperature.toInt(),
-            pressure = pressureMeasured.toInt(),
-            adjustedPressure = adjustedPressure.toInt(),
+            temperature = temperature.toFloat(),
+            pressure = pressureMeasured.toFloat(),
+            adjustedPressure = adjustedPressure.toFloat(),
             treadDepth1 = treadDepth1.toFloat(),
             treadDepth2 = treadDepth2.toFloat(),
             treadDepth3 = treadDepth3.toFloat(),
@@ -152,7 +153,7 @@ class InspectionFormState(
                     treadDepth4 = list.getOrNull(7) ?: "",
                     selectedReportId = list.getOrNull(8).orEmpty().ifBlank { null },
 
-                )
+                    )
             }
         )
     }
@@ -160,8 +161,8 @@ class InspectionFormState(
 
 @Composable
 fun rememberInspectionFormState(
-    initialTemperature: Int,
-    initialPressure: Int,
+    initialTemperature: Float,
+    initialPressure: Float,
     lastOdometer: Int,
     isValidatingReports: Boolean
 ): InspectionFormState {

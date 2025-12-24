@@ -1,6 +1,6 @@
 package com.rfz.appflotal.data.repository.tire
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.tire.dto.DisassemblyTireDto
 import com.rfz.appflotal.data.network.service.tire.DisassemblyTireCrudService
 import javax.inject.Inject
@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class DisassemblyTireCrudRepository @Inject constructor(private val disassemblyTireCrudService: DisassemblyTireCrudService) {
 
-    suspend fun doBrandCrud(requestBody: DisassemblyTireDto, tok: String): Result<List<MessageResponse>> {
+    suspend fun doBrandCrud(requestBody: DisassemblyTireDto, tok: String): Result<List<GeneralResponse>> {
         return try {
             val response = disassemblyTireCrudService.doDisassemblyTire(requestBody,tok)
             if (response.isSuccessful) {

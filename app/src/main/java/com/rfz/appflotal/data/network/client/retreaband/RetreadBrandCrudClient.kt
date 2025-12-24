@@ -1,7 +1,6 @@
 package com.rfz.appflotal.data.network.client.retreaband
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
-import com.rfz.appflotal.data.model.provider.dto.ProviderDto
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.retreadbrand.dto.RetreadBrandDto
 import retrofit2.Response
 import retrofit2.http.Body
@@ -14,5 +13,5 @@ interface RetreadBrandCrudClient {
     suspend fun doRetreadBrand(
         @Header("Authorization") token: String,
         @Body requestBody: RetreadBrandDto,
-    ): Response<List<MessageResponse>>
+    ): Response<List<GeneralResponse>>
 }

@@ -363,6 +363,7 @@
     <string name="notifications_permission_granted">Permiso de notificaciones aceptados</string>
     <string name="permiso_de_notificacion">Permiso de notificación</string>
     <string name="texto_permiso_de_notification">Permiso requerido para mantenerlo informado de actualizaciones y posibles mantenimientos</string>
+    <string name="unidades_de_medida">Unidades de Medida</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>
