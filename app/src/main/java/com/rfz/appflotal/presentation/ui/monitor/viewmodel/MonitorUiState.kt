@@ -64,12 +64,29 @@ fun CoordinatesEntity.toTire(): MonitorTire {
     )
 }
 
-fun SensorDataEntity.toTireData(): MonitorTireByDateResponse {
-    return MonitorTireByDateResponse(
+fun SensorDataEntity.toTireData(): ListOfTireData {
+    return ListOfTireData(
         tirePosition = tire,
         tireNumber = tireNumber,
         sensorDate = timestamp,
-        psi = pressure,
-        temperature = temperature
+        psi = pressure.toFloat(),
+        temperature = temperature.toFloat()
     )
 }
+
+fun MonitorTireByDateResponse.toTireData(): ListOfTireData =
+    ListOfTireData(
+        tirePosition = tirePosition,
+        tireNumber = tireNumber,
+        sensorDate = sensorDate,
+        psi = psi.toFloat(),
+        temperature = temperature.toFloat()
+    )
+
+data class ListOfTireData(
+    val tirePosition: String,
+    val tireNumber: String,
+    val sensorDate: String,
+    val psi: Float,
+    val temperature: Float,
+)

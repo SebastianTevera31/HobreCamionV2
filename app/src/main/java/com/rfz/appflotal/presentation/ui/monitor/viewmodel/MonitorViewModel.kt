@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getBitmapFromDrawable
 import com.rfz.appflotal.data.NetworkStatus
-import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
@@ -93,11 +92,11 @@ class MonitorViewModel @Inject constructor(
     )
 
     private val _positionsUiState =
-        MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Loading)
+        MutableStateFlow<ApiResult<List<ListOfTireData>?>>(ApiResult.Loading)
     val positionsUiState = _positionsUiState.asStateFlow()
 
     private val _filteredTiresUiState =
-        MutableStateFlow<ApiResult<List<MonitorTireByDateResponse>?>>(ApiResult.Success(emptyList()))
+        MutableStateFlow<ApiResult<List<ListOfTireData>?>>(ApiResult.Success(emptyList()))
     val filteredTiresUiState = _filteredTiresUiState.asStateFlow()
 
     private val _tireUiState = MutableStateFlow(TireUiState())
@@ -456,8 +455,8 @@ class MonitorViewModel @Inject constructor(
                     pressureUnit = _monitorUiState.value.pressureUnit
                 )
                 it.toTireData().copy(
-                    temperature = sensorValue.temperature.toInt(),
-                    psi = sensorValue.pressure.toInt()
+                    temperature = sensorValue.temperature,
+                    psi = sensorValue.pressure
                 )
             }.sortedBy {
                 it.tirePosition.replace("P", "").toInt()
@@ -495,9 +494,9 @@ class MonitorViewModel @Inject constructor(
                                 _monitorUiState.value.pressureUnit
                             )
 
-                            it.copy(
-                                temperature = sensorValue.temperature.toInt(),
-                                psi = sensorValue.pressure.toInt()
+                            it.toTireData().copy(
+                                temperature = sensorValue.temperature,
+                                psi = sensorValue.pressure
                             )
                         })
                     }

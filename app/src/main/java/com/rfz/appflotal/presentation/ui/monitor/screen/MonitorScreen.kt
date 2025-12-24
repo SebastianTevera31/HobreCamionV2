@@ -38,6 +38,7 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.WarningSnackBanner
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.ListOfTireData
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
@@ -248,8 +249,8 @@ private fun PositionScreenContent(
     monitorViewModel: MonitorViewModel,
     pressureUnit: String,
     temperatureUnit: String,
-    positionsUiState: ApiResult<List<MonitorTireByDateResponse>?>,
-    monitorTireUiState: ApiResult<List<MonitorTireByDateResponse>?>,
+    positionsUiState: ApiResult<List<ListOfTireData>?>,
+    monitorTireUiState: ApiResult<List<ListOfTireData>?>,
     listOfTires: List<MonitorTire>?
 ) {
     if (paymentPlan == PaymentPlanType.Complete) {
@@ -299,7 +300,7 @@ private fun PositionScreenContent(
 
 @Composable
 private fun RecentPositionsView(
-    positionsUiState: ApiResult<List<MonitorTireByDateResponse>?>,
+    positionsUiState: ApiResult<List<ListOfTireData>?>,
     onClearFilteredTire: () -> Unit,
     pressureUnit: String,
     temperatureUnit: String
@@ -313,7 +314,7 @@ private fun RecentPositionsView(
             }
         }
 
-        is ApiResult.Success<List<MonitorTireByDateResponse>?> -> {
+        is ApiResult.Success<List<ListOfTireData>?> -> {
             val data = positionsUiState.data
             CurrentPositionDataView(
                 message = R.string.no_ruedas_activas,
@@ -328,13 +329,13 @@ private fun RecentPositionsView(
 
 @Composable
 private fun FilteredPositionsView(
-    monitorTireUiState: ApiResult<List<MonitorTireByDateResponse>?>,
+    monitorTireUiState: ApiResult<List<ListOfTireData>?>,
     pressureUnit: String,
     temperatureUnit: String
 ) {
     when (monitorTireUiState) {
         is ApiResult.Success -> {
-            val data: List<MonitorTireByDateResponse>? =
+            val data: List<ListOfTireData>? =
                 monitorTireUiState.data?.sortedByDescending { it.sensorDate }
             CurrentPositionDataView(
                 message = R.string.no_registros,
