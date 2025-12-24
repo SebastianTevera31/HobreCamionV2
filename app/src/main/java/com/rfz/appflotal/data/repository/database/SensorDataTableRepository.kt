@@ -95,7 +95,7 @@ class SensorDataTableRepository @Inject constructor(
     suspend fun updateSensorDataExceptLastInspection(update: SensorDataUpdate) {
         sensorData.updateSensor(
             idMonitor = update.idMonitor,
-            tireNumber = update.tireNumber,
+            tire = update.tire,
             temperature = update.temperature,
             pressure = update.pressure,
             highTemperatureAlert = update.highTemperatureAlert,

@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.navigation.NavType
@@ -104,8 +105,10 @@ import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewM
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.screen.ShareFeedbackScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
+import com.rfz.appflotal.presentation.ui.inicio.components.ObserveOnResume
 import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
 import com.rfz.appflotal.presentation.ui.inicio.viewmodel.InicioScreenViewModel
+import com.rfz.appflotal.presentation.ui.inicio.viewmodel.NotificationPermissionState
 import com.rfz.appflotal.presentation.ui.inspection.screens.InspectionRoute
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionViewModel
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
@@ -291,6 +294,9 @@ class InicioActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+            val prefs by lazy {
+                getSharedPreferences("permissions_prefs", MODE_PRIVATE)
+            }
             var allGranted by remember { mutableStateOf(false) }
             val navController = rememberNavController()
             val backStackEntry by navController.currentBackStackEntryAsState()
@@ -307,35 +313,126 @@ class InicioActivity : ComponentActivity() {
             val userData = uiState.value.userData
             val hasInitialValidation = uiState.value.initialValidationCompleted
 
-            val postNotificationGranted =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) == PackageManager.PERMISSION_GRANTED
-                } else false
-
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
             ) { result ->
-                val todosConcedidos = result.values.all { it }
-                if (todosConcedidos) {
+                val wasRequestedBefore = inicioScreenViewModel.werePermissionsRequested(prefs)
+
+                val deniedPermissions = result
+                    .filterValues { granted -> !granted }
+                    .keys
+
+                val permanentlyDenied = deniedPermissions.any { permission ->
+                    !ActivityCompat.shouldShowRequestPermissionRationale(
+                        this@InicioActivity,
+                        permission
+                    )
+                } && wasRequestedBefore
+
+                inicioScreenViewModel.markPermissionsRequested(prefs)
+
+
+                if (deniedPermissions.isEmpty()) {
                     allGranted = true
                     if (!isServiceRunning(this@InicioActivity, HombreCamionService::class.java)) {
                         HombreCamionService.startService(this@InicioActivity)
                     }
                 } else {
                     allGranted = false
-                    Log.d("Permiso", "❌ Permiso denegado")
+
+                    if (permanentlyDenied) {
+                        Log.d("Permiso", "🚫 Denegado permanentemente")
+                        inicioScreenViewModel.openAppSettings(context)
+                    } else {
+                        Log.d("Permiso", "❌ Denegado temporalmente")
+                    }
                 }
             }
 
+            val notificationPermissionLauncher =
+                rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { granted ->
+
+                    val state = if (granted) {
+                        NotificationPermissionState.Granted
+                    } else {
+                        if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                                this@InicioActivity,
+                                Manifest.permission.POST_NOTIFICATIONS
+                            )
+                        ) {
+                            NotificationPermissionState.PermanentlyDenied
+                        } else {
+                            NotificationPermissionState.Denied
+                        }
+                    }
+
+                    inicioScreenViewModel.updatePermissionState(state)
+                }
+
+
+            ObserveOnResume {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    inicioScreenViewModel.updatePermissionState(
+                        NotificationPermissionState.Granted
+                    )
+                } else {
+                    val granted = ContextCompat.checkSelfPermission(
+                        this@InicioActivity,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                    if (granted) { inicioScreenViewModel.updatePermissionState(
+                            NotificationPermissionState.Granted
+                        )
+                    }
+
+                }
+            }
+
+
             HombreCamionTheme {
                 LocalizedApp {
-                    if (!postNotificationGranted) {
-                        NotificationPermissionDialog(onDismiss = { finish() }, onConfirmation = {
-                            askNotificationPermission()
-                        })
+                    when (uiState.value.notificationPermission) {
+                        NotificationPermissionState.NotRequested -> {
+                            NotificationPermissionDialog(
+                                onDismiss = { finish() },
+                                onConfirmation = {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        notificationPermissionLauncher.launch(
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        )
+                                    }
+                                }
+                            )
+                        }
+
+                        NotificationPermissionState.Denied -> {
+                            NotificationPermissionDialog(
+                                onDismiss = { finish() },
+                                onConfirmation = {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        notificationPermissionLauncher.launch(
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        )
+                                    }
+                                }
+                            )
+                        }
+
+                        NotificationPermissionState.PermanentlyDenied -> {
+                            NotificationPermissionDialog(
+                                onDismiss = { finish() },
+                                onConfirmation = {
+                                    inicioScreenViewModel.openAppSettings(this@InicioActivity)
+                                }
+                            )
+                        }
+
+                        NotificationPermissionState.Granted -> {
+                            // Continúas flujo normal
+                        }
                     }
 
                     Scaffold(
@@ -360,7 +457,7 @@ class InicioActivity : ComponentActivity() {
                                     .safeDrawingPadding()
                             ) {
                                 //ca-app-pub-3415237437138959/2146418588
-                                if (showBanner) {
+                                if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.None) {
                                     GlobalAdMobBanner(
                                         adUnitId = "ca-app-pub-3940256099942544/9214589741",
                                         modifier = Modifier.fillMaxWidth()
@@ -983,11 +1080,9 @@ class InicioActivity : ComponentActivity() {
     private fun askNotificationPermission() {
         // This is only necessary for API Level > 33 (TIRAMISU)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
                 PackageManager.PERMISSION_GRANTED
             ) {
-            } else {
-                // Directly ask for the permission
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }

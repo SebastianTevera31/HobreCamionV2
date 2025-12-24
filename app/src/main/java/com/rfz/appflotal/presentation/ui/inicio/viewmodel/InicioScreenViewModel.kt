@@ -1,5 +1,11 @@
 package com.rfz.appflotal.presentation.ui.inicio.viewmodel
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.net.Uri
+import android.provider.Settings
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.ads.AdView
@@ -14,6 +20,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class NotificationPermissionState {
+    object Granted : NotificationPermissionState()
+    object NotRequested : NotificationPermissionState()
+    object Denied : NotificationPermissionState()
+    object PermanentlyDenied : NotificationPermissionState()
+}
+
 @HiltViewModel
 class InicioScreenViewModel @Inject constructor(
     private val getTasksUseCase: GetTasksUseCase,
@@ -22,6 +35,7 @@ class InicioScreenViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(MainActivityUiState())
     val uiState = _uiState.asStateFlow()
+
 
     init {
         checkUserSession()
@@ -62,10 +76,36 @@ class InicioScreenViewModel @Inject constructor(
             }
         }
     }
+
+    fun openAppSettings(context: Context) {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", context.packageName, null)
+        }
+        context.startActivity(intent)
+    }
+
+    fun markPermissionsRequested(prefs: SharedPreferences) {
+        prefs.edit {
+            putBoolean("permissions_requested", true)
+        }
+    }
+
+
+    fun werePermissionsRequested(prefs: SharedPreferences): Boolean =
+        prefs.getBoolean("permissions_requested", false)
+
+    fun updatePermissionState(state: NotificationPermissionState) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                notificationPermission = state
+            )
+        }
+    }
 }
 
 data class MainActivityUiState(
     val adView: AdView? = null,
     val userData: AppHCEntity? = null,
-    val initialValidationCompleted: Boolean = false
+    val initialValidationCompleted: Boolean = false,
+    val notificationPermission: NotificationPermissionState = NotificationPermissionState.NotRequested
 )

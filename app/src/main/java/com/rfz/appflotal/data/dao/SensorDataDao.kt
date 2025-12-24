@@ -52,11 +52,11 @@ interface SensorDataDao {
         puncture_alert = :punctureAlert,
         active = :active
     WHERE monitor_id = :idMonitor
-      AND tire_number = :tireNumber"""
+      AND tire = :tire"""
     )
     suspend fun updateSensor(
         idMonitor: Int,
-        tireNumber: String,
+        tire: String,
         temperature: Int,
         pressure: Int,
         highTemperatureAlert: Boolean,
