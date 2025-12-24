@@ -9,16 +9,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+interface UnitProvider {
+    val symbol: String
+}
 
-enum class UnidadPresion(val symbol: String) {
+enum class UnidadPresion(override val symbol: String) : UnitProvider {
     PSI("psi"), BAR("bar")
 }
 
-enum class UnidadTemperatura(val symbol: String) {
+enum class UnidadTemperatura(override val symbol: String) : UnitProvider {
     CELCIUS("°C"), FAHRENHEIT("°F")
 }
 
-enum class UnidadOdometro(val symbol: String) {
+enum class UnidadOdometro(override val symbol: String) : UnitProvider {
     KILOMETROS("km/h"), MILLAS("mph")
 }
 

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.repository.UnitProvider
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.UserInfoTopBar
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserUiState
@@ -50,13 +51,15 @@ fun UpdateUserScreen(
     val context = LocalContext.current
     val updateUserStaus = updateUserViewModel.updateUserStatus
     val wifiStatus = updateUserViewModel.wifiStatus.collectAsState()
+    val successMessage = stringResource(R.string.datos_actualizados_correctamente)
+    val errorMessage = stringResource(R.string.error_actualizar_datos)
 
     LaunchedEffect(updateUserStaus) {
         when (updateUserStaus) {
             is ApiResult.Error -> {
                 Toast.makeText(
                     context,
-                    context.getString(R.string.error_actualizar_datos),
+                    errorMessage,
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -65,7 +68,7 @@ fun UpdateUserScreen(
             is ApiResult.Success -> {
                 Toast.makeText(
                     context,
-                    context.getString(R.string.datos_actualizados_correctamente),
+                    successMessage,
                     Toast.LENGTH_SHORT
                 ).show()
                 updateUserViewModel.cleanUpdateUserStatus()
@@ -110,8 +113,15 @@ fun UpdateUserScreen(
                             context = context
                         )
                     },
-                    updateVehicleData = { typeVehicle, plates ->
-                        updateUserViewModel.updateVehicleData(typeVehicle, plates, context)
+                    updateVehicleData = { typeVehicle, plates, temperatureUnit, pressureUnit, odometerUnit ->
+                        updateUserViewModel.updateVehicleData(
+                            typeVehicle,
+                            plates,
+                            temperatureUnit,
+                            pressureUnit,
+                            odometerUnit,
+                            context
+                        )
                     })
                 Button(
                     onClick = {
@@ -127,7 +137,7 @@ fun UpdateUserScreen(
                             ).show()
                         }
                     },
-                    enabled = updateUserUiState.value.isNewData,
+                    enabled = updateUserUiState.value.isNewUserData || updateUserUiState.value.isNewVehicleData,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.width(160.dp)
                 ) {
@@ -145,7 +155,13 @@ fun UpdateUserView(
         name: String, password: String, email: String,
         country: Pair<Int, String>?, sector: Pair<Int, String>?
     ) -> Unit,
-    updateVehicleData: (vehicleType: String, plates: String) -> Unit
+    updateVehicleData: (
+        vehicleType: String,
+        plates: String,
+        temperatureUnit: UnitProvider,
+        pressureUnit: UnitProvider,
+        odometerUnit: UnitProvider
+    ) -> Unit
 ) {
     var screenSelected by remember { mutableStateOf(UpdateUserDataViews.Chofer) }
     Column(
@@ -181,7 +197,7 @@ fun UpdateUserView(
             UpdateUserDataViews.Chofer -> {
                 UpdateDriverScreen(
                     title = R.string.chofer,
-                    userData = updateUserUiState.newData,
+                    userData = updateUserUiState.newUserData,
                     countries = updateUserUiState.countries,
                     industries = updateUserUiState.industries,
                     modifier = Modifier.padding(horizontal = 40.dp)
@@ -192,10 +208,16 @@ fun UpdateUserView(
 
             UpdateUserDataViews.Vehiculo -> {
                 UpdateVehicleScreen(
-                    title = R.string.vehiculo, userData = updateUserUiState.newData,
+                    title = R.string.vehiculo, vehicleData = updateUserUiState.newVehicleData,
                     modifier = Modifier.padding(horizontal = 40.dp)
-                ) { typeVehicle, plates ->
-                    updateVehicleData(typeVehicle, plates)
+                ) { typeVehicle, plates, temperatureUnit, pressureUnit, odometerUnit ->
+                    updateVehicleData(
+                        typeVehicle,
+                        plates,
+                        temperatureUnit,
+                        pressureUnit,
+                        odometerUnit
+                    )
                 }
             }
         }

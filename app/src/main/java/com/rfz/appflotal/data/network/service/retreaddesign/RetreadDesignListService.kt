@@ -1,6 +1,5 @@
 package com.rfz.appflotal.data.network.service.retreaddesign
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
 import com.rfz.appflotal.data.model.retreaddesing.response.RetreadDesignListResponse
 import com.rfz.appflotal.data.network.client.retreaddesign.RetreadDesignListClient
 import com.rfz.appflotal.domain.database.GetTasksUseCase

@@ -1,6 +1,6 @@
 package com.rfz.appflotal.data.network.service.retreadbrand
 
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.retreadbrand.dto.RetreadBrandDto
 import com.rfz.appflotal.data.network.client.retreaband.RetreadBrandCrudClient
 import com.rfz.appflotal.domain.database.GetTasksUseCase
@@ -17,7 +17,7 @@ class RetreadBrandCrudService @Inject constructor(
 ) {
     suspend fun doRetreadBrand(
         requestBody: RetreadBrandDto,
-    ): Response<List<MessageResponse>> {
+    ): Response<List<GeneralResponse>> {
         return withContext(Dispatchers.IO) {
             val token = getTasksUseCase().first()[0].fld_token
             retreadBrandCrudClient.doRetreadBrand("bearer $token", requestBody)

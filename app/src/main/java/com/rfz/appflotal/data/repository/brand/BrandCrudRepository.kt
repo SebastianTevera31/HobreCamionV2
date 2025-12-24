@@ -1,14 +1,14 @@
 package com.rfz.appflotal.data.repository.brand
 
 import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.brand.BrandCrudService
 import javax.inject.Inject
 
 
 class BrandCrudRepository @Inject constructor(private val brandCrudService: BrandCrudService) {
 
-    suspend fun doBrandCrud(requestBody: BrandCrudDto, tok: String): Result<List<MessageResponse>> {
+    suspend fun doBrandCrud(requestBody: BrandCrudDto, tok: String): Result<List<GeneralResponse>> {
         return try {
             val response = brandCrudService.doBrandCrud(requestBody,tok)
             if (response.isSuccessful) {

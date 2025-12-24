@@ -58,16 +58,22 @@ class HombreCamionRepository @Inject constructor(
         fldEmail: String,
         country: Int,
         industry: Int,
-        vehiclePlates: String,
-        vehicleType: String
     ) = flotalDao.updateUserData(
         idUser = idUser,
         fldName = fldName,
         fldEmail = fldEmail,
-        vehiclePlates = vehiclePlates,
         industry = industry,
         country = country,
-        vehicleType = vehicleType
+    )
+
+    suspend fun updateVehicleData(
+        idUser: Int,
+        vehicleType: String,
+        vehiclePlates: String,
+    ) = flotalDao.updateVehicleData(
+        vehicleType = vehicleType,
+        vehiclePlates = vehiclePlates,
+        idUser = idUser
     )
 
     val tasks: Flow<List<AppHCEntity>> = flotalDao.getData().map { items ->
@@ -137,7 +143,7 @@ class HombreCamionRepository @Inject constructor(
         flotalDao.deleteAllFlotalSoft()
     }
 
-    suspend fun getOdometer(): OdometerData{
+    suspend fun getOdometer(): OdometerData {
         return flotalDao.getOdometer() ?: OdometerData(0, "")
     }
 

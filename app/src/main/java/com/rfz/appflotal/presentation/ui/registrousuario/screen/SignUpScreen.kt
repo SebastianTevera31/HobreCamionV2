@@ -33,7 +33,7 @@ import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
@@ -250,7 +250,7 @@ fun SignUpScreen(
 fun SignUpStatus(
     ctx: Context,
     onEnableButton: () -> Unit,
-    signUpRequestStatus: ApiResult<List<MessageResponse>?>,
+    signUpRequestStatus: ApiResult<List<GeneralResponse>?>,
     onFailure: () -> Unit,
     onLogin: () -> Unit
 ) {

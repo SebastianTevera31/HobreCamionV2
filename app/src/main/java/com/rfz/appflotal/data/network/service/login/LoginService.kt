@@ -4,7 +4,7 @@ import com.rfz.appflotal.data.model.login.dto.LoginDto
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.RegisterBody
 import com.rfz.appflotal.data.model.login.response.UpdateUserBody
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.client.login.LoginClient
 import com.rfz.appflotal.data.network.requestHelper
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -25,20 +25,20 @@ class LoginService @Inject constructor(
         }
     }
 
-    suspend fun doRegisterUser(requestBody: RegisterBody): ApiResult<List<MessageResponse>?> {
+    suspend fun doRegisterUser(requestBody: RegisterBody): ApiResult<List<GeneralResponse>?> {
         return requestHelper(endpointName = "RegisterUser") {
             loginClient.registerUser(requestBody)
         }
     }
 
-    suspend fun doUpdateUser(requestBody: UpdateUserBody): ApiResult<List<MessageResponse>?> {
+    suspend fun doUpdateUser(requestBody: UpdateUserBody): ApiResult<List<GeneralResponse>?> {
         return requestHelper(endpointName = "UpdateUser") {
             val token = getTasksUseCase().first()[0].fld_token
             loginClient.updateUser("bearer $token", requestBody)
         }
     }
 
-    suspend fun doAcceptTermsAndConditions(): ApiResult<List<MessageResponse>?> {
+    suspend fun doAcceptTermsAndConditions(): ApiResult<List<GeneralResponse>?> {
         return requestHelper(endpointName = "AcceptTermsAndConditions") {
             val token = getTasksUseCase().first()[0].fld_token
             loginClient.acceptTermsAndConditions("bearer $token")

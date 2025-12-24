@@ -5,7 +5,7 @@ import com.rfz.appflotal.data.model.login.dto.LoginDto
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.RegisterBody
 import com.rfz.appflotal.data.model.login.response.UpdateUserBody
-import com.rfz.appflotal.data.model.message.response.MessageResponse
+import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.login.LoginService
 import retrofit2.Response
@@ -26,7 +26,7 @@ class LoginRepository @Inject constructor(private val loginService: LoginService
         plates: String,
         termsGranted: Boolean,
         registerDate: String
-    ): ApiResult<List<MessageResponse>?> {
+    ): ApiResult<List<GeneralResponse>?> {
         return loginService.doRegisterUser(
             RegisterBody(
                 fldName = name,
@@ -48,9 +48,7 @@ class LoginRepository @Inject constructor(private val loginService: LoginService
         password: String,
         idCountry: Int,
         idSector: Int,
-        typeVehicle: String,
-        plates: String
-    ): ApiResult<List<MessageResponse>?> {
+    ): ApiResult<List<GeneralResponse>?> {
         return loginService.doUpdateUser(
             UpdateUserBody(
                 fldName = name,
@@ -58,13 +56,11 @@ class LoginRepository @Inject constructor(private val loginService: LoginService
                 fldPassword = password,
                 idCountry = idCountry,
                 idSector = idSector,
-                typeVehicle = typeVehicle,
-                plates = plates,
             )
         )
     }
 
-    suspend fun doAcceptTermsAndConditions(): ApiResult<List<MessageResponse>?> {
+    suspend fun doAcceptTermsAndConditions(): ApiResult<List<GeneralResponse>?> {
         return loginService.doAcceptTermsAndConditions()
     }
 }
