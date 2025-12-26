@@ -60,7 +60,7 @@
         <!--ca-app-pub-3415237437138959~7191695854-->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-3415237437138959~7191695854"/>
 
         <activity
             android:name=".presentation.ui.inicio.ui.InicioActivity"

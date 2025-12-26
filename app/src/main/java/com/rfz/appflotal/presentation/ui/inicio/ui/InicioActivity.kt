@@ -459,7 +459,7 @@ class InicioActivity : ComponentActivity() {
                                 //ca-app-pub-3415237437138959/2146418588
                                 if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.None) {
                                     GlobalAdMobBanner(
-                                        adUnitId = "ca-app-pub-3940256099942544/9214589741",
+                                        adUnitId = "ca-app-pub-3415237437138959/2146418588",
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
