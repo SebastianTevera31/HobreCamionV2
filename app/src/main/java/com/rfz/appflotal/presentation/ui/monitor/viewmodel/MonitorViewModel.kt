@@ -27,7 +27,6 @@ import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchPressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchTemperatureUnitUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
-import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -129,7 +128,7 @@ class MonitorViewModel @Inject constructor(
 
     val wifiStatus = _wifiStatus.asStateFlow()
 
-    var shouldReadManually = true // true = Automático, false = Manual (Bloqueado)
+    var shouldReadAuto = true // true = Automático, false = Manual (Bloqueado)
 
     init {
         viewModelScope.launch {
@@ -300,7 +299,7 @@ class MonitorViewModel @Inject constructor(
                 }
 
                 val currentlySelectedTire = _tireUiState.value.currentTire
-                if (currentlySelectedTire.isNotBlank() && shouldReadManually) {
+                if (currentlySelectedTire.isNotBlank() && shouldReadAuto) {
                     getSensorDataByWheel(currentlySelectedTire)
                 }
             }
@@ -375,8 +374,7 @@ class MonitorViewModel @Inject constructor(
 
         _monitorUiState.update { it.copy(listOfTires = result.updatedTireList) }
 
-        val currentSelected = _tireUiState.value.currentTire
-        if (shouldReadManually || result.newTireUiState.currentTire == currentSelected) {
+        if (shouldReadAuto) {
             _tireUiState.update { currentState ->
                 result.newTireUiState.copy(
                     rawPressure = result.newTireUiState.pressure.first,
@@ -391,13 +389,13 @@ class MonitorViewModel @Inject constructor(
     }
 
     fun getSensorDataByWheel(tireSelected: String) {
-        shouldReadManually = false
+        shouldReadAuto = false
 
         manualSelectionJob?.cancel()
 
         manualSelectionJob = viewModelScope.launch {
             delay(60000)
-            shouldReadManually = true
+            shouldReadAuto = true
         }
 
         viewModelScope.launch {
