@@ -956,7 +956,6 @@ class InicioActivity : ComponentActivity() {
                                                 onFinish = { tire ->
                                                     navController.navigate(HombreCamionScreens.MONITOR.name) {
                                                         launchSingleTop = true
-                                                        restoreState = true
                                                         popUpTo(HombreCamionScreens.MONITOR.name)
                                                     }
 //                                                    monitorViewModel.getSensorDataByWheel(tire)
@@ -1013,7 +1012,6 @@ class InicioActivity : ComponentActivity() {
                                                 onFinish = {
                                                     navController.navigate(HombreCamionScreens.MONITOR.name) {
                                                         launchSingleTop = true
-                                                        restoreState = true
                                                         popUpTo(HombreCamionScreens.MONITOR.name)
                                                     }
                                                 })
