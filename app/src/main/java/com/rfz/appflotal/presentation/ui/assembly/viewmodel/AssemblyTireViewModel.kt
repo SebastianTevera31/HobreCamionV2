@@ -12,6 +12,8 @@ import com.rfz.appflotal.domain.axle.GetAxlesUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
+import com.rfz.appflotal.presentation.ui.utils.kmToMiles
+import com.rfz.appflotal.presentation.ui.utils.milesToKm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class AssemblyTireViewModel @Inject constructor(
@@ -51,7 +54,7 @@ class AssemblyTireViewModel @Inject constructor(
             val odometerDeferred = async { hombreCamionRepository.getOdometer() }
             val tiresDeferred = async { tireUseCase() }
             val axleDeferred = async { getAxleUseCase() }
-            val odometerUnit = odometerUnit.first()
+            val odometerUnit = observeOdometerUnitUseCase().first()
 
             val tiresResult = tiresDeferred.await()
             val axleResult = axleDeferred.await()
@@ -64,10 +67,13 @@ class AssemblyTireViewModel @Inject constructor(
 
                 val axleList = axleResult.getOrNull() ?: emptyList()
 
-                // Actualizamos el estado de la UI una sola vez
+                val odometerValue =
+                    if (_uiState.value.odometerUnit == UnidadOdometro.KILOMETROS) odometer.odometer
+                    else kmToMiles(odometer.odometer.toDouble())
+
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
-                        currentOdometer = odometer.odometer.toString(),
+                        currentOdometer = odometerValue.toInt().toString(),
                         tireList = tiresList,
                         axleList = axleList,
                         screenLoadStatus = OperationStatus.Success,
@@ -106,6 +112,11 @@ class AssemblyTireViewModel @Inject constructor(
                 operationStatus = OperationStatus.Loading
             )
         }
+        val odometerNumber = odometer.toDouble()
+        val odometerValue =
+            if (_uiState.value.odometerUnit == UnidadOdometro.KILOMETROS) odometerNumber
+            else milesToKm(odometerNumber)
+
 
         viewModelScope.launch {
             val uiState = _uiState.value
@@ -114,13 +125,18 @@ class AssemblyTireViewModel @Inject constructor(
                     idAxle = idAxle,
                     idTire = idTire,
                     positionTire = uiState.positionTire,
-                    odometer = odometer.toInt(),
+                    odometer = odometerValue.roundToInt(),
                     assemblyDate = getCurrentDate(),
                     updatedAt = System.currentTimeMillis()
                 )
             )
 
-            async { hombreCamionRepository.updateOdometer(odometer.toInt(), getCurrentDate()) }
+            async {
+                hombreCamionRepository.updateOdometer(
+                    odometerValue.roundToInt(),
+                    getCurrentDate()
+                )
+            }
 
             _uiState.update { currentUiState ->
                 currentUiState.copy(

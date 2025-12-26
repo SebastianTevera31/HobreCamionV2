@@ -298,6 +298,8 @@ class MonitorViewModel @Inject constructor(
                     currentUiState.copy(listOfTires = updatedTireList)
                 }
 
+//                _tireUiState.value =TireUiState()
+
                 val currentlySelectedTire = _tireUiState.value.currentTire
                 if (currentlySelectedTire.isNotBlank() && shouldReadAuto) {
                     getSensorDataByWheel(currentlySelectedTire)
@@ -363,8 +365,9 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
-    private fun updateSensorData(dataFrame: String, timestamp: String? = null) {
+    private suspend fun updateSensorData(dataFrame: String, timestamp: String? = null) {
         val result = updateSensorDataUseCase(
+            monitorId = _monitorUiState.value.monitorId,
             dataFrame = dataFrame,
             currentTires = _monitorUiState.value.listOfTires,
             timestamp = timestamp,
@@ -373,8 +376,8 @@ class MonitorViewModel @Inject constructor(
         )
 
         _monitorUiState.update { it.copy(listOfTires = result.updatedTireList) }
-
-        if (shouldReadAuto) {
+        val currentSelected = _tireUiState.value.currentTire
+        if (shouldReadAuto || result.newTireUiState.currentTire == currentSelected) {
             _tireUiState.update { currentState ->
                 result.newTireUiState.copy(
                     rawPressure = result.newTireUiState.pressure.first,

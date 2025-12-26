@@ -17,6 +17,8 @@ import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.viewmodel.ShowToast
 import com.rfz.appflotal.presentation.ui.inspection.components.UploadingInspectionMessage
+import com.rfz.appflotal.presentation.ui.utils.kmToMiles
+import com.rfz.appflotal.presentation.ui.utils.milesToKm
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -35,6 +37,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class InspectionViewModel @Inject constructor(
@@ -109,10 +112,13 @@ class InspectionViewModel @Inject constructor(
 
             val list = orderedMain + secondaryPriority
 
+            val odometerValue = if (odometerUnit == UnidadOdometro.KILOMETROS) lastOdometer.odometer
+            else kmToMiles(lastOdometer.odometer.toDouble())
+
             _uiState.value =
                 InspectionUiState.Success(
                     inspectionList = list.map { it.toCatalog() },
-                    lastOdometer = lastOdometer.odometer,
+                    lastOdometer = odometerValue.toInt(),
                     isOdometerEditable = isOdometerEditable,
                     pressureUnit = pressureUnit,
                     temperatureUnit = temperatureUnit,
@@ -169,9 +175,8 @@ class InspectionViewModel @Inject constructor(
             (values.pressure * 14.5038).toInt()
         } else values.pressure
 
-        val odometerValue = if (state.odometerUnit == UnidadOdometro.MILLAS) {
-            (values.odometer * 1.60934).toInt()
-        } else values.odometer
+        val odometerValue = if (odometerUnit.value == UnidadOdometro.KILOMETROS) values.odometer.toDouble()
+        else milesToKm(values.odometer.toDouble())
 
         val adjustedPressureValue = if (state.pressureUnit == UnidadPresion.BAR) {
             (values.adjustedPressure * 14.5038).toInt()
@@ -187,7 +192,7 @@ class InspectionViewModel @Inject constructor(
                 tireInspectionReportId = values.reportId?.toIntOrNull() ?: 0,
                 pressureInspected = pressureValue.toInt(),
                 dateInspection = lastOdometerMeasurement,
-                odometer = odometerValue,
+                odometer = odometerValue.roundToInt(),
                 temperatureInspected = temperatureValue.toInt(),
                 pressureAdjusted = adjustedPressureValue.toInt()
             )
@@ -195,7 +200,7 @@ class InspectionViewModel @Inject constructor(
 
         if (result.isSuccess) {
             // Registrar registro de odometro
-            hombreCamionRepository.updateOdometer(odometerValue, lastOdometerMeasurement)
+            hombreCamionRepository.updateOdometer(odometerValue.roundToInt(), lastOdometerMeasurement)
             sensorDataTableRepository.updateLastInspection(
                 tire = positionTire,
                 lastInspection = convertDate(

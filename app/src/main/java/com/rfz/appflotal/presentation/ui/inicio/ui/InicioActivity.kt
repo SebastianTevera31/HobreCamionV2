@@ -959,7 +959,7 @@ class InicioActivity : ComponentActivity() {
                                                         restoreState = true
                                                         popUpTo(HombreCamionScreens.MONITOR.name)
                                                     }
-                                                    monitorViewModel.getSensorDataByWheel(tire)
+//                                                    monitorViewModel.getSensorDataByWheel(tire)
                                                 },
                                                 viewModel = inspectionViewModel
                                             )

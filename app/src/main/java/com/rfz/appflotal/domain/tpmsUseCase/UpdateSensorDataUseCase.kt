@@ -11,20 +11,27 @@ import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
+import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
-class UpdateSensorDataUseCase @Inject constructor() {
+class UpdateSensorDataUseCase @Inject constructor(private val sensorDataTableRepository: SensorDataTableRepository) {
 
     data class Result(
         val newTireUiState: TireUiState,
         val updatedTireList: List<MonitorTire>
     )
 
-    operator fun invoke(
+    suspend operator fun invoke(
+        monitorId: Int,
         dataFrame: String,
         currentTires: List<MonitorTire>,
         timestamp: String? = null,
@@ -35,7 +42,8 @@ class UpdateSensorDataUseCase @Inject constructor() {
         val rawPressure = getPressure(dataFrame)
 
         val pressureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.PRESSURE)
-        val temperatureStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
+        val temperatureStatus =
+            decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.HIGH_TEMPERATURE)
         val flatTireStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.FLAT_TIRE)
         val batteryStatus = decodeAlertDataFrame(dataFrame, SensorAlertDataFrame.LOW_BATTERY)
 
@@ -44,13 +52,35 @@ class UpdateSensorDataUseCase @Inject constructor() {
             findOutPosition("P${tire}")
         } else ""
 
+        val data =
+            sensorDataTableRepository.getLastDataByTire(monitorId, realTire)
+
+        val lastInspection = data?.lastInspection
+        val isInspectionAvailable = if (lastInspection.isNullOrEmpty()) true else {
+            try {
+                val lastInspection = Instant.parse(lastInspection)
+                val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
+                lastInspection.isBefore(oneDayAgo)
+            } catch (_: DateTimeParseException) {
+                try {
+                    val lastInspection = LocalDateTime.parse(lastInspection)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                    val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
+                    lastInspection.isBefore(oneDayAgo)
+                } catch (_: Exception) {
+                    true
+                }
+            }
+        }
 
         val time = if (timestamp != null) {
             val getDate = getDateObject(timestamp)
             getCurrentDate(date = getDate, pattern = "dd/MM/yyyy HH:mm:ss")
         } else getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss")
 
-        val inAlert = getIsTireInAlert(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
+        val inAlert =
+            getIsTireInAlert(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
 
         val newList = currentTires.map { tireData ->
             if (tireData.sensorPosition == realTire) tireData.copy(
@@ -71,7 +101,8 @@ class UpdateSensorDataUseCase @Inject constructor() {
             timestamp = time,
             batteryStatus = batteryStatus,
             flatTireStatus = flatTireStatus,
-            tireRemovingStatus = if (rawPressure.toInt() == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA
+            tireRemovingStatus = if (rawPressure.toInt() == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
+            isInspectionAvailable = isInspectionAvailable
         )
 
         return Result(

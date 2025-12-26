@@ -5,6 +5,7 @@ import androidx.compose.material3.SnackbarHostState
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.repository.UnidadOdometro
 
 fun <T> responseHelper(
     response: ApiResult<T>,
@@ -74,6 +75,16 @@ fun String.validateOdometer(lastOdometer: Int): Pair<Int?, Int?> {
     if (value.toInt() < lastOdometer) return null to R.string.valor_invalido
     return value.toInt() to null
 }
+
+private const val KM_TO_MILES = 0.621371
+private const val MILES_TO_KM = 1.60934
+
+fun kmToMiles(km: Double): Double =
+    km * KM_TO_MILES
+
+fun milesToKm(miles: Double): Double =
+    miles * MILES_TO_KM
+
 
 fun CatalogItem?.validate(): Int? {
     if (this == null) return R.string.requerido

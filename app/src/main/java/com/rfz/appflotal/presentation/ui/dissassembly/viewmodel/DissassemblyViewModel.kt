@@ -27,6 +27,8 @@ import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUi
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.convertPressureValue
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.convertTemperatureValue
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
+import com.rfz.appflotal.presentation.ui.utils.kmToMiles
+import com.rfz.appflotal.presentation.ui.utils.milesToKm
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -39,6 +41,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class DisassemblyViewModel @Inject constructor(
@@ -94,6 +97,9 @@ class DisassemblyViewModel @Inject constructor(
             val pressureUnit = observePressureUnitUseCase().first()
             val odometerUnit = observeOdometerUnitUseCase().first()
 
+            val odometerValue = if (odometerUnit == UnidadOdometro.KILOMETROS) lastOdometer.odometer
+            else kmToMiles(lastOdometer.odometer.toDouble())
+
             responseHelper(tireReportList, onError = {
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
@@ -122,7 +128,7 @@ class DisassemblyViewModel @Inject constructor(
                             tire = tire,
                             disassemblyCauseList = disassemblyList,
                             screenLoadStatus = OperationStatus.Success,
-                            lastOdometer = lastOdometer.odometer,
+                            lastOdometer = odometerValue.toInt(),
                             tireReportList = options?.map { it.toCatalog() } ?: emptyList(),
                             temperatureUnit = temperatureUnit,
                             pressureUnit = pressureUnit,
@@ -158,6 +164,11 @@ class DisassemblyViewModel @Inject constructor(
         // Publicamos camibios
         val inspectionResult = uploadInspection(lastOdometerMeasurement)
 
+        val odometer = uiState.value.inspectionForm.odometer
+        val odometerValue =
+            if (_uiState.value.odometerUnit == UnidadOdometro.KILOMETROS) odometer.toDouble()
+            else milesToKm(odometer.toDouble())
+
         if (inspectionResult) {
             val odometer = getTasksUseCase().first()[0].odometer
             val result = setDisassemblyTireUseCase(
@@ -166,14 +177,14 @@ class DisassemblyViewModel @Inject constructor(
                     destination = destinationId,
                     dateOperation = getCurrentDate(),
                     positionTire = uiState.value.positionTire,
-                    odometer = odometer
+                    odometer = odometerValue.roundToInt()
                 )
             )
 
             // Registrar registro de odometro
             async {
                 hombreCamionRepository.updateOdometer(
-                    _uiState.value.inspectionForm.odometer,
+                    odometerValue.roundToInt(),
                     lastOdometerMeasurement
                 )
             }
@@ -235,6 +246,10 @@ class DisassemblyViewModel @Inject constructor(
             uiState.inspectionForm.pressure
         }
 
+        val odometerValue =
+            if (_uiState.value.odometerUnit == UnidadOdometro.KILOMETROS) uiState.lastOdometer.toDouble()
+            else milesToKm(uiState.inspectionForm.odometer.toDouble())
+
         val result = inspectionTireCrudUseCase(
             requestBody = InspectionTireDto(
                 positionTire = uiState.positionTire,
@@ -245,13 +260,14 @@ class DisassemblyViewModel @Inject constructor(
                 tireInspectionReportId = 3, // 3 = Enviar a "desechar"
                 pressureInspected = pressure.toInt(),
                 dateInspection = lastOdometerMeasurement,
-                odometer = uiState.inspectionForm.odometer,
+                odometer = odometerValue.roundToInt(),
                 temperatureInspected = temperature.toInt(),
                 pressureAdjusted = pressureAdjusted.toInt()
             )
         )
 
         return if (result.isSuccess) {
+            hombreCamionRepository.updateOdometer(odometerValue.toInt(), lastOdometerMeasurement)
             sensorDataTableRepository.updateTireRecord(
                 tire = uiState.positionTire,
                 temperature = temperature.toInt(),
