@@ -4,9 +4,17 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.rfz.appflotal.data.model.database.SensorDataEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SensorDataDao {
+
+    @Query(
+        "SELECT * FROM sensor_data AS st1 WHERE monitor_id = :monitorId " +
+                "AND timestamp = (SELECT MAX(st2.timestamp) FROM sensor_data AS st2 " +
+                "WHERE st1.tire = st2.tire) ORDER BY st1.timestamp DESC"
+    )
+    fun observeLastRecords(monitorId: Int): Flow<List<SensorDataEntity>>
 
     @Insert
     suspend fun insertSensorData(sensorData: SensorDataEntity)

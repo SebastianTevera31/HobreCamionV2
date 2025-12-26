@@ -27,10 +27,11 @@ import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchPressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchTemperatureUnitUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,9 +41,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 enum class SensorAlerts(@param:StringRes val message: Int) {
@@ -101,6 +100,8 @@ class MonitorViewModel @Inject constructor(
 
     private val _tireUiState = MutableStateFlow(TireUiState())
 
+    private var manualSelectionJob: Job? = null
+
     // Estado para la UI con valores convertidos dinámicamente
     val tireUiState = combine(
         _tireUiState,
@@ -128,7 +129,7 @@ class MonitorViewModel @Inject constructor(
 
     val wifiStatus = _wifiStatus.asStateFlow()
 
-    var shouldReadManually = true
+    var shouldReadManually = true // true = Automático, false = Manual (Bloqueado)
 
     init {
         viewModelScope.launch {
@@ -299,7 +300,7 @@ class MonitorViewModel @Inject constructor(
                 }
 
                 val currentlySelectedTire = _tireUiState.value.currentTire
-                if (currentlySelectedTire.isNotBlank()) {
+                if (currentlySelectedTire.isNotBlank() && shouldReadManually) {
                     getSensorDataByWheel(currentlySelectedTire)
                 }
             }
@@ -322,25 +323,19 @@ class MonitorViewModel @Inject constructor(
                         )
                     }
 
-                    if (shouldReadManually) {
-                        Log.d("MonitorViewModel", "$data")
-                        val dataFrame = data.dataFrame
+                    val dataFrame = data.dataFrame
 
-                        if (bluetoothSignalQuality == BluetoothSignalQuality.Desconocida || dataFrame == null) {
-                            Log.d("MonitorViewModel", "Monitor ID $monitorId")
-                            // Se agrega la funcion Let como seguridad, sin embargo el Id debe existir en esta parte
-                            monitorId.let {
-                                dataframeTableUseCase.doGetLastRecord(it).forEach { data ->
-                                    if (data != null) updateSensorData(
-                                        data.dataFrame,
-                                        data.timestamp
-                                    )
-                                }
+                    if (dataFrame != null) {
+                        updateSensorData(dataFrame)
+                    } else if (bluetoothSignalQuality == BluetoothSignalQuality.Desconocida) {
+                        monitorId.let {
+                            dataframeTableUseCase.doGetLastRecord(it).forEach { data ->
+                                if (data != null) updateSensorData(
+                                    data.dataFrame,
+                                    data.timestamp
+                                )
                             }
-                        } else updateSensorData(dataFrame)
-                    } else {
-                        delay(60000)
-                        shouldReadManually = true
+                        }
                     }
                 }
             }
@@ -349,37 +344,21 @@ class MonitorViewModel @Inject constructor(
 
     private fun statusObserver() {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                while (isActive) {
-                    val uiState = _monitorUiState.value
-                    val tireUiState = _tireUiState.value
-                    val monitorId = uiState.monitorId
-                    val tires = updateTiresStatus(
-                        listTires = uiState.listOfTires
-                    ) { sensorDataTableRepository.getLastData(monitorId) }
+            sensorDataTableRepository.observeLastRecords().collect { sensorData ->
+                val activeTireMap = sensorData.associate { it.tire to it.active }
 
-                    updateTireState(
-                        currentTire = tireUiState.currentTire,
-                        tires = tires,
-                    ) {
-                        _tireUiState.update { currentUiState ->
-                            currentUiState.copy(
-                                currentTire = "",
-                                batteryStatus = SensorAlerts.NO_DATA,
-                                pressure = Pair(0f, SensorAlerts.NO_DATA),
-                                rawPressure = 0f,
-                                temperature = Pair(0f, SensorAlerts.NO_DATA),
-                                rawTemperature = 0f,
-                                timestamp = "",
-                            )
-                        }
-
-                        _monitorUiState.update { currentUiState ->
-                            currentUiState.copy(listOfTires = tires)
-                        }
+                _monitorUiState.update { currentState ->
+                    val updatedTires = currentState.listOfTires.map { tire ->
+                        val isActiveInDb = activeTireMap[tire.sensorPosition] ?: false
+                        tire.copy(isActive = isActiveInDb)
                     }
+                    currentState.copy(listOfTires = updatedTires)
+                }
 
-                    delay(5 * 60_000L)
+                val currentSelected = _tireUiState.value.currentTire
+                val isCurrentActive = activeTireMap[currentSelected] ?: true
+                if (!isCurrentActive) {
+                    _tireUiState.update { TireUiState() }
                 }
             }
         }
@@ -395,16 +374,32 @@ class MonitorViewModel @Inject constructor(
         )
 
         _monitorUiState.update { it.copy(listOfTires = result.updatedTireList) }
-        _tireUiState.update {
-            result.newTireUiState.copy(
-                rawPressure = result.newTireUiState.pressure.first,
-                rawTemperature = result.newTireUiState.temperature.first
-            )
+
+        val currentSelected = _tireUiState.value.currentTire
+        if (shouldReadManually || result.newTireUiState.currentTire == currentSelected) {
+            _tireUiState.update { currentState ->
+                result.newTireUiState.copy(
+                    rawPressure = result.newTireUiState.pressure.first,
+                    rawTemperature = result.newTireUiState.temperature.first,
+                    isInspectionAvailable = if (result.newTireUiState.currentTire == currentState.currentTire) {
+                        currentState.isInspectionAvailable
+                    } else result.newTireUiState.isInspectionAvailable,
+                    currentTire = if (result.newTireUiState.currentTire == "") currentState.currentTire else result.newTireUiState.currentTire
+                )
+            }
         }
     }
 
     fun getSensorDataByWheel(tireSelected: String) {
         shouldReadManually = false
+
+        manualSelectionJob?.cancel()
+
+        manualSelectionJob = viewModelScope.launch {
+            delay(60000)
+            shouldReadManually = true
+        }
+
         viewModelScope.launch {
             val monitorUiState = _monitorUiState.value
             val result = getSensorDataByWheelUseCase(

@@ -75,9 +75,12 @@ suspend fun updateTiresStatus(
 ): List<MonitorTire> = withContext(Dispatchers.IO) {
     val sensorData = onGetSensorData()
 
-    val activeTire = sensorData.associate { it.tire to it.active }
+    val activeTiresMap = sensorData.associate { it.tire to it.active }
 
-    listTires.toMutableList().filter { tire -> activeTire[tire.sensorPosition] == true }
+    listTires.map { tire ->
+        val isActive = activeTiresMap[tire.sensorPosition] ?: false
+        tire.copy(isActive = isActive)
+    }
 }
 
 fun updateTireState(

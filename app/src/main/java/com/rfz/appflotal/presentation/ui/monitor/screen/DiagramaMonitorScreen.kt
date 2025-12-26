@@ -201,7 +201,7 @@ fun PanelLlantas(
     ) {
         if (tiresList != null) {
             val filterTireList = tiresList.filter { it.isActive }
-            if (filterTireList.isEmpty()) {
+            if (tiresList.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -232,7 +232,7 @@ fun PanelLlantas(
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-                        items(items = filterTireList, key = { tire -> tire.sensorPosition }) {
+                        items(items = tiresList, key = { tire -> tire.sensorPosition }) {
                             val colorStatus =
                                 if (it.inAlert) Pair(Color.Red, Color.White)
                                 else Pair(Color(0x402E3192), Color.Black)

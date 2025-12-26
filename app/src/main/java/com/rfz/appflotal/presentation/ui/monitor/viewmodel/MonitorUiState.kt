@@ -8,6 +8,7 @@ import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 
 data class MonitorUiState(
     val monitorId: Int = 0,
@@ -15,8 +16,7 @@ data class MonitorUiState(
     val baseConfig: BaseConfig? = null,
     val signalIntensity: Pair<BluetoothSignalQuality, String> = Pair(
         BluetoothSignalQuality.Desconocida,
-        ""
-    ),
+        ""),
     val imageDimen: Pair<Int, Int> = Pair(0, 0),
     val imageBitmap: Bitmap? = null,
     val chassisImageUrl: String = "",

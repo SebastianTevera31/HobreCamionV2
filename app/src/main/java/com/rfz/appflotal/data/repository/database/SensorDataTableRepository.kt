@@ -6,12 +6,25 @@ import com.rfz.appflotal.data.model.database.SensorDataUpdate
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.mapNotNull
 
 class SensorDataTableRepository @Inject constructor(
     private val sensorData: SensorDataDao,
     private val getTasksUseCase: GetTasksUseCase
 ) {
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun observeLastRecords(): Flow<List<SensorDataEntity>> =
+        getTasksUseCase()
+            .mapNotNull { tasks -> tasks.firstOrNull()?.id_monitor }
+            .flatMapLatest { idMonitor ->
+                sensorData.observeLastRecords(idMonitor)
+            }
+
     suspend fun insertSensorData(
         idMonitor: Int,
         tire: String,

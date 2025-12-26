@@ -48,7 +48,7 @@ fun DiagramImage(
     tireSelected: String,
     modifier: Modifier = Modifier,
 ) {
-    val tireMapped = tires.map { it ->
+    val tireMapped = tires.map {
         Hotspot.fromPixelCenter(
             id = it.sensorPosition,
             px = it.xPosition.toFloat(),
@@ -127,14 +127,10 @@ fun ImageWithHotspotsProportional(
             Canvas(modifier = Modifier.fillMaxSize()) {
                 bubbleBounds.clear()
                 hotspots.forEach { h ->
-                    val colorStatus = if (h.inAlert)
-                        Pair(Color.Red, Color.White)
-                    else if (h.isActive) {
-                        Pair(h.bubbleBg, Color.Black)
-                    } else Pair(
-                        Color.Gray,
-                        Color.Gray
-                    )
+                    val colorStatus = if (h.isActive) {
+                        if (h.inAlert) Pair(Color.Red, Color.White)
+                        else Pair(h.bubbleBg, Color.Black)
+                    } else Pair(Color.Gray, Color.Gray)
 
                     // Posición del centro en pixeles del canvas
                     val cx = h.center01.x * size.width
