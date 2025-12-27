@@ -81,6 +81,9 @@ android {
 
 
 dependencies {
+    // UMP para permisos de AdMob
+    implementation("com.google.android.ump:user-messaging-platform:2.2.0")
+
     // Anuncios - Requiere ID.
     implementation("com.google.android.gms:play-services-ads:24.8.0")
 

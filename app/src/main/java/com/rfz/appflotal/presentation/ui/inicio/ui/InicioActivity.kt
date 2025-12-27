@@ -40,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,10 +61,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.android.gms.ads.MobileAds
+import com.google.android.ump.UserMessagingPlatform
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.HombreCamionScreens
 import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.data.ConsentManager
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.data.repository.fcmessaging.AppNotificationState
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
@@ -152,7 +155,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class InicioActivity : ComponentActivity() {
-
+    private lateinit var consentManager: ConsentManager
     private val loginViewModel: LoginViewModel by viewModels()
     private val inicioScreenViewModel: InicioScreenViewModel by viewModels()
     private val homeViewModel: HomeViewModel by viewModels()
@@ -273,8 +276,6 @@ class InicioActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        MobileAds.initialize(this) {}
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
             val channelId = getString(R.string.app_fcm_channel)
@@ -288,10 +289,9 @@ class InicioActivity : ComponentActivity() {
                 ),
             )
         }
+        consentManager = ConsentManager(this)
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-
-        enableEdgeToEdge()
 
         setContent {
             val prefs by lazy {
@@ -301,7 +301,7 @@ class InicioActivity : ComponentActivity() {
             val navController = rememberNavController()
             val backStackEntry by navController.currentBackStackEntryAsState()
             val showBanner = when (backStackEntry?.destination?.route) {
-                NavScreens.LOGIN, NavScreens.TERMINOS, NavScreens.INFORMACION_USUARIO, NavScreens.PERMISOS -> false
+                NavScreens.LOGIN, NavScreens.TERMINOS, NavScreens.INFORMACION_USUARIO, NavScreens.PERMISOS, NavScreens.REGISTRAR_USUARIO -> false
                 else -> true
             }
 
@@ -341,11 +341,18 @@ class InicioActivity : ComponentActivity() {
                     allGranted = false
 
                     if (permanentlyDenied) {
-                        Log.d("Permiso", "🚫 Denegado permanentemente")
+                        Log.d("Permiso", "Denegado permanentemente")
                         inicioScreenViewModel.openAppSettings(context)
                     } else {
-                        Log.d("Permiso", "❌ Denegado temporalmente")
+                        Log.d("Permiso", "Denegado temporalmente")
                     }
+                }
+            }
+
+            // INICIALIZAR ANUNCIO
+            if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
+                consentManager.requestConsent {
+                    MobileAds.initialize(this) {}
                 }
             }
 
@@ -383,7 +390,8 @@ class InicioActivity : ComponentActivity() {
                         Manifest.permission.POST_NOTIFICATIONS
                     ) == PackageManager.PERMISSION_GRANTED
 
-                    if (granted) { inicioScreenViewModel.updatePermissionState(
+                    if (granted) {
+                        inicioScreenViewModel.updatePermissionState(
                             NotificationPermissionState.Granted
                         )
                     }
@@ -457,7 +465,7 @@ class InicioActivity : ComponentActivity() {
                                     .safeDrawingPadding()
                             ) {
                                 //ca-app-pub-3415237437138959/2146418588
-                                if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.None) {
+                                if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
                                     GlobalAdMobBanner(
                                         adUnitId = "ca-app-pub-3415237437138959/2146418588",
                                         modifier = Modifier.fillMaxWidth()

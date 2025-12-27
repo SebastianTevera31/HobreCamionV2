@@ -152,7 +152,7 @@
     <string name="permiso_bluetooth_notificaciones">Bluetooth and notifications permission</string>
     <string name="conceder_permisos_btn">Grant permissions</string>
     <string name="texto_permisos_app">Bluetooth and notification access is required to connect to your HawksHead TPMS monitor.</string>
-    <string name="no_se_ha_asignado_ningun_monitor">No monitor has been assigned</string>
+    <string name="no_se_ha_asignado_ningun_monitor">Monitor could not be assigned</string>
     <string name="hombrecamion_conexion_tpms">Flotal - TPMS connection</string>
     <string name="recibiendo_datos_monitor">Receiving TPMS data...</string>
     <string name="excelente">Excellent</string>

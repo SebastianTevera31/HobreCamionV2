@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -69,6 +70,8 @@ fun SignUpScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var enableRegisterButton by remember { mutableStateOf(true) }
     var authFlow by remember { mutableStateOf<AuthFlow>(AuthFlow.None) }
+
+    val connectionError = stringResource(R.string.error_conexion_internet)
 
     LaunchedEffect(Unit) {
         signUpViewModel.populateListMenus(languageSelected)
@@ -148,7 +151,7 @@ fun SignUpScreen(
                                 signUpViewModel.changeScreen(SignUpViews.VEHICLE_DATA_VIEW)
                             } else Toast.makeText(
                                 ctx,
-                                ctx.getString(message.message),
+                                message.message,
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -179,7 +182,7 @@ fun SignUpScreen(
                             } else {
                                 Toast.makeText(
                                     ctx,
-                                    ctx.getString(message.message),
+                                    message.message,
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -196,7 +199,7 @@ fun SignUpScreen(
                             authFlow = AuthFlow.SignUp
                             signUpViewModel.signUpUser(ctx) {
                                 snackbarHostState.showSnackbar(
-                                    message = ctx.getString(R.string.error_conexion_internet),
+                                    message = connectionError,
                                     actionLabel = "OK"
                                 )
                             }
@@ -257,15 +260,14 @@ fun SignUpStatus(
     when (signUpRequestStatus) {
         is ApiResult.Success -> {
             onEnableButton()
-            val result = signUpRequestStatus
-            if (result.data != null) {
-                if (result.data[0].id != 200) {
-                    Toast.makeText(ctx, result.data[0].message, Toast.LENGTH_SHORT).show()
+            if (signUpRequestStatus.data != null) {
+                if (signUpRequestStatus.data[0].id != 200) {
+                    Toast.makeText(ctx, signUpRequestStatus.data[0].message, Toast.LENGTH_SHORT).show()
                     onFailure()
                 } else onLogin()
             } else Toast.makeText(
                 ctx,
-                ctx.getString(SignUpAlerts.UNKNOWN.message),
+                SignUpAlerts.UNKNOWN.message,
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -274,7 +276,7 @@ fun SignUpStatus(
             onEnableButton()
             Toast.makeText(
                 ctx,
-                ctx.getString(R.string.signup_network_alert),
+                R.string.signup_network_alert,
                 Toast.LENGTH_SHORT
             ).show()
             onFailure()
@@ -300,7 +302,7 @@ fun LoginStatus(
         is Result.Failure -> {
             Toast.makeText(
                 ctx,
-                ctx.getString(R.string.signup_network_alert),
+                R.string.signup_network_alert,
                 Toast.LENGTH_SHORT
             ).show()
             onFailure()

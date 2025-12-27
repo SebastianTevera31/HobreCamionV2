@@ -27,6 +27,7 @@ fun RegisterMonitorDialog(
         macValue = monitorConfigurationUiState.mac,
         onScan = { onScan() },
         onCloseButton = { onCloseButton() },
+        onError = {  },
         onContinueButton = { mac, configuration -> onContinueButton(mac, configuration) },
         registerMonitorStatus = registerMonitorStatus,
         onSuccessRegister = { onSuccess() },

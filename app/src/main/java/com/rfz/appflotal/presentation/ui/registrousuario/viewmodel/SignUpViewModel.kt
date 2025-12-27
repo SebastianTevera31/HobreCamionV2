@@ -194,10 +194,6 @@ class SignUpViewModel @Inject constructor(
     fun onLogin(ctx: Context) {
         loginRequestStatus = Result.Loading
         try {
-
-            // Vaciar estado
-            cleanSignUpData()
-
             Firebase.messaging.token
                 .addOnCompleteListener { task ->
                     if (!task.isSuccessful) {
@@ -207,6 +203,7 @@ class SignUpViewModel @Inject constructor(
 
                     val token = task.result
                     loginRequest(token)
+                    cleanSignUpData()
                 }
         } catch (e: Exception) {
             Log.e("SignUpViewModel", "${e.message}")

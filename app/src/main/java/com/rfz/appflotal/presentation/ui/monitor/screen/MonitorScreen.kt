@@ -230,6 +230,7 @@ private fun ShowMonitorRegisterDialog(
             monitorViewModel.initMonitorData()
             registerMonitorViewModel.clearMonitorRegistrationData()
         },
+        onError = { registerMonitorViewModel.clearMonitorRegistrationData() },
         closeText = cancelButtonText,
         onMonitorConfiguration = { config ->
             registerMonitorViewModel.updateMonitorConfiguration(config)

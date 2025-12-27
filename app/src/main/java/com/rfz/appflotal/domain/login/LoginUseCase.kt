@@ -30,7 +30,7 @@ class LoginUseCase @Inject constructor(
                 val errorMessage = response.message()
                 val parsedError = try {
                     if (errorMessage == "Unauthorized") ctx.getString(R.string.credenciales_incorrectas) else errorMessage
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     ctx.getString(R.string.error_desconocido_del_servidor)
                 }
                 Result.Failure(Exception(parsedError))

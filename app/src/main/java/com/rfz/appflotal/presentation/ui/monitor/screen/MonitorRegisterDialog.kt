@@ -67,6 +67,7 @@ fun MonitorRegisterDialog(
     closeText: String,
     onMonitorConfiguration: (Pair<Int, String>?) -> Unit,
     onScan: () -> Unit,
+    onError: () -> Unit,
     onCloseButton: () -> Unit = {},
     onContinueButton: (String, Pair<Int, String>?) -> Unit
 ) {
@@ -91,6 +92,7 @@ fun MonitorRegisterDialog(
         is ApiResult.Error -> {
             val errorMessage = registerMonitorStatus.message
             Toast.makeText(ctx, errorMessage, Toast.LENGTH_SHORT).show()
+            onError()
         }
 
         ApiResult.Loading -> {}

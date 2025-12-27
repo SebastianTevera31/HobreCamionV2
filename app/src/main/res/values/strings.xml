@@ -151,7 +151,7 @@
     <string name="permiso_bluetooth_notificaciones">Permisos de Bluetooth y notificaciones</string>
     <string name="conceder_permisos_btn">Conceder permisos</string>
     <string name="texto_permisos_app">Se requiere acceso a Bluetooth y notificaciones para conectarse con tu monitor HawksHead TPMS.</string>
-    <string name="no_se_ha_asignado_ningun_monitor">No se ha asignado ningún monitor</string>
+    <string name="no_se_ha_asignado_ningun_monitor">No se pudo asignar un monitor</string>
     <string name="hombrecamion_conexion_tpms">Flotal - Conexión TPMS</string>
     <string name="recibiendo_datos_monitor">Recibiendo datos del monitor...</string>
     <string name="excelente">Excelente</string>
