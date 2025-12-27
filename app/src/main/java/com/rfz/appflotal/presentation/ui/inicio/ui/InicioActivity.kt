@@ -290,6 +290,10 @@ class InicioActivity : ComponentActivity() {
             )
         }
         consentManager = ConsentManager(this)
+        // INICIALIZAR ANUNCIO
+        consentManager.requestConsent {
+            MobileAds.initialize(this) {}
+        }
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
@@ -346,13 +350,6 @@ class InicioActivity : ComponentActivity() {
                     } else {
                         Log.d("Permiso", "Denegado temporalmente")
                     }
-                }
-            }
-
-            // INICIALIZAR ANUNCIO
-            if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
-                consentManager.requestConsent {
-                    MobileAds.initialize(this) {}
                 }
             }
 
