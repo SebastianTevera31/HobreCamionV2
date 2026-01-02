@@ -93,7 +93,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             rawTemperature = rawTemp,
             timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             batteryStatus = batteryStatus,
-            tireRemovingStatus = if (rawPressure == 0f) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
+            tireRemovingStatus = if (rawPressure == 0f && rawTemp != 0f) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
             flatTireStatus = flatTireStatus,
             isInspectionAvailable = isInspectionAvailable
         )

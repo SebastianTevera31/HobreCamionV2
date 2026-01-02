@@ -101,7 +101,7 @@ class UpdateSensorDataUseCase @Inject constructor(private val sensorDataTableRep
             timestamp = time,
             batteryStatus = batteryStatus,
             flatTireStatus = flatTireStatus,
-            tireRemovingStatus = if (rawPressure.toInt() == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
+            tireRemovingStatus = if (rawPressure.toInt() == 0 && rawTemp.toInt() != 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
             isInspectionAvailable = isInspectionAvailable
         )
 
