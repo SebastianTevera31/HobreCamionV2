@@ -163,7 +163,7 @@ fun HomeScreen(
                             title = {
                                 Box(
                                     modifier = Modifier
-                                        .height(120.dp)
+                                        .height(80.dp)
                                         .clip(CircleShape)
                                         .background(Color.White)
                                 ) {
@@ -458,18 +458,19 @@ fun HomeScreen(
 }
 
 @Composable
-private fun ElegantMenuCard(
+fun ElegantMenuCard(
     title: String,
     iconRes: Int,
     onClick: () -> Unit,
     primaryColor: Color = primaryLight,
     secondaryColor: Color = secondaryLight,
-    cardBackground: Color = Color.White
+    cardBackground: Color = Color.White,
+    modifier: Modifier = Modifier
 ) {
     val highlightColor = onPrimaryLight
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .height(180.dp)
             .fillMaxWidth()
             .clickable(onClick = onClick)
