@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.rfz.appflotal"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.rfz.appflotal"
@@ -28,11 +28,7 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
-            buildConfigField(
-                "String",
-                "URL_API",
-                "\"https://owneroperatorapi.azurewebsites.net/\""
-            )
+            buildConfigField("String", "URL_API", "\"https://owneroperatorapi.azurewebsites.net/\"")
             buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
         }
 
@@ -43,11 +39,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField(
-                "String",
-                "URL_API",
-                "\"https://owneroperatorapi.azurewebsites.net/\""
-            )
+            buildConfigField("String", "URL_API", "\"https://owneroperatorapi.azurewebsites.net/\"")
             buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -67,10 +59,6 @@ android {
         buildConfig = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "2.1.0"
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -78,127 +66,91 @@ android {
     }
 }
 
-
-
 dependencies {
-    // UMP para permisos de AdMob
-    implementation("com.google.android.ump:user-messaging-platform:2.2.0")
+    // Jetpack Compose BOM - Gestiona versiones automáticamente
+    val composeBom = platform("androidx.compose:compose-bom:2025.12.01")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
 
-    // Anuncios - Requiere ID.
-    implementation("com.google.android.gms:play-services-ads:24.8.0")
-
-    // Preferencias
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
-
-    // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
-
-    // Import the Firebase Messaging
-    implementation("com.google.firebase:firebase-messaging")
-
-    implementation("androidx.hilt:hilt-work:1.3.0")
-    implementation("androidx.hilt:hilt-compiler:1.3.0")
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
-
-    implementation(platform("androidx.compose:compose-bom:2024.02.02"))
-
+    // Core & Lifecycle
     implementation("androidx.core:core-ktx:1.16.0")
-
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
-
-    implementation("androidx.activity:activity-compose:1.10.1")
-
-    implementation("androidx.compose.ui:ui")
-
-    implementation("androidx.compose.ui:ui-graphics")
-
-    implementation("androidx.compose.ui:ui-tooling-preview")
-
-    implementation("androidx.compose.material3:material3")
-
-    implementation("androidx.work:work-runtime:2.10.2")
-
-    implementation("androidx.compose.material:material-icons-extended:<version>")
-
-    implementation("com.google.android.engage:engage-core:1.5.8")
-
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-    implementation("androidx.room:room-runtime:2.7.2")
-
     implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
+    implementation("androidx.activity:activity-compose:1.12.2")
 
-    implementation("androidx.compose.animation:animation:1.9.1")
-    implementation("androidx.compose.runtime:runtime-saveable:1.9.4")
-    implementation("androidx.compose.foundation:foundation:1.9.4")
-    implementation("androidx.compose.foundation:foundation:1.9.5")
-    implementation("androidx.compose.animation:animation:1.10.0")
-    implementation("androidx.compose.ui:ui:1.10.0")
-    implementation("androidx.compose.foundation:foundation:1.10.0")
+    // Compose Libraries (Sin versión manual, controladas por BOM)
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.runtime:runtime-livedata")
+    implementation("androidx.compose.runtime:runtime-saveable")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.animation:animation")
 
-    kapt("androidx.room:room-compiler:2.7.2")
-
-    implementation("androidx.room:room-ktx:2.7.2")
+    // Navigation
     implementation("androidx.navigation:navigation-compose:2.9.0")
-    implementation("androidx.compose.runtime:runtime-livedata:1.8.3")
-    implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation("com.github.f0ris.sweetalert:library:1.5.6")
 
+    // Hilt - Inyección de dependencias
+    implementation("com.google.dagger:hilt-android:2.57.2")
+    kapt("com.google.dagger:hilt-compiler:2.57.2")
+    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
+    implementation("androidx.hilt:hilt-work:1.3.0")
+    kapt("androidx.hilt:hilt-compiler:1.3.0")
 
+    // Room - Base de Datos
+    val roomVersion = "2.7.2"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+
+    // Network - Retrofit & OkHttp
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
 
-    implementation("com.google.dagger:hilt-android:2.57.2")
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+    implementation("com.google.firebase:firebase-messaging")
 
-    kapt("com.google.dagger:hilt-compiler:2.57.2")
-    // Hilt ViewModels
-    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
+    // Ads & UMP
+    implementation("com.google.android.gms:play-services-ads:24.8.0")
+    implementation("com.google.android.ump:user-messaging-platform:2.2.0")
 
-    implementation("androidx.compose.material3:material3:1.3.2")
-
-    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
-
-    implementation("com.github.composeuisuite:ohteepee:1.0.6")
-
-    implementation("androidx.camera:camera-core:1.4.2")
-
-    implementation("androidx.camera:camera-lifecycle:1.4.2")
-
-    implementation("androidx.camera:camera-view:1.4.2")
-
-    implementation("androidx.camera:camera-extensions:1.4.2")
-
-    implementation("io.coil-kt:coil-compose:2.6.0")
-
-    implementation("io.coil-kt:coil-gif:2.6.0")
-
-    implementation("com.vanniktech:android-image-cropper:4.5.0")
+    // DataStore & Serialization
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
     // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.10.2")
 
-    implementation("androidx.work:work-runtime-ktx:2.7.1")
+    // CameraX
+    val cameraVersion = "1.4.2"
+    implementation("androidx.camera:camera-core:$cameraVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraVersion")
+    implementation("androidx.camera:camera-view:$cameraVersion")
+    implementation("androidx.camera:camera-extensions:$cameraVersion")
 
+    // Utilities
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("io.coil-kt:coil-gif:2.6.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.github.f0ris.sweetalert:library:1.5.6")
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+    implementation("com.github.composeuisuite:ohteepee:1.0.6")
+    implementation("com.vanniktech:android-image-cropper:4.5.0")
+    implementation("com.google.android.engage:engage-core:1.5.8")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Testing
     testImplementation("junit:junit:4.13.2")
-
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
-
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-
     debugImplementation("androidx.compose.ui:ui-tooling")
-
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
