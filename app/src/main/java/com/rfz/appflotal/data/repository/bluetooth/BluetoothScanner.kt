@@ -6,13 +6,10 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import androidx.core.app.ActivityCompat
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothScannerImp.Companion.SERVICE
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -70,7 +67,7 @@ class BluetoothScannerImp(
 
             }
 
-            if (_resultScanDevices.value != null){
+            if (_resultScanDevices.value != null) {
                 bluetoothScanner?.stopScan(this)
             }
         }
@@ -83,13 +80,17 @@ class BluetoothScannerImp(
 
     private fun matchesTarget(result: ScanResult): Boolean {
         val sr = result.scanRecord ?: return false
-        val target = ParcelUuid.fromString("00001000-0000-1000-8000-00805f9b34fb")
 
-        val hasService = sr.serviceUuids?.any { it == target } == true
-        val hasServiceData = sr.getServiceData(target) != null
+        val targetUuids = listOf(
+            ParcelUuid.fromString("00001000-0000-1000-8000-00805f9b34fb"), // V4
+            ParcelUuid.fromString("0000A002-0000-1000-8000-00805f9b34fb")  // V5
+        )
 
-        // Ejemplo opcional con manufacturer data:
-        val mfgId = 0xFFFF // cambia por el tuyo
+        val hasService = sr.serviceUuids?.any { it in targetUuids } == true
+
+        val hasServiceData = targetUuids.any { sr.getServiceData(it) != null }
+
+        val mfgId = 0xFFFF // cambia por tu propio ID
         val hasMfg = sr.manufacturerSpecificData.get(mfgId) != null
 
         return hasService || hasServiceData || hasMfg
@@ -104,7 +105,10 @@ class BluetoothScannerImp(
         val settings = ScanSettings.Builder().setScanMode(
             if (lowLatency) ScanSettings.SCAN_MODE_LOW_LATENCY
             else ScanSettings.SCAN_MODE_BALANCED
-        ).build()
+        )
+            .setLegacy(false)
+            .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
+            .build()
 
         _resultScanDevices.value = null
         seen.clear()

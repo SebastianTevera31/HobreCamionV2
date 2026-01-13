@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -60,18 +61,18 @@ fun RendimientoRuedaView(modifier: Modifier = Modifier) {
             )
             TireInfoCard(
                 tire = Tire(
-                    id = 101,
-                    description = "Michelin - size: 205/55R16",
-                    size = "205/55R16",
-                    brand = "Michelin",
-                    model = "Primacy 4",
-                    thread = 7.5,
-                    loadingCapacity = "615",
-                    destination = "Oficina"
+                    id = 202,
+                    description = "Double Coin Rt500 215/75R17.5",
+                    size = "215/75R17.5",
+                    brand = "Double Coin",
+                    model = "Rt500",
+                    thread = 16.00,
+                    loadingCapacity = "135/133J", // índice de carga / velocidad
+                    destination = "Camión ligero",
                 ),
                 modifier = Modifier
                     .width(240.dp)
-                    .height(180.dp)
+                    .height(200.dp)
                     .align(Alignment.CenterHorizontally)
             )
 
@@ -96,14 +97,14 @@ fun RendimientoRuedaView(modifier: Modifier = Modifier) {
                     Row {
                         DataComponent(
                             title = "Odometro",
-                            value = "$24.00",
+                            value = "2900 km",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
                         )
                         DataComponent(
                             title = "Profunidad final",
-                            value = "13 mm",
+                            value = "9 mm",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -111,7 +112,7 @@ fun RendimientoRuedaView(modifier: Modifier = Modifier) {
                     }
                     Row {
                         DataComponent(
-                            title = "Distancia recorrida",
+                            title = "Distancia recorrida actual",
                             value = "2900 km",
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -128,7 +129,7 @@ fun RendimientoRuedaView(modifier: Modifier = Modifier) {
                     Row {
                         DataComponent(
                             title = "Ciclo actual",
-                            value = "3",
+                            value = "0",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -180,14 +181,14 @@ fun RendimientoRuedaView(modifier: Modifier = Modifier) {
                     Row {
                         DataComponent(
                             title = "Costo Unitario",
-                            value = "$24.00",
+                            value = "$2,000.00",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
                         )
                         DataComponent(
-                            title = "Por distancia",
-                            value = "$0.00793",
+                            title = "Por Distancia",
+                            value = "$0.68",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -196,7 +197,7 @@ fun RendimientoRuedaView(modifier: Modifier = Modifier) {
                     Row {
                         DataComponent(
                             title = "Por Profundidad",
-                            value = "$3.28571",
+                            value = "$285.71",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
