@@ -16,8 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.UUID
 
-private var scanning = false
-
 interface BluetoothScanner {
     fun scanDevices(serviceUUID: UUID? = SERVICE, lowLatency: Boolean = true)
     fun stopScan()
@@ -37,6 +35,8 @@ class BluetoothScannerImp(
 
     private var _resultScanDevices = MutableStateFlow<ScanItem?>(null)
     private val seen = mutableSetOf<String>()
+
+    private var scanning = false
 
     val resultScanDevices = _resultScanDevices.asStateFlow()
 
@@ -67,7 +67,7 @@ class BluetoothScannerImp(
 
             }
 
-            if (_resultScanDevices.value != null) {
+            if (_resultScanDevices.value != null){
                 bluetoothScanner?.stopScan(this)
             }
         }
@@ -79,18 +79,23 @@ class BluetoothScannerImp(
     }
 
     private fun matchesTarget(result: ScanResult): Boolean {
+        if (result.device.name == "TM508") {
+            Log.e("Monitor", result.device.name)
+        }
+
         val sr = result.scanRecord ?: return false
 
-        val targetUuids = listOf(
-            ParcelUuid.fromString("00001000-0000-1000-8000-00805f9b34fb"), // V4
-            ParcelUuid.fromString("0000A002-0000-1000-8000-00805f9b34fb")  // V5
-        )
+        val hasNameBle5 = result.device.name == "TM508"
 
-        val hasService = sr.serviceUuids?.any { it in targetUuids } == true
+        if (hasNameBle5) return true
 
-        val hasServiceData = targetUuids.any { sr.getServiceData(it) != null }
+        val target = ParcelUuid.fromString("00001000-0000-1000-8000-00805f9b34fb")
 
-        val mfgId = 0xFFFF // cambia por tu propio ID
+        val hasService = sr.serviceUuids?.any { it == target } == true
+        val hasServiceData = sr.getServiceData(target) != null
+
+        // Ejemplo opcional con manufacturer data:
+        val mfgId = 0xFFFF // cambia por el tuyo
         val hasMfg = sr.manufacturerSpecificData.get(mfgId) != null
 
         return hasService || hasServiceData || hasMfg
@@ -105,10 +110,7 @@ class BluetoothScannerImp(
         val settings = ScanSettings.Builder().setScanMode(
             if (lowLatency) ScanSettings.SCAN_MODE_LOW_LATENCY
             else ScanSettings.SCAN_MODE_BALANCED
-        )
-            .setLegacy(false)
-            .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
-            .build()
+        ).build()
 
         _resultScanDevices.value = null
         seen.clear()

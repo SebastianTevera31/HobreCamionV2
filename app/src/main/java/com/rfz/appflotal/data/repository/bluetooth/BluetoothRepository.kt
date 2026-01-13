@@ -152,26 +152,32 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-            if (status != BluetoothGatt.GATT_SUCCESS) return
+            val service = gatt.getService(UUID.fromString("00001000-0000-1000-8000-00805f9b34fb"))
+            val serviceBle5 = gatt.getService(UUID.fromString("0000A002-0000-1000-8000-00805F9B34FB"))
 
-            val serviceMap = mapOf(
-                "00001000-0000-1000-8000-00805f9b34fb" to "00001002-0000-1000-8000-00805f9b34fb",
-                "0000A002-0000-1000-8000-00805f9b34fb" to "0000C305-0000-1000-8000-00805f9b34fb"
-            )
+            if (service != null) {
+                val characteristic =
+                    service.getCharacteristic(UUID.fromString("00001002-0000-1000-8000-00805f9b34fb")) // UUID característico
+                if (characteristic != null) {
+                    gatt.setCharacteristicNotification(characteristic, true)
 
-            for ((serviceUUID, charUUID) in serviceMap) {
-                val service = gatt.getService(UUID.fromString(serviceUUID)) ?: continue
-                val characteristic = service.getCharacteristic(UUID.fromString(charUUID)) ?: continue
-
-                gatt.setCharacteristicNotification(characteristic, true)
-
-                val descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
-                descriptor?.let {
-                    it.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                    gatt.writeDescriptor(it)
+                    val descriptor = characteristic
+                        .getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
+                    descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                    gatt.writeDescriptor(descriptor)
+                    ready = (status == BluetoothGatt.GATT_SUCCESS)
                 }
+            } else if (serviceBle5 != null) {
+                val notifyChar = serviceBle5.getCharacteristic(UUID.fromString("0000C305-0000-1000-8000-00805F9B34FB"))
 
-                ready = true
+                if (notifyChar != null) {
+                    gatt.device.name
+                    val descriptor = notifyChar
+                        .getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
+                    descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                    gatt.writeDescriptor(descriptor)
+                    ready = (status == BluetoothGatt.GATT_SUCCESS)
+                }
             }
         }
 
