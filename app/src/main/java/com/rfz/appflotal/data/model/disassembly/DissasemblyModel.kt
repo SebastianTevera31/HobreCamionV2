@@ -1,6 +1,5 @@
 package com.rfz.appflotal.data.model.disassembly
 
-import com.google.gson.annotations.SerializedName
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.disassembly.response.DisassemblyCauseResponse
 

@@ -204,7 +204,7 @@
     <string name="profundidad_de_piso">Tread depth</string>
     <string name="fecha_de_adquisicion">Acquisition date</string>
     <string name="agregar_llanta">Add tire</string>
-    <string name="no_se_encontraron_llantas">No tires found.</string>
+    <string name="no_se_encontraron_llantas">No tires were found.</string>
     <string name="modelo">Model: %1$s</string>
     <string name="tama_o">Size: %1$s</string>
     <string name="adquisici_n">Acquisition: %1$s</string>
@@ -220,7 +220,7 @@
     <string name="dot">DOT</string>
     <string name="sin_llantas">No active tires</string>
     <string name="inspeccionar">Inspect</string>
-    <string name="inspeccion_exitosa_mensaje">Inspection saved successfully</string>
+    <string name="inspeccion_exitosa_mensaje">Inspección registrada exitosamente</string>
     <string name="error_registrar_inspeccion">An error occurred while registering the inspection</string>
     <string name="inspeccion">Inspection</string>
     <string name="corregir_campos_marcados">Correct the highlighted fields.</string>
@@ -238,7 +238,6 @@
 
     <string name="montaje">Mounting</string>
     <string name="error_odometro_inferior">The odometer reading cannot be lower than the current one.</string>
-    <string name="error_carga_datos">An error occurred while loading the data.</string>
     <string name="montar">Mount</string>
     <string name="eje">Axle</string>
     <string name="detalles_de_llanta">Tire details</string>
@@ -380,6 +379,7 @@
     <string name="permiso_de_notificacion">Notification permission</string>
     <string name="texto_permiso_de_notification">Permission required to keep you informed about updates and possible maintenance.</string>
     <string name="unidades_de_medida">Measurement units</string>
+    <string name="error_carga_datos">There was an error loading the data</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
