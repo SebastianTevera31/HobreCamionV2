@@ -15,6 +15,7 @@ import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import java.time.Instant
 import java.time.LocalDateTime
@@ -101,7 +102,8 @@ class UpdateSensorDataUseCase @Inject constructor(private val sensorDataTableRep
             timestamp = time,
             batteryStatus = batteryStatus,
             flatTireStatus = flatTireStatus,
-            tireRemovingStatus = if (rawPressure.toInt() == 0) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
+            tireRemovingStatus = if (rawPressure.toInt() == 0 && time != VOID_DATE) SensorAlerts.REMOVAL
+            else SensorAlerts.NO_DATA,
             isInspectionAvailable = isInspectionAvailable
         )
 

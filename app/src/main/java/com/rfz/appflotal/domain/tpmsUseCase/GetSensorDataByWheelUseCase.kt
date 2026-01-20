@@ -8,6 +8,7 @@ import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import java.time.Instant
 import java.time.LocalDateTime
@@ -83,6 +84,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         }
 
         val isAssembled = assemblyTireRepository.confirmTireMounted(tireSelected)
+        val date = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
         val newTireUiState = TireUiState(
             currentTire = data.tire,
@@ -91,9 +93,9 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             rawPressure = rawPressure,
             temperature = Pair(rawTemp, temperatureStatus),
             rawTemperature = rawTemp,
-            timestamp = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            timestamp = date,
             batteryStatus = batteryStatus,
-            tireRemovingStatus = if (rawPressure == 0f) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
+            tireRemovingStatus = if (rawPressure == 0f && date != VOID_DATE) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
             flatTireStatus = flatTireStatus,
             isInspectionAvailable = isInspectionAvailable
         )

@@ -10,6 +10,8 @@ import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 
+const val VOID_DATE = "01/01/1900 00:00:00"
+
 data class MonitorUiState(
     val monitorId: Int = 0,
     val currentData: String = "",

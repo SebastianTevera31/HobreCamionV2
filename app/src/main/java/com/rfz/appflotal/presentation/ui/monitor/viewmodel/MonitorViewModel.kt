@@ -298,8 +298,6 @@ class MonitorViewModel @Inject constructor(
                     currentUiState.copy(listOfTires = updatedTireList)
                 }
 
-//                _tireUiState.value =TireUiState()
-
                 val currentlySelectedTire = _tireUiState.value.currentTire
                 if (currentlySelectedTire.isNotBlank() && shouldReadAuto) {
                     getSensorDataByWheel(currentlySelectedTire)
