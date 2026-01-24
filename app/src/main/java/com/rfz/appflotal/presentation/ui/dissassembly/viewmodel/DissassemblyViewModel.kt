@@ -170,7 +170,7 @@ class DisassemblyViewModel @Inject constructor(
             else milesToKm(odometer.toDouble())
 
         if (inspectionResult) {
-            val odometer = getTasksUseCase().first()[0].odometer
+//            val odometer = getTasksUseCase().first()[0].odometer
             val result = setDisassemblyTireUseCase(
                 DisassemblyTire(
                     disassemblyCause = causeId,
