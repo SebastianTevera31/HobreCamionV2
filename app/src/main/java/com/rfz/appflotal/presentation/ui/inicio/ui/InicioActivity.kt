@@ -318,7 +318,7 @@ class InicioActivity : ComponentActivity() {
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
             ) { result ->
-                val wasRequestedBefore = inicioScreenViewModel.werePermissionsRequested(prefs)
+                val wasRequestedBefore = inicioScreenViewModel.permissionsRequested(prefs)
 
                 val deniedPermissions = result
                     .filterValues { granted -> !granted }
@@ -332,7 +332,6 @@ class InicioActivity : ComponentActivity() {
                 } && wasRequestedBefore
 
                 inicioScreenViewModel.markPermissionsRequested(prefs)
-
 
                 if (deniedPermissions.isEmpty()) {
                     allGranted = true
@@ -372,7 +371,6 @@ class InicioActivity : ComponentActivity() {
 
                     inicioScreenViewModel.updatePermissionState(state)
                 }
-
 
             ObserveOnResume {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
@@ -1106,7 +1104,8 @@ fun NotificationComponent(
             UpdateAppScreen(
                 modifier = modifier
                     .fillMaxSize()
-                    .clickable {})
+                    .clickable {}
+            )
         }
 
         FireCloudMessagingType.ARREGLO_URGENTE, FireCloudMessagingType.MANTENIMIENTO -> {

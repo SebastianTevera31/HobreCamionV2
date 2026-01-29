@@ -11,8 +11,7 @@ class ConsentManager(
 ) {
 
     fun requestConsent(onFinished: () -> Unit) {
-        val consentInformation =
-            UserMessagingPlatform.getConsentInformation(activity)
+        val consentInformation = UserMessagingPlatform.getConsentInformation(activity)
 
         val params = ConsentRequestParameters.Builder()
             .setTagForUnderAgeOfConsent(false)

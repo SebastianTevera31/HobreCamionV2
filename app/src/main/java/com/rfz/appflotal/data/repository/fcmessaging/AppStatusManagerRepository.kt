@@ -103,7 +103,10 @@ class AppStatusManagerRepository @Inject constructor(
                 when (message.tipo) {
                     FireCloudMessagingType.MANTENIMIENTO.value,
                     FireCloudMessagingType.ARREGLO_URGENTE.value -> {
-                        _appState.update { it.copy(eventType = FireCloudMessagingType.MANTENIMIENTO) }
+                        _appState.update { it.copy(
+                            eventType = FireCloudMessagingType.MANTENIMIENTO,
+                            isMaintenance = MaintenanceStatus.MAINTENANCE
+                        ) }
                         handleMaintenance(message)
                     }
 

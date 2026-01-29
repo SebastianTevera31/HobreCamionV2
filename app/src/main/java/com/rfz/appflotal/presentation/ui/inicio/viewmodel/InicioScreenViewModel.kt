@@ -91,7 +91,7 @@ class InicioScreenViewModel @Inject constructor(
     }
 
 
-    fun werePermissionsRequested(prefs: SharedPreferences): Boolean =
+    fun permissionsRequested(prefs: SharedPreferences): Boolean =
         prefs.getBoolean("permissions_requested", false)
 
     fun updatePermissionState(state: NotificationPermissionState) {
