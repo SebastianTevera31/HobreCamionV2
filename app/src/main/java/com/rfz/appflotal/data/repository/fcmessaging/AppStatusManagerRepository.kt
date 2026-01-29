@@ -101,18 +101,17 @@ class AppStatusManagerRepository @Inject constructor(
             processingMutex.withLock {
                 val currentEvent = _appState.value.eventType
                 when (message.tipo) {
-                    FireCloudMessagingType.MANTENIMIENTO.value,
+                    FireCloudMessagingType.MANTENIMIENTO.value -> {
+                        handleMaintenance(message, FireCloudMessagingType.MANTENIMIENTO)
+                    }
+
                     FireCloudMessagingType.ARREGLO_URGENTE.value -> {
-                        _appState.update { it.copy(
-                            eventType = FireCloudMessagingType.MANTENIMIENTO,
-                            isMaintenance = MaintenanceStatus.MAINTENANCE
-                        ) }
-                        handleMaintenance(message)
+                        handleMaintenance(message, FireCloudMessagingType.ARREGLO_URGENTE)
                     }
 
                     FireCloudMessagingType.CAMBIO_DE_PLAN.value -> {
                         val isAppBusy = currentEvent == FireCloudMessagingType.MANTENIMIENTO ||
-                                    currentEvent == FireCloudMessagingType.ACTUALIZACION
+                                currentEvent == FireCloudMessagingType.ACTUALIZACION
 
                         if (!isAppBusy) {
                             _appState.update {
@@ -137,7 +136,7 @@ class AppStatusManagerRepository @Inject constructor(
                         val isAppBusy = currentEvent == FireCloudMessagingType.MANTENIMIENTO ||
                                 currentEvent == FireCloudMessagingType.ACTUALIZACION
 
-                        if (!isAppBusy){
+                        if (!isAppBusy) {
                             _appState.update { it.copy(eventType = FireCloudMessagingType.TERMINOS) }
                         }
                     }
@@ -150,7 +149,7 @@ class AppStatusManagerRepository @Inject constructor(
         }
     }
 
-    private fun handleMaintenance(notification: AppUpdateMessage) {
+    private fun handleMaintenance(notification: AppUpdateMessage, type: FireCloudMessagingType) {
         // Cancelar cualquier trabajo de mantenimiento anterior de forma segura
         maintenanceJob?.cancel()
 
@@ -178,6 +177,7 @@ class AppStatusManagerRepository @Inject constructor(
 
                     _appState.update {
                         it.copy(
+                            eventType = type,
                             isMaintenance = status,
                             finalUpdateDataForUser = if (status != MaintenanceStatus.NOT_MAINTENANCE)
                                 fechaFinUTC.atZone(ZoneId.systemDefault())
@@ -191,7 +191,7 @@ class AppStatusManagerRepository @Inject constructor(
                     }
 
                     if (status == MaintenanceStatus.NOT_MAINTENANCE) {
-                       break
+                        break
                     }
 
                     delay(10_000L)
@@ -222,7 +222,7 @@ class AppStatusManagerRepository @Inject constructor(
 
             } catch (_: Exception) {
                 // Manejo de error: registrar (o exponer al logger del proyecto)
-            }finally {
+            } finally {
                 cleanNotificationsState()
             }
         }
@@ -232,7 +232,7 @@ class AppStatusManagerRepository @Inject constructor(
         val localVersion = BuildConfig.VERSION_NAME.split(".").map { it.toIntOrNull() ?: 0 }
         val remoteVersion = minRemoteVersion.split(".").map { it.toIntOrNull() ?: 0 }
 
-         val max = maxOf(localVersion.size, remoteVersion.size)
+        val max = maxOf(localVersion.size, remoteVersion.size)
 
         for (i in 0 until max) {
             val localPart = localVersion.getOrNull(i) ?: 0
