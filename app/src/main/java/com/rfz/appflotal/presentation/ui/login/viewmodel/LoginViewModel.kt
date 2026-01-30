@@ -1,29 +1,16 @@
 package com.rfz.appflotal.presentation.ui.login.viewmodel
 
-
-import android.annotation.SuppressLint
-import android.content.Context
-import android.os.Build
 import android.util.Patterns
-import androidx.annotation.RequiresApi
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.LBEncryptionUtils
+import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
-import com.rfz.appflotal.data.model.login.response.LoginState
-import com.rfz.appflotal.data.model.login.response.LoginState.Error
-import com.rfz.appflotal.data.model.login.response.LoginState.Idle
-import com.rfz.appflotal.data.model.login.response.LoginState.Loading
-import com.rfz.appflotal.data.model.login.response.LoginState.Success
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.data.repository.vehicle.VehicleRepository
 import com.rfz.appflotal.domain.database.AddTaskUseCase
@@ -32,21 +19,41 @@ import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
-sealed class NavigationEvent {
-    object NavigateToHome : NavigationEvent()
-    object NavigateToPermissions : NavigationEvent()
+sealed interface LoginEvent {
+    object NavigateToHome : LoginEvent
+    object NavigateToPermissions : LoginEvent
+    data class ShowMessage(val message: String) : LoginEvent
+}
+
+sealed interface LoginUiState {
+    object Idle : LoginUiState
+    object Loading : LoginUiState
+
+    data class Error(
+        @param:StringRes val message: Int,
+        val canRetry: Boolean = true
+    ) : LoginUiState
+
+    data class Success(
+        val paymentPlan: PaymentPlanType,
+        val termsGranted: Boolean
+    ) : LoginUiState
 }
 
 @HiltViewModel
@@ -55,160 +62,116 @@ class LoginViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
     private val getTasksUseCase: GetTasksUseCase,
     private val vehicleRepository: VehicleRepository,
-    private val mapper: AppFlotalMapper,
-    @param:ApplicationContext private val context: Context
+    private val mapper: AppFlotalMapper
 ) : ViewModel() {
-    private val _navigateToHome = MutableLiveData<Triple<Boolean, PaymentPlanType, Boolean>>()
 
-    val navigateToHome: LiveData<Triple<Boolean, PaymentPlanType, Boolean>> = _navigateToHome
+    private val _email = MutableStateFlow("")
+    val email = _email.asStateFlow()
 
-    private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
-    val navigationEvent = _navigationEvent.asSharedFlow()
+    private val _password = MutableStateFlow("")
+    val password = _password.asStateFlow()
 
-    private val _navigateverifycodeloginScreen = MutableLiveData<Boolean>()
-    val navigateverifycodeloginScreen: LiveData<Boolean> = _navigateverifycodeloginScreen
+    private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
+    val uiState: StateFlow<LoginUiState> = _uiState
 
-    private val _usuario = MutableLiveData<String>()
+    private val _events = MutableSharedFlow<LoginEvent>()
+    val events = _events.asSharedFlow()
 
-    val usuario: LiveData<String> = _usuario
+    val isLoginEnabled: StateFlow<Boolean> =
+        combine(email, password) { email, pass ->
+            email.isNotBlank() && pass.isNotBlank() && _uiState.value is LoginUiState.Loading
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false
+        )
 
-    private val _password = MutableLiveData<String>()
-
-    val password: LiveData<String> = _password
-
-    private val _isLoginEnable = MutableLiveData<Boolean>()
-
-    val isLoginEnable: LiveData<Boolean> = _isLoginEnable
-
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
-
-    private val _loginMessage = MutableLiveData<String>()
-    val loginMessage: LiveData<String> = _loginMessage
-
-    private val _loginState = MutableStateFlow<LoginState>(Idle)
-    val loginState: StateFlow<LoginState> = _loginState
-
-    private val _isProgressVisible = MutableStateFlow(false)
-    val isProgressVisible: StateFlow<Boolean> = _isProgressVisible
-
-    var isUserDataValid: Pair<Boolean, Int?> by mutableStateOf(Pair(true, null))
-        private set
-
-    private fun showProgressDialog() {
-        _isProgressVisible.value = true
+    fun onEmailChanged(value: String) {
+        _email.value = value
     }
 
-    private fun dismissProgressDialog() {
-        _isProgressVisible.value = false
+    fun onPasswordChanged(value: String) {
+        _password.value = value
     }
 
-    fun onLoginChanged(usuario: String, password: String) {
-        _usuario.value = usuario
-        _password.value = password
-        _isLoginEnable.value = enableLogin(usuario, password)
-    }
-
-    private fun enableLogin(usuario: String, password: String): Boolean {
-        return usuario.isNotEmpty() && password.isNotEmpty()
-    }
 
     fun cleanLoginData() {
-        _usuario.value = ""
-        _password.value = ""
-        _loginMessage.value = ""
+        _email.update { "" }
+        _password.update { "" }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("HardwareIds")
-    fun onLoginSelected(ctx: Context) {
-        showProgressDialog()
-        _isLoading.value = true
-        _loginState.value = Loading
+    fun onLoginClicked() {
+        val email = _email.value
 
-        try {
-            if (!Patterns.EMAIL_ADDRESS.matcher(usuario.value!!).matches()) {
-                _loginState.value = Error(ctx.getString(R.string.error_invalid_email))
-                _loginMessage.value = ctx.getString(R.string.error_invalid_email)
-            } else {
-                Firebase.messaging.token
-                    .addOnCompleteListener { task ->
-                        if (!task.isSuccessful) {
-                            _loginState.value =
-                                Error(context.getString(R.string.error_en_el_servidor))
-                            return@addOnCompleteListener
-                        }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            _uiState.value = LoginUiState.Error(
+                message = R.string.error_invalid_email,
+                canRetry = false
+            )
+            return
+        }
 
-                        val token = task.result
-                        loginRequest(token)
-                    }
+        _uiState.value = LoginUiState.Loading
+
+        Firebase.messaging.token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                _uiState.value = LoginUiState.Error(
+                    R.string.error_en_el_servidor
+                )
+                return@addOnCompleteListener
             }
-        } catch (e: Exception) {
-            _loginState.value = Error("Unexpected error")
-            _loginMessage.value = "Connection error"
-        } finally {
-            _isLoading.value = false
-            dismissProgressDialog()
+
+            loginRequest(task.result)
         }
     }
+
 
     private fun loginRequest(fcmToken: String) {
         viewModelScope.launch {
+            val user = LBEncryptionUtils.encrypt(_email.value)
+            val pass = LBEncryptionUtils.encrypt(_password.value)
 
-            val user = LBEncryptionUtils.encrypt(usuario.value!!)
-            val pass = LBEncryptionUtils.encrypt(password.value!!)
+            when (val result = loginUseCase.doLogin(user, pass, fcmToken)) {
+                is Result.Success -> handleLoginSuccess(result.data)
+                is Result.Failure -> _uiState.value =
+                    LoginUiState.Error(R.string.auth_error)
 
-            when (val result = loginUseCase.doLogin(user, pass, fcmToken, context)) {
-                is Result.Success -> {
-                    handleLoginResponse(
-                        result.data,
-                        ctx = context
-                    )
-                }
-
-                is Result.Failure -> {
-                    _loginState.value =
-                        Error("Unexpected error")
-                    _loginMessage.value = "Authentication error"
-                }
-
-                Result.Loading -> {}
+                Result.Loading -> _uiState.value = LoginUiState.Loading
             }
         }
     }
 
-    private suspend fun handleLoginResponse(loginResponse: LoginResponse, ctx: Context) {
-        when (loginResponse.id) {
+    private suspend fun handleLoginSuccess(response: LoginResponse) {
+        when (response.id) {
             200 -> {
-                try {
-                    onTaskCreated(loginResponse)
-                    val paymentPlan = when (loginResponse.paymentPlan) {
-                        PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
-                        PaymentPlanType.OnlyTPMS.planName -> PaymentPlanType.OnlyTPMS
-                        else -> PaymentPlanType.None
-                    }
-                    _navigateToHome.value =
-                        Triple(true, paymentPlan, loginResponse.termsGranted)
-                    _loginState.value = Success(loginResponse)
-                } catch (e: Exception) {
-                    val errorMessage = context.getString(R.string.error_establecer_sesion)
-                    _loginState.value = Error(errorMessage)
-                    _loginMessage.value = errorMessage
+                onTaskCreated(response)
+
+                val plan = when (response.paymentPlan) {
+                    PaymentPlanType.Complete.planName -> PaymentPlanType.Complete
+                    PaymentPlanType.OnlyTPMS.planName -> PaymentPlanType.OnlyTPMS
+                    else -> PaymentPlanType.None
                 }
+
+                _uiState.value = LoginUiState.Success(
+                    paymentPlan = plan,
+                    termsGranted = response.termsGranted
+                )
+
+                _events.emit(
+                    if (response.termsGranted)
+                        LoginEvent.NavigateToHome
+                    else
+                        LoginEvent.NavigateToPermissions
+                )
             }
 
-            -100 -> {
-                _loginMessage.value = ctx.getString(R.string.credenciales_incorrectas)
-                _isLoginEnable.value = true
-                _loginState.value =
-                    Error(ctx.getString(R.string.credenciales_incorrectas))
-            }
+            -100 -> _uiState.value = LoginUiState.Error(
+                R.string.credenciales_incorrectas
+            )
 
-            else -> {
-                _loginMessage.value =
-                    ctx.getString(R.string.error_en_el_servidor, loginResponse.id)
-                _loginState.value = Error(ctx.getString(R.string.error_en_el_servidor_only))
-            }
+            else -> _uiState.value = LoginUiState.Error(
+                R.string.error_en_el_servidor_only
+            )
         }
     }
 
@@ -224,11 +187,11 @@ class LoginViewModel @Inject constructor(
         addTaskUseCase(entity)
     }
 
-    fun onNavigateToHomeCompleted() {
-        _navigateToHome.value = Triple(false, PaymentPlanType.None, false)
-    }
-
-    fun acceptTermsConditions(onSuccess: () -> Unit = {}, onPermissionsGranted: () -> Boolean) {
+    fun acceptTermsConditions(
+        onSuccess: () -> Unit = {},
+        onNavigate: (String) -> Unit,
+        onPermissionsGranted: () -> Boolean
+    ) {
         viewModelScope.launch {
             val user = getTasksUseCase.invoke().first()
 
@@ -239,21 +202,18 @@ class LoginViewModel @Inject constructor(
                         addTaskUseCase.updateTermsFlag(user.first().idUser, true)
                         onSuccess()
                         if (onPermissionsGranted()) {
-                            _navigationEvent.emit(NavigationEvent.NavigateToPermissions)
+                            onNavigate(NavScreens.PERMISOS)
                         } else {
-                            _navigationEvent.emit(NavigationEvent.NavigateToHome)
+                            onNavigate(NavScreens.HOME)
                         }
                     }
-
-
                 }
-            } catch (e: Exception) {
-                _loginMessage.value = context.getString(R.string.error_aceptar_terminos, e.message)
+            } catch (_: Exception) {
             }
         }
     }
 
-    fun onNavigateToVerificodeloginComplete() {
-        _navigateverifycodeloginScreen.value = false
+    fun cleanLoginState() {
+        _uiState.update { LoginUiState.Idle }
     }
 }

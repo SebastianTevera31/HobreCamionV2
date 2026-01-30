@@ -219,7 +219,6 @@ class SignUpViewModel @Inject constructor(
                 LBEncryptionUtils.encrypt(email),
                 LBEncryptionUtils.encrypt(password),
                 token,
-                context
             )) {
                 is Result.Success -> {
                     handleLoginResponse(result.data)

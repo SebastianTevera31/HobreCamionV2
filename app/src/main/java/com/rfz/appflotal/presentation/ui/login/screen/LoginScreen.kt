@@ -1,7 +1,6 @@
 package com.rfz.appflotal.presentation.ui.login.screen
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,27 +18,28 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,130 +55,172 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.Connected
 import com.rfz.appflotal.core.util.NavScreens
-import com.rfz.appflotal.core.util.NavScreens.RECUPERAR_CONTRASENIA
-import com.rfz.appflotal.core.util.NavScreens.REGISTRAR_USUARIO
-import com.rfz.appflotal.data.model.login.response.LoginState
 import com.rfz.appflotal.presentation.commons.TermsAndConditionsText
-import com.rfz.appflotal.presentation.theme.primaryLight
-import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.AwaitDialog
-import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
-import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginEvent
+import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginUiState
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel,
-    homeViewModel: HomeViewModel,
     navController: NavController
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.White
-    ) {
-        val loginState by loginViewModel.loginState.collectAsState()
-        val navigateToHome by loginViewModel.navigateToHome.observeAsState()
-        val context = LocalContext.current
-        val isProgressVisible by loginViewModel.isProgressVisible.collectAsState()
+    val uiState by loginViewModel.uiState.collectAsState()
+    val email by loginViewModel.email.collectAsState()
+    val password by loginViewModel.password.collectAsState()
+    val isLoading by loginViewModel.isLoginEnabled.collectAsState()
+    val context = LocalContext.current
 
-        LaunchedEffect(loginState) {
-            when (val state = loginState) {
-                is LoginState.Success -> {
-                    if (navigateToHome?.second == PaymentPlanType.Complete) {
+    DisposableEffect(Unit) {
+        onDispose {
+            loginViewModel.cleanLoginState()
+            loginViewModel.cleanLoginData()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        loginViewModel.events.collect { event ->
+            when (event) {
+                LoginEvent.NavigateToHome -> {
+                    if (!(uiState as LoginUiState.Success).termsGranted) {
+                        navController.navigate(NavScreens.TERMINOS)
+                        loginViewModel.cleanLoginData()
+                    } else {
                         navController.navigate(NavScreens.HOME) {
                             popUpTo(NavScreens.LOGIN) { inclusive = true }
                         }
                     }
                 }
 
-                else -> {}
+                LoginEvent.NavigateToPermissions -> {
+                    navController.navigate(NavScreens.PERMISOS) {
+                        popUpTo(NavScreens.LOGIN) { inclusive = true }
+                    }
+                }
+
+                is LoginEvent.ShowMessage -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
+    }
 
-        if (isProgressVisible) {
+    when (uiState) {
+        LoginUiState.Idle -> Unit
+
+        LoginUiState.Loading -> {
             AwaitDialog()
         }
 
-        LoginContent(loginViewModel, navController)
+        is LoginUiState.Error -> {
+            val message = stringResource((uiState as LoginUiState.Error).message)
+            ErrorDialog(message) {
+                loginViewModel.cleanLoginState()
+                loginViewModel.cleanLoginData()
+            }
+        }
+
+        is LoginUiState.Success -> Unit
+    }
+    Surface(
+        modifier = Modifier
+            .fillMaxSize(),
+        color = Color.Transparent
+    ) {
+        LoginContent(
+            email = email,
+            password = password,
+            isLoading = isLoading,
+            onLoginClick = {
+                loginViewModel.onLoginClicked()
+            },
+            onRegisterClick = {
+                loginViewModel.cleanLoginData()
+                navController.navigate(NavScreens.REGISTRAR_USUARIO)
+            },
+            onCleanUserData = {
+                loginViewModel.cleanLoginData()
+            },
+            onEmailChange = {
+                loginViewModel.onEmailChanged(it)
+            },
+            onPasswordChange = {
+                loginViewModel.onPasswordChanged(it)
+            }
+        )
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+
 @Composable
 private fun LoginContent(
-    loginViewModel: LoginViewModel,
-    navController: NavController
+    email: String,
+    password: String,
+    isLoading: Boolean,
+    onLoginClick: () -> Unit,
+    onRegisterClick: () -> Unit,
+    onCleanUserData: () -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    val isLoading: Boolean by loginViewModel.isLoading.observeAsState(initial = false)
     val context = LocalContext.current
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color.Transparent,
-        modifier = Modifier.background(
-            brush = Brush.verticalGradient(
-                colors = listOf(
-                    Color(0xFF213DF3), // Blue
-                    Color(0xFF4CAF50)  // Green
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF213DF3), // Blue
+                        Color(0xFF4CAF50)  // Green
+                    )
                 )
-            )
-        )
-    ) { innerPadding ->
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        LogoImage(modifier = Modifier.size(240.dp))
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LogoImage(modifier = Modifier.size(240.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                WelcomeMessage()
-                Spacer(modifier = Modifier.height(32.dp))
-                LoginForm(
-                    loginViewModel = loginViewModel,
-                    brandColor = primaryLight,
-                    darkerGray = secondaryLight,
-                    isLoading = isLoading,
-                    onLoginClick = {
-                        if (Connected.isConnected(context)) {
-                            loginViewModel.onLoginSelected(context)
-                        } else {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = context.getString(R.string.error_conexion_internet),
-                                    actionLabel = "OK"
-                                )
-                            }
-                        }
-                    },
-                    onRegisterClick = { navController.navigate(REGISTRAR_USUARIO) },
-                    onForgotPasswordClick = {
-                        navController.navigate(RECUPERAR_CONTRASENIA)
-                    }
-                )
-
+            WelcomeMessage()
+            Spacer(modifier = Modifier.height(32.dp))
+            LoginForm(
+                email = email,
+                password = password,
+                isLoading = isLoading,
+                onLoginClick = onLoginClick,
+                onRegisterClick = onRegisterClick,
+                onCleanUserData = onCleanUserData,
+                onEmailChange = onEmailChange,
+                onPasswordChange = onPasswordChange
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Column(verticalArrangement = Arrangement.Center) {
                 TermsAndConditionsText(
                     text = stringResource(R.string.terminos_condiciones),
                     context = context,
-                    modifier = Modifier.padding(20.dp)
+                    url = "https://www.flotal.com.mx/terminos-y-condiciones/",
+
+                    )
+                Spacer(modifier = Modifier.height(16.dp))
+                TermsAndConditionsText(
+                    text = stringResource(R.string.politicas_de_privacidad),
+                    context = context,
+                    url = "https://www.flotal.com.mx/aviso-de-privacidad",
                 )
             }
         }
@@ -218,37 +260,24 @@ private fun WelcomeMessage() {
 
 @Composable
 private fun LoginForm(
-    loginViewModel: LoginViewModel,
-    brandColor: Color,
-    darkerGray: Color,
+    email: String,
+    password: String,
+    brandColor: Color = Color(0xFF213DF3),
+    darkerGray: Color = Color(0xFF333333),
     isLoading: Boolean,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit
+    onCleanUserData: () -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
 ) {
-    val usuario: String by loginViewModel.usuario.observeAsState(initial = "")
-    val password: String by loginViewModel.password.observeAsState(initial = "")
-    val isLoginEnabled: Boolean by loginViewModel.isLoginEnable.observeAsState(initial = false)
-    val loginMessage: String by loginViewModel.loginMessage.observeAsState(initial = "")
-
     LaunchedEffect(Unit) {
-        loginViewModel.cleanLoginData()
-    }
-
-    if (loginMessage.isNotEmpty()) {
-        Text(
-            text = loginMessage,
-            color = Color.White,
-            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        onCleanUserData()
     }
 
     UsernameField(
-        value = usuario,
-        onValueChange = { loginViewModel.onLoginChanged(usuario = it, password = password) },
+        value = email,
+        onValueChange = { onEmailChange(it) },
         brandColor = brandColor,
         darkerGray = darkerGray
     )
@@ -257,8 +286,8 @@ private fun LoginForm(
 
     PasswordField(
         value = password,
-        onValueChange = { loginViewModel.onLoginChanged(usuario = usuario, password = it) },
-        brandColor = brandColor,
+        onValueChange = { onPasswordChange(it) },
+        brandColor = MaterialTheme.colorScheme.primary,
         darkerGray = darkerGray
     )
 
@@ -266,7 +295,7 @@ private fun LoginForm(
 
     Text(
         text = stringResource(R.string.no_tienes_cuenta_registrate),
-        color = brandColor,
+        color = MaterialTheme.colorScheme.primary,
         style = TextStyle(
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
@@ -282,13 +311,13 @@ private fun LoginForm(
 
     Button(
         onClick = onLoginClick,
-        enabled = isLoginEnabled && !isLoading,
+        enabled = !isLoading,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = brandColor,
-            disabledContainerColor = brandColor.copy(alpha = 0.6f),
+            containerColor = MaterialTheme.colorScheme.primary,
+            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
             contentColor = Color.White,
             disabledContentColor = Color.White
         ),
@@ -403,4 +432,85 @@ private fun PasswordField(
         )
 
     )
+}
+
+@Composable
+@Preview(showBackground = true, showSystemUi = true)
+fun LoginScreenPreview() {
+    HombreCamionTheme {
+        LoginContent(
+            email = "",
+            password = "",
+            isLoading = false,
+            onLoginClick = {},
+            onRegisterClick = {},
+            onCleanUserData = {},
+            onEmailChange = {}
+        ) { }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+@Preview(showBackground = true)
+fun ErrorLoginDialogPreview() {
+    HombreCamionTheme {
+        ErrorDialog("Mensaje de error") {}
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ErrorDialog(
+    message: String,
+    onDismiss: () -> Unit,
+) {
+    BasicAlertDialog(
+        onDismissRequest = onDismiss
+    ) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+
+                Icon(
+                    imageVector = Icons.Outlined.ErrorOutline,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(48.dp)
+                )
+
+                Text(
+                    text = "Ocurrió un problema",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Button(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Aceptar")
+                }
+            }
+        }
+    }
 }

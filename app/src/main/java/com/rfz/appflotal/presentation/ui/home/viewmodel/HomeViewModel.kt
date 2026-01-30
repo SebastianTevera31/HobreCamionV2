@@ -1,16 +1,14 @@
 package com.rfz.appflotal.presentation.ui.home.viewmodel
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.apputilities.UserOpinion
 import com.rfz.appflotal.data.model.languaje.LanguageResponse
-import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.apputilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
+import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
@@ -21,10 +19,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -48,13 +44,6 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(OperationStatus.Loading)
     val messageOperationState = _messageOperationState.asStateFlow()
 
-    private val _homeCheckInMessage = MutableLiveData<String>()
-    val homeCheckInMessage: LiveData<String> = _homeCheckInMessage
-
-    val notificationState = appStatusManagerRepository.appState.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000), null
-    )
 
     suspend fun logout() {
         hombreCamionRepository.clearUserData()
@@ -103,7 +92,6 @@ class HomeViewModel @Inject constructor(
                         screenLoadStatus = OperationStatus.Error
                     )
                 }
-                _homeCheckInMessage.value = "Error loading data: ${e.message}"
             }
         }
     }
@@ -160,7 +148,6 @@ class HomeViewModel @Inject constructor(
                 result
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false) }
-                _homeCheckInMessage.value = "Error changing language: ${e.message}"
                 Result.failure(e)
             }
         } else {

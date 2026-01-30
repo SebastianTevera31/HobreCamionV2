@@ -364,6 +364,9 @@
     <string name="permiso_de_notificacion">Permiso de notificación</string>
     <string name="texto_permiso_de_notification">Permiso requerido para mantenerlo informado de actualizaciones y posibles mantenimientos</string>
     <string name="unidades_de_medida">Unidades de Medida</string>
+    <string name="auth_error">Ocurrio un error en la autorización. verifique su usuario o contraseña.</string>
+    <string name="error_inesperado">Ocurrió un error inesperado. Intenta nuevamente o vuelve más tarde.</string>
+    <string name="politicas_de_privacidad">Politicas de privacidad</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

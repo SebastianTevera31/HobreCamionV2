@@ -39,12 +39,17 @@ import androidx.core.net.toUri
 import com.rfz.appflotal.R
 
 @Composable
-fun TermsAndConditionsText(text: String, context: Context, modifier: Modifier = Modifier) {
+fun TermsAndConditionsText(
+    text: String,
+    context: Context,
+    url: String,
+    modifier: Modifier = Modifier
+) {
     // Texto con estilo y anotación para el link
     val annotatedLinkString: AnnotatedString = buildAnnotatedString {
         pushStringAnnotation(
             tag = "URL",
-            annotation = "https://www.flotal.com.mx/aviso-de-privacidad"
+            annotation = url
         )
         withStyle(
             style = SpanStyle(

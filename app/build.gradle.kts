@@ -67,6 +67,8 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.material3:material3:1.4.0")
+    implementation("androidx.compose.foundation:foundation:1.10.1")
     // Jetpack Compose BOM - Gestiona versiones automáticamente
     val composeBom = platform("androidx.compose:compose-bom:2025.12.01")
     implementation(composeBom)

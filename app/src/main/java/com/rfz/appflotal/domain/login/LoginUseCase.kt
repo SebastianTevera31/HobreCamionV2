@@ -9,16 +9,17 @@ import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.login.LoginRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class LoginUseCase @Inject constructor(
-    private val repository: LoginRepository
+    private val repository: LoginRepository,
+    @param:ApplicationContext private val ctx: Context
 ) {
     suspend fun doLogin(
         usuario: String,
         password: String,
         fcmToken: String,
-        ctx: Context,
     ): Result<LoginResponse> {
         return try {
             val response = repository.doLogin(usuario, password, fcmToken)
