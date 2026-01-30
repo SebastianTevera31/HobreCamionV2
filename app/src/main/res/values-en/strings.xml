@@ -383,6 +383,7 @@
     <string name="auth_error">An error occurred during authentication.</string>
     <string name="error_inesperado">An unexpected error occurred. Please try again or come back later.</string>
     <string name="politicas_de_privacidad">Politicas de privacidad</string>
+    <string name="asi_como_nuestros">, as well as our</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

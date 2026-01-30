@@ -367,6 +367,7 @@
     <string name="auth_error">Ocurrio un error en la autorización. verifique su usuario o contraseña.</string>
     <string name="error_inesperado">Ocurrió un error inesperado. Intenta nuevamente o vuelve más tarde.</string>
     <string name="politicas_de_privacidad">Politicas de privacidad</string>
+    <string name="asi_como_nuestros">, así como nuestros </string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>

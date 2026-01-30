@@ -79,7 +79,7 @@ fun TerminosScreen(
 
         Spacer(modifier = Modifier.padding(16.dp))
         LinkText(
-            text = stringResource(R.string.terminos_condiciones),
+            text = stringResource(R.string.politicas_de_privacidad),
             url = "https://www.flotal.com.mx/aviso-de-privacidad",
             context = context
         )
@@ -97,7 +97,7 @@ fun TerminosScreen(
             )
         }
 
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.padding(12.dp))
         Button(
             onClick = onGranted,
             enabled = checked,
@@ -111,10 +111,12 @@ fun TerminosScreen(
 
 @Composable
 fun LinkText(text: String, url: String, context: Context) {
+    val terminosTitle = stringResource(R.string.terminos_condiciones)
 
     // Texto con estilo y anotación para el link
     val annotatedLinkString: AnnotatedString = buildAnnotatedString {
         append(stringResource(R.string.invitacion_terminos))
+        append(" ")
         pushStringAnnotation(tag = "URL", annotation = url)
         withStyle(
             style = SpanStyle(
@@ -124,6 +126,21 @@ fun LinkText(text: String, url: String, context: Context) {
             )
         ) {
             append(text)
+        }
+
+        append(stringResource(R.string.asi_como_nuestros))
+        pushStringAnnotation(
+            tag = "URL",
+            annotation = "https://www.flotal.com.mx/terminos-y-condiciones/"
+        )
+        withStyle(
+            style = SpanStyle(
+                color = Color(0xFF1E88E5),
+                textDecoration = TextDecoration.Underline,
+                fontSize = 16.sp
+            )
+        ) {
+            append(terminosTitle)
         }
         pop()
     }
