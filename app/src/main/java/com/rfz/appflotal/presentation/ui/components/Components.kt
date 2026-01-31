@@ -68,9 +68,7 @@ fun CompleteFormButton(
         onClick = onFinish,
         enabled = isValid,
         modifier = modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-            .height(52.dp),
+            .fillMaxWidth(),
         shape = MaterialTheme.shapes.large
     ) { Text(text) }
 }

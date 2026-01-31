@@ -8,15 +8,21 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -31,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -57,7 +64,9 @@ import com.rfz.appflotal.presentation.ui.components.TireInfoCard
 import com.rfz.appflotal.presentation.ui.components.TireListScreen
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import com.rfz.appflotal.presentation.ui.utils.SubScreens
+import com.rfz.appflotal.presentation.ui.utils.showMessage
 import com.rfz.appflotal.presentation.ui.utils.validate
+import kotlinx.coroutines.launch
 
 @Composable
 fun AssemblyTireScreen(
@@ -133,7 +142,7 @@ fun AssemblyTireView(
     val context = LocalContext.current
     var axleSelected: CatalogItem? by remember { mutableStateOf(null) }
     var tireSelected: CatalogItem? by remember { mutableStateOf(null) }
-
+    val scroll = rememberScrollState()
     var navScreens by remember { mutableStateOf(SubScreens.HOME) }
 
     val notFoundTiresError = stringResource(R.string.no_se_encontraron_llantas)
@@ -165,7 +174,6 @@ fun AssemblyTireView(
     }
 
     Scaffold(
-        modifier = modifier,
         topBar = {
             SimpleTopBar(
                 title = title,
@@ -178,28 +186,39 @@ fun AssemblyTireView(
         },
         bottomBar = {
             if (uiState.screenLoadStatus == OperationStatus.Success) {
-                CompleteFormButton(
-                    text = stringResource(R.string.montar).uppercase(),
-                    isValid = isFormValid
+                Box(
+                    Modifier
+                        .fillMaxWidth()
                 ) {
-                    onAssembly(odometer, axleSelected!!.id, tireSelected!!.id)
+                    CompleteFormButton(
+                        text = stringResource(R.string.montar).uppercase(),
+                        isValid = isFormValid,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 48.dp, horizontal = 28.dp)
+                           .height(52.dp)
+                    ) {
+                        onAssembly(odometer, axleSelected!!.id, tireSelected!!.id)
+                    }
                 }
             }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Surface(
-            modifier = Modifier.padding(innerPadding).fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            when (uiState.screenLoadStatus) {
-                OperationStatus.Error -> {
-                    ErrorView()
-                }
+        when (uiState.screenLoadStatus) {
+            OperationStatus.Error -> {
+                ErrorView(modifier = Modifier.padding(innerPadding))
+            }
 
-                OperationStatus.Loading -> {
-                    CircularLoading()
+            OperationStatus.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+            }
 
                 OperationStatus.Success -> {
                     when (navScreens) {
@@ -207,6 +226,7 @@ fun AssemblyTireView(
                             TireListScreen(
                                 tires = uiState.tireList,
                                 modifier = Modifier
+                                    .padding(innerPadding)
                                     .padding(16.dp)
                             ) {
                                 updateTire(it.id)
@@ -215,85 +235,88 @@ fun AssemblyTireView(
                             }
                         }
 
-                        SubScreens.HOME -> {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
+                    SubScreens.HOME -> {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .verticalScroll(scroll)
+                                .padding(16.dp)
+                        ) {
+                            CatalogDropdown(
+                                catalog = uiState.axleList,
+                                selected = axleSelected?.description,
+                                errorText = axleSelected.validate(),
+                                onSelected = { axleSelected = it },
+                                label = stringResource(R.string.eje),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Button(
+                                onClick = {
+                                    if (uiState.tireList.isEmpty()) {
+                                        Toast.makeText(
+                                            context,
+                                            notFoundTiresError,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else navScreens = SubScreens.LIST
+                                },
                                 modifier = Modifier
-                                    .verticalScroll(rememberScrollState())
-                                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                                    .fillMaxWidth()
+                                    .height(52.dp),
+                                shape = MaterialTheme.shapes.large
                             ) {
-                                CatalogDropdown(
-                                    catalog = uiState.axleList,
-                                    selected = axleSelected?.description,
-                                    errorText = axleSelected.validate(),
-                                    onSelected = { axleSelected = it },
-                                    label = stringResource(R.string.eje),
+                                Text(text = stringResource(R.string.seleccione_una_llanta))
+                            }
+
+                            if (uiState.currentTire != null) {
+                                Text(
+                                    text = stringResource(R.string.detalles_de_llanta),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     modifier = Modifier.fillMaxWidth()
                                 )
 
-                                Button(
-                                    onClick = {
-                                        if (uiState.tireList.isEmpty()) {
-                                            Toast.makeText(
-                                                context,
-                                                notFoundTiresError,
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        } else navScreens = SubScreens.LIST
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(52.dp),
-                                    shape = MaterialTheme.shapes.large
+                                AnimatedVisibility(
+                                    visible = true,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
                                 ) {
-                                    Text(text = stringResource(R.string.seleccione_una_llanta))
+                                    TireInfoCard(
+                                        tire = uiState.currentTire,
+                                        modifier = Modifier.width(240.dp)
+                                    )
                                 }
 
-                                if (uiState.currentTire != null) {
-                                    Text(
-                                        text = stringResource(R.string.detalles_de_llanta),
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                Column {
+                                    SectionHeader(
+                                        text = stringResource(R.string.odometro),
                                         modifier = Modifier.fillMaxWidth()
                                     )
+                                    val odometerValue =
+                                        uiState.currentOdometer.toIntOrNull() ?: 0
+                                    Text(
+                                        text = stringResource(
+                                            R.string.advertencia_ingreso_odometro,
+                                            "$odometerValue ${uiState.odometerUnit.symbol}"
+                                        ),
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontStyle = FontStyle.Italic
+                                        ),
+                                        modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
+                                    )
 
-                                    AnimatedVisibility(
-                                        visible = true,
-                                        enter = expandVertically() + fadeIn(),
-                                        exit = shrinkVertically() + fadeOut()
-                                    ) {
-                                        TireInfoCard(
-                                            tire = uiState.currentTire,
-                                            modifier = Modifier.width(240.dp)
-                                        )
-                                    }
-
-                                    Column {
-                                        SectionHeader(
-                                            text = stringResource(R.string.odometro),
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
-                                        val odometerValue = uiState.currentOdometer.toIntOrNull() ?: 0
-                                        Text(
-                                            text = stringResource(
-                                                R.string.advertencia_ingreso_odometro,
-                                                "$odometerValue ${uiState.odometerUnit.symbol}"
-                                            ),
-                                            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                                            modifier = Modifier.padding(dimensionResource(R.dimen.small_dimen))
-                                        )
-
-                                        NumberField(
-                                            value = odometer,
-                                            onValueChange = {
-                                                validateOdometer(it)
-                                                odometer = it
-                                            },
-                                            placeHolderText = uiState.currentOdometer,
-                                            label = "",
-                                            errorText = uiState.isOdometerValid.message,
-                                        )
-                                    }
+                                    NumberField(
+                                        value = odometer,
+                                        onValueChange = {
+                                            validateOdometer(it)
+                                            odometer = it
+                                        },
+                                        placeHolderText = uiState.currentOdometer,
+                                        label = "",
+                                        errorText = uiState.isOdometerValid.message,
+                                    )
                                 }
                             }
                         }
@@ -301,6 +324,15 @@ fun AssemblyTireView(
                 }
             }
         }
+
+//        Surface(
+//            modifier = Modifier
+//                .padding(innerPadding)
+//                .fillMaxSize(),
+//            color = MaterialTheme.colorScheme.background
+//        ) {
+//
+//        }
     }
 }
 
