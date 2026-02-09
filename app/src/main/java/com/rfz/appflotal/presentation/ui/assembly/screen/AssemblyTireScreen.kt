@@ -187,20 +187,17 @@ fun AssemblyTireView(
         },
         bottomBar = {
             if (uiState.screenLoadStatus == OperationStatus.Success) {
-                // 2. Usamos un Surface o Box con navigationBarsPadding
-                // para que respete la barrita de gestos de Android
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .navigationBarsPadding(), // Asegura espacio sobre la barra de navegación
-                    tonalElevation = 2.dp // Opcional: da una ligera separación visual
+                        .navigationBarsPadding(),
+                    tonalElevation = 2.dp
                 ) {
                     CompleteFormButton(
                         text = stringResource(R.string.montar).uppercase(),
                         isValid = isFormValid,
                         modifier = Modifier
                             .fillMaxWidth()
-                            // 3. USA PADDINGS ESTÁNDAR (16.dp suele ser la norma)
                             .padding(16.dp)
                             .height(52.dp)
                     ) {
@@ -226,20 +223,20 @@ fun AssemblyTireView(
                 }
             }
 
-                OperationStatus.Success -> {
-                    when (navScreens) {
-                        SubScreens.LIST -> {
-                            TireListScreen(
-                                tires = uiState.tireList,
-                                modifier = Modifier
-                                    .padding(innerPadding)
-                                    .padding(16.dp)
-                            ) {
-                                updateTire(it.id)
-                                tireSelected = it
-                                navScreens = SubScreens.HOME
-                            }
+            OperationStatus.Success -> {
+                when (navScreens) {
+                    SubScreens.LIST -> {
+                        TireListScreen(
+                            tires = uiState.tireList,
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .padding(16.dp)
+                        ) {
+                            updateTire(it.id)
+                            tireSelected = it
+                            navScreens = SubScreens.HOME
                         }
+                    }
 
                     SubScreens.HOME -> {
                         Column(

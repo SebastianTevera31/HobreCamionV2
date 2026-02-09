@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -194,12 +195,15 @@ fun InspectionScreen(
         },
         snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
-            Surface(shadowElevation = 4.dp, contentColor = Color.White) {
+            Surface(
+                shadowElevation = 8.dp,
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.navigationBarsPadding()
+            ) {
                 Box(
                     Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                        .imePadding()
                 ) {
                     val isValid = form.validate()
                     Button(
@@ -208,7 +212,6 @@ fun InspectionScreen(
                             if (ui != null) {
                                 onFinish(ui)
                             } else scope.launch {
-
                                 snackbar.showMessage(message)
                             }
                         },

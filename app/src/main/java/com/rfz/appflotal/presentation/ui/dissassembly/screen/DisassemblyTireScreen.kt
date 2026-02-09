@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.rememberScrollState
@@ -13,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -197,41 +199,55 @@ fun DisassemblyTireView(
             )
         },
         bottomBar = {
-            val (buttonText, isValid) = when (uiState.navigationScreen) {
-                NavigationScreen.DISASSEMBLY -> {
-                    val isValid =
-                        if (uiState.navigationScreen == NavigationScreen.DISASSEMBLY) isFormValid else true
-                    Pair(R.string.desmontar, isValid)
-                }
-
-                NavigationScreen.INSPECTION -> {
-                    val isValid = form.validate()
-                    Pair(R.string.siguiente, isValid)
-                }
-            }
-
-            CompleteFormButton(
-                text = stringResource(buttonText).uppercase(),
-                isValid = isValid
+            Surface(
+                color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+                tonalElevation = 3.dp,
+                modifier = Modifier.navigationBarsPadding()
             ) {
-                when (uiState.navigationScreen) {
+                val (buttonText, isValid) = when (uiState.navigationScreen) {
                     NavigationScreen.DISASSEMBLY -> {
-                        if (causesSelected != null && destinationSelected != null) {
-                            onDismount(causesSelected?.id ?: 0, destinationSelected?.id ?: 0)
-                        }
+                        val isValid = isFormValid
+                        Pair(R.string.desmontar, isValid)
                     }
 
                     NavigationScreen.INSPECTION -> {
-
-                        val ui = form.toUiOrNull()
-                        if (ui != null) {
-                            onInspectionFinish(ui)
-                        } else scope.launch {
-                            snackbar.showMessage(errorMessage)
-                        }
+                        val isValid = form.validate()
+                        Pair(R.string.siguiente, isValid)
                     }
                 }
 
+                // 3. Un Box o Column con padding para que el botón no toque los bordes laterales
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    CompleteFormButton(
+                        text = stringResource(buttonText).uppercase(),
+                        isValid = isValid,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        when (uiState.navigationScreen) {
+                            NavigationScreen.DISASSEMBLY -> {
+                                if (causesSelected != null && destinationSelected != null) {
+                                    onDismount(
+                                        causesSelected?.id ?: 0,
+                                        destinationSelected?.id ?: 0
+                                    )
+                                }
+                            }
+
+                            NavigationScreen.INSPECTION -> {
+                                val ui = form.toUiOrNull()
+                                if (ui != null) {
+                                    onInspectionFinish(ui)
+                                } else scope.launch {
+                                    snackbar.showMessage(errorMessage)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     ) { innerPadding ->
