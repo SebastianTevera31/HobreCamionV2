@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.safeDrawing
@@ -186,17 +187,22 @@ fun AssemblyTireView(
         },
         bottomBar = {
             if (uiState.screenLoadStatus == OperationStatus.Success) {
-                Box(
-                    Modifier
+                // 2. Usamos un Surface o Box con navigationBarsPadding
+                // para que respete la barrita de gestos de Android
+                Surface(
+                    modifier = Modifier
                         .fillMaxWidth()
+                        .navigationBarsPadding(), // Asegura espacio sobre la barra de navegación
+                    tonalElevation = 2.dp // Opcional: da una ligera separación visual
                 ) {
                     CompleteFormButton(
                         text = stringResource(R.string.montar).uppercase(),
                         isValid = isFormValid,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 48.dp, horizontal = 28.dp)
-                           .height(52.dp)
+                            // 3. USA PADDINGS ESTÁNDAR (16.dp suele ser la norma)
+                            .padding(16.dp)
+                            .height(52.dp)
                     ) {
                         onAssembly(odometer, axleSelected!!.id, tireSelected!!.id)
                     }
