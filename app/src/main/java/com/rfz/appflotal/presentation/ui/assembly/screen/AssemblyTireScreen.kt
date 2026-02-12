@@ -13,12 +13,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -49,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.tire.Tire
-import com.rfz.appflotal.presentation.commons.CircularLoading
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -65,9 +59,7 @@ import com.rfz.appflotal.presentation.ui.components.TireInfoCard
 import com.rfz.appflotal.presentation.ui.components.TireListScreen
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import com.rfz.appflotal.presentation.ui.utils.SubScreens
-import com.rfz.appflotal.presentation.ui.utils.showMessage
 import com.rfz.appflotal.presentation.ui.utils.validate
-import kotlinx.coroutines.launch
 
 @Composable
 fun AssemblyTireScreen(
@@ -188,7 +180,7 @@ fun AssemblyTireView(
         bottomBar = {
             if (uiState.screenLoadStatus == OperationStatus.Success) {
                 Surface(
-                    modifier = Modifier
+                    modifier = modifier
                         .fillMaxWidth()
                         .navigationBarsPadding(),
                     tonalElevation = 2.dp
@@ -196,7 +188,7 @@ fun AssemblyTireView(
                     CompleteFormButton(
                         text = stringResource(R.string.montar).uppercase(),
                         isValid = isFormValid,
-                        modifier = Modifier
+                        modifier = modifier
                             .fillMaxWidth()
                             .padding(16.dp)
                             .height(52.dp)
