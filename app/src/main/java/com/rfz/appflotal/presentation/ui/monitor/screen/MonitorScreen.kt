@@ -64,7 +64,6 @@ fun MonitorScreen(
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val monitorUiState by monitorViewModel.monitorUiState.collectAsState()
     val positionsUiState by monitorViewModel.positionsUiState.collectAsState()
     val monitorTireUiState by monitorViewModel.filteredTiresUiState.collectAsState()
@@ -89,7 +88,7 @@ fun MonitorScreen(
         onDisassemblyClick = onDisassemblyClick,
         onShowMonitorDialog = { show -> monitorViewModel.showMonitorDialog(show) },
         onGetLastedSensorData = { monitorViewModel.getLastedSensorData() },
-        onGetBitmapImage = { monitorViewModel.getBitmapImage() },
+        onGetBitmapImage = {monitorViewModel.initMonitorData() },
         onUpdateSelectedTire = { tire -> monitorViewModel.updateSelectedTire(tire) },
         onGetSensorDataByWheel = { wheel -> monitorViewModel.getSensorDataByWheel(wheel) },
         onSwitchPressureUnit = { monitorViewModel.switchPressureUnit() },
@@ -141,7 +140,9 @@ fun MonitorScreenContent(
             cancelButtonText = buttonCancelText,
             registerMonitorViewModel = registerMonitorViewModel,
             onDialogCancel = { onDialogCancel(monitorUiState.monitorId) },
-            onSuccessRegister = { onGetBitmapImage() }, // This should ideally be passed down or handled better
+            onSuccessRegister = { mac ->
+                onGetBitmapImage()
+            }, // This should ideally be passed down or handled better
             context = context,
         )
     }
@@ -179,7 +180,8 @@ fun MonitorScreenContent(
                     val isSignalUnknown =
                         monitorUiState.signalIntensity.first == BluetoothSignalQuality.Desconocida
                                 && monitorUiState.monitorId != 0
-                    onGetBitmapImage()
+
+                    //onGetBitmapImage()
 
                     if (isSignalUnknown) {
                         val text = stringResource(
@@ -235,7 +237,7 @@ private fun ShowMonitorRegisterDialog(
     cancelButtonText: String,
     registerMonitorViewModel: RegisterMonitorViewModel,
     onDialogCancel: () -> Unit,
-    onSuccessRegister: () -> Unit,
+    onSuccessRegister: (mac: Int) -> Unit,
     context: Context
 ) {
     val configurationsUiState by registerMonitorViewModel.configurationList.collectAsState()
@@ -266,7 +268,7 @@ private fun ShowMonitorRegisterDialog(
         configurations = configurationsUiState,
         onCloseButton = onDialogCancel,
         onSuccessRegister = {
-            onSuccessRegister()
+            onSuccessRegister(it)
             registerMonitorViewModel.clearMonitorRegistrationData()
         },
         onError = { registerMonitorViewModel.clearMonitorRegistrationData() },

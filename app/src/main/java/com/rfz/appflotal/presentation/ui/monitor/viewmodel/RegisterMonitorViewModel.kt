@@ -133,7 +133,7 @@ class RegisterMonitorViewModel @Inject constructor(
                             )
                             showAlert(context, message = RegisterMonitorMessage.REGISTERED.message)
 
-                            onRestartClicked(context)
+                            onRestartBleConnection(context)
 
                             _registeredMonitorState.value = ApiResult.Success(data = idMonitor)
                         } else {
@@ -230,7 +230,7 @@ class RegisterMonitorViewModel @Inject constructor(
         }
     }
 
-    fun onRestartClicked(context: Context) {
+    fun onRestartBleConnection(context: Context) {
         ContextCompat.startForegroundService(
             context,
             Intent(context, HombreCamionService::class.java).setAction("ACTION_RESTART")

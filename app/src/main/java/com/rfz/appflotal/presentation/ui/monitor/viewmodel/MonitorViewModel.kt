@@ -182,7 +182,7 @@ class MonitorViewModel @Inject constructor(
 
                 // Traer información del servicio
                 getConfigData()
-
+                getBitmapImage()
                 // Controlar si mostrar la vista
                 _monitorUiState.update { currentUiState -> currentUiState.copy(showView = true) }
             }
