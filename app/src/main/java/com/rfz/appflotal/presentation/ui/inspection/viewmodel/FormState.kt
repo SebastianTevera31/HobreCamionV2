@@ -15,6 +15,7 @@ import com.rfz.appflotal.presentation.ui.utils.validateOdometer
 
 @Stable
 class InspectionFormState(
+    var lastOdometer: Int = 0,
     odometer: String = "",
     temperature: String = "",
     pressureMeasured: String = "",
@@ -26,7 +27,6 @@ class InspectionFormState(
     selectedReportId: String? = null,
     isValidatingReports: Boolean = true
 ) {
-    val lastOdometer = odometer
     val validatingReports = isValidatingReports
 
     var odometer by mutableStateOf(odometer)
@@ -67,7 +67,7 @@ class InspectionFormState(
 
         selectedReportIdError = reportErr
 
-        val (odoInt, odoErr) = odometer.validateOdometer(lastOdometer.toInt())
+        val (odoInt, odoErr) = odometer.validateOdometer(lastOdometer)
         odometerError = odoErr
 
         val (tempInt, tempErr) = temperature.toFloatOrError()
@@ -170,7 +170,7 @@ fun rememberInspectionFormState(
         InspectionFormState(
             temperature = initialTemperature.toString(),
             pressureMeasured = initialPressure.toString(),
-            odometer = lastOdometer.toString(),
+            lastOdometer = lastOdometer,
             isValidatingReports = isValidatingReports
         )
     }

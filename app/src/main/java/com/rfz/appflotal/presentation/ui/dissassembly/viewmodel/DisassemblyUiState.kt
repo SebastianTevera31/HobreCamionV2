@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.dissassembly.viewmodel
 
+import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.catalog.TireInspectionItem
 import com.rfz.appflotal.data.model.destination.Destination
 import com.rfz.appflotal.data.model.disassembly.DisassemblyCause
@@ -17,6 +18,7 @@ data class DisassemblyUiState(
     val initialTemperature: Int? = null,
     val disassemblyCauseList: List<DisassemblyCause> = emptyList(),
     val destinationList: List<Destination> = emptyList(),
+    val inspectionList: List<CatalogItem> = emptyList(),
     val tireList: List<Tire> = emptyList(),
     val tire: Tire? = null,
     val screenLoadStatus: OperationStatus = OperationStatus.Loading,

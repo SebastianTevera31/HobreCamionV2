@@ -51,6 +51,7 @@ import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import com.rfz.appflotal.presentation.ui.utils.showMessage
 import com.rfz.appflotal.presentation.ui.utils.validate
 import kotlinx.coroutines.launch
+import kotlin.toString
 
 sealed interface NavigationScreen {
     object INSPECTION : NavigationScreen
@@ -76,7 +77,7 @@ fun DisassemblyTireScreen(
         initialTemperature = 0f,
         initialPressure = 0f,
         lastOdometer = 0,
-        isValidatingReports = false
+        isValidatingReports = true
     )
 
     LaunchedEffect(positionTire) {
@@ -155,6 +156,7 @@ fun DisassemblyTireView(
     LaunchedEffect(uiState) {
         if (uiState.screenLoadStatus == OperationStatus.Success) {
             if (uiState.lastOdometer > 0) {
+                form.lastOdometer = uiState.lastOdometer
                 form.odometer = uiState.lastOdometer.toString()
             }
             uiState.initialTemperature?.let {
@@ -299,7 +301,8 @@ fun DisassemblyTireView(
                             form = form,
                             lastOdometer = uiState.lastOdometer,
                             isOdometerEditable = true,
-                            showReportList = false,
+                            showReportList = true,
+                            inspectionList = uiState.inspectionList,
                             temperatureUnit = uiState.temperatureUnit.symbol,
                             pressureUnit = uiState.pressureUnit.symbol,
                             odometerUnit = uiState.odometerUnit.symbol

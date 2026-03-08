@@ -57,6 +57,7 @@ import com.rfz.appflotal.presentation.ui.inspection.viewmodel.rememberInspection
 import com.rfz.appflotal.presentation.ui.utils.showMessage
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlin.toString
 
 @Composable
 fun InspectionRoute(
@@ -141,6 +142,7 @@ fun InspectionScreen(
     LaunchedEffect(uiState) {
         if (uiState is InspectionUiState.Success) {
             if (uiState.lastOdometer > 0) {
+                form.lastOdometer = uiState.lastOdometer
                 form.odometer = uiState.lastOdometer.toString()
             }
         }

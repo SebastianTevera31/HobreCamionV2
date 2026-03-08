@@ -6,6 +6,7 @@ import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.disassembly.tire.DisassemblyTire
 import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
 import com.rfz.appflotal.data.model.tire.toTire
+import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
@@ -85,6 +86,7 @@ class DisassemblyViewModel @Inject constructor(
             val getDisassemblyCauseDeferred = async { disassemblyCauseUseCase() }
             val tireReportDeferred = async { catalogUseCase.onGetTireReport() }
             val lastOdometerDeferred = async { hombreCamionRepository.getOdometer() }
+            val tireReportTypeCatalogDeferred = async { catalogUseCase.onGetTireReport() }
 
             val destinations = getDestinationDeferred.await()
             val tire = getMountedTireDeferred.await()
@@ -92,6 +94,7 @@ class DisassemblyViewModel @Inject constructor(
             val disassemblyCauses = getDisassemblyCauseDeferred.await()
             val tireReportList = tireReportDeferred.await()
             val lastOdometer = lastOdometerDeferred.await()
+            val tireReportType = tireReportTypeCatalogDeferred.await()
 
             val temperatureUnit = observeTemperatureUnitUseCase().first()
             val pressureUnit = observePressureUnitUseCase().first()
@@ -99,6 +102,18 @@ class DisassemblyViewModel @Inject constructor(
 
             val odometerValue = if (odometerUnit == UnidadOdometro.KILOMETROS) lastOdometer.odometer
             else kmToMiles(lastOdometer.odometer.toDouble())
+
+            val tireInspectionReport = when (tireReportType) {
+                is ApiResult.Error -> {
+                    emptyList()
+                }
+
+                is ApiResult.Success -> {
+                    tireReportType.data
+                }
+
+                else -> emptyList()
+            }
 
             responseHelper(tireReportList, onError = {
                 _uiState.update { currentUiState ->
@@ -111,7 +126,20 @@ class DisassemblyViewModel @Inject constructor(
                     && tire != null
                     && disassemblyCauses.isSuccess
                     && availableTireList.isSuccess
+                    && !tireInspectionReport.isNullOrEmpty()
                 ) {
+                    val mainOrder = listOf(1, 27, 6, 38, 9)
+                    val mainIds = mainOrder.toSet()
+
+                    val (mainPriority, secondaryPriority) = tireInspectionReport
+                        .partition { it.idTireInspectionReport in mainIds }
+
+                    val orderedMain = mainPriority.sortedBy { option ->
+                        mainOrder.indexOf(option.idTireInspectionReport)
+                    }
+
+                    val inspectionReportList = orderedMain + secondaryPriority
+
                     val destinationsList =
                         destinations.getOrNull()?.filter { it.id == 1 || it.id == 3 || it.id == 6 }
                             ?: emptyList()
@@ -131,6 +159,7 @@ class DisassemblyViewModel @Inject constructor(
                             lastOdometer = odometerValue.toInt(),
                             tireReportList = options?.map { it.toCatalog() } ?: emptyList(),
                             temperatureUnit = temperatureUnit,
+                            inspectionList = inspectionReportList.map { it.toCatalog() },
                             pressureUnit = pressureUnit,
                             odometerUnit = odometerUnit
                         )
@@ -181,18 +210,17 @@ class DisassemblyViewModel @Inject constructor(
                 )
             )
 
-            // Registrar registro de odometro
-            async {
-                hombreCamionRepository.updateOdometer(
-                    odometerValue.roundToInt(),
-                    lastOdometerMeasurement
-                )
-            }
-
             _uiState.update { currentUiState ->
                 currentUiState.copy(
                     operationStatus = result.fold(
                         onSuccess = {
+                            // Registrar registro de odometro
+                            launch {
+                                hombreCamionRepository.updateOdometer(
+                                    odometerValue.roundToInt(),
+                                    lastOdometerMeasurement
+                                )
+                            }
                             OperationStatus.Success
                         },
                         onFailure = { OperationStatus.Error }
@@ -250,6 +278,9 @@ class DisassemblyViewModel @Inject constructor(
             if (_uiState.value.odometerUnit == UnidadOdometro.KILOMETROS) uiState.lastOdometer.toDouble()
             else milesToKm(uiState.inspectionForm.odometer.toDouble())
 
+        if (uiState.tire?.id == null) return false
+        if (uiState.inspectionForm.reportId.isNullOrEmpty()) return false
+
         val result = inspectionTireCrudUseCase(
             requestBody = InspectionTireDto(
                 positionTire = uiState.positionTire,
@@ -257,7 +288,7 @@ class DisassemblyViewModel @Inject constructor(
                 treadDepth2 = uiState.inspectionForm.treadDepth2,
                 treadDepth3 = uiState.inspectionForm.treadDepth3,
                 treadDepth4 = uiState.inspectionForm.treadDepth4,
-                tireInspectionReportId = 3, // 3 = Enviar a "desechar"
+                tireInspectionReportId = uiState.inspectionForm.reportId.toInt(), // 3 = Enviar a "desechar"
                 pressureInspected = pressure.toInt(),
                 dateInspection = lastOdometerMeasurement,
                 odometer = odometerValue.roundToInt(),
@@ -267,6 +298,9 @@ class DisassemblyViewModel @Inject constructor(
         )
 
         return if (result.isSuccess) {
+            val response = result.getOrNull()
+            if (response.isNullOrEmpty()) return false
+            if (result.getOrNull()?.first()?.id != 200) return false
             hombreCamionRepository.updateOdometer(odometerValue.toInt(), lastOdometerMeasurement)
             sensorDataTableRepository.updateTireRecord(
                 tire = uiState.positionTire,

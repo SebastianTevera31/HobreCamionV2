@@ -131,7 +131,7 @@ class AssemblyTireViewModel @Inject constructor(
                 )
             )
 
-            async {
+            launch {
                 hombreCamionRepository.updateOdometer(
                     odometerValue.roundToInt(),
                     getCurrentDate()
