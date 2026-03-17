@@ -11,6 +11,7 @@ import com.rfz.appflotal.data.network.client.airPressureRating.UpdateAirPressure
 import com.rfz.appflotal.data.network.client.assembly.AssemblyTireService
 import com.rfz.appflotal.data.network.client.axle.AxleService
 import com.rfz.appflotal.data.network.client.base.BaseClient
+import com.rfz.appflotal.data.network.client.blelog.BleLogClient
 import com.rfz.appflotal.data.network.client.brand.BrandCrudClient
 import com.rfz.appflotal.data.network.client.brand.BrandListClient
 import com.rfz.appflotal.data.network.client.catalog.CatalogClient
@@ -413,6 +414,12 @@ class NetworkModule {
     @Provides
     fun provideRepairService(retrofit: Retrofit): RepairService {
         return retrofit.create(RepairService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideBleLog(retrofit: Retrofit): BleLogClient {
+        return retrofit.create(BleLogClient::class.java)
     }
 }
 

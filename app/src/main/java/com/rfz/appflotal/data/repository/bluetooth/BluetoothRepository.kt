@@ -18,6 +18,7 @@ import androidx.annotation.StringRes
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLog
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
+import com.rfz.appflotal.data.repository.blelog.BleLogRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -66,8 +67,10 @@ enum class BluetoothSignalQuality(
     Desconocida(R.string.sin_conexi_n, R.string.aviso_conexion_blueotooth)
 }
 
-class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
-    BluetoothRepository {
+class BluetoothRepositoryImp @Inject constructor(
+    private val context: Context,
+    private val bleLogRepository: BleLogRepository
+) : BluetoothRepository {
     private var ready = false
     private var lastMacAddress: String? = null
 
@@ -174,8 +177,13 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
                         descriptor.value = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
                         gatt.writeDescriptor(descriptor)
+                    } else {
+                        scope.launch {
+                            bleLogRepository.sendDataFrame("BLE 5: No se encontro caracterisica 00001002-0000-1000-8000-00805f9b34fb")
+                        }
                     }
                 }
+
                 service != null -> {
                     // BLE 4
                     val characteristic =
@@ -187,6 +195,10 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                             .getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
                         descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                         gatt.writeDescriptor(descriptor)
+                    } else {
+                        scope.launch {
+                            bleLogRepository.sendBleError(error = "BLE 4: No se encontro caracterisica 00001002-0000-1000-8000-00805f9b34fb")
+                        }
                     }
                 }
             }
@@ -366,6 +378,10 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                 AppLog.d("BLE", "Trama correcta")
                 return dataFrameToHex
             } else AppLog.d("BLE", "Trama incorrecta")
+        } else {
+            scope.launch {
+                bleLogRepository.sendDataFrame(dataFrameToHex)
+            }
         }
         return null
     }
