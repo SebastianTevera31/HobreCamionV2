@@ -80,10 +80,10 @@ class NetworkModule {
     fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         val cacheDir = File(context.cacheDir, "image_cache")
         return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(45, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .cache(Cache(cacheDir, 50L * 1024 * 1024)) // 50 MB
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(90, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .cache(Cache(cacheDir, 100L * 1024 * 1024)) // 100 MB
             .build()
     }
 
