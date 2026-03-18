@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.compose.currentStateAsState
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -143,6 +144,7 @@ import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScree
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -259,10 +261,8 @@ class InicioActivity : ComponentActivity() {
     ) { isGranted: Boolean ->
         if (isGranted) {
             Toast.makeText(
-                this,
-                getString(R.string.notifications_permission_granted), Toast.LENGTH_SHORT
-            )
-                .show()
+                this, getString(R.string.notifications_permission_granted), Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -302,6 +302,9 @@ class InicioActivity : ComponentActivity() {
                 else -> true
             }
 
+            val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+            val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
+
             val context = LocalContext.current
 
             val inicioState = appStatusManagerRepository.appState.collectAsState()
@@ -315,14 +318,11 @@ class InicioActivity : ComponentActivity() {
             ) { result ->
                 val wasRequestedBefore = inicioScreenViewModel.permissionsRequested(prefs)
 
-                val deniedPermissions = result
-                    .filterValues { granted -> !granted }
-                    .keys
+                val deniedPermissions = result.filterValues { granted -> !granted }.keys
 
                 val permanentlyDenied = deniedPermissions.any { permission ->
                     !ActivityCompat.shouldShowRequestPermissionRationale(
-                        this@InicioActivity,
-                        permission
+                        this@InicioActivity, permission
                     )
                 } && wasRequestedBefore
 
@@ -345,27 +345,25 @@ class InicioActivity : ComponentActivity() {
                 }
             }
 
-            val notificationPermissionLauncher =
-                rememberLauncherForActivityResult(
-                    ActivityResultContracts.RequestPermission()
-                ) { granted ->
+            val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { granted ->
 
-                    val state = if (granted) {
-                        NotificationPermissionState.Granted
+                val state = if (granted) {
+                    NotificationPermissionState.Granted
+                } else {
+                    if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                            this@InicioActivity, Manifest.permission.POST_NOTIFICATIONS
+                        )
+                    ) {
+                        NotificationPermissionState.PermanentlyDenied
                     } else {
-                        if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                                this@InicioActivity,
-                                Manifest.permission.POST_NOTIFICATIONS
-                            )
-                        ) {
-                            NotificationPermissionState.PermanentlyDenied
-                        } else {
-                            NotificationPermissionState.Denied
-                        }
+                        NotificationPermissionState.Denied
                     }
-
-                    inicioScreenViewModel.updatePermissionState(state)
                 }
+
+                inicioScreenViewModel.updatePermissionState(state)
+            }
 
             ObserveOnResume {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
@@ -374,8 +372,7 @@ class InicioActivity : ComponentActivity() {
                     )
                 } else {
                     val granted = ContextCompat.checkSelfPermission(
-                        this@InicioActivity,
-                        Manifest.permission.POST_NOTIFICATIONS
+                        this@InicioActivity, Manifest.permission.POST_NOTIFICATIONS
                     ) == PackageManager.PERMISSION_GRANTED
 
                     if (granted) {
@@ -399,8 +396,7 @@ class InicioActivity : ComponentActivity() {
                                             Manifest.permission.POST_NOTIFICATIONS
                                         )
                                     }
-                                }
-                            )
+                                })
                         }
 
                         NotificationPermissionState.Denied -> {
@@ -412,8 +408,7 @@ class InicioActivity : ComponentActivity() {
                                             Manifest.permission.POST_NOTIFICATIONS
                                         )
                                     }
-                                }
-                            )
+                                })
                         }
 
                         NotificationPermissionState.PermanentlyDenied -> {
@@ -421,8 +416,7 @@ class InicioActivity : ComponentActivity() {
                                 onDismiss = { finish() },
                                 onConfirmation = {
                                     inicioScreenViewModel.openAppSettings(this@InicioActivity)
-                                }
-                            )
+                                })
                         }
 
                         NotificationPermissionState.Granted -> {
@@ -440,8 +434,7 @@ class InicioActivity : ComponentActivity() {
                                         Color(0xFF4CAF50)  // Green
                                     )
                                 )
-                            ),
-                        color = MaterialTheme.colorScheme.primary
+                            ), color = MaterialTheme.colorScheme.primary
                     ) {
                         Column(modifier = Modifier.fillMaxSize()) {
                             if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
@@ -477,8 +470,7 @@ class InicioActivity : ComponentActivity() {
                                 NetworkConfig.imei =
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                         Settings.Secure.getString(
-                                            contentResolver,
-                                            Settings.Secure.ANDROID_ID
+                                            contentResolver, Settings.Secure.ANDROID_ID
                                         )
                                     } else {
                                         val tel =
@@ -505,25 +497,21 @@ class InicioActivity : ComponentActivity() {
 //                                    }
 
                                 // Control de traslado de pantalla cuando se inicia la aplicacion
-                                LaunchedEffect(hasInitialValidation, userData) {
-                                    if (hasInitialValidation) {
+                                LaunchedEffect(hasInitialValidation, userData, lifecycleState) {
+                                    if (hasInitialValidation && lifecycleState == androidx.lifecycle.Lifecycle.State.RESUMED) {
                                         userData?.let { data ->
                                             val fechaRegistro = data.fecha
                                             if (fechaRegistro.isNotEmpty()) {
                                                 val formatter =
                                                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                                                val fechaUsuario =
-                                                    LocalDateTime.parse(
-                                                        fechaRegistro,
-                                                        formatter
-                                                    )
+                                                val fechaUsuario = LocalDateTime.parse(
+                                                    fechaRegistro, formatter
+                                                )
                                                 val fechaActual = LocalDateTime.now()
 
-                                                val diferenciaHoras =
-                                                    ChronoUnit.HOURS.between(
-                                                        fechaUsuario,
-                                                        fechaActual
-                                                    )
+                                                val diferenciaHoras = ChronoUnit.HOURS.between(
+                                                    fechaUsuario, fechaActual
+                                                )
 
                                                 if (diferenciaHoras < 24) {
 
@@ -534,21 +522,23 @@ class InicioActivity : ComponentActivity() {
                                                             }
                                                         }
                                                     } else {
-                                                        if (!arePermissionsGranted(
+                                                        delay(500)
+                                                        val permissionsGranted =
+                                                            arePermissionsGranted(
                                                                 this@InicioActivity,
                                                                 getRequiredPermissions()
                                                             )
-                                                        ) {
+
+                                                        if (!permissionsGranted) {
                                                             navController.navigate(NavScreens.PERMISOS) {
                                                                 popUpTo(NavScreens.LOADING) {
                                                                     inclusive = true
                                                                 }
+                                                                launchSingleTop = true
                                                             }
                                                         } else {
                                                             navController.navigate(NavScreens.HOME) {
-                                                                popUpTo(0) {
-                                                                    inclusive = true
-                                                                }
+                                                                popUpTo(0) { inclusive = true }
                                                             }
                                                         }
                                                     }
@@ -614,14 +604,12 @@ class InicioActivity : ComponentActivity() {
                                             AnimatedContentTransitionScope.SlideDirection.Right,
                                             animationSpec = tween(700)
                                         ) + fadeOut(animationSpec = tween(700))
-                                    }
-                                ) {
+                                    }) {
                                     composable(NavScreens.HOME) {
                                         // Efecto: si ya están concedidos, arrancar servicio automáticamente
                                         LaunchedEffect(Unit) {
                                             if (arePermissionsGranted(
-                                                    this@InicioActivity,
-                                                    getRequiredPermissions()
+                                                    this@InicioActivity, getRequiredPermissions()
                                                 )
                                             ) {
                                                 if (!isServiceRunning(
@@ -670,8 +658,7 @@ class InicioActivity : ComponentActivity() {
                                         // Efecto: si ya están concedidos, arrancar servicio automáticamente
                                         LaunchedEffect(Unit) {
                                             if (arePermissionsGranted(
-                                                    this@InicioActivity,
-                                                    getRequiredPermissions()
+                                                    this@InicioActivity, getRequiredPermissions()
                                                 )
                                             ) {
                                                 if (!isServiceRunning(
@@ -836,11 +823,12 @@ class InicioActivity : ComponentActivity() {
                                             languageSelected = uiState.value.selectedLanguage,
                                             signUpViewModel = signUpViewModel
                                         ) {
-                                            if (!arePermissionsGranted(
-                                                    this@InicioActivity,
-                                                    getRequiredPermissions()
-                                                )
-                                            ) {
+                                            delay(500)
+                                            val permissionsGranted = arePermissionsGranted(
+                                                this@InicioActivity,
+                                                getRequiredPermissions()
+                                            )
+                                            if (!permissionsGranted) {
                                                 navController.navigate(NavScreens.PERMISOS) {
                                                     popUpTo(NavScreens.REGISTRAR_USUARIO) {
                                                         inclusive = true
@@ -888,8 +876,7 @@ class InicioActivity : ComponentActivity() {
                                                 navController.navigate(it)
                                             }) {
                                                 !arePermissionsGranted(
-                                                    this@InicioActivity,
-                                                    getRequiredPermissions()
+                                                    this@InicioActivity, getRequiredPermissions()
                                                 )
                                             }
                                         }
@@ -897,24 +884,18 @@ class InicioActivity : ComponentActivity() {
 
                                     composable(
                                         route = "${NavScreens.INSPECCION}/{tire}?temp={temp}&pressure={pressure}",
-                                        arguments = listOf(
-                                            navArgument("tire") {
-                                                type = NavType.StringType
-                                            },
-                                            navArgument("temp") {
-                                                type = NavType.FloatType; defaultValue = 0
-                                            },
-                                            navArgument("pressure") {
-                                                type = NavType.FloatType; defaultValue = 0
-                                            })
+                                        arguments = listOf(navArgument("tire") {
+                                            type = NavType.StringType
+                                        }, navArgument("temp") {
+                                            type = NavType.FloatType; defaultValue = 0
+                                        }, navArgument("pressure") {
+                                            type = NavType.FloatType; defaultValue = 0
+                                        })
                                     ) { backStackEntry ->
-                                        val tire =
-                                            backStackEntry.arguments?.getString("tire") ?: ""
-                                        val temp =
-                                            backStackEntry.arguments?.getFloat("temp") ?: 0.0
+                                        val tire = backStackEntry.arguments?.getString("tire") ?: ""
+                                        val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
                                         val pressure =
-                                            backStackEntry.arguments?.getFloat("pressure")
-                                                ?: 0.0
+                                            backStackEntry.arguments?.getFloat("pressure") ?: 0.0
 
                                         InspectionRoute(
                                             tire = tire,
@@ -939,8 +920,7 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(
-                                        route = "${NavScreens.MONTAJE}/{tire}",
-                                        arguments = listOf(
+                                        route = "${NavScreens.MONTAJE}/{tire}", arguments = listOf(
                                             navArgument("tire") {
                                                 type = NavType.StringType
                                             })
@@ -957,24 +937,18 @@ class InicioActivity : ComponentActivity() {
 
                                     composable(
                                         route = "${NavScreens.DESMONTAJE}/{tire}?temp={temp}&pressure={pressure}",
-                                        arguments = listOf(
-                                            navArgument("tire") {
-                                                type = NavType.StringType
-                                            },
-                                            navArgument("temp") {
-                                                type = NavType.FloatType; defaultValue = 0
-                                            },
-                                            navArgument("pressure") {
-                                                type = NavType.FloatType; defaultValue = 0
-                                            })
+                                        arguments = listOf(navArgument("tire") {
+                                            type = NavType.StringType
+                                        }, navArgument("temp") {
+                                            type = NavType.FloatType; defaultValue = 0
+                                        }, navArgument("pressure") {
+                                            type = NavType.FloatType; defaultValue = 0
+                                        })
                                     ) { backStackEntry ->
-                                        val tire =
-                                            backStackEntry.arguments?.getString("tire") ?: ""
-                                        val temp =
-                                            backStackEntry.arguments?.getFloat("temp") ?: 0.0
+                                        val tire = backStackEntry.arguments?.getString("tire") ?: ""
+                                        val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
                                         val pressure =
-                                            backStackEntry.arguments?.getFloat("pressure")
-                                                ?: 0.0
+                                            backStackEntry.arguments?.getFloat("pressure") ?: 0.0
                                         DisassemblyTireScreen(
                                             positionTire = tire,
                                             initialTemperature = temp.toFloat(),
@@ -1051,8 +1025,10 @@ class InicioActivity : ComponentActivity() {
     private fun askNotificationPermission() {
         // This is only necessary for API Level > 33 (TIRAMISU)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
-                PackageManager.PERMISSION_GRANTED
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
@@ -1076,8 +1052,7 @@ fun NotificationComponent(
             UpdateAppScreen(
                 modifier = modifier
                     .fillMaxSize()
-                    .clickable {}
-            )
+                    .clickable {})
         }
 
         FireCloudMessagingType.ARREGLO_URGENTE, FireCloudMessagingType.MANTENIMIENTO -> {

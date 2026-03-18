@@ -45,6 +45,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.AuthFlow
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
+import kotlinx.coroutines.delay
 
 enum class SignUpViews() {
     USER_DATA_VIEW, VEHICLE_DATA_VIEW, TERMS_VIEW
@@ -58,7 +59,7 @@ fun SignUpScreen(
     languageSelected: String,
     signUpViewModel: SignUpViewModel,
     modifier: Modifier = Modifier,
-    navigateToMenu: (PaymentPlanType) -> Unit
+    navigateToMenu: suspend (PaymentPlanType) -> Unit
 ) {
     val ctx = LocalContext.current
     var isNextScreen by remember { mutableStateOf(false) }
@@ -262,7 +263,8 @@ fun SignUpStatus(
             onEnableButton()
             if (signUpRequestStatus.data != null) {
                 if (signUpRequestStatus.data[0].id != 200) {
-                    Toast.makeText(ctx, signUpRequestStatus.data[0].message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, signUpRequestStatus.data[0].message, Toast.LENGTH_SHORT)
+                        .show()
                     onFailure()
                 } else onLogin()
             } else Toast.makeText(
@@ -292,24 +294,29 @@ fun LoginStatus(
     ctx: Context,
     loginRequestStatus: Result<LoginResponse>,
     onFailure: () -> Unit,
-    onNavigate: () -> Unit
+    onNavigate: suspend () -> Unit
 ) {
-    when (loginRequestStatus) {
-        is Result.Success -> {
-            onNavigate()
-        }
+    LaunchedEffect(loginRequestStatus) {
+        when (loginRequestStatus) {
+            is Result.Success -> {
+                delay(100)
+                onNavigate()
+            }
 
-        is Result.Failure -> {
-            Toast.makeText(
-                ctx,
-                R.string.signup_network_alert,
-                Toast.LENGTH_SHORT
-            ).show()
-            onFailure()
-            Log.e("SingUpScreen", "${loginRequestStatus.exception.message}")
-        }
+            is Result.Failure -> {
+                Toast.makeText(
+                    ctx,
+                    R.string.signup_network_alert,
+                    Toast.LENGTH_SHORT
+                ).show()
+                onFailure()
+                Log.e("SingUpScreen", "${loginRequestStatus.exception.message}")
+            }
 
-        Result.Loading -> {}
+            Result.Loading -> {
+
+            }
+        }
     }
 }
 
