@@ -1,11 +1,17 @@
 package com.rfz.appflotal.presentation.ui.utils
 
+import android.Manifest
+import android.app.ActivityManager
+import android.content.Context
+import android.content.Context.ACTIVITY_SERVICE
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.core.content.ContextCompat
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.network.service.ApiResult
-import com.rfz.appflotal.data.repository.UnidadOdometro
 
 fun <T> responseHelper(
     response: ApiResult<T>,
@@ -121,4 +127,37 @@ enum class FireCloudMessagingType(val value: String) {
     MANTENIMIENTO("Mantenimiento"),
     ARREGLO_URGENTE("Arreglo Urgente"),
     NONE("Sin evento")
+}
+
+fun getRequiredPermissions(): Array<String> {
+    val permissions = mutableListOf<String>()
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        // Android 12+
+        permissions.add(Manifest.permission.BLUETOOTH_SCAN)
+        permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+    } else {
+        // Android 11 o menor
+        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        // Android 13+
+        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    return permissions.toTypedArray()
+}
+
+fun arePermissionsGranted(context: Context, permissions: Array<String>): Boolean {
+    return permissions.all { perm ->
+        ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
+    }
+}
+
+fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
+    val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+    return manager.getRunningServices(Int.MAX_VALUE).any {
+        it.service.className == serviceClass.name
+    }
 }

@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.inicio.ui.arePermissionsGranted
-import com.rfz.appflotal.presentation.ui.inicio.ui.getRequiredPermissions
 import com.rfz.appflotal.presentation.ui.inicio.ui.isServiceRunning
+import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
+import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
 
 @Composable
 fun PermissionScreen(

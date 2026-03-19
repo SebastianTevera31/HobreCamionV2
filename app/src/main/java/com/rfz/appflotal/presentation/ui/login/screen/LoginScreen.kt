@@ -67,6 +67,8 @@ import com.rfz.appflotal.presentation.ui.components.AwaitDialog
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginEvent
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginUiState
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
+import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
+import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +79,8 @@ fun LoginScreen(
     val uiState by loginViewModel.uiState.collectAsState()
     val email by loginViewModel.email.collectAsState()
     val password by loginViewModel.password.collectAsState()
-    val isLoading by loginViewModel.isLoginEnabled.collectAsState()
+    val isButtonEnabled by loginViewModel.isButtonEnabled.collectAsState()
+    val isLoading = uiState is LoginUiState.Loading
     val context = LocalContext.current
 
     DisposableEffect(Unit) {
@@ -91,12 +94,21 @@ fun LoginScreen(
         loginViewModel.events.collect { event ->
             when (event) {
                 LoginEvent.NavigateToHome -> {
-                    if (!(uiState as LoginUiState.Success).termsGranted) {
-                        navController.navigate(NavScreens.TERMINOS)
-                        loginViewModel.cleanLoginData()
-                    } else {
-                        navController.navigate(NavScreens.HOME) {
-                            popUpTo(NavScreens.LOGIN) { inclusive = true }
+                    val successState = uiState as? LoginUiState.Success
+                    if (successState != null) {
+                        if (!successState.termsGranted) {
+                            navController.navigate(NavScreens.TERMINOS)
+                            loginViewModel.cleanLoginData()
+                        } else {
+                            if (!arePermissionsGranted(context, getRequiredPermissions())) {
+                                navController.navigate(NavScreens.PERMISOS) {
+                                    popUpTo(NavScreens.LOGIN) { inclusive = true }
+                                }
+                            } else {
+                                navController.navigate(NavScreens.HOME) {
+                                    popUpTo(NavScreens.LOGIN) { inclusive = true }
+                                }
+                            }
                         }
                     }
                 }
@@ -140,6 +152,7 @@ fun LoginScreen(
             email = email,
             password = password,
             isLoading = isLoading,
+            isButtonEnabled = isButtonEnabled,
             onLoginClick = {
                 loginViewModel.onLoginClicked()
             },
@@ -166,6 +179,7 @@ private fun LoginContent(
     email: String,
     password: String,
     isLoading: Boolean,
+    isButtonEnabled: Boolean,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onCleanUserData: () -> Unit,
@@ -202,6 +216,7 @@ private fun LoginContent(
                 email = email,
                 password = password,
                 isLoading = isLoading,
+                isButtonEnabled = isButtonEnabled,
                 onLoginClick = onLoginClick,
                 onRegisterClick = onRegisterClick,
                 onCleanUserData = onCleanUserData,
@@ -265,6 +280,7 @@ private fun LoginForm(
     brandColor: Color = Color(0xFF213DF3),
     darkerGray: Color = Color(0xFF333333),
     isLoading: Boolean,
+    isButtonEnabled: Boolean,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onCleanUserData: () -> Unit,
@@ -311,7 +327,7 @@ private fun LoginForm(
 
     Button(
         onClick = onLoginClick,
-        enabled = !isLoading,
+        enabled = isButtonEnabled,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
@@ -442,6 +458,7 @@ fun LoginScreenPreview() {
             email = "",
             password = "",
             isLoading = false,
+            isButtonEnabled = false,
             onLoginClick = {},
             onRegisterClick = {},
             onCleanUserData = {},

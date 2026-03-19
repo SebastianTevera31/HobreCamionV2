@@ -77,9 +77,10 @@ class LoginViewModel @Inject constructor(
     private val _events = MutableSharedFlow<LoginEvent>()
     val events = _events.asSharedFlow()
 
-    val isLoginEnabled: StateFlow<Boolean> =
-        combine(email, password) { email, pass ->
-            email.isNotBlank() && pass.isNotBlank() && _uiState.value is LoginUiState.Loading
+    // El botón se habilita si los campos NO están vacíos Y NO se está cargando
+    val isButtonEnabled: StateFlow<Boolean> =
+        combine(email, password, _uiState) { email, pass, state ->
+            email.isNotBlank() && pass.isNotBlank() && state !is LoginUiState.Loading
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -157,12 +158,8 @@ class LoginViewModel @Inject constructor(
                     termsGranted = response.termsGranted
                 )
 
-                _events.emit(
-                    if (response.termsGranted)
-                        LoginEvent.NavigateToHome
-                    else
-                        LoginEvent.NavigateToPermissions
-                )
+                // Siempre navegamos al flujo "Home", LoginScreen decidirá si va a TERMINOS o PERMISOS
+                _events.emit(LoginEvent.NavigateToHome)
             }
 
             -100 -> _uiState.value = LoginUiState.Error(
@@ -190,7 +187,7 @@ class LoginViewModel @Inject constructor(
     fun acceptTermsConditions(
         onSuccess: () -> Unit = {},
         onNavigate: (String) -> Unit,
-        onPermissionsGranted: () -> Boolean
+        checkPermissionsMissing: () -> Boolean
     ) {
         viewModelScope.launch {
             val user = getTasksUseCase.invoke().first()
@@ -201,7 +198,7 @@ class LoginViewModel @Inject constructor(
                     asyncResponseHelper(result) {
                         addTaskUseCase.updateTermsFlag(user.first().idUser, true)
                         onSuccess()
-                        if (onPermissionsGranted()) {
+                        if (checkPermissionsMissing()) {
                             onNavigate(NavScreens.PERMISOS)
                         } else {
                             onNavigate(NavScreens.HOME)
