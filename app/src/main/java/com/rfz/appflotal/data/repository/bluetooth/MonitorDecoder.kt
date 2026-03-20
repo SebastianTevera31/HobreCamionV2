@@ -29,7 +29,8 @@ fun decodeDataFrame(dataFrame: String?, typeData: MonitorDataFrame): String {
                     .padStart(8, '0')
 
                 val vehicleId = binaryString.substring(0, 3)
-                val position = binaryString.substring(3, 5).toInt(2)
+
+                val position = binaryString.substring(3).toInt(2)
 
                 val result = when (vehicleId) {
                     "000" -> position
