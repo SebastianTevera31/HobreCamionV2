@@ -42,7 +42,7 @@ fun decodeDataFrame(dataFrame: String?, typeData: MonitorDataFrame): String {
                     else -> 0
                 }
 
-                return String.format(Locale.US, "%02d", result)
+                return String.format(Locale.getDefault(), "%02d", result)
             }
 
             MonitorDataFrame.SENSOR_ID -> return dataFrame.substring(12, 18)
