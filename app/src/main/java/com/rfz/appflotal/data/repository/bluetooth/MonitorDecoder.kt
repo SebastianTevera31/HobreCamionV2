@@ -24,9 +24,12 @@ fun decodeDataFrame(dataFrame: String?, typeData: MonitorDataFrame): String {
             MonitorDataFrame.POSITION_WHEEL -> {
                 val binaryString = dataFrame
                     .substring(10, 12)
-                    .toInt(16)
-                    .toString(2)
-                    .padStart(8, '0')
+                    .toIntOrNull(16)
+                    ?.toString(2)
+                    ?.padStart(8, '0')
+
+
+                if (binaryString == null) return "00"
 
                 val vehicleId = binaryString.substring(0, 3)
 
