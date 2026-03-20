@@ -2,6 +2,7 @@ package com.rfz.appflotal.data.repository.bluetooth
 
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import java.math.MathContext
+import java.util.Locale
 
 enum class MonitorDataFrame {
     SENSOR_ID,
@@ -20,7 +21,25 @@ enum class SensorAlertDataFrame {
 fun decodeDataFrame(dataFrame: String?, typeData: MonitorDataFrame): String {
     if (dataFrame != null) {
         when (typeData) {
-            MonitorDataFrame.POSITION_WHEEL -> return dataFrame.substring(10, 12)
+            MonitorDataFrame.POSITION_WHEEL -> {
+                val binaryString = dataFrame
+                    .substring(10, 12)
+                    .toInt(16)
+                    .toString(2)
+                    .padStart(8, '0')
+
+                val vehicleId = binaryString.substring(0, 3)
+                val position = binaryString.substring(3, 5).toInt(2)
+
+                val result = when (vehicleId) {
+                    "000" -> position
+                    "001" -> position + 10
+                    "010" -> position + 22
+                    else -> 0
+                }
+
+                return String.format(Locale.US, "%02d", result)
+            }
 
             MonitorDataFrame.SENSOR_ID -> return dataFrame.substring(12, 18)
 
