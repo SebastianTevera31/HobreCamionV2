@@ -364,35 +364,37 @@ class HombreCamionService : Service() {
 
                         val tire = getTire(dataFrame)
 
-                        sensorDataTableRepository.updateSensorDataExceptLastInspection(
-                            update = SensorDataUpdate(
-                                idMonitor = monitorId,
-                                tire = tire,
-                                tireNumber = "",
-                                timestamp = timestamp,
-                                temperature = getTemperature(dataFrame).toInt(),
-                                pressure = getPressure(dataFrame).toInt(),
-                                highTemperatureAlert = highTemperatureAlert,
-                                highPressureAlert = highPressureAlert,
-                                lowPressureAlert = lowPressureAlert,
-                                lowBatteryAlert = lowBatteryAlert,
-                                punctureAlert = puncture,
-                                active = true
+                        if (!tire.isEmpty() && tire != "00") {
+                            sensorDataTableRepository.updateSensorDataExceptLastInspection(
+                                update = SensorDataUpdate(
+                                    idMonitor = monitorId,
+                                    tire = tire,
+                                    tireNumber = "",
+                                    timestamp = timestamp,
+                                    temperature = getTemperature(dataFrame).toInt(),
+                                    pressure = getPressure(dataFrame).toInt(),
+                                    highTemperatureAlert = highTemperatureAlert,
+                                    highPressureAlert = highPressureAlert,
+                                    lowPressureAlert = lowPressureAlert,
+                                    lowBatteryAlert = lowBatteryAlert,
+                                    punctureAlert = puncture,
+                                    active = true
+                                )
                             )
-                        )
 
-                        val inAlert = highTemperatureAlert || highPressureAlert
-                                || lowPressureAlert || lowBatteryAlert
+                            val inAlert = highTemperatureAlert || highPressureAlert
+                                    || lowPressureAlert || lowBatteryAlert
 
-                        coordinatesTableUseCase.updateCoordinates(
-                            monitorId,
-                            tire,
-                            isAlert = inAlert,
-                            isActive = true
-                        )
+                            coordinatesTableUseCase.updateCoordinates(
+                                monitorId,
+                                tire,
+                                isAlert = inAlert,
+                                isActive = true
+                            )
 
-                        // Enviar datos a API
-                        sendDataToApi(dataFrame, timestamp, monitorId)
+                            // Enviar datos a API
+                            sendDataToApi(dataFrame, timestamp, monitorId)
+                        }
                     }
                 }
         }

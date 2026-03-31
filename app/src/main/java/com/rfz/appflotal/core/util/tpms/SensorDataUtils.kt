@@ -11,7 +11,15 @@ import kotlin.math.roundToInt
 
 fun getTire(dataFrame: String): String {
     val tire = decodeDataFrame(dataFrame, MonitorDataFrame.POSITION_WHEEL).toInt()
-    return findOutPosition("P${tire}")
+    val position = findOutPosition("P$tire")
+
+    if (position.isEmpty()) return ""
+
+    return if (position.startsWith("P0")) {
+        "P" + position.substring(2)
+    } else {
+        position
+    }
 }
 
 fun getPressure(dataFrame: String): Float {
