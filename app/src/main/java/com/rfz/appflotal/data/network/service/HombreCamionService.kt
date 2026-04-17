@@ -46,7 +46,7 @@ import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
 import com.rfz.appflotal.domain.database.DataframeTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
-import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
+import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.InicioActivity
 import dagger.hilt.android.AndroidEntryPoint

@@ -1,5 +1,7 @@
 package com.rfz.appflotal.data.model.tire.dto
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 
@@ -37,4 +39,50 @@ data class InspectionTireDto(
 
     @SerializedName("fld_pressureAdjusted")
     val pressureAdjusted: Int,
+)
+
+@Entity(tableName = "inspection_tire_table")
+data class InspectionTireEntity(
+    @PrimaryKey
+    val positionTire: String,
+    val treadDepth: Float,
+    val treadDepth2: Float,
+    val treadDepth3: Float,
+    val treadDepth4: Float,
+    val tireInspectionReportId: Int,
+    val pressureInspected: Int,
+    val dateInspection: String,
+    val odometer: Int,
+    val temperatureInspected: Int,
+    val pressureAdjusted: Int,
+    val updatedAt: Long
+)
+
+fun InspectionTireEntity.toDto(): InspectionTireDto = InspectionTireDto(
+    positionTire = positionTire,
+    treadDepth = treadDepth,
+    treadDepth2 = treadDepth2,
+    treadDepth3 = treadDepth3,
+    treadDepth4 = treadDepth4,
+    tireInspectionReportId = tireInspectionReportId,
+    pressureInspected = pressureInspected,
+    dateInspection = dateInspection,
+    odometer = odometer,
+    temperatureInspected = temperatureInspected,
+    pressureAdjusted = pressureAdjusted
+)
+
+fun InspectionTireDto.toEntity(updatedAt: Long): InspectionTireEntity = InspectionTireEntity(
+    positionTire = positionTire,
+    treadDepth = treadDepth,
+    treadDepth2 = treadDepth2,
+    treadDepth3 = treadDepth3,
+    treadDepth4 = treadDepth4,
+    tireInspectionReportId = tireInspectionReportId,
+    pressureInspected = pressureInspected,
+    dateInspection = dateInspection,
+    odometer = odometer,
+    temperatureInspected = temperatureInspected,
+    pressureAdjusted = pressureAdjusted,
+    updatedAt = updatedAt
 )

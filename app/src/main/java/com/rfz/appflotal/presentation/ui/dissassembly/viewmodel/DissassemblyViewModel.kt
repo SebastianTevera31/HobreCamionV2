@@ -298,9 +298,6 @@ class DisassemblyViewModel @Inject constructor(
         )
 
         return if (result.isSuccess) {
-            val response = result.getOrNull()
-            if (response.isNullOrEmpty()) return false
-            if (result.getOrNull()?.first()?.id != 200) return false
             hombreCamionRepository.updateOdometer(odometerValue.toInt(), lastOdometerMeasurement)
             sensorDataTableRepository.updateTireRecord(
                 tire = uiState.positionTire,

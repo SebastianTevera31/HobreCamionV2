@@ -200,27 +200,6 @@ class InspectionViewModel @Inject constructor(
         )
 
         if (result.isSuccess) {
-            val response = result.getOrNull()
-            if (response.isNullOrEmpty()) {
-                _requestState.update { currentUiState ->
-                    currentUiState.copy(
-                        isSending = false,
-                        operationState = OperationState.Error
-                    )
-                }
-                _eventFlow.emit(ShowToast(UploadingInspectionMessage.GENERAL_ERROR.message))
-                return@launch
-            }
-            if (result.getOrNull()?.first()?.id != 200) {
-                _requestState.update { currentUiState ->
-                    currentUiState.copy(
-                        isSending = false,
-                        operationState = OperationState.Error
-                    )
-                }
-                _eventFlow.emit(ShowToast(UploadingInspectionMessage.GENERAL_ERROR.message))
-                return@launch
-            }
             // Registrar registro de odometro
             hombreCamionRepository.updateOdometer(
                 odometerValue.roundToInt(),

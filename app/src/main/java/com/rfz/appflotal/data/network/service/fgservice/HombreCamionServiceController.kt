@@ -8,7 +8,7 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
-import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
+import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import jakarta.inject.Inject

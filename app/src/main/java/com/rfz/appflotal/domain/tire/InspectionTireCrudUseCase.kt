@@ -8,7 +8,7 @@ import javax.inject.Inject
 class InspectionTireCrudUseCase @Inject constructor(
     private val inspectionTireCrudRepository: InspectionTireCrudRepository
 ) {
-    suspend operator fun invoke(requestBody: InspectionTireDto): Result<List<GeneralResponse>> {
+    suspend operator fun invoke(requestBody: InspectionTireDto): Result<Unit> {
         return inspectionTireCrudRepository.doInspectionTire(requestBody)
     }
 }

@@ -13,7 +13,7 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
-import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
+import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

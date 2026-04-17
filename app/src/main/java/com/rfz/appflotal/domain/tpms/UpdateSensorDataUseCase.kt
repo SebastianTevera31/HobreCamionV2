@@ -1,4 +1,4 @@
-package com.rfz.appflotal.domain.tpmsUseCase
+package com.rfz.appflotal.domain.tpms
 
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.getDateObject

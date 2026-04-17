@@ -9,6 +9,8 @@ import com.rfz.appflotal.data.dao.AssemblyTireDao
 import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
+import com.rfz.appflotal.data.dao.DisassemblyTireDao
+import com.rfz.appflotal.data.dao.InspectionTireDao
 import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.database.AppHombreCamionDatabase
 import dagger.Module
@@ -45,6 +47,16 @@ class DataBaseModule {
     @Provides
     fun provideAssemblyTireDao(hombreCamionDatabase: AppHombreCamionDatabase): AssemblyTireDao {
         return hombreCamionDatabase.assemblyTireDao()
+    }
+
+    @Provides
+    fun provideDisassemblyTireDao(hombreCamionDatabase: AppHombreCamionDatabase): DisassemblyTireDao {
+        return hombreCamionDatabase.disassemblyTireDao()
+    }
+
+    @Provides
+    fun provideInspectionTireDao(hombreCamionDatabase: AppHombreCamionDatabase): InspectionTireDao {
+        return hombreCamionDatabase.inspectionTireDao()
     }
 
     @Provides

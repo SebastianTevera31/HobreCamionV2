@@ -18,10 +18,10 @@ import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
 import com.rfz.appflotal.domain.database.DataframeTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
-import com.rfz.appflotal.domain.tpmsUseCase.ApiTpmsUseCase
-import com.rfz.appflotal.domain.tpmsUseCase.GetSensorDataByWheelUseCase
-import com.rfz.appflotal.domain.tpmsUseCase.MonitorUnitConversionUseCase
-import com.rfz.appflotal.domain.tpmsUseCase.UpdateSensorDataUseCase
+import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
+import com.rfz.appflotal.domain.tpms.GetSensorDataByWheelUseCase
+import com.rfz.appflotal.domain.tpms.MonitorUnitConversionUseCase
+import com.rfz.appflotal.domain.tpms.UpdateSensorDataUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchPressureUnitUseCase
