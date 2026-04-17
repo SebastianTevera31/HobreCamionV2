@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -68,7 +68,7 @@ fun HomeTopBar(
             }
             IconButton(onClick = onShare) {
                 Icon(
-                    Icons.Filled.Share,
+                    Icons.AutoMirrored.Filled.Comment,
                     contentDescription = stringResource(R.string.share_feedback),
                     tint = Color.White
                 )

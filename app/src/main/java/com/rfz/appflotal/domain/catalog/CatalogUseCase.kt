@@ -19,4 +19,8 @@ class CatalogUseCase @Inject constructor(private val catalogRepository: CatalogR
     suspend fun onGetTireReport(): ApiResult<List<GetTireInspectionReportResponse>?> {
         return catalogRepository.onGetTireReports()
     }
+
+    suspend fun refreshTireReportCatalog() {
+        catalogRepository.refreshTireReports()
+    }
 }

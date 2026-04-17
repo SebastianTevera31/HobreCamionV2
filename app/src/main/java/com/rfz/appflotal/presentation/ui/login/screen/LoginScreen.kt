@@ -63,7 +63,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.NavScreens
 import com.rfz.appflotal.presentation.commons.TermsAndConditionsText
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginEvent
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginUiState
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
@@ -130,7 +130,7 @@ fun LoginScreen(
         LoginUiState.Idle -> Unit
 
         LoginUiState.Loading -> {
-            AwaitDialog()
+            LoadingDialog()
         }
 
         is LoginUiState.Error -> {

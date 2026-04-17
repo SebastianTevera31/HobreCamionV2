@@ -41,13 +41,13 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private val _messageOperationState: MutableStateFlow<OperationStatus> =
-        MutableStateFlow(OperationStatus.Loading)
+        MutableStateFlow(OperationStatus.Idle)
     val messageOperationState = _messageOperationState.asStateFlow()
 
 
     suspend fun logout() {
         hombreCamionRepository.clearUserData()
-        _messageOperationState.value = OperationStatus.Loading
+        _messageOperationState.value = OperationStatus.Idle
         _uiState.value = HomeUiState()
     }
 
@@ -157,6 +157,8 @@ class HomeViewModel @Inject constructor(
 
     fun onSendFeedback(feedback: String) {
         viewModelScope.launch {
+            _messageOperationState.value = OperationStatus.Loading
+
             val result = appUtilitiesRepository.sendFeedback(
                 UserOpinion(
                     opinion = feedback,
@@ -182,6 +184,6 @@ class HomeViewModel @Inject constructor(
     }
 
     fun cleanOperationStatus() {
-        _messageOperationState.value = OperationStatus.Loading
+        _messageOperationState.value = OperationStatus.Idle
     }
 }

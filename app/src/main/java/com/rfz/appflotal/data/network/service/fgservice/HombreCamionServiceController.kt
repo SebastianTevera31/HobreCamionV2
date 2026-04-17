@@ -66,8 +66,7 @@ class HombreCamionServiceController @Inject constructor(
                 data?.forEach {
                     val tire = it.sensorPosition
 
-                    val inAlert =
-                        it.highPressure && it.highTemperature && it.lowPressure && it.lowBattery
+                    val inAlert = it.highPressure || it.highTemperature || it.lowPressure || it.lowBattery
 
                     val date = convertDate(
                         it.ultimalectura,

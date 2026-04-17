@@ -8,26 +8,29 @@ import com.rfz.appflotal.data.dao.AssemblyTireDao
 import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
-import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.dao.DisassemblyTireDao
+import com.rfz.appflotal.data.dao.InspectionCatalogDao
 import com.rfz.appflotal.data.dao.InspectionTireDao
+import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.model.assembly.AssemblyTireEntity
 import com.rfz.appflotal.data.model.axle.AxleEntity
 import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.data.model.database.DataframeEntity
+import com.rfz.appflotal.data.model.database.DisassemblyTireEntity
+import com.rfz.appflotal.data.model.database.InspectionCatalogEntity
+import com.rfz.appflotal.data.model.database.InspectionTireEntity
 import com.rfz.appflotal.data.model.database.SensorDataEntity
-import com.rfz.appflotal.data.model.disassembly.tire.DisassemblyTireEntity
-import com.rfz.appflotal.data.model.tire.dto.InspectionTireEntity
 
 @Keep
 @Database(
     entities = [
         AppHCEntity::class, DataframeEntity::class, CoordinatesEntity::class,
         SensorDataEntity::class, AssemblyTireEntity::class, AxleEntity::class,
-        DisassemblyTireEntity::class, InspectionTireEntity::class
+        DisassemblyTireEntity::class, InspectionTireEntity::class,
+        InspectionCatalogEntity::class
     ],
-    version = 24,
+    version = 25,
     exportSchema = false
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {
@@ -40,6 +43,7 @@ abstract class AppHombreCamionDatabase : RoomDatabase() {
     abstract fun assemblyTireDao(): AssemblyTireDao
     abstract fun disassemblyTireDao(): DisassemblyTireDao
     abstract fun inspectionTireDao(): InspectionTireDao
+    abstract fun inspectionCatalogDao(): InspectionCatalogDao
 
     abstract fun axleDao(): AxleDao
 }

@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,7 +24,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 
 @Composable
-fun AwaitDialog(@StringRes message: Int = R.string.espere_un_momento) {
+fun LoadingDialog(@StringRes message: Int = R.string.espere_un_momento) {
     AlertDialog(
         onDismissRequest = { },
         title = {},

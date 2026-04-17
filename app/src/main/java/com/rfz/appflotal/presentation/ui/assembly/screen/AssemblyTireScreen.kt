@@ -50,7 +50,7 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireUiState
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.OdometerValidation
-import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.NumberField
@@ -160,7 +160,7 @@ fun AssemblyTireView(
         }
 
         OperationStatus.Loading -> {
-            AwaitDialog()
+            LoadingDialog()
         }
 
         else -> {}
@@ -318,6 +318,8 @@ fun AssemblyTireView(
                     }
                 }
             }
+
+            else -> {}
         }
 
 //        Surface(

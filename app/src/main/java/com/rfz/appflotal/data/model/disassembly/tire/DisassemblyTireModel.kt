@@ -12,17 +12,6 @@ data class DisassemblyTireRequestDto(
     @SerializedName("fld_odometer") val odometer: Int
 )
 
-@Entity(tableName = "disassembly_tire_table")
-data class DisassemblyTireEntity(
-    @PrimaryKey
-    val positionTire: String,
-    val disassemblyCause: Int,
-    val destination: Int,
-    val dateOperation: String,
-    val odometer: Int,
-    val updatedAt: Long
-)
-
 data class DisassemblyTire(
     val disassemblyCause: Int,
     val destination: Int,

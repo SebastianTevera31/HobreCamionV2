@@ -11,7 +11,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -22,7 +21,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.text.isDigitsOnly
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -30,7 +28,7 @@ import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.AddIte
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ItemDialog
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ListItemContent
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ListManagementScreen
-import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.components.FieldSpinner
 import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreadCatalogDesignFields
 import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreadDesignFields
@@ -66,7 +64,7 @@ fun RetreatedDesignScreen(
     }
 
     if (state.value.isSending) {
-        AwaitDialog()
+        LoadingDialog()
     }
 
     val treadWarning = dialogState.value.profundidadPiso.trim().toIntOrNull()?.let { number ->

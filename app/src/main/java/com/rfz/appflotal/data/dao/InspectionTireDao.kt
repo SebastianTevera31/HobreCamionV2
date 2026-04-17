@@ -3,7 +3,7 @@ package com.rfz.appflotal.data.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
-import com.rfz.appflotal.data.model.tire.dto.InspectionTireEntity
+import com.rfz.appflotal.data.model.database.InspectionTireEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

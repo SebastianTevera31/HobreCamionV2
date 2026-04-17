@@ -109,6 +109,7 @@ suspend fun SnackbarHostState.showMessage(
 }
 
 sealed class OperationStatus {
+    object Idle : OperationStatus()
     object Loading : OperationStatus()
     object Error : OperationStatus()
     object Success : OperationStatus()

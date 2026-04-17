@@ -33,11 +33,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
-import com.rfz.appflotal.presentation.commons.CircularLoading
+import com.rfz.appflotal.presentation.commons.LoadingIndicator
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
@@ -51,7 +51,6 @@ import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import com.rfz.appflotal.presentation.ui.utils.showMessage
 import com.rfz.appflotal.presentation.ui.utils.validate
 import kotlinx.coroutines.launch
-import kotlin.toString
 
 sealed interface NavigationScreen {
     object INSPECTION : NavigationScreen
@@ -184,7 +183,7 @@ fun DisassemblyTireView(
         }
 
         OperationStatus.Loading -> {
-            AwaitDialog()
+            LoadingDialog()
         }
 
         else -> {}
@@ -263,7 +262,7 @@ fun DisassemblyTireView(
             }
 
             OperationStatus.Loading -> {
-                CircularLoading(
+                LoadingIndicator(
                     modifier
                         .safeContentPadding()
                         .padding(innerPadding)
@@ -310,6 +309,8 @@ fun DisassemblyTireView(
                     }
                 }
             }
+
+            else -> {}
         }
     }
 }

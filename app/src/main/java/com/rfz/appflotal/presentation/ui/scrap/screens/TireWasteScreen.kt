@@ -39,11 +39,11 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.tire.Tire
-import com.rfz.appflotal.presentation.commons.CircularLoading
+import com.rfz.appflotal.presentation.commons.LoadingIndicator
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
@@ -148,7 +148,7 @@ fun TireWasteView(
         }
 
         OperationStatus.Loading -> {
-            AwaitDialog()
+            LoadingDialog()
         }
 
         else -> {}
@@ -184,7 +184,7 @@ fun TireWasteView(
             }
 
             OperationStatus.Loading -> {
-                CircularLoading(modifier.padding(innerPadding))
+                LoadingIndicator(modifier.padding(innerPadding))
             }
 
             OperationStatus.Success -> {
@@ -262,6 +262,8 @@ fun TireWasteView(
                     }
                 }
             }
+
+            else -> {}
         }
     }
 }

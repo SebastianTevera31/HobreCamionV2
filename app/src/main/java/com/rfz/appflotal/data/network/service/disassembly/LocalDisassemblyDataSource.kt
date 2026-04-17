@@ -1,7 +1,7 @@
 package com.rfz.appflotal.data.network.service.disassembly
 
 import com.rfz.appflotal.data.dao.DisassemblyTireDao
-import com.rfz.appflotal.data.model.disassembly.tire.DisassemblyTireEntity
+import com.rfz.appflotal.data.model.database.DisassemblyTireEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -13,13 +13,15 @@ class LocalDisassemblyDataSource @Inject constructor(
     fun observeDisassemblyTire(): Flow<List<DisassemblyTireEntity>> =
         disassemblyTireDao.observeDisassemblyTires()
 
-    suspend fun saveDisassemblyTire(disassemblyTire: DisassemblyTireEntity) = withContext(Dispatchers.IO) {
-        disassemblyTireDao.upsertDisassemblyTire(disassemblyTire)
-    }
+    suspend fun saveDisassemblyTire(disassemblyTire: DisassemblyTireEntity) =
+        withContext(Dispatchers.IO) {
+            disassemblyTireDao.upsertDisassemblyTire(disassemblyTire)
+        }
 
-    suspend fun getDisassemblyTire(position: String): DisassemblyTireEntity? = withContext(Dispatchers.IO) {
-        disassemblyTireDao.getDisassemblyTire(position)
-    }
+    suspend fun getDisassemblyTire(position: String): DisassemblyTireEntity? =
+        withContext(Dispatchers.IO) {
+            disassemblyTireDao.getDisassemblyTire(position)
+        }
 
     suspend fun deleteDisassemblyTire(position: String) = withContext(Dispatchers.IO) {
         disassemblyTireDao.deleteDisassemblyTire(position)

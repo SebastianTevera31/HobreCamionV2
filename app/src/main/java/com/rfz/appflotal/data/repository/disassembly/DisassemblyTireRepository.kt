@@ -1,8 +1,8 @@
 package com.rfz.appflotal.data.repository.disassembly
 
+import com.rfz.appflotal.data.model.database.DisassemblyTireEntity
 import com.rfz.appflotal.data.model.disassembly.response.DisassemblyCauseResponse
 import com.rfz.appflotal.data.model.disassembly.tire.DisassemblyTire
-import com.rfz.appflotal.data.model.disassembly.tire.DisassemblyTireEntity
 import com.rfz.appflotal.data.network.service.assembly.AssemblySyncScheduler
 import com.rfz.appflotal.data.network.service.disassembly.LocalDisassemblyDataSource
 import com.rfz.appflotal.data.network.service.disassembly.RemoteDisassemblyTireDataSource
@@ -25,7 +25,7 @@ class DisassemblyTireRepository @Inject constructor(
 
     suspend fun pushDisassemblyTire(request: DisassemblyTire) {
         val token = getTasksUseCase().first().first().fld_token
-        
+
         // Guardado Local
         val entity = DisassemblyTireEntity(
             positionTire = request.positionTire,
@@ -35,9 +35,9 @@ class DisassemblyTireRepository @Inject constructor(
             odometer = request.odometer,
             updatedAt = System.currentTimeMillis()
         )
-        
+
         localDisassemblyDataSource.saveDisassemblyTire(entity)
-        
+
         // Encolar Sincronización
         syncScheduler.enqueueDisassembly(request.positionTire, token)
     }

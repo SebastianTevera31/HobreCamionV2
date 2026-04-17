@@ -47,7 +47,7 @@ import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.inspection.components.InspectionContent
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUi
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUiState
@@ -57,7 +57,6 @@ import com.rfz.appflotal.presentation.ui.inspection.viewmodel.rememberInspection
 import com.rfz.appflotal.presentation.ui.utils.showMessage
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlin.toString
 
 @Composable
 fun InspectionRoute(
@@ -88,7 +87,7 @@ fun InspectionRoute(
 
         OperationState.Loading -> {
             if (requestState.value.isSending) {
-                AwaitDialog()
+                LoadingDialog()
             }
         }
 

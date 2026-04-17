@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.destination.Destination
 import com.rfz.appflotal.data.model.tire.Tire
-import com.rfz.appflotal.presentation.commons.CircularLoading
+import com.rfz.appflotal.presentation.commons.LoadingIndicator
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -166,7 +166,7 @@ fun CambioDestinoView(
             }
 
             OperationStatus.Loading -> {
-                CircularLoading(modifier.padding(innerPadding))
+                LoadingIndicator(modifier.padding(innerPadding))
             }
 
             OperationStatus.Success -> {
@@ -290,6 +290,8 @@ fun CambioDestinoView(
                     }
                 }
             }
+
+            else -> {}
         }
     }
 }

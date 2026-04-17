@@ -52,7 +52,7 @@ import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
-import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
@@ -133,7 +133,7 @@ fun HomeScreen(
         }
 
         OperationStatus.Loading -> {
-            AwaitDialog()
+            LoadingDialog()
         }
 
         OperationStatus.Success -> {
@@ -240,6 +240,8 @@ fun HomeScreen(
                 }
             }
         }
+
+        else -> {}
     }
 }
 

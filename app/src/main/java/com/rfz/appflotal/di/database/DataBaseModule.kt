@@ -10,6 +10,7 @@ import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
 import com.rfz.appflotal.data.dao.DisassemblyTireDao
+import com.rfz.appflotal.data.dao.InspectionCatalogDao
 import com.rfz.appflotal.data.dao.InspectionTireDao
 import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.database.AppHombreCamionDatabase
@@ -62,6 +63,11 @@ class DataBaseModule {
     @Provides
     fun provideAxleDao(hombreCamionDatabase: AppHombreCamionDatabase): AxleDao {
         return hombreCamionDatabase.axleDao()
+    }
+
+    @Provides
+    fun provideInspectionCatalogDao(database: AppHombreCamionDatabase): InspectionCatalogDao {
+        return database.inspectionCatalogDao()
     }
 
     @Keep

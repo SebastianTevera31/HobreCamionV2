@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.model.tire.dto
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
+import com.rfz.appflotal.data.model.database.InspectionTireEntity
 import java.time.LocalDateTime
 
 data class InspectionTireDto(
@@ -41,22 +42,6 @@ data class InspectionTireDto(
     val pressureAdjusted: Int,
 )
 
-@Entity(tableName = "inspection_tire_table")
-data class InspectionTireEntity(
-    @PrimaryKey
-    val positionTire: String,
-    val treadDepth: Float,
-    val treadDepth2: Float,
-    val treadDepth3: Float,
-    val treadDepth4: Float,
-    val tireInspectionReportId: Int,
-    val pressureInspected: Int,
-    val dateInspection: String,
-    val odometer: Int,
-    val temperatureInspected: Int,
-    val pressureAdjusted: Int,
-    val updatedAt: Long
-)
 
 fun InspectionTireEntity.toDto(): InspectionTireDto = InspectionTireDto(
     positionTire = positionTire,

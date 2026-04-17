@@ -114,3 +114,38 @@ data class SensorDataUpdate(
     val punctureAlert: Boolean,
     val active: Boolean
 )
+
+@Entity(tableName = "disassembly_tire_table")
+data class DisassemblyTireEntity(
+    @PrimaryKey
+    val positionTire: String,
+    val disassemblyCause: Int,
+    val destination: Int,
+    val dateOperation: String,
+    val odometer: Int,
+    val updatedAt: Long
+)
+
+@Entity(tableName = "inspection_catalog")
+data class InspectionCatalogEntity(
+    @PrimaryKey val idTireInspectionReport: Int,
+    val description: String,
+    val isActive: Boolean = true
+)
+
+@Entity(tableName = "inspection_tire_table")
+data class InspectionTireEntity(
+    @PrimaryKey
+    val positionTire: String,
+    val treadDepth: Float,
+    val treadDepth2: Float,
+    val treadDepth3: Float,
+    val treadDepth4: Float,
+    val tireInspectionReportId: Int,
+    val pressureInspected: Int,
+    val dateInspection: String,
+    val odometer: Int,
+    val temperatureInspected: Int,
+    val pressureAdjusted: Int,
+    val updatedAt: Long
+)

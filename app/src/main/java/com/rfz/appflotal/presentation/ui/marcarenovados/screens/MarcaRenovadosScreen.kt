@@ -15,7 +15,7 @@ import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.AddIte
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ItemDialog
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ListItemContent
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ListManagementScreen
-import com.rfz.appflotal.presentation.ui.components.AwaitDialog
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.marcarenovados.viewmodel.MarcaRenovadosViewModel
 import com.rfz.appflotal.presentation.ui.marcarenovados.viewmodel.RetreadBrandFields
 import kotlinx.coroutines.flow.collectLatest
@@ -45,7 +45,7 @@ fun MarcaRenovadosScreen(
     }
 
     if (state.value.isSending) {
-        AwaitDialog()
+        LoadingDialog()
     }
 
     ListManagementScreen(
