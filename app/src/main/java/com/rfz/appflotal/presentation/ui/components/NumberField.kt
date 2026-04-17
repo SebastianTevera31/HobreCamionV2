@@ -11,13 +11,17 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.filterNumericDot
 
 @Composable
@@ -54,7 +58,19 @@ fun NumberField(
             ),
             enabled = isEditable,
             singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    if (it.isFocused) {
+                        if (value == "0") {
+                            onValueChange("")
+                        }
+                    } else {
+                        if (value.isBlank()) {
+                            onValueChange("0")
+                        }
+                    }
+                },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color(0xFF6A5DD9),
                 unfocusedBorderColor = Color(0xFFAAAAAA),
@@ -72,5 +88,35 @@ fun NumberField(
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NumberFieldPreview() {
+    HombreCamionTheme {
+        NumberField(
+            value = "123.45",
+            onValueChange = {},
+            errorText = null,
+            label = "Sample Label",
+            placeHolderText = "Sample Placeholder",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NumberFieldWithErrorPreview() {
+    HombreCamionTheme {
+        NumberField(
+            value = "123.45",
+            onValueChange = {},
+            errorText = R.string.app_name,
+            label = "Sample Label",
+            placeHolderText = "Sample Placeholder",
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

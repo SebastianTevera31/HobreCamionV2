@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +22,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
+import com.rfz.appflotal.data.model.catalog.TireInspectionItem
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.NumberField
 import com.rfz.appflotal.presentation.ui.components.SectionHeader
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionFormState
@@ -204,5 +208,40 @@ fun InspectionContent(
         }
 
         Spacer(Modifier.height(80.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun InspectionContentPreview() {
+    val formState = InspectionFormState(
+        lastOdometer = 10000,
+        odometer = "10500",
+        temperature = "35",
+        pressureMeasured = "100",
+        adjustedPressure = "105",
+        treadDepth1 = "10",
+        treadDepth2 = "10",
+        treadDepth3 = "10",
+        treadDepth4 = "10"
+    )
+    val inspectionList = listOf(
+        TireInspectionItem(1, "Desgaste Irregular"),
+        TireInspectionItem(2, "Corte en banda"),
+        TireInspectionItem(3, "Separación de capas")
+    )
+
+    HombreCamionTheme {
+        Surface {
+            InspectionContent(
+                form = formState,
+                temperatureUnit = "°C",
+                pressureUnit = "PSI",
+                odometerUnit = "km",
+                lastOdometer = 10000,
+                inspectionList = inspectionList,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
     }
 }
