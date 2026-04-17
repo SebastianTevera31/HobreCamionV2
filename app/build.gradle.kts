@@ -6,6 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("androidx.room")
 }
 
 android {
@@ -57,6 +58,10 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 
     packaging {

@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.database
 
 import androidx.annotation.Keep
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.rfz.appflotal.data.dao.AppHCDao
@@ -30,8 +31,9 @@ import com.rfz.appflotal.data.model.database.SensorDataEntity
         DisassemblyTireEntity::class, InspectionTireEntity::class,
         InspectionCatalogEntity::class
     ],
-    version = 25,
-    exportSchema = false
+    version = 26,
+    autoMigrations = [AutoMigration(from = 25, to = 26)],
+    exportSchema = true
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {
     //DAO

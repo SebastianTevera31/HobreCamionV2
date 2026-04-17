@@ -78,6 +78,6 @@ class DataBaseModule {
             appContext,
             AppHombreCamionDatabase::class.java,
             BuildConfig.DB_NAME
-        ).fallbackToDestructiveMigration(true).build()
+        ).build()
     }
 }
