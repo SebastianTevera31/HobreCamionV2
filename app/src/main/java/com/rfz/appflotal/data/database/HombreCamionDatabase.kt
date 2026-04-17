@@ -32,7 +32,6 @@ import com.rfz.appflotal.data.model.database.SensorDataEntity
         InspectionCatalogEntity::class
     ],
     version = 26,
-    autoMigrations = [AutoMigration(from = 25, to = 26)],
     exportSchema = true
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {

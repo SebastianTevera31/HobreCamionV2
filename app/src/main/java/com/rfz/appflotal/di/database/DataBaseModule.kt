@@ -75,9 +75,9 @@ class DataBaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext appContext: Context): AppHombreCamionDatabase {
         return Room.databaseBuilder(
-            appContext,
-            AppHombreCamionDatabase::class.java,
-            BuildConfig.DB_NAME
-        ).build()
+                appContext,
+                AppHombreCamionDatabase::class.java,
+                BuildConfig.DB_NAME
+            ).fallbackToDestructiveMigration(false).build()
     }
 }
