@@ -52,6 +52,7 @@ import com.rfz.appflotal.data.network.client.vehicle.VehicleByIdClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleCrudClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleListClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleTypeClient
+import com.rfz.appflotal.data.network.client.vialstatus.VialStatusService
 import com.rfz.appflotal.data.network.client.waster.WasteService
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepository
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepositoryImp
@@ -413,6 +414,12 @@ class NetworkModule {
     @Provides
     fun provideRepairService(retrofit: Retrofit): RepairService {
         return retrofit.create(RepairService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideVialStatusService(retrofit: Retrofit): VialStatusService {
+        return retrofit.create(VialStatusService::class.java)
     }
 }
 

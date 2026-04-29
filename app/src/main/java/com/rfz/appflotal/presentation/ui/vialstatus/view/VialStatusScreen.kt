@@ -49,13 +49,13 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialViewModel
+import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
 
 @Composable
 fun VialStatusScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: VialViewModel = hiltViewModel()
+    viewModel: VialStatusViewModel = hiltViewModel()
 ) {
     VialStatusView(
         onBack = onBack
