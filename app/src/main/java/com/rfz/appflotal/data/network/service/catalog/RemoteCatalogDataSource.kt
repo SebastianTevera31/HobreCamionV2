@@ -4,13 +4,14 @@ import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
 import com.rfz.appflotal.data.network.client.catalog.CatalogClient
+import com.rfz.appflotal.data.network.networkRequestHelper
 import com.rfz.appflotal.data.network.requestHelper
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
-class CatalogService @Inject constructor(
+class RemoteCatalogDataSource @Inject constructor(
     private val catalogClient: CatalogClient,
     private val getTasksUseCase: GetTasksUseCase
 ) {
@@ -31,5 +32,9 @@ class CatalogService @Inject constructor(
             val token = getTasksUseCase().first()[0].fld_token
             catalogClient.getTireInspectionReport("bearer $token")
         }
+    }
+
+    suspend fun getStates(countryId: Int) = networkRequestHelper {
+        catalogClient.getStates(countryId)
     }
 }

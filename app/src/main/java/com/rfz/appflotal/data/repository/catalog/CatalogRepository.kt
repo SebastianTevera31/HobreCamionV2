@@ -7,11 +7,11 @@ import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
 import com.rfz.appflotal.data.network.service.ApiResult
-import com.rfz.appflotal.data.network.service.catalog.CatalogService
+import com.rfz.appflotal.data.network.service.catalog.RemoteCatalogDataSource
 import javax.inject.Inject
 
 class CatalogRepository @Inject constructor(
-    private val catalogService: CatalogService,
+    private val catalogService: RemoteCatalogDataSource,
     private val inspectionCatalogDao: InspectionCatalogDao
 ) {
 

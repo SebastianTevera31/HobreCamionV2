@@ -15,6 +15,11 @@ data class GetSectorsResponse(
     @SerializedName("fld_sector") val fldSector: String,
 )
 
+data class StateDto(
+    @SerializedName("id") val idState: Int,
+    @SerializedName("fld_place") val stateName: String
+)
+
 data class GetTireInspectionReportResponse(
     @SerializedName("id_tireInspectionReport") val idTireInspectionReport: Int,
     @SerializedName("fld_description") val description: String,

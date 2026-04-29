@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.vialstatus
+package com.rfz.appflotal.presentation.ui.vialstatus.view
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -48,14 +49,14 @@ import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
-fun VialConfigurationMenu(
+fun VialLocationMenu(
     visible: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     countryFields: List<CatalogItem>,
     stateFields: List<CatalogItem>,
-    onCountryChange: () -> Unit,
-    onStateChange: () -> Unit,
+    onCountryChange: (id: Int) -> Unit,
+    onStateChange: (id: Int) -> Unit,
     onSearch: () -> Unit
 ) {
     val currentOnDismiss by rememberUpdatedState(onDismiss)
@@ -92,6 +93,7 @@ fun VialConfigurationMenu(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .safeContentPadding()
                         .padding(12.dp)
                         .heightIn(max = 620.dp)
                         .clickable(
@@ -141,7 +143,7 @@ fun VialConfigurationMenu(
                         DropConfigurationView(
                             title = "Pais",
                             selectedOption = null,
-                            onSelectOption = {},
+                            onSelectOption = onCountryChange,
                             options = countryFields,
                         )
 
@@ -152,13 +154,14 @@ fun VialConfigurationMenu(
                         DropConfigurationView(
                             title = "Estado",
                             selectedOption = null,
-                            onSelectOption = {},
+                            onSelectOption = onStateChange,
                             options = stateFields
                         )
 
                         Button(
                             modifier = Modifier.fillMaxWidth(),
-                            onClick = onDismiss
+                            onClick = onSearch,
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Text("Ir")
                         }
@@ -240,9 +243,9 @@ fun DropConfigurationView(
 
 @Preview(showBackground = true)
 @Composable
-fun VialConfigurationMenuPreview() {
+fun VialLocationMenuPreview() {
     HombreCamionTheme {
-        VialConfigurationMenu(
+        VialLocationMenu(
             visible = true,
             onDismiss = {},
             countryFields = emptyList(),

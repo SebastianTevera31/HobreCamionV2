@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.vialstatus
+package com.rfz.appflotal.presentation.ui.vialstatus.view
 
 import android.annotation.SuppressLint
 import android.webkit.WebView
@@ -43,14 +43,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialViewModel
 
 @Composable
-fun VialStatusScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun VialStatusScreen(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: VialViewModel = hiltViewModel()
+) {
     VialStatusView(
         onBack = onBack
     )
@@ -64,19 +70,19 @@ fun VialStatusView(
     modifier: Modifier = Modifier,
     onBack: () -> Unit
 ) {
-
     var showVialSearch by remember { mutableStateOf(false) }
 
-    VialConfigurationMenu(
+    VialLocationMenu(
         visible = showVialSearch,
         onDismiss = { showVialSearch = false },
         countryFields = emptyList(),
         stateFields = emptyList(),
         onCountryChange = {},
-        onStateChange = {}
-    ) {
-        // onSearch()
-    }
+        onStateChange = {},
+        onSearch = {
+            // onSearch()
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -377,7 +383,31 @@ private fun PreviewZoomButton(
 fun VialStatusScreenPreview() {
     HombreCamionTheme {
         VialStatusView(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onBack = {}
         )
+    }
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun VialStatusWithMenuPreview() {
+    HombreCamionTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
+            VialStatusView(
+                modifier = Modifier.fillMaxSize(),
+                onBack = {}
+            )
+            // Force the menu to be visible for validation
+            VialLocationMenu(
+                visible = true,
+                onDismiss = {},
+                countryFields = emptyList(),
+                stateFields = emptyList(),
+                onCountryChange = {},
+                onStateChange = {},
+                onSearch = {}
+            )
+        }
     }
 }
