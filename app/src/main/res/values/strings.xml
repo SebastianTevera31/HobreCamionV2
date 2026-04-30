@@ -368,6 +368,19 @@
     <string name="error_inesperado">Ocurrió un error inesperado. Intenta nuevamente o vuelve más tarde.</string>
     <string name="politicas_de_privacidad">Politicas de privacidad</string>
     <string name="asi_como_nuestros">, así como nuestros </string>
+    <string name="vial_status">Mapa vial</string>
+    <string name="ubicacion">Ubicación</string>
+    <string name="pais">País</string>
+    <string name="estado">Estado</string>
+    <string name="ir">Ir</string>
+    <string name="sin_elementos">Sin elementos</string>
+    <string name="vista_previa_del_mapa">Vista previa del mapa</string>
+    <string name="selecciona_una_ubicacion_para_consultar_el_mapa_vial">Selecciona una ubicación para consultar el mapa vial</string>
+    <string name="mapa_vial_con_estado">Mapa Vial: %1$s</string>
+    <string name="selecciona_pais_estado_instruccion">Selecciona el país y estado para consultar el mapa</string>
+    <string name="buscar_mapa_vial">Buscar mapa vial</string>
+    <string name="selecciona_una_opcion">Selecciona una opción</string>
+    <string name="sin_elementos_disponibles">Sin elementos disponibles</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>
