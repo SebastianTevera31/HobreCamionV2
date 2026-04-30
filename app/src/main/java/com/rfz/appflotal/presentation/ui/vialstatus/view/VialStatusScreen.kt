@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -79,7 +82,9 @@ fun VialStatusScreen(
         onBack = onBack,
         onCountryChange = viewModel::changeCountry,
         onStateChange = viewModel::changeState,
-        onSearch = viewModel::getMap
+        onSearch = viewModel::getMap,
+        onReduceScale = viewModel::reduceScale,
+        onIncreaseScale = viewModel::increaseScale
     )
 }
 
@@ -93,6 +98,8 @@ fun VialStatusView(
     onCountryChange: (Int) -> Unit,
     onStateChange: (Int) -> Unit,
     onSearch: () -> Unit,
+    onReduceScale: () -> Unit,
+    onIncreaseScale: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showVialSearch by rememberSaveable { mutableStateOf(false) }
@@ -170,6 +177,7 @@ fun VialStatusView(
             if (uiState.mapUrl.isNotBlank()) {
                 VialStatusWebView(
                     url = uiState.mapUrl,
+                    initScale = uiState.initScale,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
@@ -180,6 +188,39 @@ fun VialStatusView(
 
             if (isLoading) {
                 LoadingDialog()
+            }
+
+            if (uiState.mapUrl.isNotBlank()) {
+                Column(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .align(Alignment.BottomEnd)
+                ) {
+                    IconButton(
+                        onClick = onIncreaseScale,
+                        colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.primary),
+                        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    IconButton(
+                        onClick = onReduceScale,
+                        colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.primary),
+                        shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp),
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Remove,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
             }
 
             VialLocationMenu(
@@ -233,6 +274,7 @@ private fun EmptyMapState(
 @Composable
 fun VialStatusWebView(
     url: String,
+    initScale: Double,
     modifier: Modifier = Modifier
 ) {
     var webView by remember { mutableStateOf<WebView?>(null) }
@@ -274,7 +316,7 @@ fun VialStatusWebView(
                                     meta.name = 'viewport';
                                     document.head.appendChild(meta);
                                 }
-                                meta.content = 'width=700, initial-scale=0.55, minimum-scale=0.1, maximum-scale=5.0';
+                                meta.content = 'width=700, initial-scale=0.5, minimum-scale=0.1, maximum-scale=5.0';
                             })();
                             """.trimIndent(),
                             null
@@ -308,6 +350,20 @@ fun VialStatusWebView(
             if (view.url != url) {
                 view.loadUrl(url)
             }
+            
+            // Actualizar la escala sin recargar la página completa
+            view.evaluateJavascript(
+                """
+                (function() {
+                    var meta = document.querySelector('meta[name="viewport"]');
+                    if (meta) {
+                        meta.content = 'width=700, initial-scale=${initScale}, minimum-scale=0.1, maximum-scale=5.0';
+                    }
+                })();
+                """.trimIndent(),
+                null
+            )
+
             canGoBack = view.canGoBack()
         }
     )
@@ -373,7 +429,9 @@ fun VialStatusScreenPreview() {
             onBack = {},
             onCountryChange = {},
             onStateChange = {},
-            onSearch = {}
+            onSearch = {},
+            onReduceScale = {},
+            onIncreaseScale = {}
         )
     }
 }
@@ -388,7 +446,9 @@ fun VialStatusWithMenuPreview() {
                 onBack = {},
                 onCountryChange = {},
                 onStateChange = {},
-                onSearch = {}
+                onSearch = {},
+                onReduceScale = {},
+                onIncreaseScale = {}
             )
             // Force the menu to be visible for validation
             VialLocationMenu(

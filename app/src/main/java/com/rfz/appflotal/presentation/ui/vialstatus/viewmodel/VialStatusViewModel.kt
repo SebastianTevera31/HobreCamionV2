@@ -23,6 +23,7 @@ data class VialUiStatus(
     val selectedCountry: CatalogItem? = null,
     val selectedState: CatalogItem? = null,
     val mapUrl: String = "",
+    val initScale: Double = 0.55,
     val gettingStatesStatus: LoadState<Unit> = LoadState.Idle,
     val gettingMapStatus: LoadState<String> = LoadState.Idle
 )
@@ -137,6 +138,22 @@ class VialStatusViewModel @Inject constructor(
                     copy(gettingMapStatus = it)
                 }
             }
+        }
+    }
+
+    fun reduceScale() {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                initScale = (_uiState.value.initScale - 0.05).coerceAtLeast(0.1)
+            )
+        }
+    }
+
+    fun increaseScale() {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                initScale = (_uiState.value.initScale + 0.05).coerceAtMost(5.0)
+            )
         }
     }
 
