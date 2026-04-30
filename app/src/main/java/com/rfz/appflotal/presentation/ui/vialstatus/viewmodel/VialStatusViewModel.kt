@@ -3,6 +3,7 @@ package com.rfz.appflotal.presentation.ui.vialstatus.viewmodel
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.local.Catalog
 import com.rfz.appflotal.data.local.mapCountries
 import com.rfz.appflotal.data.model.CatalogItem
@@ -15,15 +16,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 data class VialUiStatus(
-    val countries: List<Catalog> = mapCountries,
+    val countries: List<Catalog> = emptyList(),
     val states: List<Catalog> = emptyList(),
     val selectedCountry: CatalogItem? = null,
     val selectedState: CatalogItem? = null,
     val mapUrl: String = "",
     val initScale: Double = 0.55,
+    val currentLanguage: Locale = Locale.getDefault(),
     val gettingStatesStatus: LoadState<Unit> = LoadState.Idle,
     val gettingMapStatus: LoadState<String> = LoadState.Idle
 )
@@ -35,7 +38,8 @@ enum class VialError {
 @HiltViewModel
 class VialStatusViewModel @Inject constructor(
     private val vialStatusRepository: VialStatusRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val appLocal: AppLocale
 ) : ViewModel() {
 
     private var _uiState = MutableStateFlow(VialUiStatus())
@@ -44,7 +48,21 @@ class VialStatusViewModel @Inject constructor(
     @SuppressLint("MissingPermission")
     fun getCurrentLocation() = viewModelScope.launch {
 
-        _uiState.update { it.copy(mapUrl = "") }
+        val currentLocale = appLocal.currentLocale.value
+
+        val mappedCountries = mapCountries.map {
+            if (currentLocale.language == Locale.ENGLISH.language) {
+                it.copy(description = it.enDescription)
+            } else it
+        }
+
+        _uiState.update {
+            it.copy(
+                countries = mappedCountries,
+                mapUrl = "",
+                currentLanguage = currentLocale
+            )
+        }
 
         val result = locationRepository.getLastLocation()
         if (result != null) {

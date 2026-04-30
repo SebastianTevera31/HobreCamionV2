@@ -105,8 +105,8 @@ fun VialStatusView(
     var showVialSearch by rememberSaveable { mutableStateOf(false) }
 
     val title = uiState.selectedState?.let { selectedState ->
-        "Mapa Vial: ${selectedState.description}"
-    } ?: "Mapa Vial"
+        stringResource(R.string.mapa_vial_con_estado, selectedState.description)
+    } ?: stringResource(R.string.vial_status)
 
     val isLoading =
         uiState.gettingMapStatus is LoadState.Loading ||
@@ -262,7 +262,7 @@ private fun EmptyMapState(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Selecciona una ubicación para consultar el mapa vial",
+            text = stringResource(R.string.selecciona_una_ubicacion_para_consultar_el_mapa_vial),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant

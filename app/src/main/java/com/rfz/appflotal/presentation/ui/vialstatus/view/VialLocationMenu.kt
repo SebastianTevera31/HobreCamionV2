@@ -49,9 +49,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
@@ -141,14 +143,14 @@ fun VialLocationMenu(
                         ) {
                             Column {
                                 Text(
-                                    text = "Ubicación",
+                                    text = stringResource(R.string.ubicacion),
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 )
 
                                 Text(
-                                    text = "Selecciona el país y estado para consultar el mapa",
+                                    text = stringResource(R.string.selecciona_pais_estado_instruccion),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -159,26 +161,26 @@ fun VialLocationMenu(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Cerrar"
+                                    contentDescription = stringResource(R.string.cerrar)
                                 )
                             }
                         }
 
                         HorizontalDivider()
 
-                        ConfigSectionTitle(title = "País")
+                        ConfigSectionTitle(title = stringResource(R.string.pais))
 
                         DropConfigurationView(
-                            title = "País",
+                            title = stringResource(R.string.pais),
                             selectedOption = selectedCountry,
                             onSelectOption = onCountryChange,
                             options = countryFields
                         )
 
-                        ConfigSectionTitle(title = "Estado")
+                        ConfigSectionTitle(title = stringResource(R.string.estado))
 
                         DropConfigurationView(
-                            title = "Estado",
+                            title = stringResource(R.string.estado),
                             selectedOption = selectedState,
                             onSelectOption = onStateChange,
                             options = stateFields
@@ -201,7 +203,7 @@ fun VialLocationMenu(
                             Spacer(modifier = Modifier.width(8.dp))
 
                             Text(
-                                text = "Buscar mapa vial",
+                                text = stringResource(R.string.buscar_mapa_vial),
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -256,7 +258,7 @@ fun DropConfigurationView(
             },
             placeholder = {
                 Text(
-                    text = if (hasOptions) "Selecciona una opción" else "Sin elementos"
+                    text = if (hasOptions) stringResource(R.string.selecciona_una_opcion) else stringResource(R.string.sin_elementos)
                 )
             },
             trailingIcon = {
@@ -320,7 +322,7 @@ fun DropConfigurationView(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = "Sin elementos disponibles",
+                            text = stringResource(R.string.sin_elementos_disponibles),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
