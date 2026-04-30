@@ -34,7 +34,7 @@ class RemoteCatalogDataSource @Inject constructor(
         }
     }
 
-    suspend fun getStates(countryId: Int) = networkRequestHelper {
-        catalogClient.getStates(countryId)
+    suspend fun getStates(token: String, countryId: Int) = networkRequestHelper {
+        catalogClient.getStates("Bearer $token", countryId)
     }
 }

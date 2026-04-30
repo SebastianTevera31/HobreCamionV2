@@ -2,6 +2,8 @@ package com.rfz.appflotal.di.app
 
 
 import android.content.Context
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import dagger.Module
 import dagger.Provides
@@ -17,5 +19,13 @@ object AppModule {
     @Singleton
     fun provideAppFlotalMapper(): AppFlotalMapper {
         return AppFlotalMapper()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFusedLocationProviderClient(
+        @ApplicationContext context: Context
+    ): FusedLocationProviderClient {
+        return LocationServices.getFusedLocationProviderClient(context)
     }
 }

@@ -19,15 +19,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -55,6 +53,8 @@ fun VialLocationMenu(
     modifier: Modifier = Modifier,
     countryFields: List<CatalogItem>,
     stateFields: List<CatalogItem>,
+    selectedCountry: CatalogItem? = null,
+    selectedState: CatalogItem? = null,
     onCountryChange: (id: Int) -> Unit,
     onStateChange: (id: Int) -> Unit,
     onSearch: () -> Unit
@@ -142,7 +142,7 @@ fun VialLocationMenu(
 
                         DropConfigurationView(
                             title = "Pais",
-                            selectedOption = null,
+                            selectedOption = selectedCountry,
                             onSelectOption = onCountryChange,
                             options = countryFields,
                         )
@@ -153,7 +153,7 @@ fun VialLocationMenu(
 
                         DropConfigurationView(
                             title = "Estado",
-                            selectedOption = null,
+                            selectedOption = selectedState,
                             onSelectOption = onStateChange,
                             options = stateFields
                         )
@@ -202,19 +202,18 @@ fun DropConfigurationView(
         TextField(
             value = selectedOption?.description ?: "",
             onValueChange = {},
+            readOnly = true,
             label = {
                 if (options.isNotEmpty()) {
                     Text(text = title)
                 }
             },
             trailingIcon = {
-                val icon = if (expanded) {
-                    Icons.Default.ArrowDropDown
-                } else Icons.Default.ArrowDropUp
-                Icon(imageVector = icon, contentDescription = null)
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
-            enabled = options.isNotEmpty(),
+            colors = ExposedDropdownMenuDefaults.textFieldColors(),
             modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
                 .fillMaxWidth()
                 .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(12.dp))
         )
@@ -227,7 +226,11 @@ fun DropConfigurationView(
                 options.forEach {
                     DropdownMenuItem(
                         text = { Text(text = it.description) },
-                        onClick = { onSelectOption(it.id) },
+                        onClick = {
+                            onSelectOption(it.id)
+                            expanded = false
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

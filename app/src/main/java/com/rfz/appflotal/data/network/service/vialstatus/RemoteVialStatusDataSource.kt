@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class RemoteVialStatusDataSource @Inject constructor(private val vialStatusService: VialStatusService) {
 
-    suspend fun getMapByState(id: Int) = networkRequestHelper {
-        vialStatusService.getRoadMap(id)
+    suspend fun getMapByState(token: String, id: Int) = networkRequestHelper {
+        vialStatusService.getRoadMap("Bearer $token", id)
     }
 }

@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -143,6 +145,8 @@ import com.rfz.appflotal.presentation.ui.scrap.viewmodel.TireWasteViewModel
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
+import com.rfz.appflotal.presentation.ui.vialstatus.view.VialStatusScreen
+import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -175,7 +179,7 @@ class InicioActivity : ComponentActivity() {
     private val repararRenovarViewModel: RepararRenovarViewModel by viewModels()
 
     private val cambioDestinoViewModel: CambioDestinoViewModel by viewModels()
-
+    private val vialStatusViewModel: VialStatusViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -302,7 +306,7 @@ class InicioActivity : ComponentActivity() {
                 else -> true
             }
 
-            val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+            val lifecycleOwner = LocalLifecycleOwner.current
             val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
 
             val context = LocalContext.current
@@ -498,7 +502,7 @@ class InicioActivity : ComponentActivity() {
 
                                 // Control de traslado de pantalla cuando se inicia la aplicacion
                                 LaunchedEffect(hasInitialValidation, userData, lifecycleState) {
-                                    if (hasInitialValidation && lifecycleState == androidx.lifecycle.Lifecycle.State.RESUMED) {
+                                    if (hasInitialValidation && lifecycleState == Lifecycle.State.RESUMED) {
                                         userData?.let { data ->
                                             val fechaRegistro = data.fecha
                                             if (fechaRegistro.isNotEmpty()) {
@@ -998,6 +1002,13 @@ class InicioActivity : ComponentActivity() {
                                             },
                                             onBack = { navController.popBackStack() },
                                             messageOperationState = msgOperationState.value,
+                                        )
+                                    }
+
+                                    composable(route = HombreCamionScreens.MAPA_VIAL.name) {
+                                        VialStatusScreen(
+                                            onBack = { navController.popBackStack() },
+                                            viewModel = vialStatusViewModel
                                         )
                                     }
                                 }

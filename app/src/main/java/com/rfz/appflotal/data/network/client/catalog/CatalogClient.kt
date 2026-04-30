@@ -20,5 +20,8 @@ interface CatalogClient {
     suspend fun getTireInspectionReport(@Header("Authorization") token: String): Response<List<GetTireInspectionReportResponse>?>
 
     @GET("api/Catalog/States")
-    suspend fun getStates(@Query("id_country") countryId: Int): Response<List<StateDto>>
+    suspend fun getStates(
+        @Header("Authorization") token: String,
+        @Query("id_country") countryId: Int
+    ): Response<List<StateDto>>
 }
