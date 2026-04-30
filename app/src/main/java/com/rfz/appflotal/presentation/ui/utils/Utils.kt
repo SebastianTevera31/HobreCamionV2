@@ -133,13 +133,14 @@ enum class FireCloudMessagingType(val value: String) {
 fun getRequiredPermissions(): Array<String> {
     val permissions = mutableListOf<String>()
 
+    // Permisos de ubicación (Necesarios para Geocoder, Bluetooth y Mapas)
+    permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+    permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         // Android 12+
         permissions.add(Manifest.permission.BLUETOOTH_SCAN)
         permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
-    } else {
-        // Android 11 o menor
-        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

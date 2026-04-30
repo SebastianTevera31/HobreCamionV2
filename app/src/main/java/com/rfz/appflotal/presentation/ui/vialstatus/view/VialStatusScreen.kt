@@ -6,25 +6,25 @@ import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,12 +36,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +55,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
 import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialUiStatus
@@ -64,22 +68,6 @@ fun VialStatusScreen(
     viewModel: VialStatusViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-//    val locationPermissionState = rememberMultiplePermissionsState(
-//        listOf(
-//            Manifest.permission.ACCESS_FINE_LOCATION,
-//            Manifest.permission.ACCESS_COARSE_LOCATION
-//        )
-//    )
-//
-//    LaunchedEffect(Unit) {
-//        if (!locationPermissionState.allPermissionsGranted) {
-//            locationPermissionState.launchMultiplePermissionRequest()
-//        }
-//    }
-//
-//    // Si alguno de los permisos es concedido, procedemos a obtener la ubicación
-//    val anyPermissionGranted = locationPermissionState.permissions.any { it.status.isGranted }
 
     LaunchedEffect(Unit) {
         viewModel.getCurrentLocation()
@@ -107,35 +95,39 @@ fun VialStatusView(
     onSearch: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showVialSearch by remember { mutableStateOf(false) }
+    var showVialSearch by rememberSaveable { mutableStateOf(false) }
+
+    val title = uiState.selectedState?.let { selectedState ->
+        "Mapa Vial: ${selectedState.description}"
+    } ?: "Mapa Vial"
+
+    val isLoading =
+        uiState.gettingMapStatus is LoadState.Loading ||
+                uiState.gettingStatesStatus is LoadState.Loading
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Mapa Vial",
-                        style = MaterialTheme.typography.titleLarge
-                            .copy(
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
+                        text = title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        )
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = Color.White
-                ),
                 navigationIcon = {
                     IconButton(
                         onClick = onBack,
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = 4.dp)
                     ) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.regresar),
-                            tint = Color.White,
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
@@ -144,45 +136,57 @@ fun VialStatusView(
                         onClick = {
                             showVialSearch = true
                         },
-                        modifier = Modifier.padding(start = 8.dp)
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.onPrimary.copy(
+                                alpha = 0.14f
+                            ),
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .size(40.dp)
                     ) {
                         Icon(
-                            Icons.Filled.Search,
-                            contentDescription = stringResource(R.string.regresar),
-                            tint = Color.White,
-                            modifier = Modifier.size(40.dp)
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = stringResource(R.string.buscar),
+                            modifier = Modifier.size(22.dp)
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
-        },
-        modifier = modifier
+        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            if (uiState.mapUrl.isNotEmpty()) {
+            if (uiState.mapUrl.isNotBlank()) {
                 VialStatusWebView(
                     url = uiState.mapUrl,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                VialStatusPreviewMap(
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            if (uiState.gettingMapStatus is LoadState.Loading || uiState.gettingStatesStatus is LoadState.Loading) {
-                CircularProgressIndicator(
+                EmptyMapState(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
 
+            if (isLoading) {
+                LoadingDialog()
+            }
+
             VialLocationMenu(
                 visible = showVialSearch,
-                onDismiss = { showVialSearch = false },
+                onDismiss = {
+                    showVialSearch = false
+                },
                 countryFields = uiState.countries,
                 stateFields = uiState.states,
                 selectedCountry = uiState.selectedCountry,
@@ -195,6 +199,33 @@ fun VialStatusView(
                 }
             )
         }
+    }
+}
+
+@Composable
+private fun EmptyMapState(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Map,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(48.dp)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "Selecciona una ubicación para consultar el mapa vial",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -283,104 +314,6 @@ fun VialStatusWebView(
 
     BackHandler(enabled = canGoBack) {
         webView?.goBack()
-    }
-}
-
-@Composable
-fun VialStatusPreviewMap(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .background(Color(0xFFEAF4F7))
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(72.dp)
-                    .background(Color(0xFF285A96)),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Text(
-                    modifier = Modifier.padding(start = 20.dp),
-                    text = "Delaware.gov",
-                    color = Color.White,
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .width(230.dp)
-                        .fillMaxHeight()
-                        .background(Color(0xFF00508A))
-                        .padding(top = 16.dp)
-                ) {
-                    PreviewMenuItem(text = "MAP LAYERS")
-                    PreviewMenuItem(text = "WTMC RADIO")
-                    PreviewMenuItem(text = "MY FAVORITE CAMERAS")
-                    PreviewMenuItem(text = "MY FAVORITE BUS STOPS")
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        text = "MAP DATA UPDATED",
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        text = "53",
-                        color = Color.White,
-                        fontSize = 34.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Text(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        text = "SECONDS",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0xFFBDECF4))
-                ) {
-                    Text(
-                        modifier = Modifier.align(Alignment.Center),
-                        text = "Vista previa del mapa",
-                        color = Color(0xFF355C65),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(16.dp)
-                    ) {
-                        PreviewZoomButton("+")
-                        PreviewZoomButton("−")
-                    }
-                }
-            }
-        }
     }
 }
 

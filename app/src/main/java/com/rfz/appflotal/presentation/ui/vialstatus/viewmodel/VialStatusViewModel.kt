@@ -42,6 +42,9 @@ class VialStatusViewModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     fun getCurrentLocation() = viewModelScope.launch {
+
+        _uiState.update { it.copy(mapUrl = "") }
+
         val result = locationRepository.getLastLocation()
         if (result != null) {
             val currentCountry = _uiState.value.countries.find { result.pais == it.enDescription }

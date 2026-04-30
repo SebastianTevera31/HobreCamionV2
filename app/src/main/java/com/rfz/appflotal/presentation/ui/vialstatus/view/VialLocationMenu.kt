@@ -1,24 +1,32 @@
 package com.rfz.appflotal.presentation.ui.vialstatus.view
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,20 +34,21 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,19 +69,27 @@ fun VialLocationMenu(
     onSearch: () -> Unit
 ) {
     val currentOnDismiss by rememberUpdatedState(onDismiss)
+    val currentOnSearch by rememberUpdatedState(onSearch)
+
+    val canSearch = selectedCountry != null && selectedState != null
+
+    BackHandler(enabled = visible) {
+        currentOnDismiss()
+    }
 
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(),
-        exit = fadeOut()
+        exit = fadeOut(),
+        modifier = modifier.fillMaxSize()
     ) {
         Box(
-            modifier = modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.45f))
+                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.45f))
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
@@ -88,29 +105,33 @@ fun VialLocationMenu(
                 ) + fadeIn(),
                 exit = slideOutVertically(
                     targetOffsetY = { fullHeight -> -fullHeight }
-                ) + fadeOut()
+                ) + fadeOut(),
+                modifier = Modifier.align(Alignment.TopCenter)
             ) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .safeContentPadding()
-                        .padding(12.dp)
+                        .statusBarsPadding()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                         .heightIn(max = 620.dp)
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
-                        ) {},
+                        ) {
+                            // Consume el click para evitar cerrar al tocar dentro del panel.
+                        },
                     shape = RoundedCornerShape(
-                        bottomStart = 24.dp,
-                        bottomEnd = 24.dp,
-                        topStart = 16.dp,
-                        topEnd = 16.dp
+                        topStart = 20.dp,
+                        topEnd = 20.dp,
+                        bottomStart = 28.dp,
+                        bottomEnd = 28.dp
                     ),
+                    color = MaterialTheme.colorScheme.surface,
                     tonalElevation = 8.dp,
                     shadowElevation = 8.dp
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(18.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         Row(
@@ -118,38 +139,43 @@ fun VialLocationMenu(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Ubicacion",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            )
-
-                            TextButton(
-                                onClick = onDismiss
-                            ) {
+                            Column {
                                 Text(
-                                    text = "Cerrar",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.error
+                                    text = "Ubicación",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                )
+
+                                Text(
+                                    text = "Selecciona el país y estado para consultar el mapa",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            IconButton(
+                                onClick = currentOnDismiss
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Cerrar"
                                 )
                             }
                         }
 
                         HorizontalDivider()
 
-                        ConfigSectionTitle("Pais")
+                        ConfigSectionTitle(title = "País")
 
                         DropConfigurationView(
-                            title = "Pais",
+                            title = "País",
                             selectedOption = selectedCountry,
                             onSelectOption = onCountryChange,
-                            options = countryFields,
+                            options = countryFields
                         )
 
-                        HorizontalDivider()
-
-                        ConfigSectionTitle("Estado")
+                        ConfigSectionTitle(title = "Estado")
 
                         DropConfigurationView(
                             title = "Estado",
@@ -159,11 +185,25 @@ fun VialLocationMenu(
                         )
 
                         Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = onSearch,
-                            shape = RoundedCornerShape(12.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            enabled = canSearch,
+                            onClick = currentOnSearch,
+                            shape = RoundedCornerShape(14.dp)
                         ) {
-                            Text("Ir")
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = "Buscar mapa vial",
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
                 }
@@ -178,9 +218,10 @@ fun ConfigSectionTitle(
 ) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium.copy(
+        style = MaterialTheme.typography.labelLarge.copy(
             fontWeight = FontWeight.SemiBold
-        )
+        ),
+        color = MaterialTheme.colorScheme.primary
     )
 }
 
@@ -193,56 +234,103 @@ fun DropConfigurationView(
     options: List<CatalogItem>,
     modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+
+    val hasOptions = options.isNotEmpty()
+    val selectedText = selectedOption?.description.orEmpty()
+
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = it },
+        onExpandedChange = {
+            expanded = it
+        },
         modifier = modifier
     ) {
-        TextField(
-            value = selectedOption?.description ?: "",
+        OutlinedTextField(
+            value = selectedText,
             onValueChange = {},
             readOnly = true,
+            singleLine = true,
             label = {
-                if (options.isNotEmpty()) {
-                    Text(text = title)
-                }
+                Text(text = title)
+            },
+            placeholder = {
+                Text(
+                    text = if (hasOptions) "Selecciona una opción" else "Sin elementos"
+                )
             },
             trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
             },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
+                .menuAnchor(
+                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                    enabled = true
+                )
                 .fillMaxWidth()
-                .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(12.dp))
         )
 
-        if (options.isNotEmpty()) {
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                options.forEach {
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = {
+                expanded = false
+            },
+            modifier = Modifier
+                .exposedDropdownSize(matchAnchorWidth = true)
+                .heightIn(max = 280.dp)
+        ) {
+            if (hasOptions) {
+                options.forEach { option ->
+                    val isSelected = option.id == selectedOption?.id
+
                     DropdownMenuItem(
-                        text = { Text(text = it.description) },
+                        text = {
+                            Text(
+                                text = option.description,
+                                fontWeight = if (isSelected) {
+                                    FontWeight.SemiBold
+                                } else {
+                                    FontWeight.Normal
+                                }
+                            )
+                        },
+                        trailingIcon = if (isSelected) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        } else {
+                            null
+                        },
                         onClick = {
-                            onSelectOption(it.id)
+                            onSelectOption(option.id)
                             expanded = false
                         },
-                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                        modifier = Modifier.fillMaxWidth()
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                     )
                 }
+            } else {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = "Sin elementos disponibles",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    enabled = false,
+                    onClick = {}
+                )
             }
-        } else {
-            DropdownMenuItem(text = {
-                Text(text = "Sin elementos")
-            }, onClick = {}, modifier = Modifier.fillMaxWidth())
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
