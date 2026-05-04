@@ -41,6 +41,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,8 +73,15 @@ fun VialLocationMenu(
 ) {
     val currentOnDismiss by rememberUpdatedState(onDismiss)
     val currentOnSearch by rememberUpdatedState(onSearch)
+    var currentState: CatalogItem? by remember { mutableStateOf(selectedState) }
 
-    val canSearch = selectedCountry != null && selectedState != null
+    LaunchedEffect(visible, selectedState) {
+        if (visible) {
+            currentState = selectedState
+        }
+    }
+
+    val canSearch = selectedCountry != null && currentState != null
 
     BackHandler(enabled = visible) {
         currentOnDismiss()
@@ -173,7 +181,9 @@ fun VialLocationMenu(
                         DropConfigurationView(
                             title = stringResource(R.string.pais),
                             selectedOption = selectedCountry,
-                            onSelectOption = onCountryChange,
+                            onSelectOption = {
+                                onCountryChange(it.id)
+                            },
                             options = countryFields
                         )
 
@@ -181,8 +191,10 @@ fun VialLocationMenu(
 
                         DropConfigurationView(
                             title = stringResource(R.string.estado),
-                            selectedOption = selectedState,
-                            onSelectOption = onStateChange,
+                            selectedOption = currentState,
+                            onSelectOption = {
+                                currentState = it
+                            },
                             options = stateFields
                         )
 
@@ -191,7 +203,11 @@ fun VialLocationMenu(
                                 .fillMaxWidth()
                                 .height(48.dp),
                             enabled = canSearch,
-                            onClick = currentOnSearch,
+                            onClick = {
+                                if (currentState == null) return@Button
+                                onStateChange(currentState!!.id)
+                                currentOnSearch()
+                            },
                             shape = RoundedCornerShape(14.dp)
                         ) {
                             Icon(
@@ -232,7 +248,7 @@ fun ConfigSectionTitle(
 fun DropConfigurationView(
     title: String,
     selectedOption: CatalogItem?,
-    onSelectOption: (id: Int) -> Unit,
+    onSelectOption: (item: CatalogItem) -> Unit,
     options: List<CatalogItem>,
     modifier: Modifier = Modifier
 ) {
@@ -258,7 +274,9 @@ fun DropConfigurationView(
             },
             placeholder = {
                 Text(
-                    text = if (hasOptions) stringResource(R.string.selecciona_una_opcion) else stringResource(R.string.sin_elementos)
+                    text = if (hasOptions) stringResource(R.string.selecciona_una_opcion) else stringResource(
+                        R.string.sin_elementos
+                    )
                 )
             },
             trailingIcon = {
@@ -312,7 +330,7 @@ fun DropConfigurationView(
                             null
                         },
                         onClick = {
-                            onSelectOption(option.id)
+                            onSelectOption(option)
                             expanded = false
                         },
                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding

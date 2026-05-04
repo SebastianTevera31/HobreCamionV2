@@ -280,6 +280,7 @@ fun VialStatusWebView(
     var webView by remember { mutableStateOf<WebView?>(null) }
     var canGoBack by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
+    var isLoadingPage by remember { mutableStateOf(true) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -299,16 +300,26 @@ fun VialStatusWebView(
         }
     }
 
-    AndroidView(
-        modifier = modifier.fillMaxSize(),
-        factory = { context ->
-            WebView(context).apply {
-                webViewClient = object : WebViewClient() {
-                    override fun onPageFinished(view: WebView, url: String) {
-                        super.onPageFinished(view, url)
+    Box(modifier = modifier) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { context ->
+                WebView(context).apply {
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageStarted(
+                            view: WebView?,
+                            url: String?,
+                            favicon: android.graphics.Bitmap?
+                        ) {
+                            super.onPageStarted(view, url, favicon)
+                            isLoadingPage = true
+                        }
 
-                        view.evaluateJavascript(
-                            """
+                        override fun onPageFinished(view: WebView, url: String) {
+                            super.onPageFinished(view, url)
+
+                            view.evaluateJavascript(
+                                """
                             (function() {
                                 var meta = document.querySelector('meta[name="viewport"]');
                                 if (!meta) {
@@ -319,41 +330,42 @@ fun VialStatusWebView(
                                 meta.content = 'width=700, initial-scale=0.5, minimum-scale=0.1, maximum-scale=5.0';
                             })();
                             """.trimIndent(),
-                            null
-                        )
+                                null
+                            )
 
-                        canGoBack = view.canGoBack()
+                            canGoBack = view.canGoBack()
+                            isLoadingPage = false
+                        }
                     }
+
+                    with(settings) {
+                        javaScriptEnabled = true
+                        domStorageEnabled = true
+                        loadWithOverviewMode = true
+                        useWideViewPort = true
+                        builtInZoomControls = true
+                        displayZoomControls = false
+                        setSupportZoom(true)
+
+                        userAgentString =
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                                    "AppleWebKit/537.36 (KHTML, like Gecko) " +
+                                    "Chrome/120.0.0.0 Safari/537.36"
+                    }
+
+                    loadUrl(url)
+                }.also {
+                    webView = it
+                }
+            },
+            update = { view ->
+                if (view.url != url) {
+                    view.loadUrl(url)
                 }
 
-                with(settings) {
-                    javaScriptEnabled = true
-                    domStorageEnabled = true
-                    loadWithOverviewMode = true
-                    useWideViewPort = true
-                    builtInZoomControls = true
-                    displayZoomControls = false
-                    setSupportZoom(true)
-
-                    userAgentString =
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-                                "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                                "Chrome/120.0.0.0 Safari/537.36"
-                }
-
-                loadUrl(url)
-            }.also {
-                webView = it
-            }
-        },
-        update = { view ->
-            if (view.url != url) {
-                view.loadUrl(url)
-            }
-            
-            // Actualizar la escala sin recargar la página completa
-            view.evaluateJavascript(
-                """
+                // Actualizar la escala sin recargar la página completa
+                view.evaluateJavascript(
+                    """
                 (function() {
                     var meta = document.querySelector('meta[name="viewport"]');
                     if (meta) {
@@ -361,12 +373,17 @@ fun VialStatusWebView(
                     }
                 })();
                 """.trimIndent(),
-                null
-            )
+                    null
+                )
 
-            canGoBack = view.canGoBack()
+                canGoBack = view.canGoBack()
+            }
+        )
+
+        if (isLoadingPage) {
+            LoadingDialog()
         }
-    )
+    }
 
     BackHandler(enabled = canGoBack) {
         webView?.goBack()
