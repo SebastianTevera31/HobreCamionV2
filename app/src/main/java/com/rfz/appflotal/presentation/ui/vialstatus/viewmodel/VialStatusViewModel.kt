@@ -136,7 +136,12 @@ class VialStatusViewModel @Inject constructor(
 
     fun getMap() {
         val state = _uiState.value.selectedState ?: return
-        updateLoadState(LoadState.Loading) { copy(gettingMapStatus = it) }
+        updateLoadState(LoadState.Loading) {
+            copy(
+                gettingMapStatus = it,
+                mapUrl = ""
+            )
+        }
 
         viewModelScope.launch {
             vialStatusRepository.getMapByState(state.id).onSuccess { result ->
