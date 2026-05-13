@@ -71,6 +71,11 @@ val menuItems = listOf(
         title = R.string.monitoreo,
         route = HombreCamionScreens.MONITOR.name,
         iconRes = R.drawable.monitor
+    ),
+    MenuItem(
+        title = R.string.vial_status,
+        route = HombreCamionScreens.MAPA_VIAL.name,
+        iconRes = R.drawable.road_map
     )
 )
 

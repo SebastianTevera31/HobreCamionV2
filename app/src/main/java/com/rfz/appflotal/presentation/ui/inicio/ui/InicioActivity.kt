@@ -21,6 +21,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -51,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -143,6 +146,8 @@ import com.rfz.appflotal.presentation.ui.scrap.viewmodel.TireWasteViewModel
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
+import com.rfz.appflotal.presentation.ui.vialstatus.view.VialStatusScreen
+import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -175,7 +180,7 @@ class InicioActivity : ComponentActivity() {
     private val repararRenovarViewModel: RepararRenovarViewModel by viewModels()
 
     private val cambioDestinoViewModel: CambioDestinoViewModel by viewModels()
-
+    private val vialStatusViewModel: VialStatusViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -266,7 +271,7 @@ class InicioActivity : ComponentActivity() {
         }
     }
 
-
+    
     @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -302,7 +307,7 @@ class InicioActivity : ComponentActivity() {
                 else -> true
             }
 
-            val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+            val lifecycleOwner = LocalLifecycleOwner.current
             val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
 
             val context = LocalContext.current
@@ -498,7 +503,9 @@ class InicioActivity : ComponentActivity() {
 
                                 // Control de traslado de pantalla cuando se inicia la aplicacion
                                 LaunchedEffect(hasInitialValidation, userData, lifecycleState) {
-                                    if (hasInitialValidation && lifecycleState == androidx.lifecycle.Lifecycle.State.RESUMED) {
+                                    if (hasInitialValidation && lifecycleState == Lifecycle.State.RESUMED) {
+                                        val currentRoute = navController.currentDestination?.route
+
                                         userData?.let { data ->
                                             val fechaRegistro = data.fecha
                                             if (fechaRegistro.isNotEmpty()) {
@@ -516,9 +523,12 @@ class InicioActivity : ComponentActivity() {
                                                 if (diferenciaHoras < 24) {
 
                                                     if (!data.termsGranted) {
-                                                        navController.navigate(NavScreens.TERMINOS) {
-                                                            popUpTo(NavScreens.LOADING) {
-                                                                inclusive = true
+                                                        if (currentRoute != NavScreens.TERMINOS) {
+                                                            navController.navigate(NavScreens.TERMINOS) {
+                                                                popUpTo(NavScreens.LOADING) {
+                                                                    inclusive = true
+                                                                }
+                                                                launchSingleTop = true
                                                             }
                                                         }
                                                     } else {
@@ -530,30 +540,40 @@ class InicioActivity : ComponentActivity() {
                                                             )
 
                                                         if (!permissionsGranted) {
-                                                            navController.navigate(NavScreens.PERMISOS) {
-                                                                popUpTo(NavScreens.LOADING) {
-                                                                    inclusive = true
+                                                            if (currentRoute != NavScreens.PERMISOS) {
+                                                                navController.navigate(NavScreens.PERMISOS) {
+                                                                    popUpTo(NavScreens.LOADING) {
+                                                                        inclusive = true
+                                                                    }
+                                                                    launchSingleTop = true
                                                                 }
-                                                                launchSingleTop = true
                                                             }
                                                         } else {
-                                                            navController.navigate(NavScreens.HOME) {
-                                                                popUpTo(0) { inclusive = true }
+                                                            if (currentRoute == NavScreens.LOADING) {
+                                                                navController.navigate(NavScreens.HOME) {
+                                                                    popUpTo(0) { inclusive = true }
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 } else {
-                                                    inicioScreenViewModel.deleteUserData()
-                                                    navController.navigate(NavScreens.LOGIN) {
-                                                        popUpTo(NavScreens.LOADING) {
-                                                            inclusive = true
+                                                    if (currentRoute != NavScreens.LOGIN) {
+                                                        inicioScreenViewModel.deleteUserData()
+                                                        navController.navigate(NavScreens.LOGIN) {
+                                                            popUpTo(NavScreens.LOADING) {
+                                                                inclusive = true
+                                                            }
+                                                            launchSingleTop = true
                                                         }
                                                     }
                                                 }
                                             }
                                         } ?: run {
-                                            navController.navigate(NavScreens.LOGIN) {
-                                                popUpTo(NavScreens.LOADING) { inclusive = true }
+                                            if (currentRoute == NavScreens.LOADING) {
+                                                navController.navigate(NavScreens.LOGIN) {
+                                                    popUpTo(NavScreens.LOADING) { inclusive = true }
+                                                    launchSingleTop = true
+                                                }
                                             }
                                         }
                                     }
@@ -998,6 +1018,13 @@ class InicioActivity : ComponentActivity() {
                                             },
                                             onBack = { navController.popBackStack() },
                                             messageOperationState = msgOperationState.value,
+                                        )
+                                    }
+
+                                    composable(route = HombreCamionScreens.MAPA_VIAL.name) {
+                                        VialStatusScreen(
+                                            onBack = { navController.popBackStack() },
+                                            viewModel = vialStatusViewModel
                                         )
                                     }
                                 }

@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
 
 object AppLocale {
-    private val _currentLocale = MutableStateFlow(getSystemLocale())
-    val currentLocale: StateFlow<Locale> = _currentLocale.asStateFlow()
 
+    private val _currentLocale = MutableStateFlow(getInitialLocale())
+    val currentLocale: StateFlow<Locale> = _currentLocale.asStateFlow()
     fun setLocale(locale: Locale) {
         _currentLocale.value = locale
         Locale.setDefault(locale)
@@ -22,9 +22,16 @@ object AppLocale {
         _currentLocale.value = Locale(lang)
     }
 
-    fun getSystemLocale(): Locale {
+    private fun getInitialLocale(): Locale {
         val systemLang = Locale.getDefault().language
         return if (systemLang.contains("es")) Locale("es")
-        else Locale("en")
+        else Locale.ENGLISH
+    }
+
+
+    fun getSystemLocale(): Locale {
+        val lang = _currentLocale.value.language
+        return if (lang.contains("es")) Locale("es")
+        else Locale.ENGLISH
     }
 }
