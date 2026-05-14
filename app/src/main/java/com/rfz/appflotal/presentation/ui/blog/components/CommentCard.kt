@@ -39,19 +39,18 @@ fun CommentCard(
     content: String,
     imageUrl: String,
     likes: Int,
-    isSaved: Boolean,
-    isAuthor: Boolean,
+    isSaved: Boolean = false,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    onReply: () -> Unit,
-    onSave: () -> Unit,
+    onSeeMore: () -> Unit = {},
+    onReply: () -> Unit = {},
+    onSave: () -> Unit = {},
     secondInitial: String = "",
 ) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(Dimens.PaddingMedium),
         colors = CardDefaults.cardColors(Color.White),
-        onClick = onClick
+        onClick = onSeeMore
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
@@ -145,11 +144,10 @@ fun CommentCardPreview() {
             imageUrl = "http://ontheair.com",
             likes = 12,
             isSaved = false,
-            onClick = {},
+            onSeeMore = {},
             onReply = {},
             onSave = {},
-            secondInitial = "P",
-            isAuthor = false
+            secondInitial = "P"
         )
     }
 }
