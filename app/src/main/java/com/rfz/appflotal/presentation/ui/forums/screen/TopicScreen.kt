@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.blog.screen
+package com.rfz.appflotal.presentation.ui.forums.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -17,10 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.blog.components.CommentCard
-import com.rfz.appflotal.presentation.ui.blog.components.TopicHeader
-import com.rfz.appflotal.presentation.ui.blog.viewmodel.Comment
-import com.rfz.appflotal.presentation.ui.blog.viewmodel.Post
+import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
+import com.rfz.appflotal.presentation.ui.forums.components.TopicHeader
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -51,6 +51,7 @@ fun TopicScreen(
                 isSaved = mainComment.isSaved,
                 onReply = onReply,
                 onSave = onSave,
+                isAuthor = true,
                 secondInitial = mainComment.secondInitial
             )
 

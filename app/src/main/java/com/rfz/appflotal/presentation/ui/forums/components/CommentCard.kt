@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.blog.components
+package com.rfz.appflotal.presentation.ui.forums.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,6 +41,7 @@ fun CommentCard(
     likes: Int,
     modifier: Modifier = Modifier,
     isSaved: Boolean = false,
+    isAuthor: Boolean = false,
     onSeeMore: () -> Unit = {},
     onReply: () -> Unit = {},
     onSave: () -> Unit = {},
@@ -84,7 +85,8 @@ fun CommentCard(
                 ) {
                     BlogContent(
                         title = user,
-                        content = content
+                        content = content,
+                        isAuthor = isAuthor
                     )
 
                     if (imageUrl.isNotEmpty()) {

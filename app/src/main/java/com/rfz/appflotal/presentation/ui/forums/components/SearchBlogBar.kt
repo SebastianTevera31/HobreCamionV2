@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.blog.components
+package com.rfz.appflotal.presentation.ui.forums.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row

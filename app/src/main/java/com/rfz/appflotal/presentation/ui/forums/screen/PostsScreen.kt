@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.blog.screen
+package com.rfz.appflotal.presentation.ui.forums.screen
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,33 +12,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.blog.components.PostCard
-import com.rfz.appflotal.presentation.ui.blog.viewmodel.Post
+import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
+import com.rfz.appflotal.presentation.ui.forums.components.PostCard
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
+import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
-fun PostsScreen(comments: List<Post>, modifier: Modifier = Modifier) {
+fun PostsScreen(
+    posts: List<Post>,
+    loadState: LoadState<Any> = LoadState.Idle,
+    modifier: Modifier = Modifier,
+    onPostClick: (Post) -> Unit
+) {
     Surface(
         modifier = modifier
             .fillMaxSize(),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        LazyColumn(
-            contentPadding = PaddingValues(Dimens.PaddingSmall),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(comments) { comment ->
-                PostCard(
-                    title = comment.title,
-                    content = comment.description,
-                    modifier = Modifier.padding(Dimens.PaddingSmall),
-                    numComments = comment.numComments,
-                    isPost = true,
-                    onClick = {},
-                    author = comment.author,
-                    time = comment.time,
-                    firstInitial = "F",
-                    secondInitial = "S"
-                )
+        if (loadState is LoadState.Loading) {
+            ForumShimmerList()
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(Dimens.PaddingSmall),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(posts) { post ->
+                    PostCard(
+                        title = post.title,
+                        content = post.description,
+                        modifier = Modifier.padding(Dimens.PaddingSmall),
+                        numComments = post.numComments,
+                        isPost = true,
+                        onClick = { onPostClick(post) },
+                        author = post.author,
+                        time = post.time,
+                        firstInitial = post.author.take(1).uppercase(),
+                        secondInitial = ""
+                    )
+                }
             }
         }
     }
@@ -77,6 +88,6 @@ fun PostsScreenPreview() {
         )
     )
     HombreCamionTheme {
-        PostsScreen(comments = samplePosts)
+        PostsScreen(posts = samplePosts, onPostClick = {})
     }
 }

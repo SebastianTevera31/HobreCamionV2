@@ -1,10 +1,16 @@
-package com.rfz.appflotal.presentation.ui.blog.viewmodel
+package com.rfz.appflotal.presentation.ui.forums.viewmodel
 
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
-data class BlogUiState(
+data class ForumUiState(
     val screenState: LoadState<Unit> = LoadState.Idle,
+    val forums: List<Topic> = emptyList(),
+    val posts: List<Post> = emptyList(),
+    val selectedPost: Post? = null,
+    val selectedRoom: Topic? = null,
+    val comments: List<Comment> = emptyList(),
+    val searchQuery: String = ""
 )
 
 data class Comment(
@@ -16,7 +22,7 @@ data class Comment(
     val isSaved: Boolean,
     val firstInitial: String,
     val secondInitial: String
-) : BlogRecord
+) : ForumRecord
 
 data class Post(
     override val id: Int,
@@ -26,16 +32,16 @@ data class Post(
     val author: String,
     val numComments: Int,
     val time: String
-) : BlogRecord
+) : ForumRecord
 
 data class Topic(
     override val id: Int,
     override val title: String,
     override val description: String,
     override val imageUrl: String
-) : BlogRecord
+) : ForumRecord
 
-interface BlogRecord : CatalogItem {
+interface ForumRecord : CatalogItem {
     override val id: Int
     val title: String
     override val description: String

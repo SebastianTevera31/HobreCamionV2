@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.blog.screen
+package com.rfz.appflotal.presentation.ui.forums.screen
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,27 +12,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.blog.components.PostCard
-import com.rfz.appflotal.presentation.ui.blog.viewmodel.Topic
+import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
+import com.rfz.appflotal.presentation.ui.forums.components.PostCard
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
+import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
-fun ForumsScreen(foros: List<Topic>, modifier: Modifier = Modifier) {
+fun ForumsScreen(
+    foros: List<Topic>,
+    loadState: LoadState<Any> = LoadState.Idle,
+    modifier: Modifier = Modifier,
+    onNavigate: (Topic) -> Unit
+) {
     Surface(
         modifier = modifier
             .fillMaxSize(),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        LazyColumn(
-            contentPadding = PaddingValues(Dimens.PaddingSmall),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(foros) { foro ->
-                PostCard(
-                    title = foro.title,
-                    content = foro.description,
-                    modifier = Modifier.padding(Dimens.PaddingSmall),
-                    onClick = {}
-                )
+        if (loadState is LoadState.Loading) {
+            ForumShimmerList()
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(Dimens.PaddingSmall),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(foros) { foro ->
+                    PostCard(
+                        title = foro.title,
+                        content = foro.description,
+                        modifier = Modifier.padding(Dimens.PaddingSmall),
+                        onClick = { onNavigate(foro) }
+                    )
+                }
             }
         }
     }
@@ -63,6 +74,6 @@ fun ForumsScreenPreview() {
         )
     )
     HombreCamionTheme {
-        ForumsScreen(foros = sampleForos)
+        ForumsScreen(foros = sampleForos) {}
     }
 }

@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.blog.components
+package com.rfz.appflotal.presentation.ui.forums.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -58,7 +58,9 @@ fun BottomCommentField(
 
         OutlinedTextField(
             value = comment,
-            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.primary),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                color = MaterialTheme.colorScheme.primary
+            ),
             onValueChange = onCommentChange,
             shape = RoundedCornerShape(Dimens.PaddingSmall),
             placeholder = {

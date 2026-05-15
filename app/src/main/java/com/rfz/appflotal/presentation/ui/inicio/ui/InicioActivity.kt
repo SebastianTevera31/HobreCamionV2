@@ -21,7 +21,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -105,6 +104,9 @@ import com.rfz.appflotal.presentation.ui.cambiodestino.screen.CambioDestinoScree
 import com.rfz.appflotal.presentation.ui.cambiodestino.viewmodel.CambioDestinoViewModel
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.DisassemblyTireScreen
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
+import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
+import com.rfz.appflotal.presentation.ui.forums.navigation.forumsGraph
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.screen.ShareFeedbackScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
@@ -181,6 +183,8 @@ class InicioActivity : ComponentActivity() {
 
     private val cambioDestinoViewModel: CambioDestinoViewModel by viewModels()
     private val vialStatusViewModel: VialStatusViewModel by viewModels()
+
+    private val forumViewModel: ForumViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -271,7 +275,7 @@ class InicioActivity : ComponentActivity() {
         }
     }
 
-    
+
     @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -1027,6 +1031,14 @@ class InicioActivity : ComponentActivity() {
                                             viewModel = vialStatusViewModel
                                         )
                                     }
+
+                                    composable(route = NavScreens.BLOG) {
+                                        navController.navigate(ForumsGraph) {
+                                            popUpTo(NavScreens.BLOG) { inclusive = true }
+                                        }
+                                    }
+
+                                    forumsGraph(navController, forumViewModel)
                                 }
 
                                 NotificationComponent(
