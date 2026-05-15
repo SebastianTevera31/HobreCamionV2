@@ -381,6 +381,7 @@
     <string name="buscar_mapa_vial">Buscar mapa vial</string>
     <string name="selecciona_una_opcion">Selecciona una opción</string>
     <string name="sin_elementos_disponibles">Sin elementos disponibles</string>
+    <string name="blog">Blog</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>
