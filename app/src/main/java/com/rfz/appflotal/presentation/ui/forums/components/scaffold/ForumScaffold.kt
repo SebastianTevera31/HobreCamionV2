@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -30,7 +29,7 @@ data class ForumTopBarConfig(
     val title: String,
     val subtitle: String? = null,
     val showBackButton: Boolean = false,
-    val showMenuButton: Boolean = true,
+    val showMenuButton: Boolean = false,
     val searchConfig: ForumSearchConfig? = null,
     val onBackClick: (() -> Unit)? = null,
     val onMenuClick: (() -> Unit)? = null
@@ -105,10 +104,12 @@ fun ForumScaffoldPreview() {
                         comment = "",
                         onCommentChange = {},
                         onSend = {},
+                        selectedImages = emptyList(),
+                        onAddImage = {},
+                        onRemoveImage = {},
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
-                            .height(52.dp)
                     )
                 }
             }

@@ -13,15 +13,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
-import com.rfz.appflotal.presentation.ui.forums.components.PostCard
+import com.rfz.appflotal.presentation.ui.forums.screen.post.PostCard
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
 fun PostsScreen(
     posts: List<Post>,
-    loadState: LoadState<Any> = LoadState.Idle,
     modifier: Modifier = Modifier,
+    loadState: LoadState<Any> = LoadState.Idle,
     onPostClick: (Post) -> Unit
 ) {
     Surface(
@@ -43,6 +43,7 @@ fun PostsScreen(
                         modifier = Modifier.padding(Dimens.PaddingSmall),
                         numComments = post.numComments,
                         isPost = true,
+                        showOptions = true,
                         onClick = { onPostClick(post) },
                         author = post.author,
                         time = post.time,

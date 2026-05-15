@@ -74,7 +74,7 @@ class ForumViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
             delay(1000) // Simular red
-            
+
             // Intentar encontrar el post en la lista actual, o crear uno temporal si no existe (ej. navegación directa)
             val post = _uiState.value.posts.find { it.id == topicId } ?: Post(
                 id = topicId,

@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.forums.components
+package com.rfz.appflotal.presentation.ui.forums.screen.topic
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,11 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.components.PostDropdownMenu
 
 @Composable
 fun TopicHeader(
     title: String,
     content: String,
+    onReport: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -67,7 +69,7 @@ fun TopicHeader(
                 }
                 Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
 
-                Column() {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Tema",
                         style = MaterialTheme.typography.titleMedium.copy(color = Color.DarkGray)
@@ -81,6 +83,7 @@ fun TopicHeader(
                     )
                 }
 
+                PostDropdownMenu(onReport = onReport)
             }
             Text(
                 text = content,
@@ -96,7 +99,8 @@ fun TopicHeaderPreview() {
     HombreCamionTheme {
         TopicHeader(
             title = "Mantenimiento Preventivo",
-            content = "Aprende cómo realizar un mantenimiento preventivo a tus neumáticos para alargar su vida útil y ahorrar costos."
+            content = "Aprende cómo realizar un mantenimiento preventivo a tus neumáticos para alargar su vida útil y ahorrar costos.",
+            onReport = {}
         )
     }
 }

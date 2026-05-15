@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.forums.screen
+package com.rfz.appflotal.presentation.ui.forums.screen.topic
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -18,9 +18,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
-import com.rfz.appflotal.presentation.ui.forums.components.TopicHeader
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.PostType
+
+enum class TopicViews {
+    COMMENTS, NEW_COMMENT
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -28,8 +32,9 @@ fun TopicScreen(
     topic: Post,
     mainComment: Comment,
     comments: List<Comment>,
-    onReply: () -> Unit,
+    onReply: (Comment) -> Unit,
     onSave: () -> Unit,
+    onReport: (postId: Int, type: PostType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -39,8 +44,10 @@ fun TopicScreen(
         Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
             TopicHeader(
                 title = topic.title,
-                content = topic.description
+                content = topic.description,
+                onReport = { onReport(topic.id, PostType.TOPIC) }
             )
+
             Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
             CommentCard(
                 firstInitial = mainComment.firstInitial,
@@ -49,13 +56,13 @@ fun TopicScreen(
                 imageUrl = mainComment.imageUrl,
                 likes = mainComment.likes,
                 isSaved = mainComment.isSaved,
-                onReply = onReply,
+                onReply = { onReply(mainComment) },
                 onSave = onSave,
                 isAuthor = true,
                 secondInitial = mainComment.secondInitial
             )
 
-            Row {
+            Row(modifier = Modifier.weight(1f)) {
                 Spacer(modifier = Modifier.padding(Dimens.PaddingMedium))
                 LazyColumn(
                     contentPadding = PaddingValues(Dimens.PaddingSmall),
@@ -69,7 +76,7 @@ fun TopicScreen(
                             content = comment.description,
                             imageUrl = comment.imageUrl,
                             likes = comment.likes,
-                            onReply = onReply,
+                            onReply = { onReply(comment) },
                             onSave = onSave,
                             isSaved = comment.isSaved,
                             secondInitial = comment.secondInitial
@@ -132,7 +139,8 @@ fun TopicScreenPreview() {
             mainComment = sampleMainComment,
             comments = sampleComments,
             onReply = {},
-            onSave = {}
+            onSave = {},
+            onReport = { _, _ -> }
         )
     }
 }

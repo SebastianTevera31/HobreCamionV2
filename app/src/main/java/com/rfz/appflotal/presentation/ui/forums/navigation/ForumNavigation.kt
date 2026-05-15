@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -33,7 +35,10 @@ import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchC
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
 import com.rfz.appflotal.presentation.ui.forums.screen.ForumsScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.PostsScreen
-import com.rfz.appflotal.presentation.ui.forums.screen.TopicScreen
+import com.rfz.appflotal.presentation.ui.forums.screen.post.NewTopicScreen
+import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReplyScreen
+import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReportPostScreen
+import com.rfz.appflotal.presentation.ui.forums.screen.topic.TopicScreen
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import kotlinx.serialization.Serializable
@@ -57,14 +62,34 @@ data class TopicDetail(
     val topicTitle: String
 )
 
+
+@Serializable
+data class ReportPost(
+    val idPost: Int,
+    val type: Int
+)
+
+@Serializable
+data class NewTopicNav(
+    val roomId: String,
+    val roomTitle: String
+)
+
+@Serializable
+data class NewCommentNav(
+    val commentId: Int
+)
+
 fun NavGraphBuilder.forumsGraph(
     navController: NavHostController
 ) {
     navigation<ForumsGraph>(
         startDestination = ForumsRooms
     ) {
-        composable<ForumsRooms> {
-            val viewModel: ForumViewModel = hiltViewModel()
+        composable<ForumsRooms> { backStackEntry ->
+            val viewModel: ForumViewModel = hiltViewModel(
+                navController.getBackStackEntry<ForumsGraph>()
+            )
             val state by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
@@ -122,7 +147,9 @@ fun NavGraphBuilder.forumsGraph(
         }
 
         composable<PostsTopics> { backStackEntry ->
-            val viewModel: ForumViewModel = hiltViewModel()
+            val viewModel: ForumViewModel = hiltViewModel(
+                navController.getBackStackEntry<ForumsGraph>()
+            )
             val args = backStackEntry.toRoute<PostsTopics>()
             val state by viewModel.uiState.collectAsState()
 
@@ -145,7 +172,14 @@ fun NavGraphBuilder.forumsGraph(
                     onMenuClick = viewModel::onMenuClick
                 ),
                 floatingActionButton = {
-                    FloatingActionButton(onClick = {}) {
+                    FloatingActionButton(onClick = {
+                        navController.navigate(
+                            NewTopicNav(
+                                roomId = args.roomId,
+                                roomTitle = args.roomTitle
+                            )
+                        )
+                    }) {
                         Row(
                             modifier = Modifier.padding(Dimens.PaddingSmall),
                             verticalAlignment = Alignment.CenterVertically
@@ -201,7 +235,9 @@ fun NavGraphBuilder.forumsGraph(
         }
 
         composable<TopicDetail> { backStackEntry ->
-            val viewModel: ForumViewModel = hiltViewModel()
+            val viewModel: ForumViewModel = hiltViewModel(
+                navController.getBackStackEntry<ForumsGraph>()
+            )
             val args = backStackEntry.toRoute<TopicDetail>()
             val state by viewModel.uiState.collectAsState()
 
@@ -248,8 +284,18 @@ fun NavGraphBuilder.forumsGraph(
                                 topic = topic,
                                 mainComment = comments.first(),
                                 comments = comments.drop(1),
-                                onReply = { },
+                                onReply = { comment ->
+                                    navController.navigate(NewCommentNav(commentId = comment.id))
+                                },
                                 onSave = { },
+                                onReport = { postId, type ->
+                                    navController.navigate(
+                                        ReportPost(
+                                            idPost = postId,
+                                            type = type.typeId
+                                        )
+                                    )
+                                },
                                 modifier = Modifier.padding(paddingValues)
                             )
                         }
@@ -263,6 +309,84 @@ fun NavGraphBuilder.forumsGraph(
                     }
 
                     else -> {}
+                }
+            }
+        }
+
+        composable<ReportPost> { backStackEntry ->
+            ForumModuleScaffold(
+                topBarConfig = ForumTopBarConfig(
+                    title = "Reportar",
+                    subtitle = "Ayúdanos a mejorar la comunidad",
+                    showBackButton = true,
+                    showMenuButton = false,
+                    onBackClick = { navController.popBackStack() }
+                )
+            ) { paddingValues ->
+                ReportPostScreen(
+                    modifier = Modifier.padding(paddingValues),
+                    onSendReport = { _, _ ->
+                        navController.popBackStack()
+                    }
+                )
+            }
+        }
+
+        composable<NewTopicNav> { backStackEntry ->
+            val args = backStackEntry.toRoute<NewTopicNav>()
+            ForumModuleScaffold(
+                topBarConfig = ForumTopBarConfig(
+                    title = "Nuevo Tema",
+                    subtitle = args.roomTitle,
+                    showBackButton = true,
+                    showMenuButton = false,
+                    onBackClick = { navController.popBackStack() }
+                )
+            ) { paddingValues ->
+                NewTopicScreen(
+                    modifier = Modifier.padding(paddingValues),
+                    onSend = { title, message ->
+                        // Aquí iría la lógica para guardar el tema
+                        navController.popBackStack()
+                    }
+                )
+            }
+        }
+
+        composable<NewCommentNav> { backStackEntry ->
+            val args = backStackEntry.toRoute<NewCommentNav>()
+            val viewModel: ForumViewModel = hiltViewModel(
+                navController.getBackStackEntry<ForumsGraph>()
+            )
+            val state by viewModel.uiState.collectAsState()
+
+            // Buscamos el comentario al que se está respondiendo en el estado actual
+            val commentToReply = state.comments.find { it.id == args.commentId }
+                ?: state.selectedPost?.let {
+                    // Si no está en comentarios, podría ser el post principal (que actúa como comentario inicial)
+                    // Nota: En un sistema real, el post principal suele tener un ID de comentario asociado.
+                    null 
+                }
+
+            ForumModuleScaffold(
+                topBarConfig = ForumTopBarConfig(
+                    title = "Responder",
+                    subtitle = state.selectedPost?.title ?: "",
+                    showBackButton = true,
+                    showMenuButton = false,
+                    onBackClick = { navController.popBackStack() }
+                )
+            ) { paddingValues ->
+                commentToReply?.let { comment ->
+                    ReplyScreen(
+                        comment = comment,
+                        modifier = Modifier.padding(paddingValues),
+                        onOptions = {},
+                        onSend = { message: String ->
+                            // Aquí iría la lógica para guardar el comentario
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
         }

@@ -42,7 +42,9 @@ fun CommentCard(
     modifier: Modifier = Modifier,
     isSaved: Boolean = false,
     isAuthor: Boolean = false,
+    showOptions: Boolean = true,
     onSeeMore: () -> Unit = {},
+    onReport: () -> Unit = {},
     onReply: () -> Unit = {},
     onSave: () -> Unit = {},
     secondInitial: String = "",
@@ -82,12 +84,17 @@ fun CommentCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(Dimens.PaddingLarge)
                 ) {
-                    BlogContent(
-                        title = user,
-                        content = content,
-                        isAuthor = isAuthor,
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        BlogContent(
+                            title = user,
+                            content = content,
+                            isAuthor = isAuthor,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        PostDropdownMenu(onReport = onReport)
+                    }
 
                     if (imageUrl.isNotEmpty()) {
                         Image(
@@ -100,38 +107,43 @@ fun CommentCard(
                         )
                     }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
-                    ) {
+                    if (showOptions) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                            modifier = Modifier.clickable { onSave() }
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
                         ) {
-                            Icon(
-                                imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
-                                contentDescription = null,
-                                tint = if (isSaved) Color.Red else Color.Gray
-                            )
-                            Text(text = likes.toString(), style = MaterialTheme.typography.bodySmall)
-                        }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                                modifier = Modifier.clickable { onSave() }
+                            ) {
+                                Icon(
+                                    imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
+                                    contentDescription = null,
+                                    tint = if (isSaved) Color.Red else Color.Gray
+                                )
+                                Text(
+                                    text = likes.toString(),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                            modifier = Modifier.clickable { onReply() }
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Reply,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = "Responder",
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                                modifier = Modifier.clickable { onReply() }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Reply,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Responder",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
                 }

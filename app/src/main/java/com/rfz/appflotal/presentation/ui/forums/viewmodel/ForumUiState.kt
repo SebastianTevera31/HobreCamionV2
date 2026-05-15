@@ -13,6 +13,10 @@ data class ForumUiState(
     val searchQuery: String = ""
 )
 
+enum class PostType(val typeId: Int) {
+    COMMENT(0), TOPIC(1)
+}
+
 data class Comment(
     override val id: Int,
     override val title: String,

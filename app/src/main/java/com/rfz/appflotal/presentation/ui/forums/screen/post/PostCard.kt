@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.forums.components
+package com.rfz.appflotal.presentation.ui.forums.screen.post
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.TireRepair
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.components.BlogContent
 
 @Composable
 fun PostCard(
@@ -43,6 +45,7 @@ fun PostCard(
     time: String = "",
     numComments: Int = 0,
     isPost: Boolean = false,
+    showOptions: Boolean = false,
     hidePostInfo: Boolean = false,
     onClick: () -> Unit
 ) {
@@ -91,6 +94,15 @@ fun PostCard(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                             contentDescription = null,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                if (showOptions) {
+                    IconButton(onClick = {}) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "See more",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -157,6 +169,7 @@ private fun PostCardPreview() {
             time = "Hace 2 horas",
             numComments = 12,
             isPost = true,
+            showOptions = true,
             onClick = {}
         )
     }
