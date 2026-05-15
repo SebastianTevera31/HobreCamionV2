@@ -67,8 +67,8 @@ fun ForumShimmerItem() {
 }
 
 @Composable
-fun ForumShimmerList() {
-    Column {
+fun ForumShimmerList(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
         repeat(5) {
             ForumShimmerItem()
         }

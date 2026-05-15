@@ -78,7 +78,7 @@ fun BlogContent(
 
         Text(
             text = content,
-            style = MaterialTheme.typography.bodyLarge.copy(Color.DarkGray),
+            style = MaterialTheme.typography.bodyMedium.copy(Color.DarkGray),
             maxLines = if (showAllContent) Int.MAX_VALUE else 2,
             overflow = if (showAllContent) TextOverflow.Clip else TextOverflow.Ellipsis
         )

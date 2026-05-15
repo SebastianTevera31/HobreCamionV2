@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.forums.components
+package com.rfz.appflotal.presentation.ui.forums.components.scaffold
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.components.ForumSearchBar
 
 @Composable
 fun ForumTopAppBar(

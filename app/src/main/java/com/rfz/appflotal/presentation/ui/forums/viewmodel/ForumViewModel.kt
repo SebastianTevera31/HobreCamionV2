@@ -16,11 +16,8 @@ class ForumViewModel @Inject constructor() : ViewModel() {
     private var _uiState = MutableStateFlow(ForumUiState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        getForums()
-    }
-
     fun getForums() {
+        if (_uiState.value.forums.isNotEmpty()) return
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
             delay(1000) // Simular red
@@ -38,12 +35,15 @@ class ForumViewModel @Inject constructor() : ViewModel() {
     }
 
     fun loadPostsByRoom(roomId: String) {
+        if (_uiState.value.selectedRoom?.id?.toString() == roomId && _uiState.value.posts.isNotEmpty()) return
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
             delay(1000) // Simular red
+            val room = _uiState.value.forums.find { it.id.toString() == roomId }
             _uiState.update {
                 it.copy(
                     screenState = LoadState.Success(Unit),
+                    selectedRoom = room,
                     posts = listOf(
                         Post(
                             1,
@@ -70,10 +70,22 @@ class ForumViewModel @Inject constructor() : ViewModel() {
     }
 
     fun loadTopicDetail(topicId: Int) {
+        if (_uiState.value.selectedPost?.id == topicId && _uiState.value.comments.isNotEmpty()) return
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
             delay(1000) // Simular red
-            val post = _uiState.value.posts.find { it.id == topicId }
+            
+            // Intentar encontrar el post en la lista actual, o crear uno temporal si no existe (ej. navegación directa)
+            val post = _uiState.value.posts.find { it.id == topicId } ?: Post(
+                id = topicId,
+                title = "Tema #$topicId",
+                description = "Cargando descripción...",
+                imageUrl = "",
+                author = "Usuario",
+                numComments = 0,
+                time = "Reciente"
+            )
+
             _uiState.update {
                 it.copy(
                     screenState = LoadState.Success(Unit),

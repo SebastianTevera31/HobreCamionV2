@@ -69,7 +69,6 @@ fun CommentCard(
                         .size(60.dp)
                         .clip(RoundedCornerShape(100))
                         .background(MaterialTheme.colorScheme.primary)
-                        .align(Alignment.Top)
                 ) {
                     Text(
                         text = if (secondInitial.isNotEmpty()) "$firstInitial$secondInitial" else firstInitial,
@@ -86,7 +85,8 @@ fun CommentCard(
                     BlogContent(
                         title = user,
                         content = content,
-                        isAuthor = isAuthor
+                        isAuthor = isAuthor,
+                        style = MaterialTheme.typography.titleMedium
                     )
 
                     if (imageUrl.isNotEmpty()) {
@@ -114,7 +114,7 @@ fun CommentCard(
                                 contentDescription = null,
                                 tint = if (isSaved) Color.Red else Color.Gray
                             )
-                            Text(text = likes.toString())
+                            Text(text = likes.toString(), style = MaterialTheme.typography.bodySmall)
                         }
 
                         Row(
@@ -127,7 +127,11 @@ fun CommentCard(
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                             )
-                            Text(text = "Responder", color = MaterialTheme.colorScheme.primary)
+                            Text(
+                                text = "Responder",
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }

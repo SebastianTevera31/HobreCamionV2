@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.forums.components
+package com.rfz.appflotal.presentation.ui.forums.components.scaffold
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -34,7 +34,7 @@ fun BottomCommentField(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-        modifier = Modifier.padding(Dimens.PaddingSmall)
+        modifier = modifier.padding(Dimens.PaddingSmall)
     ) {
         IconButton(
             onClick = onSend,
@@ -75,7 +75,7 @@ fun BottomCommentField(
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent
             ),
-            modifier = modifier.weight(6f)
+            modifier = Modifier.weight(6f)
         )
         IconButton(
             onClick = onSend,

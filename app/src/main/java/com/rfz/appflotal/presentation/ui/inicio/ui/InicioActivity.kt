@@ -104,6 +104,7 @@ import com.rfz.appflotal.presentation.ui.cambiodestino.screen.CambioDestinoScree
 import com.rfz.appflotal.presentation.ui.cambiodestino.viewmodel.CambioDestinoViewModel
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.DisassemblyTireScreen
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.forumsGraph
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
@@ -163,28 +164,9 @@ class InicioActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private val inicioScreenViewModel: InicioScreenViewModel by viewModels()
     private val homeViewModel: HomeViewModel by viewModels()
-    private val passwordViewModel: PasswordViewModel by viewModels()
     private val monitorViewModel: MonitorViewModel by viewModels()
-    private val signUpViewModel: SignUpViewModel by viewModels()
     private val registerMonitorViewModel: RegisterMonitorViewModel by viewModels()
     private val updateUserViewModel: UpdateUserViewModel by viewModels()
-    private val retreatedDesignViewModel: RetreatedDesignViewModel by viewModels()
-    private val inspectionViewModel: InspectionViewModel by viewModels()
-    private val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel by viewModels()
-    private val marcaRenovadosScreen: MarcaRenovadosViewModel by viewModels()
-
-    private val assemblyTireViewModel: AssemblyTireViewModel by viewModels()
-
-    private val disassemblyTireViewModel: DisassemblyViewModel by viewModels()
-
-    private val tireWasteViewModel: TireWasteViewModel by viewModels()
-
-    private val repararRenovarViewModel: RepararRenovarViewModel by viewModels()
-
-    private val cambioDestinoViewModel: CambioDestinoViewModel by viewModels()
-    private val vialStatusViewModel: VialStatusViewModel by viewModels()
-
-    private val forumViewModel: ForumViewModel by viewModels()
 
     @Inject
     lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
@@ -608,26 +590,26 @@ class InicioActivity : ComponentActivity() {
                                     enterTransition = {
                                         slideIntoContainer(
                                             AnimatedContentTransitionScope.SlideDirection.Left,
-                                            animationSpec = tween(700)
-                                        ) + fadeIn(animationSpec = tween(700))
+                                            animationSpec = tween(400)
+                                        ) + fadeIn(animationSpec = tween(400))
                                     },
                                     exitTransition = {
                                         slideOutOfContainer(
                                             AnimatedContentTransitionScope.SlideDirection.Left,
-                                            animationSpec = tween(700)
-                                        ) + fadeOut(animationSpec = tween(700))
+                                            animationSpec = tween(400)
+                                        ) + fadeOut(animationSpec = tween(400))
                                     },
                                     popEnterTransition = {
                                         slideIntoContainer(
                                             AnimatedContentTransitionScope.SlideDirection.Right,
-                                            animationSpec = tween(700)
-                                        ) + fadeIn(animationSpec = tween(700))
+                                            animationSpec = tween(400)
+                                        ) + fadeIn(animationSpec = tween(400))
                                     },
                                     popExitTransition = {
                                         slideOutOfContainer(
                                             AnimatedContentTransitionScope.SlideDirection.Right,
-                                            animationSpec = tween(700)
-                                        ) + fadeOut(animationSpec = tween(700))
+                                            animationSpec = tween(400)
+                                        ) + fadeOut(animationSpec = tween(400))
                                     }) {
                                     composable(NavScreens.HOME) {
                                         // Efecto: si ya están concedidos, arrancar servicio automáticamente
@@ -731,6 +713,7 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(NavScreens.RECUPERAR_CONTRASENIA) {
+                                        val passwordViewModel: PasswordViewModel = hiltViewModel()
                                         PasswordScreen(passwordViewModel)
                                     }
 
@@ -765,12 +748,14 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(NavScreens.RENOVADOS) {
+                                        val retreatedDesignViewModel: RetreatedDesignViewModel = hiltViewModel()
                                         RetreatedDesignScreen(
                                             viewModel = retreatedDesignViewModel,
                                             onBackScreen = { navController.popBackStack() })
                                     }
 
                                     composable(NavScreens.MARCA_RENOVADA) {
+                                        val marcaRenovadosScreen: MarcaRenovadosViewModel = hiltViewModel()
                                         MarcaRenovadosScreen(
                                             viewModel = marcaRenovadosScreen,
                                             onBackScreen = { navController.popBackStack() })
@@ -812,6 +797,7 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(NavScreens.REGISTRO_LLANTAS) {
+                                        val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel = hiltViewModel()
                                         NuevoRegistroLlantasScreen(
                                             navController = navController,
                                             viewModel = nuevoRegistroLllantasViewModel
@@ -841,6 +827,7 @@ class InicioActivity : ComponentActivity() {
                                     composable(NavScreens.INICIO) { InicioScreen(navController) }
 
                                     composable(route = NavScreens.REGISTRAR_USUARIO) {
+                                        val signUpViewModel: SignUpViewModel = hiltViewModel()
                                         val uiState = homeViewModel.uiState.collectAsState()
                                         SignUpScreen(
                                             navController,
@@ -916,6 +903,7 @@ class InicioActivity : ComponentActivity() {
                                             type = NavType.FloatType; defaultValue = 0
                                         })
                                     ) { backStackEntry ->
+                                        val inspectionViewModel: InspectionViewModel = hiltViewModel()
                                         val tire = backStackEntry.arguments?.getString("tire") ?: ""
                                         val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
                                         val pressure =
@@ -949,6 +937,7 @@ class InicioActivity : ComponentActivity() {
                                                 type = NavType.StringType
                                             })
                                     ) { backStackEntry ->
+                                        val assemblyTireViewModel: AssemblyTireViewModel = hiltViewModel()
                                         val positionTire =
                                             backStackEntry.arguments?.getString("tire") ?: ""
                                         AssemblyTireScreen(
@@ -969,6 +958,7 @@ class InicioActivity : ComponentActivity() {
                                             type = NavType.FloatType; defaultValue = 0
                                         })
                                     ) { backStackEntry ->
+                                        val disassemblyTireViewModel: DisassemblyViewModel = hiltViewModel()
                                         val tire = backStackEntry.arguments?.getString("tire") ?: ""
                                         val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
                                         val pressure =
@@ -990,6 +980,7 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(route = NavScreens.DESECHO) {
+                                        val tireWasteViewModel: TireWasteViewModel = hiltViewModel()
                                         TireWastePileScreen(
                                             onBack = { navController.popBackStack() },
                                             viewModel = tireWasteViewModel,
@@ -997,6 +988,7 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(route = NavScreens.REPARARRENOVAR) {
+                                        val repararRenovarViewModel: RepararRenovarViewModel = hiltViewModel()
                                         RepararRenovarScreen(
                                             onBack = { navController.popBackStack() },
                                             viewModel = repararRenovarViewModel,
@@ -1004,6 +996,7 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(route = NavScreens.CAMBIO_DESTINO) {
+                                        val cambioDestinoViewModel: CambioDestinoViewModel = hiltViewModel()
                                         CambioDestinoScreen(
                                             onBack = { navController.popBackStack() },
                                             viewModel = cambioDestinoViewModel,
@@ -1026,6 +1019,7 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(route = HombreCamionScreens.MAPA_VIAL.name) {
+                                        val vialStatusViewModel: VialStatusViewModel = hiltViewModel()
                                         VialStatusScreen(
                                             onBack = { navController.popBackStack() },
                                             viewModel = vialStatusViewModel
@@ -1038,7 +1032,7 @@ class InicioActivity : ComponentActivity() {
                                         }
                                     }
 
-                                    forumsGraph(navController, forumViewModel)
+                                    forumsGraph(navController)
                                 }
 
                                 NotificationComponent(

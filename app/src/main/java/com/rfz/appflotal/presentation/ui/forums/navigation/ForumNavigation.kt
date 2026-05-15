@@ -1,22 +1,41 @@
 package com.rfz.appflotal.presentation.ui.forums.navigation
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.rfz.appflotal.presentation.ui.forums.components.ForumModuleScaffold
-import com.rfz.appflotal.presentation.ui.forums.components.ForumSearchConfig
-import com.rfz.appflotal.presentation.ui.forums.components.ForumTopBarConfig
+import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.presentation.theme.Dimens
+import com.rfz.appflotal.presentation.ui.forums.components.ForumErrorView
+import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
+import com.rfz.appflotal.presentation.ui.forums.components.scaffold.BottomCommentField
+import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleScaffold
+import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
+import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
 import com.rfz.appflotal.presentation.ui.forums.screen.ForumsScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.PostsScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.TopicScreen
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
+import com.rfz.appflotal.presentation.ui.utils.LoadState
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -39,13 +58,13 @@ data class TopicDetail(
 )
 
 fun NavGraphBuilder.forumsGraph(
-    navController: NavHostController,
-    viewModel: ForumViewModel
+    navController: NavHostController
 ) {
     navigation<ForumsGraph>(
         startDestination = ForumsRooms
     ) {
         composable<ForumsRooms> {
+            val viewModel: ForumViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
@@ -56,33 +75,54 @@ fun NavGraphBuilder.forumsGraph(
                 topBarConfig = ForumTopBarConfig(
                     title = "Foros",
                     subtitle = "Comunidad Hombre Camión",
-                    showBackButton = false,
+                    showBackButton = true,
                     showMenuButton = true,
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
                         placeholder = "Buscar tema...",
                         onValueChange = viewModel::onSearchChanged
                     ),
+                    onBackClick = {
+                        navController.popBackStack(NavScreens.HOME, inclusive = false)
+                    },
                     onMenuClick = viewModel::onMenuClick
                 )
             ) { paddingValues ->
-                ForumsScreen(
-                    foros = state.forums,
-                    loadState = state.screenState,
-                    onNavigate = { topic ->
-                        navController.navigate(
-                            PostsTopics(
-                                roomId = topic.id.toString(),
-                                roomTitle = topic.title
-                            )
+                when (state.screenState) {
+                    is LoadState.Loading -> {
+                        ForumShimmerList(modifier = Modifier.padding(paddingValues))
+                    }
+
+                    is LoadState.Success -> {
+                        ForumsScreen(
+                            foros = state.forums,
+                            loadState = state.screenState,
+                            onNavigate = { topic ->
+                                navController.navigate(
+                                    PostsTopics(
+                                        roomId = topic.id.toString(),
+                                        roomTitle = topic.title
+                                    )
+                                )
+                            },
+                            modifier = Modifier.padding(paddingValues)
                         )
-                    },
-                    modifier = Modifier.padding(paddingValues)
-                )
+                    }
+
+                    is LoadState.Error -> {
+                        ForumErrorView(
+                            onRetry = { viewModel.getForums() },
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
+
+                    else -> {}
+                }
             }
         }
 
         composable<PostsTopics> { backStackEntry ->
+            val viewModel: ForumViewModel = hiltViewModel()
             val args = backStackEntry.toRoute<PostsTopics>()
             val state by viewModel.uiState.collectAsState()
 
@@ -103,26 +143,65 @@ fun NavGraphBuilder.forumsGraph(
                     ),
                     onBackClick = { navController.popBackStack() },
                     onMenuClick = viewModel::onMenuClick
-                )
-            ) { paddingValues ->
-                PostsScreen(
-                    posts = state.posts,
-                    loadState = state.screenState,
-                    onPostClick = { post ->
-                        navController.navigate(
-                            TopicDetail(
-                                roomId = args.roomId,
-                                topicId = post.id.toString(),
-                                topicTitle = post.title
+                ),
+                floatingActionButton = {
+                    FloatingActionButton(onClick = {}) {
+                        Row(
+                            modifier = Modifier.padding(Dimens.PaddingSmall),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add topic",
+                                tint = Color.White
                             )
+                            Text(
+                                text = "Nuevo tema",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            )
+                        }
+                    }
+                }
+            ) { paddingValues ->
+                when (state.screenState) {
+                    is LoadState.Loading -> {
+                        ForumShimmerList(modifier = Modifier.padding(paddingValues))
+                    }
+
+                    is LoadState.Success -> {
+                        PostsScreen(
+                            posts = state.posts,
+                            loadState = state.screenState,
+                            onPostClick = { post ->
+                                navController.navigate(
+                                    TopicDetail(
+                                        roomId = args.roomId,
+                                        topicId = post.id.toString(),
+                                        topicTitle = post.title
+                                    )
+                                )
+                            },
+                            modifier = Modifier.padding(paddingValues)
                         )
-                    },
-                    modifier = Modifier.padding(paddingValues)
-                )
+                    }
+
+                    is LoadState.Error -> {
+                        ForumErrorView(
+                            onRetry = { viewModel.loadPostsByRoom(args.roomId) },
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
+
+                    else -> {}
+                }
             }
         }
 
         composable<TopicDetail> { backStackEntry ->
+            val viewModel: ForumViewModel = hiltViewModel()
             val args = backStackEntry.toRoute<TopicDetail>()
             val state by viewModel.uiState.collectAsState()
 
@@ -140,16 +219,51 @@ fun NavGraphBuilder.forumsGraph(
                     searchConfig = null,
                     onBackClick = { navController.popBackStack() },
                     onMenuClick = viewModel::onMenuClick
-                )
+                ),
+                bottomBar = {
+                    Surface(
+                        modifier = Modifier.navigationBarsPadding(),
+                        tonalElevation = Dimens.PaddingExtraSmall,
+                        color = Color.White
+                    ) {
+                        BottomCommentField(
+                            comment = "",
+                            onCommentChange = {},
+                            onSend = {}
+                        )
+                    }
+                }
             ) { paddingValues ->
-                TopicScreen(
-                    topic = state.selectedPost ?: return@ForumModuleScaffold,
-                    mainComment = state.comments.firstOrNull() ?: return@ForumModuleScaffold,
-                    comments = state.comments.drop(1),
-                    onReply = { },
-                    onSave = { },
-                    modifier = Modifier.padding(paddingValues)
-                )
+                when (state.screenState) {
+                    is LoadState.Loading -> {
+                        ForumShimmerList(modifier = Modifier.padding(paddingValues))
+                    }
+
+                    is LoadState.Success -> {
+                        val topic = state.selectedPost
+                        val comments = state.comments
+
+                        if (topic != null && comments.isNotEmpty()) {
+                            TopicScreen(
+                                topic = topic,
+                                mainComment = comments.first(),
+                                comments = comments.drop(1),
+                                onReply = { },
+                                onSave = { },
+                                modifier = Modifier.padding(paddingValues)
+                            )
+                        }
+                    }
+
+                    is LoadState.Error -> {
+                        ForumErrorView(
+                            onRetry = { viewModel.loadTopicDetail(args.topicId.toInt()) },
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
+
+                    else -> {}
+                }
             }
         }
     }
