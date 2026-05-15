@@ -141,13 +141,10 @@ fun CommentCardPreview() {
         CommentCard(
             firstInitial = "J",
             user = "Juan Perez",
-            content = "Este es un comentario de prueba para ver como se visualiza en la tarjeta de comentarios.",
-            imageUrl = "http://ontheair.com",
+            content = "Este es un comentario de prueba.",
+            imageUrl = "",
             likes = 12,
             isSaved = false,
-            onSeeMore = {},
-            onReply = {},
-            onSave = {},
             secondInitial = "P"
         )
     }
