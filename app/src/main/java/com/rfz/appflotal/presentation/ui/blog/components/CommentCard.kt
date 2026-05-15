@@ -39,8 +39,8 @@ fun CommentCard(
     content: String,
     imageUrl: String,
     likes: Int,
-    isSaved: Boolean = false,
     modifier: Modifier = Modifier,
+    isSaved: Boolean = false,
     onSeeMore: () -> Unit = {},
     onReply: () -> Unit = {},
     onSave: () -> Unit = {},
@@ -109,7 +109,8 @@ fun CommentCard(
                         ) {
                             Icon(
                                 imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
-                                contentDescription = null
+                                contentDescription = null,
+                                tint = if (isSaved) Color.Red else Color.Gray
                             )
                             Text(text = likes.toString())
                         }

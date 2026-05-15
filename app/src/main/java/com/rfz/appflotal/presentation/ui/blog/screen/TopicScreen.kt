@@ -4,7 +4,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -25,9 +28,6 @@ fun TopicScreen(
     topic: Post,
     mainComment: Comment,
     comments: List<Comment>,
-    firstInitial: String,
-    isSaved: Boolean,
-    secondInitial: String,
     onReply: () -> Unit,
     onSave: () -> Unit,
     modifier: Modifier = Modifier
@@ -36,44 +36,45 @@ fun TopicScreen(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        LazyColumn(
-            contentPadding = PaddingValues(Dimens.PaddingSmall),
-            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            stickyHeader {
-                Column {
-                    TopicHeader(
-                        title = topic.title,
-                        content = topic.description
-                    )
+        Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
+            TopicHeader(
+                title = topic.title,
+                content = topic.description
+            )
+            Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
+            CommentCard(
+                firstInitial = mainComment.firstInitial,
+                user = mainComment.title,
+                content = mainComment.description,
+                imageUrl = mainComment.imageUrl,
+                likes = mainComment.likes,
+                isSaved = mainComment.isSaved,
+                onReply = onReply,
+                onSave = onSave,
+                secondInitial = mainComment.secondInitial
+            )
 
-                    CommentCard(
-                        firstInitial = firstInitial,
-                        user = mainComment.title,
-                        content = mainComment.description,
-                        imageUrl = mainComment.imageUrl,
-                        likes = mainComment.likes,
-                        isSaved = isSaved,
-                        onReply = onReply,
-                        onSave = onSave,
-                        secondInitial = secondInitial
-                    )
+            Row {
+                Spacer(modifier = Modifier.padding(Dimens.PaddingMedium))
+                LazyColumn(
+                    contentPadding = PaddingValues(Dimens.PaddingSmall),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(comments) { comment ->
+                        CommentCard(
+                            firstInitial = comment.firstInitial,
+                            user = comment.title,
+                            content = comment.description,
+                            imageUrl = comment.imageUrl,
+                            likes = comment.likes,
+                            onReply = onReply,
+                            onSave = onSave,
+                            isSaved = comment.isSaved,
+                            secondInitial = comment.secondInitial
+                        )
+                    }
                 }
-            }
-
-            items(comments) { comment ->
-                CommentCard(
-                    firstInitial = "C",
-                    user = comment.title,
-                    content = comment.description,
-                    imageUrl = comment.imageUrl,
-                    likes = comment.likes,
-                    modifier = modifier,
-                    onReply = onReply,
-                    onSave = onSave,
-                    secondInitial = "C"
-                )
             }
         }
     }
@@ -96,7 +97,10 @@ fun TopicScreenPreview() {
         title = "Admin",
         description = "Excelente tema para discutir. Aquí les dejo mis primeros consejos...",
         imageUrl = "",
-        likes = 10
+        likes = 10,
+        firstInitial = "A",
+        secondInitial = "",
+        isSaved = true
     )
     val sampleComments = listOf(
         Comment(
@@ -104,14 +108,20 @@ fun TopicScreenPreview() {
             title = "Carlos Ruiz",
             description = "Yo siempre mantengo la presión de los neumáticos al nivel recomendado.",
             imageUrl = "",
-            likes = 5
+            likes = 5,
+            firstInitial = "C",
+            secondInitial = "R",
+            isSaved = false
         ),
         Comment(
             id = 3,
             title = "Ana Martínez",
             description = "Evitar frenazos bruscos también ayuda mucho.",
             imageUrl = "",
-            likes = 8
+            likes = 8,
+            firstInitial = "A",
+            secondInitial = "M",
+            isSaved = true
         )
     )
 
@@ -120,13 +130,8 @@ fun TopicScreenPreview() {
             topic = sampleTopic,
             mainComment = sampleMainComment,
             comments = sampleComments,
-            firstInitial = "J",
-            isSaved = false,
-            secondInitial = "A",
             onReply = {},
             onSave = {}
         )
     }
 }
-
-

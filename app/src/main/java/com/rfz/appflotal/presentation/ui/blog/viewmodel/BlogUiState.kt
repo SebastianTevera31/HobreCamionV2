@@ -12,7 +12,10 @@ data class Comment(
     override val title: String,
     override val description: String,
     override val imageUrl: String,
-    val likes: Int
+    val likes: Int,
+    val isSaved: Boolean,
+    val firstInitial: String,
+    val secondInitial: String
 ) : BlogRecord
 
 data class Post(
