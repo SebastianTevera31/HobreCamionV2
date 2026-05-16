@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -44,28 +42,24 @@ fun BottomCommentField(
     onCommentChange: (String) -> Unit,
     onSend: () -> Unit,
     modifier: Modifier = Modifier,
-    selectedImages: List<Uri> = emptyList(),
+    selectedImage: Uri? = null,
     onAddImage: () -> Unit = {},
-    onRemoveImage: (Uri) -> Unit = {},
+    onRemoveImage: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
     ) {
-        if (selectedImages.isNotEmpty()) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+        if (selectedImage != null) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = Dimens.PaddingSmall, vertical = 4.dp)
             ) {
-                items(selectedImages) { uri ->
-                    ImageThumbnail(
-                        uri = uri,
-                        onRemove = { onRemoveImage(uri) }
-                    )
-                }
+                ImageThumbnail(
+                    uri = selectedImage,
+                    onRemove = onRemoveImage
+                )
             }
         }
 
@@ -78,6 +72,7 @@ fun BottomCommentField(
         ) {
             IconButton(
                 onClick = onAddImage,
+                enabled = selectedImage == null, // Opcional: deshabilitar si ya hay una imagen
                 modifier = Modifier
                     .shadow(
                         elevation = 4.dp,
@@ -86,7 +81,10 @@ fun BottomCommentField(
                     .size(48.dp),
                 shape = RoundedCornerShape(Dimens.PaddingSmall),
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = if (selectedImage == null)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.outline
                 )
             ) {
                 Icon(
@@ -148,7 +146,7 @@ private fun ImageThumbnail(
 ) {
     Box(
         modifier = Modifier
-            .size(60.dp)
+            .size(80.dp)
             .padding(4.dp)
     ) {
         AsyncImage(
@@ -164,14 +162,14 @@ private fun ImageThumbnail(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .offset(x = 8.dp, y = (-8).dp)
-                .size(20.dp)
+                .size(24.dp)
                 .background(Color.Red, CircleShape)
         ) {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Remove",
                 tint = Color.White,
-                modifier = Modifier.size(12.dp)
+                modifier = Modifier.size(16.dp)
             )
         }
     }
@@ -185,10 +183,7 @@ fun BottomCommentFieldPreview() {
             comment = "Este es un comentario de prueba",
             onCommentChange = {},
             onSend = {},
-            selectedImages = listOf(
-                Uri.parse("https://example.com/image1.jpg"),
-                Uri.parse("https://example.com/image2.jpg")
-            )
+            selectedImage = Uri.parse("https://example.com/image1.jpg")
         )
     }
 }

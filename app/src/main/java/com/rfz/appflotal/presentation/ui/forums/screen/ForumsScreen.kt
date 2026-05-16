@@ -20,13 +20,12 @@ import com.rfz.appflotal.presentation.ui.utils.LoadState
 @Composable
 fun ForumsScreen(
     foros: List<Topic>,
-    loadState: LoadState<Any> = LoadState.Idle,
     modifier: Modifier = Modifier,
+    loadState: LoadState<Any> = LoadState.Idle,
     onNavigate: (Topic) -> Unit
 ) {
     Surface(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         if (loadState is LoadState.Loading) {
@@ -41,7 +40,8 @@ fun ForumsScreen(
                         title = foro.title,
                         content = foro.description,
                         modifier = Modifier.padding(Dimens.PaddingSmall),
-                        onClick = { onNavigate(foro) }
+                        onNav = { onNavigate(foro) },
+                        onReport = {}
                     )
                 }
             }

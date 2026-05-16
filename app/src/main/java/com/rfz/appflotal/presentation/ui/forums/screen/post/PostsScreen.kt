@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.forums.screen
+package com.rfz.appflotal.presentation.ui.forums.screen.post
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,8 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
-import com.rfz.appflotal.presentation.ui.forums.screen.post.PostCard
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.PostType
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
@@ -22,11 +22,11 @@ fun PostsScreen(
     posts: List<Post>,
     modifier: Modifier = Modifier,
     loadState: LoadState<Any> = LoadState.Idle,
-    onPostClick: (Post) -> Unit
+    onPostClick: (Post) -> Unit,
+    onReport: (postId: Int, type: PostType) -> Unit
 ) {
     Surface(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         if (loadState is LoadState.Loading) {
@@ -44,11 +44,12 @@ fun PostsScreen(
                         numComments = post.numComments,
                         isPost = true,
                         showOptions = true,
-                        onClick = { onPostClick(post) },
+                        onNav = { onPostClick(post) },
                         author = post.author,
                         time = post.time,
                         firstInitial = post.author.take(1).uppercase(),
-                        secondInitial = ""
+                        secondInitial = "",
+                        onReport = { onReport(post.id, PostType.TOPIC) }
                     )
                 }
             }
@@ -89,6 +90,6 @@ fun PostsScreenPreview() {
         )
     )
     HombreCamionTheme {
-        PostsScreen(posts = samplePosts, onPostClick = {})
+        PostsScreen(posts = samplePosts, onPostClick = {}, onReport = {_, _ ->})
     }
 }

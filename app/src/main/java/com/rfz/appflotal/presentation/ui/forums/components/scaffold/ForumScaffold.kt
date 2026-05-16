@@ -104,7 +104,7 @@ fun ForumScaffoldPreview() {
                         comment = "",
                         onCommentChange = {},
                         onSend = {},
-                        selectedImages = emptyList(),
+                        selectedImage = null,
                         onAddImage = {},
                         onRemoveImage = {},
                         modifier = Modifier

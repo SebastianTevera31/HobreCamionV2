@@ -10,8 +10,16 @@ data class ForumUiState(
     val selectedPost: Post? = null,
     val selectedRoom: Topic? = null,
     val comments: List<Comment> = emptyList(),
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val photoEvidence: CameraUiState = CameraUiState.Idle
 )
+
+sealed class CameraUiState {
+    object Idle : CameraUiState()
+    object TakingPhoto : CameraUiState()
+    data class Captured(val uri: android.net.Uri) : CameraUiState()
+    data class Error(val message: String) : CameraUiState()
+}
 
 enum class PostType(val typeId: Int) {
     COMMENT(0), TOPIC(1)

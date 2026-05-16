@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.forums.navigation
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -13,13 +15,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -34,11 +38,12 @@ import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleS
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
 import com.rfz.appflotal.presentation.ui.forums.screen.ForumsScreen
-import com.rfz.appflotal.presentation.ui.forums.screen.PostsScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.post.NewTopicScreen
+import com.rfz.appflotal.presentation.ui.forums.screen.post.PostsScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReplyScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReportPostScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.TopicScreen
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.CameraUiState
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import kotlinx.serialization.Serializable
@@ -87,9 +92,10 @@ fun NavGraphBuilder.forumsGraph(
         startDestination = ForumsRooms
     ) {
         composable<ForumsRooms> { backStackEntry ->
-            val viewModel: ForumViewModel = hiltViewModel(
+            val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry<ForumsGraph>()
-            )
+            }
+            val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
@@ -101,14 +107,16 @@ fun NavGraphBuilder.forumsGraph(
                     title = "Foros",
                     subtitle = "Comunidad Hombre Camión",
                     showBackButton = true,
-                    showMenuButton = true,
+                    showMenuButton = false,
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
                         placeholder = "Buscar tema...",
                         onValueChange = viewModel::onSearchChanged
                     ),
                     onBackClick = {
-                        navController.popBackStack(NavScreens.HOME, inclusive = false)
+                        navController.navigate(NavScreens.HOME) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     },
                     onMenuClick = viewModel::onMenuClick
                 )
@@ -147,9 +155,10 @@ fun NavGraphBuilder.forumsGraph(
         }
 
         composable<PostsTopics> { backStackEntry ->
-            val viewModel: ForumViewModel = hiltViewModel(
+            val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry<ForumsGraph>()
-            )
+            }
+            val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val args = backStackEntry.toRoute<PostsTopics>()
             val state by viewModel.uiState.collectAsState()
 
@@ -162,7 +171,7 @@ fun NavGraphBuilder.forumsGraph(
                     title = args.roomTitle,
                     subtitle = "Temas de la sala",
                     showBackButton = true,
-                    showMenuButton = true,
+                    showMenuButton = false,
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
                         placeholder = "Buscar temas...",
@@ -218,6 +227,14 @@ fun NavGraphBuilder.forumsGraph(
                                     )
                                 )
                             },
+                            onReport = { roomId, type ->
+                                navController.navigate(
+                                    ReportPost(
+                                        idPost = roomId,
+                                        type = type.typeId
+                                    )
+                                )
+                            },
                             modifier = Modifier.padding(paddingValues)
                         )
                     }
@@ -235,11 +252,24 @@ fun NavGraphBuilder.forumsGraph(
         }
 
         composable<TopicDetail> { backStackEntry ->
-            val viewModel: ForumViewModel = hiltViewModel(
+            val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry<ForumsGraph>()
-            )
+            }
+            val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val args = backStackEntry.toRoute<TopicDetail>()
             val state by viewModel.uiState.collectAsState()
+            val context = LocalContext.current
+            var commentText by remember { mutableStateOf("") }
+
+            val cameraLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.TakePicture()
+            ) { success ->
+                if (success) {
+                    viewModel.onPhotoCaptured()
+                } else {
+                    viewModel.onPhotoError("Captura cancelada")
+                }
+            }
 
             LaunchedEffect(args.topicId) {
                 viewModel.loadTopicDetail(args.topicId.toInt())
@@ -251,7 +281,7 @@ fun NavGraphBuilder.forumsGraph(
                     subtitle = state.selectedPost?.let { "${it.title} · ${it.numComments} respuestas" }
                         ?: args.topicTitle,
                     showBackButton = true,
-                    showMenuButton = true,
+                    showMenuButton = false,
                     searchConfig = null,
                     onBackClick = { navController.popBackStack() },
                     onMenuClick = viewModel::onMenuClick
@@ -263,9 +293,19 @@ fun NavGraphBuilder.forumsGraph(
                         color = Color.White
                     ) {
                         BottomCommentField(
-                            comment = "",
-                            onCommentChange = {},
-                            onSend = {}
+                            comment = commentText,
+                            onCommentChange = { commentText = it },
+                            onSend = {
+                                viewModel.sendComment(commentText)
+                                commentText = ""
+                            },
+                            selectedImage = (state.photoEvidence as? CameraUiState.Captured)?.uri,
+                            onAddImage = {
+                                viewModel.startCamera(context) { uri ->
+                                    cameraLauncher.launch(uri)
+                                }
+                            },
+                            onRemoveImage = viewModel::clearPhoto
                         )
                     }
                 }
@@ -313,7 +353,7 @@ fun NavGraphBuilder.forumsGraph(
             }
         }
 
-        composable<ReportPost> { backStackEntry ->
+        composable<ReportPost> { _ ->
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = "Reportar",
@@ -355,9 +395,10 @@ fun NavGraphBuilder.forumsGraph(
 
         composable<NewCommentNav> { backStackEntry ->
             val args = backStackEntry.toRoute<NewCommentNav>()
-            val viewModel: ForumViewModel = hiltViewModel(
+            val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry<ForumsGraph>()
-            )
+            }
+            val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
 
             // Buscamos el comentario al que se está respondiendo en el estado actual
@@ -365,7 +406,7 @@ fun NavGraphBuilder.forumsGraph(
                 ?: state.selectedPost?.let {
                     // Si no está en comentarios, podría ser el post principal (que actúa como comentario inicial)
                     // Nota: En un sistema real, el post principal suele tener un ID de comentario asociado.
-                    null 
+                    null
                 }
 
             ForumModuleScaffold(

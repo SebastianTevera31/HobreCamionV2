@@ -22,10 +22,6 @@ import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.PostType
 
-enum class TopicViews {
-    COMMENTS, NEW_COMMENT
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TopicScreen(
@@ -79,6 +75,7 @@ fun TopicScreen(
                             onReply = { onReply(comment) },
                             onSave = onSave,
                             isSaved = comment.isSaved,
+                            onReport = { onReport(comment.id, PostType.COMMENT) },
                             secondInitial = comment.secondInitial
                         )
                     }

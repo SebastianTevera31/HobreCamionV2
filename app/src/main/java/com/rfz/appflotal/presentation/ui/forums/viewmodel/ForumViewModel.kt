@@ -1,5 +1,9 @@
 package com.rfz.appflotal.presentation.ui.forums.viewmodel
 
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.presentation.ui.utils.LoadState
@@ -15,6 +19,7 @@ import javax.inject.Inject
 class ForumViewModel @Inject constructor() : ViewModel() {
     private var _uiState = MutableStateFlow(ForumUiState())
     val uiState = _uiState.asStateFlow()
+    private var currentPhotoUri: Uri? = null
 
     fun getForums() {
         if (_uiState.value.forums.isNotEmpty()) return
@@ -114,5 +119,65 @@ class ForumViewModel @Inject constructor() : ViewModel() {
 
     fun onSearchChanged(query: String) {
 
+    }
+
+    fun sendComment(commentText: String) {
+        val capturedUri = (_uiState.value.photoEvidence as? CameraUiState.Captured)?.uri
+        viewModelScope.launch {
+            // Aquí iría la lógica para enviar el comentario al repositorio
+            // incluyendo el capturedUri si no es nulo
+            
+            // Simulación de éxito:
+            delay(500)
+            
+            // Limpiar el estado de la foto después de enviar
+            clearPhoto()
+        }
+    }
+
+    fun startCamera(context: Context, onUriReady: (Uri) -> Unit) {
+        currentPhotoUri = ImageUriFactory.create(context)
+        changePhotoStatus(CameraUiState.TakingPhoto)
+        onUriReady(currentPhotoUri!!)
+    }
+
+    fun onPhotoCaptured() {
+        currentPhotoUri?.let { uri ->
+            changePhotoStatus(CameraUiState.Captured(uri))
+        }
+    }
+
+    fun onPhotoError(message: String) {
+        changePhotoStatus(CameraUiState.Error(message))
+    }
+
+    fun clearPhoto() {
+        currentPhotoUri = null
+        changePhotoStatus(CameraUiState.Idle)
+    }
+
+    private fun changePhotoStatus(status: CameraUiState) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                photoEvidence = status
+            )
+        }
+    }
+}
+
+object ImageUriFactory {
+    fun create(context: Context): Uri {
+        val contentValues = ContentValues().apply {
+            put(
+                MediaStore.Images.Media.DISPLAY_NAME,
+                "photo_${System.currentTimeMillis()}.jpg"
+            )
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        }
+
+        return context.contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            contentValues
+        ) ?: throw IllegalStateException("No se pudo crear URI")
     }
 }

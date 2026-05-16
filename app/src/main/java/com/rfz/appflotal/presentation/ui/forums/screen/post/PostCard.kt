@@ -47,13 +47,14 @@ fun PostCard(
     isPost: Boolean = false,
     showOptions: Boolean = false,
     hidePostInfo: Boolean = false,
-    onClick: () -> Unit
+    onNav: () -> Unit,
+    onReport: () -> Unit
 ) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(Dimens.PaddingMedium),
         colors = CardDefaults.cardColors(Color.White),
-        onClick = onClick
+        onClick = onNav
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
@@ -90,7 +91,7 @@ fun PostCard(
                     modifier = Modifier.weight(1f)
                 )
                 if (!isPost) {
-                    IconButton(onClick = onClick) {
+                    IconButton(onClick = onNav) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                             contentDescription = null,
@@ -99,7 +100,7 @@ fun PostCard(
                     }
                 }
                 if (showOptions) {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = onReport) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "See more",
@@ -170,7 +171,8 @@ private fun PostCardPreview() {
             numComments = 12,
             isPost = true,
             showOptions = true,
-            onClick = {}
+            onNav = {},
+            onReport = {}
         )
     }
 }
@@ -183,7 +185,8 @@ private fun PostCardForumPreview() {
             title = "Título del Foro",
             content = "Este es un contenido de ejemplo para una entrada del foro que no es una publicación completa.",
             isPost = false,
-            onClick = {}
+            onNav = {},
+            onReport = {}
         )
     }
 }

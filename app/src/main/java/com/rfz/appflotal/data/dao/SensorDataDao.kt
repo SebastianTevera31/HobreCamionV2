@@ -53,6 +53,7 @@ interface SensorDataDao {
     UPDATE sensor_data
     SET temperature = :temperature,
         pressure = :pressure,
+        timestamp = :timestamp,
         high_temperature_alert = :highTemperatureAlert,
         high_pressure_alert = :highPressureAlert,
         low_pressure_alert = :lowPressureAlert,
@@ -67,6 +68,7 @@ interface SensorDataDao {
         tire: String,
         temperature: Int,
         pressure: Int,
+        timestamp: String,
         highTemperatureAlert: Boolean,
         highPressureAlert: Boolean,
         lowPressureAlert: Boolean,
