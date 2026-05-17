@@ -60,7 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.commons.TermsAndConditionsText
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog

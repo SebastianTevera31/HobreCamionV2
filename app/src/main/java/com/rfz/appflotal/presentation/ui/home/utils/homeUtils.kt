@@ -2,8 +2,8 @@ package com.rfz.appflotal.presentation.ui.home.utils
 
 import androidx.annotation.StringRes
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.HombreCamionScreens
-import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.core.util.screens.HombreCamionScreens
+import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
@@ -72,11 +72,11 @@ val menuItems = listOf(
         route = HombreCamionScreens.MONITOR.name,
         iconRes = R.drawable.monitor
     ),
-    MenuItem(
-        title = R.string.vial_status,
-        route = HombreCamionScreens.MAPA_VIAL.name,
-        iconRes = R.drawable.road_map
-    )
+//    MenuItem(
+//        title = R.string.vial_status,
+//        route = HombreCamionScreens.MAPA_VIAL.name,
+//        iconRes = R.drawable.road_map
+//    )
 )
 
 val primaryColor = primaryLight

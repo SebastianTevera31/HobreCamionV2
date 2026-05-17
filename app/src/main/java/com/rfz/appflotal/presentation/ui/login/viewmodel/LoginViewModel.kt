@@ -8,7 +8,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.LBEncryptionUtils
-import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result

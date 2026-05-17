@@ -169,7 +169,8 @@ fun DiagramaMonitorScreen(
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxHeight()
+                        .fillMaxHeight(),
+                    isLoading = tireUiState.isLoading
                 )
 
                 PanelLlantas(
@@ -369,7 +370,8 @@ fun PanelSensor(
     onSwitchTempUnit: () -> Unit,
     onSwitchPressureUnit: () -> Unit,
     onDisassemblyClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     val (tirePanelWeight, alertPanelWeight) =
         if (paymentPlan == PaymentPlanType.Complete) 0.65f to 0.35f
@@ -413,7 +415,17 @@ fun PanelSensor(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = if (wheel.isNotEmpty()) Arrangement.Top else Arrangement.Center
             ) {
-                if (wheel.isNotEmpty()) {
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 3.dp
+                        )
+                    }
+                } else if (wheel.isNotEmpty()) {
                     // Encabezado: llanta + batería
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

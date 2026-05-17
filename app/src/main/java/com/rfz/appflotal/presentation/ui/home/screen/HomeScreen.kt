@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.onPrimaryLight

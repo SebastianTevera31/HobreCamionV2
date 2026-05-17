@@ -1,4 +1,4 @@
-package com.rfz.appflotal.core.util
+package com.rfz.appflotal.core.util.screens
 
 enum class HombreCamionScreens(screenName: String) {
 
