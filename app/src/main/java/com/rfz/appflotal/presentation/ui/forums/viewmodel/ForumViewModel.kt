@@ -6,7 +6,11 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.model.forum.ForumResult
+import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.domain.forum.ForumUseCase
 import com.rfz.appflotal.presentation.ui.utils.LoadState
+import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +20,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ForumViewModel @Inject constructor() : ViewModel() {
+class ForumViewModel @Inject constructor(
+    private val forumUseCase: ForumUseCase
+) : ViewModel() {
     private var _uiState = MutableStateFlow(ForumUiState())
     val uiState = _uiState.asStateFlow()
     private var currentPhotoUri: Uri? = null
@@ -25,16 +31,28 @@ class ForumViewModel @Inject constructor() : ViewModel() {
         if (_uiState.value.forums.isNotEmpty()) return
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
-            delay(1000) // Simular red
-            _uiState.update {
-                it.copy(
-                    screenState = LoadState.Success(Unit),
-                    forums = listOf(
-                        Topic(1, "Mecánica General", "Todo sobre mantenimiento y averías", ""),
-                        Topic(2, "Rutas y Logística", "Mejores paradas y estados de vía", ""),
-                        Topic(3, "Seguridad Vial", "Consejos de conducción segura", "")
+            val response = forumUseCase.getForums(1)
+            asyncResponseHelper(
+                response,
+                onError = {
+                    _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar foros")) }
+                }
+            ) { data ->
+                val forums = data?.results?.map {
+                    Topic(
+                        id = it.idForum,
+                        title = it.fldTitle,
+                        description = it.fldDescription,
+                        imageUrl = it.fldImage
                     )
-                )
+                } ?: emptyList()
+
+                _uiState.update {
+                    it.copy(
+                        screenState = LoadState.Success(Unit),
+                        forums = forums
+                    )
+                }
             }
         }
     }

@@ -69,7 +69,6 @@ interface SensorDataDao {
         timestamp: String,
         temperature: Int,
         pressure: Int,
-        timestamp: String,
         highTemperatureAlert: Boolean,
         highPressureAlert: Boolean,
         lowPressureAlert: Boolean,

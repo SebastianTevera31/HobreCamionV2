@@ -19,6 +19,7 @@ import com.rfz.appflotal.data.network.client.defaultparameter.DefaultParameterCl
 import com.rfz.appflotal.data.network.client.destination.DestinationClient
 import com.rfz.appflotal.data.network.client.diagram.DiagramClient
 import com.rfz.appflotal.data.network.client.disassembly.DisassemblyCauseService
+import com.rfz.appflotal.data.network.client.forum.ForumClient
 import com.rfz.appflotal.data.network.client.languaje.LanguajeClient
 import com.rfz.appflotal.data.network.client.login.LoginClient
 import com.rfz.appflotal.data.network.client.originaldesign.CrudOriginalDesignClient
@@ -420,6 +421,12 @@ class NetworkModule {
     @Provides
     fun provideVialStatusService(retrofit: Retrofit): VialStatusService {
         return retrofit.create(VialStatusService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideForumClient(retrofit: Retrofit): ForumClient {
+        return retrofit.create(ForumClient::class.java)
     }
 }
 

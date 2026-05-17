@@ -29,7 +29,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.ui.forums.components.ForumErrorView
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
