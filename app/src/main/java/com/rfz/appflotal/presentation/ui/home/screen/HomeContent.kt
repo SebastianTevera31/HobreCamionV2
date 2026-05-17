@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.home.screen
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +37,7 @@ fun HomeContent(
     onGetSensorDataByWheel: (String) -> Unit,
     plates: String,
     userName: String,
+    paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
     when (paymentPlan) {
@@ -84,7 +87,7 @@ fun HomeContent(
                     onGetTireDataByDate(position, date)
                 },
                 onCleanFilteredTire = onCleanFilteredTire,
-                modifier = modifier
+                modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
             )
         }
     }
@@ -116,6 +119,7 @@ fun HomeContentPreview() {
             onGetSensorDataByWheel = {},
             plates = "ABC-123",
             userName = "Juan Perez",
+            paddingValues = PaddingValues()
         )
     }
 }

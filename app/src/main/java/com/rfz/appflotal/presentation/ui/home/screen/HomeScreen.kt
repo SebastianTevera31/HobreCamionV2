@@ -54,10 +54,10 @@ import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.monitor.screen.ShowMonitorRegisterDialog
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
-import com.rfz.appflotal.presentation.ui.monitor.screen.ShowMonitorRegisterDialog
-import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import kotlinx.coroutines.CoroutineScope
@@ -228,7 +228,7 @@ fun HomeScreen(
                         },
                         monitorTireUiState = monitorTireUiState,
                         tireUiState = tireUiState,
-
+                        paddingValues = innerPadding,
                         modifier = Modifier.padding(innerPadding)
                     )
 
