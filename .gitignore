@@ -13,6 +13,8 @@
 /captures
 .externalNativeBuild
 .cxx
+.idea/planningMode.xml
+.idea/codeStyles/Project.xml
 local.properties
 *.hprof
 /app/release
