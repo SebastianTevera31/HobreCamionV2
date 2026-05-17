@@ -1,6 +1,9 @@
 package com.rfz.appflotal.data.network.service.forum
 
+import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
+import com.rfz.appflotal.data.model.forum.GetTopicsResponse
+import com.rfz.appflotal.data.model.forum.TopicMessageResult
 import com.rfz.appflotal.data.network.client.forum.ForumClient
 import com.rfz.appflotal.data.network.requestHelper
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -16,6 +19,32 @@ class ForumService @Inject constructor(
         return requestHelper("getForums") {
             val token = getTasksUseCase().first()[0].fld_token
             forumClient.getForums("bearer $token", pageNumber, title)
+        }
+    }
+
+    suspend fun getForumsById(idForum: Int): ApiResult<List<ForumResult>?> {
+        return requestHelper("getForumsById") {
+            val token = getTasksUseCase().first()[0].fld_token
+            forumClient.getForumsById("bearer $token", idForum)
+        }
+    }
+
+    suspend fun getTopics(
+        pageNumber: Int,
+        idForum: Int,
+        title: String = "",
+        tipoOrdenamiento: Int = 1
+    ): ApiResult<GetTopicsResponse?> {
+        return requestHelper("getTopics") {
+            val token = getTasksUseCase().first()[0].fld_token
+            forumClient.getTopics("bearer $token", pageNumber, idForum, title, tipoOrdenamiento)
+        }
+    }
+
+    suspend fun getTopicMessages(idTopic: Int): ApiResult<List<TopicMessageResult>?> {
+        return requestHelper("getTopicMessages") {
+            val token = getTasksUseCase().first()[0].fld_token
+            forumClient.getTopicMessages("bearer $token", idTopic)
         }
     }
 }

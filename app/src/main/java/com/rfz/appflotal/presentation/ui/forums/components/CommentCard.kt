@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.forums.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,10 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rfz.appflotal.R
+import coil.compose.AsyncImage
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
@@ -97,13 +95,14 @@ fun CommentCard(
                     }
 
                     if (imageUrl.isNotEmpty()) {
-                        Image(
-                            painter = painterResource(R.drawable.logo),
+                        AsyncImage(
+                            model = imageUrl,
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(Dimens.PaddingMedium))
-                                .background(MaterialTheme.colorScheme.onSurfaceVariant)
+                                .background(MaterialTheme.colorScheme.onSurfaceVariant),
+                            contentScale = androidx.compose.ui.layout.ContentScale.FillWidth
                         )
                     }
 

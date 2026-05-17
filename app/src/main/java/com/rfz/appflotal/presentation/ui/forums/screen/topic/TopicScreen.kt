@@ -41,6 +41,7 @@ fun TopicScreen(
             TopicHeader(
                 title = topic.title,
                 content = topic.description,
+                imageUrl = topic.imageUrl,
                 onReport = { onReport(topic.id, PostType.TOPIC) }
             )
 

@@ -40,6 +40,7 @@ fun PostsScreen(
                     PostCard(
                         title = post.title,
                         content = post.description,
+                        imageUrl = post.imageUrl,
                         modifier = Modifier.padding(Dimens.PaddingSmall),
                         numComments = post.numComments,
                         isPost = true,

@@ -39,6 +39,7 @@ fun ForumsScreen(
                     PostCard(
                         title = foro.title,
                         content = foro.description,
+                        imageUrl = foro.imageUrl,
                         modifier = Modifier.padding(Dimens.PaddingSmall),
                         onNav = { onNavigate(foro) },
                         onReport = {}

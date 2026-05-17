@@ -58,75 +58,91 @@ class ForumViewModel @Inject constructor(
     }
 
     fun loadPostsByRoom(roomId: String) {
-        if (_uiState.value.selectedRoom?.id?.toString() == roomId && _uiState.value.posts.isNotEmpty()) return
+        val id = roomId.toIntOrNull() ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
-            delay(1000) // Simular red
-            val room = _uiState.value.forums.find { it.id.toString() == roomId }
-            _uiState.update {
-                it.copy(
-                    screenState = LoadState.Success(Unit),
-                    selectedRoom = room,
-                    posts = listOf(
-                        Post(
-                            1,
-                            "Ruido en motor DT12",
-                            "Siento un golpeteo al arrancar...",
-                            "",
-                            "Juan Pérez",
-                            5,
-                            "2h"
-                        ),
-                        Post(
-                            2,
-                            "Mejor ruta para el Norte",
-                            "¿Cómo está la vía por el paso?",
-                            "",
-                            "Carlos Ruiz",
-                            3,
-                            "5h"
-                        )
+
+            // Obtenemos los detalles del foro para asegurar que tenemos la info actualizada (título, imagen, etc)
+            val forumResponse = forumUseCase.getForumsById(id)
+            var currentRoom = _uiState.value.forums.find { it.id == id }
+
+            asyncResponseHelper(forumResponse) { data ->
+                data?.firstOrNull()?.let {
+                    currentRoom = Topic(
+                        id = it.idForum,
+                        title = it.fldTitle,
+                        description = it.fldDescription,
+                        imageUrl = it.fldImage
                     )
-                )
+                }
+            }
+
+            // Cargamos los temas (posts) del foro
+            val topicsResponse = forumUseCase.getTopics(pageNumber = 1, idForum = id)
+            asyncResponseHelper(
+                topicsResponse,
+                onError = {
+                    _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar temas")) }
+                }
+            ) { data ->
+                val posts = data?.results?.map {
+                    Post(
+                        id = it.idTopic,
+                        title = it.fldTitle,
+                        description = it.fldDescription,
+                        imageUrl = it.fldImage,
+                        author = it.fldUserName,
+                        numComments = it.fldMessages,
+                        time = it.fldRegistrationDate // Podrías formatear esta fecha si es necesario
+                    )
+                } ?: emptyList()
+
+                _uiState.update {
+                    it.copy(
+                        screenState = LoadState.Success(Unit),
+                        selectedRoom = currentRoom,
+                        posts = posts
+                    )
+                }
             }
         }
     }
 
     fun loadTopicDetail(topicId: Int) {
-        if (_uiState.value.selectedPost?.id == topicId && _uiState.value.comments.isNotEmpty()) return
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
-            delay(1000) // Simular red
 
-            // Intentar encontrar el post en la lista actual, o crear uno temporal si no existe (ej. navegación directa)
-            val post = _uiState.value.posts.find { it.id == topicId } ?: Post(
-                id = topicId,
-                title = "Tema #$topicId",
-                description = "Cargando descripción...",
-                imageUrl = "",
-                author = "Usuario",
-                numComments = 0,
-                time = "Reciente"
-            )
+            // Buscamos el post en la lista actual o lo recuperamos de algún sitio si es necesario
+            // Por ahora asumimos que viene de la lista de posts previa.
+            val post = _uiState.value.posts.find { it.id == topicId }
 
-            _uiState.update {
-                it.copy(
-                    screenState = LoadState.Success(Unit),
-                    selectedPost = post,
-                    comments = listOf(
-                        Comment(1, "Admin", "Revisa los filtros de aceite.", "", 12, true, "A", ""),
-                        Comment(
-                            2,
-                            "Ana Martínez",
-                            "A mí me pasó algo parecido y era la correa.",
-                            "",
-                            5,
-                            false,
-                            "A",
-                            "M"
-                        )
+            val response = forumUseCase.getTopicMessages(topicId)
+            asyncResponseHelper(
+                response,
+                onError = {
+                    _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar comentarios")) }
+                }
+            ) { data ->
+                val comments = data?.map {
+                    Comment(
+                        id = it.idTopicMessages,
+                        title = it.fldUserName,
+                        description = it.fldMessage,
+                        imageUrl = it.fldImage,
+                        likes = it.fldLike,
+                        isSaved = false, // Ajustar si hay endpoint de likes/saved
+                        firstInitial = it.fldUserName.take(1).uppercase(),
+                        secondInitial = ""
                     )
-                )
+                } ?: emptyList()
+
+                _uiState.update {
+                    it.copy(
+                        screenState = LoadState.Success(Unit),
+                        selectedPost = post,
+                        comments = comments
+                    )
+                }
             }
         }
     }

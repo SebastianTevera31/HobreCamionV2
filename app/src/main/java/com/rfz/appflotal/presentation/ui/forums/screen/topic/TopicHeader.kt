@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.PostDropdownMenu
@@ -34,7 +36,8 @@ fun TopicHeader(
     title: String,
     content: String,
     onReport: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    imageUrl: String = ""
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -58,14 +61,23 @@ fun TopicHeader(
                         .clip(RoundedCornerShape(Dimens.PaddingMedium))
                         .background(MaterialTheme.colorScheme.primary)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.TireRepair,
-                        contentDescription = null,
-                        modifier = Modifier.align(
-                            Alignment.Center
-                        ),
-                        tint = Color.White
-                    )
+                    if (imageUrl.isNotEmpty()) {
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.TireRepair,
+                            contentDescription = null,
+                            modifier = Modifier.align(
+                                Alignment.Center
+                            ),
+                            tint = Color.White
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
 
