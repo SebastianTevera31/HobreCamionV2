@@ -234,7 +234,7 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun handleLoginResponse(loginResponse: LoginResponse) {
+    private suspend fun handleLoginResponse(loginResponse: LoginResponse) {
         when (loginResponse.id) {
             200 -> {
                 val paymentPlan = when (loginResponse.paymentPlan) {
@@ -264,14 +264,12 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onTaskCreated(loginResponse: LoginResponse) {
+    private suspend fun onTaskCreated(loginResponse: LoginResponse) {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         loginResponse.fecha = dateFormat.format(Date())
 
-        viewModelScope.launch {
-            val entity = mapper.fromLoginResponseToEntity(loginResponse)
-            addTaskUseCase(entity)
-        }
+        val entity = mapper.fromLoginResponseToEntity(loginResponse)
+        addTaskUseCase(entity)
     }
 
     private fun getUsername(email: String): String {

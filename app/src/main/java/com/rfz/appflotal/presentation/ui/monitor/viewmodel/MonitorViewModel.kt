@@ -133,13 +133,15 @@ class MonitorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val data = getTasksUseCase().first()
-            if (data.isNotEmpty()) {
-                val user = data[0]
-                _monitorUiState.update { currentUiState ->
-                    currentUiState.copy(
-                        monitorId = user.id_monitor,
-                    )
+            getTasksUseCase().collect { data ->
+                if (data.isNotEmpty()) {
+                    val user = data[0]
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            monitorId = user.id_monitor,
+                            showDialog = user.id_monitor == 0
+                        )
+                    }
                 }
             }
         }
@@ -157,33 +159,42 @@ class MonitorViewModel @Inject constructor(
     }
 
     fun initMonitorData() {
-        _monitorUiState.update { currentUiState -> currentUiState.copy(showView = false) }
+        // Only set showView to false if we actually have to wait for something
         shouldReadAuto = true
 
         viewModelScope.launch {
-            val userData = getTasksUseCase().first()
-            if (userData.isNotEmpty()) {
-                val user = userData[0]
-                val baseConfig = if (!user.baseConfiguration.isEmpty()) getBaseConfigImage(
-                    user.baseConfiguration.replace("BASE", "")
-                        .trim().toInt()
-                ) else null
+            try {
+                val userData = getTasksUseCase().first()
+                if (userData.isNotEmpty()) {
+                    val user = userData[0]
 
-                val uiState = _monitorUiState
+                    // If monitor is already 0, we can skip showView = false to avoid flickering
+                    if (user.id_monitor != 0) {
+                        _monitorUiState.update { it.copy(showView = false) }
+                    }
 
-                uiState.update { currentUiState ->
-                    currentUiState.copy(
-                        monitorId = user.id_monitor,
-                        baseConfig = baseConfig,
-                        showDialog = user.id_monitor == 0
-                    )
+                    val baseConfigString = user.baseConfiguration.replace("BASE", "").trim()
+                    val baseConfigId = baseConfigString.toIntOrNull()
+                    val baseConfig =
+                        if (baseConfigId != null) getBaseConfigImage(baseConfigId) else null
+
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            monitorId = user.id_monitor,
+                            baseConfig = baseConfig,
+                            showDialog = user.id_monitor == 0
+                        )
+                    }
+
+                    if (user.id_monitor != 0) {
+                        getConfigData()
+                        getBitmapImage()
+                    }
                 }
-
-                // Traer información del servicio
-                getConfigData()
-                getBitmapImage()
-                // Controlar si mostrar la vista
-                _monitorUiState.update { currentUiState -> currentUiState.copy(showView = true) }
+            } catch (e: Exception) {
+                Log.e("MonitorViewModel", "Error initializing monitor data", e)
+            } finally {
+                _monitorUiState.update { it.copy(showView = true) }
             }
         }
     }

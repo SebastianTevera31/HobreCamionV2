@@ -18,6 +18,7 @@ import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -109,7 +110,7 @@ class RegisterMonitorViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val userData = getTasksUseCase().first()[0]
+            val userData = getTasksUseCase().filter { it.isNotEmpty() }.first()[0]
 
             val response = apiTpmsUseCase.doPostCrudMonitor(
                 idMonitor = idMonitor,
@@ -183,7 +184,7 @@ class RegisterMonitorViewModel @Inject constructor(
 
     fun getMonitorConfiguration() {
         viewModelScope.launch {
-            val result = getTasksUseCase().first()
+            val result = getTasksUseCase().filter { it.isNotEmpty() }.first()
             if (result.isNotEmpty()) {
                 val values = result[0]
                 val monitorType = values.baseConfiguration.replace("BASE", "TALON")

@@ -132,14 +132,14 @@
     <string name="guardar">Guardar</string>
     <string name="cerrar">Cerrar</string>
     <string name="ingresar_datos_monitor">Ingresa los datos del monitor</string>
-    <string name="escaneando">Escaneando...</string>
+    <string name="escaneando">Buscando...</string>
     <string name="ingrese_la_mac_del_monitor">Ingresa la dirección MAC del monitor</string>
     <string name="seleccione_tipo_monitor">Selecciona el tipo de monitor</string>
     <string name="monitor_registrado_correctamente">Monitor registrado correctamente</string>
     <string name="error_desconocido">Error desconocido</string>
     <string name="connection_error">Error de conexión</string>
     <string name="mac_no_disponible">Dirección MAC no encontrada</string>
-    <string name="escanear">Vincular monitor</string>
+    <string name="escanear">Buscar</string>
     <string name="vehiculo">Vehículo</string>
     <string name="perfil">Perfil</string>
     <string name="chofer">Chofer</string>

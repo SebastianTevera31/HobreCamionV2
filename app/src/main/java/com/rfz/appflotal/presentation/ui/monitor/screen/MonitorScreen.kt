@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,15 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.network.service.ApiResult
-import com.rfz.appflotal.data.repository.UnidadPresion
-import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
-import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.WarningSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.ListOfTireData
@@ -47,6 +44,12 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
+import androidx.compose.ui.tooling.preview.Preview
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 
 enum class PositionView {
     RECIENTES, FILTRAR
@@ -70,6 +73,12 @@ fun MonitorScreen(
     val tireUiState by monitorViewModel.tireUiState.collectAsState()
     val wifiStatus by monitorViewModel.wifiStatus.collectAsState()
 
+    val context = LocalContext.current
+    val buttonCancelText =
+        if (paymentPlan == PaymentPlanType.Complete || monitorUiState.monitorId != 0) {
+            stringResource(R.string.cerrar)
+        } else stringResource(R.string.logout)
+
     LaunchedEffect(monitorUiState.monitorId) {
         monitorViewModel.initMonitorData()
     }
@@ -81,21 +90,32 @@ fun MonitorScreen(
         tireUiState = tireUiState,
         wifiStatus = wifiStatus,
         paymentPlan = paymentPlan,
-        onDialogCancel = onDialogCancel,
         navigateUp = navigateUp,
         onInspectClick = onInspectClick,
         onAssemblyClick = onAssemblyClick,
         onDisassemblyClick = onDisassemblyClick,
         onShowMonitorDialog = { show -> monitorViewModel.showMonitorDialog(show) },
         onGetLastedSensorData = { monitorViewModel.getLastedSensorData() },
-        onGetBitmapImage = {monitorViewModel.initMonitorData() },
         onUpdateSelectedTire = { tire -> monitorViewModel.updateSelectedTire(tire) },
         onGetSensorDataByWheel = { wheel -> monitorViewModel.getSensorDataByWheel(wheel) },
         onSwitchPressureUnit = { monitorViewModel.switchPressureUnit() },
         onSwitchTempUnit = { monitorViewModel.switchTemperatureUnit() },
         onGetTireDataByDate = { pos, date -> monitorViewModel.getTireDataByDate(pos, date) },
         onCleanFilteredTire = { monitorViewModel.cleanFilteredTire() },
-        registerMonitorViewModel = registerMonitorViewModel,
+        registerDialogSlot = {
+            if (monitorUiState.showView && monitorUiState.showDialog) {
+                ShowMonitorRegisterDialog(
+                    monitorId = monitorUiState.monitorId,
+                    cancelButtonText = buttonCancelText,
+                    registerMonitorViewModel = registerMonitorViewModel,
+                    onDialogCancel = { onDialogCancel(monitorUiState.monitorId) },
+                    onSuccessRegister = { _ ->
+                        monitorViewModel.initMonitorData()
+                    },
+                    context = context,
+                )
+            }
+        },
         modifier = modifier
     )
 }
@@ -109,43 +129,25 @@ fun MonitorScreenContent(
     tireUiState: TireUiState,
     wifiStatus: NetworkStatus,
     paymentPlan: PaymentPlanType,
-    onDialogCancel: (mac: Int) -> Unit,
     navigateUp: () -> Unit,
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,
     onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onShowMonitorDialog: (Boolean) -> Unit,
     onGetLastedSensorData: () -> Unit,
-    onGetBitmapImage: () -> Unit,
     onUpdateSelectedTire: (String) -> Unit,
     onGetSensorDataByWheel: (String) -> Unit,
     onSwitchPressureUnit: () -> Unit,
     onSwitchTempUnit: () -> Unit,
     onGetTireDataByDate: (position: String, date: String) -> Unit,
     onCleanFilteredTire: () -> Unit,
-    registerMonitorViewModel: RegisterMonitorViewModel?,
     modifier: Modifier = Modifier,
+    registerDialogSlot: @Composable () -> Unit = {},
 ) {
     val context = LocalContext.current
     var selectedOption by rememberSaveable { mutableStateOf(MonitorScreenViews.DIAGRAMA) }
 
-    val buttonCancelText =
-        if (paymentPlan == PaymentPlanType.Complete || monitorUiState.monitorId != 0) {
-            stringResource(R.string.cerrar)
-        } else stringResource(R.string.logout)
-
-    if (monitorUiState.showView && monitorUiState.showDialog && registerMonitorViewModel != null) {
-        ShowMonitorRegisterDialog(
-            monitorId = monitorUiState.monitorId,
-            cancelButtonText = buttonCancelText,
-            registerMonitorViewModel = registerMonitorViewModel,
-            onDialogCancel = { onDialogCancel(monitorUiState.monitorId) },
-            onSuccessRegister = { mac ->
-                onGetBitmapImage()
-            }, // This should ideally be passed down or handled better
-            context = context,
-        )
-    }
+    registerDialogSlot()
 
     Scaffold(
         topBar = {
@@ -232,7 +234,7 @@ fun MonitorScreenContent(
 }
 
 @Composable
-private fun ShowMonitorRegisterDialog(
+fun ShowMonitorRegisterDialog(
     monitorId: Int,
     cancelButtonText: String,
     registerMonitorViewModel: RegisterMonitorViewModel,
@@ -283,28 +285,6 @@ private fun ShowMonitorRegisterDialog(
             context = context
         )
     }
-}
-
-@Composable
-private fun PositionScreenContent(
-    paymentPlan: PaymentPlanType,
-    monitorViewModel: MonitorViewModel,
-    pressureUnit: String,
-    temperatureUnit: String,
-    positionsUiState: ApiResult<List<ListOfTireData>?>,
-    monitorTireUiState: ApiResult<List<ListOfTireData>?>,
-    listOfTires: List<MonitorTire>?
-) {
-    PositionScreenContentInternal(
-        paymentPlan = paymentPlan,
-        pressureUnit = pressureUnit,
-        temperatureUnit = temperatureUnit,
-        positionsUiState = positionsUiState,
-        monitorTireUiState = monitorTireUiState,
-        listOfTires = listOfTires,
-        onGetTireDataByDate = { pos, date -> monitorViewModel.getTireDataByDate(pos, date) },
-        onCleanFilteredTire = { monitorViewModel.cleanFilteredTire() }
-    )
 }
 
 @Composable
@@ -497,55 +477,62 @@ fun NavPositionMonitorScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MonitorScreenPreview() {
+    val sampleTires = listOf(
+        MonitorTire("P1", inAlert = false, isAssembled = true, isActive = true, xPosition = 100, yPosition = 100),
+        MonitorTire("P2", inAlert = true, isAssembled = true, isActive = true, xPosition = 200, yPosition = 100),
+        MonitorTire("P3", inAlert = false, isAssembled = false, isActive = true, xPosition = 300, yPosition = 100),
+        MonitorTire("P4", inAlert = false, isAssembled = true, isActive = false, xPosition = 400, yPosition = 100)
+    )
+
+    val monitorUiState = MonitorUiState(
+        monitorId = 1,
+        showView = true,
+        listOfTires = sampleTires,
+        temperatureUnit = UnidadTemperatura.CELCIUS,
+        pressureUnit = UnidadPresion.PSI,
+        signalIntensity = Pair(BluetoothSignalQuality.Excelente, "Excelente"),
+        imageBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
+        imageDimen = Pair(100, 100)
+    )
+
+    val tireUiState = TireUiState(
+        currentTire = "P1",
+        pressure = Pair(32.5f, SensorAlerts.NO_DATA),
+        temperature = Pair(25.0f, SensorAlerts.NO_DATA),
+        timestamp = VOID_DATE,
+        isAssembled = true,
+        isInspectionAvailable = true
+    )
+
+    val mockSensorData = listOf(
+        ListOfTireData("P1", "T001", VOID_DATE, 32.5f, 25.0f),
+        ListOfTireData("P2", "T002", VOID_DATE, 30.0f, 26.0f)
+    )
+
     HombreCamionTheme {
         MonitorScreenContent(
-            monitorUiState = MonitorUiState(
-                showView = true,
-                monitorId = 1,
-                listOfTires = listOf(
-                    MonitorTire("P1", false, true, true, 100, 100),
-                    MonitorTire("P2", true, true, true, 200, 100)
-                ),
-                temperatureUnit = UnidadTemperatura.CELCIUS,
-                pressureUnit = UnidadPresion.PSI
-            ),
-            positionsUiState = ApiResult.Success(
-                listOf(
-                    ListOfTireData("P1", "123456", "2023-10-27 10:00:00", 100f, 35f)
-                )
-            ),
+            monitorUiState = monitorUiState,
+            positionsUiState = ApiResult.Success(mockSensorData),
             monitorTireUiState = ApiResult.Success(emptyList()),
-            tireUiState = TireUiState(
-                currentTire = "P1",
-                pressure = Pair(
-                    100f,
-                    com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts.NO_DATA
-                ),
-                temperature = Pair(
-                    35f,
-                    com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts.NO_DATA
-                )
-            ),
+            tireUiState = tireUiState,
             wifiStatus = NetworkStatus.Connected,
             paymentPlan = PaymentPlanType.Complete,
-            onDialogCancel = {},
             navigateUp = {},
             onInspectClick = { _, _, _ -> },
-            onAssemblyClick = { _ -> },
+            onAssemblyClick = {},
             onDisassemblyClick = { _, _, _ -> },
             onShowMonitorDialog = {},
             onGetLastedSensorData = {},
-            onGetBitmapImage = {},
             onUpdateSelectedTire = {},
             onGetSensorDataByWheel = {},
             onSwitchPressureUnit = {},
             onSwitchTempUnit = {},
             onGetTireDataByDate = { _, _ -> },
             onCleanFilteredTire = {},
-            registerMonitorViewModel = null
+            registerDialogSlot = {}
         )
     }
 }

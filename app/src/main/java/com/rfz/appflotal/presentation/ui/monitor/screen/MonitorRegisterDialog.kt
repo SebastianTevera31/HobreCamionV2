@@ -39,12 +39,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Dialog
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.isValidMacAddress
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
@@ -191,6 +193,28 @@ fun MonitorRegisterDialog(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun MonitorRegisterDialogPreview() {
+    HombreCamionTheme {
+        MonitorRegisterDialog(
+            configurations = mapOf(1 to "Configuración 1", 2 to "Configuración 2"),
+            isScanning = false,
+            registerMonitorStatus = ApiResult.Success(1),
+            onSuccessRegister = {},
+            showCloseButton = true,
+            monitorSelected = 1 to "Configuración 1",
+            macValue = "AA:BB:CC:DD:EE:FF",
+            closeText = "Cerrar",
+            onMonitorConfiguration = {},
+            onScan = {},
+            onError = {},
+            onCloseButton = {},
+            onContinueButton = { _, _ -> }
+        )
     }
 }
 

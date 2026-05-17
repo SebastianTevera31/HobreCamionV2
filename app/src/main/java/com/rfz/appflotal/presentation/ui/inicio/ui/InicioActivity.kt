@@ -443,10 +443,10 @@ class InicioActivity : ComponentActivity() {
                     ) {
                         Column(modifier = Modifier.fillMaxSize()) {
                             if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
-                                GlobalAdMobBanner(
-                                    adUnitId = "ca-app-pub-3415237437138959/2146418588",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+//                                GlobalAdMobBanner(
+//                                    adUnitId = "ca-app-pub-3415237437138959/2146418588",
+//                                    modifier = Modifier.fillMaxWidth()
+//                                )
                             }
 
                             WarningSnackBanner(
