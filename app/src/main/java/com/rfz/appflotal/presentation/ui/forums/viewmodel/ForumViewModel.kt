@@ -6,13 +6,11 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.data.model.forum.ForumResult
-import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.domain.forum.ForumUseCase
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -156,16 +154,29 @@ class ForumViewModel @Inject constructor(
     }
 
     fun sendComment(commentText: String) {
+        val topicId = _uiState.value.selectedPost?.id ?: return
         val capturedUri = (_uiState.value.photoEvidence as? CameraUiState.Captured)?.uri
+
         viewModelScope.launch {
-            // Aquí iría la lógica para enviar el comentario al repositorio
-            // incluyendo el capturedUri si no es nulo
-            
-            // Simulación de éxito:
-            delay(500)
-            
-            // Limpiar el estado de la foto después de enviar
-            clearPhoto()
+            _uiState.update { it.copy(screenState = LoadState.Loading) }
+
+            val response = forumUseCase.crudTopicMessage(
+                idTopic = topicId,
+                message = commentText,
+                registrationDate = getCurrentDate(),
+                image = "" // TODO: Implementar subida de imagen si es necesario
+            )
+
+            asyncResponseHelper(
+                response,
+                onError = {
+                    _uiState.update { it.copy(screenState = LoadState.Error("Error al enviar comentario")) }
+                }
+            ) {
+                // Recargar comentarios tras el éxito
+                loadTopicDetail(topicId)
+                clearPhoto()
+            }
         }
     }
 

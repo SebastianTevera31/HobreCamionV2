@@ -1,9 +1,11 @@
 package com.rfz.appflotal.data.repository.forum
 
+import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
+import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.forum.ForumService
 import javax.inject.Inject
@@ -30,5 +32,9 @@ class ForumRepository @Inject constructor(
 
     suspend fun getTopicMessages(idTopic: Int): ApiResult<List<TopicMessageResult>?> {
         return forumService.getTopicMessages(idTopic)
+    }
+
+    suspend fun crudTopicMessage(request: CrudTopicMessageRequest): ApiResult<List<TpmsResponse>?> {
+        return forumService.crudTopicMessage(request)
     }
 }

@@ -1,9 +1,11 @@
 package com.rfz.appflotal.data.network.service.forum
 
+import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
+import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.client.forum.ForumClient
 import com.rfz.appflotal.data.network.requestHelper
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -45,6 +47,13 @@ class ForumService @Inject constructor(
         return requestHelper("getTopicMessages") {
             val token = getTasksUseCase().first()[0].fld_token
             forumClient.getTopicMessages("bearer $token", idTopic)
+        }
+    }
+
+    suspend fun crudTopicMessage(request: CrudTopicMessageRequest): ApiResult<List<TpmsResponse>?> {
+        return requestHelper("crudTopicMessage") {
+            val token = getTasksUseCase().first()[0].fld_token
+            forumClient.crudTopicMessage("bearer $token", request)
         }
     }
 }

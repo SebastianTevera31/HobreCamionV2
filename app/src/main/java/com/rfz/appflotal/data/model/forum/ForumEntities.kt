@@ -48,3 +48,11 @@ data class TopicMessageResult(
     @SerializedName("fld_edited") val fldEdited: Boolean,
     @SerializedName("fld_image") val fldImage: String
 )
+
+data class CrudTopicMessageRequest(
+    @SerializedName("id_topicMessage") val idTopicMessage: Int,
+    @SerializedName("message") val message: String,
+    @SerializedName("registrationDate") val registrationDate: String,
+    @SerializedName("id_topic") val idTopic: Int,
+    @SerializedName("image") val image: String
+)
