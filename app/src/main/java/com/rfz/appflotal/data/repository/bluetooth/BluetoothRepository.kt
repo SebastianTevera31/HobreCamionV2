@@ -50,6 +50,14 @@ interface BluetoothRepository {
     fun stopScan()
 }
 
+private val bleFrameBuffer = mutableListOf<Byte>()
+
+private const val HEADER_1 = 0xAA
+private const val HEADER_2 = 0xA1
+private const val LENGTH_INDEX = 3
+private const val MIN_FRAME_LENGTH = 5
+
+
 data class BluetoothData(
     val dataFrame: String? = null,
     val bluetoothSignalQuality: BluetoothSignalQuality = BluetoothSignalQuality.Desconocida,
@@ -176,6 +184,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                         gatt.writeDescriptor(descriptor)
                     }
                 }
+
                 service != null -> {
                     // BLE 4
                     val characteristic =
@@ -381,5 +390,126 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             in -100..-86 -> BluetoothSignalQuality.Pobre
             else -> BluetoothSignalQuality.Desconocida
         }
+    }
+
+    private fun processIncomingDataFrames(dataFrame: ByteArray): List<String> {
+        val validFrames = mutableListOf<String>()
+
+        bleFrameBuffer.addAll(dataFrame.toList())
+
+        while (bleFrameBuffer.size >= MIN_FRAME_LENGTH) {
+
+            val headerIndex = findHeaderIndex(bleFrameBuffer)
+
+            if (headerIndex == -1) {
+                val discarded = bleFrameBuffer.toByteArray().toHexString()
+                AppLog.d("BLE", "Sin header válido, descartando: $discarded")
+
+//                scope.launch {
+//                    bleLogRepository.sendDataFrame(discarded)
+//                }
+
+                bleFrameBuffer.clear()
+                break
+            }
+
+            if (headerIndex > 0) {
+                val discarded = bleFrameBuffer.take(headerIndex).toByteArray().toHexString()
+                AppLog.d("BLE", "Bytes basura antes del header: $discarded")
+
+//                scope.launch {
+//                    bleLogRepository.sendDataFrame(discarded)
+//                }
+
+                repeat(headerIndex) {
+                    bleFrameBuffer.removeAt(0)
+                }
+            }
+
+            if (bleFrameBuffer.size <= LENGTH_INDEX) {
+                break
+            }
+
+            val expectedLength = bleFrameBuffer[LENGTH_INDEX].toUByte().toInt()
+
+            if (expectedLength < MIN_FRAME_LENGTH) {
+                val invalidByte = bleFrameBuffer.removeAt(0)
+                AppLog.d("BLE", "Longitud inválida, descartando byte: ${byteToHex(invalidByte)}")
+                continue
+            }
+
+            if (bleFrameBuffer.size < expectedLength) {
+                AppLog.d(
+                    "BLE",
+                    "Trama incompleta. Esperados: $expectedLength, recibidos: ${bleFrameBuffer.size}"
+                )
+                break
+            }
+
+            val frame = bleFrameBuffer.take(expectedLength).toByteArray()
+            val frameHex = frame.toHexString()
+
+            if (isValidFrame(frame)) {
+                AppLog.d("BLE", "Trama correcta: $frameHex")
+                validFrames.add(frameHex)
+
+                repeat(expectedLength) {
+                    bleFrameBuffer.removeAt(0)
+                }
+            } else {
+                AppLog.d("BLE", "Trama incorrecta, intentando resincronizar: $frameHex")
+
+//                scope.launch {
+//                    bleLogRepository.sendDataFrame(frameHex)
+//                }
+
+                bleFrameBuffer.removeAt(0)
+            }
+        }
+
+        return validFrames
+    }
+
+    private fun findHeaderIndex(buffer: List<Byte>): Int {
+        for (i in 0 until buffer.size - 1) {
+            val current = buffer[i].toUByte().toInt()
+            val next = buffer[i + 1].toUByte().toInt()
+
+            if (current == HEADER_1 && next == HEADER_2) {
+                return i
+            }
+        }
+
+        return -1
+    }
+
+    private fun isValidFrame(frame: ByteArray): Boolean {
+        if (frame.size < MIN_FRAME_LENGTH) return false
+
+        val frameHex = frame.toHexString()
+
+        val expectedLength = frame[LENGTH_INDEX].toUByte().toInt()
+
+        if (frame.size != expectedLength) {
+            AppLog.d("BLE", "Longitud incorrecta. Esperada: $expectedLength, real: ${frame.size}")
+            return false
+        }
+
+        val calculatedChecksum = frame
+            .dropLast(1)
+            .sumOf { it.toUByte().toInt() } % 256
+
+        val receivedChecksum = frame.last().toUByte().toInt()
+
+        AppLog.d("BLE", "Current dataframe $frameHex")
+        AppLog.d("BLE", "CalculatedDataFrame $calculatedChecksum")
+        AppLog.d("BLE", "CheckSum $receivedChecksum")
+
+        return calculatedChecksum == receivedChecksum &&
+                verifyTemperature(frameHex)
+    }
+
+    private fun byteToHex(byte: Byte): String {
+        return "%02x".format(byte.toUByte().toInt())
     }
 }

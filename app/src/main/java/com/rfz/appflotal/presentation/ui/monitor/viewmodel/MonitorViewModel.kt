@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getBitmapFromDrawable
 import com.rfz.appflotal.data.NetworkStatus
+import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
@@ -132,13 +133,15 @@ class MonitorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val data = getTasksUseCase().first()
-            if (data.isNotEmpty()) {
-                val user = data[0]
-                _monitorUiState.update { currentUiState ->
-                    currentUiState.copy(
-                        monitorId = user.id_monitor,
-                    )
+            getTasksUseCase().collect { data ->
+                if (data.isNotEmpty()) {
+                    val user = data[0]
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            monitorId = user.id_monitor,
+                            showDialog = user.id_monitor == 0
+                        )
+                    }
                 }
             }
         }
@@ -149,42 +152,49 @@ class MonitorViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch {
-            updateAssemblyStatus()
-        }
-
+        observeAssemblyChanges()
         setUnits()
         readBluetoothData()
         statusObserver()
     }
 
     fun initMonitorData() {
-        _monitorUiState.update { currentUiState -> currentUiState.copy(showView = false) }
+        // Only set showView to false if we actually have to wait for something
+        shouldReadAuto = true
 
         viewModelScope.launch {
-            val userData = getTasksUseCase().first()
-            if (userData.isNotEmpty()) {
-                val user = userData[0]
-                val baseConfig = if (!user.baseConfiguration.isEmpty()) getBaseConfigImage(
-                    user.baseConfiguration.replace("BASE", "")
-                        .trim().toInt()
-                ) else null
+            try {
+                val userData = getTasksUseCase().first()
+                if (userData.isNotEmpty()) {
+                    val user = userData[0]
 
-                val uiState = _monitorUiState
+                    // If monitor is already 0, we can skip showView = false to avoid flickering
+                    if (user.id_monitor != 0) {
+                        _monitorUiState.update { it.copy(showView = false) }
+                    }
 
-                uiState.update { currentUiState ->
-                    currentUiState.copy(
-                        monitorId = user.id_monitor,
-                        baseConfig = baseConfig,
-                        showDialog = user.id_monitor == 0
-                    )
+                    val baseConfigString = user.baseConfiguration.replace("BASE", "").trim()
+                    val baseConfigId = baseConfigString.toIntOrNull()
+                    val baseConfig =
+                        if (baseConfigId != null) getBaseConfigImage(baseConfigId) else null
+
+                    _monitorUiState.update { currentUiState ->
+                        currentUiState.copy(
+                            monitorId = user.id_monitor,
+                            baseConfig = baseConfig,
+                            showDialog = user.id_monitor == 0
+                        )
+                    }
+
+                    if (user.id_monitor != 0) {
+                        getConfigData()
+                        getBitmapImage()
+                    }
                 }
-
-                // Traer información del servicio
-                getConfigData()
-                getBitmapImage()
-                // Controlar si mostrar la vista
-                _monitorUiState.update { currentUiState -> currentUiState.copy(showView = true) }
+            } catch (e: Exception) {
+                Log.e("MonitorViewModel", "Error initializing monitor data", e)
+            } finally {
+                _monitorUiState.update { it.copy(showView = true) }
             }
         }
     }
@@ -282,27 +292,40 @@ class MonitorViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateAssemblyStatus() {
-        assemblyTireRepository.observeAssemblyTire()
-            .collect { assembledTiresFromDb ->
-                val assembledPositions = assembledTiresFromDb.map { it.positionTire }.toSet()
-
-                _monitorUiState.update { currentUiState ->
-                    val updatedTireList = currentUiState.listOfTires.map { tire ->
-                        if (tire.sensorPosition in assembledPositions) {
-                            if (!tire.isAssembled) tire.copy(isAssembled = true) else tire
-                        } else {
-                            if (tire.isAssembled) tire.copy(isAssembled = false) else tire
-                        }
-                    }
-                    currentUiState.copy(listOfTires = updatedTireList)
-                }
-
-                val currentlySelectedTire = _tireUiState.value.currentTire
-                if (currentlySelectedTire.isNotBlank() && shouldReadAuto) {
-                    getSensorDataByWheel(currentlySelectedTire)
-                }
+    private fun observeAssemblyChanges() {
+        viewModelScope.launch {
+            assemblyTireRepository.observeAssemblyTire().collect { assembledTires ->
+                syncAssemblyStatus(assembledTires)
             }
+        }
+    }
+
+    private fun syncAssemblyStatus(assembledTires: List<AssemblyTire>) {
+        val assembledPositions = assembledTires.map { it.positionTire.trim().uppercase() }.toSet()
+        val monitorId = _monitorUiState.value.monitorId
+
+        _monitorUiState.update { state ->
+            val updatedList = state.listOfTires.map { tire ->
+                val isNowAssembled = tire.sensorPosition.trim().uppercase() in assembledPositions
+
+                if (tire.isAssembled != isNowAssembled && monitorId != 0) {
+                    viewModelScope.launch {
+                        coordinatesTableUseCase.updateAssemblyStatus(
+                            monitorId = monitorId,
+                            tire = tire.sensorPosition,
+                            isAssembled = isNowAssembled
+                        )
+                    }
+                }
+                tire.copy(isAssembled = isNowAssembled)
+            }
+            state.copy(listOfTires = updatedList)
+        }
+
+        val currentTire = _tireUiState.value.currentTire
+        if (currentTire.isNotBlank()) {
+            fetchSensorDataInternal(currentTire)
+        }
     }
 
     private fun readBluetoothData() {
@@ -383,7 +406,8 @@ class MonitorViewModel @Inject constructor(
                     isInspectionAvailable = if (result.newTireUiState.currentTire == currentState.currentTire) {
                         currentState.isInspectionAvailable
                     } else result.newTireUiState.isInspectionAvailable,
-                    currentTire = if (result.newTireUiState.currentTire == "") currentState.currentTire else result.newTireUiState.currentTire
+                    currentTire = if (result.newTireUiState.currentTire == "") currentState.currentTire else result.newTireUiState.currentTire,
+                    isLoading = false
                 )
             }
         }
@@ -391,6 +415,7 @@ class MonitorViewModel @Inject constructor(
 
     fun getSensorDataByWheel(tireSelected: String) {
         shouldReadAuto = false
+        _tireUiState.update { it.copy(currentTire = tireSelected, isLoading = true) }
 
         manualSelectionJob?.cancel()
 
@@ -399,6 +424,10 @@ class MonitorViewModel @Inject constructor(
             shouldReadAuto = true
         }
 
+        fetchSensorDataInternal(tireSelected)
+    }
+
+    private fun fetchSensorDataInternal(tireSelected: String) {
         viewModelScope.launch {
             val monitorUiState = _monitorUiState.value
             val result = getSensorDataByWheelUseCase(
@@ -413,12 +442,15 @@ class MonitorViewModel @Inject constructor(
                 _tireUiState.update {
                     result.newTireUiState.copy(
                         rawPressure = result.newTireUiState.pressure.first,
-                        rawTemperature = result.newTireUiState.temperature.first
+                        rawTemperature = result.newTireUiState.temperature.first,
+                        isLoading = false
                     )
                 }
                 _monitorUiState.update { currentState ->
                     currentState.copy(listOfTires = result.updatedTireList)
                 }
+            } else {
+                _tireUiState.update { it.copy(isLoading = false) }
             }
         }
     }

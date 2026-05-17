@@ -8,7 +8,6 @@ import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
-import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 
 const val VOID_DATE = "01/01/1900 00:00:00"
 
@@ -44,6 +43,7 @@ data class TireUiState(
     val tireRemovingStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val isAssembled: Boolean = false,
     val isInspectionAvailable: Boolean = false,
+    val isLoading:Boolean = false
 )
 
 data class MonitorTire(

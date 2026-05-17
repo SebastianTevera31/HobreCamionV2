@@ -117,7 +117,8 @@ class SensorDataTableRepository @Inject constructor(
             lowPressureAlert = update.lowPressureAlert,
             lowBatteryAlert = update.lowBatteryAlert,
             punctureAlert = update.punctureAlert,
-            active = update.active
+            active = update.active,
+            timestamp = update.timestamp
         )
     }
 

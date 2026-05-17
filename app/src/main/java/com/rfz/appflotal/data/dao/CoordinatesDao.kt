@@ -19,4 +19,7 @@ interface CoordinatesDao {
 
     @Query("UPDATE coordinates SET inActive =:isActive, inAlert =:isAlert WHERE monitor_id =:monitorId AND idPosition =:tire")
     suspend fun updateCoordinates(monitorId: Int, tire: String, isActive: Boolean, isAlert: Boolean)
+
+    @Query("UPDATE coordinates SET isAssembled = :isAssembled WHERE monitor_id = :monitorId AND idPosition = :tire")
+    suspend fun updateAssemblyStatus(monitorId: Int, tire: String, isAssembled: Boolean)
 }

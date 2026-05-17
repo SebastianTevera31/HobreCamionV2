@@ -50,9 +50,8 @@ class BluetoothScannerImp(
 
             val addr = result.device.address
 
-            Log.i("BluetoothScanner", "Address detected: $addr")
-
             if (seen.add(addr) && matchesTarget(result)) {
+                Log.i("BluetoothScanner", "Valid device found: $addr")
                 val item = ScanItem(
                     name = result.device.name,
                     address = result.device.address,
@@ -60,15 +59,7 @@ class BluetoothScannerImp(
                 )
 
                 _resultScanDevices.update { item }
-
-                scanning = false
-
-                // Desactivar escaneo
-
-            }
-
-            if (_resultScanDevices.value != null){
-                bluetoothScanner?.stopScan(this)
+                stopScan()
             }
         }
 
@@ -79,26 +70,21 @@ class BluetoothScannerImp(
     }
 
     private fun matchesTarget(result: ScanResult): Boolean {
-        if (result.device.name == "TM508") {
-            Log.e("Monitor", result.device.name)
+        val deviceName = result.device.name ?: ""
+        if (VALID_NAME_PREFIXES.any { deviceName.startsWith(it) }) {
+            Log.i("BluetoothScanner", "Target device found by name: $deviceName")
+            return true
         }
 
         val sr = result.scanRecord ?: return false
 
-        val hasNameBle5 = result.device.name == "TM508"
+        val targetBle4 = ParcelUuid.fromString("00001000-0000-1000-8000-00805f9b34fb")
+        val targetBle5 = ParcelUuid.fromString("0000A002-0000-1000-8000-00805F9B34FB")
 
-        if (hasNameBle5) return true
+        val hasService = sr.serviceUuids?.any { it == targetBle4 || it == targetBle5 } == true
+        val hasServiceData = sr.getServiceData(targetBle4) != null || sr.getServiceData(targetBle5) != null
 
-        val target = ParcelUuid.fromString("00001000-0000-1000-8000-00805f9b34fb")
-
-        val hasService = sr.serviceUuids?.any { it == target } == true
-        val hasServiceData = sr.getServiceData(target) != null
-
-        // Ejemplo opcional con manufacturer data:
-        val mfgId = 0xFFFF // cambia por el tuyo
-        val hasMfg = sr.manufacturerSpecificData.get(mfgId) != null
-
-        return hasService || hasServiceData || hasMfg
+        return hasService || hasServiceData
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
@@ -132,6 +118,7 @@ class BluetoothScannerImp(
     }
 
     companion object {
+        val VALID_NAME_PREFIXES = listOf("TM")
         val SERVICE: UUID = UUID.fromString("f000ffd0-0451-4000-b000-000000000000")
         val required = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> arrayOf(

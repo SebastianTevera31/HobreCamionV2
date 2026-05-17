@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
@@ -54,6 +54,8 @@ import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.monitor.screen.ShowMonitorRegisterDialog
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
@@ -94,6 +96,27 @@ fun HomeScreen(
 
     val scope = rememberCoroutineScope()
 
+    val onLogout = {
+        CoroutineScope(Dispatchers.IO).launch {
+            HombreCamionService.stopService(context)
+            homeViewModel.logout()
+            registerMonitorViewModel.clearMonitorConfiguration()
+            registerMonitorViewModel.stopScan()
+            monitorViewModel.cleanMonitorData()
+
+            withContext(Dispatchers.Main) {
+                navController.navigate(NavScreens.LOGIN) {
+                    // Pop-up hasta la raíz del grafo de navegación (ID 0)
+                    // y elimina TODO lo que hay en el back stack.
+                    popUpTo(0) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         homeViewModel.loadInitialData()
         registerMonitorViewModel.stopScan()
@@ -102,6 +125,10 @@ fun HomeScreen(
     val positionsUiState by monitorViewModel.positionsUiState.collectAsState()
     val monitorTireUiState by monitorViewModel.filteredTiresUiState.collectAsState()
     val tireUiState by monitorViewModel.tireUiState.collectAsState()
+
+    LaunchedEffect(monitorUiState.monitorId) {
+        monitorViewModel.initMonitorData()
+    }
 
 
     // BLOQUEAR BOTON DE RETROCESO DEL DISPOSITIVO
@@ -147,26 +174,7 @@ fun HomeScreen(
                                 homeViewModel.changeLanguage(code)
                             }
                         },
-                        onLogout = {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                HombreCamionService.stopService(context)
-                                homeViewModel.logout()
-                                registerMonitorViewModel.clearMonitorConfiguration()
-                                registerMonitorViewModel.stopScan()
-                                monitorViewModel.cleanMonitorData()
-
-                                withContext(Dispatchers.Main) {
-                                    navController.navigate(NavScreens.LOGIN) {
-                                        // Pop-up hasta la raíz del grafo de navegación (ID 0)
-                                        // y elimina TODO lo que hay en el back stack.
-                                        popUpTo(0) {
-                                            inclusive = true
-                                        }
-                                        launchSingleTop = true
-                                    }
-                                }
-                            }
-                        },
+                        onLogout = { onLogout() },
                         onShare = {
                             homeViewModel.cleanOperationStatus()
                             navController.navigate(NavScreens.COMENTARIOS)
@@ -198,7 +206,6 @@ fun HomeScreen(
                         onAssemblyClick = onAssemblyClick,
                         onDisassemblyClick = onDisassemblyClick,
                         onGetLastedSensorData = { monitorViewModel.getLastedSensorData() },
-                        onGetBitmapImage = { monitorViewModel.getBitmapImage() },
                         onUpdateSelectedTire = { tire -> monitorViewModel.updateSelectedTire(tire) },
                         onGetSensorDataByWheel = { wheel ->
                             monitorViewModel.getSensorDataByWheel(
@@ -219,11 +226,9 @@ fun HomeScreen(
                         onBack = {
                             navController.navigateUp()
                         },
-                        registerMonitorViewModel = registerMonitorViewModel,
                         monitorTireUiState = monitorTireUiState,
                         tireUiState = tireUiState,
-                        onDialogCancel = {},
-
+                        paddingValues = innerPadding,
                         modifier = Modifier.padding(innerPadding)
                     )
 
@@ -236,6 +241,30 @@ fun HomeScreen(
                         ) {
                             homeViewModel.acceptNewTermsAndConditions()
                         }
+                    }
+
+                    if (monitorUiState.showView && monitorUiState.showDialog) {
+                        val buttonCancelText =
+                            if (paymentPlan == PaymentPlanType.Complete || monitorUiState.monitorId != 0) {
+                                stringResource(R.string.cerrar)
+                            } else stringResource(R.string.logout)
+
+                        ShowMonitorRegisterDialog(
+                            monitorId = monitorUiState.monitorId,
+                            cancelButtonText = buttonCancelText,
+                            registerMonitorViewModel = registerMonitorViewModel,
+                            onDialogCancel = {
+                                if (paymentPlan == PaymentPlanType.Complete || monitorUiState.monitorId != 0) {
+                                    monitorViewModel.showMonitorDialog(false)
+                                } else {
+                                    onLogout()
+                                }
+                            },
+                            onSuccessRegister = { _ ->
+                                monitorViewModel.initMonitorData()
+                            },
+                            context = context,
+                        )
                     }
                 }
             }

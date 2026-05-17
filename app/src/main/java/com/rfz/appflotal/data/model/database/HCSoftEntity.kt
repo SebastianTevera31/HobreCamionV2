@@ -3,6 +3,8 @@ package com.rfz.appflotal.data.model.database
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import org.joda.time.DateTime
+import java.sql.Date
 
 @Entity(tableName = "user")
 data class AppHCEntity(
@@ -148,4 +150,28 @@ data class InspectionTireEntity(
     val temperatureInspected: Int,
     val pressureAdjusted: Int,
     val updatedAt: Long
+)
+
+@Entity(tableName = "tire")
+data class TireEntity(
+    @PrimaryKey
+    val id_tire: Int,
+    val fld_provider: String,
+    val fld_size: String,
+    val fld_brand: String,
+    val fld_model: String,
+    val fld_loadingCapacity: String,
+    val fld_destination: String,
+    val fld_typeAcquisition: String,
+    val fld_lastMountedPosition: String,
+    val fld_descriptionLastRenovatedDesign: String,
+    val fld_lastMountedPositionDate: String,
+    val fld_vehicleNumber: Int,
+    val fld_dateEventAssembly: Date,
+    val fld_dateEventA: DateTime,
+    val fld_treadDepthAssembly: Double,
+    val fld_odometerAssembly: Int,
+    val fld_typeVehicle: String,
+    val axleID: Int,
+    val tirePosition: Int
 )

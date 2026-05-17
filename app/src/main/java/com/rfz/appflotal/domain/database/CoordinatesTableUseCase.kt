@@ -29,4 +29,14 @@ class CoordinatesTableUseCase @Inject constructor(private val coordinatesTableRe
             isActive = isActive,
             isAlert = isAlert
         )
+
+    suspend fun updateAssemblyStatus(
+        monitorId: Int,
+        tire: String,
+        isAssembled: Boolean
+    ) = coordinatesTableRepository.updateAssemblyStatus(
+        monitorId = monitorId,
+        tire = tire,
+        isAssembled = isAssembled
+    )
 }

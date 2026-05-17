@@ -1,4 +1,4 @@
-package com.rfz.appflotal.core.util
+package com.rfz.appflotal.core.util.screens
 
 object NavScreens {
     const val LOADING = "loadingScreen"

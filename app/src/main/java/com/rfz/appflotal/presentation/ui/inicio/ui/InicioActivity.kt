@@ -63,8 +63,8 @@ import androidx.navigation.navArgument
 import com.google.android.gms.ads.MobileAds
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
-import com.rfz.appflotal.core.util.HombreCamionScreens
-import com.rfz.appflotal.core.util.NavScreens
+import com.rfz.appflotal.core.util.screens.HombreCamionScreens
+import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.ConsentManager
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.data.repository.fcmessaging.AppNotificationState
@@ -429,10 +429,10 @@ class InicioActivity : ComponentActivity() {
                     ) {
                         Column(modifier = Modifier.fillMaxSize()) {
                             if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
-                                GlobalAdMobBanner(
-                                    adUnitId = "ca-app-pub-3415237437138959/2146418588",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+//                                GlobalAdMobBanner(
+//                                    adUnitId = "ca-app-pub-3415237437138959/2146418588",
+//                                    modifier = Modifier.fillMaxWidth()
+//                                )
                             }
 
                             WarningSnackBanner(

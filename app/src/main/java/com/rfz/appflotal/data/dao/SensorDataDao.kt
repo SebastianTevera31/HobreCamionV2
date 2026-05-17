@@ -66,6 +66,7 @@ interface SensorDataDao {
     suspend fun updateSensor(
         idMonitor: Int,
         tire: String,
+        timestamp: String,
         temperature: Int,
         pressure: Int,
         timestamp: String,

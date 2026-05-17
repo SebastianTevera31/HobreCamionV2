@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.home.screen
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -10,7 +12,6 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreenContent
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.ListOfTireData
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorUiState
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 
 @Composable
@@ -24,7 +25,6 @@ fun HomeContent(
     onShowMonitorDialog: (Boolean) -> Unit,
     onNavigate: (route: String) -> Unit,
     onBack: () -> Unit,
-    onDialogCancel: (mac: Int) -> Unit,
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,
     onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
@@ -33,13 +33,12 @@ fun HomeContent(
     onSwitchPressureUnit: () -> Unit,
     onSwitchTempUnit: () -> Unit,
     onGetLastedSensorData: () -> Unit,
-    onGetBitmapImage: () -> Unit,
     onUpdateSelectedTire: (String) -> Unit,
     onGetSensorDataByWheel: (String) -> Unit,
     plates: String,
     userName: String,
-    registerMonitorViewModel: RegisterMonitorViewModel?,
-    modifier: Modifier = Modifier
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
 ) {
     when (paymentPlan) {
         PaymentPlanType.Complete -> CompletePlanContent(
@@ -62,9 +61,6 @@ fun HomeContent(
                 tireUiState = tireUiState,
                 wifiStatus = wifiStatus,
                 paymentPlan = paymentPlan,
-                onDialogCancel = { mac ->
-                    onDialogCancel(mac)
-                },
                 navigateUp = onBack,
                 onInspectClick = { tire, temperature, pressure ->
                     onInspectClick(tire, temperature, pressure)
@@ -79,7 +75,6 @@ fun HomeContent(
                     onShowMonitorDialog(it)
                 },
                 onGetLastedSensorData = onGetLastedSensorData,
-                onGetBitmapImage = onGetBitmapImage,
                 onUpdateSelectedTire = { tire ->
                     onUpdateSelectedTire(tire)
                 },
@@ -92,8 +87,7 @@ fun HomeContent(
                     onGetTireDataByDate(position, date)
                 },
                 onCleanFilteredTire = onCleanFilteredTire,
-                registerMonitorViewModel = registerMonitorViewModel,
-                modifier = modifier
+                modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
             )
         }
     }
@@ -113,7 +107,6 @@ fun HomeContentPreview() {
             onShowMonitorDialog = {},
             onNavigate = {},
             onBack = {},
-            onDialogCancel = {},
             onInspectClick = { _, _, _ -> },
             onAssemblyClick = {},
             onDisassemblyClick = { _, _, _ -> },
@@ -122,12 +115,11 @@ fun HomeContentPreview() {
             onSwitchPressureUnit = {},
             onSwitchTempUnit = {},
             onGetLastedSensorData = {},
-            onGetBitmapImage = {},
             onUpdateSelectedTire = {},
             onGetSensorDataByWheel = {},
             plates = "ABC-123",
             userName = "Juan Perez",
-            registerMonitorViewModel = null
+            paddingValues = PaddingValues()
         )
     }
 }

@@ -8,12 +8,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -25,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,12 +42,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Dialog
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.isValidMacAddress
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
@@ -69,44 +76,35 @@ fun MonitorRegisterDialog(
     onCloseButton: () -> Unit = {},
     onContinueButton: (String, Pair<Int, String>?) -> Unit
 ) {
-    var macAddress by remember { mutableStateOf("") }
-    var configurationSelected by remember { mutableStateOf<Pair<Int, String>?>(null) }
     val ctx = LocalContext.current
+    var configurationSelected by remember(monitorSelected) { mutableStateOf(monitorSelected) }
 
-
-    macAddress = if (isScanning) stringResource(R.string.escaneando) else {
-        macValue
+    val currentMacAddress = if (isScanning) {
+        stringResource(R.string.escaneando)
+    } else {
+        macValue.ifEmpty { stringResource(R.string.mac_no_disponible) }
     }
 
-    macAddress = macAddress.ifEmpty {
-        stringResource(
-            R.string.mac_no_disponible
-        )
-    }
+    val isMacAddressValid = remember(currentMacAddress) { isValidMacAddress(currentMacAddress) }
 
-    val isMacAddress = isValidMacAddress(macAddress)
-
-    when (registerMonitorStatus) {
-        is ApiResult.Error -> {
-            val errorMessage = registerMonitorStatus.message
-            Toast.makeText(ctx, errorMessage, Toast.LENGTH_SHORT).show()
-            onError()
-        }
-
-        ApiResult.Loading -> {}
-        is ApiResult.Success -> {
-            // Actualiza la vista si estaba vacia
-            onSuccessRegister(registerMonitorStatus.data)
+    LaunchedEffect(registerMonitorStatus) {
+        when (registerMonitorStatus) {
+            is ApiResult.Error -> {
+                Toast.makeText(ctx, registerMonitorStatus.message, Toast.LENGTH_SHORT).show()
+                onError()
+            }
+            is ApiResult.Success -> {
+                onSuccessRegister(registerMonitorStatus.data)
+            }
+            else -> {}
         }
     }
-
-    configurationSelected = monitorSelected
 
     Dialog(onDismissRequest = {}) {
         Card(
             modifier = modifier
                 .fillMaxWidth()
-                .height(376.dp)
+                .wrapContentHeight()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = onPrimaryLight)
@@ -114,18 +112,18 @@ fun MonitorRegisterDialog(
             LocalizedApp {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(vertical = 16.dp, horizontal = 28.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = stringResource(R.string.ingresar_datos_monitor),
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
                     )
 
-                    val configurations = configurations
                     DropDownConfigurationMenu(
                         title = R.string.monitor,
                         values = configurations,
@@ -137,12 +135,11 @@ fun MonitorRegisterDialog(
 
                     MacTextField(
                         title = R.string.direcci_n_mac,
-                        value = macAddress
+                        value = currentMacAddress
                     )
 
                     Button(
                         onClick = {
-                            macAddress = ""
                             onScan()
                         },
                         colors = ButtonDefaults.buttonColors(tertiaryLight),
@@ -162,29 +159,33 @@ fun MonitorRegisterDialog(
                             Button(
                                 onClick = onCloseButton,
                                 shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier
-                                    .width(120.dp)
-                                    .weight(1f),
-                                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
+                                contentPadding = PaddingValues(horizontal = 8.dp)
                             ) {
                                 Text(
-                                    text = closeText
+                                    text = closeText,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    textAlign = TextAlign.Center
                                 )
                             }
                         }
 
                         Button(
                             onClick = {
-                                onContinueButton(macAddress, configurationSelected)
+                                onContinueButton(currentMacAddress, configurationSelected)
                             },
-                            enabled = !isScanning && isMacAddress,
+                            enabled = !isScanning && isMacAddressValid,
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier
-                                .width(120.dp)
-                                .weight(1f)
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
                         ) {
                             Text(
-                                text = stringResource(R.string.confirmar)
+                                text = stringResource(R.string.confirmar),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
@@ -204,9 +205,7 @@ fun DropDownConfigurationMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
     var parentSize by remember { mutableStateOf(Size.Zero) }
-    var selectedValue by remember { mutableStateOf("") }
-
-    selectedValue = defaultOption
+    var selectedValue by remember(defaultOption) { mutableStateOf(defaultOption) }
 
     Box(
         modifier = modifier
@@ -257,5 +256,54 @@ fun DropDownConfigurationMenu(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun MonitorRegisterDialogPreview() {
+    HombreCamionTheme {
+        MonitorRegisterDialog(
+            configurations = mapOf(
+                1 to "Configuración A",
+                2 to "Configuración B",
+                3 to "Configuración C"
+            ),
+            isScanning = false,
+            registerMonitorStatus = ApiResult.Loading,
+            onSuccessRegister = {},
+            showCloseButton = true,
+            monitorSelected = 1 to "Configuración A",
+            macValue = "AA:BB:CC:DD:EE:FF",
+            closeText = "Cerrar",
+            onMonitorConfiguration = {},
+            onScan = {},
+            onError = {},
+            onCloseButton = {},
+            onContinueButton = { _, _ -> }
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun MonitorRegisterDialogScanningPreview() {
+    HombreCamionTheme {
+        MonitorRegisterDialog(
+            configurations = mapOf(
+                1 to "Configuración A",
+                2 to "Configuración B"
+            ),
+            isScanning = true,
+            registerMonitorStatus = ApiResult.Loading,
+            onSuccessRegister = {},
+            showCloseButton = true,
+            closeText = "Cerrar",
+            onMonitorConfiguration = {},
+            onScan = {},
+            onError = {},
+            onCloseButton = {},
+            onContinueButton = { _, _ -> }
+        )
     }
 }

@@ -133,14 +133,14 @@
     <string name="guardar">Save</string>
     <string name="cerrar">Close</string>
     <string name="ingresar_datos_monitor">Enter monitor information</string>
-    <string name="escaneando">Scanning...</string>
+    <string name="escaneando">Searching...</string>
     <string name="ingrese_la_mac_del_monitor">Enter the monitor MAC address</string>
     <string name="seleccione_tipo_monitor">Select the monitor type</string>
     <string name="monitor_registrado_correctamente">Monitor registered successfully</string>
     <string name="error_desconocido">Unknown error</string>
     <string name="connection_error">Connection error</string>
     <string name="mac_no_disponible">MAC address not found</string>
-    <string name="escanear">Pair monitor</string>
+    <string name="escanear">Search monitor</string>
     <string name="vehiculo">Vehicle</string>
     <string name="perfil">Profile</string>
     <string name="chofer">Driver</string>
