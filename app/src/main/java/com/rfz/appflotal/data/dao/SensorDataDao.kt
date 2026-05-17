@@ -53,6 +53,7 @@ interface SensorDataDao {
     UPDATE sensor_data
     SET temperature = :temperature,
         pressure = :pressure,
+        timestamp = :timestamp,
         high_temperature_alert = :highTemperatureAlert,
         high_pressure_alert = :highPressureAlert,
         low_pressure_alert = :lowPressureAlert,
@@ -65,6 +66,7 @@ interface SensorDataDao {
     suspend fun updateSensor(
         idMonitor: Int,
         tire: String,
+        timestamp: String,
         temperature: Int,
         pressure: Int,
         highTemperatureAlert: Boolean,
