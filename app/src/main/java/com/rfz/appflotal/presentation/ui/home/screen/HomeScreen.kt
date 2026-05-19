@@ -183,6 +183,9 @@ fun HomeScreen(
                             updateUserData(uiState.selectedLanguage)
                             navController.navigate(NavScreens.INFORMACION_USUARIO)
                         },
+                        showDialog = {
+                            monitorViewModel.showMonitorDialog(true)
+                        }
                     )
                 }
             ) { innerPadding ->
