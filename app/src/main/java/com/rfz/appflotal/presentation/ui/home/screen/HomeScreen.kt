@@ -196,8 +196,18 @@ fun HomeScreen(
                             )
                         },
                         onNavigate = { route ->
-                            navController.navigate(route) {
-                                launchSingleTop = true
+                            when (route) {
+                                is String -> {
+                                    navController.navigate(route) {
+                                        launchSingleTop = true
+                                    }
+                                }
+
+                                else -> {
+                                    navController.navigate(route) {
+                                        launchSingleTop = true
+                                    }
+                                }
                             }
                         },
                         plates = plates,

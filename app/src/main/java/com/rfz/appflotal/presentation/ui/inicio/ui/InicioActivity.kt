@@ -1026,12 +1026,6 @@ class InicioActivity : ComponentActivity() {
                                         )
                                     }
 
-                                    composable(route = NavScreens.BLOG) {
-                                        navController.navigate(ForumsGraph) {
-                                            popUpTo(NavScreens.BLOG) { inclusive = true }
-                                        }
-                                    }
-
                                     forumsGraph(navController)
                                 }
 

@@ -23,7 +23,7 @@ fun HomeContent(
     paymentPlan: PaymentPlanType,
     wifiStatus: NetworkStatus,
     onShowMonitorDialog: (Boolean) -> Unit,
-    onNavigate: (route: String) -> Unit,
+    onNavigate: (route: Any) -> Unit,
     onBack: () -> Unit,
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,

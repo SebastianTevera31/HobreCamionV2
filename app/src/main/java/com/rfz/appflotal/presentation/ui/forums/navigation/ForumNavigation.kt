@@ -93,7 +93,11 @@ fun NavGraphBuilder.forumsGraph(
     ) {
         composable<ForumsRooms> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<ForumsGraph>()
+                try {
+                    navController.getBackStackEntry<ForumsGraph>()
+                } catch (e: Exception) {
+                    backStackEntry
+                }
             }
             val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
@@ -156,7 +160,11 @@ fun NavGraphBuilder.forumsGraph(
 
         composable<PostsTopics> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<ForumsGraph>()
+                try {
+                    navController.getBackStackEntry<ForumsGraph>()
+                } catch (e: Exception) {
+                    backStackEntry
+                }
             }
             val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val args = backStackEntry.toRoute<PostsTopics>()
@@ -253,7 +261,11 @@ fun NavGraphBuilder.forumsGraph(
 
         composable<TopicDetail> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<ForumsGraph>()
+                try {
+                    navController.getBackStackEntry<ForumsGraph>()
+                } catch (e: Exception) {
+                    backStackEntry
+                }
             }
             val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val args = backStackEntry.toRoute<TopicDetail>()
@@ -396,7 +408,11 @@ fun NavGraphBuilder.forumsGraph(
         composable<NewCommentNav> { backStackEntry ->
             val args = backStackEntry.toRoute<NewCommentNav>()
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<ForumsGraph>()
+                try {
+                    navController.getBackStackEntry<ForumsGraph>()
+                } catch (e: Exception) {
+                    backStackEntry
+                }
             }
             val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()

@@ -50,7 +50,7 @@ fun CompletePlanContent(
     wifiStatus: NetworkStatus,
     modifier: Modifier = Modifier,
     onShowMonitorDialog: (Boolean) -> Unit,
-    onNavigate: (route: String) -> Unit
+    onNavigate: (route: Any) -> Unit
 ) {
     val context = LocalContext.current
 
