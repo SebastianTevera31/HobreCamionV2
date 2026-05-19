@@ -15,6 +15,7 @@
 .cxx
 .idea/planningMode.xml
 .idea/codeStyles/Project.xml
+.idea/appInsightsSettings.xml
 local.properties
 *.hprof
 /app/release
