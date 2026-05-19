@@ -122,7 +122,6 @@ fun MonitorScreen(
 }
 
 @Composable
-
 fun MonitorScreenContent(
     monitorUiState: MonitorUiState,
     positionsUiState: ApiResult<List<ListOfTireData>?>,

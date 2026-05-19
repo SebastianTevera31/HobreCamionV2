@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -429,10 +430,12 @@ class InicioActivity : ComponentActivity() {
                     ) {
                         Column(modifier = Modifier.fillMaxSize()) {
                             if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
-//                                GlobalAdMobBanner(
-//                                    adUnitId = "ca-app-pub-3415237437138959/2146418588",
-//                                    modifier = Modifier.fillMaxWidth()
-//                                )
+                                GlobalAdMobBanner(
+                                    adUnitId = "ca-app-pub-3415237437138959/2146418588",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .statusBarsPadding()
+                                )
                             }
 
                             WarningSnackBanner(
