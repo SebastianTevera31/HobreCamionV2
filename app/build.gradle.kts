@@ -31,6 +31,7 @@ android {
             applicationIdSuffix = ".debug"
             buildConfigField("String", "URL_API", "\"https://owneroperatorapi.azurewebsites.net/\"")
             buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
+            buildConfigField("String", "AD_UNIT_ID", "\"ca-app-pub-3940256099942544/9214589741\"")
         }
 
         release {
@@ -42,6 +43,7 @@ android {
             )
             buildConfigField("String", "URL_API", "\"https://owneroperatorapi.azurewebsites.net/\"")
             buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
+            buildConfigField("String", "AD_UNIT_ID", "\"ca-app-pub-3415237437138959/2146418588\"")
             signingConfig = signingConfigs.getByName("debug")
         }
     }

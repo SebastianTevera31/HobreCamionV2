@@ -62,6 +62,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.android.gms.ads.MobileAds
+import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
@@ -444,7 +445,7 @@ class InicioActivity : ComponentActivity() {
                         Column(modifier = Modifier.fillMaxSize()) {
                             if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
                                 GlobalAdMobBanner(
-                                    adUnitId = "ca-app-pub-3415237437138959/2146418588",
+                                    adUnitId = BuildConfig.AD_UNIT_ID,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .statusBarsPadding()
