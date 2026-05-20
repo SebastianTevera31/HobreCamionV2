@@ -93,7 +93,8 @@ class BluetoothScannerImp(
         // 3. Verificación por registros de servicio (UUIDs)
         val sr = result.scanRecord ?: return false
         val hasService = sr.serviceUuids?.any { it == TARGET_BLE4 || it == TARGET_BLE5 } == true
-        val hasServiceData = sr.getServiceData(TARGET_BLE4) != null || sr.getServiceData(TARGET_BLE5) != null
+        val hasServiceData =
+            sr.getServiceData(TARGET_BLE4) != null || sr.getServiceData(TARGET_BLE5) != null
 
         return hasService || hasServiceData
     }
