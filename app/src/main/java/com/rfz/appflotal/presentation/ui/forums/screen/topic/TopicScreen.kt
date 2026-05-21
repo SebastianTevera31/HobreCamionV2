@@ -37,50 +37,66 @@ fun TopicScreen(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
-            TopicHeader(
-                title = topic.title,
-                content = topic.description,
-                imageUrl = topic.imageUrl,
-                onReport = { onReport(topic.id, PostType.TOPIC) }
-            )
+        LazyColumn(
+            contentPadding = PaddingValues(Dimens.PaddingSmall),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            item {
+                Column(modifier = Modifier.padding(Dimens.PaddingSmall)) {
+                    TopicHeader(
+                        title = topic.title,
+                        content = topic.description,
+                        imageUrl = topic.imageUrl,
+                        onReport = { onReport(topic.id, PostType.TOPIC) },
+                        onSave = {},
+                        onReply = {},
+                        isSaved = false,
+                        likes = 3
+                    )
+                    
+                    Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
 
-            Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
-            CommentCard(
-                firstInitial = mainComment.firstInitial,
-                user = mainComment.title,
-                content = mainComment.description,
-                imageUrl = mainComment.imageUrl,
-                likes = mainComment.likes,
-                isSaved = mainComment.isSaved,
-                onReply = { onReply(mainComment) },
-                onSave = onSave,
-                isAuthor = true,
-                secondInitial = mainComment.secondInitial
-            )
+                    CommentCard(
+                        firstInitial = mainComment.firstInitial,
+                        user = mainComment.title,
+                        content = mainComment.description,
+                        imageUrl = mainComment.imageUrl,
+                        likes = mainComment.likes,
+                        isSaved = mainComment.isSaved,
+                        onReply = { onReply(mainComment) },
+                        onSave = onSave,
+                        isAuthor = true,
+                        secondInitial = mainComment.secondInitial
+                    )
+                }
+            }
+
+            items(comments) { comment ->
+                Column(modifier = Modifier.padding(horizontal = Dimens.PaddingSmall)) {
+                    CommentCard(
+                        firstInitial = comment.firstInitial,
+                        user = comment.title,
+                        content = comment.description,
+                        imageUrl = comment.imageUrl,
+                        likes = comment.likes,
+                        onReply = { onReply(comment) },
+                        onSave = onSave,
+                        isSaved = comment.isSaved,
+                        onReport = { onReport(comment.id, PostType.COMMENT) },
+                        secondInitial = comment.secondInitial
+                    )
+                }
+            }
+        }
+
+
+        Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
+
 
             Row(modifier = Modifier.weight(1f)) {
                 Spacer(modifier = Modifier.padding(Dimens.PaddingMedium))
-                LazyColumn(
-                    contentPadding = PaddingValues(Dimens.PaddingSmall),
-                    verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(comments) { comment ->
-                        CommentCard(
-                            firstInitial = comment.firstInitial,
-                            user = comment.title,
-                            content = comment.description,
-                            imageUrl = comment.imageUrl,
-                            likes = comment.likes,
-                            onReply = { onReply(comment) },
-                            onSave = onSave,
-                            isSaved = comment.isSaved,
-                            onReport = { onReport(comment.id, PostType.COMMENT) },
-                            secondInitial = comment.secondInitial
-                        )
-                    }
-                }
+
             }
         }
     }

@@ -94,7 +94,9 @@ fun PostCard(
                         )
                     }
                 }
+                
                 Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
+
                 BlogContent(
                     title = title,
                     content = content,
@@ -146,10 +148,12 @@ fun PostCard(
                         }
                         Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
                         Text(
-                            text = author, style = MaterialTheme.typography.bodyMedium.copy(
+                            text = author,
+                            style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                                color = MaterialTheme.colorScheme.primary,
+                            ),
+                            maxLines = 1
                         )
                         Text(text = " · $time", color = Color.DarkGray)
                     }

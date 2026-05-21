@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.forums.screen.topic
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.TireRepair
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -23,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +41,10 @@ fun TopicHeader(
     title: String,
     content: String,
     onReport: () -> Unit,
+    onSave: () -> Unit,
+    onReply: () -> Unit,
+    isSaved: Boolean,
+    likes: Int,
     modifier: Modifier = Modifier,
     imageUrl: String = ""
 ) {
@@ -52,11 +61,11 @@ fun TopicHeader(
             )
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall)
             ) {
                 Box(
                     modifier = Modifier
+                        .align(Alignment.Top)
                         .size(60.dp)
                         .clip(RoundedCornerShape(Dimens.PaddingMedium))
                         .background(MaterialTheme.colorScheme.primary)
@@ -66,7 +75,7 @@ fun TopicHeader(
                             model = imageUrl,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            contentScale = ContentScale.Crop
                         )
                     } else {
                         Icon(
@@ -101,6 +110,44 @@ fun TopicHeader(
                 text = content,
                 style = MaterialTheme.typography.bodyLarge.copy(Color.DarkGray)
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                    modifier = Modifier.clickable { onSave() }
+                ) {
+                    Icon(
+                        imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
+                        contentDescription = null,
+                        tint = if (isSaved) Color.Red else Color.Gray
+                    )
+                    Text(
+                        text = likes.toString(),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                    modifier = Modifier.clickable { onReply() }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Reply,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "Responder",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         }
     }
 }
@@ -112,7 +159,12 @@ fun TopicHeaderPreview() {
         TopicHeader(
             title = "Mantenimiento Preventivo",
             content = "Aprende cómo realizar un mantenimiento preventivo a tus neumáticos para alargar su vida útil y ahorrar costos.",
-            onReport = {}
+            onReport = {},
+            onSave = {},
+            onReply = {},
+            isSaved = true,
+            likes = 30,
+            imageUrl = ""
         )
     }
 }

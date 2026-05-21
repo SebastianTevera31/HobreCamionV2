@@ -56,16 +56,15 @@ fun CommentCard(
         Column(
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
             modifier = Modifier.padding(
-                horizontal = Dimens.PaddingMedium,
-                vertical = Dimens.PaddingSmall
+                Dimens.PaddingMedium
             )
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
             ) {
                 Box(
                     modifier = Modifier
+                        .align(Alignment.Top)
                         .size(60.dp)
                         .clip(RoundedCornerShape(100))
                         .background(MaterialTheme.colorScheme.primary)
@@ -80,14 +79,15 @@ fun CommentCard(
                 }
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(Dimens.PaddingLarge)
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
                 ) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         BlogContent(
                             title = user,
                             content = content,
                             isAuthor = isAuthor,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.weight(1f)
                         )
 
@@ -109,7 +109,7 @@ fun CommentCard(
                     if (showOptions) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,

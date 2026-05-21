@@ -43,42 +43,46 @@ fun BlogContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
-            if (isPost) {
-                Icon(
-                    imageVector = Icons.Default.Pin,
-                    contentDescription = null,
-                    tint = Color(0xFFFFD700)
-                )
-            }
-            Text(
-                text = title,
-                style = style.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                ),
-                maxLines = if (showAllContent) Int.MAX_VALUE else 2,
-                overflow = if (showAllContent) TextOverflow.Clip else TextOverflow.Ellipsis
-            )
-            if (isAuthor) {
-                Box(
-                    modifier = Modifier
-                        .background(Color(0xFFE8F5E9), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = "AUTOR",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4CAF50)
+            Column(verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)) {
+                    if (isPost) {
+                        Icon(
+                            imageVector = Icons.Default.Pin,
+                            contentDescription = null,
+                            tint = Color(0xFFFFD700)
                         )
-                    )
+                    }
+                    if (isAuthor) {
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFFE8F5E9), RoundedCornerShape(12.dp))
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "AUTOR",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF4CAF50)
+                                )
+                            )
+                        }
+                    }
                 }
+                Text(
+                    text = title,
+                    style = style.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    maxLines = if (showAllContent) Int.MAX_VALUE else 2,
+                    overflow = if (showAllContent) TextOverflow.Clip else TextOverflow.Ellipsis
+                )
             }
         }
 
         Text(
             text = content,
-            style = MaterialTheme.typography.bodyMedium.copy(Color.DarkGray),
+            style = MaterialTheme.typography.bodySmall.copy(Color.DarkGray),
             maxLines = if (showAllContent) Int.MAX_VALUE else 2,
             overflow = if (showAllContent) TextOverflow.Clip else TextOverflow.Ellipsis
         )
