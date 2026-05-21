@@ -54,7 +54,7 @@ fun TopicScreen(
                         isSaved = false,
                         likes = 3
                     )
-                    
+
                     Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
 
                     CommentCard(
@@ -67,6 +67,7 @@ fun TopicScreen(
                         onReply = { onReply(mainComment) },
                         onSave = onSave,
                         isAuthor = true,
+                        isPost = true,
                         secondInitial = mainComment.secondInitial
                     )
                 }
@@ -75,6 +76,7 @@ fun TopicScreen(
             items(comments) { comment ->
                 Column(modifier = Modifier.padding(horizontal = Dimens.PaddingSmall)) {
                     CommentCard(
+                        isPost = true,
                         firstInitial = comment.firstInitial,
                         user = comment.title,
                         content = comment.description,

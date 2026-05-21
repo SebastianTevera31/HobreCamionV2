@@ -40,6 +40,7 @@ fun CommentCard(
     modifier: Modifier = Modifier,
     isSaved: Boolean = false,
     isAuthor: Boolean = false,
+    isPost: Boolean = false,
     showOptions: Boolean = true,
     onSeeMore: () -> Unit = {},
     onReport: () -> Unit = {},
@@ -84,6 +85,7 @@ fun CommentCard(
                 ) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         BlogContent(
+                            isPost = isPost,
                             title = user,
                             content = content,
                             isAuthor = isAuthor,

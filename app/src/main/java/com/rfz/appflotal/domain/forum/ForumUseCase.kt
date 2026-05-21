@@ -1,6 +1,7 @@
 package com.rfz.appflotal.domain.forum
 
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
+import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
@@ -47,6 +48,30 @@ class ForumUseCase @Inject constructor(
                 registrationDate = registrationDate,
                 idTopic = idTopic,
                 image = image
+            )
+        )
+    }
+
+    suspend fun crudTopic(
+        idTopic: Int,
+        title: String,
+        description: String,
+        color: String,
+        image: String,
+        idForum: Int,
+        tags: String,
+        registrationDate: String
+    ): ApiResult<List<TpmsResponse>?> {
+        return forumRepository.crudTopic(
+            CrudTopicRequest(
+                idTopic = idTopic,
+                title = title,
+                description = description,
+                color = color,
+                image = image,
+                idForum = idForum,
+                tags = tags,
+                registrationDate = registrationDate
             )
         )
     }

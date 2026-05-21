@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.repository.forum
 
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
+import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
@@ -36,5 +37,9 @@ class ForumRepository @Inject constructor(
 
     suspend fun crudTopicMessage(request: CrudTopicMessageRequest): ApiResult<List<TpmsResponse>?> {
         return forumService.crudTopicMessage(request)
+    }
+
+    suspend fun crudTopic(request: CrudTopicRequest): ApiResult<List<TpmsResponse>?> {
+        return forumService.crudTopic(request)
     }
 }

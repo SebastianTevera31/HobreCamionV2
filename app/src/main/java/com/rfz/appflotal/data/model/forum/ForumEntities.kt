@@ -56,3 +56,14 @@ data class CrudTopicMessageRequest(
     @SerializedName("id_topic") val idTopic: Int,
     @SerializedName("image") val image: String
 )
+
+data class CrudTopicRequest(
+    @SerializedName("id_topic") val idTopic: Int,
+    @SerializedName("title") val title: String,
+    @SerializedName("description") val description: String,
+    @SerializedName("color") val color: String,
+    @SerializedName("image") val image: String,
+    @SerializedName("id_forum") val idForum: Int,
+    @SerializedName("tags") val tags: String,
+    @SerializedName("registrationDate") val registrationDate: String
+)

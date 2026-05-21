@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.network.client.forum
 
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
+import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
@@ -46,5 +47,11 @@ interface ForumClient {
     suspend fun crudTopicMessage(
         @Header("Authorization") token: String,
         @Body request: CrudTopicMessageRequest
+    ): Response<List<TpmsResponse>>
+
+    @POST("api/Blog/CrudTopic")
+    suspend fun crudTopic(
+        @Header("Authorization") token: String,
+        @Body request: CrudTopicRequest
     ): Response<List<TpmsResponse>>
 }
