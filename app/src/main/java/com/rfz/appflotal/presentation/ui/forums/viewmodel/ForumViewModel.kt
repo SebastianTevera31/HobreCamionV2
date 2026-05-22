@@ -48,7 +48,8 @@ class ForumViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         screenState = LoadState.Success(Unit),
-                        forums = forums
+                        forums = forums,
+                        filteredForums = forums
                     )
                 }
             }
@@ -100,7 +101,8 @@ class ForumViewModel @Inject constructor(
                     it.copy(
                         screenState = LoadState.Success(Unit),
                         selectedRoom = currentRoom,
-                        posts = posts
+                        posts = posts,
+                        filteredPosts = posts
                     )
                 }
             }
@@ -151,17 +153,80 @@ class ForumViewModel @Inject constructor(
     }
 
     fun onSearchChanged(query: String, screenType: ForumScreenType) {
-        val list = if (screenType == ForumScreenType.TOPIC) {
-            _uiState.value.posts.filter {
-                it.description.equals(query, ignoreCase = true) ||
-                        it.author.equals(query, ignoreCase = true)
+        _uiState.update { it.copy(searchQuery = query) }
+
+        if (screenType == ForumScreenType.TOPIC) {
+            val list = if (query.isEmpty()) {
+                _uiState.value.forums
+            } else {
+                _uiState.value.forums.filter {
+                    it.title.contains(query, ignoreCase = true) ||
+                            it.description.contains(query, ignoreCase = true)
+                }
             }
-        } else emptyList()
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
-                filteredPosts = list
-            )
+
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    filteredForums = list
+                )
+            }
+        } else if (screenType == ForumScreenType.POST) {
+            val list = if (query.isEmpty()) {
+                _uiState.value.posts
+            } else {
+                _uiState.value.posts.filter {
+                    it.title.contains(query, ignoreCase = true) ||
+                            it.description.contains(query, ignoreCase = true)
+                }
+            }
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    filteredPosts = list
+                )
+            }
         }
+    }
+
+    fun sendPost(
+        title: String,
+        description: String,
+        tags: String,
+        color: String
+    ) {
+        viewModelScope.launch {
+            val currentForumId = _uiState.value.selectedRoom?.id ?: 0
+            if (currentForumId == 0) {
+                _uiState.update { it.copy(newTopicState = LoadState.Error("No se ha seleccionado un foro válido.")) }
+                return@launch
+            }
+
+            _uiState.update { it.copy(newTopicState = LoadState.Loading) }
+
+            val response = forumUseCase.crudPost(
+                title = title,
+                description = description,
+                color = color,
+                image = "",
+                idForum = currentForumId,
+                tags = tags,
+                registrationDate = getCurrentDate()
+            )
+
+            asyncResponseHelper(
+                response,
+                onError = {
+                    _uiState.update { it.copy(newTopicState = LoadState.Error("Error al publicar el tema")) }
+                }
+            ) {
+                _uiState.update { it.copy(newTopicState = LoadState.Success(Unit)) }
+                // Recargamos los posts de la sala actual para que al volver se vea el nuevo
+                loadPostsByRoom(currentForumId.toString())
+            }
+        }
+    }
+
+    fun resetNewTopicState() {
+        _uiState.update { it.copy(newTopicState = LoadState.Idle) }
     }
 
     fun sendComment(commentText: String) {
@@ -171,7 +236,7 @@ class ForumViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
 
-            val response = forumUseCase.crudTopicMessage(
+            val response = forumUseCase.crudCommit(
                 idTopic = topicId,
                 message = commentText,
                 registrationDate = getCurrentDate(),

@@ -51,17 +51,17 @@ class ForumService @Inject constructor(
         }
     }
 
-    suspend fun crudTopicMessage(request: CrudTopicMessageRequest): ApiResult<List<TpmsResponse>?> {
+    suspend fun crudComment(request: CrudTopicMessageRequest): ApiResult<List<TpmsResponse>?> {
         return requestHelper("crudTopicMessage") {
             val token = getTasksUseCase().first()[0].fld_token
-            forumClient.crudTopicMessage("bearer $token", request)
+            forumClient.crudComment("bearer $token", request)
         }
     }
 
-    suspend fun crudTopic(request: CrudTopicRequest): ApiResult<List<TpmsResponse>?> {
+    suspend fun crudPost(request: CrudTopicRequest): ApiResult<List<TpmsResponse>?> {
         return requestHelper("crudTopic") {
             val token = getTasksUseCase().first()[0].fld_token
-            forumClient.crudTopic("bearer $token", request)
+            forumClient.crudPost("bearer $token", request)
         }
     }
 }

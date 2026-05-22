@@ -5,6 +5,7 @@ import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 data class ForumUiState(
     val screenState: LoadState<Unit> = LoadState.Idle,
+    val newTopicState: LoadState<Unit> = LoadState.Idle,
     val forums: List<Topic> = emptyList(),
     val posts: List<Post> = emptyList(),
     val filteredPosts: List<Post> = emptyList(),

@@ -44,13 +44,13 @@ interface ForumClient {
     ): Response<List<TopicMessageResult>>
 
     @POST("api/Blog/CrudTopicMessage")
-    suspend fun crudTopicMessage(
+    suspend fun crudComment(
         @Header("Authorization") token: String,
         @Body request: CrudTopicMessageRequest
     ): Response<List<TpmsResponse>>
 
     @POST("api/Blog/CrudTopic")
-    suspend fun crudTopic(
+    suspend fun crudPost(
         @Header("Authorization") token: String,
         @Body request: CrudTopicRequest
     ): Response<List<TpmsResponse>>

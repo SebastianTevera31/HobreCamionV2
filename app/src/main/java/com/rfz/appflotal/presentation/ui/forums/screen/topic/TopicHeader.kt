@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.TireRepair
 import androidx.compose.material.icons.outlined.Favorite
@@ -42,7 +41,6 @@ fun TopicHeader(
     content: String,
     onReport: () -> Unit,
     onSave: () -> Unit,
-    onReply: () -> Unit,
     isSaved: Boolean,
     likes: Int,
     modifier: Modifier = Modifier,
@@ -130,23 +128,6 @@ fun TopicHeader(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                    modifier = Modifier.clickable { onReply() }
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Reply,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "Responder",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
             }
         }
     }
@@ -161,7 +142,6 @@ fun TopicHeaderPreview() {
             content = "Aprende cómo realizar un mantenimiento preventivo a tus neumáticos para alargar su vida útil y ahorrar costos.",
             onReport = {},
             onSave = {},
-            onReply = {},
             isSaved = true,
             likes = 30,
             imageUrl = ""

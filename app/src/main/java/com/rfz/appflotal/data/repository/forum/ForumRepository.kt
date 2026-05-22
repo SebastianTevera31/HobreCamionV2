@@ -35,11 +35,11 @@ class ForumRepository @Inject constructor(
         return forumService.getTopicMessages(idTopic)
     }
 
-    suspend fun crudTopicMessage(request: CrudTopicMessageRequest): ApiResult<List<TpmsResponse>?> {
-        return forumService.crudTopicMessage(request)
+    suspend fun crudComment(request: CrudTopicMessageRequest): ApiResult<List<TpmsResponse>?> {
+        return forumService.crudComment(request)
     }
 
-    suspend fun crudTopic(request: CrudTopicRequest): ApiResult<List<TpmsResponse>?> {
-        return forumService.crudTopic(request)
+    suspend fun crudPost(request: CrudTopicRequest): ApiResult<List<TpmsResponse>?> {
+        return forumService.crudPost(request)
     }
 }

@@ -35,13 +35,13 @@ class ForumUseCase @Inject constructor(
         return forumRepository.getTopicMessages(idTopic)
     }
 
-    suspend fun crudTopicMessage(
+    suspend fun crudCommit(
         idTopic: Int,
         message: String,
         registrationDate: String,
         image: String = ""
     ): ApiResult<List<TpmsResponse>?> {
-        return forumRepository.crudTopicMessage(
+        return forumRepository.crudComment(
             CrudTopicMessageRequest(
                 idTopicMessage = 0,
                 message = message,
@@ -52,8 +52,7 @@ class ForumUseCase @Inject constructor(
         )
     }
 
-    suspend fun crudTopic(
-        idTopic: Int,
+    suspend fun crudPost(
         title: String,
         description: String,
         color: String,
@@ -62,9 +61,9 @@ class ForumUseCase @Inject constructor(
         tags: String,
         registrationDate: String
     ): ApiResult<List<TpmsResponse>?> {
-        return forumRepository.crudTopic(
+        return forumRepository.crudPost(
             CrudTopicRequest(
-                idTopic = idTopic,
+                idTopic = 0,
                 title = title,
                 description = description,
                 color = color,

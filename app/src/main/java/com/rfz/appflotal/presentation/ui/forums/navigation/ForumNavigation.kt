@@ -44,6 +44,7 @@ import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReplyScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReportPostScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.TopicScreen
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.CameraUiState
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumScreenType
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import kotlinx.serialization.Serializable
@@ -115,7 +116,9 @@ fun NavGraphBuilder.forumsGraph(
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
                         placeholder = "Buscar tema...",
-                        onValueChange = viewModel::onSearchChanged
+                        onValueChange = {
+                            viewModel.onSearchChanged(it, ForumScreenType.TOPIC)
+                        }
                     ),
                     onBackClick = {
                         navController.navigate(NavScreens.HOME) {
@@ -132,7 +135,7 @@ fun NavGraphBuilder.forumsGraph(
 
                     is LoadState.Success -> {
                         ForumsScreen(
-                            foros = state.forums,
+                            foros = state.filteredForums,
                             loadState = state.screenState,
                             onNavigate = { topic ->
                                 navController.navigate(
@@ -183,7 +186,9 @@ fun NavGraphBuilder.forumsGraph(
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
                         placeholder = "Buscar temas...",
-                        onValueChange = viewModel::onSearchChanged
+                        onValueChange = {
+                            viewModel.onSearchChanged(it, ForumScreenType.POST)
+                        }
                     ),
                     onBackClick = { navController.popBackStack() },
                     onMenuClick = viewModel::onMenuClick
@@ -224,7 +229,7 @@ fun NavGraphBuilder.forumsGraph(
 
                     is LoadState.Success -> {
                         PostsScreen(
-                            posts = state.posts,
+                            posts = state.filteredPosts,
                             loadState = state.screenState,
                             onPostClick = { post ->
                                 navController.navigate(
@@ -385,21 +390,43 @@ fun NavGraphBuilder.forumsGraph(
 
         composable<NewTopicNav> { backStackEntry ->
             val args = backStackEntry.toRoute<NewTopicNav>()
+            val parentEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<ForumsGraph>()
+                } catch (e: Exception) {
+                    backStackEntry
+                }
+            }
+            val viewModel: ForumViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.resetNewTopicState()
+            }
+
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = "Nuevo Tema",
                     subtitle = args.roomTitle,
                     showBackButton = true,
                     showMenuButton = false,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
                 )
             ) { paddingValues ->
                 NewTopicScreen(
                     modifier = Modifier.padding(paddingValues),
-                    onSend = { title, message ->
-                        // Aquí iría la lógica para guardar el tema
-                        navController.popBackStack()
-                    }
+                    newTopicStatus = state.newTopicState,
+                    onSend = { title, message, tags, color ->
+                        viewModel.sendPost(
+                            title = title,
+                            description = message,
+                            tags = tags,
+                            color = color
+                        )
+                    },
+                    onBack = { navController.popBackStack() }
                 )
             }
         }
