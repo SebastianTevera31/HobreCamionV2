@@ -67,3 +67,17 @@ data class CrudTopicRequest(
     @SerializedName("tags") val tags: String,
     @SerializedName("registrationDate") val registrationDate: String
 )
+
+data class DoLikeRequest(
+    @SerializedName("likedDate") val likedDate: String,
+    @SerializedName("id_topic") val idTopic: Int,
+    @SerializedName("id_message") val idMessage: Int
+)
+
+data class LikedPostResult(
+    @SerializedName("id_liked") val idLiked: Int,
+    @SerializedName("summarizedPublication") val summarizedPublication: String,
+    @SerializedName("completePublication") val completePublication: String,
+    @SerializedName("id_user") val idUser: Int,
+    @SerializedName("likedDate") val likedDate: String
+)

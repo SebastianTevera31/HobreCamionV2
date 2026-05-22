@@ -5,6 +5,8 @@ import com.rfz.appflotal.data.mapper.toPost
 import com.rfz.appflotal.data.mapper.toTopic
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicRequest
+import com.rfz.appflotal.data.model.forum.DoLikeRequest
+import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.forum.ForumRepository
@@ -119,5 +121,27 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
                 registrationDate = registrationDate
             )
         )
+    }
+
+    suspend fun doLike(
+        likedDate: String,
+        idTopic: Int,
+        idMessage: Int
+    ): ApiResult<List<TpmsResponse>?> {
+        return forumRepository.doLike(
+            DoLikeRequest(
+                likedDate = likedDate,
+                idTopic = idTopic,
+                idMessage = idMessage
+            )
+        )
+    }
+
+    suspend fun getLikedPosts(): ApiResult<List<LikedPostResult>> {
+        return when (val response = forumRepository.getLikedPosts()) {
+            is ApiResult.Success -> ApiResult.Success(response.data ?: emptyList())
+            is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
+            ApiResult.Loading -> ApiResult.Loading
+        }
     }
 }

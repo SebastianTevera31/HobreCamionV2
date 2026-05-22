@@ -28,6 +28,7 @@ fun TopicResult.toPost(): Post {
         author = this.fldUserName,
         numComments = this.fldMessages,
         idUser = this.idUser,
+        isSaved = false,
         time = Commons.getRelativeTime(this.fldRegistrationDate),
         color = runCatching {
             val colorStr = this.fldColor.trim()

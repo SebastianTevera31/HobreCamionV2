@@ -56,7 +56,8 @@ fun ReplyScreen(
                 onSave = {},
                 onSeeMore = onOptions,
                 showOptions = false,
-                secondInitial = comment.secondInitial
+                secondInitial = comment.secondInitial,
+                time = comment.time
             )
 
             OutlinedTextField(

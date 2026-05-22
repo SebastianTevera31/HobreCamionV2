@@ -22,8 +22,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.width
+import com.rfz.appflotal.presentation.ui.forums.components.PostDropdownMenu
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,27 +60,25 @@ fun PostCard(
     onReport: () -> Unit
 ) {
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(Dimens.PaddingMedium),
-        colors = CardDefaults.cardColors(Color.White),
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         onClick = onNav
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-            modifier = Modifier.padding(
-                horizontal = Dimens.PaddingMedium,
-                vertical = Dimens.PaddingSmall
-            )
+            modifier = Modifier.padding(Dimens.PaddingMedium),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall)
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(RoundedCornerShape(Dimens.PaddingMedium))
-                        .background(color)
+                // Avatar / Thumbnail
+                Surface(
+                    modifier = Modifier.size(64.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = color.copy(alpha = 0.1f)
                 ) {
                     if (imageUrl.isNotEmpty()) {
                         AsyncImage(
@@ -86,100 +88,110 @@ fun PostCard(
                             contentScale = ContentScale.Crop
                         )
                     } else {
-                        Icon(
-                            imageVector = Icons.Default.TireRepair,
-                            contentDescription = null,
-                            modifier = Modifier.align(
-                                Alignment.Center
-                            ),
-                            tint = Color.White
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.TireRepair,
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp),
+                                tint = color
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
-
-                BlogContent(
-                    title = title,
-                    content = content,
-                    showAllContent = false,
-                    style = if (isPost) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.weight(1f)
-                )
-                if (!isPost) {
-                    IconButton(onClick = onNav) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = null,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    Text(
+                        text = content,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
+
                 if (showOptions) {
-                    IconButton(onClick = onReport) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "See more",
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                    PostDropdownMenu(onReport = onReport)
                 }
             }
 
             if (isPost && !hidePostInfo) {
-                HorizontalDivider(thickness = 1.dp)
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(RoundedCornerShape(100))
-                                .background(MaterialTheme.colorScheme.primary)
-                                .align(Alignment.Top)
+                        Surface(
+                            modifier = Modifier.size(24.dp),
+                            shape = RoundedCornerShape(100),
+                            color = MaterialTheme.colorScheme.primaryContainer
                         ) {
-                            Text(
-                                text = if (secondInitial.isNotEmpty()) "$firstInitial$secondInitial" else firstInitial,
-                                modifier = Modifier.align(
-                                    Alignment.Center
-                                ),
-                                style = MaterialTheme.typography.bodySmall.copy(color = Color.White)
-                            )
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = if (secondInitial.isNotEmpty()) "$firstInitial$secondInitial" else firstInitial,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                )
+                            }
                         }
-                        Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = author,
-                            style = MaterialTheme.typography.labelSmall.copy(
+                            style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                            ),
-                            maxLines = 1
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         )
                         Text(
-                            text = " · $time",
-                            color = Color.DarkGray,
-                            style = MaterialTheme.typography.labelSmall
+                            text = " • $time",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         )
                     }
 
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(
-                            Dimens.PaddingExtraSmall,
-                            Alignment.CenterHorizontally
-                        ),
+                    Surface(
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Comment,
-                            contentDescription = null,
-                            modifier = Modifier.size(Dimens.PaddingMedium)
-                        )
-                        Text(
-                            text = numComments.toString(),
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Comment,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            Text(
+                                text = numComments.toString(),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            )
+                        }
                     }
                 }
             }

@@ -1,7 +1,6 @@
 package com.rfz.appflotal.presentation.ui.forums.screen.topic
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,14 +29,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.PostDropdownMenu
 
+import androidx.compose.material3.Surface
+
 @Composable
 fun TopicHeader(
     title: String,
+    time: String,
     content: String,
     onReport: () -> Unit,
     onSave: () -> Unit,
@@ -48,25 +51,24 @@ fun TopicHeader(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(Dimens.PaddingMedium),
-        colors = CardDefaults.cardColors(Color.White)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-            modifier = Modifier.padding(
-                horizontal = Dimens.PaddingMedium,
-                vertical = Dimens.PaddingSmall
-            )
+            modifier = Modifier.padding(Dimens.PaddingMedium),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall)
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
             ) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.Top)
-                        .size(60.dp)
-                        .clip(RoundedCornerShape(Dimens.PaddingMedium))
-                        .background(MaterialTheme.colorScheme.primary)
+                // Topic Icon / Image
+                Surface(
+                    modifier = Modifier.size(60.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
                     if (imageUrl.isNotEmpty()) {
                         AsyncImage(
@@ -76,56 +78,71 @@ fun TopicHeader(
                             contentScale = ContentScale.Crop
                         )
                     } else {
-                        Icon(
-                            imageVector = Icons.Default.TireRepair,
-                            contentDescription = null,
-                            modifier = Modifier.align(
-                                Alignment.Center
-                            ),
-                            tint = Color.White
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.TireRepair,
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Tema",
-                        style = MaterialTheme.typography.titleMedium.copy(color = Color.DarkGray)
+                        text = "TEMA PRINCIPAL",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            letterSpacing = 1.2.sp
+                        )
                     )
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleSmall.copy(
+                        style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                    Text(
+                        text = time,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
                 }
 
                 PostDropdownMenu(onReport = onReport)
             }
+
             Text(
                 text = content,
-                style = MaterialTheme.typography.bodySmall.copy(Color.DarkGray)
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 20.sp
+                )
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+            // Like Action
+            Surface(
+                onClick = onSave,
+                shape = RoundedCornerShape(20.dp),
+                color = if (isSaved) Color.Red.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                contentColor = if (isSaved) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                    modifier = Modifier.clickable { onSave() }
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Icon(
                         imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
                         contentDescription = null,
-                        tint = if (isSaved) Color.Red else Color.Gray
+                        modifier = Modifier.size(18.dp)
                     )
                     Text(
                         text = likes.toString(),
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
@@ -144,7 +161,8 @@ fun TopicHeaderPreview() {
             onSave = {},
             isSaved = true,
             likes = 30,
-            imageUrl = ""
+            imageUrl = "",
+            time = "1 mes"
         )
     }
 }

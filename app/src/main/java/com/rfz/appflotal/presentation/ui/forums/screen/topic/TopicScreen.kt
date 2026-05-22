@@ -28,7 +28,7 @@ fun TopicScreen(
     topic: Post,
     comments: List<Comment>,
     onReply: (Comment) -> Unit,
-    onSave: () -> Unit,
+    onSave: (id: Int, isPost: Boolean) -> Unit,
     onReport: (postId: Int, type: PostType) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -42,21 +42,22 @@ fun TopicScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             item {
-                Column(modifier = Modifier.padding(Dimens.PaddingSmall)) {
+                Column(modifier = Modifier.padding(Dimens.PaddingExtraSmall)) {
                     TopicHeader(
                         title = topic.title,
                         content = topic.description,
                         imageUrl = topic.imageUrl,
                         onReport = { onReport(topic.id, PostType.TOPIC) },
-                        onSave = {},
+                        onSave = { onSave(topic.id, true) },
                         isSaved = false,
-                        likes = 3
+                        likes = 3,
+                        time = topic.time
                     )
                 }
             }
 
             items(comments) { comment ->
-                Column(modifier = Modifier.padding(horizontal = Dimens.PaddingSmall)) {
+                Column(modifier = Modifier.padding(horizontal = Dimens.PaddingExtraSmall)) {
                     CommentCard(
                         isPost = true,
                         firstInitial = comment.firstInitial,
@@ -65,11 +66,12 @@ fun TopicScreen(
                         imageUrl = comment.imageUrl,
                         likes = comment.likes,
                         onReply = { onReply(comment) },
-                        onSave = onSave,
+                        onSave = { onSave(comment.id, false) },
                         isAuthor = comment.id == topic.idUser,
                         isSaved = comment.isSaved,
                         onReport = { onReport(comment.id, PostType.COMMENT) },
-                        secondInitial = comment.secondInitial
+                        secondInitial = comment.secondInitial,
+                        time = comment.time
                     )
                 }
             }
@@ -99,7 +101,8 @@ fun TopicScreenPreview() {
         numComments = 15,
         time = "hace 3 horas",
         idUser = 1,
-        color = MaterialTheme.colorScheme.primary
+        color = MaterialTheme.colorScheme.primary,
+        isSaved = false
     )
 
     val sampleComments = listOf(
@@ -143,7 +146,7 @@ fun TopicScreenPreview() {
             topic = sampleTopic,
             comments = sampleComments,
             onReply = {},
-            onSave = {},
+            onSave = { _, _ -> },
             onReport = { _, _ -> }
         )
     }

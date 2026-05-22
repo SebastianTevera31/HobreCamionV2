@@ -36,7 +36,7 @@ data class Comment(
     override val imageUrl: String,
     val time: String,
     val likes: Int,
-    val isSaved: Boolean,
+    var isSaved: Boolean,
     val firstInitial: String,
     val secondInitial: String
 ) : ForumRecord
@@ -50,7 +50,8 @@ data class Post(
     val numComments: Int,
     val time: String,
     val idUser: Int,
-    val color: Color
+    val color: Color,
+    val isSaved: Boolean
 ) : ForumRecord
 
 data class Topic(

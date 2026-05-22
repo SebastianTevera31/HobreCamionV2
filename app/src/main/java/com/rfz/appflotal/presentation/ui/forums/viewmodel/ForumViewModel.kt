@@ -95,10 +95,6 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun onMenuClick() {
-
-    }
-
     fun onSearchChanged(query: String, screenType: ForumScreenType) {
         _uiState.update { it.copy(searchQuery = query) }
 
@@ -130,6 +126,58 @@ class ForumViewModel @Inject constructor(
                 currentUiState.copy(
                     filteredPosts = list
                 )
+            }
+        }
+    }
+
+    fun clearFilterSearch() {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                filteredPosts = currentUiState.posts,
+                filteredForums = currentUiState.forums
+            )
+        }
+    }
+
+    fun doLike(postId: Int, isPost: Boolean) {
+        viewModelScope.launch {
+            val response = forumUseCase.doLike(
+                likedDate = getCurrentDate(),
+                idTopic = if (isPost) postId else 0,
+                idMessage = if (!isPost) postId else 0
+            )
+
+            asyncResponseHelper(
+                response,
+                onError = {
+                    // Manejar error si es necesario
+                }
+            ) {
+                // Actualizar UI localmente o recargar datos
+                if (isPost) {
+                    val currentTopicId = _uiState.value.selectedPost?.id
+                    if (currentTopicId != null) {
+                        _uiState.update { currentUiState ->
+                            val post = _uiState.value.selectedPost!!.copy(isSaved = true)
+                            currentUiState.copy(selectedPost = post)
+                        }
+                    }
+                } else {
+                    _uiState.update { currentUiState ->
+                        val updatedComments = currentUiState.comments.map { comment ->
+                            if (comment.id == postId) {
+                                val newIsSaved = !comment.isSaved
+                                comment.copy(
+                                    isSaved = newIsSaved,
+                                    likes = if (newIsSaved) comment.likes + 1 else comment.likes - 1
+                                )
+                            } else {
+                                comment
+                            }
+                        }
+                        currentUiState.copy(comments = updatedComments)
+                    }
+                }
             }
         }
     }

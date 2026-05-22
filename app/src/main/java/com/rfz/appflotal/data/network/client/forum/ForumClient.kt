@@ -2,9 +2,11 @@ package com.rfz.appflotal.data.network.client.forum
 
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicRequest
+import com.rfz.appflotal.data.model.forum.DoLikeRequest
 import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
+import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import retrofit2.Response
@@ -12,6 +14,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface ForumClient {
@@ -54,4 +57,15 @@ interface ForumClient {
         @Header("Authorization") token: String,
         @Body request: CrudTopicRequest
     ): Response<List<TpmsResponse>>
+
+    @PUT("api/Blog/DoLike")
+    suspend fun doLike(
+        @Header("Authorization") token: String,
+        @Body request: DoLikeRequest
+    ): Response<List<TpmsResponse>>
+
+    @GET("api/Blog/GetLikedPosts")
+    suspend fun getLikedPosts(
+        @Header("Authorization") token: String
+    ): Response<List<LikedPostResult>>
 }

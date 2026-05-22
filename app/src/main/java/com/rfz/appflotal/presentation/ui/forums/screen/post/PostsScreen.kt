@@ -72,7 +72,8 @@ fun PostsScreenPreview() {
             numComments = 5,
             time = "hace 2 horas",
             idUser = 1,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+            isSaved = false
         ),
         Post(
             id = 2,
@@ -83,7 +84,8 @@ fun PostsScreenPreview() {
             numComments = 10,
             time = "hace 5 horas",
             idUser = 2,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+            isSaved = false
         ),
         Post(
             id = 3,
@@ -94,7 +96,8 @@ fun PostsScreenPreview() {
             numComments = 0,
             time = "hace 1 día",
             idUser = 3,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+            isSaved = false
         )
     )
     HombreCamionTheme {

@@ -1,12 +1,11 @@
 package com.rfz.appflotal.presentation.ui.forums.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,12 +17,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -34,6 +35,7 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 fun CommentCard(
     firstInitial: String,
     user: String,
+    time: String,
     content: String,
     imageUrl: String,
     likes: Int,
@@ -49,102 +51,103 @@ fun CommentCard(
     secondInitial: String = "",
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(Dimens.PaddingMedium),
-        colors = CardDefaults.cardColors(Color.White),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         onClick = onSeeMore
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-            modifier = Modifier.padding(
-                Dimens.PaddingMedium
-            )
+            modifier = Modifier.padding(Dimens.PaddingMedium),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
             ) {
-                Box(
+                BlogContent(
+                    firstInitial = firstInitial,
+                    secondInitial = secondInitial,
+                    isPost = isPost,
+                    title = user,
+                    content = content,
+                    isAuthor = isAuthor,
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.weight(1f),
+                    time = time
+                )
+
+                PostDropdownMenu(onReport = onReport)
+            }
+
+            if (imageUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Imagen del comentario",
                     modifier = Modifier
-                        .align(Alignment.Top)
-                        .size(60.dp)
-                        .clip(RoundedCornerShape(100))
-                        .background(MaterialTheme.colorScheme.primary)
-                ) {
-                    Text(
-                        text = if (secondInitial.isNotEmpty()) "$firstInitial$secondInitial" else firstInitial,
-                        modifier = Modifier.align(
-                            Alignment.Center
-                        ),
-                        style = MaterialTheme.typography.titleLarge.copy(color = Color.White)
-                    )
-                }
-                Column(
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(Dimens.PaddingSmall))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            if (showOptions) {
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        BlogContent(
-                            isPost = isPost,
-                            title = user,
-                            content = content,
-                            isAuthor = isAuthor,
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        PostDropdownMenu(onReport = onReport)
-                    }
-
-                    if (imageUrl.isNotEmpty()) {
-                        AsyncImage(
-                            model = imageUrl,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(Dimens.PaddingMedium))
-                                .background(MaterialTheme.colorScheme.onSurfaceVariant),
-                            contentScale = androidx.compose.ui.layout.ContentScale.FillWidth
-                        )
-                    }
-
-                    if (showOptions) {
+                    // Botón de Like
+                    Surface(
+                        onClick = onSave,
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (isSaved) Color.Red.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(
+                            alpha = 0.5f
+                        ),
+                        contentColor = if (isSaved) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
+                    ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                                modifier = Modifier.clickable { onSave() }
-                            ) {
-                                Icon(
-                                    imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
-                                    contentDescription = null,
-                                    tint = if (isSaved) Color.Red else Color.Gray
-                                )
-                                Text(
-                                    text = likes.toString(),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
+                            Icon(
+                                imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = likes.toString(),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                                modifier = Modifier.clickable { onReply() }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Reply,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = "Responder",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
+                    // Botón de Responder
+                    Surface(
+                        onClick = onReply,
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Reply,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = "Responder",
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                     }
                 }
@@ -152,6 +155,7 @@ fun CommentCard(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
@@ -164,7 +168,9 @@ fun CommentCardPreview() {
             imageUrl = "",
             likes = 12,
             isSaved = false,
-            secondInitial = "P"
+            isPost = true,
+            secondInitial = "P",
+            time = "3 horas"
         )
     }
 }

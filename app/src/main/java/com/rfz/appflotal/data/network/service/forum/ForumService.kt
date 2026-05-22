@@ -2,9 +2,11 @@ package com.rfz.appflotal.data.network.service.forum
 
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicRequest
+import com.rfz.appflotal.data.model.forum.DoLikeRequest
 import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
+import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.client.forum.ForumClient
@@ -62,6 +64,20 @@ class ForumService @Inject constructor(
         return requestHelper("crudTopic") {
             val token = getTasksUseCase().first()[0].fld_token
             forumClient.crudPost("bearer $token", request)
+        }
+    }
+
+    suspend fun doLike(request: DoLikeRequest): ApiResult<List<TpmsResponse>?> {
+        return requestHelper("doLike") {
+            val token = getTasksUseCase().first()[0].fld_token
+            forumClient.doLike("bearer $token", request)
+        }
+    }
+
+    suspend fun getLikedPosts(): ApiResult<List<LikedPostResult>?> {
+        return requestHelper("getLikedPosts") {
+            val token = getTasksUseCase().first()[0].fld_token
+            forumClient.getLikedPosts("bearer $token")
         }
     }
 }

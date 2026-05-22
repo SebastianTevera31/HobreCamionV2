@@ -125,7 +125,7 @@ fun NavGraphBuilder.forumsGraph(
                             popUpTo(0) { inclusive = true }
                         }
                     },
-                    onMenuClick = viewModel::onMenuClick
+                    onMenuClick = {}
                 )
             ) { paddingValues ->
                 when (state.screenState) {
@@ -192,7 +192,7 @@ fun NavGraphBuilder.forumsGraph(
                         }
                     ),
                     onBackClick = { navController.popBackStack() },
-                    onMenuClick = viewModel::onMenuClick
+                    onMenuClick = {}
                 ),
                 floatingActionButton = {
                     FloatingActionButton(onClick = {
@@ -302,7 +302,7 @@ fun NavGraphBuilder.forumsGraph(
                     showMenuButton = false,
                     searchConfig = null,
                     onBackClick = { navController.popBackStack() },
-                    onMenuClick = viewModel::onMenuClick
+                    onMenuClick = {}
                 ),
                 bottomBar = {
                     Surface(
@@ -344,7 +344,7 @@ fun NavGraphBuilder.forumsGraph(
                                 onReply = { comment ->
                                     navController.navigate(NewCommentNav(commentId = comment.id))
                                 },
-                                onSave = { },
+                                onSave = {id, isPost -> viewModel.doLike(id, isPost)},
                                 onReport = { postId, type ->
                                     navController.navigate(
                                         ReportPost(
