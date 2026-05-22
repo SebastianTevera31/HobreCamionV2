@@ -43,7 +43,8 @@ data class Post(
     override val imageUrl: String,
     val author: String,
     val numComments: Int,
-    val time: String
+    val time: String,
+    val idUser: Int
 ) : ForumRecord
 
 data class Topic(

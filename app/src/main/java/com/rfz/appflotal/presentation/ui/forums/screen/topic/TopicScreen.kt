@@ -26,7 +26,6 @@ import com.rfz.appflotal.presentation.ui.forums.viewmodel.PostType
 @Composable
 fun TopicScreen(
     topic: Post,
-    mainComment: Comment,
     comments: List<Comment>,
     onReply: (Comment) -> Unit,
     onSave: () -> Unit,
@@ -54,22 +53,6 @@ fun TopicScreen(
                         isSaved = false,
                         likes = 3
                     )
-
-                    Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
-
-                    CommentCard(
-                        firstInitial = mainComment.firstInitial,
-                        user = mainComment.title,
-                        content = mainComment.description,
-                        imageUrl = mainComment.imageUrl,
-                        likes = mainComment.likes,
-                        isSaved = mainComment.isSaved,
-                        onReply = { onReply(mainComment) },
-                        onSave = onSave,
-                        isAuthor = true,
-                        isPost = true,
-                        secondInitial = mainComment.secondInitial
-                    )
                 }
             }
 
@@ -84,6 +67,7 @@ fun TopicScreen(
                         likes = comment.likes,
                         onReply = { onReply(comment) },
                         onSave = onSave,
+                        isAuthor = comment.id == topic.idUser,
                         isSaved = comment.isSaved,
                         onReport = { onReport(comment.id, PostType.COMMENT) },
                         secondInitial = comment.secondInitial
@@ -114,21 +98,23 @@ fun TopicScreenPreview() {
         imageUrl = "",
         author = "Juan Pérez",
         numComments = 15,
-        time = "hace 3 horas"
+        time = "hace 3 horas",
+        idUser = 1
     )
-    val sampleMainComment = Comment(
-        id = 1,
-        title = "Admin",
-        description = "Excelente tema para discutir. Aquí les dejo mis primeros consejos...",
-        imageUrl = "",
-        likes = 10,
-        firstInitial = "A",
-        secondInitial = "",
-        isSaved = true
-    )
+
     val sampleComments = listOf(
         Comment(
             id = 2,
+            title = "Admin",
+            description = "Excelente tema para discutir. Aquí les dejo mis primeros consejos...",
+            imageUrl = "",
+            likes = 10,
+            firstInitial = "A",
+            secondInitial = "",
+            isSaved = true
+        ),
+        Comment(
+            id = 1,
             title = "Carlos Ruiz",
             description = "Yo siempre mantengo la presión de los neumáticos al nivel recomendado.",
             imageUrl = "",
@@ -152,7 +138,6 @@ fun TopicScreenPreview() {
     HombreCamionTheme {
         TopicScreen(
             topic = sampleTopic,
-            mainComment = sampleMainComment,
             comments = sampleComments,
             onReply = {},
             onSave = {},

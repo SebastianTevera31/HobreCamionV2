@@ -334,8 +334,7 @@ fun NavGraphBuilder.forumsGraph(
                         if (topic != null && comments.isNotEmpty()) {
                             TopicScreen(
                                 topic = topic,
-                                mainComment = comments.first(),
-                                comments = comments.drop(1),
+                                comments = comments,
                                 onReply = { comment ->
                                     navController.navigate(NewCommentNav(commentId = comment.id))
                                 },

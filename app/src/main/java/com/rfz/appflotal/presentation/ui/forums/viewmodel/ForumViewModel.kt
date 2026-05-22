@@ -91,6 +91,7 @@ class ForumViewModel @Inject constructor(
                         imageUrl = it.fldImage,
                         author = it.fldUserName,
                         numComments = it.fldMessages,
+                        idUser = it.idUser,
                         time = it.fldRegistrationDate // Podrías formatear esta fecha si es necesario
                     )
                 } ?: emptyList()
