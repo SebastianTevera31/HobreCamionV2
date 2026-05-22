@@ -44,6 +44,7 @@ fun CommentCard(
     isAuthor: Boolean = false,
     isPost: Boolean = false,
     showOptions: Boolean = true,
+    showReportOption: Boolean = true,
     onSeeMore: () -> Unit = {},
     onReport: () -> Unit = {},
     onReply: () -> Unit = {},
@@ -79,7 +80,9 @@ fun CommentCard(
                     time = time
                 )
 
-                PostDropdownMenu(onReport = onReport)
+                if (showReportOption) {
+                    PostDropdownMenu(onReport = onReport)
+                }
             }
 
             if (imageUrl.isNotEmpty()) {

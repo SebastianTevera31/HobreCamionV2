@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,9 +47,9 @@ val reportTypes = listOf(
 @Composable
 fun ReportPostScreen(
     onSendReport: (reportTypeId: Int, details: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    var selectedReportTypeId by remember { mutableStateOf(reportTypes.first().id) }
+    var selectedReportTypeId by remember { mutableIntStateOf(reportTypes.first().id) }
     var details by remember { mutableStateOf("") }
 
     Surface(
