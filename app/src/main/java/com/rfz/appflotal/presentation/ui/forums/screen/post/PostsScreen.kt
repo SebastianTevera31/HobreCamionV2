@@ -50,7 +50,8 @@ fun PostsScreen(
                         time = post.time,
                         firstInitial = post.author.take(1).uppercase(),
                         secondInitial = "",
-                        onReport = { onReport(post.id, PostType.TOPIC) }
+                        onReport = { onReport(post.id, PostType.TOPIC) },
+                        color = post.color
                     )
                 }
             }
@@ -70,7 +71,8 @@ fun PostsScreenPreview() {
             author = "Autor 1",
             numComments = 5,
             time = "hace 2 horas",
-            idUser = 1
+            idUser = 1,
+            color = MaterialTheme.colorScheme.primary
         ),
         Post(
             id = 2,
@@ -80,7 +82,8 @@ fun PostsScreenPreview() {
             author = "Autor 2",
             numComments = 10,
             time = "hace 5 horas",
-            idUser = 2
+            idUser = 2,
+            color = MaterialTheme.colorScheme.primary
         ),
         Post(
             id = 3,
@@ -90,7 +93,8 @@ fun PostsScreenPreview() {
             author = "Autor 3",
             numComments = 0,
             time = "hace 1 día",
-            idUser = 3
+            idUser = 3,
+            color = MaterialTheme.colorScheme.primary
         )
     )
     HombreCamionTheme {

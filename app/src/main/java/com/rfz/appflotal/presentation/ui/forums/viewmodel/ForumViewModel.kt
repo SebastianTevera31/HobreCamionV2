@@ -35,16 +35,7 @@ class ForumViewModel @Inject constructor(
                 onError = {
                     _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar foros")) }
                 }
-            ) { data ->
-                val forums = data?.results?.map {
-                    Topic(
-                        id = it.idForum,
-                        title = it.fldTitle,
-                        description = it.fldDescription,
-                        imageUrl = it.fldImage
-                    )
-                } ?: emptyList()
-
+            ) { forums ->
                 _uiState.update {
                     it.copy(
                         screenState = LoadState.Success(Unit),
@@ -61,46 +52,18 @@ class ForumViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
 
-            // Obtenemos los detalles del foro para asegurar que tenemos la info actualizada (título, imagen, etc)
-            val forumResponse = forumUseCase.getForumsById(id)
-            var currentRoom = _uiState.value.forums.find { it.id == id }
-
-            asyncResponseHelper(forumResponse) { data ->
-                data?.firstOrNull()?.let {
-                    currentRoom = Topic(
-                        id = it.idForum,
-                        title = it.fldTitle,
-                        description = it.fldDescription,
-                        imageUrl = it.fldImage
-                    )
-                }
-            }
-
-            // Cargamos los temas (posts) del foro
-            val topicsResponse = forumUseCase.getTopics(pageNumber = 1, idForum = id)
+            val response = forumUseCase.getRoomWithPosts(id)
             asyncResponseHelper(
-                topicsResponse,
+                response,
                 onError = {
                     _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar temas")) }
                 }
-            ) { data ->
-                val posts = data?.results?.map {
-                    Post(
-                        id = it.idTopic,
-                        title = it.fldTitle,
-                        description = it.fldDescription,
-                        imageUrl = it.fldImage,
-                        author = it.fldUserName,
-                        numComments = it.fldMessages,
-                        idUser = it.idUser,
-                        time = it.fldRegistrationDate // Podrías formatear esta fecha si es necesario
-                    )
-                } ?: emptyList()
-
+            ) { result ->
+                val (currentRoom, posts) = result
                 _uiState.update {
                     it.copy(
                         screenState = LoadState.Success(Unit),
-                        selectedRoom = currentRoom,
+                        selectedRoom = currentRoom ?: it.forums.find { f -> f.id == id },
                         posts = posts,
                         filteredPosts = posts
                     )
@@ -113,30 +76,14 @@ class ForumViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
 
-            // Buscamos el post en la lista actual o lo recuperamos de algún sitio si es necesario
-            // Por ahora asumimos que viene de la lista de posts previa.
             val post = _uiState.value.posts.find { it.id == topicId }
-
             val response = forumUseCase.getTopicMessages(topicId)
             asyncResponseHelper(
                 response,
                 onError = {
                     _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar comentarios")) }
                 }
-            ) { data ->
-                val comments = data?.map {
-                    Comment(
-                        id = it.idTopicMessages,
-                        title = it.fldUserName,
-                        description = it.fldMessage,
-                        imageUrl = it.fldImage,
-                        likes = it.fldLike,
-                        isSaved = false, // Ajustar si hay endpoint de likes/saved
-                        firstInitial = it.fldUserName.take(1).uppercase(),
-                        secondInitial = ""
-                    )
-                } ?: emptyList()
-
+            ) { comments ->
                 _uiState.update {
                     it.copy(
                         screenState = LoadState.Success(Unit),
@@ -236,7 +183,7 @@ class ForumViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
 
-            val response = forumUseCase.crudCommit(
+            val response = forumUseCase.crudComment(
                 idTopic = topicId,
                 message = commentText,
                 registrationDate = getCurrentDate(),

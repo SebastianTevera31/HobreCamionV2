@@ -169,6 +169,7 @@ fun NavGraphBuilder.forumsGraph(
                     backStackEntry
                 }
             }
+
             val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val args = backStackEntry.toRoute<PostsTopics>()
             val state by viewModel.uiState.collectAsState()

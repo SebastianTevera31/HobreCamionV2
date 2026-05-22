@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ fun PostCard(
     time: String = "",
     numComments: Int = 0,
     imageUrl: String = "",
+    color: Color,
     isPost: Boolean = false,
     showOptions: Boolean = false,
     hidePostInfo: Boolean = false,
@@ -74,14 +76,14 @@ fun PostCard(
                     modifier = Modifier
                         .size(60.dp)
                         .clip(RoundedCornerShape(Dimens.PaddingMedium))
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(color)
                 ) {
                     if (imageUrl.isNotEmpty()) {
                         AsyncImage(
                             model = imageUrl,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            contentScale = ContentScale.Crop
                         )
                     } else {
                         Icon(
@@ -94,7 +96,7 @@ fun PostCard(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
 
                 BlogContent(
@@ -128,7 +130,8 @@ fun PostCard(
                 HorizontalDivider(thickness = 1.dp)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
@@ -149,23 +152,34 @@ fun PostCard(
                         Spacer(modifier = Modifier.padding(Dimens.PaddingExtraSmall))
                         Text(
                             text = author,
-                            style = MaterialTheme.typography.bodyMedium.copy(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
                             ),
                             maxLines = 1
                         )
-                        Text(text = " · $time", color = Color.DarkGray)
+                        Text(
+                            text = " · $time",
+                            color = Color.DarkGray,
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            Dimens.PaddingExtraSmall,
+                            Alignment.CenterHorizontally
+                        ),
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Comment,
-                            contentDescription = null
+                            contentDescription = null,
+                            modifier = Modifier.size(Dimens.PaddingMedium)
                         )
-                        Text(text = numComments.toString())
+                        Text(
+                            text = numComments.toString(),
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
@@ -188,7 +202,8 @@ private fun PostCardPreview() {
             isPost = true,
             showOptions = true,
             onNav = {},
-            onReport = {}
+            onReport = {},
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -202,7 +217,8 @@ private fun PostCardForumPreview() {
             content = "Este es un contenido de ejemplo para una entrada del foro que no es una publicación completa.",
             isPost = false,
             onNav = {},
-            onReport = {}
+            onReport = {},
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }

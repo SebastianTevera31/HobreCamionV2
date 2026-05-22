@@ -105,7 +105,8 @@ fun ReplyScreenPreview() {
         likes = 0,
         firstInitial = "J",
         secondInitial = "P",
-        isSaved = false
+        isSaved = false,
+        time = "Hace 2 dias",
     )
     HombreCamionTheme {
         ReplyScreen(

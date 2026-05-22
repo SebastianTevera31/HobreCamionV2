@@ -98,7 +98,8 @@ fun TopicScreenPreview() {
         author = "Juan Pérez",
         numComments = 15,
         time = "hace 3 horas",
-        idUser = 1
+        idUser = 1,
+        color = MaterialTheme.colorScheme.primary
     )
 
     val sampleComments = listOf(
@@ -110,7 +111,8 @@ fun TopicScreenPreview() {
             likes = 10,
             firstInitial = "A",
             secondInitial = "",
-            isSaved = true
+            isSaved = true,
+            time = ""
         ),
         Comment(
             id = 1,
@@ -120,7 +122,8 @@ fun TopicScreenPreview() {
             likes = 5,
             firstInitial = "C",
             secondInitial = "R",
-            isSaved = false
+            isSaved = false,
+            time = ""
         ),
         Comment(
             id = 3,
@@ -130,7 +133,8 @@ fun TopicScreenPreview() {
             likes = 8,
             firstInitial = "A",
             secondInitial = "M",
-            isSaved = true
+            isSaved = true,
+            time = ""
         )
     )
 

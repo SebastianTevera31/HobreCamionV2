@@ -67,6 +67,7 @@ object Commons {
         val sdf = SimpleDateFormat(initialFormat, Locale.getDefault())
         val date = sdf.parse(date)!!
         val outDate = SimpleDateFormat(convertFormat, Locale.getDefault())
+        
         return outDate.format(date)
     }
 
@@ -95,5 +96,32 @@ object Commons {
         val localHour = LocalTime.parse(hora.chunked(2).joinToString(":"))
         val horaFinal = LocalDateTime.of(localDate, localHour)
         return horaFinal.atZone(ZoneId.of("UTC"))
+    }
+
+    fun getRelativeTime(dateString: String, pattern: String = "yyyy-MM-dd'T'HH:mm:ss"): String {
+        return try {
+            val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+            val date = sdf.parse(dateString) ?: return dateString
+            val now = System.currentTimeMillis()
+            val diff = now - date.time
+
+            val seconds = diff / 1000
+            val minutes = seconds / 60
+            val hours = minutes / 60
+            val days = hours / 24
+            val months = days / 30
+            val years = days / 365
+
+            when {
+                seconds < 60 -> "ahora"
+                minutes < 60 -> "${minutes}min"
+                hours < 24 -> "${hours}h"
+                days < 30 -> "${days}d"
+                months < 12 -> "${months} meses"
+                else -> "${years} y"
+            }
+        } catch (e: Exception) {
+            dateString
+        }
     }
 }

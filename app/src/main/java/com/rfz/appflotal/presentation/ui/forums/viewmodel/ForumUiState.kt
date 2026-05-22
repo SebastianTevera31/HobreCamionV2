@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.forums.viewmodel
 
+import androidx.compose.ui.graphics.Color
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
@@ -33,6 +34,7 @@ data class Comment(
     override val title: String,
     override val description: String,
     override val imageUrl: String,
+    val time: String,
     val likes: Int,
     val isSaved: Boolean,
     val firstInitial: String,
@@ -47,7 +49,8 @@ data class Post(
     val author: String,
     val numComments: Int,
     val time: String,
-    val idUser: Int
+    val idUser: Int,
+    val color: Color
 ) : ForumRecord
 
 data class Topic(

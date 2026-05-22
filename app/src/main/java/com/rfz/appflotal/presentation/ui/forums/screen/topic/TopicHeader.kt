@@ -95,7 +95,7 @@ fun TopicHeader(
                     )
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        style = MaterialTheme.typography.titleSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -106,7 +106,7 @@ fun TopicHeader(
             }
             Text(
                 text = content,
-                style = MaterialTheme.typography.bodyLarge.copy(Color.DarkGray)
+                style = MaterialTheme.typography.bodySmall.copy(Color.DarkGray)
             )
 
             Row(
