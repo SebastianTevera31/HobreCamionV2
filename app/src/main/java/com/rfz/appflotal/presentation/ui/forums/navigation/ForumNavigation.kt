@@ -104,6 +104,7 @@ fun NavGraphBuilder.forumsGraph(
             val state by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
+                viewModel.clearFilterSearch()
                 viewModel.getForums()
             }
 
@@ -175,6 +176,7 @@ fun NavGraphBuilder.forumsGraph(
             val state by viewModel.uiState.collectAsState()
 
             LaunchedEffect(args.roomId) {
+                viewModel.clearFilterSearch()
                 viewModel.loadPostsByRoom(args.roomId)
             }
 
@@ -344,7 +346,7 @@ fun NavGraphBuilder.forumsGraph(
                                 onReply = { comment ->
                                     navController.navigate(NewCommentNav(commentId = comment.id))
                                 },
-                                onSave = {id, isPost -> viewModel.doLike(id, isPost)},
+                                onSave = { id, isPost -> viewModel.doLike(id, isPost) },
                                 onReport = { postId, type ->
                                     navController.navigate(
                                         ReportPost(

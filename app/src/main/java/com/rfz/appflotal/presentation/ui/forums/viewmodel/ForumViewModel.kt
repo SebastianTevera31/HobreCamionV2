@@ -134,7 +134,8 @@ class ForumViewModel @Inject constructor(
         _uiState.update { currentUiState ->
             currentUiState.copy(
                 filteredPosts = currentUiState.posts,
-                filteredForums = currentUiState.forums
+                filteredForums = currentUiState.forums,
+                searchQuery = ""
             )
         }
     }

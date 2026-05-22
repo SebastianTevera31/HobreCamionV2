@@ -70,29 +70,29 @@ fun BottomCommentField(
                 .fillMaxWidth()
                 .padding(Dimens.PaddingSmall)
         ) {
-            IconButton(
-                onClick = onAddImage,
-                enabled = selectedImage == null, // Opcional: deshabilitar si ya hay una imagen
-                modifier = Modifier
-                    .shadow(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(Dimens.PaddingSmall)
-                    )
-                    .size(48.dp),
-                shape = RoundedCornerShape(Dimens.PaddingSmall),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (selectedImage == null)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.outline
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Image,
-                    contentDescription = "Add image",
-                    tint = Color.White
-                )
-            }
+//            IconButton(
+//                onClick = onAddImage,
+//                enabled = selectedImage == null, // Opcional: deshabilitar si ya hay una imagen
+//                modifier = Modifier
+//                    .shadow(
+//                        elevation = 4.dp,
+//                        shape = RoundedCornerShape(Dimens.PaddingSmall)
+//                    )
+//                    .size(48.dp),
+//                shape = RoundedCornerShape(Dimens.PaddingSmall),
+//                colors = IconButtonDefaults.iconButtonColors(
+//                    containerColor = if (selectedImage == null)
+//                        MaterialTheme.colorScheme.primary
+//                    else
+//                        MaterialTheme.colorScheme.outline
+//                )
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Default.Image,
+//                    contentDescription = "Add image",
+//                    tint = Color.White
+//                )
+//            }
 
             OutlinedTextField(
                 value = comment,
