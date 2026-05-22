@@ -150,8 +150,18 @@ class ForumViewModel @Inject constructor(
 
     }
 
-    fun onSearchChanged(query: String) {
-
+    fun onSearchChanged(query: String, screenType: ForumScreenType) {
+        val list = if (screenType == ForumScreenType.TOPIC) {
+            _uiState.value.posts.filter {
+                it.description.equals(query, ignoreCase = true) ||
+                        it.author.equals(query, ignoreCase = true)
+            }
+        } else emptyList()
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                filteredPosts = list
+            )
+        }
     }
 
     fun sendComment(commentText: String) {

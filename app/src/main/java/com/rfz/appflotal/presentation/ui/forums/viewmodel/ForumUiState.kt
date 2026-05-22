@@ -7,6 +7,8 @@ data class ForumUiState(
     val screenState: LoadState<Unit> = LoadState.Idle,
     val forums: List<Topic> = emptyList(),
     val posts: List<Post> = emptyList(),
+    val filteredPosts: List<Post> = emptyList(),
+    val filteredForums: List<Topic> = emptyList(),
     val selectedPost: Post? = null,
     val selectedRoom: Topic? = null,
     val comments: List<Comment> = emptyList(),
@@ -53,6 +55,10 @@ data class Topic(
     override val description: String,
     override val imageUrl: String
 ) : ForumRecord
+
+enum class ForumScreenType {
+    TOPIC, POST, COMMENT
+}
 
 interface ForumRecord : CatalogItem {
     override val id: Int

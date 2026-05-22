@@ -69,7 +69,8 @@ fun PostsScreenPreview() {
             imageUrl = "",
             author = "Autor 1",
             numComments = 5,
-            time = "hace 2 horas"
+            time = "hace 2 horas",
+            idUser = 1
         ),
         Post(
             id = 2,
@@ -78,7 +79,8 @@ fun PostsScreenPreview() {
             imageUrl = "",
             author = "Autor 2",
             numComments = 10,
-            time = "hace 5 horas"
+            time = "hace 5 horas",
+            idUser = 2
         ),
         Post(
             id = 3,
@@ -87,10 +89,11 @@ fun PostsScreenPreview() {
             imageUrl = "",
             author = "Autor 3",
             numComments = 0,
-            time = "hace 1 día"
+            time = "hace 1 día",
+            idUser = 3
         )
     )
     HombreCamionTheme {
-        PostsScreen(posts = samplePosts, onPostClick = {}, onReport = {_, _ ->})
+        PostsScreen(posts = samplePosts, onPostClick = {}, onReport = { _, _ -> })
     }
 }
