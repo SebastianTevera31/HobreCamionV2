@@ -397,6 +397,23 @@ fun NavGraphBuilder.forumsGraph(
             } else uiState.value.comments.find { it.id == args.idPost }
 
             val forumNotFoundMsg = stringResource(R.string.forum_post_not_found)
+            val reportSuccessMsg = stringResource(R.string.forum_report_success)
+
+            LaunchedEffect(uiState.value.reportState) {
+                when (val reportState = uiState.value.reportState) {
+                    is LoadState.Success -> {
+                        Toast.makeText(context, reportSuccessMsg, Toast.LENGTH_SHORT).show()
+                        navController.popBackStack()
+                        viewModel.resetReportState()
+                    }
+                    is LoadState.Error -> {
+                        Toast.makeText(context, reportState.message, Toast.LENGTH_SHORT).show()
+                        viewModel.resetReportState()
+                    }
+                    else -> {}
+                }
+            }
+
             if (message == null) {
                 Toast.makeText(context, forumNotFoundMsg, Toast.LENGTH_LONG).show()
                 navController.popBackStack()
@@ -419,7 +436,6 @@ fun NavGraphBuilder.forumsGraph(
                                 reportTypeId = reportTypeId,
                                 details = details
                             )
-                            navController.popBackStack()
                         },
                         comment = message
                     )

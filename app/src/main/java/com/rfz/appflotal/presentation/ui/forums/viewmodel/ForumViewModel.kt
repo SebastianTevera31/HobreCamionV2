@@ -225,9 +225,13 @@ class ForumViewModel @Inject constructor(
         _uiState.update { it.copy(newTopicState = LoadState.Idle) }
     }
 
+    fun resetReportState() {
+        _uiState.update { it.copy(reportState = LoadState.Idle) }
+    }
+
     fun sendReport(id: Int, isPost: Boolean, reportTypeId: Int, details: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(screenState = LoadState.Loading) }
+            _uiState.update { it.copy(reportState = LoadState.Loading) }
 
             val response = forumUseCase.createReport(
                 idTopic = if (isPost) id else 0,
@@ -239,10 +243,10 @@ class ForumViewModel @Inject constructor(
             asyncResponseHelper(
                 response,
                 onError = {
-                    _uiState.update { it.copy(screenState = LoadState.Error("Error al enviar reporte")) }
+                    _uiState.update { it.copy(reportState = LoadState.Error("Error al enviar reporte")) }
                 }
             ) {
-                _uiState.update { it.copy(screenState = LoadState.Success(Unit)) }
+                _uiState.update { it.copy(reportState = LoadState.Success(Unit)) }
             }
         }
     }
