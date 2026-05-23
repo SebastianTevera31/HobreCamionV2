@@ -6,5 +6,4 @@ import javax.inject.Inject
 class LocalForumDataSource @Inject constructor(private val forumDao: ForumDao) {
 
 
-
 }

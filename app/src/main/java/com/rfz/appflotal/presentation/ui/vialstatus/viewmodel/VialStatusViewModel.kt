@@ -12,6 +12,7 @@ import com.rfz.appflotal.data.repository.location.LocationRepository
 import com.rfz.appflotal.data.repository.vialstatus.VialStatusRepository
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -45,145 +46,136 @@ class VialStatusViewModel @Inject constructor(
     private var _uiState = MutableStateFlow(VialUiStatus())
     val uiState = _uiState.asStateFlow()
 
-    @SuppressLint("MissingPermission")
-    fun getCurrentLocation() = viewModelScope.launch {
+    private var currentJob: Job? = null
 
-        val currentLocale = appLocal.currentLocale.value
+    init {
+        observeLocale()
+    }
 
-        val mappedCountries = mapCountries.map {
-            if (currentLocale.language == Locale.ENGLISH.language) {
-                it.copy(description = it.enDescription)
-            } else it
-        }
-
-        _uiState.update {
-            it.copy(
-                countries = mappedCountries,
-                mapUrl = "",
-                currentLanguage = currentLocale
-            )
-        }
-
-        val result = locationRepository.getLastLocation()
-        if (result != null) {
-            val currentCountry = _uiState.value.countries.find { result.pais == it.enDescription }
-
-            if (currentCountry != null) {
-                // Seleccionamos el país y cargamos sus estados
+    private fun observeLocale() {
+        viewModelScope.launch {
+            appLocal.currentLocale.collect { locale ->
+                val mappedCountries = mapCountries.map {
+                    if (locale.language == Locale.ENGLISH.language) {
+                        it.copy(description = it.enDescription)
+                    } else it
+                }
                 _uiState.update {
                     it.copy(
-                        selectedCountry = currentCountry,
-                        gettingStatesStatus = LoadState.Loading
+                        countries = mappedCountries,
+                        currentLanguage = locale
                     )
-                }
-
-                vialStatusRepository.getStates(currentCountry.id).onSuccess { statesList ->
-                    val mappedStates = statesList.map {
-                        Catalog(
-                            id = it.idState,
-                            description = it.stateName,
-                            enDescription = it.stateName
-                        )
-                    }
-                    val currentState = mappedStates.find { result.estado == it.enDescription }
-
-                    _uiState.update {
-                        it.copy(
-                            states = mappedStates,
-                            selectedState = currentState,
-                            gettingStatesStatus = LoadState.Success(Unit)
-                        )
-                    }
-                }.onFailure {
-                    _uiState.update { it.copy(gettingStatesStatus = LoadState.Error("")) }
                 }
             }
         }
     }
 
-    fun changeState(stateId: Int) {
-        val selectedState = _uiState.value.states.find { stateId == it.id }
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
-                selectedState = selectedState
+    fun cancelOperation() {
+        currentJob?.cancel()
+        _uiState.update {
+            it.copy(
+                mapUrl = "",
+                gettingStatesStatus = if (it.gettingStatesStatus is LoadState.Loading) LoadState.Cancelled else it.gettingStatesStatus,
+                gettingMapStatus = if (it.gettingMapStatus is LoadState.Loading) LoadState.Cancelled else it.gettingMapStatus
             )
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun getCurrentLocation() {
+        currentJob?.cancel()
+        currentJob = viewModelScope.launch {
+            _uiState.update { 
+                it.copy(
+                    mapUrl = "", 
+                    gettingStatesStatus = LoadState.Loading,
+                    gettingMapStatus = LoadState.Idle
+                ) 
+            }
+
+            val result = locationRepository.getLastLocation() ?: run {
+                _uiState.update { it.copy(gettingStatesStatus = LoadState.Idle) }
+                return@launch
+            }
+
+            val currentCountry = _uiState.value.countries.find { result.pais == it.enDescription }
+
+            if (currentCountry != null) {
+                _uiState.update { it.copy(selectedCountry = currentCountry) }
+                fetchStates(currentCountry.id, result.estado)
+            }
         }
     }
 
     fun changeCountry(countryId: Int) {
         val selectedCountry = _uiState.value.countries.find { countryId == it.id } ?: return
 
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
+        _uiState.update {
+            it.copy(
                 selectedCountry = selectedCountry,
                 selectedState = null,
                 states = emptyList(),
-                gettingStatesStatus = LoadState.Loading
+                mapUrl = ""
             )
         }
-
-        viewModelScope.launch {
-            vialStatusRepository.getStates(selectedCountry.id).onSuccess { statesList ->
-                val mappedStates = statesList.map { it.toDomain() }
-                updateLoadState(LoadState.Success(Unit)) {
-                    copy(states = mappedStates, gettingStatesStatus = it)
-                }
-            }.onFailure {
-                updateLoadState(LoadState.Error("")) { copy(gettingStatesStatus = it) }
-            }
+        currentJob?.cancel()
+        currentJob = viewModelScope.launch {
+            fetchStates(selectedCountry.id)
         }
+    }
+
+    private suspend fun fetchStates(countryId: Int, stateToMatch: String? = null) {
+        _uiState.update { it.copy(gettingStatesStatus = LoadState.Loading) }
+
+        vialStatusRepository.getStates(countryId).onSuccess { statesList ->
+            val mappedStates = statesList.map { it.toDomain() }
+            val currentState = stateToMatch?.let { name ->
+                mappedStates.find { it.enDescription == name }
+            }
+
+            _uiState.update {
+                it.copy(
+                    states = mappedStates,
+                    selectedState = currentState ?: it.selectedState,
+                    gettingStatesStatus = LoadState.Success(Unit)
+                )
+            }
+        }.onFailure {
+            _uiState.update { it.copy(gettingStatesStatus = LoadState.Error("")) }
+        }
+    }
+
+    fun changeState(stateId: Int) {
+        val selectedState = _uiState.value.states.find { stateId == it.id }
+        _uiState.update { it.copy(selectedState = selectedState) }
     }
 
     fun getMap() {
         val state = _uiState.value.selectedState ?: return
-        updateLoadState(LoadState.Loading) {
-            copy(
-                gettingMapStatus = it,
-                mapUrl = ""
-            )
-        }
 
-        viewModelScope.launch {
+        _uiState.update { it.copy(gettingMapStatus = LoadState.Loading, mapUrl = "") }
+
+        currentJob?.cancel()
+        currentJob = viewModelScope.launch {
             vialStatusRepository.getMapByState(state.id).onSuccess { result ->
                 if (result.isEmpty()) {
-                    updateLoadState(LoadState.Error(VialError.EMPTY_MAP.name)) {
-                        copy(gettingMapStatus = it)
-                    }
+                    _uiState.update { it.copy(gettingMapStatus = LoadState.Error(VialError.EMPTY_MAP.name)) }
                     return@onSuccess
                 }
 
                 val link = result.first().link
-                updateLoadState(LoadState.Success(link)) {
-                    copy(mapUrl = link, gettingMapStatus = it)
-                }
+                _uiState.update { it.copy(mapUrl = link, gettingMapStatus = LoadState.Success(link)) }
             }.onFailure {
-                updateLoadState(LoadState.Error(VialError.SERVER_ERROR.name)) {
-                    copy(gettingMapStatus = it)
-                }
+                _uiState.update { it.copy(gettingMapStatus = LoadState.Error(VialError.SERVER_ERROR.name)) }
             }
         }
     }
 
     fun reduceScale() {
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
-                initScale = (_uiState.value.initScale - 0.05).coerceAtLeast(0.1)
-            )
-        }
+        _uiState.update { it.copy(initScale = (it.initScale - 0.05).coerceAtLeast(0.1)) }
     }
 
     fun increaseScale() {
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
-                initScale = (_uiState.value.initScale + 0.05).coerceAtMost(5.0)
-            )
-        }
-    }
-
-    fun <T> updateLoadState(
-        status: LoadState<T>,
-        updateBlock: VialUiStatus.(LoadState<T>) -> VialUiStatus
-    ) {
-        _uiState.update { it.updateBlock(status) }
+        _uiState.update { it.copy(initScale = (it.initScale + 0.05).coerceAtMost(5.0)) }
     }
 }

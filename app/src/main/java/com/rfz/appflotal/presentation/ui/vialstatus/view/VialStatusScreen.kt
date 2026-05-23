@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -16,14 +17,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +38,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -44,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,7 +67,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
 import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialUiStatus
@@ -84,7 +92,9 @@ fun VialStatusScreen(
         onStateChange = viewModel::changeState,
         onSearch = viewModel::getMap,
         onReduceScale = viewModel::reduceScale,
-        onIncreaseScale = viewModel::increaseScale
+        onIncreaseScale = viewModel::increaseScale,
+        onCancel = viewModel::cancelOperation,
+        onRetryLocation = viewModel::getCurrentLocation
     )
 }
 
@@ -100,6 +110,8 @@ fun VialStatusView(
     onSearch: () -> Unit,
     onReduceScale: () -> Unit,
     onIncreaseScale: () -> Unit,
+    onCancel: () -> Unit,
+    onRetryLocation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showVialSearch by rememberSaveable { mutableStateOf(false) }
@@ -111,6 +123,10 @@ fun VialStatusView(
     val isLoading =
         uiState.gettingMapStatus is LoadState.Loading ||
                 uiState.gettingStatesStatus is LoadState.Loading
+
+    val isCancelled =
+        uiState.gettingMapStatus is LoadState.Cancelled ||
+                uiState.gettingStatesStatus is LoadState.Cancelled
 
     Scaffold(
         modifier = modifier,
@@ -174,20 +190,35 @@ fun VialStatusView(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            if (uiState.mapUrl.isNotBlank()) {
-                VialStatusWebView(
-                    url = uiState.mapUrl,
-                    initScale = uiState.initScale,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                EmptyMapState(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+            when {
+                uiState.mapUrl.isNotBlank() -> {
+                    VialStatusWebView(
+                        url = uiState.mapUrl,
+                        initScale = uiState.initScale,
+                        onCancel = onCancel,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                isCancelled -> {
+                    StatusMessageState(
+                        imageVector = Icons.Default.Info,
+                        message = stringResource(R.string.operacion_cancelada),
+                        buttonText = stringResource(R.string.reintentar),
+                        onButtonClick = onRetryLocation,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
+                else -> {
+                    EmptyMapState(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
 
             if (isLoading) {
-                LoadingDialog()
+                CancellableLoadingDialog(onCancel = onCancel)
             }
 
             if (uiState.mapUrl.isNotBlank()) {
@@ -244,6 +275,87 @@ fun VialStatusView(
 }
 
 @Composable
+fun CancellableLoadingDialog(
+    onCancel: () -> Unit,
+    @StringRes message: Int = R.string.espere_un_momento
+) {
+    AlertDialog(
+        onDismissRequest = { },
+        title = {},
+        text = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp),
+                    strokeWidth = 4.dp
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = stringResource(message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onCancel) {
+                Text(stringResource(R.string.cancelar))
+            }
+        },
+        shape = RoundedCornerShape(16.dp),
+        containerColor = MaterialTheme.colorScheme.surface
+    )
+}
+
+@Composable
+private fun StatusMessageState(
+    imageVector: ImageVector,
+    message: String,
+    modifier: Modifier = Modifier,
+    buttonText: String? = null,
+    onButtonClick: (() -> Unit)? = null
+) {
+    Column(
+        modifier = modifier.padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(48.dp)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = message,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        if (buttonText != null && onButtonClick != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onButtonClick,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = buttonText)
+            }
+        }
+    }
+}
+
+@Composable
 private fun EmptyMapState(
     modifier: Modifier = Modifier
 ) {
@@ -275,6 +387,7 @@ private fun EmptyMapState(
 fun VialStatusWebView(
     url: String,
     initScale: Double,
+    onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var webView by remember { mutableStateOf<WebView?>(null) }
@@ -381,7 +494,11 @@ fun VialStatusWebView(
         )
 
         if (isLoadingPage) {
-            LoadingDialog()
+            CancellableLoadingDialog(onCancel = {
+                isLoadingPage = false
+                webView?.stopLoading()
+                onCancel()
+            })
         }
     }
 
@@ -439,6 +556,26 @@ private fun PreviewZoomButton(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
+fun VialStatusCancelledPreview() {
+    HombreCamionTheme {
+        VialStatusView(
+            uiState = VialUiStatus(
+                gettingMapStatus = LoadState.Cancelled
+            ),
+            onBack = {},
+            onCountryChange = {},
+            onStateChange = {},
+            onSearch = {},
+            onReduceScale = {},
+            onIncreaseScale = {},
+            onCancel = {},
+            onRetryLocation = {}
+        )
+    }
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
 fun VialStatusScreenPreview() {
     HombreCamionTheme {
         VialStatusView(
@@ -448,7 +585,9 @@ fun VialStatusScreenPreview() {
             onStateChange = {},
             onSearch = {},
             onReduceScale = {},
-            onIncreaseScale = {}
+            onIncreaseScale = {},
+            onCancel = {},
+            onRetryLocation = {}
         )
     }
 }
@@ -465,7 +604,9 @@ fun VialStatusWithMenuPreview() {
                 onStateChange = {},
                 onSearch = {},
                 onReduceScale = {},
-                onIncreaseScale = {}
+                onIncreaseScale = {},
+                onCancel = {},
+                onRetryLocation = {}
             )
             // Force the menu to be visible for validation
             VialLocationMenu(
