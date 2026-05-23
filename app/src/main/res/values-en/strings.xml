@@ -439,6 +439,7 @@
     <string name="forum_report_details_label">Additional details (optional)</string>
     <string name="forum_report_details_placeholder">Describe the problem...</string>
     <string name="forum_report_send_button">Send Report</string>
+    <string name="forum_report_success">Report sent successfully</string>
 
     <string name="forum_report_type_inappropriate">Inappropriate content</string>
     <string name="forum_report_type_harassment">Harassment</string>
@@ -446,4 +447,22 @@
     <string name="forum_report_type_nudity">Nudity</string>
     <string name="forum_report_type_hate_speech">Hate speech</string>
     <string name="forum_report_type_spam">Spam</string>
+
+    <string name="forum_cancel_publication">Cancel publication</string>
+    <string name="forum_publishing">Publishing…</string>
+    <string name="forum_new_topic_success">Topic published successfully</string>
+    <string name="forum_new_comment_success">Comment sent successfully</string>
+    <string name="forum_comment_placeholder">Write a comment…</string>
+    <string name="forum_title_label">Title</string>
+    <string name="forum_title_placeholder">Enter title…</string>
+    <string name="forum_select_color">Select a color</string>
+    <string name="forum_tags_label">Tags</string>
+    <string name="forum_new_tag_placeholder">New tag</string>
+    <string name="forum_add_tag_desc">Add tag</string>
+    <string name="forum_message_label">Message</string>
+    <string name="forum_message_placeholder">Write content here…</string>
+    <string name="forum_publish_topic_button">Publish Topic</string>
+    <string name="forum_just_now">Just now</string>
+    <string name="forum_me">Me</string>
+    <string name="responder">Reply</string>
 </resources>

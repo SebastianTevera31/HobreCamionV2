@@ -25,9 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
@@ -148,7 +150,7 @@ fun CommentCard(
                                 modifier = Modifier.size(18.dp)
                             )
                             Text(
-                                text = "Responder",
+                                text = stringResource(R.string.responder),
                                 style = MaterialTheme.typography.labelMedium
                             )
                         }

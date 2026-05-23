@@ -423,6 +423,7 @@
     <string name="forum_report_details_label">Detalles adicionales (opcional)</string>
     <string name="forum_report_details_placeholder">Describe el problema...</string>
     <string name="forum_report_send_button">Enviar Reporte</string>
+    <string name="forum_report_success">Reporte enviado con éxito</string>
 
     <string name="forum_report_type_inappropriate">Contenido inapropiado</string>
     <string name="forum_report_type_harassment">Acoso</string>
@@ -430,4 +431,22 @@
     <string name="forum_report_type_nudity">Desnudez</string>
     <string name="forum_report_type_hate_speech">Discurso de odio</string>
     <string name="forum_report_type_spam">Spam</string>
+
+    <string name="forum_cancel_publication">Cancelar publicación</string>
+    <string name="forum_publishing">Publicando…</string>
+    <string name="forum_new_topic_success">Tema publicado con éxito</string>
+    <string name="forum_new_comment_success">Comentario enviado con éxito</string>
+    <string name="forum_comment_placeholder">Escribe un comentario…</string>
+    <string name="forum_title_label">Título</string>
+    <string name="forum_title_placeholder">Introduce el título…</string>
+    <string name="forum_select_color">Selecciona un color</string>
+    <string name="forum_tags_label">Etiquetas</string>
+    <string name="forum_new_tag_placeholder">Nueva etiqueta</string>
+    <string name="forum_add_tag_desc">Agregar tag</string>
+    <string name="forum_message_label">Mensaje</string>
+    <string name="forum_message_placeholder">Escribe el contenido aquí…</string>
+    <string name="forum_publish_topic_button">Publicar Tema</string>
+    <string name="forum_just_now">Recién publicado</string>
+    <string name="forum_me">Yo</string>
+    <string name="responder">Responder</string>
 </resources>
