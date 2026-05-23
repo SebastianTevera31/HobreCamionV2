@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
 import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
+import com.rfz.appflotal.data.model.forum.TopicResult
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -40,6 +41,12 @@ interface ForumClient {
         @Query("tittle") title: String = "",
         @Query("tipoOrdenamiento") tipoOrdenamiento: Int = 1
     ): Response<GetTopicsResponse>
+
+    @GET("api/Blog/GetTopicsByID")
+    suspend fun getTopicsById(
+        @Header("Authorization") token: String,
+        @Query("id_topic") idTopic: Int
+    ): Response<List<TopicResult>>
 
     @GET("api/Blog/GetTopicMessages")
     suspend fun getTopicMessages(

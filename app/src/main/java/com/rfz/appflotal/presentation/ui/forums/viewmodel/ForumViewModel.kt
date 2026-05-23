@@ -93,21 +93,28 @@ class ForumViewModel @Inject constructor(
     fun loadTopicMessages(topicId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
-
-            val topic = _uiState.value.topics.find { it.id == topicId }
+            val topicResponse = forumUseCase.getTopicById(topicId)
             val response = forumUseCase.getTopicMessages(topicId)
+
             asyncResponseHelper(
-                response,
+                topicResponse,
                 onError = {
                     _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar comentarios")) }
                 }
-            ) { comments ->
-                _uiState.update {
-                    it.copy(
-                        screenState = LoadState.Success(Unit),
-                        selectedTopic = topic,
-                        comments = comments
-                    )
+            ) { topic ->
+                asyncResponseHelper(
+                    response,
+                    onError = {
+                        _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar comentarios")) }
+                    }
+                ) { comments ->
+                    _uiState.update {
+                        it.copy(
+                            screenState = LoadState.Success(Unit),
+                            selectedTopic = topic,
+                            comments = comments
+                        )
+                    }
                 }
             }
         }

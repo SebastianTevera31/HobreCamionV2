@@ -54,6 +54,14 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
         }
     }
 
+    suspend fun getTopicById(idTopic: Int): ApiResult<Topic?> {
+        return when (val response = forumRepository.getTopicsById(idTopic)) {
+            is ApiResult.Success -> ApiResult.Success(response.data?.firstOrNull()?.toTopic())
+            is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
+            ApiResult.Loading -> ApiResult.Loading
+        }
+    }
+
     suspend fun getTopicMessages(idTopic: Int): ApiResult<List<Comment>> {
         return when (val response = forumRepository.getTopicMessages(idTopic)) {
             is ApiResult.Success -> ApiResult.Success(

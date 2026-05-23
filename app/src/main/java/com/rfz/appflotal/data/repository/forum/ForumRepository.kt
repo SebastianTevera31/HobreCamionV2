@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
 import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
+import com.rfz.appflotal.data.model.forum.TopicResult
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.forum.ForumService
@@ -34,6 +35,10 @@ class ForumRepository @Inject constructor(
         tipoOrdenamiento: Int = 1
     ): ApiResult<GetTopicsResponse?> {
         return forumService.getTopics(pageNumber, idForum, title, tipoOrdenamiento)
+    }
+
+    suspend fun getTopicsById(idTopic: Int): ApiResult<List<TopicResult>?> {
+        return forumService.getTopicsById(idTopic)
     }
 
     suspend fun getTopicMessages(idTopic: Int): ApiResult<List<TopicMessageResult>?> {

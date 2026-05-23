@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
 import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
+import com.rfz.appflotal.data.model.forum.TopicResult
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.client.forum.ForumClient
 import com.rfz.appflotal.data.network.requestHelper
@@ -44,6 +45,13 @@ class ForumService @Inject constructor(
         return requestHelper("getTopics") {
             val token = getTasksUseCase().first()[0].fld_token
             forumClient.getTopics("bearer $token", pageNumber, idForum, title, tipoOrdenamiento)
+        }
+    }
+
+    suspend fun getTopicsById(idTopic: Int): ApiResult<List<TopicResult>?> {
+        return requestHelper("getTopicsById") {
+            val token = getTasksUseCase().first()[0].fld_token
+            forumClient.getTopicsById("bearer $token", idTopic)
         }
     }
 
