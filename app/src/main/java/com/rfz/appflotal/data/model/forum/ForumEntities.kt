@@ -81,3 +81,10 @@ data class LikedPostResult(
     @SerializedName("id_user") val idUser: Int,
     @SerializedName("likedDate") val likedDate: String
 )
+
+data class CreateReportRequest(
+    @SerializedName("id_topic") val idTopic: Int,
+    @SerializedName("id_message") val idMessage: Int,
+    @SerializedName("reportDate") val reportDate: String,
+    @SerializedName("id_typeReport") val idTypeReport: Int
+)

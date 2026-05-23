@@ -4,16 +4,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,30 +24,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
 
 data class ReportType(
     val id: Int,
-    val description: String
+    val descriptionRes: Int
 )
 
-val reportTypes = listOf(
-    ReportType(1, "Innapropiate Content"),
-    ReportType(2, "Harassment"),
-    ReportType(3, "Violence"),
-    ReportType(4, "Nudity"),
-    ReportType(5, "Hate speech"),
-    ReportType(6, "Spam")
+@Composable
+fun getReportTypes() = listOf(
+    ReportType(1, R.string.forum_report_type_inappropriate),
+    ReportType(2, R.string.forum_report_type_harassment),
+    ReportType(3, R.string.forum_report_type_violence),
+    ReportType(4, R.string.forum_report_type_nudity),
+    ReportType(5, R.string.forum_report_type_hate_speech),
+    ReportType(6, R.string.forum_report_type_spam)
 )
 
 @Composable
 fun ReportPostScreen(
+    comment: Comment,
     onSendReport: (reportTypeId: Int, details: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val reportTypes = getReportTypes()
     var selectedReportTypeId by remember { mutableIntStateOf(reportTypes.first().id) }
     var details by remember { mutableStateOf("") }
 
@@ -62,22 +67,42 @@ fun ReportPostScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
         ) {
-            Text(
-                text = "Reportar publicación",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Text(
-                text = "Selecciona el motivo del reporte:",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
             ) {
+                item {
+                    CommentCard(
+                        firstInitial = comment.firstInitial,
+                        user = comment.title,
+                        content = comment.description,
+                        imageUrl = comment.imageUrl,
+                        likes = comment.likes,
+                        isSaved = comment.isSaved,
+                        onReply = {},
+                        onSave = {},
+                        onSeeMore = {},
+                        showOptions = false,
+                        secondInitial = comment.secondInitial,
+                        time = comment.time
+                    )
+                    Spacer(modifier = Modifier.padding(Dimens.PaddingSmall))
+
+                    Text(
+                        text = stringResource(R.string.forum_report_post_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    Text(
+                        text = stringResource(R.string.forum_report_reason_label),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+
+                }
+
                 items(reportTypes) { reportType ->
                     Row(
                         modifier = Modifier
@@ -91,30 +116,32 @@ fun ReportPostScreen(
                             onClick = { selectedReportTypeId = reportType.id }
                         )
                         Text(
-                            text = reportType.description,
+                            text = stringResource(reportType.descriptionRes),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = Dimens.PaddingSmall),
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
-            }
 
-            OutlinedTextField(
-                value = details,
-                onValueChange = { details = it },
-                label = { Text("Detalles adicionales (opcional)") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 100.dp),
-                placeholder = { Text("Describe el problema...") }
-            )
+//                item {
+//                    OutlinedTextField(
+//                        value = details,
+//                        onValueChange = { details = it },
+//                        label = { Text(stringResource(R.string.forum_report_details_label)) },
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .heightIn(min = 100.dp),
+//                        placeholder = { Text(stringResource(R.string.forum_report_details_placeholder)) }
+//                    )
+//                }
+            }
 
             Button(
                 onClick = { onSendReport(selectedReportTypeId, details) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Enviar Reporte")
+                Text(stringResource(R.string.forum_report_send_button))
             }
         }
     }
@@ -126,7 +153,18 @@ fun ReportPostScreenPreview() {
     HombreCamionTheme {
         ReportPostScreen(
             onSendReport = { _, _ -> },
-            modifier = Modifier.safeContentPadding()
+            modifier = Modifier.safeContentPadding(),
+            comment = Comment(
+                id = 1,
+                title = "Juan Pérez",
+                description = "Este es un comentario de prueba para la pantalla de nuevo comentario.",
+                imageUrl = "",
+                likes = 0,
+                firstInitial = "J",
+                secondInitial = "P",
+                isSaved = false,
+                time = "Hace 2 dias",
+            )
         )
     }
 }

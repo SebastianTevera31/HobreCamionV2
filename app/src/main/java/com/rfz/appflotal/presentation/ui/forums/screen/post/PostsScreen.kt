@@ -50,7 +50,7 @@ fun PostsScreen(
                         time = post.time,
                         firstInitial = post.author.take(1).uppercase(),
                         secondInitial = "",
-                        onReport = { onReport(post.id, PostType.TOPIC) },
+                        onReport = { onReport(post.id, PostType.POST) },
                         color = post.color
                     )
                 }

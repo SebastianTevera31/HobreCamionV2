@@ -39,6 +39,20 @@ fun TopicResult.toPost(): Post {
     )
 }
 
+fun Post.toComment(): Comment {
+    return Comment(
+        id = this.id,
+        title = this.title,
+        description = this.description,
+        imageUrl = this.imageUrl,
+        time = this.time,
+        likes = 0,
+        isSaved = false,
+        firstInitial = "",
+        secondInitial = ""
+    )
+}
+
 fun TopicMessageResult.toComment(): Comment {
     return Comment(
         id = this.idTopicMessages,

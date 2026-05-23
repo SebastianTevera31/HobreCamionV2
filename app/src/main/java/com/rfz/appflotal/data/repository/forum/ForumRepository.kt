@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.repository.forum
 
+import com.rfz.appflotal.data.model.forum.CreateReportRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.DoLikeRequest
@@ -51,5 +52,9 @@ class ForumRepository @Inject constructor(
 
     suspend fun getLikedPosts(): ApiResult<List<LikedPostResult>?> {
         return forumService.getLikedPosts()
+    }
+
+    suspend fun createReport(request: CreateReportRequest): ApiResult<List<TpmsResponse>?> {
+        return forumService.createReport(request)
     }
 }

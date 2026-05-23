@@ -72,7 +72,7 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun loadTopicDetail(topicId: Int) {
+    fun loadPostNComments(topicId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
 
@@ -225,6 +225,28 @@ class ForumViewModel @Inject constructor(
         _uiState.update { it.copy(newTopicState = LoadState.Idle) }
     }
 
+    fun sendReport(id: Int, isPost: Boolean, reportTypeId: Int, details: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(screenState = LoadState.Loading) }
+
+            val response = forumUseCase.createReport(
+                idTopic = if (isPost) id else 0,
+                idMessage = if (!isPost) id else 0,
+                reportTypeId = reportTypeId,
+                reportDate = getCurrentDate()
+            )
+
+            asyncResponseHelper(
+                response,
+                onError = {
+                    _uiState.update { it.copy(screenState = LoadState.Error("Error al enviar reporte")) }
+                }
+            ) {
+                _uiState.update { it.copy(screenState = LoadState.Success(Unit)) }
+            }
+        }
+    }
+
     fun sendComment(commentText: String) {
         val topicId = _uiState.value.selectedPost?.id ?: return
         val capturedUri = (_uiState.value.photoEvidence as? CameraUiState.Captured)?.uri
@@ -246,7 +268,7 @@ class ForumViewModel @Inject constructor(
                 }
             ) {
                 // Recargar comentarios tras el éxito
-                loadTopicDetail(topicId)
+                loadPostNComments(topicId)
                 clearPhoto()
             }
         }

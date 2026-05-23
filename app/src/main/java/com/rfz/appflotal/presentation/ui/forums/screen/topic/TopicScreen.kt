@@ -47,7 +47,7 @@ fun TopicScreen(
                         title = topic.title,
                         content = topic.description,
                         imageUrl = topic.imageUrl,
-                        onReport = { onReport(topic.id, PostType.TOPIC) },
+                        onReport = { onReport(topic.id, PostType.POST) },
                         onSave = { onSave(topic.id, true) },
                         isSaved = false,
                         likes = 3,

@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.forums.navigation
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
@@ -29,7 +31,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.NavScreens
+import com.rfz.appflotal.data.mapper.toComment
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.ui.forums.components.ForumErrorView
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
@@ -72,7 +76,7 @@ data class TopicDetail(
 @Serializable
 data class ReportPost(
     val idPost: Int,
-    val type: Int
+    val isPost: Boolean
 )
 
 @Serializable
@@ -110,13 +114,13 @@ fun NavGraphBuilder.forumsGraph(
 
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
-                    title = "Foros",
-                    subtitle = "Comunidad Hombre Camión",
+                    title = stringResource(R.string.forum_title),
+                    subtitle = stringResource(R.string.forum_subtitle),
                     showBackButton = true,
                     showMenuButton = false,
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
-                        placeholder = "Buscar tema...",
+                        placeholder = stringResource(R.string.forum_search_placeholder),
                         onValueChange = {
                             viewModel.onSearchChanged(it, ForumScreenType.TOPIC)
                         }
@@ -183,12 +187,12 @@ fun NavGraphBuilder.forumsGraph(
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = args.roomTitle,
-                    subtitle = "Temas de la sala",
+                    subtitle = stringResource(R.string.forum_room_topics_subtitle),
                     showBackButton = true,
                     showMenuButton = false,
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
-                        placeholder = "Buscar temas...",
+                        placeholder = stringResource(R.string.forum_search_topics_placeholder),
                         onValueChange = {
                             viewModel.onSearchChanged(it, ForumScreenType.POST)
                         }
@@ -211,11 +215,11 @@ fun NavGraphBuilder.forumsGraph(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = "Add topic",
+                                contentDescription = stringResource(R.string.forum_add_topic_desc),
                                 tint = Color.White
                             )
                             Text(
-                                text = "Nuevo tema",
+                                text = stringResource(R.string.forum_new_topic_button),
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
@@ -247,7 +251,7 @@ fun NavGraphBuilder.forumsGraph(
                                 navController.navigate(
                                     ReportPost(
                                         idPost = roomId,
-                                        type = type.typeId
+                                        isPost = type.isPost
                                     )
                                 )
                             },
@@ -280,6 +284,7 @@ fun NavGraphBuilder.forumsGraph(
             val state by viewModel.uiState.collectAsState()
             val context = LocalContext.current
             var commentText by remember { mutableStateOf("") }
+            val errorMessage = stringResource(R.string.forum_capture_cancelled)
 
             val cameraLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.TakePicture()
@@ -287,19 +292,20 @@ fun NavGraphBuilder.forumsGraph(
                 if (success) {
                     viewModel.onPhotoCaptured()
                 } else {
-                    viewModel.onPhotoError("Captura cancelada")
+                    viewModel.onPhotoError(errorMessage)
                 }
             }
 
             LaunchedEffect(args.topicId) {
-                viewModel.loadTopicDetail(args.topicId.toInt())
+                viewModel.loadPostNComments(args.topicId.toInt())
             }
 
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = args.topicTitle,
-                    subtitle = state.selectedPost?.let { "${it.title} · ${it.numComments} respuestas" }
-                        ?: args.topicTitle,
+                    subtitle = state.selectedPost?.let {
+                        stringResource(R.string.forum_responses_format, it.title, it.numComments)
+                    } ?: args.topicTitle,
                     showBackButton = true,
                     showMenuButton = false,
                     searchConfig = null,
@@ -351,7 +357,7 @@ fun NavGraphBuilder.forumsGraph(
                                     navController.navigate(
                                         ReportPost(
                                             idPost = postId,
-                                            type = type.typeId
+                                            isPost = type.isPost
                                         )
                                     )
                                 },
@@ -362,7 +368,7 @@ fun NavGraphBuilder.forumsGraph(
 
                     is LoadState.Error -> {
                         ForumErrorView(
-                            onRetry = { viewModel.loadTopicDetail(args.topicId.toInt()) },
+                            onRetry = { viewModel.loadPostNComments(args.topicId.toInt()) },
                             modifier = Modifier.padding(paddingValues)
                         )
                     }
@@ -372,22 +378,52 @@ fun NavGraphBuilder.forumsGraph(
             }
         }
 
-        composable<ReportPost> { _ ->
-            ForumModuleScaffold(
-                topBarConfig = ForumTopBarConfig(
-                    title = "Reportar",
-                    subtitle = "Ayúdanos a mejorar la comunidad",
-                    showBackButton = true,
-                    showMenuButton = false,
-                    onBackClick = { navController.popBackStack() }
-                )
-            ) { paddingValues ->
-                ReportPostScreen(
-                    modifier = Modifier.padding(paddingValues),
-                    onSendReport = { _, _ ->
-                        navController.popBackStack()
-                    }
-                )
+        composable<ReportPost> { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<ForumsGraph>()
+                } catch (e: Exception) {
+                    backStackEntry
+                }
+            }
+            val viewModel: ForumViewModel = hiltViewModel(parentEntry)
+            val args = backStackEntry.toRoute<ReportPost>()
+            val uiState = viewModel.uiState.collectAsState()
+            val context = LocalContext.current
+
+            val message = if (args.isPost) {
+                uiState.value.selectedPost?.takeIf { it.id == args.idPost }?.toComment()
+                    ?: uiState.value.posts.find { it.id == args.idPost }?.toComment()
+            } else uiState.value.comments.find { it.id == args.idPost }
+
+            val forumNotFoundMsg = stringResource(R.string.forum_post_not_found)
+            if (message == null) {
+                Toast.makeText(context, forumNotFoundMsg, Toast.LENGTH_LONG).show()
+                navController.popBackStack()
+            } else {
+                ForumModuleScaffold(
+                    topBarConfig = ForumTopBarConfig(
+                        title = stringResource(R.string.forum_report_title),
+                        subtitle = stringResource(R.string.forum_report_subtitle),
+                        showBackButton = true,
+                        showMenuButton = false,
+                        onBackClick = { navController.popBackStack() }
+                    )
+                ) { paddingValues ->
+                    ReportPostScreen(
+                        modifier = Modifier.padding(paddingValues),
+                        onSendReport = { reportTypeId, details ->
+                            viewModel.sendReport(
+                                id = args.idPost,
+                                isPost = args.isPost,
+                                reportTypeId = reportTypeId,
+                                details = details
+                            )
+                            navController.popBackStack()
+                        },
+                        comment = message
+                    )
+                }
             }
         }
 
@@ -409,7 +445,7 @@ fun NavGraphBuilder.forumsGraph(
 
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
-                    title = "Nuevo Tema",
+                    title = stringResource(R.string.forum_new_topic_title),
                     subtitle = args.roomTitle,
                     showBackButton = true,
                     showMenuButton = false,
@@ -456,7 +492,7 @@ fun NavGraphBuilder.forumsGraph(
 
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
-                    title = "Responder",
+                    title = stringResource(R.string.forum_reply_title),
                     subtitle = state.selectedPost?.title ?: "",
                     showBackButton = true,
                     showMenuButton = false,

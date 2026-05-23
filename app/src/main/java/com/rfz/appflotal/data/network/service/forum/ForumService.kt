@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.network.service.forum
 
+import com.rfz.appflotal.data.model.forum.CreateReportRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.DoLikeRequest
@@ -78,6 +79,13 @@ class ForumService @Inject constructor(
         return requestHelper("getLikedPosts") {
             val token = getTasksUseCase().first()[0].fld_token
             forumClient.getLikedPosts("bearer $token")
+        }
+    }
+
+    suspend fun createReport(request: CreateReportRequest): ApiResult<List<TpmsResponse>?> {
+        return requestHelper("createReport") {
+            val token = getTasksUseCase().first()[0].fld_token
+            forumClient.createReport("bearer $token", request)
         }
     }
 }

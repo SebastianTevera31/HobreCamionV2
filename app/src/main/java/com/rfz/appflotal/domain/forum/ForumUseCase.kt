@@ -3,6 +3,7 @@ package com.rfz.appflotal.domain.forum
 import com.rfz.appflotal.data.mapper.toComment
 import com.rfz.appflotal.data.mapper.toPost
 import com.rfz.appflotal.data.mapper.toTopic
+import com.rfz.appflotal.data.model.forum.CreateReportRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.DoLikeRequest
@@ -143,5 +144,21 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
             is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
             ApiResult.Loading -> ApiResult.Loading
         }
+    }
+
+    suspend fun createReport(
+        idTopic: Int,
+        idMessage: Int,
+        reportTypeId: Int,
+        reportDate: String
+    ): ApiResult<List<TpmsResponse>?> {
+        return forumRepository.createReport(
+            CreateReportRequest(
+                idTopic = idTopic,
+                idMessage = idMessage,
+                reportDate = reportDate,
+                idTypeReport = reportTypeId
+            )
+        )
     }
 }

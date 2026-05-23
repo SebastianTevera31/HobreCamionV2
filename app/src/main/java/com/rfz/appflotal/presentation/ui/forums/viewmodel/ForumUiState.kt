@@ -25,8 +25,8 @@ sealed class CameraUiState {
     data class Error(val message: String) : CameraUiState()
 }
 
-enum class PostType(val typeId: Int) {
-    COMMENT(0), TOPIC(1)
+enum class PostType(val isPost: Boolean) {
+    POST(true), COMMENT(false)
 }
 
 data class Comment(

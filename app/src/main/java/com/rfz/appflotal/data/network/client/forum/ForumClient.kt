@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.network.client.forum
 
+import com.rfz.appflotal.data.model.forum.CreateReportRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.DoLikeRequest
@@ -68,4 +69,10 @@ interface ForumClient {
     suspend fun getLikedPosts(
         @Header("Authorization") token: String
     ): Response<List<LikedPostResult>>
+
+    @POST("api/Blog/CreateReport")
+    suspend fun createReport(
+        @Header("Authorization") token: String,
+        @Body request: CreateReportRequest
+    ): Response<List<TpmsResponse>>
 }

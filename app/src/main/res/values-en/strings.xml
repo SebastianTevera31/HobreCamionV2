@@ -418,4 +418,32 @@
         <item quantity="one">Retread design</item>
         <item quantity="other">Retread designs</item>
     </plurals>
+
+    <string name="forum_title">Forums</string>
+    <string name="forum_subtitle">Hombre Camión Community</string>
+    <string name="forum_search_placeholder">Search topic…</string>
+    <string name="forum_room_topics_subtitle">Room topics</string>
+    <string name="forum_search_topics_placeholder">Search topics…</string>
+    <string name="forum_add_topic_desc">Add topic</string>
+    <string name="forum_new_topic_button">New topic</string>
+    <string name="forum_capture_cancelled">Capture cancelled</string>
+    <string name="forum_post_not_found">Post not found.</string>
+    <string name="forum_report_title">Report</string>
+    <string name="forum_report_subtitle">Help us improve the community</string>
+    <string name="forum_new_topic_title">New Topic</string>
+    <string name="forum_reply_title">Reply</string>
+    <string name="forum_responses_format">%1$s · %2$d responses</string>
+
+    <string name="forum_report_post_title">Report post</string>
+    <string name="forum_report_reason_label">Select the reason for reporting:</string>
+    <string name="forum_report_details_label">Additional details (optional)</string>
+    <string name="forum_report_details_placeholder">Describe the problem...</string>
+    <string name="forum_report_send_button">Send Report</string>
+
+    <string name="forum_report_type_inappropriate">Inappropriate content</string>
+    <string name="forum_report_type_harassment">Harassment</string>
+    <string name="forum_report_type_violence">Violence</string>
+    <string name="forum_report_type_nudity">Nudity</string>
+    <string name="forum_report_type_hate_speech">Hate speech</string>
+    <string name="forum_report_type_spam">Spam</string>
 </resources>
