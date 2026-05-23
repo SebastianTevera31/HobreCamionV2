@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
-fun PostDropdownMenu(onReport: () -> Unit) {
+fun ForumDropdownMenu(onReport: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }) {
@@ -40,8 +40,8 @@ fun PostDropdownMenu(onReport: () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-fun PostDropdownMenuPreview() {
+fun ForumDropdownMenuPreview() {
     HombreCamionTheme {
-        PostDropdownMenu(onReport = {})
+        ForumDropdownMenu(onReport = {})
     }
 }

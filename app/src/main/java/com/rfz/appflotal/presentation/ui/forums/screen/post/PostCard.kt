@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.forums.screen.post
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,39 +9,34 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Comment
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.TireRepair
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.foundation.layout.width
-import com.rfz.appflotal.presentation.ui.forums.components.PostDropdownMenu
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.forums.components.BlogContent
+import com.rfz.appflotal.presentation.ui.forums.components.ForumDropdownMenu
 
 @Composable
-fun PostCard(
+fun ForumCard(
     title: String,
     content: String,
     modifier: Modifier = Modifier,
@@ -53,9 +47,9 @@ fun PostCard(
     numComments: Int = 0,
     imageUrl: String = "",
     color: Color,
-    isPost: Boolean = false,
+    isTopic: Boolean = false,
     showOptions: Boolean = false,
-    hidePostInfo: Boolean = false,
+    hideTopicInfo: Boolean = false,
     onNav: () -> Unit,
     onReport: () -> Unit
 ) {
@@ -121,11 +115,11 @@ fun PostCard(
                 }
 
                 if (showOptions) {
-                    PostDropdownMenu(onReport = onReport)
+                    ForumDropdownMenu(onReport = onReport)
                 }
             }
 
-            if (isPost && !hidePostInfo) {
+            if (isTopic && !hideTopicInfo) {
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp),
                     thickness = 0.5.dp,
@@ -201,9 +195,9 @@ fun PostCard(
 
 @Preview(showBackground = true)
 @Composable
-private fun PostCardPreview() {
+private fun ForumCardPreview() {
     HombreCamionTheme {
-        PostCard(
+        ForumCard(
             title = "Título de ejemplo",
             content = "Este es un contenido de ejemplo para la tarjeta de publicación. Aquí se muestra cómo se vería el texto descriptivo.",
             author = "Juan Pérez",
@@ -211,23 +205,8 @@ private fun PostCardPreview() {
             secondInitial = "P",
             time = "Hace 2 horas",
             numComments = 12,
-            isPost = true,
+            isTopic = true,
             showOptions = true,
-            onNav = {},
-            onReport = {},
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PostCardForumPreview() {
-    HombreCamionTheme {
-        PostCard(
-            title = "Título del Foro",
-            content = "Este es un contenido de ejemplo para una entrada del foro que no es una publicación completa.",
-            isPost = false,
             onNav = {},
             onReport = {},
             color = MaterialTheme.colorScheme.primary

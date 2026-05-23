@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,10 +41,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.utils.LoadState
@@ -53,6 +56,7 @@ fun NewTopicScreen(
     modifier: Modifier = Modifier,
     newTopicStatus: LoadState<Unit>,
     onSend: (String, String, String, String) -> Unit,
+    onCancel: () -> Unit = {},
     onBack: () -> Unit
 ) {
     var title by remember { mutableStateOf("") }
@@ -87,13 +91,13 @@ fun NewTopicScreen(
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
             Text(
-                text = "Nuevo Tema",
+                text = stringResource(R.string.forum_new_topic_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
             )
 
             // Título
             Text(
-                text = "Título",
+                text = stringResource(R.string.forum_title_label),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -101,7 +105,7 @@ fun NewTopicScreen(
                 value = title,
                 onValueChange = { title = it },
                 shape = RoundedCornerShape(Dimens.PaddingSmall),
-                placeholder = { Text("Introduce el título...") },
+                placeholder = { Text(stringResource(R.string.forum_title_placeholder)) },
                 singleLine = true,
                 enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth()
@@ -109,7 +113,7 @@ fun NewTopicScreen(
 
             // Color Selection
             Text(
-                text = "Selecciona un color",
+                text = stringResource(R.string.forum_select_color),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -136,7 +140,7 @@ fun NewTopicScreen(
 
             // Tags
             Text(
-                text = "Etiquetas",
+                text = stringResource(R.string.forum_tags_label),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -149,7 +153,7 @@ fun NewTopicScreen(
                     value = currentTag,
                     onValueChange = { currentTag = it },
                     shape = RoundedCornerShape(Dimens.PaddingSmall),
-                    placeholder = { Text("Nueva etiqueta") },
+                    placeholder = { Text(stringResource(R.string.forum_new_tag_placeholder)) },
                     singleLine = true,
                     enabled = !isLoading,
                     modifier = Modifier.weight(1f)
@@ -169,7 +173,11 @@ fun NewTopicScreen(
                         )
                         .size(48.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Agregar tag", tint = Color.White)
+                    Icon(
+                        imageVector = Icons.Default.Add, 
+                        contentDescription = stringResource(R.string.forum_add_tag_desc), 
+                        tint = Color.White
+                    )
                 }
             }
 
@@ -196,7 +204,7 @@ fun NewTopicScreen(
 
             // Mensaje
             Text(
-                text = "Mensaje",
+                text = stringResource(R.string.forum_message_label),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -204,7 +212,7 @@ fun NewTopicScreen(
                 value = message,
                 onValueChange = { message = it },
                 shape = RoundedCornerShape(Dimens.PaddingSmall),
-                placeholder = { Text("Escribe el contenido aquí...") },
+                placeholder = { Text(stringResource(R.string.forum_message_placeholder)) },
                 enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -219,23 +227,36 @@ fun NewTopicScreen(
                 )
             }
 
-            Button(
-                onClick = {
-                    val finalTags = tagsList.joinToString(",")
-                    onSend(title, message, finalTags, selectedColor)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(Dimens.PaddingMedium),
-                enabled = title.isNotBlank() && message.isNotBlank() && !isLoading
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Publicar Tema")
+            if (isLoading) {
+                Button(
+                    onClick = onCancel,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(Dimens.PaddingMedium),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                        Text(stringResource(R.string.forum_cancel_publication))
+                    }
+                }
+            } else {
+                Button(
+                    onClick = {
+                        val finalTags = tagsList.joinToString(",")
+                        onSend(title, message, finalTags, selectedColor)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(Dimens.PaddingMedium),
+                    enabled = title.isNotBlank() && message.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.forum_publish_topic_button))
                 }
             }
         }

@@ -124,4 +124,12 @@ object Commons {
             dateString
         }
     }
+
+    fun getInitials(name: String): Pair<String, String> {
+        if (name.isBlank()) return Pair("", "")
+        val parts = name.trim().split("\\s+".toRegex()).filter { it.isNotBlank() }
+        val first = parts.firstOrNull()?.take(1)?.uppercase() ?: ""
+        val second = if (parts.size > 1) parts[1].take(1).uppercase() else ""
+        return Pair(first, second)
+    }
 }

@@ -80,9 +80,9 @@ fun CommentCard(
                     time = time
                 )
 
-                if (showReportOption) {
-                    PostDropdownMenu(onReport = onReport)
-                }
+                    if (showReportOption) {
+                        ForumDropdownMenu(onReport = onReport)
+                    }
             }
 
             if (imageUrl.isNotEmpty()) {

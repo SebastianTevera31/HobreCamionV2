@@ -13,16 +13,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
-import com.rfz.appflotal.presentation.ui.forums.screen.post.PostCard
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
+import com.rfz.appflotal.presentation.ui.forums.screen.post.ForumCard
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Room
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
-fun ForumsScreen(
-    foros: List<Topic>,
+fun RoomsScreen(
+    rooms: List<Room>,
     modifier: Modifier = Modifier,
     loadState: LoadState<Any> = LoadState.Idle,
-    onNavigate: (Topic) -> Unit
+    onNavigate: (Room) -> Unit
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -35,13 +35,13 @@ fun ForumsScreen(
                 contentPadding = PaddingValues(Dimens.PaddingSmall),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(foros) { foro ->
-                    PostCard(
-                        title = foro.title,
-                        content = foro.description,
-                        imageUrl = foro.imageUrl,
+                items(rooms) { room ->
+                    ForumCard(
+                        title = room.title,
+                        content = room.description,
+                        imageUrl = room.imageUrl,
                         modifier = Modifier.padding(Dimens.PaddingSmall),
-                        onNav = { onNavigate(foro) },
+                        onNav = { onNavigate(room) },
                         onReport = {},
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -54,21 +54,21 @@ fun ForumsScreen(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ForumsScreenPreview() {
-    val sampleForos = listOf(
-        Topic(
+fun RoomsScreenPreview() {
+    val sampleRooms = listOf(
+        Room(
             id = 1,
             title = "Cómo cambiar una llanta",
             description = "En este tutorial aprenderás los pasos básicos para cambiar una llanta de forma segura.",
             imageUrl = ""
         ),
-        Topic(
+        Room(
             id = 2,
             title = "Mantenimiento preventivo",
             description = "La importancia de revisar los frenos y el aceite regularmente para evitar averías mayores.",
             imageUrl = ""
         ),
-        Topic(
+        Room(
             id = 3,
             title = "Rutas recomendadas",
             description = "Descubre las mejores rutas para transportistas este verano, con paradas seguras y buenos servicios.",
@@ -76,6 +76,6 @@ fun ForumsScreenPreview() {
         )
     )
     HombreCamionTheme {
-        ForumsScreen(foros = sampleForos) {}
+        RoomsScreen(rooms = sampleRooms) {}
     }
 }

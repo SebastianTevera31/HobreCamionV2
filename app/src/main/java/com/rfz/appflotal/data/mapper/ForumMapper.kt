@@ -7,11 +7,11 @@ import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
 import com.rfz.appflotal.data.model.forum.TopicResult
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Room
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
 
-fun ForumResult.toTopic(): Topic {
-    return Topic(
+fun ForumResult.toRoom(): Room {
+    return Room(
         id = this.idForum,
         title = this.fldTitle,
         description = this.fldDescription,
@@ -19,8 +19,8 @@ fun ForumResult.toTopic(): Topic {
     )
 }
 
-fun TopicResult.toPost(): Post {
-    return Post(
+fun TopicResult.toTopic(): Topic {
+    return Topic(
         id = this.idTopic,
         title = this.fldTitle,
         description = this.fldDescription,
@@ -39,7 +39,7 @@ fun TopicResult.toPost(): Post {
     )
 }
 
-fun Post.toComment(): Comment {
+fun Topic.toComment(): Comment {
     return Comment(
         id = this.id,
         title = this.title,
@@ -54,6 +54,7 @@ fun Post.toComment(): Comment {
 }
 
 fun TopicMessageResult.toComment(): Comment {
+    val (first, second) = Commons.getInitials(this.fldUserName)
     return Comment(
         id = this.idTopicMessages,
         title = this.fldUserName,
@@ -61,8 +62,8 @@ fun TopicMessageResult.toComment(): Comment {
         imageUrl = this.fldImage,
         likes = this.fldLike,
         isSaved = false,
-        firstInitial = this.fldUserName.take(1).uppercase(),
-        secondInitial = "",
+        firstInitial = first,
+        secondInitial = second,
         time = Commons.getRelativeTime(this.fldRegistrationDate)
     )
 }

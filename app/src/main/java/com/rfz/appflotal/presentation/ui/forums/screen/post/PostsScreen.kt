@@ -13,17 +13,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.PostType
+import com.rfz.appflotal.presentation.ui.forums.screen.post.ForumCard
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.TopicType
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
-fun PostsScreen(
-    posts: List<Post>,
+fun TopicsScreen(
+    topics: List<Topic>,
     modifier: Modifier = Modifier,
     loadState: LoadState<Any> = LoadState.Idle,
-    onPostClick: (Post) -> Unit,
-    onReport: (postId: Int, type: PostType) -> Unit
+    onTopicClick: (Topic) -> Unit,
+    onReport: (topicId: Int, type: TopicType) -> Unit
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -36,22 +37,22 @@ fun PostsScreen(
                 contentPadding = PaddingValues(Dimens.PaddingSmall),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(posts) { post ->
-                    PostCard(
-                        title = post.title,
-                        content = post.description,
-                        imageUrl = post.imageUrl,
+                items(topics) { topic ->
+                    ForumCard(
+                        title = topic.title,
+                        content = topic.description,
+                        imageUrl = topic.imageUrl,
                         modifier = Modifier.padding(Dimens.PaddingSmall),
-                        numComments = post.numComments,
-                        isPost = true,
+                        numComments = topic.numComments,
+                        isTopic = true,
                         showOptions = true,
-                        onNav = { onPostClick(post) },
-                        author = post.author,
-                        time = post.time,
-                        firstInitial = post.author.take(1).uppercase(),
+                        onNav = { onTopicClick(topic) },
+                        author = topic.author,
+                        time = topic.time,
+                        firstInitial = topic.author.take(1).uppercase(),
                         secondInitial = "",
-                        onReport = { onReport(post.id, PostType.POST) },
-                        color = post.color
+                        onReport = { onReport(topic.id, TopicType.TOPIC) },
+                        color = topic.color
                     )
                 }
             }
@@ -61,9 +62,9 @@ fun PostsScreen(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PostsScreenPreview() {
-    val samplePosts = listOf(
-        Post(
+fun TopicsScreenPreview() {
+    val sampleTopics = listOf(
+        Topic(
             id = 1,
             title = "Noticia 1",
             description = "Descripción de la noticia 1",
@@ -75,7 +76,7 @@ fun PostsScreenPreview() {
             color = MaterialTheme.colorScheme.primary,
             isSaved = false
         ),
-        Post(
+        Topic(
             id = 2,
             title = "Noticia 2",
             description = "Descripción de la noticia 2",
@@ -87,7 +88,7 @@ fun PostsScreenPreview() {
             color = MaterialTheme.colorScheme.primary,
             isSaved = false
         ),
-        Post(
+        Topic(
             id = 3,
             title = "Noticia 3",
             description = "Descripción de la noticia 3",
@@ -101,6 +102,6 @@ fun PostsScreenPreview() {
         )
     )
     HombreCamionTheme {
-        PostsScreen(posts = samplePosts, onPostClick = {}, onReport = { _, _ -> })
+        TopicsScreen(topics = sampleTopics, onTopicClick = {}, onReport = { _, _ -> })
     }
 }

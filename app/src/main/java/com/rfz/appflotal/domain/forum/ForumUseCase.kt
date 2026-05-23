@@ -1,7 +1,7 @@
 package com.rfz.appflotal.domain.forum
 
 import com.rfz.appflotal.data.mapper.toComment
-import com.rfz.appflotal.data.mapper.toPost
+import com.rfz.appflotal.data.mapper.toRoom
 import com.rfz.appflotal.data.mapper.toTopic
 import com.rfz.appflotal.data.model.forum.CreateReportRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
@@ -12,15 +12,15 @@ import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.forum.ForumRepository
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Room
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
 import javax.inject.Inject
 
 class ForumUseCase @Inject constructor(private val forumRepository: ForumRepository) {
-    suspend fun getForums(pageNumber: Int, title: String? = null): ApiResult<List<Topic>> {
+    suspend fun getRooms(pageNumber: Int, title: String? = null): ApiResult<List<Room>> {
         return when (val response = forumRepository.getForums(pageNumber, title)) {
             is ApiResult.Success -> ApiResult.Success(
-                response.data?.results?.map { it.toTopic() } ?: emptyList()
+                response.data?.results?.map { it.toRoom() } ?: emptyList()
             )
 
             is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
@@ -28,9 +28,9 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
         }
     }
 
-    suspend fun getForumsById(idForum: Int): ApiResult<Topic?> {
+    suspend fun getRoomById(idForum: Int): ApiResult<Room?> {
         return when (val response = forumRepository.getForumsById(idForum)) {
-            is ApiResult.Success -> ApiResult.Success(response.data?.firstOrNull()?.toTopic())
+            is ApiResult.Success -> ApiResult.Success(response.data?.firstOrNull()?.toRoom())
             is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
             ApiResult.Loading -> ApiResult.Loading
         }
@@ -41,11 +41,11 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
         idForum: Int,
         title: String = "",
         tipoOrdenamiento: Int = 1
-    ): ApiResult<List<Post>> {
+    ): ApiResult<List<Topic>> {
         val response = forumRepository.getTopics(pageNumber, idForum, title, tipoOrdenamiento)
         return when (response) {
             is ApiResult.Success -> ApiResult.Success(
-                response.data?.results?.map { it.toPost() } ?: emptyList()
+                response.data?.results?.map { it.toTopic() } ?: emptyList()
             )
 
             is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
@@ -64,10 +64,10 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
         }
     }
 
-    suspend fun getRoomWithPosts(roomId: Int): ApiResult<Pair<Topic?, List<Post>>> {
+    suspend fun getRoomWithTopics(roomId: Int): ApiResult<Pair<Room?, List<Topic>>> {
         val forumResponse = forumRepository.getForumsById(roomId)
         val room = if (forumResponse is ApiResult.Success) {
-            forumResponse.data?.firstOrNull()?.toTopic()
+            forumResponse.data?.firstOrNull()?.toRoom()
         } else null
 
         val topicsResponse = forumRepository.getTopics(pageNumber = 1, idForum = roomId)
@@ -75,7 +75,7 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
             is ApiResult.Success -> ApiResult.Success(
                 Pair(
                     room,
-                    topicsResponse.data?.results?.map { it.toPost() } ?: emptyList()
+                    topicsResponse.data?.results?.map { it.toTopic() } ?: emptyList()
                 )
             )
 
@@ -101,7 +101,7 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
         )
     }
 
-    suspend fun crudPost(
+    suspend fun crudTopic(
         title: String,
         description: String,
         color: String,

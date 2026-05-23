@@ -19,17 +19,17 @@ import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Post
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.PostType
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.TopicType
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TopicScreen(
-    topic: Post,
+fun DiscussionScreen(
+    topic: Topic,
     comments: List<Comment>,
     onReply: (Comment) -> Unit,
-    onSave: (id: Int, isPost: Boolean) -> Unit,
-    onReport: (postId: Int, type: PostType) -> Unit,
+    onSave: (id: Int, isTopic: Boolean) -> Unit,
+    onReport: (id: Int, type: TopicType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -47,11 +47,12 @@ fun TopicScreen(
                         title = topic.title,
                         content = topic.description,
                         imageUrl = topic.imageUrl,
-                        onReport = { onReport(topic.id, PostType.POST) },
+                        onReport = { onReport(topic.id, TopicType.TOPIC) },
                         onSave = { onSave(topic.id, true) },
                         isSaved = false,
                         likes = 3,
-                        time = topic.time
+                        time = topic.time,
+                        color = topic.color
                     )
                 }
             }
@@ -69,7 +70,7 @@ fun TopicScreen(
                         onSave = { onSave(comment.id, false) },
                         isAuthor = comment.id == topic.idUser,
                         isSaved = comment.isSaved,
-                        onReport = { onReport(comment.id, PostType.COMMENT) },
+                        onReport = { onReport(comment.id, TopicType.COMMENT) },
                         secondInitial = comment.secondInitial,
                         time = comment.time
                     )
@@ -91,8 +92,8 @@ fun TopicScreen(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun TopicScreenPreview() {
-    val sampleTopic = Post(
+fun DiscussionScreenPreview() {
+    val sampleTopic = Topic(
         id = 1,
         title = "Cómo mejorar la eficiencia de combustible",
         description = "Compartamos consejos sobre cómo ahorrar combustible en rutas largas.",
@@ -142,7 +143,7 @@ fun TopicScreenPreview() {
     )
 
     HombreCamionTheme {
-        TopicScreen(
+        DiscussionScreen(
             topic = sampleTopic,
             comments = sampleComments,
             onReply = {},

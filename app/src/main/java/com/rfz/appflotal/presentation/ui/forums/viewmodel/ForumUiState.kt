@@ -7,13 +7,14 @@ import com.rfz.appflotal.presentation.ui.utils.LoadState
 data class ForumUiState(
     val screenState: LoadState<Unit> = LoadState.Idle,
     val newTopicState: LoadState<Unit> = LoadState.Idle,
+    val sendCommentState: LoadState<Unit> = LoadState.Idle,
     val reportState: LoadState<Unit> = LoadState.Idle,
-    val forums: List<Topic> = emptyList(),
-    val posts: List<Post> = emptyList(),
-    val filteredPosts: List<Post> = emptyList(),
-    val filteredForums: List<Topic> = emptyList(),
-    val selectedPost: Post? = null,
-    val selectedRoom: Topic? = null,
+    val rooms: List<Room> = emptyList(),
+    val topics: List<Topic> = emptyList(),
+    val filteredTopics: List<Topic> = emptyList(),
+    val filteredRooms: List<Room> = emptyList(),
+    val selectedTopic: Topic? = null,
+    val selectedRoom: Room? = null,
     val comments: List<Comment> = emptyList(),
     val searchQuery: String = "",
     val photoEvidence: CameraUiState = CameraUiState.Idle
@@ -26,8 +27,8 @@ sealed class CameraUiState {
     data class Error(val message: String) : CameraUiState()
 }
 
-enum class PostType(val isPost: Boolean) {
-    POST(true), COMMENT(false)
+enum class TopicType(val isTopic: Boolean) {
+    TOPIC(true), COMMENT(false)
 }
 
 data class Comment(
@@ -42,7 +43,7 @@ data class Comment(
     val secondInitial: String
 ) : ForumRecord
 
-data class Post(
+data class Topic(
     override val id: Int,
     override val title: String,
     override val description: String,
@@ -55,7 +56,7 @@ data class Post(
     val isSaved: Boolean
 ) : ForumRecord
 
-data class Topic(
+data class Room(
     override val id: Int,
     override val title: String,
     override val description: String,
@@ -63,7 +64,7 @@ data class Topic(
 ) : ForumRecord
 
 enum class ForumScreenType {
-    TOPIC, POST, COMMENT
+    ROOM, TOPIC, COMMENT
 }
 
 interface ForumRecord : CatalogItem {

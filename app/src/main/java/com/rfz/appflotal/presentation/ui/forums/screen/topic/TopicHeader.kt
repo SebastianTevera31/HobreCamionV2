@@ -1,11 +1,9 @@
 package com.rfz.appflotal.presentation.ui.forums.screen.topic
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,11 +17,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -33,14 +31,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.forums.components.PostDropdownMenu
-
-import androidx.compose.material3.Surface
+import com.rfz.appflotal.presentation.ui.forums.components.ForumDropdownMenu
 
 @Composable
 fun TopicHeader(
     title: String,
     time: String,
+    color: Color,
     content: String,
     onReport: () -> Unit,
     onSave: () -> Unit,
@@ -67,7 +64,7 @@ fun TopicHeader(
                 Surface(
                     modifier = Modifier.size(60.dp),
                     shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = color.copy(alpha = 0.1f),
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
                     if (imageUrl.isNotEmpty()) {
@@ -82,7 +79,8 @@ fun TopicHeader(
                             Icon(
                                 imageVector = Icons.Default.TireRepair,
                                 contentDescription = null,
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(32.dp),
+                                tint = color
                             )
                         }
                     }
@@ -112,7 +110,7 @@ fun TopicHeader(
                     )
                 }
 
-                PostDropdownMenu(onReport = onReport)
+                ForumDropdownMenu(onReport = onReport)
             }
 
             Text(
@@ -127,7 +125,9 @@ fun TopicHeader(
             Surface(
                 onClick = onSave,
                 shape = RoundedCornerShape(20.dp),
-                color = if (isSaved) Color.Red.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                color = if (isSaved) Color.Red.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(
+                    alpha = 0.5f
+                ),
                 contentColor = if (isSaved) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
             ) {
                 Row(
@@ -162,7 +162,8 @@ fun TopicHeaderPreview() {
             isSaved = true,
             likes = 30,
             imageUrl = "",
-            time = "1 mes"
+            time = "1 mes",
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }

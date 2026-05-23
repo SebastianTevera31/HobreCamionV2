@@ -4,79 +4,88 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
+import com.rfz.appflotal.core.util.Commons.getRelativeTime
+import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.forum.ForumUseCase
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ForumViewModel @Inject constructor(
-    private val forumUseCase: ForumUseCase
+    private val forumUseCase: ForumUseCase,
+    private val getTasksUseCase: GetTasksUseCase
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(ForumUiState())
     val uiState = _uiState.asStateFlow()
     private var currentPhotoUri: Uri? = null
+    private var publicationJob: Job? = null
 
-    fun getForums() {
-        if (_uiState.value.forums.isNotEmpty()) return
+    fun getRooms() {
+        if (_uiState.value.rooms.isNotEmpty()) return
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
-            val response = forumUseCase.getForums(1)
+            val response = forumUseCase.getRooms(1)
             asyncResponseHelper(
                 response,
                 onError = {
-                    _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar foros")) }
+                    _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar salas")) }
                 }
-            ) { forums ->
+            ) { rooms ->
                 _uiState.update {
                     it.copy(
                         screenState = LoadState.Success(Unit),
-                        forums = forums,
-                        filteredForums = forums
+                        rooms = rooms,
+                        filteredRooms = rooms
                     )
                 }
             }
         }
     }
 
-    fun loadPostsByRoom(roomId: String) {
+    fun loadTopicsByRoom(roomId: String) {
         val id = roomId.toIntOrNull() ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
 
-            val response = forumUseCase.getRoomWithPosts(id)
+            val response = forumUseCase.getRoomWithTopics(id)
             asyncResponseHelper(
                 response,
                 onError = {
                     _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar temas")) }
                 }
             ) { result ->
-                val (currentRoom, posts) = result
+                val (currentRoom, topics) = result
                 _uiState.update {
                     it.copy(
                         screenState = LoadState.Success(Unit),
-                        selectedRoom = currentRoom ?: it.forums.find { f -> f.id == id },
-                        posts = posts,
-                        filteredPosts = posts
+                        selectedRoom = currentRoom ?: it.rooms.find { f -> f.id == id },
+                        topics = topics,
+                        filteredTopics = topics
                     )
                 }
             }
         }
     }
 
-    fun loadPostNComments(topicId: Int) {
+    fun loadTopicMessages(topicId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
 
-            val post = _uiState.value.posts.find { it.id == topicId }
+            val topic = _uiState.value.topics.find { it.id == topicId }
             val response = forumUseCase.getTopicMessages(topicId)
             asyncResponseHelper(
                 response,
@@ -87,7 +96,7 @@ class ForumViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         screenState = LoadState.Success(Unit),
-                        selectedPost = post,
+                        selectedTopic = topic,
                         comments = comments
                     )
                 }
@@ -98,11 +107,11 @@ class ForumViewModel @Inject constructor(
     fun onSearchChanged(query: String, screenType: ForumScreenType) {
         _uiState.update { it.copy(searchQuery = query) }
 
-        if (screenType == ForumScreenType.TOPIC) {
+        if (screenType == ForumScreenType.ROOM) {
             val list = if (query.isEmpty()) {
-                _uiState.value.forums
+                _uiState.value.rooms
             } else {
-                _uiState.value.forums.filter {
+                _uiState.value.rooms.filter {
                     it.title.contains(query, ignoreCase = true) ||
                             it.description.contains(query, ignoreCase = true)
                 }
@@ -110,21 +119,21 @@ class ForumViewModel @Inject constructor(
 
             _uiState.update { currentUiState ->
                 currentUiState.copy(
-                    filteredForums = list
+                    filteredRooms = list
                 )
             }
-        } else if (screenType == ForumScreenType.POST) {
+        } else if (screenType == ForumScreenType.TOPIC) {
             val list = if (query.isEmpty()) {
-                _uiState.value.posts
+                _uiState.value.topics
             } else {
-                _uiState.value.posts.filter {
+                _uiState.value.topics.filter {
                     it.title.contains(query, ignoreCase = true) ||
                             it.description.contains(query, ignoreCase = true)
                 }
             }
             _uiState.update { currentUiState ->
                 currentUiState.copy(
-                    filteredPosts = list
+                    filteredTopics = list
                 )
             }
         }
@@ -133,19 +142,19 @@ class ForumViewModel @Inject constructor(
     fun clearFilterSearch() {
         _uiState.update { currentUiState ->
             currentUiState.copy(
-                filteredPosts = currentUiState.posts,
-                filteredForums = currentUiState.forums,
+                filteredTopics = currentUiState.topics,
+                filteredRooms = currentUiState.rooms,
                 searchQuery = ""
             )
         }
     }
 
-    fun doLike(postId: Int, isPost: Boolean) {
+    fun doLike(id: Int, isTopic: Boolean) {
         viewModelScope.launch {
             val response = forumUseCase.doLike(
                 likedDate = getCurrentDate(),
-                idTopic = if (isPost) postId else 0,
-                idMessage = if (!isPost) postId else 0
+                idTopic = if (isTopic) id else 0,
+                idMessage = if (!isTopic) id else 0
             )
 
             asyncResponseHelper(
@@ -155,18 +164,18 @@ class ForumViewModel @Inject constructor(
                 }
             ) {
                 // Actualizar UI localmente o recargar datos
-                if (isPost) {
-                    val currentTopicId = _uiState.value.selectedPost?.id
+                if (isTopic) {
+                    val currentTopicId = _uiState.value.selectedTopic?.id
                     if (currentTopicId != null) {
                         _uiState.update { currentUiState ->
-                            val post = _uiState.value.selectedPost!!.copy(isSaved = true)
-                            currentUiState.copy(selectedPost = post)
+                            val topic = _uiState.value.selectedTopic!!.copy(isSaved = true)
+                            currentUiState.copy(selectedTopic = topic)
                         }
                     }
                 } else {
                     _uiState.update { currentUiState ->
                         val updatedComments = currentUiState.comments.map { comment ->
-                            if (comment.id == postId) {
+                            if (comment.id == id) {
                                 val newIsSaved = !comment.isSaved
                                 comment.copy(
                                     isSaved = newIsSaved,
@@ -183,27 +192,28 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun sendPost(
+    fun sendTopic(
         title: String,
         description: String,
         tags: String,
         color: String
     ) {
-        viewModelScope.launch {
-            val currentForumId = _uiState.value.selectedRoom?.id ?: 0
-            if (currentForumId == 0) {
-                _uiState.update { it.copy(newTopicState = LoadState.Error("No se ha seleccionado un foro válido.")) }
+        publicationJob?.cancel()
+        publicationJob = viewModelScope.launch {
+            val currentRoomId = _uiState.value.selectedRoom?.id ?: 0
+            if (currentRoomId == 0) {
+                _uiState.update { it.copy(newTopicState = LoadState.Error("No se ha seleccionado una sala válida.")) }
                 return@launch
             }
 
             _uiState.update { it.copy(newTopicState = LoadState.Loading) }
 
-            val response = forumUseCase.crudPost(
+            val response = forumUseCase.crudTopic(
                 title = title,
                 description = description,
                 color = color,
                 image = "",
-                idForum = currentForumId,
+                idForum = currentRoomId,
                 tags = tags,
                 registrationDate = getCurrentDate()
             )
@@ -214,9 +224,29 @@ class ForumViewModel @Inject constructor(
                     _uiState.update { it.copy(newTopicState = LoadState.Error("Error al publicar el tema")) }
                 }
             ) {
-                _uiState.update { it.copy(newTopicState = LoadState.Success(Unit)) }
-                // Recargamos los posts de la sala actual para que al volver se vea el nuevo
-                loadPostsByRoom(currentForumId.toString())
+                // Actualizamos localmente para evitar el GET.
+                val user = getTasksUseCase().first().first()
+                val newTopic = Topic(
+                    id = 0, // ID temporal
+                    title = title,
+                    description = description,
+                    imageUrl = "",
+                    author = user.fld_username, // Se actualizará al refrescar
+                    numComments = 0,
+                    time = getRelativeTime(getCurrentDate()),
+                    idUser = 0,
+                    color = Color(color.toColorInt()),
+                    isSaved = false
+                )
+
+                _uiState.update { state ->
+                    val newList = state.topics + newTopic
+                    state.copy(
+                        newTopicState = LoadState.Success(Unit),
+                        topics = newList,
+                        filteredTopics = newList
+                    )
+                }
             }
         }
     }
@@ -225,17 +255,31 @@ class ForumViewModel @Inject constructor(
         _uiState.update { it.copy(newTopicState = LoadState.Idle) }
     }
 
+    fun resetCommentState() {
+        _uiState.update { it.copy(sendCommentState = LoadState.Idle) }
+    }
+
     fun resetReportState() {
         _uiState.update { it.copy(reportState = LoadState.Idle) }
     }
 
-    fun sendReport(id: Int, isPost: Boolean, reportTypeId: Int, details: String) {
+    fun cancelPublication() {
+        publicationJob?.cancel()
+        _uiState.update {
+            it.copy(
+                newTopicState = LoadState.Idle,
+                sendCommentState = LoadState.Idle
+            )
+        }
+    }
+
+    fun sendReport(id: Int, isTopic: Boolean, reportTypeId: Int, details: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(reportState = LoadState.Loading) }
 
             val response = forumUseCase.createReport(
-                idTopic = if (isPost) id else 0,
-                idMessage = if (!isPost) id else 0,
+                idTopic = if (isTopic) id else 0,
+                idMessage = if (!isTopic) id else 0,
                 reportTypeId = reportTypeId,
                 reportDate = getCurrentDate()
             )
@@ -252,11 +296,11 @@ class ForumViewModel @Inject constructor(
     }
 
     fun sendComment(commentText: String) {
-        val topicId = _uiState.value.selectedPost?.id ?: return
-        val capturedUri = (_uiState.value.photoEvidence as? CameraUiState.Captured)?.uri
+        val topicId = _uiState.value.selectedTopic?.id ?: return
 
-        viewModelScope.launch {
-            _uiState.update { it.copy(screenState = LoadState.Loading) }
+        publicationJob?.cancel()
+        publicationJob = viewModelScope.launch {
+            _uiState.update { it.copy(sendCommentState = LoadState.Loading) }
 
             val response = forumUseCase.crudComment(
                 idTopic = topicId,
@@ -268,11 +312,29 @@ class ForumViewModel @Inject constructor(
             asyncResponseHelper(
                 response,
                 onError = {
-                    _uiState.update { it.copy(screenState = LoadState.Error("Error al enviar comentario")) }
+                    _uiState.update { it.copy(sendCommentState = LoadState.Error("Error al enviar comentario")) }
                 }
             ) {
-                // Recargar comentarios tras el éxito
-                loadPostNComments(topicId)
+                val user = getTasksUseCase().first().first()
+                val (first, second) = Commons.getInitials(user.fld_username)
+                val newComment = Comment(
+                    id = 0, // ID temporal
+                    title = user.fld_username,
+                    description = commentText,
+                    imageUrl = "",
+                    time = getRelativeTime(getCurrentDate()),
+                    likes = 0,
+                    isSaved = false,
+                    firstInitial = first,
+                    secondInitial = second
+                )
+
+                _uiState.update { state ->
+                    state.copy(
+                        sendCommentState = LoadState.Success(Unit),
+                        comments = state.comments + newComment
+                    )
+                }
                 clearPhoto()
             }
         }
