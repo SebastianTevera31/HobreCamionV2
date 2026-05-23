@@ -1,7 +1,6 @@
 package com.rfz.appflotal.data.database
 
 import androidx.annotation.Keep
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.rfz.appflotal.data.dao.AppHCDao
@@ -10,18 +9,21 @@ import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
 import com.rfz.appflotal.data.dao.DisassemblyTireDao
+import com.rfz.appflotal.data.dao.ForumDao
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
 import com.rfz.appflotal.data.dao.InspectionTireDao
 import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.model.assembly.AssemblyTireEntity
 import com.rfz.appflotal.data.model.axle.AxleEntity
 import com.rfz.appflotal.data.model.database.AppHCEntity
+import com.rfz.appflotal.data.model.database.CommentEntity
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.data.model.database.DataframeEntity
 import com.rfz.appflotal.data.model.database.DisassemblyTireEntity
 import com.rfz.appflotal.data.model.database.InspectionCatalogEntity
 import com.rfz.appflotal.data.model.database.InspectionTireEntity
 import com.rfz.appflotal.data.model.database.SensorDataEntity
+import com.rfz.appflotal.data.model.database.TopicEntity
 
 @Keep
 @Database(
@@ -29,7 +31,7 @@ import com.rfz.appflotal.data.model.database.SensorDataEntity
         AppHCEntity::class, DataframeEntity::class, CoordinatesEntity::class,
         SensorDataEntity::class, AssemblyTireEntity::class, AxleEntity::class,
         DisassemblyTireEntity::class, InspectionTireEntity::class,
-        InspectionCatalogEntity::class
+        InspectionCatalogEntity::class, CommentEntity::class, TopicEntity::class
     ],
     version = 26,
     exportSchema = true
@@ -47,4 +49,6 @@ abstract class AppHombreCamionDatabase : RoomDatabase() {
     abstract fun inspectionCatalogDao(): InspectionCatalogDao
 
     abstract fun axleDao(): AxleDao
+
+    abstract fun forumDao(): ForumDao
 }

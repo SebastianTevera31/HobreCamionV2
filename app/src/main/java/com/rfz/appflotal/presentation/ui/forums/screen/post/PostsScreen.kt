@@ -13,9 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
-import com.rfz.appflotal.presentation.ui.forums.screen.post.ForumCard
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.TopicType
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.MessageType
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
@@ -24,7 +23,7 @@ fun TopicsScreen(
     modifier: Modifier = Modifier,
     loadState: LoadState<Any> = LoadState.Idle,
     onTopicClick: (Topic) -> Unit,
-    onReport: (topicId: Int, type: TopicType) -> Unit
+    onReport: (topicId: Int, type: MessageType) -> Unit
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -51,7 +50,7 @@ fun TopicsScreen(
                         time = topic.time,
                         firstInitial = topic.author.take(1).uppercase(),
                         secondInitial = "",
-                        onReport = { onReport(topic.id, TopicType.TOPIC) },
+                        onReport = { onReport(topic.id, MessageType.TOPIC) },
                         color = topic.color
                     )
                 }

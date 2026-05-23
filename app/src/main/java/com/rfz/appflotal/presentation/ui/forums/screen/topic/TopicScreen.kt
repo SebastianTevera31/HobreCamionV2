@@ -19,8 +19,8 @@ import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.MessageType
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.TopicType
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -28,8 +28,8 @@ fun DiscussionScreen(
     topic: Topic,
     comments: List<Comment>,
     onReply: (Comment) -> Unit,
-    onSave: (id: Int, isTopic: Boolean) -> Unit,
-    onReport: (id: Int, type: TopicType) -> Unit,
+    onSave: (id: Int, isComment: Boolean) -> Unit,
+    onReport: (id: Int, type: MessageType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -47,9 +47,9 @@ fun DiscussionScreen(
                         title = topic.title,
                         content = topic.description,
                         imageUrl = topic.imageUrl,
-                        onReport = { onReport(topic.id, TopicType.TOPIC) },
-                        onSave = { onSave(topic.id, true) },
-                        isSaved = false,
+                        onReport = { onReport(topic.id, MessageType.TOPIC) },
+                        onSave = { onSave(topic.id, false) },
+                        isSaved = topic.isSaved,
                         likes = 3,
                         time = topic.time,
                         color = topic.color
@@ -67,10 +67,10 @@ fun DiscussionScreen(
                         imageUrl = comment.imageUrl,
                         likes = comment.likes,
                         onReply = { onReply(comment) },
-                        onSave = { onSave(comment.id, false) },
+                        onSave = { onSave(comment.id, true) },
                         isAuthor = comment.id == topic.idUser,
                         isSaved = comment.isSaved,
-                        onReport = { onReport(comment.id, TopicType.COMMENT) },
+                        onReport = { onReport(comment.id, MessageType.COMMENT) },
                         secondInitial = comment.secondInitial,
                         time = comment.time
                     )

@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.forums.viewmodel
 
 import androidx.compose.ui.graphics.Color
 import com.rfz.appflotal.data.model.CatalogItem
+import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 data class ForumUiState(
@@ -17,7 +18,8 @@ data class ForumUiState(
     val selectedRoom: Room? = null,
     val comments: List<Comment> = emptyList(),
     val searchQuery: String = "",
-    val photoEvidence: CameraUiState = CameraUiState.Idle
+    val photoEvidence: CameraUiState = CameraUiState.Idle,
+    val likedPosts: List<LikedPostResult> = emptyList()
 )
 
 sealed class CameraUiState {
@@ -27,8 +29,8 @@ sealed class CameraUiState {
     data class Error(val message: String) : CameraUiState()
 }
 
-enum class TopicType(val isTopic: Boolean) {
-    TOPIC(true), COMMENT(false)
+enum class MessageType(val isMessage: Boolean) {
+    TOPIC(false), COMMENT(true)
 }
 
 data class Comment(

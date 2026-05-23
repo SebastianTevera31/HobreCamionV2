@@ -17,6 +17,7 @@ import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
 import javax.inject.Inject
 
 class ForumUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+
     suspend fun getRooms(pageNumber: Int, title: String? = null): ApiResult<List<Room>> {
         return when (val response = forumRepository.getForums(pageNumber, title)) {
             is ApiResult.Success -> ApiResult.Success(
@@ -126,14 +127,14 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
 
     suspend fun doLike(
         likedDate: String,
-        idTopic: Int,
+        tipoElemento: Boolean,
         idMessage: Int
     ): ApiResult<List<TpmsResponse>?> {
         return forumRepository.doLike(
             DoLikeRequest(
                 likedDate = likedDate,
-                idTopic = idTopic,
-                idMessage = idMessage
+                tipoElemento = tipoElemento,
+                idElemento = idMessage
             )
         )
     }

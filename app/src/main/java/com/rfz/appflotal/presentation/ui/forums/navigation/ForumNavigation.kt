@@ -50,7 +50,6 @@ import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReportScreen
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.CameraUiState
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumScreenType
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.TopicType
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import kotlinx.serialization.Serializable
 
@@ -110,7 +109,7 @@ fun NavGraphBuilder.forumsGraph(
 
             LaunchedEffect(Unit) {
                 viewModel.clearFilterSearch()
-                viewModel.getRooms()
+                viewModel.getInitialData()
             }
 
             ForumModuleScaffold(
@@ -157,7 +156,7 @@ fun NavGraphBuilder.forumsGraph(
 
                     is LoadState.Error -> {
                         ForumErrorView(
-                            onRetry = { viewModel.getRooms() },
+                            onRetry = { viewModel.getInitialData() },
                             modifier = Modifier.padding(paddingValues)
                         )
                     }
@@ -252,7 +251,7 @@ fun NavGraphBuilder.forumsGraph(
                                 navController.navigate(
                                     ReportContent(
                                         id = id,
-                                        isTopic = type.isTopic
+                                        isTopic = type.isMessage
                                     )
                                 )
                             },
@@ -360,7 +359,7 @@ fun NavGraphBuilder.forumsGraph(
                                     navController.navigate(
                                         ReportContent(
                                             id = id,
-                                            isTopic = type.isTopic
+                                            isTopic = type.isMessage
                                         )
                                     )
                                 },
