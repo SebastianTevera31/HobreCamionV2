@@ -158,11 +158,11 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun doLike(id: Int, isTopic: Boolean) {
+    fun doLike(id: Int, isComment: Boolean) {
         viewModelScope.launch {
             val response = forumUseCase.doLike(
                 likedDate = getCurrentDate(),
-                tipoElemento = isTopic,
+                tipoElemento = isComment,
                 idMessage = id
             )
 
@@ -173,7 +173,7 @@ class ForumViewModel @Inject constructor(
                 }
             ) {
                 // Actualizar UI localmente o recargar datos
-                if (isTopic) {
+                if (!isComment) {
                     val currentTopicId = _uiState.value.selectedTopic?.id
                     if (currentTopicId != null) {
                         _uiState.update { currentUiState ->
