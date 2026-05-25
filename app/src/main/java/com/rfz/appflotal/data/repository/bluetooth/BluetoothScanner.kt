@@ -71,18 +71,30 @@ class BluetoothScannerImp(
 
     private fun matchesTarget(result: ScanResult): Boolean {
         val deviceName = result.device.name ?: ""
-        if (VALID_NAME_PREFIXES.any { deviceName.startsWith(it) }) {
-            Log.i("BluetoothScanner", "Target device found by name: $deviceName")
+
+        // 1. Caso específico para TPMS (Validación estricta)
+        if (deviceName.startsWith("TPMS")) {
+            val mac = result.device.address.replace(":", "").take(6)
+            val hasProduct = MONITOR_PRODUCTOS.any { deviceName.contains(it) }
+            val hasMac = deviceName.contains(mac)
+
+            if (hasProduct && hasMac) {
+                Log.i("BluetoothScanner", "Target TPMS found: $deviceName")
+                return true
+            }
+            // Si empieza con TPMS pero no cumple lo anterior, seguimos buscando por UUID
+        }
+
+        // 2. Otros prefijos que no requieren validación extra (ej. "TM")
+        if (deviceName.startsWith("TM")) {
             return true
         }
 
+        // 3. Verificación por registros de servicio (UUIDs)
         val sr = result.scanRecord ?: return false
-
-        val targetBle4 = ParcelUuid.fromString("00001000-0000-1000-8000-00805f9b34fb")
-        val targetBle5 = ParcelUuid.fromString("0000A002-0000-1000-8000-00805F9B34FB")
-
-        val hasService = sr.serviceUuids?.any { it == targetBle4 || it == targetBle5 } == true
-        val hasServiceData = sr.getServiceData(targetBle4) != null || sr.getServiceData(targetBle5) != null
+        val hasService = sr.serviceUuids?.any { it == TARGET_BLE4 || it == TARGET_BLE5 } == true
+        val hasServiceData =
+            sr.getServiceData(TARGET_BLE4) != null || sr.getServiceData(TARGET_BLE5) != null
 
         return hasService || hasServiceData
     }
@@ -118,7 +130,10 @@ class BluetoothScannerImp(
     }
 
     companion object {
-        val VALID_NAME_PREFIXES = listOf("TM")
+        val VALID_NAME_PREFIXES = listOf("TM", "TPMS")
+        val MONITOR_PRODUCTOS = listOf("T6", "T22", "T38")
+        val TARGET_BLE4: ParcelUuid = ParcelUuid.fromString("00001000-0000-1000-8000-00805f9b34fb")
+        val TARGET_BLE5: ParcelUuid = ParcelUuid.fromString("0000A002-0000-1000-8000-00805F9B34FB")
         val SERVICE: UUID = UUID.fromString("f000ffd0-0451-4000-b000-000000000000")
         val required = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> arrayOf(
