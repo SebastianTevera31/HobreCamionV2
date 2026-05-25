@@ -555,8 +555,9 @@ fun NavGraphBuilder.forumsGraph(
                         navController.popBackStack()
                     }
                 )
-            ) {
+            ) { paddingValues ->
                 SavedCommentsRoute(
+                    modifier = Modifier.padding(paddingValues),
                     onNavigateTo = { idRecord, title, isComment ->
                         if (isComment) {
                             navController.navigate(NewCommentNav(commentId = idRecord))
