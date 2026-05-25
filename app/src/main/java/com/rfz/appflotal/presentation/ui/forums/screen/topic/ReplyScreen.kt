@@ -30,15 +30,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.forum.ForumComment
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
 fun ReplyScreen(
-    comment: Comment,
+    comment: ForumComment,
     modifier: Modifier = Modifier,
     replyStatus: LoadState<Unit>,
     onSend: (String) -> Unit,
@@ -148,7 +148,7 @@ fun ReplyScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ReplyScreenPreview() {
-    val sampleComment = Comment(
+    val sampleComment = ForumComment(
         id = 1,
         title = "Juan Pérez",
         description = "Este es un comentario de prueba para la pantalla de nuevo comentario.",

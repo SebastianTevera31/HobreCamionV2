@@ -4,17 +4,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,12 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.forum.ForumComment
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
 
 data class ReportType(
     val id: Int,
@@ -52,7 +48,7 @@ fun getReportTypes() = listOf(
 
 @Composable
 fun ReportScreen(
-    comment: Comment,
+    comment: ForumComment,
     onSendReport: (reportTypeId: Int, details: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -153,7 +149,7 @@ fun ReportScreenPreview() {
         ReportScreen(
             onSendReport = { _, _ -> },
             modifier = Modifier.safeContentPadding(),
-            comment = Comment(
+            comment = ForumComment(
                 id = 1,
                 title = "Juan Pérez",
                 description = "Este es un comentario de prueba para la pantalla de reporte.",

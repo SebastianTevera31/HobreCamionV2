@@ -1,8 +1,8 @@
 package com.rfz.appflotal.presentation.ui.forums.viewmodel
 
-import androidx.compose.ui.graphics.Color
-import com.rfz.appflotal.data.model.CatalogItem
-import com.rfz.appflotal.data.model.forum.LikedPostResult
+import com.rfz.appflotal.data.model.forum.ForumComment
+import com.rfz.appflotal.data.model.forum.ForumRoom
+import com.rfz.appflotal.data.model.forum.ForumTopic
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 data class ForumUiState(
@@ -10,16 +10,15 @@ data class ForumUiState(
     val newTopicState: LoadState<Unit> = LoadState.Idle,
     val sendCommentState: LoadState<Unit> = LoadState.Idle,
     val reportState: LoadState<Unit> = LoadState.Idle,
-    val rooms: List<Room> = emptyList(),
-    val topics: List<Topic> = emptyList(),
-    val filteredTopics: List<Topic> = emptyList(),
-    val filteredRooms: List<Room> = emptyList(),
-    val selectedTopic: Topic? = null,
-    val selectedRoom: Room? = null,
-    val comments: List<Comment> = emptyList(),
+    val rooms: List<ForumRoom> = emptyList(),
+    val topics: List<ForumTopic> = emptyList(),
+    val filteredTopics: List<ForumTopic> = emptyList(),
+    val filteredRooms: List<ForumRoom> = emptyList(),
+    val selectedTopic: ForumTopic? = null,
+    val selectedRoom: ForumRoom? = null,
+    val comments: List<ForumComment> = emptyList(),
     val searchQuery: String = "",
-    val photoEvidence: CameraUiState = CameraUiState.Idle,
-    val likedPosts: List<LikedPostResult> = emptyList()
+    val photoEvidence: CameraUiState = CameraUiState.Idle
 )
 
 sealed class CameraUiState {
@@ -29,49 +28,10 @@ sealed class CameraUiState {
     data class Error(val message: String) : CameraUiState()
 }
 
-enum class MessageType(val isMessage: Boolean) {
+enum class RecordType(val isComment: Boolean) {
     TOPIC(false), COMMENT(true)
 }
 
-data class Comment(
-    override val id: Int,
-    override val title: String,
-    override val description: String,
-    override val imageUrl: String,
-    val time: String,
-    val likes: Int,
-    var isSaved: Boolean,
-    val firstInitial: String,
-    val secondInitial: String
-) : ForumRecord
-
-data class Topic(
-    override val id: Int,
-    override val title: String,
-    override val description: String,
-    override val imageUrl: String,
-    val author: String,
-    val numComments: Int,
-    val time: String,
-    val idUser: Int,
-    val color: Color,
-    val isSaved: Boolean
-) : ForumRecord
-
-data class Room(
-    override val id: Int,
-    override val title: String,
-    override val description: String,
-    override val imageUrl: String
-) : ForumRecord
-
 enum class ForumScreenType {
-    ROOM, TOPIC, COMMENT
-}
-
-interface ForumRecord : CatalogItem {
-    override val id: Int
-    val title: String
-    override val description: String
-    val imageUrl: String
+    ROOM, TOPIC
 }

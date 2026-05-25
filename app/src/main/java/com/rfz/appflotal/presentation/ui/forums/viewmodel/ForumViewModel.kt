@@ -11,13 +11,21 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.getRelativeTime
+import com.rfz.appflotal.data.model.forum.ForumComment
+import com.rfz.appflotal.data.model.forum.ForumTopic
 import com.rfz.appflotal.domain.database.GetTasksUseCase
-import com.rfz.appflotal.domain.forum.ForumUseCase
+import com.rfz.appflotal.domain.forum.CreateForumReportUseCase
+import com.rfz.appflotal.domain.forum.CrudForumCommentUseCase
+import com.rfz.appflotal.domain.forum.CrudForumTopicUseCase
+import com.rfz.appflotal.domain.forum.DoForumLikeUseCase
+import com.rfz.appflotal.domain.forum.GetForumRoomWithTopicsUseCase
+import com.rfz.appflotal.domain.forum.GetForumRoomsUseCase
+import com.rfz.appflotal.domain.forum.GetForumTopicByIdUseCase
+import com.rfz.appflotal.domain.forum.GetForumTopicMessagesUseCase
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -27,7 +35,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ForumViewModel @Inject constructor(
-    private val forumUseCase: ForumUseCase,
+    private val getForumRoomsUseCase: GetForumRoomsUseCase,
+    private val getForumRoomWithTopicsUseCase: GetForumRoomWithTopicsUseCase,
+    private val getForumTopicByIdUseCase: GetForumTopicByIdUseCase,
+    private val getForumTopicMessagesUseCase: GetForumTopicMessagesUseCase,
+    private val doForumLikeUseCase: DoForumLikeUseCase,
+    private val crudForumTopicUseCase: CrudForumTopicUseCase,
+    private val createForumReportUseCase: CreateForumReportUseCase,
+    private val crudForumCommentUseCase: CrudForumCommentUseCase,
     private val getTasksUseCase: GetTasksUseCase
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(ForumUiState())
@@ -40,26 +55,17 @@ class ForumViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
 
-            val roomsDeferred = async { forumUseCase.getRooms(1) }
-            val likedPostsDeferred = async { forumUseCase.getLikedPosts() }
-
-            val roomsResponse = roomsDeferred.await()
-            val likedPostsResponse = likedPostsDeferred.await()
+            val roomsResponse = getForumRoomsUseCase(1)
 
             asyncResponseHelper(roomsResponse, onError = {
                 _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar salas")) }
             }) { rooms ->
-                asyncResponseHelper(likedPostsResponse, onError = {
-                    _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar datos de usuario")) }
-                }) { likedPosts ->
-                    _uiState.update {
-                        it.copy(
-                            screenState = LoadState.Success(Unit),
-                            rooms = rooms,
-                            filteredRooms = rooms,
-                            likedPosts = likedPosts
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        screenState = LoadState.Success(Unit),
+                        rooms = rooms,
+                        filteredRooms = rooms,
+                    )
                 }
             }
         }
@@ -70,7 +76,7 @@ class ForumViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
 
-            val response = forumUseCase.getRoomWithTopics(id)
+            val response = getForumRoomWithTopicsUseCase(id)
             asyncResponseHelper(
                 response,
                 onError = {
@@ -93,8 +99,8 @@ class ForumViewModel @Inject constructor(
     fun loadTopicMessages(topicId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
-            val topicResponse = forumUseCase.getTopicById(topicId)
-            val response = forumUseCase.getTopicMessages(topicId)
+            val topicResponse = getForumTopicByIdUseCase(topicId)
+            val response = getForumTopicMessagesUseCase(topicId)
 
             asyncResponseHelper(
                 topicResponse,
@@ -167,7 +173,7 @@ class ForumViewModel @Inject constructor(
 
     fun doLike(id: Int, isComment: Boolean) {
         viewModelScope.launch {
-            val response = forumUseCase.doLike(
+            val response = doForumLikeUseCase(
                 likedDate = getCurrentDate(),
                 tipoElemento = isComment,
                 idMessage = id
@@ -225,7 +231,7 @@ class ForumViewModel @Inject constructor(
 
             _uiState.update { it.copy(newTopicState = LoadState.Loading) }
 
-            val response = forumUseCase.crudTopic(
+            val response = crudForumTopicUseCase(
                 title = title,
                 description = description,
                 color = color,
@@ -245,7 +251,7 @@ class ForumViewModel @Inject constructor(
                 val userList = getTasksUseCase().first()
                 if (userList.isNotEmpty()) {
                     val user = userList.first()
-                    val newTopic = Topic(
+                    val newTopic = ForumTopic(
                         id = 0, // ID temporal
                         title = title,
                         description = description,
@@ -297,7 +303,7 @@ class ForumViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(reportState = LoadState.Loading) }
 
-            val response = forumUseCase.createReport(
+            val response = createForumReportUseCase(
                 idTopic = if (isTopic) id else 0,
                 idMessage = if (!isTopic) id else 0,
                 reportTypeId = reportTypeId,
@@ -322,7 +328,7 @@ class ForumViewModel @Inject constructor(
         publicationJob = viewModelScope.launch {
             _uiState.update { it.copy(sendCommentState = LoadState.Loading) }
 
-            val response = forumUseCase.crudComment(
+            val response = crudForumCommentUseCase(
                 idTopic = topicId,
                 message = commentText,
                 registrationDate = getCurrentDate(),
@@ -339,7 +345,7 @@ class ForumViewModel @Inject constructor(
                 if (userList.isNotEmpty()) {
                     val user = userList.first()
                     val (first, second) = Commons.getInitials(user.fld_username)
-                    val newComment = Comment(
+                    val newComment = ForumComment(
                         id = 0, // ID temporal
                         title = user.fld_username,
                         description = commentText,

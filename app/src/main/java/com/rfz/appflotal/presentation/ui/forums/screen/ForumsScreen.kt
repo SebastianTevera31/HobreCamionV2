@@ -10,19 +10,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.rfz.appflotal.data.model.forum.ForumRoom
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
 import com.rfz.appflotal.presentation.ui.forums.screen.post.ForumCard
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Room
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
 fun RoomsScreen(
-    rooms: List<Room>,
+    rooms: List<ForumRoom>,
     modifier: Modifier = Modifier,
     loadState: LoadState<Any> = LoadState.Idle,
-    onNavigate: (Room) -> Unit
+    onNavigate: (ForumRoom) -> Unit
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -56,19 +56,19 @@ fun RoomsScreen(
 @Composable
 fun RoomsScreenPreview() {
     val sampleRooms = listOf(
-        Room(
+        ForumRoom(
             id = 1,
             title = "Cómo cambiar una llanta",
             description = "En este tutorial aprenderás los pasos básicos para cambiar una llanta de forma segura.",
             imageUrl = ""
         ),
-        Room(
+        ForumRoom(
             id = 2,
             title = "Mantenimiento preventivo",
             description = "La importancia de revisar los frenos y el aceite regularmente para evitar averías mayores.",
             imageUrl = ""
         ),
-        Room(
+        ForumRoom(
             id = 3,
             title = "Rutas recomendadas",
             description = "Descubre las mejores rutas para transportistas este verano, con paradas seguras y buenos servicios.",

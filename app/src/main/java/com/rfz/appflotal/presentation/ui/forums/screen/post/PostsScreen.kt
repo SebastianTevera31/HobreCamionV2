@@ -10,20 +10,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.rfz.appflotal.data.model.forum.ForumTopic
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.MessageType
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.RecordType
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
 fun TopicsScreen(
-    topics: List<Topic>,
+    topics: List<ForumTopic>,
     modifier: Modifier = Modifier,
     loadState: LoadState<Any> = LoadState.Idle,
-    onTopicClick: (Topic) -> Unit,
-    onReport: (topicId: Int, type: MessageType) -> Unit
+    onTopicClick: (ForumTopic) -> Unit,
+    onReport: (topicId: Int, type: RecordType) -> Unit
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -50,7 +50,7 @@ fun TopicsScreen(
                         time = topic.time,
                         firstInitial = topic.author.take(1).uppercase(),
                         secondInitial = "",
-                        onReport = { onReport(topic.id, MessageType.TOPIC) },
+                        onReport = { onReport(topic.id, RecordType.TOPIC) },
                         color = topic.color
                     )
                 }
@@ -63,7 +63,7 @@ fun TopicsScreen(
 @Composable
 fun TopicsScreenPreview() {
     val sampleTopics = listOf(
-        Topic(
+        ForumTopic(
             id = 1,
             title = "Noticia 1",
             description = "Descripción de la noticia 1",
@@ -75,7 +75,7 @@ fun TopicsScreenPreview() {
             color = MaterialTheme.colorScheme.primary,
             isSaved = false
         ),
-        Topic(
+        ForumTopic(
             id = 2,
             title = "Noticia 2",
             description = "Descripción de la noticia 2",
@@ -87,7 +87,7 @@ fun TopicsScreenPreview() {
             color = MaterialTheme.colorScheme.primary,
             isSaved = false
         ),
-        Topic(
+        ForumTopic(
             id = 3,
             title = "Noticia 3",
             description = "Descripción de la noticia 3",

@@ -1,90 +1,59 @@
 package com.rfz.appflotal.data.model.forum
 
-import com.google.gson.annotations.SerializedName
+import androidx.compose.ui.graphics.Color
+import com.rfz.appflotal.data.model.CatalogItem
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.RecordType
 
-data class GetForumsResponse(
-    @SerializedName("results") val results: List<ForumResult>,
-    @SerializedName("total") val total: Int
-)
 
-data class ForumResult(
-    @SerializedName("id_forum") val idForum: Int,
-    @SerializedName("fld_title") val fldTitle: String,
-    @SerializedName("fld_description") val fldDescription: String,
-    @SerializedName("fld_registrationDate") val fldRegistrationDate: String,
-    @SerializedName("fld_image") val fldImage: String,
-    @SerializedName("fld_color") val fldColor: String
-)
+data class ForumComment(
+    override val id: Int,
+    override val title: String,
+    override val description: String,
+    override val imageUrl: String,
+    val time: String,
+    val likes: Int,
+    var isSaved: Boolean,
+    val firstInitial: String,
+    val secondInitial: String
+) : ForumRecord
 
-data class GetTopicsResponse(
-    @SerializedName("results") val results: List<TopicResult>,
-    @SerializedName("total") val total: Int
-)
+data class ForumTopic(
+    override val id: Int,
+    override val title: String,
+    override val description: String,
+    override val imageUrl: String,
+    val author: String,
+    val numComments: Int,
+    val time: String,
+    val idUser: Int,
+    val color: Color,
+    val isSaved: Boolean
+) : ForumRecord
 
-data class TopicResult(
-    @SerializedName("id_topic") val idTopic: Int,
-    @SerializedName("fld_title") val fldTitle: String,
-    @SerializedName("fld_description") val fldDescription: String,
-    @SerializedName("fld_color") val fldColor: String,
-    @SerializedName("fld_like") val fldLike: Int,
-    @SerializedName("fld_messages") val fldMessages: Int,
-    @SerializedName("fld_image") val fldImage: String,
-    @SerializedName("id_forum") val idForum: Int,
-    @SerializedName("fld_tags") val fldTags: String,
-    @SerializedName("fld_registrationDate") val fldRegistrationDate: String,
-    @SerializedName("id_user") val idUser: Int,
-    @SerializedName("fld_userName") val fldUserName: String,
-    @SerializedName("fld_edited") val fldEdited: Boolean
-)
+data class ForumRoom(
+    override val id: Int,
+    override val title: String,
+    override val description: String,
+    override val imageUrl: String
+) : ForumRecord
 
-data class TopicMessageResult(
-    @SerializedName("id_topicMessages") val idTopicMessages: Int,
-    @SerializedName("fld_message") val fldMessage: String,
-    @SerializedName("fld_registrationDate") val fldRegistrationDate: String,
-    @SerializedName("id_user") val idUser: Int,
-    @SerializedName("fld_userName") val fldUserName: String,
-    @SerializedName("fld_like") val fldLike: Int,
-    @SerializedName("id_topic") val idTopic: Int,
-    @SerializedName("fld_edited") val fldEdited: Boolean,
-    @SerializedName("fld_image") val fldImage: String
-)
+data class LikedRecord(
+    override val id: Int,
+    override val title: String,
+    override val description: String,
+    override val imageUrl: String,
+    val likedId: Int,
+    val likes: Int,
+    val author: String,
+    val type: RecordType,
+    val date: String,
+    val firstInitial: String,
+    val secondInitial: String
+) : ForumRecord
 
-data class CrudTopicMessageRequest(
-    @SerializedName("id_topicMessage") val idTopicMessage: Int,
-    @SerializedName("message") val message: String,
-    @SerializedName("registrationDate") val registrationDate: String,
-    @SerializedName("id_topic") val idTopic: Int,
-    @SerializedName("image") val image: String
-)
-
-data class CrudTopicRequest(
-    @SerializedName("id_topic") val idTopic: Int,
-    @SerializedName("title") val title: String,
-    @SerializedName("description") val description: String,
-    @SerializedName("color") val color: String,
-    @SerializedName("image") val image: String,
-    @SerializedName("id_forum") val idForum: Int,
-    @SerializedName("tags") val tags: String,
-    @SerializedName("registrationDate") val registrationDate: String
-)
-
-data class DoLikeRequest(
-    @SerializedName("likedDate") val likedDate: String,
-    @SerializedName("tipoElemento") val tipoElemento: Boolean,
-    @SerializedName("id_elemento") val idElemento: Int
-)
-
-data class LikedPostResult(
-    @SerializedName("id_liked") val idLiked: Int,
-    @SerializedName("summarizedPublication") val summarizedPublication: String,
-    @SerializedName("completePublication") val completePublication: String,
-    @SerializedName("id_user") val idUser: Int,
-    @SerializedName("likedDate") val likedDate: String
-)
-
-data class CreateReportRequest(
-    @SerializedName("id_topic") val idTopic: Int,
-    @SerializedName("id_message") val idMessage: Int,
-    @SerializedName("reportDate") val reportDate: String,
-    @SerializedName("id_typeReport") val idTypeReport: Int
-)
+interface ForumRecord : CatalogItem {
+    override val id: Int
+    val title: String
+    override val description: String
+    val imageUrl: String
+}

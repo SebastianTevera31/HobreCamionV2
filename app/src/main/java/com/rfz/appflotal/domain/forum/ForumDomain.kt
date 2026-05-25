@@ -1,24 +1,23 @@
 package com.rfz.appflotal.domain.forum
 
-import com.rfz.appflotal.data.mapper.toComment
-import com.rfz.appflotal.data.mapper.toRoom
-import com.rfz.appflotal.data.mapper.toTopic
+import com.rfz.appflotal.data.model.forum.ForumComment
 import com.rfz.appflotal.data.model.forum.CreateReportRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.DoLikeRequest
 import com.rfz.appflotal.data.model.forum.LikedPostResult
+import com.rfz.appflotal.data.model.forum.ForumRoom
+import com.rfz.appflotal.data.model.forum.ForumTopic
+import com.rfz.appflotal.data.model.forum.toComment
+import com.rfz.appflotal.data.model.forum.toRoom
+import com.rfz.appflotal.data.model.forum.toTopic
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.forum.ForumRepository
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Room
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
 import javax.inject.Inject
 
-class ForumUseCase @Inject constructor(private val forumRepository: ForumRepository) {
-
-    suspend fun getRooms(pageNumber: Int, title: String? = null): ApiResult<List<Room>> {
+class GetForumRoomsUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(pageNumber: Int, title: String? = null): ApiResult<List<ForumRoom>> {
         return when (val response = forumRepository.getForums(pageNumber, title)) {
             is ApiResult.Success -> ApiResult.Success(
                 response.data?.results?.map { it.toRoom() } ?: emptyList()
@@ -28,21 +27,25 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
             ApiResult.Loading -> ApiResult.Loading
         }
     }
+}
 
-    suspend fun getRoomById(idForum: Int): ApiResult<Room?> {
+class GetForumRoomByIdUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(idForum: Int): ApiResult<ForumRoom?> {
         return when (val response = forumRepository.getForumsById(idForum)) {
             is ApiResult.Success -> ApiResult.Success(response.data?.firstOrNull()?.toRoom())
             is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
             ApiResult.Loading -> ApiResult.Loading
         }
     }
+}
 
-    suspend fun getTopics(
+class GetForumTopicsUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(
         pageNumber: Int,
         idForum: Int,
         title: String = "",
         tipoOrdenamiento: Int = 1
-    ): ApiResult<List<Topic>> {
+    ): ApiResult<List<ForumTopic>> {
         val response = forumRepository.getTopics(pageNumber, idForum, title, tipoOrdenamiento)
         return when (response) {
             is ApiResult.Success -> ApiResult.Success(
@@ -53,16 +56,20 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
             ApiResult.Loading -> ApiResult.Loading
         }
     }
+}
 
-    suspend fun getTopicById(idTopic: Int): ApiResult<Topic?> {
+class GetForumTopicByIdUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(idTopic: Int): ApiResult<ForumTopic?> {
         return when (val response = forumRepository.getTopicsById(idTopic)) {
             is ApiResult.Success -> ApiResult.Success(response.data?.firstOrNull()?.toTopic())
             is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
             ApiResult.Loading -> ApiResult.Loading
         }
     }
+}
 
-    suspend fun getTopicMessages(idTopic: Int): ApiResult<List<Comment>> {
+class GetForumTopicMessagesUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(idTopic: Int): ApiResult<List<ForumComment>> {
         return when (val response = forumRepository.getTopicMessages(idTopic)) {
             is ApiResult.Success -> ApiResult.Success(
                 response.data?.map { it.toComment() } ?: emptyList()
@@ -72,8 +79,10 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
             ApiResult.Loading -> ApiResult.Loading
         }
     }
+}
 
-    suspend fun getRoomWithTopics(roomId: Int): ApiResult<Pair<Room?, List<Topic>>> {
+class GetForumRoomWithTopicsUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(roomId: Int): ApiResult<Pair<ForumRoom?, List<ForumTopic>>> {
         val forumResponse = forumRepository.getForumsById(roomId)
         val room = if (forumResponse is ApiResult.Success) {
             forumResponse.data?.firstOrNull()?.toRoom()
@@ -92,8 +101,10 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
             ApiResult.Loading -> ApiResult.Loading
         }
     }
+}
 
-    suspend fun crudComment(
+class CrudForumCommentUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(
         idTopic: Int,
         message: String,
         registrationDate: String,
@@ -109,8 +120,10 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
             )
         )
     }
+}
 
-    suspend fun crudTopic(
+class CrudForumTopicUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(
         title: String,
         description: String,
         color: String,
@@ -132,8 +145,10 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
             )
         )
     }
+}
 
-    suspend fun doLike(
+class DoForumLikeUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(
         likedDate: String,
         tipoElemento: Boolean,
         idMessage: Int
@@ -146,16 +161,20 @@ class ForumUseCase @Inject constructor(private val forumRepository: ForumReposit
             )
         )
     }
+}
 
-    suspend fun getLikedPosts(): ApiResult<List<LikedPostResult>> {
+class GetLikedPostsUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(): ApiResult<List<LikedPostResult>> {
         return when (val response = forumRepository.getLikedPosts()) {
             is ApiResult.Success -> ApiResult.Success(response.data ?: emptyList())
             is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
             ApiResult.Loading -> ApiResult.Loading
         }
     }
+}
 
-    suspend fun createReport(
+class CreateForumReportUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(
         idTopic: Int,
         idMessage: Int,
         reportTypeId: Int,

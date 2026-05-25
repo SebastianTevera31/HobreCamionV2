@@ -106,9 +106,7 @@ import com.rfz.appflotal.presentation.ui.cambiodestino.viewmodel.CambioDestinoVi
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.DisassemblyTireScreen
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.forumsGraph
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.screen.ShareFeedbackScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
@@ -119,7 +117,7 @@ import com.rfz.appflotal.presentation.ui.inicio.viewmodel.NotificationPermission
 import com.rfz.appflotal.presentation.ui.inspection.screens.InspectionRoute
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionViewModel
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
-import com.rfz.appflotal.presentation.ui.loading.screen.LoadingScreen
+import com.rfz.appflotal.presentation.ui.loading.screen.SplashScreen
 import com.rfz.appflotal.presentation.ui.login.screen.LoginScreen
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import com.rfz.appflotal.presentation.ui.marcarenovados.screens.MarcaRenovadosScreen
@@ -720,7 +718,7 @@ class InicioActivity : ComponentActivity() {
                                         PasswordScreen(passwordViewModel)
                                     }
 
-                                    composable(NavScreens.LOADING) { LoadingScreen() }
+                                    composable(NavScreens.LOADING) { SplashScreen() }
 
                                     composable(NavScreens.LOGIN) {
                                         LoginScreen(

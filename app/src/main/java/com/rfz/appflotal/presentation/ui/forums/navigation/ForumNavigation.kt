@@ -33,7 +33,7 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.NavScreens
-import com.rfz.appflotal.data.mapper.toComment
+import com.rfz.appflotal.data.model.forum.toComment
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.ui.forums.components.ForumErrorView
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
@@ -44,6 +44,7 @@ import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarC
 import com.rfz.appflotal.presentation.ui.forums.screen.RoomsScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.post.NewTopicScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.post.TopicsScreen
+import com.rfz.appflotal.presentation.ui.forums.screen.savedcomments.SavedCommentsRoute
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.DiscussionScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReplyScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReportScreen
@@ -72,7 +73,6 @@ data class TopicDiscussion(
     val topicTitle: String
 )
 
-
 @Serializable
 data class ReportContent(
     val id: Int,
@@ -89,6 +89,9 @@ data class NewTopicNav(
 data class NewCommentNav(
     val commentId: Int
 )
+
+@Serializable
+object SavedCommentsNav
 
 fun NavGraphBuilder.forumsGraph(
     navController: NavHostController
@@ -251,7 +254,7 @@ fun NavGraphBuilder.forumsGraph(
                                 navController.navigate(
                                     ReportContent(
                                         id = id,
-                                        isTopic = type.isMessage
+                                        isTopic = type.isComment
                                     )
                                 )
                             },
@@ -359,7 +362,7 @@ fun NavGraphBuilder.forumsGraph(
                                     navController.navigate(
                                         ReportContent(
                                             id = id,
-                                            isTopic = type.isMessage
+                                            isTopic = type.isComment
                                         )
                                     )
                                 },
@@ -408,10 +411,12 @@ fun NavGraphBuilder.forumsGraph(
                         navController.popBackStack()
                         viewModel.resetReportState()
                     }
+
                     is LoadState.Error -> {
                         Toast.makeText(context, reportState.message, Toast.LENGTH_SHORT).show()
                         viewModel.resetReportState()
                     }
+
                     else -> {}
                 }
             }
@@ -524,6 +529,34 @@ fun NavGraphBuilder.forumsGraph(
                         onBack = { navController.popBackStack() }
                     )
                 }
+            }
+        }
+
+        composable<SavedCommentsNav> {
+            ForumModuleScaffold(
+                topBarConfig = ForumTopBarConfig(
+                    title = "Publicaciones guardadas",
+                    subtitle = "",
+                    showBackButton = true,
+                    showMenuButton = false,
+                    onBackClick = { navController.popBackStack() }
+                )
+            ) {
+                SavedCommentsRoute(
+                    onNavigateTo = { idRecord, title, isComment ->
+                        if (isComment) {
+                            navController.navigate(NewCommentNav(commentId = idRecord))
+                        } else {
+                            navController.navigate(
+                                TopicDiscussion(
+                                    roomId = "",
+                                    topicId = idRecord.toString(),
+                                    topicTitle = title
+                                )
+                            )
+                        }
+                    }
+                )
             }
         }
     }

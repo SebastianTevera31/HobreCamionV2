@@ -15,21 +15,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.rfz.appflotal.data.model.forum.ForumComment
+import com.rfz.appflotal.data.model.forum.ForumTopic
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Comment
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.MessageType
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.Topic
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.RecordType
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DiscussionScreen(
-    topic: Topic,
-    comments: List<Comment>,
-    onReply: (Comment) -> Unit,
+    topic: ForumTopic,
+    comments: List<ForumComment>,
+    onReply: (ForumComment) -> Unit,
     onSave: (id: Int, isComment: Boolean) -> Unit,
-    onReport: (id: Int, type: MessageType) -> Unit,
+    onReport: (id: Int, type: RecordType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -47,7 +47,7 @@ fun DiscussionScreen(
                         title = topic.title,
                         content = topic.description,
                         imageUrl = topic.imageUrl,
-                        onReport = { onReport(topic.id, MessageType.TOPIC) },
+                        onReport = { onReport(topic.id, RecordType.TOPIC) },
                         onSave = { onSave(topic.id, false) },
                         isSaved = topic.isSaved,
                         likes = 3,
@@ -70,7 +70,7 @@ fun DiscussionScreen(
                         onSave = { onSave(comment.id, true) },
                         isAuthor = comment.id == topic.idUser,
                         isSaved = comment.isSaved,
-                        onReport = { onReport(comment.id, MessageType.COMMENT) },
+                        onReport = { onReport(comment.id, RecordType.COMMENT) },
                         secondInitial = comment.secondInitial,
                         time = comment.time
                     )
@@ -93,7 +93,7 @@ fun DiscussionScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DiscussionScreenPreview() {
-    val sampleTopic = Topic(
+    val sampleTopic = ForumTopic(
         id = 1,
         title = "Cómo mejorar la eficiencia de combustible",
         description = "Compartamos consejos sobre cómo ahorrar combustible en rutas largas.",
@@ -107,7 +107,7 @@ fun DiscussionScreenPreview() {
     )
 
     val sampleComments = listOf(
-        Comment(
+        ForumComment(
             id = 2,
             title = "Admin",
             description = "Excelente tema para discutir. Aquí les dejo mis primeros consejos...",
@@ -118,7 +118,7 @@ fun DiscussionScreenPreview() {
             isSaved = true,
             time = ""
         ),
-        Comment(
+        ForumComment(
             id = 1,
             title = "Carlos Ruiz",
             description = "Yo siempre mantengo la presión de los neumáticos al nivel recomendado.",
@@ -129,7 +129,7 @@ fun DiscussionScreenPreview() {
             isSaved = false,
             time = ""
         ),
-        Comment(
+        ForumComment(
             id = 3,
             title = "Ana Martínez",
             description = "Evitar frenazos bruscos también ayuda mucho.",

@@ -11,10 +11,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
-fun LoadingScreen() {
+fun SplashScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -29,6 +31,10 @@ fun LoadingScreen() {
     }
 }
 
-
-
-
+@Preview(showBackground = true)
+@Composable
+fun SplashScreenPreview() {
+    HombreCamionTheme {
+        SplashScreen()
+    }
+}
