@@ -53,16 +53,16 @@ class ForumViewModel @Inject constructor(
     fun getInitialData() {
         if (_uiState.value.rooms.isNotEmpty()) return
         viewModelScope.launch {
-            _uiState.update { it.copy(screenState = LoadState.Loading) }
+            _uiState.update { it.copy(roomState = LoadState.Loading) }
 
             val roomsResponse = getForumRoomsUseCase(1)
 
             asyncResponseHelper(roomsResponse, onError = {
-                _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar salas")) }
+                _uiState.update { it.copy(roomState = LoadState.Error("Error al cargar salas")) }
             }) { rooms ->
                 _uiState.update {
                     it.copy(
-                        screenState = LoadState.Success(Unit),
+                        roomState = LoadState.Success(Unit),
                         rooms = rooms,
                         filteredRooms = rooms,
                     )
@@ -191,8 +191,13 @@ class ForumViewModel @Inject constructor(
                     if (currentTopicId != null) {
                         _uiState.update { currentUiState ->
                             val newIsSaved = !currentUiState.selectedTopic!!.isSaved
-                            val topic = currentUiState.selectedTopic.copy(isSaved = newIsSaved)
-                            currentUiState.copy(selectedTopic = topic)
+                            val topic = currentUiState.selectedTopic
+                            currentUiState.copy(
+                                selectedTopic = topic.copy(
+                                    isSaved = newIsSaved,
+                                    numComments = if (newIsSaved) topic.likes + 1 else topic.likes - 1
+                                )
+                            )
                         }
                     }
                 } else {
@@ -261,7 +266,8 @@ class ForumViewModel @Inject constructor(
                         time = getRelativeTime(getCurrentDate()),
                         idUser = user.idUser,
                         color = Color(color.toColorInt()),
-                        isSaved = false
+                        isSaved = false,
+                        likes = 0
                     )
 
                     _uiState.update { state ->
@@ -388,6 +394,14 @@ class ForumViewModel @Inject constructor(
     fun clearPhoto() {
         currentPhotoUri = null
         changePhotoStatus(CameraUiState.Idle)
+    }
+
+    fun clearScreenState() {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                screenState = LoadState.Idle
+            )
+        }
     }
 
     private fun changePhotoStatus(status: CameraUiState) {

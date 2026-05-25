@@ -73,7 +73,8 @@ fun TopicsScreenPreview() {
             time = "hace 2 horas",
             idUser = 1,
             color = MaterialTheme.colorScheme.primary,
-            isSaved = false
+            isSaved = false,
+            likes = 0
         ),
         ForumTopic(
             id = 2,
@@ -85,7 +86,8 @@ fun TopicsScreenPreview() {
             time = "hace 5 horas",
             idUser = 2,
             color = MaterialTheme.colorScheme.primary,
-            isSaved = false
+            isSaved = false,
+            likes = 0
         ),
         ForumTopic(
             id = 3,
@@ -97,7 +99,8 @@ fun TopicsScreenPreview() {
             time = "hace 1 día",
             idUser = 3,
             color = MaterialTheme.colorScheme.primary,
-            isSaved = false
+            isSaved = false,
+            likes = 0
         )
     )
     HombreCamionTheme {

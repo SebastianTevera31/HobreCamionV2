@@ -2,23 +2,29 @@ package com.rfz.appflotal.presentation.ui.forums.components.scaffold
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -30,11 +36,14 @@ import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ForumSearchBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForumTopAppBar(
     config: ForumTopBarConfig,
     modifier: Modifier = Modifier
 ) {
+    var expandMenu by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -54,69 +63,83 @@ fun ForumTopAppBar(
                 bottom = 16.dp
             )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 48.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (config.showBackButton) {
-                IconButton(
-                    onClick = {
-                        config.onBackClick?.invoke()
-                    }
+        TopAppBar(
+            title = {
+                Column(
+                    modifier = Modifier
+                        .padding(
+                            start = if (config.showBackButton) 4.dp else 0.dp,
+                            end = 8.dp
+                        )
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Regresar",
-                        tint = Color.White
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(
-                        start = if (config.showBackButton) 4.dp else 0.dp,
-                        end = 8.dp
-                    )
-            ) {
-                Text(
-                    text = config.title,
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                config.subtitle?.let { subtitle ->
                     Text(
-                        text = subtitle,
-                        color = Color.White.copy(alpha = 0.78f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        text = config.title,
+                        color = Color.White,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                }
-            }
 
-            if (config.showMenuButton) {
-                IconButton(
-                    onClick = {
-                        config.onMenuClick?.invoke()
+                    config.subtitle?.let { subtitle ->
+                        Text(
+                            text = subtitle,
+                            color = Color.White.copy(alpha = 0.78f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreHoriz,
-                        contentDescription = "Más opciones",
-                        tint = Color.White
-                    )
                 }
-            }
-        }
+            },
+            navigationIcon = {
+                if (config.showBackButton) {
+                    IconButton(
+                        onClick = {
+                            config.onBackClick?.invoke()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Regresar",
+                            tint = Color.White
+                        )
+                    }
+                }
+            },
+            actions = {
+                if (config.showMenuButton) {
+                    Column {
+                        IconButton(
+                            onClick = {
+                                expandMenu = true
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Más opciones",
+                                tint = Color.White
+                            )
+                        }
+
+                        DropdownMenu(expanded = expandMenu, onDismissRequest = {}) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = "Gustados"
+                                    )
+                                },
+                                onClick = {
+                                    config.onMenuClick?.invoke()
+                                }
+                            )
+                        }
+                    }
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+        )
 
         config.searchConfig?.let { searchConfig ->
             Spacer(modifier = Modifier.height(12.dp))
@@ -152,6 +175,7 @@ fun ForumTopAppBarSearchPreview() {
             config = ForumTopBarConfig(
                 title = "Buscar en el foro",
                 showBackButton = true,
+                showMenuButton = true,
                 searchConfig = ForumSearchConfig(
                     value = "",
                     placeholder = "Buscar temas...",

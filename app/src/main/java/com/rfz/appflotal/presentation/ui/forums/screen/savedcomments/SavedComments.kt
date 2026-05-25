@@ -12,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.data.model.forum.LikedRecord
-import com.rfz.appflotal.presentation.commons.ErrorView
-import com.rfz.appflotal.presentation.commons.LoadingIndicator
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.components.ForumErrorView
+import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
 import com.rfz.appflotal.presentation.ui.forums.components.RecordCard
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.RecordType
 import com.rfz.appflotal.presentation.ui.utils.LoadState
@@ -34,13 +34,13 @@ fun SavedCommentsRoute(
 
     when (uiState.value.savedCommentState) {
         is LoadState.Error -> {
-            ErrorView(showRetryButton = true) {
-                viewModel.loadComments()
-            }
+            ForumErrorView(
+                onRetry = { viewModel.loadComments() }
+            )
         }
 
         LoadState.Loading -> {
-            LoadingIndicator()
+            ForumShimmerList()
         }
 
         is LoadState.Success -> {
@@ -66,7 +66,7 @@ fun SavedCommentsScreen(
     LazyColumn(
         contentPadding = PaddingValues(Dimens.PaddingSmall),
         verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         items(likedComments, key = { it.likedId }) { record ->
             RecordCard(

@@ -130,7 +130,6 @@ fun HomeScreen(
         monitorViewModel.initMonitorData()
     }
 
-
     // BLOQUEAR BOTON DE RETROCESO DEL DISPOSITIVO
     BackHandler { }
 

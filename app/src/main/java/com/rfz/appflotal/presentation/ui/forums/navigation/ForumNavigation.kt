@@ -103,7 +103,7 @@ fun NavGraphBuilder.forumsGraph(
             val parentEntry = remember(backStackEntry) {
                 try {
                     navController.getBackStackEntry<ForumsGraph>()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     backStackEntry
                 }
             }
@@ -120,7 +120,7 @@ fun NavGraphBuilder.forumsGraph(
                     title = stringResource(R.string.forum_title),
                     subtitle = stringResource(R.string.forum_subtitle),
                     showBackButton = true,
-                    showMenuButton = false,
+                    showMenuButton = true,
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
                         placeholder = stringResource(R.string.forum_search_placeholder),
@@ -133,10 +133,12 @@ fun NavGraphBuilder.forumsGraph(
                             popUpTo(0) { inclusive = true }
                         }
                     },
-                    onMenuClick = {}
+                    onMenuClick = {
+                        navController.navigate(SavedCommentsNav)
+                    }
                 )
             ) { paddingValues ->
-                when (state.screenState) {
+                when (state.roomState) {
                     is LoadState.Loading -> {
                         ForumShimmerList(modifier = Modifier.padding(paddingValues))
                     }
@@ -192,7 +194,7 @@ fun NavGraphBuilder.forumsGraph(
                     title = args.roomTitle,
                     subtitle = stringResource(R.string.forum_room_topics_subtitle),
                     showBackButton = true,
-                    showMenuButton = false,
+                    showMenuButton = true,
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
                         placeholder = stringResource(R.string.forum_search_topics_placeholder),
@@ -200,8 +202,12 @@ fun NavGraphBuilder.forumsGraph(
                             viewModel.onSearchChanged(it, ForumScreenType.TOPIC)
                         }
                     ),
-                    onBackClick = { navController.popBackStack() },
-                    onMenuClick = {}
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onMenuClick = {
+                        navController.navigate(SavedCommentsNav)
+                    }
                 ),
                 floatingActionButton = {
                     FloatingActionButton(onClick = {
@@ -455,7 +461,7 @@ fun NavGraphBuilder.forumsGraph(
             val parentEntry = remember(backStackEntry) {
                 try {
                     navController.getBackStackEntry<ForumsGraph>()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     backStackEntry
                 }
             }
@@ -535,11 +541,12 @@ fun NavGraphBuilder.forumsGraph(
         composable<SavedCommentsNav> {
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
-                    title = "Publicaciones guardadas",
-                    subtitle = "",
+                    title = "Gustados",
                     showBackButton = true,
                     showMenuButton = false,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
                 )
             ) {
                 SavedCommentsRoute(

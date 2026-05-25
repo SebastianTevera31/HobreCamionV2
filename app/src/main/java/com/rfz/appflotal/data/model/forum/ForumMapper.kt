@@ -30,7 +30,8 @@ fun TopicResult.toTopic(): ForumTopic {
             val finalColor = if (colorStr.startsWith("#") || colorStr.isEmpty()) colorStr
             else "#$colorStr"
             Color(finalColor.toColorInt())
-        }.getOrDefault(Color.Transparent)
+        }.getOrDefault(Color.Transparent),
+        likes = this.fldLike
     )
 }
 
@@ -41,7 +42,7 @@ fun ForumTopic.toComment(): ForumComment {
         description = this.description,
         imageUrl = this.imageUrl,
         time = this.time,
-        likes = 0,
+        likes = this.likes,
         isSaved = false,
         firstInitial = "",
         secondInitial = ""

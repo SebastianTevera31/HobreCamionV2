@@ -398,8 +398,8 @@
     <string name="selecciona_una_opcion">Select an option</string>
     <string name="sin_elementos_disponibles">No items available</string>
     <string name="reintentar">Retry</string>
-    <string name="operacion_cancelada">The operation was cancelled.</string>
-    <string name="blog">Blog</string>
+    <string name="operacion_cancelada">The operation was canceled.</string>
+    <string name="blog">Vlog</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>

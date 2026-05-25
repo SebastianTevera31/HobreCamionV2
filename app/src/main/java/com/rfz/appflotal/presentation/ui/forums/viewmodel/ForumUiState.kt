@@ -9,6 +9,7 @@ data class ForumUiState(
     val screenState: LoadState<Unit> = LoadState.Idle,
     val newTopicState: LoadState<Unit> = LoadState.Idle,
     val sendCommentState: LoadState<Unit> = LoadState.Idle,
+    val roomState: LoadState<Unit> = LoadState.Idle,
     val reportState: LoadState<Unit> = LoadState.Idle,
     val rooms: List<ForumRoom> = emptyList(),
     val topics: List<ForumTopic> = emptyList(),

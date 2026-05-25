@@ -27,6 +27,7 @@ data class ForumTopic(
     val time: String,
     val idUser: Int,
     val color: Color,
+    val likes: Int,
     val isSaved: Boolean
 ) : ForumRecord
 

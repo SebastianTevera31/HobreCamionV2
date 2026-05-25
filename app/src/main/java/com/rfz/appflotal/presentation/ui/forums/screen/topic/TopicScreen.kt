@@ -4,8 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -77,16 +75,6 @@ fun DiscussionScreen(
                 }
             }
         }
-
-
-        Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
-
-
-            Row(modifier = Modifier.weight(1f)) {
-                Spacer(modifier = Modifier.padding(Dimens.PaddingMedium))
-
-            }
-        }
     }
 }
 
@@ -103,7 +91,8 @@ fun DiscussionScreenPreview() {
         time = "hace 3 horas",
         idUser = 1,
         color = MaterialTheme.colorScheme.primary,
-        isSaved = false
+        isSaved = false,
+        likes = 0
     )
 
     val sampleComments = listOf(
