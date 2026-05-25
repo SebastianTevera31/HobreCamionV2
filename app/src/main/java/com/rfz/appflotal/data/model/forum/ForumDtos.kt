@@ -34,7 +34,8 @@ data class TopicResult(
     @SerializedName("fld_registrationDate") val fldRegistrationDate: String,
     @SerializedName("id_user") val idUser: Int,
     @SerializedName("fld_userName") val fldUserName: String,
-    @SerializedName("fld_edited") val fldEdited: Boolean
+    @SerializedName("fld_edited") val fldEdited: Boolean,
+    @SerializedName("isLiked") val isLiked: Boolean
 )
 
 data class TopicMessageResult(
@@ -46,7 +47,8 @@ data class TopicMessageResult(
     @SerializedName("fld_like") val fldLike: Int,
     @SerializedName("id_topic") val idTopic: Int,
     @SerializedName("fld_edited") val fldEdited: Boolean,
-    @SerializedName("fld_image") val fldImage: String
+    @SerializedName("fld_image") val fldImage: String,
+    @SerializedName("isLiked") val isLiked: Boolean
 )
 
 data class CrudTopicMessageRequest(

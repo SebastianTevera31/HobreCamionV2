@@ -12,9 +12,9 @@ data class ForumComment(
     override val imageUrl: String,
     val time: String,
     val likes: Int,
-    var isSaved: Boolean,
     val firstInitial: String,
-    val secondInitial: String
+    val secondInitial: String,
+    val isLiked: Boolean
 ) : ForumRecord
 
 data class ForumTopic(
@@ -28,7 +28,7 @@ data class ForumTopic(
     val idUser: Int,
     val color: Color,
     val likes: Int,
-    val isSaved: Boolean
+    val isLiked: Boolean
 ) : ForumRecord
 
 data class ForumRoom(

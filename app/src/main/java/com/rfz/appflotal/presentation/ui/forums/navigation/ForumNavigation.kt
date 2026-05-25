@@ -264,7 +264,14 @@ fun NavGraphBuilder.forumsGraph(
                                     )
                                 )
                             },
-                            modifier = Modifier.padding(paddingValues)
+                            modifier = Modifier.padding(paddingValues),
+                            onSaved = {
+                                viewModel.doLike(
+                                    id = it,
+                                    isComment = false,
+                                    fromPostsView = true
+                                )
+                            }
                         )
                     }
 

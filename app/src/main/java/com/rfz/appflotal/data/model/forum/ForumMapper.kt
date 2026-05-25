@@ -23,7 +23,6 @@ fun TopicResult.toTopic(): ForumTopic {
         author = this.fldUserName,
         numComments = this.fldMessages,
         idUser = this.idUser,
-        isSaved = false,
         time = Commons.getRelativeTime(this.fldRegistrationDate),
         color = runCatching {
             val colorStr = this.fldColor.trim()
@@ -31,7 +30,8 @@ fun TopicResult.toTopic(): ForumTopic {
             else "#$colorStr"
             Color(finalColor.toColorInt())
         }.getOrDefault(Color.Transparent),
-        likes = this.fldLike
+        likes = this.fldLike,
+        isLiked = this.isLiked
     )
 }
 
@@ -43,9 +43,9 @@ fun ForumTopic.toComment(): ForumComment {
         imageUrl = this.imageUrl,
         time = this.time,
         likes = this.likes,
-        isSaved = false,
         firstInitial = "",
-        secondInitial = ""
+        secondInitial = "",
+        isLiked = this.isLiked
     )
 }
 
@@ -57,10 +57,10 @@ fun TopicMessageResult.toComment(): ForumComment {
         description = this.fldMessage,
         imageUrl = this.fldImage,
         likes = this.fldLike,
-        isSaved = false,
         firstInitial = first,
         secondInitial = second,
-        time = Commons.getRelativeTime(this.fldRegistrationDate)
+        time = Commons.getRelativeTime(this.fldRegistrationDate),
+        isLiked = this.isLiked
     )
 }
 

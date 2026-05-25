@@ -47,7 +47,7 @@ fun DiscussionScreen(
                         imageUrl = topic.imageUrl,
                         onReport = { onReport(topic.id, RecordType.TOPIC) },
                         onSave = { onSave(topic.id, false) },
-                        isSaved = topic.isSaved,
+                        isSaved = topic.isLiked,
                         likes = 3,
                         time = topic.time,
                         color = topic.color
@@ -67,7 +67,7 @@ fun DiscussionScreen(
                         onReply = { onReply(comment) },
                         onSave = { onSave(comment.id, true) },
                         isAuthor = comment.id == topic.idUser,
-                        isSaved = comment.isSaved,
+                        isSaved = comment.isLiked,
                         onReport = { onReport(comment.id, RecordType.COMMENT) },
                         secondInitial = comment.secondInitial,
                         time = comment.time
@@ -91,8 +91,8 @@ fun DiscussionScreenPreview() {
         time = "hace 3 horas",
         idUser = 1,
         color = MaterialTheme.colorScheme.primary,
-        isSaved = false,
-        likes = 0
+        likes = 0,
+        isLiked = true
     )
 
     val sampleComments = listOf(
@@ -104,8 +104,8 @@ fun DiscussionScreenPreview() {
             likes = 10,
             firstInitial = "A",
             secondInitial = "",
-            isSaved = true,
-            time = ""
+            time = "",
+            isLiked = false
         ),
         ForumComment(
             id = 1,
@@ -115,8 +115,8 @@ fun DiscussionScreenPreview() {
             likes = 5,
             firstInitial = "C",
             secondInitial = "R",
-            isSaved = false,
-            time = ""
+            time = "",
+            isLiked = true
         ),
         ForumComment(
             id = 3,
@@ -126,8 +126,8 @@ fun DiscussionScreenPreview() {
             likes = 8,
             firstInitial = "A",
             secondInitial = "M",
-            isSaved = true,
-            time = ""
+            time = "",
+            isLiked = false
         )
     )
 

@@ -171,7 +171,7 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun doLike(id: Int, isComment: Boolean) {
+    fun doLike(id: Int, isComment: Boolean, fromPostsView: Boolean = false) {
         viewModelScope.launch {
             val response = doForumLikeUseCase(
                 likedDate = getCurrentDate(),
@@ -187,26 +187,43 @@ class ForumViewModel @Inject constructor(
             ) {
                 // Actualizar UI localmente o recargar datos
                 if (!isComment) {
-                    val currentTopicId = _uiState.value.selectedTopic?.id
-                    if (currentTopicId != null) {
+                    if (fromPostsView) {
                         _uiState.update { currentUiState ->
-                            val newIsSaved = !currentUiState.selectedTopic!!.isSaved
-                            val topic = currentUiState.selectedTopic
-                            currentUiState.copy(
-                                selectedTopic = topic.copy(
-                                    isSaved = newIsSaved,
-                                    numComments = if (newIsSaved) topic.likes + 1 else topic.likes - 1
+                            val updatedTopics = currentUiState.filteredTopics.map { topic ->
+                                if (topic.id == id) {
+                                    val newIsSaved = !topic.isLiked
+                                    topic.copy(
+                                        isLiked = newIsSaved,
+                                        likes = if (newIsSaved) topic.likes + 1 else topic.likes - 1
+                                    )
+                                } else {
+                                    topic
+                                }
+                            }
+                            currentUiState.copy(filteredTopics = updatedTopics)
+                        }
+                    } else {
+                        val currentTopicId = _uiState.value.selectedTopic?.id
+                        if (currentTopicId != null) {
+                            _uiState.update { currentUiState ->
+                                val newIsSaved = !currentUiState.selectedTopic!!.isLiked
+                                val topic = currentUiState.selectedTopic
+                                currentUiState.copy(
+                                    selectedTopic = topic.copy(
+                                        isLiked = newIsSaved,
+                                        numComments = if (newIsSaved) topic.likes + 1 else topic.likes - 1
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 } else {
                     _uiState.update { currentUiState ->
                         val updatedComments = currentUiState.comments.map { comment ->
                             if (comment.id == id) {
-                                val newIsSaved = !comment.isSaved
+                                val newIsSaved = !comment.isLiked
                                 comment.copy(
-                                    isSaved = newIsSaved,
+                                    isLiked = newIsSaved,
                                     likes = if (newIsSaved) comment.likes + 1 else comment.likes - 1
                                 )
                             } else {
@@ -266,7 +283,7 @@ class ForumViewModel @Inject constructor(
                         time = getRelativeTime(getCurrentDate()),
                         idUser = user.idUser,
                         color = Color(color.toColorInt()),
-                        isSaved = false,
+                        isLiked = false,
                         likes = 0
                     )
 
@@ -358,9 +375,9 @@ class ForumViewModel @Inject constructor(
                         imageUrl = "",
                         time = getRelativeTime(getCurrentDate()),
                         likes = 0,
-                        isSaved = false,
                         firstInitial = first,
-                        secondInitial = second
+                        secondInitial = second,
+                        isLiked = false
                     )
 
                     _uiState.update { state ->
