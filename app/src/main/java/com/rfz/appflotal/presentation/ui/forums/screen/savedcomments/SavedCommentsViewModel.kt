@@ -39,7 +39,12 @@ class SavedCommentsViewModel @Inject constructor(
                 _uiState.update { it.copy(savedCommentState = LoadState.Error("Error al cargar comentarios")) }
             }) { result ->
                 val comments = result.mapNotNull { record -> record.toEntity() }
-                _uiState.update { it.copy(comments = comments, savedCommentState = LoadState.Success(Unit)) }
+                _uiState.update {
+                    it.copy(
+                        comments = comments,
+                        savedCommentState = LoadState.Success(Unit)
+                    )
+                }
             }
         }
     }

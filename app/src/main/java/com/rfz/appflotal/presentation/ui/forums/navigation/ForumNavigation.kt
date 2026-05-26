@@ -70,7 +70,8 @@ data class RoomTopics(
 data class TopicDiscussion(
     val roomId: String,
     val topicId: String,
-    val topicTitle: String
+    val topicTitle: String,
+    val selectedComment: String = "0"
 )
 
 @Serializable
@@ -260,7 +261,7 @@ fun NavGraphBuilder.forumsGraph(
                                 navController.navigate(
                                     ReportContent(
                                         id = id,
-                                        isTopic = type.isComment
+                                        isTopic = !type.isComment
                                     )
                                 )
                             },
@@ -375,10 +376,11 @@ fun NavGraphBuilder.forumsGraph(
                                     navController.navigate(
                                         ReportContent(
                                             id = id,
-                                            isTopic = type.isComment
+                                            isTopic = !type.isComment
                                         )
                                     )
                                 },
+                                selectedComment = args.selectedComment,
                                 modifier = Modifier.padding(paddingValues)
                             )
                         }
@@ -506,7 +508,6 @@ fun NavGraphBuilder.forumsGraph(
                 )
             }
         }
-
         composable<NewCommentNav> { backStackEntry ->
             val args = backStackEntry.toRoute<NewCommentNav>()
             val parentEntry = remember(backStackEntry) {
@@ -544,7 +545,6 @@ fun NavGraphBuilder.forumsGraph(
                 }
             }
         }
-
         composable<SavedCommentsNav> {
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
@@ -558,18 +558,15 @@ fun NavGraphBuilder.forumsGraph(
             ) { paddingValues ->
                 SavedCommentsRoute(
                     modifier = Modifier.padding(paddingValues),
-                    onNavigateTo = { idRecord, title, isComment ->
-                        if (isComment) {
-                            navController.navigate(NewCommentNav(commentId = idRecord))
-                        } else {
-                            navController.navigate(
-                                TopicDiscussion(
-                                    roomId = "",
-                                    topicId = idRecord.toString(),
-                                    topicTitle = title
-                                )
+                    onNavigateTo = { idTopic, idComment, title ->
+                        navController.navigate(
+                            TopicDiscussion(
+                                roomId = "",
+                                topicId = idTopic.toString(),
+                                topicTitle = title,
+                                selectedComment = idComment.toString()
                             )
-                        }
+                        )
                     }
                 )
             }

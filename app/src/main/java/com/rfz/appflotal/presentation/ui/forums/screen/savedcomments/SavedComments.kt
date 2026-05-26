@@ -23,7 +23,7 @@ import com.rfz.appflotal.presentation.ui.utils.LoadState
 @Composable
 fun SavedCommentsRoute(
     modifier: Modifier = Modifier,
-    onNavigateTo: (idRecord: Int, title: String, isComment: Boolean) -> Unit,
+    onNavigateTo: (idTopic: Int, idComment: Int, title: String) -> Unit,
     viewModel: SavedCommentsViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.uiState.collectAsState()
@@ -61,7 +61,7 @@ fun SavedCommentsScreen(
     likedComments: List<LikedRecord>,
     modifier: Modifier = Modifier,
     onDeleteLike: (idMessage: Int, idRecord: Int, type: RecordType) -> Unit,
-    onNavigateTo: (idRecord: Int, title: String, isComment: Boolean) -> Unit
+    onNavigateTo: (idTopic: Int, idComment: Int, title: String) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(Dimens.PaddingSmall),
@@ -81,11 +81,10 @@ fun SavedCommentsScreen(
                     onDeleteLike(id, record.likedId, record.type)
                 },
                 onSeeMore = {
-                    val id = if (record.type.isComment) record.commentId else record.topicId
                     onNavigateTo(
-                        id,
-                        record.title,
-                        record.type.isComment
+                        record.topicId,
+                        record.commentId,
+                        record.title
                     )
                 }
             )

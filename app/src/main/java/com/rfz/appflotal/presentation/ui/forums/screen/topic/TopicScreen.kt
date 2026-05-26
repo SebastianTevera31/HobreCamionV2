@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.data.model.forum.ForumComment
@@ -28,13 +30,26 @@ fun DiscussionScreen(
     onReply: (ForumComment) -> Unit,
     onSave: (id: Int, isComment: Boolean) -> Unit,
     onReport: (id: Int, type: RecordType) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedComment: String = "0"
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(selectedComment, comments) {
+        if (selectedComment != "0" && comments.isNotEmpty()) {
+            val indexComment = comments.indexOfFirst { selectedComment == it.id.toString() }
+            if (indexComment != -1) {
+                listState.animateScrollToItem(indexComment + 1)
+            }
+        }
+    }
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         LazyColumn(
+            state = listState,
             contentPadding = PaddingValues(Dimens.PaddingSmall),
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
             modifier = Modifier.fillMaxSize()
@@ -48,14 +63,14 @@ fun DiscussionScreen(
                         onReport = { onReport(topic.id, RecordType.TOPIC) },
                         onSave = { onSave(topic.id, false) },
                         isSaved = topic.isLiked,
-                        likes = 3,
+                        likes = topic.likes,
                         time = topic.time,
                         color = topic.color
                     )
                 }
             }
 
-            items(comments) { comment ->
+            items(comments, key = { it.id }) { comment ->
                 Column(modifier = Modifier.padding(horizontal = Dimens.PaddingExtraSmall)) {
                     CommentCard(
                         isPost = true,
@@ -66,7 +81,7 @@ fun DiscussionScreen(
                         likes = comment.likes,
                         onReply = { onReply(comment) },
                         onSave = { onSave(comment.id, true) },
-                        isAuthor = comment.id == topic.idUser,
+                        isAuthor = comment.title == topic.author,
                         isSaved = comment.isLiked,
                         onReport = { onReport(comment.id, RecordType.COMMENT) },
                         secondInitial = comment.secondInitial,
