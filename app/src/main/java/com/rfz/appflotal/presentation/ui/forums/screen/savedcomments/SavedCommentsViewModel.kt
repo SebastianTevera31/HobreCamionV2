@@ -33,22 +33,28 @@ class SavedCommentsViewModel @Inject constructor(
 
     fun loadComments() {
         viewModelScope.launch {
+            _uiState.update { it.copy(savedCommentState = LoadState.Loading) }
             val response = getLikedPostsUseCase()
             asyncResponseHelper(response, {
                 _uiState.update { it.copy(savedCommentState = LoadState.Error("Error al cargar comentarios")) }
             }) { result ->
                 val comments = result.mapNotNull { record -> record.toEntity() }
-                _uiState.update { it.copy(comments = comments) }
+                _uiState.update {
+                    it.copy(
+                        comments = comments,
+                        savedCommentState = LoadState.Success(Unit)
+                    )
+                }
             }
         }
     }
 
-    fun deleteComment(idRecord: Int, type: RecordType) {
+    fun deleteComment(idMessage: Int, idRecord: Int, type: RecordType) {
         viewModelScope.launch {
             val response = doForumLikeUseCase(
                 likedDate = getCurrentDate(),
                 tipoElemento = type.isComment,
-                idMessage = idRecord
+                idMessage = idMessage
             )
 
             asyncResponseHelper(
@@ -57,13 +63,9 @@ class SavedCommentsViewModel @Inject constructor(
                     // Manejar error si es necesario
                 }
             ) {
-                val topic = _uiState.value.comments.find { it.type == type && it.id == idRecord }
-
-                if (topic != null) {
-                    _uiState.update { currentUiState ->
-                        val updatedComments = currentUiState.comments.filter { it.id != idRecord }
-                        currentUiState.copy(comments = updatedComments)
-                    }
+                _uiState.update { currentUiState ->
+                    val updatedComments = currentUiState.comments.filter { it.likedId != idRecord }
+                    currentUiState.copy(comments = updatedComments)
                 }
             }
         }

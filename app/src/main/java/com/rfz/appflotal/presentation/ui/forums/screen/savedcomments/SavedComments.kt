@@ -23,7 +23,7 @@ import com.rfz.appflotal.presentation.ui.utils.LoadState
 @Composable
 fun SavedCommentsRoute(
     modifier: Modifier = Modifier,
-    onNavigateTo: (idRecord: Int, title: String, isComment: Boolean) -> Unit,
+    onNavigateTo: (idTopic: Int, idComment: Int, title: String) -> Unit,
     viewModel: SavedCommentsViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.uiState.collectAsState()
@@ -60,8 +60,8 @@ fun SavedCommentsRoute(
 fun SavedCommentsScreen(
     likedComments: List<LikedRecord>,
     modifier: Modifier = Modifier,
-    onDeleteLike: (idRecord: Int, type: RecordType) -> Unit,
-    onNavigateTo: (idRecord: Int, title: String, isComment: Boolean) -> Unit
+    onDeleteLike: (idMessage: Int, idRecord: Int, type: RecordType) -> Unit,
+    onNavigateTo: (idTopic: Int, idComment: Int, title: String) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(Dimens.PaddingSmall),
@@ -70,16 +70,23 @@ fun SavedCommentsScreen(
     ) {
         items(likedComments, key = { it.likedId }) { record ->
             RecordCard(
-                header = if (record.type.isComment) record.description else record.title,
+                header = record.title,
                 time = record.date,
-                imageUrl = record.imageUrl,
-                likes = record.likes,
                 isComment = record.type.isComment,
                 isSaved = true,
                 firstInitial = record.firstInitial,
                 secondInitial = record.secondInitial,
-                onSave = { onDeleteLike(record.likedId, record.type) },
-                onSeeMore = { onNavigateTo(record.likedId, record.title, record.type.isComment) }
+                onSave = {
+                    val id = if (record.type.isComment) record.commentId else record.topicId
+                    onDeleteLike(id, record.likedId, record.type)
+                },
+                onSeeMore = {
+                    onNavigateTo(
+                        record.topicId,
+                        record.commentId,
+                        record.title
+                    )
+                }
             )
         }
     }
@@ -90,12 +97,8 @@ fun SavedCommentsScreen(
 fun SavedCommentsScreenPreview() {
     val sampleComments = listOf(
         LikedRecord(
-            id = 1,
             title = "Topic Title 1",
-            description = "This is a comment description for the first topic.",
-            imageUrl = "",
             likedId = 101,
-            likes = 10,
             author = "Author One",
             type = RecordType.COMMENT,
             date = "2 hours ago",
@@ -103,12 +106,8 @@ fun SavedCommentsScreenPreview() {
             secondInitial = "O"
         ),
         LikedRecord(
-            id = 2,
             title = "Topic Title 2",
-            description = "This is another comment description for the second topic.",
-            imageUrl = "",
             likedId = 102,
-            likes = 5,
             author = "Author Two",
             type = RecordType.TOPIC,
             date = "5 hours ago",
@@ -119,7 +118,7 @@ fun SavedCommentsScreenPreview() {
     HombreCamionTheme {
         SavedCommentsScreen(
             likedComments = sampleComments,
-            onDeleteLike = { _, _ -> },
+            onDeleteLike = { _, _, _ -> },
             onNavigateTo = { _, _, _ -> }
         )
     }

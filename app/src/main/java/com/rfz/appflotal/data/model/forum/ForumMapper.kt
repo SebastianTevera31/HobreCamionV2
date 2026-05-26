@@ -23,7 +23,6 @@ fun TopicResult.toTopic(): ForumTopic {
         author = this.fldUserName,
         numComments = this.fldMessages,
         idUser = this.idUser,
-        isSaved = false,
         time = Commons.getRelativeTime(this.fldRegistrationDate),
         color = runCatching {
             val colorStr = this.fldColor.trim()
@@ -31,7 +30,8 @@ fun TopicResult.toTopic(): ForumTopic {
             else "#$colorStr"
             Color(finalColor.toColorInt())
         }.getOrDefault(Color.Transparent),
-        likes = this.fldLike
+        likes = this.fldLike,
+        isLiked = this.isLiked
     )
 }
 
@@ -43,9 +43,10 @@ fun ForumTopic.toComment(): ForumComment {
         imageUrl = this.imageUrl,
         time = this.time,
         likes = this.likes,
-        isSaved = false,
         firstInitial = "",
-        secondInitial = ""
+        secondInitial = "",
+        isLiked = this.isLiked,
+        idUser = this.idUser
     )
 }
 
@@ -57,39 +58,58 @@ fun TopicMessageResult.toComment(): ForumComment {
         description = this.fldMessage,
         imageUrl = this.fldImage,
         likes = this.fldLike,
-        isSaved = false,
         firstInitial = first,
         secondInitial = second,
-        time = Commons.getRelativeTime(this.fldRegistrationDate)
+        time = Commons.getRelativeTime(this.fldRegistrationDate),
+        isLiked = this.isLiked,
+        idUser = this.idUser
     )
 }
 
 fun LikedPostResult.toEntity(): LikedRecord? {
-    val completeData = this.summarizedPublication.split(",")
-    if (completeData.size < 7) return null
-    val type = completeData[0].split(":").firstOrNull() ?: return null
-    val id = completeData[1].split(":").firstOrNull()?.toIntOrNull() ?: return null
-    val username = completeData[2].split(":").firstOrNull() ?: return null
-    val title = completeData[3].split(":").firstOrNull() ?: return null
-    val description = completeData[4].split(":").firstOrNull() ?: return null
-    val image = completeData[5].split(":").firstOrNull() ?: return null
-    val likes = completeData[6].split(":").firstOrNull()?.toIntOrNull() ?: return null
+    val summarized = this.summarizedPublication.split(",")
+    val complete = this.completePublication.split(",")
 
-    val (first, second) = Commons.getInitials(username)
+    if (summarized.size < 3 || complete.size < 2) return null
 
-    val recordType = if (type == "topic") RecordType.TOPIC else RecordType.COMMENT
+    return runCatching {
+        // Usamos substringAfter(":") para ser más robustos si hay más de un ":"
+        val type = summarized[0].substringAfter(":").trim()
+        val username = summarized[1].substringAfter(":").trim()
 
-    return LikedRecord(
-        likedId = this.idLiked,
-        id = id,
-        title = title,
-        description = description,
-        imageUrl = image,
-        likes = likes,
-        type = recordType,
-        firstInitial = first,
-        secondInitial = second,
-        author = username,
-        date = Commons.convertDate(this.likedDate)
-    )
+        // Unimos de nuevo si el contenido tenía comas (índice 2 en adelante)
+        val content = summarized.drop(2).joinToString(",").substringAfter(":").trim()
+
+        val isTopic = type == "topic"
+        val recordType = if (isTopic) RecordType.TOPIC else RecordType.COMMENT
+
+        var topicId = 0
+        var commentId = 0
+
+        if (isTopic) {
+            // "type: topic, id_topic: 2" -> id está en el índice 1
+            topicId = complete[1].substringAfter(":").trim().toIntOrNull() ?: 0
+        } else {
+            // "type: message, id_message: 17, id_topic: 2"
+            commentId = complete[1].substringAfter(":").trim().toIntOrNull() ?: 0
+            if (complete.size >= 3) {
+                topicId = complete[2].substringAfter(":").trim().toIntOrNull() ?: 0
+            }
+        }
+
+        val (first, second) = Commons.getInitials(username)
+
+        val datePart = this.likedDate.substringBefore(".")
+        LikedRecord(
+            likedId = this.idLiked,
+            title = content,
+            type = recordType,
+            firstInitial = first,
+            secondInitial = second,
+            author = username,
+            date = Commons.convertDate(datePart),
+            topicId = topicId,
+            commentId = commentId
+        )
+    }.getOrNull()
 }

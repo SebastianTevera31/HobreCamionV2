@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.data.model.forum.ForumComment
@@ -28,18 +30,31 @@ fun DiscussionScreen(
     onReply: (ForumComment) -> Unit,
     onSave: (id: Int, isComment: Boolean) -> Unit,
     onReport: (id: Int, type: RecordType) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedComment: String = "0"
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(Unit) {
+        if (selectedComment != "0" && comments.isNotEmpty()) {
+            val indexComment = comments.indexOfFirst { selectedComment == it.id.toString() }
+            if (indexComment != -1) {
+                listState.animateScrollToItem(indexComment + 1)
+            }
+        }
+    }
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         LazyColumn(
+            state = listState,
             contentPadding = PaddingValues(Dimens.PaddingSmall),
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
             modifier = Modifier.fillMaxSize()
         ) {
-            item {
+            item(key = "topic_header") {
                 Column(modifier = Modifier.padding(Dimens.PaddingExtraSmall)) {
                     TopicHeader(
                         title = topic.title,
@@ -47,15 +62,16 @@ fun DiscussionScreen(
                         imageUrl = topic.imageUrl,
                         onReport = { onReport(topic.id, RecordType.TOPIC) },
                         onSave = { onSave(topic.id, false) },
-                        isSaved = topic.isSaved,
-                        likes = 3,
+                        isSaved = topic.isLiked,
+                        likes = topic.likes,
                         time = topic.time,
-                        color = topic.color
+                        color = topic.color,
+                        numComments = topic.numComments
                     )
                 }
             }
 
-            items(comments) { comment ->
+            items(comments, key = { it.id }) { comment ->
                 Column(modifier = Modifier.padding(horizontal = Dimens.PaddingExtraSmall)) {
                     CommentCard(
                         isPost = true,
@@ -66,8 +82,8 @@ fun DiscussionScreen(
                         likes = comment.likes,
                         onReply = { onReply(comment) },
                         onSave = { onSave(comment.id, true) },
-                        isAuthor = comment.id == topic.idUser,
-                        isSaved = comment.isSaved,
+                        isAuthor = comment.idUser == topic.idUser,
+                        isSaved = comment.isLiked,
                         onReport = { onReport(comment.id, RecordType.COMMENT) },
                         secondInitial = comment.secondInitial,
                         time = comment.time
@@ -91,8 +107,8 @@ fun DiscussionScreenPreview() {
         time = "hace 3 horas",
         idUser = 1,
         color = MaterialTheme.colorScheme.primary,
-        isSaved = false,
-        likes = 0
+        likes = 0,
+        isLiked = true
     )
 
     val sampleComments = listOf(
@@ -104,8 +120,9 @@ fun DiscussionScreenPreview() {
             likes = 10,
             firstInitial = "A",
             secondInitial = "",
-            isSaved = true,
-            time = ""
+            time = "",
+            isLiked = false,
+            idUser = 1
         ),
         ForumComment(
             id = 1,
@@ -115,8 +132,9 @@ fun DiscussionScreenPreview() {
             likes = 5,
             firstInitial = "C",
             secondInitial = "R",
-            isSaved = false,
-            time = ""
+            time = "",
+            isLiked = true,
+            idUser = 100
         ),
         ForumComment(
             id = 3,
@@ -126,8 +144,9 @@ fun DiscussionScreenPreview() {
             likes = 8,
             firstInitial = "A",
             secondInitial = "M",
-            isSaved = true,
-            time = ""
+            time = "",
+            isLiked = false,
+            idUser = 2
         )
     )
 

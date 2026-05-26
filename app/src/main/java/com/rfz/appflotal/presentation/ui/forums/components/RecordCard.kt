@@ -38,8 +38,6 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 fun RecordCard(
     header: String,
     time: String,
-    imageUrl: String,
-    likes: Int,
     isComment: Boolean,
     isSaved: Boolean,
     modifier: Modifier = Modifier,
@@ -82,22 +80,13 @@ fun RecordCard(
                         }
                     }
                 } else {
-                    if (imageUrl.isNotEmpty()) {
-                        AsyncImage(
-                            model = imageUrl,
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.TireRepair,
                             contentDescription = null,
                             modifier = Modifier.size(40.dp),
-                            contentScale = ContentScale.Crop
+                            tint = MaterialTheme.colorScheme.primary
                         )
-                    } else {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.TireRepair,
-                                contentDescription = null,
-                                modifier = Modifier.size(40.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
                     }
                 }
 
@@ -155,10 +144,6 @@ fun RecordCard(
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
-                        Text(
-                            text = likes.toString(),
-                            style = MaterialTheme.typography.labelMedium
-                        )
                     }
                 }
             }
@@ -173,8 +158,6 @@ private fun RecordCardPreview() {
         RecordCard(
             header = "Juan Pérez",
             time = "Hace 2 horas",
-            imageUrl = "",
-            likes = 15,
             isComment = true,
             isSaved = false,
             firstInitial = "J",
@@ -190,8 +173,6 @@ private fun RecordCardWithImagePreview() {
         RecordCard(
             header = "Maria Garcia",
             time = "Hace 5 horas",
-            imageUrl = "https://example.com/image.jpg",
-            likes = 42,
             isComment = false,
             isSaved = true,
             firstInitial = "M",

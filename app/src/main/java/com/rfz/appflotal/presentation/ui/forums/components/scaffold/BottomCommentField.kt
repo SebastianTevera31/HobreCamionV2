@@ -1,7 +1,6 @@
 package com.rfz.appflotal.presentation.ui.forums.components.scaffold
 
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,9 +30,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
@@ -101,16 +100,14 @@ fun BottomCommentField(
 
             Box(contentAlignment = Alignment.Center) {
                 IconButton(
+                    enabled = comment.isNotEmpty(),
                     onClick = if (isLoading) onCancel else onSend,
-                    modifier = Modifier
-                        .shadow(
-                            elevation = 4.dp,
-                            shape = RoundedCornerShape(Dimens.PaddingSmall)
-                        )
-                        .size(48.dp),
+                    modifier = Modifier.size(48.dp),
                     shape = RoundedCornerShape(Dimens.PaddingSmall),
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = if (isLoading) Color.Red else MaterialTheme.colorScheme.primary
+                        containerColor = if (isLoading) Color.Red else MaterialTheme.colorScheme.primary,
+                        disabledContentColor = Color.Gray,
+                        disabledContainerColor =Color.Gray
                     )
                 ) {
                     if (isLoading) {
@@ -127,7 +124,7 @@ fun BottomCommentField(
                         )
                     }
                 }
-                
+
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(48.dp),
@@ -181,7 +178,7 @@ private fun ImageThumbnail(
 fun BottomCommentFieldPreview() {
     HombreCamionTheme {
         BottomCommentField(
-            comment = "Este es un comentario de prueba",
+            comment = "",
             onCommentChange = {},
             onSend = {},
             selectedImage = Uri.parse("https://example.com/image1.jpg")

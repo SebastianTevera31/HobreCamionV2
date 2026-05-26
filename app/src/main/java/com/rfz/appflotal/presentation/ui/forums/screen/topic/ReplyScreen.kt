@@ -70,7 +70,7 @@ fun ReplyScreen(
                 content = comment.description,
                 imageUrl = comment.imageUrl,
                 likes = comment.likes,
-                isSaved = comment.isSaved,
+                isSaved = comment.isLiked,
                 onReply = {},
                 onSave = {},
                 onSeeMore = {},
@@ -156,8 +156,9 @@ fun ReplyScreenPreview() {
         likes = 0,
         firstInitial = "J",
         secondInitial = "P",
-        isSaved = false,
+        isLiked = false,
         time = "Hace 2 dias",
+        idUser = 2
     )
     HombreCamionTheme {
         ReplyScreen(

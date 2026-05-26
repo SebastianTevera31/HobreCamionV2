@@ -11,10 +11,11 @@ data class ForumComment(
     override val description: String,
     override val imageUrl: String,
     val time: String,
+    val idUser: Int,
     val likes: Int,
-    var isSaved: Boolean,
     val firstInitial: String,
-    val secondInitial: String
+    val secondInitial: String,
+    val isLiked: Boolean
 ) : ForumRecord
 
 data class ForumTopic(
@@ -28,7 +29,7 @@ data class ForumTopic(
     val idUser: Int,
     val color: Color,
     val likes: Int,
-    val isSaved: Boolean
+    val isLiked: Boolean
 ) : ForumRecord
 
 data class ForumRoom(
@@ -39,18 +40,16 @@ data class ForumRoom(
 ) : ForumRecord
 
 data class LikedRecord(
-    override val id: Int,
-    override val title: String,
-    override val description: String,
-    override val imageUrl: String,
     val likedId: Int,
-    val likes: Int,
+    val title: String,
+    val topicId: Int = 0,
+    val commentId: Int = 0,
     val author: String,
     val type: RecordType,
     val date: String,
     val firstInitial: String,
     val secondInitial: String
-) : ForumRecord
+)
 
 interface ForumRecord : CatalogItem {
     override val id: Int

@@ -50,8 +50,8 @@ class ForumViewModel @Inject constructor(
     private var currentPhotoUri: Uri? = null
     private var publicationJob: Job? = null
 
-    fun getInitialData() {
-        if (_uiState.value.rooms.isNotEmpty()) return
+    fun getInitialData(forceRefresh: Boolean = false) {
+        if (_uiState.value.rooms.isNotEmpty() && !forceRefresh) return
         viewModelScope.launch {
             _uiState.update { it.copy(roomState = LoadState.Loading) }
 
@@ -171,7 +171,7 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun doLike(id: Int, isComment: Boolean) {
+    fun doLike(id: Int, isComment: Boolean, fromPostsView: Boolean = false) {
         viewModelScope.launch {
             val response = doForumLikeUseCase(
                 likedDate = getCurrentDate(),
@@ -187,26 +187,43 @@ class ForumViewModel @Inject constructor(
             ) {
                 // Actualizar UI localmente o recargar datos
                 if (!isComment) {
-                    val currentTopicId = _uiState.value.selectedTopic?.id
-                    if (currentTopicId != null) {
+                    if (fromPostsView) {
                         _uiState.update { currentUiState ->
-                            val newIsSaved = !currentUiState.selectedTopic!!.isSaved
-                            val topic = currentUiState.selectedTopic
-                            currentUiState.copy(
-                                selectedTopic = topic.copy(
-                                    isSaved = newIsSaved,
-                                    numComments = if (newIsSaved) topic.likes + 1 else topic.likes - 1
+                            val updatedTopics = currentUiState.filteredTopics.map { topic ->
+                                if (topic.id == id) {
+                                    val newIsSaved = !topic.isLiked
+                                    topic.copy(
+                                        isLiked = newIsSaved,
+                                        likes = if (newIsSaved) topic.likes + 1 else topic.likes - 1
+                                    )
+                                } else {
+                                    topic
+                                }
+                            }
+                            currentUiState.copy(filteredTopics = updatedTopics)
+                        }
+                    } else {
+                        val currentTopicId = _uiState.value.selectedTopic?.id
+                        if (currentTopicId != null) {
+                            _uiState.update { currentUiState ->
+                                val newIsSaved = !currentUiState.selectedTopic!!.isLiked
+                                val topic = currentUiState.selectedTopic
+                                currentUiState.copy(
+                                    selectedTopic = topic.copy(
+                                        isLiked = newIsSaved,
+                                        likes = if (newIsSaved) topic.likes + 1 else topic.likes - 1
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 } else {
                     _uiState.update { currentUiState ->
                         val updatedComments = currentUiState.comments.map { comment ->
                             if (comment.id == id) {
-                                val newIsSaved = !comment.isSaved
+                                val newIsSaved = !comment.isLiked
                                 comment.copy(
-                                    isSaved = newIsSaved,
+                                    isLiked = newIsSaved,
                                     likes = if (newIsSaved) comment.likes + 1 else comment.likes - 1
                                 )
                             } else {
@@ -256,21 +273,21 @@ class ForumViewModel @Inject constructor(
                 val userList = getTasksUseCase().first()
                 if (userList.isNotEmpty()) {
                     val user = userList.first()
-                    val newTopic = ForumTopic(
-                        id = 0, // ID temporal
-                        title = title,
-                        description = description,
-                        imageUrl = "",
-                        author = user.fld_username,
-                        numComments = 0,
-                        time = getRelativeTime(getCurrentDate()),
-                        idUser = user.idUser,
-                        color = Color(color.toColorInt()),
-                        isSaved = false,
-                        likes = 0
-                    )
 
                     _uiState.update { state ->
+                        val newTopic = ForumTopic(
+                            id = -(state.topics.size + 1), // ID temporal único
+                            title = title,
+                            description = description,
+                            imageUrl = "",
+                            author = user.fld_username,
+                            numComments = 0,
+                            time = getRelativeTime(getCurrentDate()),
+                            idUser = user.idUser,
+                            color = Color(color.toColorInt()),
+                            isLiked = false,
+                            likes = 0
+                        )
                         val newList = state.topics + newTopic
                         state.copy(
                             newTopicState = LoadState.Success(Unit),
@@ -305,13 +322,13 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun sendReport(id: Int, isTopic: Boolean, reportTypeId: Int, details: String) {
+    fun sendReport(id: Int, isComment: Boolean, reportTypeId: Int, details: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(reportState = LoadState.Loading) }
 
             val response = createForumReportUseCase(
-                idTopic = if (isTopic) id else 0,
-                idMessage = if (!isTopic) id else 0,
+                tipoElemento = isComment,
+                idElemento = id,
                 reportTypeId = reportTypeId,
                 reportDate = getCurrentDate()
             )
@@ -351,22 +368,41 @@ class ForumViewModel @Inject constructor(
                 if (userList.isNotEmpty()) {
                     val user = userList.first()
                     val (first, second) = Commons.getInitials(user.fld_username)
-                    val newComment = ForumComment(
-                        id = 0, // ID temporal
-                        title = user.fld_username,
-                        description = commentText,
-                        imageUrl = "",
-                        time = getRelativeTime(getCurrentDate()),
-                        likes = 0,
-                        isSaved = false,
-                        firstInitial = first,
-                        secondInitial = second
-                    )
 
                     _uiState.update { state ->
+                        val newComment = ForumComment(
+                            id = -(state.comments.size + 1), // ID temporal único
+                            title = user.fld_username,
+                            description = commentText,
+                            imageUrl = "",
+                            time = getRelativeTime(getCurrentDate()),
+                            likes = 0,
+                            firstInitial = first,
+                            secondInitial = second,
+                            isLiked = false,
+                            idUser = user.idUser
+                        )
+
+                        val selectedTopicId = state.selectedTopic?.id
+
+                        val updateTopics = { list: List<ForumTopic> ->
+                            list.map { topic ->
+                                if (selectedTopicId != null && topic.id == selectedTopicId) {
+                                    topic.copy(numComments = topic.numComments + 1)
+                                } else {
+                                    topic
+                                }
+                            }
+                        }
+
                         state.copy(
                             sendCommentState = LoadState.Success(Unit),
-                            comments = state.comments + newComment
+                            comments = state.comments + newComment,
+                            topics = updateTopics(state.topics),
+                            filteredTopics = updateTopics(state.filteredTopics),
+                            selectedTopic = state.selectedTopic?.copy(
+                                numComments = state.selectedTopic.numComments + 1
+                            )
                         )
                     }
                     clearPhoto()

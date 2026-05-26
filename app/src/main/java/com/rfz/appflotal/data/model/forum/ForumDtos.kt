@@ -34,7 +34,8 @@ data class TopicResult(
     @SerializedName("fld_registrationDate") val fldRegistrationDate: String,
     @SerializedName("id_user") val idUser: Int,
     @SerializedName("fld_userName") val fldUserName: String,
-    @SerializedName("fld_edited") val fldEdited: Boolean
+    @SerializedName("fld_edited") val fldEdited: Boolean,
+    @SerializedName("isLiked") val isLiked: Boolean
 )
 
 data class TopicMessageResult(
@@ -46,7 +47,8 @@ data class TopicMessageResult(
     @SerializedName("fld_like") val fldLike: Int,
     @SerializedName("id_topic") val idTopic: Int,
     @SerializedName("fld_edited") val fldEdited: Boolean,
-    @SerializedName("fld_image") val fldImage: String
+    @SerializedName("fld_image") val fldImage: String,
+    @SerializedName("isLiked") val isLiked: Boolean
 )
 
 data class CrudTopicMessageRequest(
@@ -54,7 +56,8 @@ data class CrudTopicMessageRequest(
     @SerializedName("message") val message: String,
     @SerializedName("registrationDate") val registrationDate: String,
     @SerializedName("id_topic") val idTopic: Int,
-    @SerializedName("image") val image: String
+    @SerializedName("image") val image: String,
+    @SerializedName("p_topicMessage_fk") val fkTopicMsg: Int?
 )
 
 data class CrudTopicRequest(
@@ -83,8 +86,8 @@ data class LikedPostResult(
 )
 
 data class CreateReportRequest(
-    @SerializedName("id_topic") val idTopic: Int,
-    @SerializedName("id_message") val idMessage: Int,
+    @SerializedName("tipoElemento") val tipoElemento: Boolean,
+    @SerializedName("id_elemento") val idElemento: Int,
     @SerializedName("reportDate") val reportDate: String,
     @SerializedName("id_typeReport") val idTypeReport: Int
 )

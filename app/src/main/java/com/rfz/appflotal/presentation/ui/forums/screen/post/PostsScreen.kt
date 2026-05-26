@@ -23,7 +23,8 @@ fun TopicsScreen(
     modifier: Modifier = Modifier,
     loadState: LoadState<Any> = LoadState.Idle,
     onTopicClick: (ForumTopic) -> Unit,
-    onReport: (topicId: Int, type: RecordType) -> Unit
+    onReport: (topicId: Int, type: RecordType) -> Unit,
+    onSaved: (id: Int) -> Unit
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -46,12 +47,15 @@ fun TopicsScreen(
                         isTopic = true,
                         showOptions = true,
                         onNav = { onTopicClick(topic) },
+                        onSave = { onSaved(topic.id) },
                         author = topic.author,
                         time = topic.time,
                         firstInitial = topic.author.take(1).uppercase(),
                         secondInitial = "",
                         onReport = { onReport(topic.id, RecordType.TOPIC) },
-                        color = topic.color
+                        color = topic.color,
+                        isSaved = topic.isLiked,
+                        numLikes = topic.likes
                     )
                 }
             }
@@ -73,8 +77,8 @@ fun TopicsScreenPreview() {
             time = "hace 2 horas",
             idUser = 1,
             color = MaterialTheme.colorScheme.primary,
-            isSaved = false,
-            likes = 0
+            isLiked = false,
+            likes = 0,
         ),
         ForumTopic(
             id = 2,
@@ -86,7 +90,7 @@ fun TopicsScreenPreview() {
             time = "hace 5 horas",
             idUser = 2,
             color = MaterialTheme.colorScheme.primary,
-            isSaved = false,
+            isLiked = true,
             likes = 0
         ),
         ForumTopic(
@@ -99,11 +103,11 @@ fun TopicsScreenPreview() {
             time = "hace 1 día",
             idUser = 3,
             color = MaterialTheme.colorScheme.primary,
-            isSaved = false,
+            isLiked = false,
             likes = 0
         )
     )
     HombreCamionTheme {
-        TopicsScreen(topics = sampleTopics, onTopicClick = {}, onReport = { _, _ -> })
+        TopicsScreen(topics = sampleTopics, onTopicClick = {}, onReport = { _, _ -> }, onSaved = {})
     }
 }

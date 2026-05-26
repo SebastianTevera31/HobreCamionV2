@@ -42,7 +42,6 @@ fun RoomsScreen(
                         imageUrl = room.imageUrl,
                         modifier = Modifier.padding(Dimens.PaddingExtraSmall),
                         onNav = { onNavigate(room) },
-                        onReport = {},
                         color = MaterialTheme.colorScheme.primary
                     )
                 }

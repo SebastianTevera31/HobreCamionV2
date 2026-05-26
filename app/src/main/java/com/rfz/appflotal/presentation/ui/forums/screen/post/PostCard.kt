@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.TireRepair
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -39,19 +41,22 @@ import com.rfz.appflotal.presentation.ui.forums.components.ForumDropdownMenu
 fun ForumCard(
     title: String,
     content: String,
+    color: Color,
     modifier: Modifier = Modifier,
     author: String = "",
     firstInitial: String = "",
     secondInitial: String = "",
     time: String = "",
     numComments: Int = 0,
+    numLikes: Int = 0,
     imageUrl: String = "",
-    color: Color,
     isTopic: Boolean = false,
     showOptions: Boolean = false,
     hideTopicInfo: Boolean = false,
+    isSaved: Boolean = false,
     onNav: () -> Unit,
-    onReport: () -> Unit
+    onReport: () -> Unit = {},
+    onSave: () -> Unit = {}
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -103,7 +108,7 @@ fun ForumCard(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    
+
                     Text(
                         text = content,
                         style = MaterialTheme.typography.bodySmall.copy(
@@ -125,13 +130,16 @@ fun ForumCard(
                     thickness = 0.5.dp,
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(2f)
+                    ) {
                         Surface(
                             modifier = Modifier.size(24.dp),
                             shape = RoundedCornerShape(100),
@@ -148,43 +156,81 @@ fun ForumCard(
                             }
                         }
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = author,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                        Text(
-                            text = " • $time",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        )
-                    }
-
-                    Surface(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Comment,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        Column {
+                            Text(
+                                text = author,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = numComments.toString(),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                text = time,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             )
+                        }
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(
+                            Dimens.PaddingExtraSmall,
+                            Alignment.End
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Surface(
+                            onClick = onSave,
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (isSaved) Color.Red.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(
+                                alpha = 0.5f
+                            ),
+                            contentColor = if (isSaved) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                )
+                                Text(
+                                    text = numLikes.toString(),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+                        }
+
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Comment,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                Text(
+                                    text = numComments.toString(),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -209,6 +255,8 @@ private fun ForumCardPreview() {
             showOptions = true,
             onNav = {},
             onReport = {},
+            onSave = {},
+            isSaved = true,
             color = MaterialTheme.colorScheme.primary
         )
     }
