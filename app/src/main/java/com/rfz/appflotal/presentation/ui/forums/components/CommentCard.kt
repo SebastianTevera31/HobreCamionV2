@@ -81,10 +81,9 @@ fun CommentCard(
                     modifier = Modifier.weight(1f),
                     time = time
                 )
-
-                    if (showReportOption) {
-                        ForumDropdownMenu(onReport = onReport)
-                    }
+                if (showReportOption) {
+                    ForumDropdownMenu(onReport = onReport)
+                }
             }
 
             if (imageUrl.isNotEmpty()) {

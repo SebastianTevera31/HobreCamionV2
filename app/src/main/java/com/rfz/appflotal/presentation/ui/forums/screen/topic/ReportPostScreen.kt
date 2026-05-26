@@ -159,6 +159,7 @@ fun ReportScreenPreview() {
                 secondInitial = "P",
                 isLiked = false,
                 time = "Hace 2 dias",
+                idUser = 1
             )
         )
     }

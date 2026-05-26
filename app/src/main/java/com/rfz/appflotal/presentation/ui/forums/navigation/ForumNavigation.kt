@@ -77,7 +77,7 @@ data class TopicDiscussion(
 @Serializable
 data class ReportContent(
     val id: Int,
-    val isTopic: Boolean
+    val isComment: Boolean
 )
 
 @Serializable
@@ -113,7 +113,7 @@ fun NavGraphBuilder.forumsGraph(
 
             LaunchedEffect(Unit) {
                 viewModel.clearFilterSearch()
-                viewModel.getInitialData()
+                viewModel.getInitialData(forceRefresh = true)
             }
 
             ForumModuleScaffold(
@@ -261,7 +261,7 @@ fun NavGraphBuilder.forumsGraph(
                                 navController.navigate(
                                     ReportContent(
                                         id = id,
-                                        isTopic = !type.isComment
+                                        isComment = type.isComment
                                     )
                                 )
                             },
@@ -319,9 +319,13 @@ fun NavGraphBuilder.forumsGraph(
 
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
-                    title = args.topicTitle,
+                    title = state.selectedTopic?.title ?: "Topic",
                     subtitle = state.selectedTopic?.let {
-                        stringResource(R.string.forum_responses_format, it.title, it.numComments)
+                        stringResource(
+                            R.string.forum_responses_format,
+                            it.description,
+                            it.numComments
+                        )
                     } ?: args.topicTitle,
                     showBackButton = true,
                     showMenuButton = false,
@@ -369,6 +373,7 @@ fun NavGraphBuilder.forumsGraph(
                                 topic = topic,
                                 comments = comments,
                                 onReply = { comment ->
+                                    viewModel.resetCommentState()
                                     navController.navigate(NewCommentNav(commentId = comment.id))
                                 },
                                 onSave = { id, isTopic -> viewModel.doLike(id, isTopic) },
@@ -376,7 +381,7 @@ fun NavGraphBuilder.forumsGraph(
                                     navController.navigate(
                                         ReportContent(
                                             id = id,
-                                            isTopic = !type.isComment
+                                            isComment = type.isComment
                                         )
                                     )
                                 },
@@ -411,13 +416,20 @@ fun NavGraphBuilder.forumsGraph(
             val uiState = viewModel.uiState.collectAsState()
             val context = LocalContext.current
 
-            val message = if (args.isTopic) {
+            val message = if (!args.isComment) {
                 uiState.value.selectedTopic?.takeIf { it.id == args.id }?.toComment()
                     ?: uiState.value.topics.find { it.id == args.id }?.toComment()
             } else uiState.value.comments.find { it.id == args.id }
 
             val forumNotFoundMsg = stringResource(R.string.forum_post_not_found)
             val reportSuccessMsg = stringResource(R.string.forum_report_success)
+
+            LaunchedEffect(message) {
+                if (message == null) {
+                    Toast.makeText(context, forumNotFoundMsg, Toast.LENGTH_LONG).show()
+                    navController.popBackStack()
+                }
+            }
 
             LaunchedEffect(uiState.value.reportState) {
                 when (val reportState = uiState.value.reportState) {
@@ -436,10 +448,7 @@ fun NavGraphBuilder.forumsGraph(
                 }
             }
 
-            if (message == null) {
-                Toast.makeText(context, forumNotFoundMsg, Toast.LENGTH_LONG).show()
-                navController.popBackStack()
-            } else {
+            if (message != null) {
                 ForumModuleScaffold(
                     topBarConfig = ForumTopBarConfig(
                         title = stringResource(R.string.forum_report_title),
@@ -454,7 +463,7 @@ fun NavGraphBuilder.forumsGraph(
                         onSendReport = { reportTypeId: Int, details: String ->
                             viewModel.sendReport(
                                 id = args.id,
-                                isTopic = args.isTopic,
+                                isComment = args.isComment,
                                 reportTypeId = reportTypeId,
                                 details = details
                             )
@@ -540,7 +549,9 @@ fun NavGraphBuilder.forumsGraph(
                             viewModel.sendComment(message)
                         },
                         onCancel = viewModel::cancelPublication,
-                        onBack = { navController.popBackStack() }
+                        onBack = {
+                            navController.popBackStack()
+                        }
                     )
                 }
             }

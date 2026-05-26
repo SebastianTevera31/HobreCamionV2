@@ -11,6 +11,7 @@ data class ForumComment(
     override val description: String,
     override val imageUrl: String,
     val time: String,
+    val idUser: Int,
     val likes: Int,
     val firstInitial: String,
     val secondInitial: String,

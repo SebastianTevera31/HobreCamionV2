@@ -139,47 +139,47 @@ fun NewTopicScreen(
             }
 
             // Tags
-            Text(
-                text = stringResource(R.string.forum_tags_label),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
-            ) {
-                OutlinedTextField(
-                    value = currentTag,
-                    onValueChange = { currentTag = it },
-                    shape = RoundedCornerShape(Dimens.PaddingSmall),
-                    placeholder = { Text(stringResource(R.string.forum_new_tag_placeholder)) },
-                    singleLine = true,
-                    enabled = !isLoading,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(
-                    onClick = {
-                        if (currentTag.isNotBlank()) {
-                            tagsList.add(currentTag.trim())
-                            currentTag = ""
-                        }
-                    },
-                    enabled = !isLoading,
-                    modifier = Modifier
-                        .background(
-                            if (isLoading) Color.Gray else MaterialTheme.colorScheme.primary,
-                            CircleShape
-                        )
-                        .size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add, 
-                        contentDescription = stringResource(R.string.forum_add_tag_desc), 
-                        tint = Color.White
-                    )
-                }
-            }
+//            Text(
+//                text = stringResource(R.string.forum_tags_label),
+//                style = MaterialTheme.typography.labelLarge,
+//                color = MaterialTheme.colorScheme.primary
+//            )
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+//            ) {
+//                OutlinedTextField(
+//                    value = currentTag,
+//                    onValueChange = { currentTag = it },
+//                    shape = RoundedCornerShape(Dimens.PaddingSmall),
+//                    placeholder = { Text(stringResource(R.string.forum_new_tag_placeholder)) },
+//                    singleLine = true,
+//                    enabled = !isLoading,
+//                    modifier = Modifier.weight(1f)
+//                )
+//                IconButton(
+//                    onClick = {
+//                        if (currentTag.isNotBlank()) {
+//                            tagsList.add(currentTag.trim())
+//                            currentTag = ""
+//                        }
+//                    },
+//                    enabled = !isLoading,
+//                    modifier = Modifier
+//                        .background(
+//                            if (isLoading) Color.Gray else MaterialTheme.colorScheme.primary,
+//                            CircleShape
+//                        )
+//                        .size(48.dp)
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.Default.Add,
+//                        contentDescription = stringResource(R.string.forum_add_tag_desc),
+//                        tint = Color.White
+//                    )
+//                }
+//            }
 
             // Display added tags
             LazyRow(

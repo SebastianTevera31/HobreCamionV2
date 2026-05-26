@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.TireRepair
 import androidx.compose.material.icons.outlined.Favorite
@@ -43,6 +44,7 @@ fun TopicHeader(
     onSave: () -> Unit,
     isSaved: Boolean,
     likes: Int,
+    numComments: Int,
     modifier: Modifier = Modifier,
     imageUrl: String = ""
 ) {
@@ -122,28 +124,60 @@ fun TopicHeader(
             )
 
             // Like Action
-            Surface(
-                onClick = onSave,
-                shape = RoundedCornerShape(20.dp),
-                color = if (isSaved) Color.Red.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(
-                    alpha = 0.5f
-                ),
-                contentColor = if (isSaved) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    Dimens.PaddingSmall
+                )
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                Surface(
+                    onClick = onSave,
+                    shape = RoundedCornerShape(20.dp),
+                    color = if (isSaved) Color.Red.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(
+                        alpha = 0.5f
+                    ),
+                    contentColor = if (isSaved) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
                 ) {
-                    Icon(
-                        imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = likes.toString(),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = likes.toString(),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                }
+
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(20.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Comment,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            text = numComments.toString(),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -161,6 +195,7 @@ fun TopicHeaderPreview() {
             onSave = {},
             isSaved = true,
             likes = 30,
+            numComments = 1,
             imageUrl = "",
             time = "1 mes",
             color = MaterialTheme.colorScheme.primary

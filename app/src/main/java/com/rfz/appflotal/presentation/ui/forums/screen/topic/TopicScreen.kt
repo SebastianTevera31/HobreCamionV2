@@ -35,7 +35,7 @@ fun DiscussionScreen(
 ) {
     val listState = rememberLazyListState()
 
-    LaunchedEffect(selectedComment, comments) {
+    LaunchedEffect(Unit) {
         if (selectedComment != "0" && comments.isNotEmpty()) {
             val indexComment = comments.indexOfFirst { selectedComment == it.id.toString() }
             if (indexComment != -1) {
@@ -54,7 +54,7 @@ fun DiscussionScreen(
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
             modifier = Modifier.fillMaxSize()
         ) {
-            item {
+            item(key = "topic_header") {
                 Column(modifier = Modifier.padding(Dimens.PaddingExtraSmall)) {
                     TopicHeader(
                         title = topic.title,
@@ -65,7 +65,8 @@ fun DiscussionScreen(
                         isSaved = topic.isLiked,
                         likes = topic.likes,
                         time = topic.time,
-                        color = topic.color
+                        color = topic.color,
+                        numComments = topic.numComments
                     )
                 }
             }
@@ -81,7 +82,7 @@ fun DiscussionScreen(
                         likes = comment.likes,
                         onReply = { onReply(comment) },
                         onSave = { onSave(comment.id, true) },
-                        isAuthor = comment.title == topic.author,
+                        isAuthor = comment.idUser == topic.idUser,
                         isSaved = comment.isLiked,
                         onReport = { onReport(comment.id, RecordType.COMMENT) },
                         secondInitial = comment.secondInitial,
@@ -120,7 +121,8 @@ fun DiscussionScreenPreview() {
             firstInitial = "A",
             secondInitial = "",
             time = "",
-            isLiked = false
+            isLiked = false,
+            idUser = 1
         ),
         ForumComment(
             id = 1,
@@ -131,7 +133,8 @@ fun DiscussionScreenPreview() {
             firstInitial = "C",
             secondInitial = "R",
             time = "",
-            isLiked = true
+            isLiked = true,
+            idUser = 100
         ),
         ForumComment(
             id = 3,
@@ -142,7 +145,8 @@ fun DiscussionScreenPreview() {
             firstInitial = "A",
             secondInitial = "M",
             time = "",
-            isLiked = false
+            isLiked = false,
+            idUser = 2
         )
     )
 

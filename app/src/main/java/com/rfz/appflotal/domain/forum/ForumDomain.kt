@@ -1,13 +1,13 @@
 package com.rfz.appflotal.domain.forum
 
-import com.rfz.appflotal.data.model.forum.ForumComment
 import com.rfz.appflotal.data.model.forum.CreateReportRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicMessageRequest
 import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.DoLikeRequest
-import com.rfz.appflotal.data.model.forum.LikedPostResult
+import com.rfz.appflotal.data.model.forum.ForumComment
 import com.rfz.appflotal.data.model.forum.ForumRoom
 import com.rfz.appflotal.data.model.forum.ForumTopic
+import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.data.model.forum.toComment
 import com.rfz.appflotal.data.model.forum.toRoom
 import com.rfz.appflotal.data.model.forum.toTopic
@@ -17,7 +17,10 @@ import com.rfz.appflotal.data.repository.forum.ForumRepository
 import javax.inject.Inject
 
 class GetForumRoomsUseCase @Inject constructor(private val forumRepository: ForumRepository) {
-    suspend operator fun invoke(pageNumber: Int, title: String? = null): ApiResult<List<ForumRoom>> {
+    suspend operator fun invoke(
+        pageNumber: Int,
+        title: String? = null
+    ): ApiResult<List<ForumRoom>> {
         return when (val response = forumRepository.getForums(pageNumber, title)) {
             is ApiResult.Success -> ApiResult.Success(
                 response.data?.results?.map { it.toRoom() } ?: emptyList()
@@ -116,7 +119,8 @@ class CrudForumCommentUseCase @Inject constructor(private val forumRepository: F
                 message = message,
                 registrationDate = registrationDate,
                 idTopic = idTopic,
-                image = image
+                image = image,
+                fkTopicMsg = null
             )
         )
     }
@@ -175,15 +179,15 @@ class GetLikedPostsUseCase @Inject constructor(private val forumRepository: Foru
 
 class CreateForumReportUseCase @Inject constructor(private val forumRepository: ForumRepository) {
     suspend operator fun invoke(
-        idTopic: Int,
-        idMessage: Int,
+        tipoElemento: Boolean,
+        idElemento: Int,
         reportTypeId: Int,
         reportDate: String
     ): ApiResult<List<TpmsResponse>?> {
         return forumRepository.createReport(
             CreateReportRequest(
-                idTopic = idTopic,
-                idMessage = idMessage,
+                idElemento = idElemento,
+                tipoElemento = tipoElemento,
                 reportDate = reportDate,
                 idTypeReport = reportTypeId
             )

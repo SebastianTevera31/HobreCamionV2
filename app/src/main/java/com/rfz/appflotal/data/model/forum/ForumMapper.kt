@@ -45,7 +45,8 @@ fun ForumTopic.toComment(): ForumComment {
         likes = this.likes,
         firstInitial = "",
         secondInitial = "",
-        isLiked = this.isLiked
+        isLiked = this.isLiked,
+        idUser = this.idUser
     )
 }
 
@@ -60,7 +61,8 @@ fun TopicMessageResult.toComment(): ForumComment {
         firstInitial = first,
         secondInitial = second,
         time = Commons.getRelativeTime(this.fldRegistrationDate),
-        isLiked = this.isLiked
+        isLiked = this.isLiked,
+        idUser = this.idUser
     )
 }
 
