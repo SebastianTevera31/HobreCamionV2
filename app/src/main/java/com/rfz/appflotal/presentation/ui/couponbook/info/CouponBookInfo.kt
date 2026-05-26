@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.FireTruck
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,6 +47,26 @@ fun CouponBookInfo(modifier: Modifier = Modifier) {
             ) {
                 Image(imageVector = Icons.Default.FireTruck, contentDescription = null)
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Dimens.PaddingSmall),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
+                }
+
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = null
+                    )
+                }
+            }
         }
         Column(
             modifier = Modifier.padding(Dimens.PaddingMedium),
@@ -53,7 +76,7 @@ fun CouponBookInfo(modifier: Modifier = Modifier) {
         ) {
             Column {
                 Text(
-                    text = "Llantera Norte",
+                    text = "LLANTERA NORTE",
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
