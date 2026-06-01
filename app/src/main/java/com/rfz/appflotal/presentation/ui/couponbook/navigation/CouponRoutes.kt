@@ -9,4 +9,7 @@ object CouponGraph
 object CouponMenu
 
 @Serializable
-object GettingCoupon
+data class CouponInfo(val couponId: String)
+
+@Serializable
+object CouponList

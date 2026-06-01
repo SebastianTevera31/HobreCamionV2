@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,8 +39,15 @@ import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
-fun CouponBookInfo(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxSize()) {
+fun CouponBookInfo(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
         Box {
             Box(
                 modifier = Modifier
@@ -57,13 +65,14 @@ fun CouponBookInfo(modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = {},
+                    onClick = onBack,
                     colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.onTertiary),
                     modifier = Modifier.clip(RoundedCornerShape(Dimens.PaddingSmall))
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = Color.Black
                     )
                 }
 
@@ -74,13 +83,17 @@ fun CouponBookInfo(modifier: Modifier = Modifier) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Share,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = Color.Black
                     )
                 }
             }
         }
         Column(
-            modifier = Modifier.padding(Dimens.PaddingMedium),
+            modifier = Modifier.padding(
+                horizontal = Dimens.PaddingMedium,
+                vertical = Dimens.PaddingSmall
+            ),
             verticalArrangement = Arrangement.spacedBy(
                 Dimens.PaddingMedium
             )
@@ -93,13 +106,15 @@ fun CouponBookInfo(modifier: Modifier = Modifier) {
                 )
                 Text(
                     text = "2x1 en alineacion y balanceo",
+                    color = Color.Black,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
 
             Text(
                 text = "Lleva tu nunidad y oibten dos servicios de alineacion y lanaceo por el precio de uno. Aplica para traccion.",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Black
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -134,6 +149,7 @@ fun CouponBookInfo(modifier: Modifier = Modifier) {
             Column {
                 Text(
                     text = "Terminos y conidiciones",
+                    color = Color.Black,
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                 )
                 Row(
@@ -148,7 +164,11 @@ fun CouponBookInfo(modifier: Modifier = Modifier) {
                                 shape = CircleShape
                             )
                     )
-                    Text(text = "No acumulable con otras promociones.")
+                    Text(
+                        text = "No acumulable con otras promociones.",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }
@@ -159,6 +179,6 @@ fun CouponBookInfo(modifier: Modifier = Modifier) {
 @Composable
 fun CouponBookInfoPreview() {
     HombreCamionTheme {
-        CouponBookInfo()
+        CouponBookInfo({})
     }
 }

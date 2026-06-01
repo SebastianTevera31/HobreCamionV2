@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.couponbook.screen.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,14 +41,28 @@ import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
-fun CouponBookRoute(modifier: Modifier = Modifier) {
-    CouponBookScreen(modifier)
+fun CouponBookRoute(
+    onVerTodosClick: () -> Unit,
+    onCouponClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CouponBookScreen(
+        onVerTodosClick = onVerTodosClick,
+        onCouponClick = onCouponClick,
+        modifier = modifier
+    )
 }
 
 @Composable
-fun CouponBookScreen(modifier: Modifier = Modifier) {
+fun CouponBookScreen(
+    onVerTodosClick: () -> Unit,
+    onCouponClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = Dimens.PaddingMedium),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
     ) {
@@ -60,7 +75,7 @@ fun CouponBookScreen(modifier: Modifier = Modifier) {
                 text = "Cupones cercanos",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
-            TextButton(onClick = {}) {
+            TextButton(onClick = onVerTodosClick) {
                 Text(
                     text = "Ver todos",
                     color = MaterialTheme.colorScheme.primary,
@@ -71,7 +86,7 @@ fun CouponBookScreen(modifier: Modifier = Modifier) {
 
         LazyRow(verticalAlignment = Alignment.CenterVertically) {
             item {
-                CuponCard()
+                CuponCard(onClick = { onCouponClick("1") })
             }
         }
 
@@ -83,16 +98,21 @@ fun CouponBookScreen(modifier: Modifier = Modifier) {
 
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             item {
-                NearestCuponCard()
+                NearestCuponCard(onClick = { onCouponClick("1") })
             }
         }
     }
 }
 
 @Composable
-fun NearestCuponCard(modifier: Modifier = Modifier) {
+fun NearestCuponCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(Dimens.PaddingLarge),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
     ) {
@@ -154,9 +174,14 @@ fun NearestCuponCard(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CuponCard(modifier: Modifier = Modifier) {
+fun CuponCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = modifier.width(240.dp),
+        modifier = modifier
+            .width(240.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(Dimens.PaddingLarge),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
     ) {
@@ -184,8 +209,8 @@ fun CuponCard(modifier: Modifier = Modifier) {
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 },
-                colors = SuggestionChipDefaults.suggestionChipColors(MaterialTheme.colorScheme.tertiaryContainer),
-                modifier = Modifier.clip(RoundedCornerShape(Dimens.PaddingExtraLarge))
+                shape = RoundedCornerShape(Dimens.PaddingExtraLarge),
+                colors = SuggestionChipDefaults.suggestionChipColors(MaterialTheme.colorScheme.tertiaryContainer)
             )
 
             Text(
@@ -209,7 +234,7 @@ fun CuponCard(modifier: Modifier = Modifier) {
 @Composable
 fun CouponBookScreenPreview() {
     HombreCamionTheme {
-        CouponBookScreen(modifier = Modifier.safeContentPadding())
+        CouponBookScreen({}, {}, modifier = Modifier.safeContentPadding())
     }
 }
 
@@ -217,7 +242,7 @@ fun CouponBookScreenPreview() {
 @Composable
 fun NearestCuponCardPreview() {
     HombreCamionTheme {
-        NearestCuponCard()
+        NearestCuponCard({})
     }
 }
 
@@ -225,6 +250,6 @@ fun NearestCuponCardPreview() {
 @Composable
 fun CuponCardPreview() {
     HombreCamionTheme {
-        CuponCard()
+        CuponCard({})
     }
 }

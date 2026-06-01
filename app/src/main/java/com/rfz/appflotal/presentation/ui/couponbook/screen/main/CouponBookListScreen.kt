@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,10 +18,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,15 +28,18 @@ import com.rfz.appflotal.presentation.ui.couponbook.CouponFilterOptions
 
 @Composable
 fun CouponBookListRoute(
-    modifier: Modifier = Modifier,
+    selectedFilter: CouponFilterOptions,
+    filterOptions: List<CouponFilterOptions>,
     onFilterBy: (CouponFilterOptions) -> Unit,
-    filterOptions: CouponFilterOptions,
-    list: List<CouponFilterOptions>
+    onCouponClick: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     CouponBookListScreen(
-        filterOptions = emptyList(),
-        selectedFilter = CouponFilterOptions.ALL,
-        onFilterBy = onFilterBy
+        selectedFilter = selectedFilter,
+        filterOptions = filterOptions,
+        onFilterBy = onFilterBy,
+        onCouponClick = onCouponClick,
+        modifier = modifier
     )
 }
 
@@ -48,18 +48,24 @@ fun CouponBookListScreen(
     selectedFilter: CouponFilterOptions,
     filterOptions: List<CouponFilterOptions>,
     onFilterBy: (CouponFilterOptions) -> Unit,
+    onCouponClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selected by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier.padding(
+            horizontal = Dimens.PaddingMedium,
+            vertical = Dimens.PaddingSmall
+        ),
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(scrollState),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall)
         ) {
             filterOptions.forEach { option ->
                 CouponChip(
@@ -72,7 +78,7 @@ fun CouponBookListScreen(
 
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             item {
-                NearestCuponCard()
+                NearestCuponCard(onClick = { onCouponClick("1") })
             }
         }
     }
@@ -114,6 +120,7 @@ fun CouponBookListScreenPreview() {
         CouponBookListScreen(
             filterOptions = listOf(CouponFilterOptions.ALL, CouponFilterOptions.VALID),
             onFilterBy = {},
+            onCouponClick = {},
             selectedFilter = CouponFilterOptions.VALID,
             modifier = Modifier.safeContentPadding()
         )
