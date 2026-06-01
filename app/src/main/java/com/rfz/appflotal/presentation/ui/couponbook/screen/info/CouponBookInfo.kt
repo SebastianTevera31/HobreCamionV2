@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.couponbook.info
+package com.rfz.appflotal.presentation.ui.couponbook.screen.info
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
@@ -23,11 +24,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,14 +56,22 @@ fun CouponBookInfo(modifier: Modifier = Modifier) {
                     .padding(Dimens.PaddingSmall),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = {}) {
+                IconButton(
+                    onClick = {},
+                    colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.onTertiary),
+                    modifier = Modifier.clip(RoundedCornerShape(Dimens.PaddingSmall))
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = null
                     )
                 }
 
-                IconButton(onClick = {}) {
+                IconButton(
+                    onClick = {},
+                    colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.onTertiary),
+                    modifier = Modifier.clip(RoundedCornerShape(Dimens.PaddingSmall))
+                ) {
                     Icon(
                         imageVector = Icons.Default.Share,
                         contentDescription = null

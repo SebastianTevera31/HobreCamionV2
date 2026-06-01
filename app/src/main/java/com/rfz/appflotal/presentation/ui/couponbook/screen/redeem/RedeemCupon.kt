@@ -1,0 +1,239 @@
+package com.rfz.appflotal.presentation.ui.couponbook.screen.redeem
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.outlined.Adjust
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.rfz.appflotal.presentation.theme.Dimens
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+
+@Composable
+fun RedeemCupon(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFFF2F8FF))
+            .padding(Dimens.ScreenHorizontalPadding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing)
+    ) {
+        // Header Pill
+        Surface(
+            shape = CircleShape,
+            color = Color.White,
+            border = borderStroke(),
+            modifier = Modifier.padding(top = Dimens.PaddingSmall)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Adjust,
+                    contentDescription = null,
+                    tint = Color(0xFF3F7EE8),
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "Llantera Norte",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1C1E)
+                    )
+                )
+            }
+        }
+
+        // Main QR Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Dimens.CardPaddingLarge),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Dimens.ComponentSpacing)
+            ) {
+                // Vigente Badge
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.secondary
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Circle,
+                            contentDescription = null,
+                            tint = Color(0xFF4CAF50),
+                            modifier = Modifier.size(8.dp)
+                        )
+                        Text(
+                            text = "VIGENTE",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondary,
+                                letterSpacing = 1.sp
+                            )
+                        )
+                    }
+                }
+
+                // QR Placeholder
+                Surface(
+                    modifier = Modifier
+                        .size(240.dp)
+                        .padding(8.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color(0xFFF2F8FF)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        // QR logic would go here, using a placeholder for now
+                        Text(
+                            text = "[QR CODE]",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+                // Folio Code
+                Text(
+                    text = "A 3 F 2 - 9 B 1 C - 7 E 0 4",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
+                        color = Color(0xFF1A1C1E)
+                    )
+                )
+            }
+        }
+
+        // Promo Details
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Dimens.ElementSpacing)
+        ) {
+            Text(
+                text = "2×1 en alineación y balanceo",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1A1C1E)
+                ),
+                textAlign = TextAlign.Center
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    tint = Color(0xFF6F7785),
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "Vence el 28 de mayo, 2026",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color(0xFF6F7785)
+                    )
+                )
+            }
+        }
+
+        // Brightness Banner
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.secondary
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LightMode,
+                    contentDescription = null,
+                    tint = Color(0xFF3F7EE8),
+                    modifier = Modifier.size(24.dp)
+                )
+                Column {
+                    Text(
+                        text = "Brillo al máximo automáticamente",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondary
+                        )
+                    )
+                    Text(
+                        text = "para facilitar el escaneo del QR",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSecondary
+                        )
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Footer
+        Text(
+            text = "Folio válido para un solo uso",
+            style = MaterialTheme.typography.bodySmall.copy(
+                color = MaterialTheme.colorScheme.onSecondary
+            ),
+            modifier = Modifier.padding(bottom = Dimens.PaddingLarge)
+        )
+    }
+}
+
+@Composable
+private fun borderStroke() = androidx.compose.foundation.BorderStroke(
+    width = 1.dp,
+    color = Color(0xFFD0E4FF)
+)
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun RedeemCuponPreview() {
+    HombreCamionTheme {
+        RedeemCupon()
+    }
+}
