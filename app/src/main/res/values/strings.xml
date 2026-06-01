@@ -452,4 +452,17 @@
     <string name="forum_me">Yo</string>
     <string name="responder">Responder</string>
     <string name="autor">AUTOR</string>
+
+    <!-- Coupon Book -->
+    <string name="coupon_vigente">VIGENTE</string>
+    <string name="coupon_expires">Vence el %1$s</string>
+    <string name="coupon_brightness_title">Brillo al máximo automáticamente</string>
+    <string name="coupon_brightness_subtitle">para facilitar el escaneo del QR</string>
+    <string name="coupon_single_use">Folio válido para un solo uso</string>
+    <string name="coupon_qr_placeholder">[CÓDIGO QR]</string>
+    <string name="todos">Todos</string>
+    <string name="vigentes">Vigentes</string>
+    <string name="usados">Usados</string>
+    <string name="expirados">Expirados</string>
+    <string name="cuponera">Cuponera</string>
 </resources>

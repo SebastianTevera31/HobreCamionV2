@@ -468,4 +468,9 @@
     <string name="forum_me">Me</string>
     <string name="responder">Reply</string>
     <string name="autor">AUTHOR</string>
+    <string name="todos">Todos</string>
+    <string name="vigentes">Vigentes</string>
+    <string name="usados">Usados</string>
+    <string name="expirados">Expirados</string>
+    <string name="cuponera">Cuponera</string>
 </resources>
