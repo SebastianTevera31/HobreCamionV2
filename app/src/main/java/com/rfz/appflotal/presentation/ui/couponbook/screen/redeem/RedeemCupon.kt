@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.LightMode
@@ -20,12 +21,15 @@ import androidx.compose.material.icons.outlined.Adjust
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,9 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.couponbook.QrCodeImage
 
 @Composable
-fun RedeemCupon(modifier: Modifier = Modifier) {
+fun RedeemCupon(modifier: Modifier = Modifier, onBack: () -> Unit) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -45,6 +50,19 @@ fun RedeemCupon(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing)
     ) {
+        Box {
+            IconButton(
+                onClick = onBack,
+                colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.onTertiary),
+                modifier = Modifier.clip(RoundedCornerShape(Dimens.PaddingSmall))
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    tint = Color.Black
+                )
+            }
+        }
         // Header Pill
         Surface(
             shape = CircleShape,
@@ -123,11 +141,9 @@ fun RedeemCupon(modifier: Modifier = Modifier) {
                     color = Color(0xFFF2F8FF)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        // QR logic would go here, using a placeholder for now
-                        Text(
-                            text = "[QR CODE]",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Gray
+                        QrCodeImage(
+                            content = "https://flotal.mx",
+                            modifier = Modifier.size(260.dp)
                         )
                     }
                 }
@@ -217,7 +233,7 @@ fun RedeemCupon(modifier: Modifier = Modifier) {
         Text(
             text = "Folio válido para un solo uso",
             style = MaterialTheme.typography.bodySmall.copy(
-                color = MaterialTheme.colorScheme.onSecondary
+                color = MaterialTheme.colorScheme.onSurface
             ),
             modifier = Modifier.padding(bottom = Dimens.PaddingLarge)
         )
@@ -234,6 +250,6 @@ private fun borderStroke() = androidx.compose.foundation.BorderStroke(
 @Composable
 fun RedeemCuponPreview() {
     HombreCamionTheme {
-        RedeemCupon()
+        RedeemCupon(onBack = {})
     }
 }

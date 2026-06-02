@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.FireTruck
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -41,6 +42,7 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 @Composable
 fun CouponBookInfo(
     onBack: () -> Unit,
+    onRedeem: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -90,86 +92,103 @@ fun CouponBookInfo(
             }
         }
         Column(
-            modifier = Modifier.padding(
-                horizontal = Dimens.PaddingMedium,
-                vertical = Dimens.PaddingSmall
-            ),
-            verticalArrangement = Arrangement.spacedBy(
-                Dimens.PaddingMedium
-            )
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    horizontal = Dimens.PaddingMedium,
+                    vertical = Dimens.PaddingSmall
+                ),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
-                Text(
-                    text = "LLANTERA NORTE",
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "2x1 en alineacion y balanceo",
-                    color = Color.Black,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                )
-            }
-
-            Text(
-                text = "Lleva tu nunidad y oibten dos servicios de alineacion y lanaceo por el precio de uno. Aplica para traccion.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Black
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(
-                    Dimens.PaddingSmall
+            Column(
+                verticalArrangement = Arrangement.spacedBy(
+                    Dimens.PaddingMedium
                 )
             ) {
-                Card(
-                    modifier = Modifier.weight(1f),
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiaryContainer)
-                ) {
-                    Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
-                        Icon(imageVector = Icons.Default.CalendarToday, contentDescription = null)
-                        Spacer(modifier = Modifier.padding(Dimens.PaddingSmall))
-                        Text(text = "VIGENCIA", style = MaterialTheme.typography.bodySmall)
-                        Text(text = "Hasta 28 May", fontWeight = FontWeight.Bold)
-                    }
+                Column {
+                    Text(
+                        text = "LLANTERA NORTE",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "2x1 en alineacion y balanceo",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                    )
                 }
-                Card(
-                    modifier = Modifier.weight(1f),
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiaryContainer)
-                ) {
-                    Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
-                        Icon(imageVector = Icons.Default.LocationOn, contentDescription = null)
-                        Spacer(modifier = Modifier.padding(Dimens.PaddingSmall))
-                        Text(text = "UBICACION", style = MaterialTheme.typography.bodySmall)
-                        Text(text = "3 surcusales", fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
 
-            Column {
                 Text(
-                    text = "Terminos y conidiciones",
-                    color = Color.Black,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                    text = "Lleva tu nunidad y oibten dos servicios de alineacion y lanaceo por el precio de uno. Aplica para traccion.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Black
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+                    horizontalArrangement = Arrangement.spacedBy(
+                        Dimens.PaddingSmall
+                    )
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = CircleShape
+                    Card(
+                        modifier = Modifier.weight(1f),
+                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiaryContainer)
+                    ) {
+                        Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
+                            Icon(
+                                imageVector = Icons.Default.CalendarToday,
+                                contentDescription = null
                             )
-                    )
-                    Text(
-                        text = "No acumulable con otras promociones.",
-                        color = Color.Black,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                            Spacer(modifier = Modifier.padding(Dimens.PaddingSmall))
+                            Text(text = "VIGENCIA", style = MaterialTheme.typography.bodySmall)
+                            Text(text = "Hasta 28 May", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    Card(
+                        modifier = Modifier.weight(1f),
+                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiaryContainer)
+                    ) {
+                        Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
+                            Icon(imageVector = Icons.Default.LocationOn, contentDescription = null)
+                            Spacer(modifier = Modifier.padding(Dimens.PaddingSmall))
+                            Text(text = "UBICACION", style = MaterialTheme.typography.bodySmall)
+                            Text(text = "3 surcusales", fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
+
+                Column {
+                    Text(
+                        text = "Terminos y conidiciones",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = CircleShape
+                                )
+                        )
+                        Text(
+                            text = "No acumulable con otras promociones.",
+                            color = Color.Black,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+
+            Button(
+                onClick = onRedeem, modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+            ) {
+                Text(text = "Obtener cupon")
             }
         }
     }
@@ -179,6 +198,6 @@ fun CouponBookInfo(
 @Composable
 fun CouponBookInfoPreview() {
     HombreCamionTheme {
-        CouponBookInfo({})
+        CouponBookInfo({}, {})
     }
 }

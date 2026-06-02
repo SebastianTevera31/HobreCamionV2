@@ -18,6 +18,7 @@ import com.rfz.appflotal.presentation.ui.couponbook.CouponBookViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.screen.info.CouponBookInfo
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookListRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookRoute
+import com.rfz.appflotal.presentation.ui.couponbook.screen.redeem.RedeemCupon
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleScaffold
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
@@ -120,8 +121,15 @@ fun NavGraphBuilder.couponGraph(
                 modifier = Modifier.safeContentPadding(),
                 onBack = {
                     navController.popBackStack()
+                },
+                onRedeem = {
+                    navController.navigate(RedeemCoupon)
                 }
             )
+        }
+
+        composable<RedeemCoupon> { backStackEntry ->
+            RedeemCupon()
         }
     }
 }

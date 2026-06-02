@@ -13,3 +13,7 @@ data class CouponInfo(val couponId: String)
 
 @Serializable
 object CouponList
+
+
+@Serializable
+object RedeemCoupon

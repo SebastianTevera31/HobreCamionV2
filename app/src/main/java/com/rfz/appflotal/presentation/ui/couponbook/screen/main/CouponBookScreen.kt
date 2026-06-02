@@ -230,22 +230,6 @@ fun CuponCard(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun CouponBookScreenPreview() {
-    HombreCamionTheme {
-        CouponBookScreen({}, {}, modifier = Modifier.safeContentPadding())
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun NearestCuponCardPreview() {
-    HombreCamionTheme {
-        NearestCuponCard({})
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun CuponCardPreview() {
