@@ -22,4 +22,12 @@ class RemoteCouponDataSource @Inject constructor(private val couponBookClient: C
             validateDto = body
         )
     }
+
+    suspend fun getVoucher(id: String, token: String) {
+//        networkRequestHelper {
+////        couponBookClient.getVoucher(
+////            token = "Bearer $token"
+////        )
+//        }
+    }
 }

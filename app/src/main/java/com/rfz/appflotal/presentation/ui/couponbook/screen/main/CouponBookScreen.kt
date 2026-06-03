@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -232,8 +231,11 @@ fun CuponCard(
 
 @Preview(showBackground = true)
 @Composable
-fun CuponCardPreview() {
+fun CouponBookScreenPreview() {
     HombreCamionTheme {
-        CuponCard({})
+        CouponBookScreen(
+            onVerTodosClick = {},
+            onCouponClick = {}
+        )
     }
 }

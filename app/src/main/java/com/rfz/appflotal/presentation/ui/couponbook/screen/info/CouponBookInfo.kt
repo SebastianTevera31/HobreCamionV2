@@ -42,7 +42,7 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 @Composable
 fun CouponBookInfo(
     onBack: () -> Unit,
-    onRedeem: () -> Unit,
+    onGettingCoupon: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -184,7 +184,7 @@ fun CouponBookInfo(
             }
 
             Button(
-                onClick = onRedeem, modifier = Modifier
+                onClick = onGettingCoupon, modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
             ) {

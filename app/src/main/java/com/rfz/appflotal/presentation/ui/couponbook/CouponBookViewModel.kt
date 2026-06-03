@@ -89,4 +89,15 @@ class CouponBookViewModel @Inject constructor(
             )
         }
     }
+
+    fun getVoucher(id: String) {
+        viewModelScope.launch {
+            couponBookRepository.getVoucher(
+                id = id.toIntOrNull() ?: 0
+            ).fold(
+                onSuccess = {},
+                onFailure = {}
+            )
+        }
+    }
 }

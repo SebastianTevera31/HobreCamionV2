@@ -34,7 +34,7 @@ fun NavGraphBuilder.couponGraph(
         composable<CouponMenu> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 try {
-                    navController.getBackStackEntry<ForumsGraph>()
+                    navController.getBackStackEntry<CouponGraph>()
                 } catch (_: Exception) {
                     backStackEntry
                 }
@@ -84,7 +84,7 @@ fun NavGraphBuilder.couponGraph(
         composable<CouponList> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 try {
-                    navController.getBackStackEntry<ForumsGraph>()
+                    navController.getBackStackEntry<CouponGraph>()
                 } catch (_: Exception) {
                     backStackEntry
                 }
@@ -116,20 +116,35 @@ fun NavGraphBuilder.couponGraph(
         }
 
         composable<CouponInfo> { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<CouponGraph>()
+                } catch (_: Exception) {
+                    backStackEntry
+                }
+            }
+            val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
             val route: CouponInfo = backStackEntry.toRoute()
             CouponBookInfo(
                 modifier = Modifier.safeContentPadding(),
                 onBack = {
                     navController.popBackStack()
                 },
-                onRedeem = {
+
+                onGettingCoupon = {
+                    viewModel.getVoucher("0")
                     navController.navigate(RedeemCoupon)
                 }
             )
         }
 
         composable<RedeemCoupon> { backStackEntry ->
-            RedeemCupon()
+            RedeemCupon(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
