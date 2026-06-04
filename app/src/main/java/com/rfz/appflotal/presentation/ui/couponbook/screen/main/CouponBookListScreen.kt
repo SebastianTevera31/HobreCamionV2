@@ -22,12 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.rfz.appflotal.data.model.couponbook.Coupons
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.couponbook.CouponFilterOptions
 
 @Composable
 fun CouponBookListRoute(
+    coupons: List<Coupons>,
     selectedFilter: CouponFilterOptions,
     filterOptions: List<CouponFilterOptions>,
     onFilterBy: (CouponFilterOptions) -> Unit,
@@ -35,6 +37,7 @@ fun CouponBookListRoute(
     modifier: Modifier = Modifier
 ) {
     CouponBookListScreen(
+        coupons = coupons,
         selectedFilter = selectedFilter,
         filterOptions = filterOptions,
         onFilterBy = onFilterBy,
@@ -45,6 +48,7 @@ fun CouponBookListRoute(
 
 @Composable
 fun CouponBookListScreen(
+    coupons: List<Coupons>,
     selectedFilter: CouponFilterOptions,
     filterOptions: List<CouponFilterOptions>,
     onFilterBy: (CouponFilterOptions) -> Unit,
@@ -76,9 +80,15 @@ fun CouponBookListScreen(
             }
         }
 
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            item {
-                NearestCuponCard(onClick = { onCouponClick("1") })
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+        ) {
+            items(coupons.size) { index ->
+                NearestCuponCard(
+                    coupon = coupons[index],
+                    onClick = { onCouponClick(coupons[index].fldCode) }
+                )
             }
         }
     }
@@ -118,6 +128,7 @@ fun CouponChip(
 fun CouponBookListScreenPreview() {
     HombreCamionTheme {
         CouponBookListScreen(
+            coupons = emptyList(),
             filterOptions = listOf(CouponFilterOptions.ALL, CouponFilterOptions.VALID),
             onFilterBy = {},
             onCouponClick = {},

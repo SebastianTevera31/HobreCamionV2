@@ -45,10 +45,10 @@ class CouponBookViewModel @Inject constructor(
                     _uiState.update { currentUiState ->
                         currentUiState.copy(
                             coupons = it.map { coupon -> coupon.toDomain() },
-                            filteredCoupons = it.map { coupon -> coupon.toDomain() },
                             loadingScreen = LoadState.Success(Unit)
                         )
                     }
+                    applyFilters()
                 },
                 onFailure = {
                     _uiState.update { currentUiState ->
@@ -67,27 +67,45 @@ class CouponBookViewModel @Inject constructor(
                 selectedFilter = option
             )
         }
+        applyFilters()
     }
 
     fun clearFilterSearch() {
         _uiState.update { currentUiState ->
             currentUiState.copy(
-                filteredCoupons = currentUiState.coupons,
+                selectedFilter = CouponFilterOptions.ALL,
                 searchQuery = ""
             )
         }
+        applyFilters()
     }
 
     fun onSearchChanged(query: String) {
-        if (query.isEmpty()) return
+        _uiState.update { it.copy(searchQuery = query) }
+        applyFilters()
+    }
+
+    private fun applyFilters() {
         _uiState.update { currentUiState ->
-            currentUiState.copy(
-                filteredCoupons = currentUiState.coupons.filter { coupon ->
-                    coupon.fldDescription.contains(query, ignoreCase = true) ||
-                            coupon.fldCode.contains(query, ignoreCase = true) ||
-                            coupon.fldTitle.contains(query, ignoreCase = true)
+            val filteredList = currentUiState.coupons.filter { coupon ->
+                val matchesSearch = if (currentUiState.searchQuery.isEmpty()) {
+                    true
+                } else {
+                    coupon.fldDescription.contains(currentUiState.searchQuery, ignoreCase = true) ||
+                            coupon.fldCode.contains(currentUiState.searchQuery, ignoreCase = true) ||
+                            coupon.fldTitle.contains(currentUiState.searchQuery, ignoreCase = true)
                 }
-            )
+
+                val matchesCategory = when (currentUiState.selectedFilter) {
+                    CouponFilterOptions.ALL -> true
+                    CouponFilterOptions.VALID -> coupon.fldStatus == 5
+                    CouponFilterOptions.USED -> coupon.fldStatus == 1
+                    CouponFilterOptions.EXPIRED -> coupon.fldStatus == 4
+                }
+
+                matchesSearch && matchesCategory
+            }
+            currentUiState.copy(filteredCoupons = filteredList)
         }
     }
 
@@ -104,8 +122,20 @@ class CouponBookViewModel @Inject constructor(
             couponBookRepository.acquireVoucher(
                 code = code
             ).fold(
-                onSuccess = {},
-                onFailure = {}
+                onSuccess = {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            loadingScreen = LoadState.Success(Unit)
+                        )
+                    }
+                },
+                onFailure = {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            loadingScreen = LoadState.Error("No se pudo obtener el cupon.")
+                        )
+                    }
+                }
             )
         }
     }

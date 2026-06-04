@@ -214,7 +214,8 @@ fun CouponBookInfoPreview() {
                 fldDiscountType = 1,
                 fldDiscountValue = "50%",
                 fldStartDate = "2024-05-01",
-                fldEndDate = "2024-05-28"
+                fldEndDate = "2024-05-28",
+                fldStatus = 5
             ),
             onBack = {},
             onGettingCoupon = {}

@@ -8,5 +8,6 @@ fun GetVoucherByUserResponse.toDomain() =
         fldDiscountType = this.fldDiscountType,
         fldDiscountValue = this.fldDiscountValue,
         fldStartDate = this.fldStartDate,
-        fldEndDate = this.fldEndDate
+        fldEndDate = this.fldEndDate,
+        fldStatus = this.fldStatus
     )

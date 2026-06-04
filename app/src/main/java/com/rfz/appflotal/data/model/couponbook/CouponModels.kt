@@ -46,7 +46,8 @@ data class Coupons(
     val fldDiscountType: Int,
     val fldDiscountValue: String,
     val fldStartDate: String,
-    val fldEndDate: String
+    val fldEndDate: String,
+    val fldStatus: Int
 )
 
 enum class VoucherStatusType(val id: Int) {

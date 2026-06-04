@@ -271,7 +271,8 @@ fun RedeemCouponPreview() {
                 fldDiscountType = 1,
                 fldDiscountValue = "",
                 fldStartDate = "2024-05-01",
-                fldEndDate = "2026-05-28"
+                fldEndDate = "2026-05-28",
+                fldStatus = 5
             ),
             onBack = {}
         )

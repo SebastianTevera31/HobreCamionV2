@@ -36,16 +36,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.core.util.Commons
+import com.rfz.appflotal.data.model.couponbook.Coupons
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
 fun CouponBookRoute(
+    nearbyCoupons: List<Coupons>,
+    myCoupons: List<Coupons>,
     onVerTodosClick: () -> Unit,
     onCouponClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     CouponBookScreen(
+        nearbyCoupons = nearbyCoupons,
+        myCoupons = myCoupons,
         onVerTodosClick = onVerTodosClick,
         onCouponClick = onCouponClick,
         modifier = modifier
@@ -54,6 +60,8 @@ fun CouponBookRoute(
 
 @Composable
 fun CouponBookScreen(
+    nearbyCoupons: List<Coupons>,
+    myCoupons: List<Coupons>,
     onVerTodosClick: () -> Unit,
     onCouponClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -83,9 +91,15 @@ fun CouponBookScreen(
             }
         }
 
-        LazyRow(verticalAlignment = Alignment.CenterVertically) {
-            item {
-                CuponCard(onClick = { onCouponClick("1") })
+        LazyRow(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+        ) {
+            items(nearbyCoupons.size) { index ->
+                CuponCard(
+                    coupon = nearbyCoupons[index],
+                    onClick = { onCouponClick(nearbyCoupons[index].fldCode) }
+                )
             }
         }
 
@@ -95,9 +109,15 @@ fun CouponBookScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            item {
-                NearestCuponCard(onClick = { onCouponClick("1") })
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+        ) {
+            items(myCoupons.size) { index ->
+                NearestCuponCard(
+                    coupon = myCoupons[index],
+                    onClick = { onCouponClick(myCoupons[index].fldCode) }
+                )
             }
         }
     }
@@ -105,6 +125,7 @@ fun CouponBookScreen(
 
 @Composable
 fun NearestCuponCard(
+    coupon: Coupons,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -118,11 +139,12 @@ fun NearestCuponCard(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(Dimens.PaddingMedium)
         ) {
             Row(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
             ) {
@@ -145,14 +167,14 @@ fun NearestCuponCard(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "2x1 alineacion + balance",
+                        text = coupon.fldTitle,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "Vencido 2 de Diciembre",
+                        text = "Vence el ${Commons.formatToLongDate(coupon.fldEndDate)}",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
@@ -161,7 +183,7 @@ fun NearestCuponCard(
                 }
             }
 
-            IconButton(onClick = {}) {
+            IconButton(onClick = onClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.ArrowRight,
                     contentDescription = null,
@@ -174,6 +196,7 @@ fun NearestCuponCard(
 
 @Composable
 fun CuponCard(
+    coupon: Coupons,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -185,7 +208,7 @@ fun CuponCard(
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(Dimens.PaddingMedium)
         ) {
@@ -204,7 +227,7 @@ fun CuponCard(
                 onClick = {},
                 label = {
                     Text(
-                        text = "-50%",
+                        text = coupon.fldDiscountValue.takeIf { it.isNotEmpty() } ?: "PROMO",
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 },
@@ -220,7 +243,7 @@ fun CuponCard(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "2x1 alineacion + balance",
+                text = coupon.fldTitle,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -234,6 +257,8 @@ fun CuponCard(
 fun CouponBookScreenPreview() {
     HombreCamionTheme {
         CouponBookScreen(
+            nearbyCoupons = emptyList(),
+            myCoupons = emptyList(),
             onVerTodosClick = {},
             onCouponClick = {}
         )

@@ -69,6 +69,8 @@ fun NavGraphBuilder.couponGraph(
                 )
             ) { paddingValues ->
                 CouponBookRoute(
+                    nearbyCoupons = state.coupons,
+                    myCoupons = state.filteredCoupons,
                     onVerTodosClick = {
                         navController.navigate(CouponList)
                     },
@@ -102,6 +104,7 @@ fun NavGraphBuilder.couponGraph(
                 )
             ) { paddingValue ->
                 CouponBookListRoute(
+                    coupons = state.filteredCoupons,
                     selectedFilter = state.selectedFilter,
                     filterOptions = state.filterOptions,
                     onFilterBy = { option ->
@@ -126,7 +129,6 @@ fun NavGraphBuilder.couponGraph(
             }
             val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
-            val route: CouponInfo = backStackEntry.toRoute()
             CouponBookInfo(
                 coupons = state.selectedCoupon!!,
                 modifier = Modifier.safeContentPadding(),
@@ -151,7 +153,6 @@ fun NavGraphBuilder.couponGraph(
             }
             val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
-            val route: CouponInfo = backStackEntry.toRoute()
             RedeemCoupon(
                 coupon = state.selectedCoupon!!,
                 onBack = {

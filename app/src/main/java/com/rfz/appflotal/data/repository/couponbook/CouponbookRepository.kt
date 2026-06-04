@@ -44,7 +44,7 @@ class CouponBookRepository @Inject constructor(
         val token = getTasksUseCase().first().first().fld_token
         return remoteCouponBookDataSource.acquireVoucher(
             token = token,
-            id = id
+            id = code
         )
     }
 }
