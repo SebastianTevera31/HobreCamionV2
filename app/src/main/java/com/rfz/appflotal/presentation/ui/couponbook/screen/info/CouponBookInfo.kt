@@ -36,13 +36,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.core.util.Commons
+import com.rfz.appflotal.data.model.couponbook.Coupons
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
 fun CouponBookInfo(
+    coupons: Coupons,
     onBack: () -> Unit,
-    onGettingCoupon: () -> Unit,
+    onGettingCoupon: (code: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -78,17 +81,17 @@ fun CouponBookInfo(
                     )
                 }
 
-                IconButton(
-                    onClick = {},
-                    colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.onTertiary),
-                    modifier = Modifier.clip(RoundedCornerShape(Dimens.PaddingSmall))
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = null,
-                        tint = Color.Black
-                    )
-                }
+//                IconButton(
+//                    onClick = {},
+//                    colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.onTertiary),
+//                    modifier = Modifier.clip(RoundedCornerShape(Dimens.PaddingSmall))
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.Default.Share,
+//                        contentDescription = null,
+//                        tint = Color.Black
+//                    )
+//                }
             }
         }
         Column(
@@ -112,14 +115,14 @@ fun CouponBookInfo(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "2x1 en alineacion y balanceo",
+                        text = coupons.fldTitle,
                         color = Color.Black,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 }
 
                 Text(
-                    text = "Lleva tu nunidad y oibten dos servicios de alineacion y lanaceo por el precio de uno. Aplica para traccion.",
+                    text = coupons.fldDescription,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Black
                 )
@@ -140,20 +143,23 @@ fun CouponBookInfo(
                             )
                             Spacer(modifier = Modifier.padding(Dimens.PaddingSmall))
                             Text(text = "VIGENCIA", style = MaterialTheme.typography.bodySmall)
-                            Text(text = "Hasta 28 May", fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "Hasta ${Commons.formatToLongDate(coupons.fldEndDate)}",
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
-                    Card(
-                        modifier = Modifier.weight(1f),
-                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiaryContainer)
-                    ) {
-                        Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
-                            Icon(imageVector = Icons.Default.LocationOn, contentDescription = null)
-                            Spacer(modifier = Modifier.padding(Dimens.PaddingSmall))
-                            Text(text = "UBICACION", style = MaterialTheme.typography.bodySmall)
-                            Text(text = "3 surcusales", fontWeight = FontWeight.Bold)
-                        }
-                    }
+//                    Card(
+//                        modifier = Modifier.weight(1f),
+//                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiaryContainer)
+//                    ) {
+//                        Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
+//                            Icon(imageVector = Icons.Default.LocationOn, contentDescription = null)
+//                            Spacer(modifier = Modifier.padding(Dimens.PaddingSmall))
+//                            Text(text = "UBICACION", style = MaterialTheme.typography.bodySmall)
+//                            Text(text = "3 surcusales", fontWeight = FontWeight.Bold)
+//                        }
+//                    }
                 }
 
                 Column {
@@ -184,7 +190,9 @@ fun CouponBookInfo(
             }
 
             Button(
-                onClick = onGettingCoupon, modifier = Modifier
+                onClick = {
+                    onGettingCoupon(coupons.fldCode)
+                }, modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
             ) {
@@ -194,10 +202,22 @@ fun CouponBookInfo(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CouponBookInfoPreview() {
     HombreCamionTheme {
-        CouponBookInfo({}, {})
+        CouponBookInfo(
+            coupons = Coupons(
+                fldCode = "KFKFKFKF-3KK",
+                fldTitle = "2×1 en alineación y balanceo",
+                fldDescription = "Obtén un 2x1 en el servicio de alineación y balanceo para tu vehículo. Válido en todas nuestras sucursales.",
+                fldDiscountType = 1,
+                fldDiscountValue = "50%",
+                fldStartDate = "2024-05-01",
+                fldEndDate = "2024-05-28"
+            ),
+            onBack = {},
+            onGettingCoupon = {}
+        )
     }
 }

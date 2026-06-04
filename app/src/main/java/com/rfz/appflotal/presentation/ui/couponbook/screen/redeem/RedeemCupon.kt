@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.couponbook.screen.redeem
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,13 +39,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rfz.appflotal.core.util.Commons
+import com.rfz.appflotal.data.model.couponbook.Coupons
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.couponbook.QrCodeImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RedeemCupon(modifier: Modifier = Modifier, onBack: () -> Unit) {
+fun RedeemCoupon(coupon: Coupons, modifier: Modifier = Modifier, onBack: () -> Unit) {
     Column {
         CenterAlignedTopAppBar(
             title = {
@@ -150,7 +153,7 @@ fun RedeemCupon(modifier: Modifier = Modifier, onBack: () -> Unit) {
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             QrCodeImage(
-                                content = "https://flotal.mx",
+                                content = coupon.fldCode,
                                 modifier = Modifier.size(260.dp)
                             )
                         }
@@ -158,7 +161,7 @@ fun RedeemCupon(modifier: Modifier = Modifier, onBack: () -> Unit) {
 
                     // Folio Code
                     Text(
-                        text = "A 3 F 2 - 9 B 1 C - 7 E 0 4",
+                        text = coupon.fldCode,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp,
@@ -174,7 +177,7 @@ fun RedeemCupon(modifier: Modifier = Modifier, onBack: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(Dimens.ElementSpacing)
             ) {
                 Text(
-                    text = "2×1 en alineación y balanceo",
+                    text = coupon.fldTitle,
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1A1C1E)
@@ -192,7 +195,7 @@ fun RedeemCupon(modifier: Modifier = Modifier, onBack: () -> Unit) {
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
-                        text = "Vence el 28 de mayo, 2026",
+                        text = "Vence el ${Commons.formatToLongDate(coupon.fldEndDate)}",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = Color(0xFF6F7785)
                         )
@@ -251,15 +254,26 @@ fun RedeemCupon(modifier: Modifier = Modifier, onBack: () -> Unit) {
 }
 
 @Composable
-private fun borderStroke() = androidx.compose.foundation.BorderStroke(
+private fun borderStroke() = BorderStroke(
     width = 1.dp,
     color = Color(0xFFD0E4FF)
 )
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun RedeemCuponPreview() {
+fun RedeemCouponPreview() {
     HombreCamionTheme {
-        RedeemCupon(onBack = {})
+        RedeemCoupon(
+            coupon = Coupons(
+                fldCode = "KFKFKFKF-3KK",
+                fldTitle = "2×1 en alineación y balanceo",
+                fldDescription = "",
+                fldDiscountType = 1,
+                fldDiscountValue = "",
+                fldStartDate = "2024-05-01",
+                fldEndDate = "2026-05-28"
+            ),
+            onBack = {}
+        )
     }
 }

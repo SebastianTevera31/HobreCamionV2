@@ -18,11 +18,10 @@ import com.rfz.appflotal.presentation.ui.couponbook.CouponBookViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.screen.info.CouponBookInfo
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookListRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookRoute
-import com.rfz.appflotal.presentation.ui.couponbook.screen.redeem.RedeemCupon
+import com.rfz.appflotal.presentation.ui.couponbook.screen.redeem.RedeemCoupon
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleScaffold
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
-import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.SavedCommentsNav
 
 fun NavGraphBuilder.couponGraph(
@@ -55,8 +54,8 @@ fun NavGraphBuilder.couponGraph(
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
                         placeholder = "Buscar...",
-                        onValueChange = {
-                            viewModel.onSearchChanged()
+                        onValueChange = { query ->
+                            viewModel.onSearchChanged(query)
                         }
                     ),
                     onBackClick = {
@@ -74,7 +73,8 @@ fun NavGraphBuilder.couponGraph(
                         navController.navigate(CouponList)
                     },
                     onCouponClick = { id ->
-                        navController.navigate(CouponInfo(id))
+                        viewModel.selectCoupon(id)
+                        navController.navigate(CouponInfo)
                     },
                     modifier = Modifier.padding(paddingValues)
                 )
@@ -108,7 +108,8 @@ fun NavGraphBuilder.couponGraph(
                         viewModel.selectFilterOption(option)
                     },
                     onCouponClick = { id ->
-                        navController.navigate(CouponInfo(id))
+                        viewModel.selectCoupon(id)
+                        navController.navigate(CouponInfo)
                     },
                     modifier = Modifier.padding(paddingValue)
                 )
@@ -127,20 +128,32 @@ fun NavGraphBuilder.couponGraph(
             val state by viewModel.uiState.collectAsState()
             val route: CouponInfo = backStackEntry.toRoute()
             CouponBookInfo(
+                coupons = state.selectedCoupon!!,
                 modifier = Modifier.safeContentPadding(),
                 onBack = {
                     navController.popBackStack()
                 },
 
-                onGettingCoupon = {
-                    viewModel.getVoucher("0")
-                    navController.navigate(RedeemCoupon)
+                onGettingCoupon = { code ->
+                    viewModel.validateVoucher(code)
+                    navController.navigate(RedeemCoupon(code))
                 }
             )
         }
 
         composable<RedeemCoupon> { backStackEntry ->
-            RedeemCupon(
+            val parentEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<CouponGraph>()
+                } catch (_: Exception) {
+                    backStackEntry
+                }
+            }
+            val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
+            val route: CouponInfo = backStackEntry.toRoute()
+            RedeemCoupon(
+                coupon = state.selectedCoupon!!,
                 onBack = {
                     navController.popBackStack()
                 }

@@ -3,7 +3,8 @@ package com.rfz.appflotal.presentation.ui.couponbook
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
-import com.rfz.appflotal.data.model.couponbook.RedeemDto
+import com.rfz.appflotal.data.model.couponbook.Coupons
+import com.rfz.appflotal.data.model.couponbook.toDomain
 import com.rfz.appflotal.data.repository.couponbook.CouponBookRepository
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,9 +25,9 @@ data class CouponBookUiState(
     val filterOptions: List<CouponFilterOptions> = CouponFilterOptions.entries,
     val selectedFilter: CouponFilterOptions = CouponFilterOptions.ALL,
     val searchQuery: String = "",
-    val filteredCoupons: List<String> = emptyList(),
-    val coupons: List<String> = emptyList(),
-    val selectedCoupon: String? = null,
+    val filteredCoupons: List<Coupons> = emptyList(),
+    val coupons: List<Coupons> = emptyList(),
+    val selectedCoupon: Coupons? = null,
     val loadingScreen: LoadState<Unit> = LoadState.Idle
 )
 
@@ -38,7 +39,26 @@ class CouponBookViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     fun getInitialData(forceRefresh: Boolean = false) {
-
+        viewModelScope.launch {
+            couponBookRepository.getVoucher().fold(
+                onSuccess = {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            coupons = it.map { coupon -> coupon.toDomain() },
+                            filteredCoupons = it.map { coupon -> coupon.toDomain() },
+                            loadingScreen = LoadState.Success(Unit)
+                        )
+                    }
+                },
+                onFailure = {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            loadingScreen = LoadState.Error("No se pudo obtener los cupones.")
+                        )
+                    }
+                }
+            )
+        }
     }
 
     fun selectFilterOption(option: CouponFilterOptions) {
@@ -52,48 +72,37 @@ class CouponBookViewModel @Inject constructor(
     fun clearFilterSearch() {
         _uiState.update { currentUiState ->
             currentUiState.copy(
-                filteredCoupons = emptyList(),
+                filteredCoupons = currentUiState.coupons,
                 searchQuery = ""
             )
         }
     }
 
-    fun onSearchChanged() {
-
-    }
-
-    fun doRedeem() {
-        viewModelScope.launch {
-            couponBookRepository.redeemVoucher(
-                redeemDto = RedeemDto(
-                    code = "",
-                    idUserCustomer = 1,
-                    idUserCashier = 1,
-                    idBusiness = 1,
-                    originalAmount = 1
-                )
-            ).fold(
-                onSuccess = {},
-                onFailure = {}
+    fun onSearchChanged(query: String) {
+        if (query.isEmpty()) return
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                filteredCoupons = currentUiState.coupons.filter { coupon ->
+                    coupon.fldDescription.contains(query, ignoreCase = true) ||
+                            coupon.fldCode.contains(query, ignoreCase = true) ||
+                            coupon.fldTitle.contains(query, ignoreCase = true)
+                }
             )
         }
     }
 
-    fun validateVoucher() {
-        viewModelScope.launch {
-            couponBookRepository.validateVoucher(
-                code = ""
-            ).fold(
-                onSuccess = {},
-                onFailure = {}
+    fun selectCoupon(idCoupon: String) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                selectedCoupon = currentUiState.coupons.find { it.fldCode == idCoupon }
             )
         }
     }
 
-    fun getVoucher(id: String) {
+    fun validateVoucher(code: String) {
         viewModelScope.launch {
-            couponBookRepository.getVoucher(
-                id = id.toIntOrNull() ?: 0
+            couponBookRepository.acquireVoucher(
+                code = code
             ).fold(
                 onSuccess = {},
                 onFailure = {}

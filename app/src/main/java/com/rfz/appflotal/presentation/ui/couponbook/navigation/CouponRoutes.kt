@@ -9,11 +9,11 @@ object CouponGraph
 object CouponMenu
 
 @Serializable
-data class CouponInfo(val couponId: String)
+object CouponInfo
 
 @Serializable
 object CouponList
 
 
 @Serializable
-object RedeemCoupon
+data class RedeemCoupon(val couponId: String)

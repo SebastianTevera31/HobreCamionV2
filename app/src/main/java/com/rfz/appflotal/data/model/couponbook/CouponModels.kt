@@ -27,3 +27,28 @@ data class Validate(
     val code: String,
     val idBusiness: Int
 )
+
+data class GetVoucherByUserResponse(
+    @SerializedName("fld_code") val fldCode: String,
+    @SerializedName("fld_title") val fldTitle: String,
+    @SerializedName("fld_description") val fldDescription: String,
+    @SerializedName("fld_discount_type") val fldDiscountType: Int,
+    @SerializedName("fld_discount_value") val fldDiscountValue: String,
+    @SerializedName("fld_start_date") val fldStartDate: String,
+    @SerializedName("fld_end_date") val fldEndDate: String,
+    @SerializedName("fld_status") val fldStatus: Int
+)
+
+data class Coupons(
+    val fldCode: String,
+    val fldTitle: String,
+    val fldDescription: String,
+    val fldDiscountType: Int,
+    val fldDiscountValue: String,
+    val fldStartDate: String,
+    val fldEndDate: String
+)
+
+enum class VoucherStatusType(val id: Int) {
+    RECLAMADO(1), INACTIVO(2), NO_VALIDO(3), EXPIRADO(4), VALIDO(5)
+}

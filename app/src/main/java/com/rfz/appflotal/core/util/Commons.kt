@@ -11,7 +11,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import java.text.SimpleDateFormat
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -67,7 +66,7 @@ object Commons {
         val sdf = SimpleDateFormat(initialFormat, Locale.getDefault())
         val date = sdf.parse(date)!!
         val outDate = SimpleDateFormat(convertFormat, Locale.getDefault())
-        
+
         return outDate.format(date)
     }
 
@@ -91,8 +90,9 @@ object Commons {
     }
 
     fun getDateFromNotification(fecha: String, hora: String): ZonedDateTime? {
-        val formattedDate = convertDate(date = fecha, initialFormat = "dd/MM/yyyy", convertFormat = "yyyy-MM-dd")
-        val localDate = LocalDate.parse( formattedDate)
+        val formattedDate =
+            convertDate(date = fecha, initialFormat = "dd/MM/yyyy", convertFormat = "yyyy-MM-dd")
+        val localDate = LocalDate.parse(formattedDate)
         val localHour = LocalTime.parse(hora.chunked(2).joinToString(":"))
         val horaFinal = LocalDateTime.of(localDate, localHour)
         return horaFinal.atZone(ZoneId.of("UTC"))
@@ -131,5 +131,36 @@ object Commons {
         val first = parts.firstOrNull()?.take(1)?.uppercase() ?: ""
         val second = if (parts.size > 1) parts[1].take(1).uppercase() else ""
         return Pair(first, second)
+    }
+
+    fun formatToLongDate(
+        dateString: String,
+        inputFormat: String = "yyyy-MM-dd"
+    ): String {
+        if (dateString.isBlank()) return ""
+        val locale = Locale.getDefault()
+        val outputPattern = if (locale.language == "es") {
+            "d 'de' MMMM, yyyy"
+        } else {
+            "MMMM d, yyyy"
+        }
+
+        return try {
+            val date = getDateObject(dateString, inputFormat)
+            SimpleDateFormat(outputPattern, locale).format(date)
+        } catch (e: Exception) {
+            try {
+                // Try ISO format as fallback
+                val date = getDateObject(dateString, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                SimpleDateFormat(outputPattern, locale).format(date)
+            } catch (e2: Exception) {
+                try {
+                    val date = getDateObject(dateString, "yyyy-MM-dd'T'HH:mm:ss")
+                    SimpleDateFormat(outputPattern, locale).format(date)
+                } catch (e3: Exception) {
+                    dateString
+                }
+            }
+        }
     }
 }

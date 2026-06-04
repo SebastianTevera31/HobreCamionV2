@@ -23,11 +23,11 @@ class RemoteCouponDataSource @Inject constructor(private val couponBookClient: C
         )
     }
 
-    suspend fun getVoucher(id: String, token: String) {
-//        networkRequestHelper {
-////        couponBookClient.getVoucher(
-////            token = "Bearer $token"
-////        )
-//        }
+    suspend fun getVouchers(token: String) = networkRequestHelper {
+        couponBookClient.getVouchersByUser("Bearer $token")
+    }
+
+    suspend fun acquireVoucher(id: String, token: String) = networkRequestHelper {
+        couponBookClient.acquireVoucher("Bearer $token", id)
     }
 }
