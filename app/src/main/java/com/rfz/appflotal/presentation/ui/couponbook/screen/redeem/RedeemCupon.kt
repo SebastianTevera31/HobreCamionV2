@@ -40,14 +40,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.core.util.Commons
-import com.rfz.appflotal.data.model.couponbook.Coupons
+import com.rfz.appflotal.data.model.couponbook.Coupon
+import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.couponbook.QrCodeImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RedeemCoupon(coupon: Coupons, modifier: Modifier = Modifier, onBack: () -> Unit) {
+fun RedeemCoupon(coupon: Coupon, modifier: Modifier = Modifier, onBack: () -> Unit) {
     Column {
         CenterAlignedTopAppBar(
             title = {
@@ -265,7 +266,7 @@ private fun borderStroke() = BorderStroke(
 fun RedeemCouponPreview() {
     HombreCamionTheme {
         RedeemCoupon(
-            coupon = Coupons(
+            coupon = Coupon(
                 fldCode = "KFKFKFKF-3KK",
                 fldTitle = "2×1 en alineación y balanceo",
                 fldDescription = "",
@@ -273,7 +274,7 @@ fun RedeemCouponPreview() {
                 fldDiscountValue = "",
                 fldStartDate = "2024-05-01",
                 fldEndDate = "2026-05-28",
-                fldStatus = 5
+                fldStatus = VoucherStatusType.VALIDO
             ),
             onBack = {}
         )

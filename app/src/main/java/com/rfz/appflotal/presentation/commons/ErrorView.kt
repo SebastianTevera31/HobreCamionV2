@@ -24,10 +24,15 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 @Composable
 fun ErrorView(
     modifier: Modifier = Modifier,
+    errorMessage: Any? = null,
     showRetryButton: Boolean = false,
     onRetry: () -> Unit = {}
 ) {
-    val errorMessage = stringResource(R.string.error_carga_datos)
+    val message = when (errorMessage) {
+        is String -> errorMessage
+        is Int -> stringResource(errorMessage)
+        else -> stringResource(R.string.error_carga_datos)
+    }
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -39,7 +44,7 @@ fun ErrorView(
                 modifier = Modifier.size(240.dp)
             )
             Text(
-                errorMessage,
+                message,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
 

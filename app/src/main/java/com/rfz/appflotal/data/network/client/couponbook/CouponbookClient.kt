@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.network.client.couponbook
 import com.rfz.appflotal.data.model.couponbook.GetVoucherByUserResponse
 import com.rfz.appflotal.data.model.couponbook.RedeemDto
 import com.rfz.appflotal.data.model.couponbook.ValidateCouponDto
+import com.rfz.appflotal.data.model.couponbook.ValidateVoucherResponseDto
 import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -23,7 +24,7 @@ interface CouponBookService {
     suspend fun validateVoucher(
         @Header("Authorization") token: String,
         @Body validateDto: ValidateCouponDto
-    ): Response<Unit>
+    ): Response<ValidateVoucherResponseDto>
 
     @GET("api/vouchers/UserVouchers")
     suspend fun getVouchersByUser(

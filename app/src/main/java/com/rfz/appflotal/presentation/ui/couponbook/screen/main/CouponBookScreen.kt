@@ -35,12 +35,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
-import com.rfz.appflotal.data.model.couponbook.Coupons
+import com.rfz.appflotal.data.model.couponbook.Coupon
+import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -50,15 +54,18 @@ import com.rfz.appflotal.presentation.ui.utils.LoadState
 fun CouponBookRoute(
     screenStatus: LoadState<Unit>,
     onLoadData: () -> Unit,
-    nearbyCoupons: List<Coupons>,
-    myCoupons: List<Coupons>,
+    nearbyCoupons: List<Coupon>,
+    myCoupons: List<Coupon>,
     onVerTodosClick: () -> Unit,
     onCouponClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (screenStatus) {
         is LoadState.Error -> {
-            ErrorView(showRetryButton = true) {
+            ErrorView(
+                errorMessage = screenStatus.message,
+                showRetryButton = true
+            ) {
                 onLoadData()
             }
         }
@@ -87,8 +94,8 @@ fun CouponBookRoute(
 
 @Composable
 fun CouponBookScreen(
-    nearbyCoupons: List<Coupons>,
-    myCoupons: List<Coupons>,
+    nearbyCoupons: List<Coupon>,
+    myCoupons: List<Coupon>,
     onVerTodosClick: () -> Unit,
     onCouponClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -107,12 +114,12 @@ fun CouponBookScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Cupones cercanos",
+                text = stringResource(R.string.cupones_cercanos),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
             TextButton(onClick = onVerTodosClick) {
                 Text(
-                    text = "Ver todos",
+                    text = stringResource(R.string.ver_todos),
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                 )
@@ -126,7 +133,7 @@ fun CouponBookScreen(
                     .height(60.dp)
             ) {
                 Text(
-                    text = "No hay cupones cercanos.",
+                    text = stringResource(R.string.no_hay_cupones_cercanos),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -145,10 +152,8 @@ fun CouponBookScreen(
             }
         }
 
-
-
         Text(
-            text = "Mis cupones",
+            text = stringResource(R.string.mis_cupones),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.fillMaxWidth()
         )
@@ -160,7 +165,7 @@ fun CouponBookScreen(
                     .height(60.dp)
             ) {
                 Text(
-                    text = "No hay cupones cercanos.",
+                    text = stringResource(R.string.no_hay_cupones_cercanos),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -185,7 +190,7 @@ fun CouponBookScreen(
 
 @Composable
 fun NearestCuponCard(
-    coupon: Coupons,
+    coupon: Coupon,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -219,13 +224,43 @@ fun NearestCuponCard(
                 }
 
                 Column {
+
+                    Card(
+                        modifier = Modifier.padding(vertical = Dimens.PaddingSmall),
+                        border = CardDefaults.outlinedCardBorder(enabled = true)
+                    ) {
+                        val textRes = when (coupon.fldStatus) {
+                            VoucherStatusType.RECLAMADO -> R.string.reclamado
+
+                            VoucherStatusType.INACTIVO -> R.string.inactivo
+
+                            VoucherStatusType.NO_VALIDO -> R.string.no_valido
+
+                            VoucherStatusType.EXPIRADO -> R.string.expirado
+
+                            else -> R.string.expirado
+                        }
+
+                        Text(
+                            text = stringResource(textRes),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            modifier = Modifier.padding(Dimens.PaddingSmall)
+                        )
+                    }
+
                     Text(
-                        text = "Llantera Norte",
+                        text = stringResource(R.string.llantera_norte_placeholder),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+
                     Text(
                         text = coupon.fldTitle,
                         fontWeight = FontWeight.Bold,
@@ -234,7 +269,7 @@ fun NearestCuponCard(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "Vence el ${Commons.formatToLongDate(coupon.fldEndDate)}",
+                        text = stringResource(R.string.coupon_expires, Commons.formatToLongDate(coupon.fldEndDate)),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
@@ -256,7 +291,7 @@ fun NearestCuponCard(
 
 @Composable
 fun CuponCard(
-    coupon: Coupons,
+    coupon: Coupon,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -287,7 +322,7 @@ fun CuponCard(
                 onClick = {},
                 label = {
                     Text(
-                        text = coupon.fldDiscountValue.takeIf { it.isNotEmpty() } ?: "PROMO",
+                        text = coupon.fldDiscountValue.takeIf { it.isNotEmpty() } ?: stringResource(R.string.promo_label),
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 },
@@ -296,7 +331,7 @@ fun CuponCard(
             )
 
             Text(
-                text = "Llantera Norte",
+                text = stringResource(R.string.llantera_norte_placeholder),
                 color = MaterialTheme.colorScheme.onSecondary,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
@@ -321,6 +356,26 @@ fun CouponBookScreenPreview() {
             myCoupons = emptyList(),
             onVerTodosClick = {},
             onCouponClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NearestCuponCardPreview() {
+    HombreCamionTheme {
+        NearestCuponCard(
+            coupon = Coupon(
+                fldCode = "CODE123",
+                fldTitle = "Cupón de Descuento",
+                fldDescription = "Descripción del cupón",
+                fldDiscountType = 1,
+                fldDiscountValue = "10%",
+                fldStartDate = "2023-01-01",
+                fldEndDate = "2023-12-31",
+                fldStatus = VoucherStatusType.INACTIVO
+            ),
+            onClick = {}
         )
     }
 }

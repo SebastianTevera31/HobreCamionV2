@@ -18,8 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.FireTruck
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,17 +31,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
-import com.rfz.appflotal.data.model.couponbook.Coupons
+import com.rfz.appflotal.data.model.couponbook.Coupon
+import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
 fun CouponBookInfo(
-    coupons: Coupons,
+    coupon: Coupon,
     onBack: () -> Unit,
     onGettingCoupon: (code: String) -> Unit,
     modifier: Modifier = Modifier
@@ -80,18 +81,6 @@ fun CouponBookInfo(
                         tint = Color.Black
                     )
                 }
-
-//                IconButton(
-//                    onClick = {},
-//                    colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.onTertiary),
-//                    modifier = Modifier.clip(RoundedCornerShape(Dimens.PaddingSmall))
-//                ) {
-//                    Icon(
-//                        imageVector = Icons.Default.Share,
-//                        contentDescription = null,
-//                        tint = Color.Black
-//                    )
-//                }
             }
         }
         Column(
@@ -109,20 +98,47 @@ fun CouponBookInfo(
                 )
             ) {
                 Column {
+                    if (coupon.fldStatus != VoucherStatusType.VALIDO) {
+                        Card(
+                            modifier = Modifier.padding(vertical = Dimens.PaddingSmall),
+                            border = CardDefaults.outlinedCardBorder(enabled = true)
+                        ) {
+                            val textRes = when (coupon.fldStatus) {
+                                VoucherStatusType.RECLAMADO -> R.string.reclamado
+
+                                VoucherStatusType.INACTIVO -> R.string.inactivo
+
+                                VoucherStatusType.NO_VALIDO -> R.string.no_valido
+
+                                VoucherStatusType.EXPIRADO -> R.string.expirado
+
+                                else -> R.string.expirado
+                            }
+
+                            Text(
+                                text = stringResource(textRes),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                modifier = Modifier.padding(Dimens.PaddingSmall)
+                            )
+                        }
+                    }
+
                     Text(
-                        text = "LLANTERA NORTE",
+                        text = stringResource(R.string.llantera_norte_placeholder).uppercase(),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = coupons.fldTitle,
+                        text = coupon.fldTitle,
                         color = Color.Black,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 }
 
                 Text(
-                    text = coupons.fldDescription,
+                    text = coupon.fldDescription,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Black
                 )
@@ -142,9 +158,9 @@ fun CouponBookInfo(
                                 contentDescription = null
                             )
                             Spacer(modifier = Modifier.padding(Dimens.PaddingSmall))
-                            Text(text = "VIGENCIA", style = MaterialTheme.typography.bodySmall)
+                            Text(text = stringResource(R.string.vigencia), style = MaterialTheme.typography.bodySmall)
                             Text(
-                                text = "Hasta ${Commons.formatToLongDate(coupons.fldEndDate)}",
+                                text = stringResource(R.string.hasta_fecha, Commons.formatToLongDate(coupon.fldEndDate)),
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -164,7 +180,7 @@ fun CouponBookInfo(
 
                 Column {
                     Text(
-                        text = "Terminos y conidiciones",
+                        text = stringResource(R.string.terminos_y_condiciones_label),
                         color = Color.Black,
                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                     )
@@ -181,7 +197,7 @@ fun CouponBookInfo(
                                 )
                         )
                         Text(
-                            text = "No acumulable con otras promociones.",
+                            text = stringResource(R.string.no_acumulable_promociones),
                             color = Color.Black,
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -189,14 +205,16 @@ fun CouponBookInfo(
                 }
             }
 
-            Button(
-                onClick = {
-                    onGettingCoupon(coupons.fldCode)
-                }, modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-            ) {
-                Text(text = "Obtener cupon")
+            if (coupon.fldStatus == VoucherStatusType.VALIDO) {
+                Button(
+                    onClick = {
+                        onGettingCoupon(coupon.fldCode)
+                    }, modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                ) {
+                    Text(text = stringResource(R.string.obtener_cupon))
+                }
             }
         }
     }
@@ -207,7 +225,7 @@ fun CouponBookInfo(
 fun CouponBookInfoPreview() {
     HombreCamionTheme {
         CouponBookInfo(
-            coupons = Coupons(
+            coupon = Coupon(
                 fldCode = "KFKFKFKF-3KK",
                 fldTitle = "2×1 en alineación y balanceo",
                 fldDescription = "Obtén un 2x1 en el servicio de alineación y balanceo para tu vehículo. Válido en todas nuestras sucursales.",
@@ -215,7 +233,7 @@ fun CouponBookInfoPreview() {
                 fldDiscountValue = "50%",
                 fldStartDate = "2024-05-01",
                 fldEndDate = "2024-05-28",
-                fldStatus = 5
+                fldStatus = VoucherStatusType.EXPIRADO
             ),
             onBack = {},
             onGettingCoupon = {}

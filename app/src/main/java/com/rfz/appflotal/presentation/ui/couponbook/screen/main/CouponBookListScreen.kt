@@ -22,14 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.rfz.appflotal.data.model.couponbook.Coupons
+import com.rfz.appflotal.data.model.couponbook.Coupon
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.couponbook.CouponFilterOptions
 
 @Composable
 fun CouponBookListRoute(
-    coupons: List<Coupons>,
+    coupons: List<Coupon>,
     selectedFilter: CouponFilterOptions,
     filterOptions: List<CouponFilterOptions>,
     onFilterBy: (CouponFilterOptions) -> Unit,
@@ -48,7 +48,7 @@ fun CouponBookListRoute(
 
 @Composable
 fun CouponBookListScreen(
-    coupons: List<Coupons>,
+    coupons: List<Coupon>,
     selectedFilter: CouponFilterOptions,
     filterOptions: List<CouponFilterOptions>,
     onFilterBy: (CouponFilterOptions) -> Unit,

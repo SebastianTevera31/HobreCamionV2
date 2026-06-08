@@ -12,7 +12,16 @@ data class RedeemDto(
 
 data class ValidateCouponDto(
     @SerializedName("fld_code") val code: String,
-    @SerializedName("id_business") val idBusiness: Int,
+)
+
+data class ValidateVoucherResponseDto(
+    @SerializedName("id_voucher") val idVoucher: Int,
+    @SerializedName("id_coupon") val idCoupon: Int,
+    @SerializedName("fld_title") val fldTitle: String,
+    @SerializedName("fld_discount_type") val fldDiscountType: Int,
+    @SerializedName("fld_discount_value") val fldDiscountValue: Int,
+    @SerializedName("fld_used") val fldUsed: Boolean,
+    @SerializedName("fld_status") val fldStatus: String
 )
 
 data class Redeem(
@@ -28,6 +37,16 @@ data class Validate(
     val idBusiness: Int
 )
 
+data class ValidatedVoucher(
+    val idVoucher: Int,
+    val idCoupon: Int,
+    val title: String,
+    val discountType: Int,
+    val discountValue: Int,
+    val used: Boolean,
+    val status: String
+)
+
 data class GetVoucherByUserResponse(
     @SerializedName("fld_code") val fldCode: String,
     @SerializedName("fld_title") val fldTitle: String,
@@ -39,7 +58,7 @@ data class GetVoucherByUserResponse(
     @SerializedName("fld_status") val fldStatus: Int
 )
 
-data class Coupons(
+data class Coupon(
     val fldCode: String,
     val fldTitle: String,
     val fldDescription: String,
@@ -47,7 +66,7 @@ data class Coupons(
     val fldDiscountValue: String,
     val fldStartDate: String,
     val fldEndDate: String,
-    val fldStatus: Int
+    val fldStatus: VoucherStatusType
 )
 
 enum class VoucherStatusType(val id: Int) {

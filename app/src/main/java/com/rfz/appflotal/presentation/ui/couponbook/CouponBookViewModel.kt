@@ -3,8 +3,9 @@ package com.rfz.appflotal.presentation.ui.couponbook
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
-import com.rfz.appflotal.data.model.couponbook.Coupons
-import com.rfz.appflotal.data.model.couponbook.toDomain
+import com.rfz.appflotal.data.model.couponbook.Coupon
+import com.rfz.appflotal.data.model.couponbook.ValidatedVoucher
+import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
 import com.rfz.appflotal.data.repository.couponbook.CouponBookRepository
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,10 +26,11 @@ data class CouponBookUiState(
     val filterOptions: List<CouponFilterOptions> = CouponFilterOptions.entries,
     val selectedFilter: CouponFilterOptions = CouponFilterOptions.ALL,
     val searchQuery: String = "",
-    val filteredCoupons: List<Coupons> = emptyList(),
-    val coupons: List<Coupons> = emptyList(),
-    val selectedCoupon: Coupons? = null,
-    val loadingScreen: LoadState<Unit> = LoadState.Idle
+    val filteredCoupons: List<Coupon> = emptyList(),
+    val coupons: List<Coupon> = emptyList(),
+    val selectedCoupon: Coupon? = null,
+    val loadingScreen: LoadState<Unit> = LoadState.Idle,
+    val validateState: LoadState<ValidatedVoucher> = LoadState.Idle
 )
 
 @HiltViewModel
@@ -46,10 +48,10 @@ class CouponBookViewModel @Inject constructor(
                 )
             }
             couponBookRepository.getVouchers().fold(
-                onSuccess = {
+                onSuccess = { vouchers ->
                     _uiState.update { currentUiState ->
                         currentUiState.copy(
-                            coupons = it.map { coupon -> coupon.toDomain() },
+                            coupons = vouchers,
                             loadingScreen = LoadState.Success(Unit)
                         )
                     }
@@ -58,7 +60,7 @@ class CouponBookViewModel @Inject constructor(
                 onFailure = {
                     _uiState.update { currentUiState ->
                         currentUiState.copy(
-                            loadingScreen = LoadState.Error("No se pudo obtener los cupones.")
+                            loadingScreen = LoadState.Error("Unit")
                         )
                     }
                 }
@@ -106,9 +108,9 @@ class CouponBookViewModel @Inject constructor(
 
                 val matchesCategory = when (currentUiState.selectedFilter) {
                     CouponFilterOptions.ALL -> true
-                    CouponFilterOptions.VALID -> coupon.fldStatus == 5
-                    CouponFilterOptions.USED -> coupon.fldStatus == 1
-                    CouponFilterOptions.EXPIRED -> coupon.fldStatus == 4
+                    CouponFilterOptions.VALID -> coupon.fldStatus == VoucherStatusType.VALIDO
+                    CouponFilterOptions.USED -> coupon.fldStatus == VoucherStatusType.RECLAMADO
+                    CouponFilterOptions.EXPIRED -> coupon.fldStatus == VoucherStatusType.EXPIRADO
                 }
 
                 matchesSearch && matchesCategory
@@ -126,21 +128,34 @@ class CouponBookViewModel @Inject constructor(
     }
 
     fun validateVoucher(code: String) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                validateState = LoadState.Loading
+            )
+        }
         viewModelScope.launch {
-            couponBookRepository.acquireVoucher(
+            couponBookRepository.validateVoucher(
                 code = code
             ).fold(
-                onSuccess = {
-                    _uiState.update { currentUiState ->
-                        currentUiState.copy(
-                            loadingScreen = LoadState.Success(Unit)
-                        )
+                onSuccess = { result ->
+                    if (!result.used) {
+                        _uiState.update { currentUiState ->
+                            currentUiState.copy(
+                                validateState = LoadState.Success(result)
+                            )
+                        }
+                    } else {
+                        _uiState.update { currentUiState ->
+                            currentUiState.copy(
+                                validateState = LoadState.Error("Unit")
+                            )
+                        }
                     }
                 },
                 onFailure = {
                     _uiState.update { currentUiState ->
                         currentUiState.copy(
-                            loadingScreen = LoadState.Error("No se pudo obtener el cupon.")
+                            validateState = LoadState.Error("Unit")
                         )
                     }
                 }

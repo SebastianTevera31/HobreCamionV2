@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.couponbook.navigation
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.runtime.LaunchedEffect
@@ -7,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -22,6 +24,7 @@ import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleS
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
 import com.rfz.appflotal.presentation.ui.forums.navigation.SavedCommentsNav
+import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 fun NavGraphBuilder.couponGraph(
     navController: NavHostController
@@ -123,6 +126,7 @@ fun NavGraphBuilder.couponGraph(
         }
 
         composable<CouponInfo> { backStackEntry ->
+            val context = LocalContext.current
             val parentEntry = remember(backStackEntry) {
                 try {
                     navController.getBackStackEntry<CouponGraph>()
@@ -133,7 +137,7 @@ fun NavGraphBuilder.couponGraph(
             val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
             CouponBookInfo(
-                coupons = state.selectedCoupon!!,
+                coupon = state.selectedCoupon!!,
                 modifier = Modifier.safeContentPadding(),
                 onBack = {
                     navController.popBackStack()
@@ -141,7 +145,13 @@ fun NavGraphBuilder.couponGraph(
 
                 onGettingCoupon = { code ->
                     viewModel.validateVoucher(code)
-                    navController.navigate(RedeemCoupon(code))
+                    when (state.validateState) {
+                        is LoadState.Success -> navController.navigate(RedeemCoupon(code))
+                        else -> {
+                            val message = "El cupon ya fue utilizado o no se pudo obtener."
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             )
         }

@@ -465,4 +465,22 @@
     <string name="usados">Usados</string>
     <string name="expirados">Expirados</string>
     <string name="cuponera">Cuponera</string>
+    <string name="cupones_cercanos">Cupones cercanos</string>
+    <string name="ver_todos">Ver todos</string>
+    <string name="no_hay_cupones_cercanos">No hay cupones cercanos.</string>
+    <string name="mis_cupones">Mis cupones</string>
+    <string name="reclamado">Reclamado</string>
+    <string name="inactivo">Inactivo</string>
+    <string name="no_valido">No valido</string>
+    <string name="expirado">Expirado</string>
+    <string name="vigencia">VIGENCIA</string>
+    <string name="hasta_fecha">Hasta %1$s</string>
+    <string name="terminos_y_condiciones_label">Terminos y conidiciones</string>
+    <string name="no_acumulable_promociones">No acumulable con otras promociones.</string>
+    <string name="obtener_cupon">Obtener cupon</string>
+    <string name="error_obtener_cupones">No se pudo obtener los cupones.</string>
+    <string name="error_cupon_utilizado">El cupon ya fue utilizado.</string>
+    <string name="error_obtener_cupon">No se pudo obtener el cupon.</string>
+    <string name="promo_label">PROMO</string>
+    <string name="llantera_norte_placeholder">Llantera Norte</string>
 </resources>
