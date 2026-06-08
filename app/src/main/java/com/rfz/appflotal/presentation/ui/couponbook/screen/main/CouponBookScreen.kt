@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.FireTruck
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,24 +41,48 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.data.model.couponbook.Coupons
+import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
 fun CouponBookRoute(
+    screenStatus: LoadState<Unit>,
+    onLoadData: () -> Unit,
     nearbyCoupons: List<Coupons>,
     myCoupons: List<Coupons>,
     onVerTodosClick: () -> Unit,
     onCouponClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    CouponBookScreen(
-        nearbyCoupons = nearbyCoupons,
-        myCoupons = myCoupons,
-        onVerTodosClick = onVerTodosClick,
-        onCouponClick = onCouponClick,
-        modifier = modifier
-    )
+    when (screenStatus) {
+        is LoadState.Error -> {
+            ErrorView(showRetryButton = true) {
+                onLoadData()
+            }
+        }
+
+        LoadState.Loading -> {
+            Box(modifier = modifier.fillMaxSize()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+
+        is LoadState.Success -> {
+            CouponBookScreen(
+                nearbyCoupons = nearbyCoupons,
+                myCoupons = myCoupons,
+                onVerTodosClick = onVerTodosClick,
+                onCouponClick = onCouponClick,
+                modifier = modifier
+            )
+        }
+
+        else -> {}
+    }
 }
 
 @Composable
@@ -69,7 +96,8 @@ fun CouponBookScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = Dimens.PaddingMedium),
+            .padding(horizontal = Dimens.PaddingMedium)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
     ) {
@@ -91,17 +119,33 @@ fun CouponBookScreen(
             }
         }
 
-        LazyRow(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
-        ) {
-            items(nearbyCoupons.size) { index ->
-                CuponCard(
-                    coupon = nearbyCoupons[index],
-                    onClick = { onCouponClick(nearbyCoupons[index].fldCode) }
+        if (nearbyCoupons.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+            ) {
+                Text(
+                    text = "No hay cupones cercanos.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
+        } else {
+            LazyRow(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+            ) {
+                items(nearbyCoupons.size) { index ->
+                    CuponCard(
+                        coupon = nearbyCoupons[index],
+                        onClick = { onCouponClick(nearbyCoupons[index].fldCode) }
+                    )
+                }
+            }
         }
+
+
 
         Text(
             text = "Mis cupones",
@@ -109,15 +153,31 @@ fun CouponBookScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
-        ) {
-            items(myCoupons.size) { index ->
-                NearestCuponCard(
-                    coupon = myCoupons[index],
-                    onClick = { onCouponClick(myCoupons[index].fldCode) }
+        if (myCoupons.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+            ) {
+                Text(
+                    text = "No hay cupones cercanos.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.align(Alignment.Center)
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(360.dp),
+                verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+            ) {
+                items(myCoupons.size) { index ->
+                    NearestCuponCard(
+                        coupon = myCoupons[index],
+                        onClick = { onCouponClick(myCoupons[index].fldCode) }
+                    )
+                }
             }
         }
     }

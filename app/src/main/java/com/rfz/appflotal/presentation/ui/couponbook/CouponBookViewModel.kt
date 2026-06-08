@@ -38,9 +38,14 @@ class CouponBookViewModel @Inject constructor(
     private var _uiState = MutableStateFlow(CouponBookUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun getInitialData(forceRefresh: Boolean = false) {
+    fun getInitialData() {
         viewModelScope.launch {
-            couponBookRepository.getVoucher().fold(
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    loadingScreen = LoadState.Loading
+                )
+            }
+            couponBookRepository.getVouchers().fold(
                 onSuccess = {
                     _uiState.update { currentUiState ->
                         currentUiState.copy(
@@ -92,7 +97,10 @@ class CouponBookViewModel @Inject constructor(
                     true
                 } else {
                     coupon.fldDescription.contains(currentUiState.searchQuery, ignoreCase = true) ||
-                            coupon.fldCode.contains(currentUiState.searchQuery, ignoreCase = true) ||
+                            coupon.fldCode.contains(
+                                currentUiState.searchQuery,
+                                ignoreCase = true
+                            ) ||
                             coupon.fldTitle.contains(currentUiState.searchQuery, ignoreCase = true)
                 }
 

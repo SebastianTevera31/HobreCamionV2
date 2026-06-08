@@ -12,7 +12,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import androidx.navigation.toRoute
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.ui.couponbook.CouponBookViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.screen.info.CouponBookInfo
@@ -43,7 +42,7 @@ fun NavGraphBuilder.couponGraph(
 
             LaunchedEffect(Unit) {
                 viewModel.clearFilterSearch()
-                viewModel.getInitialData(forceRefresh = true)
+                viewModel.getInitialData()
             }
 
             ForumModuleScaffold(
@@ -78,7 +77,11 @@ fun NavGraphBuilder.couponGraph(
                         viewModel.selectCoupon(id)
                         navController.navigate(CouponInfo)
                     },
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues),
+                    screenStatus = state.loadingScreen,
+                    onLoadData = {
+                        viewModel.getInitialData()
+                    },
                 )
             }
         }

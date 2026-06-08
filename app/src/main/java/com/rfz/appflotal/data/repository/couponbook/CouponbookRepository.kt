@@ -33,7 +33,7 @@ class CouponBookRepository @Inject constructor(
         )
     }
 
-    suspend fun getVoucher(): Result<List<GetVoucherByUserResponse>> {
+    suspend fun getVouchers(): Result<List<GetVoucherByUserResponse>> {
         val token = getTasksUseCase().first().first().fld_token
         return remoteCouponBookDataSource.getVouchers(
             token = token,

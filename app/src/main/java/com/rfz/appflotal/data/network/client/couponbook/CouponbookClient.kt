@@ -12,27 +12,27 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Query
 
-interface CouponBookClient {
+interface CouponBookService {
     @POST("api/vouchers/redeem")
-    fun redeemVoucher(
-        @Header("Authenticate") token: String,
+    suspend fun redeemVoucher(
+        @Header("Authorization") token: String,
         @Body redeemBody: RedeemDto
     ): Response<Unit>
 
     @POST("api/vouchers/validate")
-    fun validateVoucher(
-        @Header("Authenticate") token: String,
+    suspend fun validateVoucher(
+        @Header("Authorization") token: String,
         @Body validateDto: ValidateCouponDto
     ): Response<Unit>
 
-    @GET("api/vouchers/UserVouchersParameters")
-    fun getVouchersByUser(
-        @Header("Authenticate") token: String
+    @GET("api/vouchers/UserVouchers")
+    suspend fun getVouchersByUser(
+        @Header("Authorization") token: String
     ): Response<List<GetVoucherByUserResponse>>
 
     @PUT("api/vouchers/AdquireVoucher")
-    fun acquireVoucher(
-        @Header("Authenticate") token: String,
+    suspend fun acquireVoucher(
+        @Header("Authorization") token: String,
         @Query("idCoupon") voucherId: Int
     ): Response<GeneralResponse>
 }
