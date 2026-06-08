@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toColorLong
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,8 +30,8 @@ import kotlinx.coroutines.withContext
 data class QrCodeConfig(
     val content: String,
     val imageSizePx: Int = 1024,
-    val foregroundColor: Int = Color.Black.toColorLong().toInt(),
-    val backgroundColor: Int = Color.White.toColorLong().toInt(),
+    val foregroundColor: Int = Color.Black.toArgb(),
+    val backgroundColor: Int = Color.White.toArgb(),
     val marginModules: Int = 4
 )
 
@@ -88,7 +89,7 @@ fun generateQrCodeBitmap(
             }
         }
 
-        createBitmap(config.imageSizePx, config.imageSizePx).apply {
+        createBitmap(config.imageSizePx, config.imageSizePx, Bitmap.Config.ARGB_8888).apply {
             setPixels(
                 pixels,
                 0,
@@ -107,8 +108,8 @@ fun QrCodeImage(
     content: String,
     modifier: Modifier = Modifier.size(240.dp),
     imageSizePx: Int = 1024,
-    foregroundColor: Int = Color.Black.toColorLong().toInt(),
-    backgroundColor: Int = Color.White.toColorLong().toInt(),
+    foregroundColor: Int = Color.Black.toArgb(),
+    backgroundColor: Int = Color.White.toArgb(),
     marginModules: Int = 4,
     contentDescription: String = "Código QR"
 ) {

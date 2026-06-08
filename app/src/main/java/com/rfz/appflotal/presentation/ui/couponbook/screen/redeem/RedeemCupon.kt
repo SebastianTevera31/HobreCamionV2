@@ -165,6 +165,7 @@ fun RedeemCoupon(coupon: Coupons, modifier: Modifier = Modifier, onBack: () -> U
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp,
+                            textAlign = TextAlign.Center,
                             color = Color(0xFF1A1C1E)
                         )
                     )
