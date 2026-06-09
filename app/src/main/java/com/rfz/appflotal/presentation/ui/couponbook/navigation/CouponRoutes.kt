@@ -12,7 +12,7 @@ object CouponMenu
 object CouponInfo
 
 @Serializable
-object CouponList
+data class CouponList(val areCoupons: Boolean)
 
 
 @Serializable

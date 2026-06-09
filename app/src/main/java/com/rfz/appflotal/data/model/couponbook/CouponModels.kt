@@ -58,6 +58,18 @@ data class GetVoucherByUserResponse(
     @SerializedName("fld_status") val fldStatus: Int
 )
 
+data class GetCouponsResponse(
+    @SerializedName("id_coupon") val idCoupon: Int,
+    @SerializedName("fld_title") val fldTitle: String,
+    @SerializedName("fld_description") val fldDescription: String,
+    @SerializedName("fld_discount_type") val fldDiscountType: Int,
+    @SerializedName("fld_discount_value") val fldDiscountValue: Int,
+    @SerializedName("fld_start_date") val fldStartDate: String,
+    @SerializedName("fld_end_date") val fldEndDate: String,
+    @SerializedName("fld_max_quantity") val fldMaxQuantity: Int,
+    @SerializedName("fld_available_quantity") val fldAvailableQuantity: Int
+)
+
 data class Coupon(
     val fldCode: String,
     val fldTitle: String,

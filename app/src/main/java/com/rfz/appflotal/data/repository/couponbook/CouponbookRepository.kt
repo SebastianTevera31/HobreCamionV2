@@ -1,6 +1,10 @@
 package com.rfz.appflotal.data.repository.couponbook
 
-import com.rfz.appflotal.data.model.couponbook.*
+import com.rfz.appflotal.data.model.couponbook.Coupon
+import com.rfz.appflotal.data.model.couponbook.RedeemDto
+import com.rfz.appflotal.data.model.couponbook.ValidateCouponDto
+import com.rfz.appflotal.data.model.couponbook.ValidatedVoucher
+import com.rfz.appflotal.data.model.couponbook.toDomain
 import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.couponbook.RemoteCouponDataSource
 import com.rfz.appflotal.domain.database.GetTasksUseCase
@@ -37,11 +41,18 @@ class CouponBookRepository @Inject constructor(
         ).map { list -> list.map { it.toDomain() } }
     }
 
-    suspend fun acquireVoucher(code: String): Result<GeneralResponse> {
+    suspend fun getCoupons(): Result<List<Coupon>> {
+        val token = getTasksUseCase().first().first().fld_token
+        return remoteCouponBookDataSource.getCoupons(
+            token = token,
+        ).map { list -> list.map { it.toDomain() } }
+    }
+
+    suspend fun acquireVoucher(idCoupon: Int): Result<GeneralResponse> {
         val token = getTasksUseCase().first().first().fld_token
         return remoteCouponBookDataSource.acquireVoucher(
             token = token,
-            id = code
+            idCoupon = idCoupon
         )
     }
 }

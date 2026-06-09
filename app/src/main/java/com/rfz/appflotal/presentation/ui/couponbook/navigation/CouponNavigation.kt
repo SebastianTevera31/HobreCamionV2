@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.couponbook.navigation
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.runtime.LaunchedEffect
@@ -14,6 +13,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.ui.couponbook.CouponBookViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.screen.info.CouponBookInfo
@@ -48,6 +48,13 @@ fun NavGraphBuilder.couponGraph(
                 viewModel.getInitialData()
             }
 
+            LaunchedEffect(state.validateState) {
+                if (state.validateState is LoadState.Success) {
+                    navController.navigate(RedeemCoupon(state.selectedCoupon?.fldCode ?: ""))
+                    viewModel.resetValidateState()
+                }
+            }
+
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = "Cuponera",
@@ -71,20 +78,27 @@ fun NavGraphBuilder.couponGraph(
                 )
             ) { paddingValues ->
                 CouponBookRoute(
-                    nearbyCoupons = state.coupons,
-                    myCoupons = state.filteredCoupons,
-                    onVerTodosClick = {
-                        navController.navigate(CouponList)
+                    nearbyCoupons = state.filteredCoupons,
+                    myCoupons = state.filteredVouchers,
+                    onSeeAllCoupons = {
+                        navController.navigate(CouponList(true))
+                    },
+                    onSeeAllVouchers = {
+                        navController.navigate(CouponList(false))
                     },
                     onCouponClick = { id ->
                         viewModel.selectCoupon(id)
                         navController.navigate(CouponInfo)
                     },
+                    onVoucherClick = { id ->
+                        viewModel.selectCoupon(id)
+                        viewModel.validateVoucher(id)
+                    },
                     modifier = Modifier.padding(paddingValues),
                     screenStatus = state.loadingScreen,
                     onLoadData = {
                         viewModel.getInitialData()
-                    },
+                    }
                 )
             }
         }
@@ -97,12 +111,21 @@ fun NavGraphBuilder.couponGraph(
                     backStackEntry
                 }
             }
+
             val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
+            val args = backStackEntry.toRoute<CouponList>()
+
+            LaunchedEffect(state.validateState) {
+                if (state.validateState is LoadState.Success) {
+                    navController.navigate(RedeemCoupon(state.selectedCoupon?.fldCode ?: ""))
+                    viewModel.resetValidateState()
+                }
+            }
 
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
-                    title = "Cupones",
+                    title = if (args.areCoupons) "Cupones" else "Mis Vouchers",
                     showBackButton = true,
                     onBackClick = {
                         navController.popBackStack()
@@ -110,23 +133,33 @@ fun NavGraphBuilder.couponGraph(
                 )
             ) { paddingValue ->
                 CouponBookListRoute(
-                    coupons = state.filteredCoupons,
+                    coupons = if (args.areCoupons) state.filteredCoupons else state.filteredVouchers,
                     selectedFilter = state.selectedFilter,
                     filterOptions = state.filterOptions,
+                    selectedCoupon = state.selectedCoupon,
                     onFilterBy = { option ->
                         viewModel.selectFilterOption(option)
                     },
                     onCouponClick = { id ->
                         viewModel.selectCoupon(id)
+                        viewModel.validateVoucher(id)
+                    },
+                    onGettingVoucher = { code ->
+                        viewModel.selectCoupon(code)
                         navController.navigate(CouponInfo)
                     },
-                    modifier = Modifier.padding(paddingValue)
+                    onRedeem = { code ->
+                        navController.navigate(RedeemCoupon(code))
+                    },
+                    modifier = Modifier.padding(paddingValue),
+                    areCoupons = args.areCoupons,
+                    validateState = state.validateState,
+                    onResetValidateState = { viewModel.resetValidateState() }
                 )
             }
         }
 
         composable<CouponInfo> { backStackEntry ->
-            val context = LocalContext.current
             val parentEntry = remember(backStackEntry) {
                 try {
                     navController.getBackStackEntry<CouponGraph>()
@@ -136,23 +169,24 @@ fun NavGraphBuilder.couponGraph(
             }
             val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(state.acquireState) {
+                if (state.acquireState is LoadState.Success) {
+                    navController.popBackStack()
+                    viewModel.resetAcquireState()
+                }
+            }
+
             CouponBookInfo(
                 coupon = state.selectedCoupon!!,
                 modifier = Modifier.safeContentPadding(),
                 onBack = {
                     navController.popBackStack()
                 },
-
-                onGettingCoupon = { code ->
-                    viewModel.validateVoucher(code)
-                    when (state.validateState) {
-                        is LoadState.Success -> navController.navigate(RedeemCoupon(code))
-                        else -> {
-                            val message = "El cupon ya fue utilizado o no se pudo obtener."
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
+                onGettingVoucher = { code ->
+                    viewModel.acquireVoucher(code.toIntOrNull() ?: 0)
+                },
+                gettingCouponState = state.acquireState
             )
         }
 

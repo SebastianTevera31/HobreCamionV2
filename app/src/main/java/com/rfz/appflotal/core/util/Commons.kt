@@ -138,7 +138,7 @@ object Commons {
         inputFormat: String = "yyyy-MM-dd"
     ): String {
         if (dateString.isBlank()) return ""
-        val locale = Locale.getDefault()
+        val locale = AppLocale.currentLocale.value
         val outputPattern = if (locale.language == "es") {
             "d 'de' MMMM, yyyy"
         } else {

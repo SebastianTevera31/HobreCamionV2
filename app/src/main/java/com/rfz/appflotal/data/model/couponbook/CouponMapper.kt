@@ -25,3 +25,16 @@ fun ValidateVoucherResponseDto.toDomain(): ValidatedVoucher {
         status = this.fldStatus
     )
 }
+
+fun GetCouponsResponse.toDomain(): Coupon {
+    return Coupon(
+        fldCode = this.idCoupon.toString(),
+        fldTitle = this.fldTitle,
+        fldDescription = this.fldDescription,
+        fldDiscountType = this.fldDiscountType,
+        fldDiscountValue = this.fldDiscountValue.toString(),
+        fldStartDate = this.fldStartDate,
+        fldEndDate = this.fldEndDate,
+        fldStatus = VoucherStatusType.VALIDO
+    )
+}

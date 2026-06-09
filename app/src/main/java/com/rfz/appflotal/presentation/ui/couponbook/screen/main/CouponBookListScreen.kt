@@ -1,9 +1,12 @@
 package com.rfz.appflotal.presentation.ui.couponbook.screen.main
 
+import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -18,32 +21,67 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.data.model.couponbook.Coupon
+import com.rfz.appflotal.data.model.couponbook.ValidatedVoucher
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.couponbook.CouponFilterOptions
+import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
 fun CouponBookListRoute(
+    areCoupons: Boolean,
     coupons: List<Coupon>,
     selectedFilter: CouponFilterOptions,
+    selectedCoupon: Coupon?,
     filterOptions: List<CouponFilterOptions>,
     onFilterBy: (CouponFilterOptions) -> Unit,
     onCouponClick: (String) -> Unit,
+    onGettingVoucher: (String) -> Unit,
+    onRedeem: (code: String) -> Unit,
+    validateState: LoadState<ValidatedVoucher>,
+    onResetValidateState: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    CouponBookListScreen(
-        coupons = coupons,
-        selectedFilter = selectedFilter,
-        filterOptions = filterOptions,
-        onFilterBy = onFilterBy,
-        onCouponClick = onCouponClick,
-        modifier = modifier
-    )
+    val context = LocalContext.current
+
+    LaunchedEffect(validateState) {
+        if (!areCoupons && validateState is LoadState.Error) {
+            Toast.makeText(context, validateState.message, Toast.LENGTH_SHORT).show()
+            onResetValidateState()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        CouponBookListScreen(
+            coupons = coupons,
+            selectedFilter = selectedFilter,
+            filterOptions = filterOptions,
+            onFilterBy = onFilterBy,
+            onCouponClick = { code ->
+                if (areCoupons) onGettingVoucher(code)
+                else onCouponClick(code)
+            },
+            modifier = modifier
+        )
+
+        if (!areCoupons) {
+            when (validateState) {
+                LoadState.Loading -> {
+                    LoadingDialog()
+                }
+
+                else -> Unit
+            }
+        }
+    }
 }
 
 @Composable
@@ -131,9 +169,9 @@ fun CouponBookListScreenPreview() {
             coupons = emptyList(),
             filterOptions = listOf(CouponFilterOptions.ALL, CouponFilterOptions.VALID),
             onFilterBy = {},
-            onCouponClick = {},
             selectedFilter = CouponFilterOptions.VALID,
-            modifier = Modifier.safeContentPadding()
+            modifier = Modifier.safeContentPadding(),
+            onCouponClick = {},
         )
     }
 }

@@ -56,8 +56,10 @@ fun CouponBookRoute(
     onLoadData: () -> Unit,
     nearbyCoupons: List<Coupon>,
     myCoupons: List<Coupon>,
-    onVerTodosClick: () -> Unit,
+    onSeeAllCoupons: () -> Unit,
+    onSeeAllVouchers: () -> Unit,
     onCouponClick: (String) -> Unit,
+    onVoucherClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (screenStatus) {
@@ -82,8 +84,10 @@ fun CouponBookRoute(
             CouponBookScreen(
                 nearbyCoupons = nearbyCoupons,
                 myCoupons = myCoupons,
-                onVerTodosClick = onVerTodosClick,
+                onSeeAllCoupons = onSeeAllCoupons,
                 onCouponClick = onCouponClick,
+                onVoucherClick = onVoucherClick,
+                onSeeAlVoucher = onSeeAllVouchers,
                 modifier = modifier
             )
         }
@@ -96,8 +100,10 @@ fun CouponBookRoute(
 fun CouponBookScreen(
     nearbyCoupons: List<Coupon>,
     myCoupons: List<Coupon>,
-    onVerTodosClick: () -> Unit,
+    onSeeAllCoupons: () -> Unit,
+    onSeeAlVoucher: () -> Unit,
     onCouponClick: (String) -> Unit,
+    onVoucherClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -117,7 +123,7 @@ fun CouponBookScreen(
                 text = stringResource(R.string.cupones_cercanos),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
-            TextButton(onClick = onVerTodosClick) {
+            TextButton(onClick = onSeeAllCoupons) {
                 Text(
                     text = stringResource(R.string.ver_todos),
                     color = MaterialTheme.colorScheme.primary,
@@ -152,11 +158,26 @@ fun CouponBookScreen(
             }
         }
 
-        Text(
-            text = stringResource(R.string.mis_cupones),
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.fillMaxWidth()
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(R.string.mis_cupones),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.weight(1f)
+            )
+
+            TextButton(onClick = onSeeAlVoucher) {
+                Text(
+                    text = stringResource(R.string.ver_todos),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+        }
+
 
         if (myCoupons.isEmpty()) {
             Box(
@@ -180,7 +201,7 @@ fun CouponBookScreen(
                 items(myCoupons.size) { index ->
                     NearestCuponCard(
                         coupon = myCoupons[index],
-                        onClick = { onCouponClick(myCoupons[index].fldCode) }
+                        onClick = { onVoucherClick(myCoupons[index].fldCode) }
                     )
                 }
             }
@@ -224,30 +245,33 @@ fun NearestCuponCard(
                 }
 
                 Column {
+                    if (coupon.fldStatus != VoucherStatusType.VALIDO) {
+                        Card(
+                            modifier = Modifier.padding(vertical = Dimens.PaddingSmall),
+                            border = CardDefaults.outlinedCardBorder(enabled = true)
+                        ) {
+                            val textRes = when (coupon.fldStatus) {
+                                VoucherStatusType.RECLAMADO -> R.string.reclamado
 
-                    Card(
-                        modifier = Modifier.padding(vertical = Dimens.PaddingSmall),
-                        border = CardDefaults.outlinedCardBorder(enabled = true)
-                    ) {
-                        val textRes = when (coupon.fldStatus) {
-                            VoucherStatusType.RECLAMADO -> R.string.reclamado
+                                VoucherStatusType.INACTIVO -> R.string.inactivo
 
-                            VoucherStatusType.INACTIVO -> R.string.inactivo
+                                VoucherStatusType.NO_VALIDO -> R.string.no_valido
 
-                            VoucherStatusType.NO_VALIDO -> R.string.no_valido
+                                VoucherStatusType.EXPIRADO -> R.string.expirado
 
-                            VoucherStatusType.EXPIRADO -> R.string.expirado
+                                else -> R.string.expirado
+                            }
 
-                            else -> R.string.expirado
+                            if (coupon.fldStatus != VoucherStatusType.VALIDO) {
+                                Text(
+                                    text = stringResource(textRes),
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier.padding(Dimens.PaddingSmall)
+                                )
+                            }
                         }
-
-                        Text(
-                            text = stringResource(textRes),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            modifier = Modifier.padding(Dimens.PaddingSmall)
-                        )
                     }
 
                     Text(
@@ -269,7 +293,10 @@ fun NearestCuponCard(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = stringResource(R.string.coupon_expires, Commons.formatToLongDate(coupon.fldEndDate)),
+                        text = stringResource(
+                            R.string.coupon_expires,
+                            Commons.formatToLongDate(coupon.fldEndDate)
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
@@ -322,7 +349,9 @@ fun CuponCard(
                 onClick = {},
                 label = {
                     Text(
-                        text = coupon.fldDiscountValue.takeIf { it.isNotEmpty() } ?: stringResource(R.string.promo_label),
+                        text = coupon.fldDiscountValue.takeIf { it.isNotEmpty() } ?: stringResource(
+                            R.string.promo_label
+                        ),
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 },
@@ -354,8 +383,10 @@ fun CouponBookScreenPreview() {
         CouponBookScreen(
             nearbyCoupons = emptyList(),
             myCoupons = emptyList(),
-            onVerTodosClick = {},
-            onCouponClick = {}
+            onSeeAllCoupons = {},
+            onCouponClick = {},
+            onVoucherClick = {},
+            onSeeAlVoucher = {}
         )
     }
 }

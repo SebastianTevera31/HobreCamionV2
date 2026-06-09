@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.network.client.couponbook
 
+import com.rfz.appflotal.data.model.couponbook.GetCouponsResponse
 import com.rfz.appflotal.data.model.couponbook.GetVoucherByUserResponse
 import com.rfz.appflotal.data.model.couponbook.RedeemDto
 import com.rfz.appflotal.data.model.couponbook.ValidateCouponDto
@@ -36,4 +37,9 @@ interface CouponBookService {
         @Header("Authorization") token: String,
         @Query("idCoupon") voucherId: Int
     ): Response<GeneralResponse>
+
+    @GET("api/coupons/GetCoupons")
+    suspend fun getCoupons(
+        @Header("Authorization") token: String
+    ): Response<List<GetCouponsResponse>>
 }
