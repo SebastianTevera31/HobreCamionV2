@@ -218,7 +218,9 @@ fun NearestCuponCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable {
+                if (coupon.fldStatus == VoucherStatusType.VALIDO) onClick()
+            },
         shape = RoundedCornerShape(Dimens.PaddingLarge),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
     ) {
@@ -247,7 +249,6 @@ fun NearestCuponCard(
                 Column {
                     if (coupon.fldStatus != VoucherStatusType.VALIDO) {
                         Card(
-                            modifier = Modifier.padding(vertical = Dimens.PaddingSmall),
                             border = CardDefaults.outlinedCardBorder(enabled = true)
                         ) {
                             val textRes = when (coupon.fldStatus) {
@@ -305,12 +306,14 @@ fun NearestCuponCard(
                 }
             }
 
-            IconButton(onClick = onClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryFixedVariant
-                )
+            if (coupon.fldStatus == VoucherStatusType.VALIDO) {
+                IconButton(onClick = onClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryFixedVariant
+                    )
+                }
             }
         }
     }

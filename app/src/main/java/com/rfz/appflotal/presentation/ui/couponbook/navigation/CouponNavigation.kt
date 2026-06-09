@@ -7,7 +7,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -60,13 +59,6 @@ fun NavGraphBuilder.couponGraph(
                     title = "Cuponera",
                     showBackButton = true,
                     showMenuButton = false,
-                    searchConfig = ForumSearchConfig(
-                        value = state.searchQuery,
-                        placeholder = "Buscar...",
-                        onValueChange = { query ->
-                            viewModel.onSearchChanged(query)
-                        }
-                    ),
                     onBackClick = {
                         navController.navigate(NavScreens.HOME) {
                             popUpTo(0) { inclusive = true }
@@ -116,6 +108,10 @@ fun NavGraphBuilder.couponGraph(
             val state by viewModel.uiState.collectAsState()
             val args = backStackEntry.toRoute<CouponList>()
 
+            LaunchedEffect(Unit) {
+                viewModel.clearFilterSearch()
+            }
+
             LaunchedEffect(state.validateState) {
                 if (state.validateState is LoadState.Success) {
                     navController.navigate(RedeemCoupon(state.selectedCoupon?.fldCode ?: ""))
@@ -127,16 +123,23 @@ fun NavGraphBuilder.couponGraph(
                 topBarConfig = ForumTopBarConfig(
                     title = if (args.areCoupons) "Cupones" else "Mis Vouchers",
                     showBackButton = true,
+                    showMenuButton = false,
                     onBackClick = {
                         navController.popBackStack()
-                    }
+                    },
+                    searchConfig = ForumSearchConfig(
+                        value = state.searchQuery,
+                        placeholder = "Buscar...",
+                        onValueChange = { query ->
+                            viewModel.onSearchChanged(query)
+                        }
+                    )
                 )
             ) { paddingValue ->
                 CouponBookListRoute(
                     coupons = if (args.areCoupons) state.filteredCoupons else state.filteredVouchers,
                     selectedFilter = state.selectedFilter,
                     filterOptions = state.filterOptions,
-                    selectedCoupon = state.selectedCoupon,
                     onFilterBy = { option ->
                         viewModel.selectFilterOption(option)
                     },
@@ -147,9 +150,6 @@ fun NavGraphBuilder.couponGraph(
                     onGettingVoucher = { code ->
                         viewModel.selectCoupon(code)
                         navController.navigate(CouponInfo)
-                    },
-                    onRedeem = { code ->
-                        navController.navigate(RedeemCoupon(code))
                     },
                     modifier = Modifier.padding(paddingValue),
                     areCoupons = args.areCoupons,
@@ -167,6 +167,7 @@ fun NavGraphBuilder.couponGraph(
                     backStackEntry
                 }
             }
+
             val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
 

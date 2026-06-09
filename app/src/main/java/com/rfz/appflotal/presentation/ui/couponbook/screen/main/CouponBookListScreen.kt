@@ -40,12 +40,10 @@ fun CouponBookListRoute(
     areCoupons: Boolean,
     coupons: List<Coupon>,
     selectedFilter: CouponFilterOptions,
-    selectedCoupon: Coupon?,
     filterOptions: List<CouponFilterOptions>,
     onFilterBy: (CouponFilterOptions) -> Unit,
     onCouponClick: (String) -> Unit,
     onGettingVoucher: (String) -> Unit,
-    onRedeem: (code: String) -> Unit,
     validateState: LoadState<ValidatedVoucher>,
     onResetValidateState: () -> Unit,
     modifier: Modifier = Modifier
