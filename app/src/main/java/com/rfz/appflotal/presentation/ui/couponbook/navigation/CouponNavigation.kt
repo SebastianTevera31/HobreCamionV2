@@ -48,9 +48,18 @@ fun NavGraphBuilder.couponGraph(
             }
 
             LaunchedEffect(state.validateState) {
-                if (state.validateState is LoadState.Success) {
-                    navController.navigate(RedeemCoupon(state.selectedCoupon?.fldCode ?: ""))
-                    viewModel.resetValidateState()
+                when (state.validateState) {
+                    is LoadState.Success -> {
+                        navController.navigate(RedeemCoupon(state.selectedCoupon?.fldCode ?: ""))
+                        viewModel.resetValidateState()
+                    }
+
+                    is LoadState.Error -> {
+                        navController.navigate(CouponInfo)
+                        viewModel.resetValidateState()
+                    }
+
+                    else -> {}
                 }
             }
 
@@ -113,9 +122,18 @@ fun NavGraphBuilder.couponGraph(
             }
 
             LaunchedEffect(state.validateState) {
-                if (state.validateState is LoadState.Success) {
-                    navController.navigate(RedeemCoupon(state.selectedCoupon?.fldCode ?: ""))
-                    viewModel.resetValidateState()
+                when (state.validateState) {
+                    is LoadState.Success -> {
+                        navController.navigate(RedeemCoupon(state.selectedCoupon?.fldCode ?: ""))
+                        viewModel.resetValidateState()
+                    }
+
+                    is LoadState.Error -> {
+                        navController.navigate(CouponInfo)
+                        viewModel.resetValidateState()
+                    }
+
+                    else -> {}
                 }
             }
 
@@ -178,17 +196,19 @@ fun NavGraphBuilder.couponGraph(
                 }
             }
 
-            CouponBookInfo(
-                coupon = state.selectedCoupon!!,
-                modifier = Modifier.safeContentPadding(),
-                onBack = {
-                    navController.popBackStack()
-                },
-                onGettingVoucher = { code ->
-                    viewModel.acquireVoucher(code.toIntOrNull() ?: 0)
-                },
-                gettingCouponState = state.acquireState
-            )
+            state.selectedCoupon?.let { coupon ->
+                CouponBookInfo(
+                    coupon = coupon,
+                    modifier = Modifier.safeContentPadding(),
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onGettingVoucher = { code ->
+                        viewModel.acquireVoucher(code.toIntOrNull() ?: 0)
+                    },
+                    gettingCouponState = state.acquireState
+                )
+            }
         }
 
         composable<RedeemCoupon> { backStackEntry ->
@@ -201,12 +221,14 @@ fun NavGraphBuilder.couponGraph(
             }
             val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
-            RedeemCoupon(
-                coupon = state.selectedCoupon!!,
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
+            state.selectedCoupon?.let { coupon ->
+                RedeemCoupon(
+                    coupon = coupon,
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
     }
 }

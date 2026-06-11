@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.couponbook.screen.main
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,16 +26,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,15 +61,11 @@ fun CouponBookListRoute(
     onResetValidateState: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(areCoupons, validateState) {
         if (!areCoupons && validateState is LoadState.Error) {
-            snackbarHostState.showSnackbar(
-                message = validateState.message,
-                withDismissAction = true
-            )
-
+            Toast.makeText(context, validateState.message, Toast.LENGTH_SHORT).show()
             onResetValidateState()
         }
     }
@@ -79,33 +73,22 @@ fun CouponBookListRoute(
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = MaterialTheme.colorScheme.background,
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = snackbarHostState
-                )
-            }
-        ) { innerPadding ->
-            CouponBookListScreen(
-                areCoupons = areCoupons,
-                coupons = coupons,
-                selectedFilter = selectedFilter,
-                filterOptions = filterOptions,
-                onFilterBy = onFilterBy,
-                onCouponClick = { coupon ->
-                    if (areCoupons) {
-                        onGettingVoucher(coupon)
-                    } else {
-                        onCouponClick(coupon)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            )
-        }
+        CouponBookListScreen(
+            areCoupons = areCoupons,
+            coupons = coupons,
+            selectedFilter = selectedFilter,
+            filterOptions = filterOptions,
+            onFilterBy = onFilterBy,
+            onCouponClick = { coupon ->
+                if (areCoupons) {
+                    onGettingVoucher(coupon)
+                } else {
+                    onCouponClick(coupon)
+                }
+            },
+            modifier = Modifier
+                .fillMaxSize()
+        )
 
         if (!areCoupons && validateState is LoadState.Loading) {
             LoadingDialog()
