@@ -47,6 +47,9 @@ import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.data.model.couponbook.Coupon
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.DINERO
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.PORCENTAJE
 import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -164,6 +167,10 @@ private fun CouponHero(
     coupon: Coupon,
     modifier: Modifier = Modifier
 ) {
+    val discount = when (coupon.fldDiscountType) {
+        PORCENTAJE -> "${coupon.fldDiscountValue}%"
+        DINERO -> "$${coupon.fldDiscountValue}"
+    }
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -179,7 +186,7 @@ private fun CouponHero(
         )
 
         CouponDiscountBadge(
-            discount = coupon.fldDiscountValue.ifBlank {
+            discount = discount.ifBlank {
                 stringResource(R.string.promo_label)
             },
             modifier = Modifier
@@ -474,8 +481,8 @@ fun CouponBookInfoPreview() {
                 fldCode = "KFKFKFKF-3KK",
                 fldTitle = "2×1 en alineación y balanceo",
                 fldDescription = "Obtén un 2x1 en el servicio de alineación y balanceo para tu vehículo. Válido en todas nuestras sucursales.",
-                fldDiscountType = 1,
-                fldDiscountValue = "50%",
+                fldDiscountType = VoucherDiscountType.PORCENTAJE,
+                fldDiscountValue = "50",
                 fldStartDate = "2024-05-01",
                 fldEndDate = "2024-05-28",
                 fldStatus = VoucherStatusType.VALIDO

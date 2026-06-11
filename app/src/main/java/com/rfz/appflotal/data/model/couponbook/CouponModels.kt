@@ -25,24 +25,11 @@ data class ValidateVoucherResponseDto(
     @SerializedName("fld_status") val fldStatus: String
 )
 
-data class Redeem(
-    val code: String,
-    val idUserCustomer: Int,
-    val idUserCashier: Int,
-    val idBusiness: Int,
-    val originalAmount: Int
-)
-
-data class Validate(
-    val code: String,
-    val idBusiness: Int
-)
-
 data class ValidatedVoucher(
     val idVoucher: Int,
     val idCoupon: Int,
     val title: String,
-    val discountType: Int,
+    val discountType: VoucherDiscountType,
     val discountValue: Int,
     val used: Boolean,
     val status: String
@@ -76,7 +63,7 @@ data class Coupon(
     val fldCode: String,
     val fldTitle: String,
     val fldDescription: String,
-    val fldDiscountType: Int,
+    val fldDiscountType: VoucherDiscountType,
     val fldDiscountValue: String,
     val fldStartDate: String,
     val fldEndDate: String,

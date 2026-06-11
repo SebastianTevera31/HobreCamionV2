@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.couponbook.Coupon
 import com.rfz.appflotal.data.model.couponbook.ValidatedVoucher
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType
 import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -403,7 +404,7 @@ fun CouponBookListScreenPreview() {
                     fldCode = "CODE1",
                     fldTitle = "Cupón 1",
                     fldDescription = "Descripción del cupón 1",
-                    fldDiscountType = 1,
+                    fldDiscountType = VoucherDiscountType.PORCENTAJE,
                     fldDiscountValue = "10%",
                     fldStartDate = "2023-01-01",
                     fldEndDate = "2023-12-31",
@@ -413,7 +414,7 @@ fun CouponBookListScreenPreview() {
                     fldCode = "CODE2",
                     fldTitle = "Cupón 2",
                     fldDescription = "Descripción del cupón 2",
-                    fldDiscountType = 0,
+                    fldDiscountType = VoucherDiscountType.DINERO,
                     fldDiscountValue = "$50",
                     fldStartDate = "2023-01-01",
                     fldEndDate = "2023-12-31",
@@ -439,7 +440,7 @@ fun MyCouponBookListScreenPreview() {
                     fldCode = "CODE3",
                     fldTitle = "Mi Cupón 1",
                     fldDescription = "Descripción de mi cupón 1",
-                    fldDiscountType = 1,
+                    fldDiscountType = VoucherDiscountType.PORCENTAJE,
                     fldDiscountValue = "15%",
                     fldStartDate = "2023-01-01",
                     fldEndDate = "2023-12-31",

@@ -42,6 +42,9 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.data.model.couponbook.Coupon
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.DINERO
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.PORCENTAJE
 import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.Dimens
@@ -270,6 +273,11 @@ fun CuponCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val discount = when (coupon.fldDiscountType) {
+        PORCENTAJE -> "${coupon.fldDiscountValue}%"
+        DINERO -> "$${coupon.fldDiscountValue}"
+    }
+
     ElevatedCard(
         modifier = modifier
             .width(272.dp)
@@ -302,7 +310,7 @@ fun CuponCard(
                 )
 
                 DiscountBadge(
-                    discount = coupon.fldDiscountValue.ifBlank {
+                    discount = discount.ifBlank {
                         stringResource(R.string.promo_label)
                     },
                     modifier = Modifier
@@ -600,11 +608,31 @@ fun NearestCuponCardPreview() {
                 fldCode = "CODE123",
                 fldTitle = "Cupón de Descuento",
                 fldDescription = "Descripción del cupón",
-                fldDiscountType = 1,
+                fldDiscountType = VoucherDiscountType.PORCENTAJE,
                 fldDiscountValue = "10%",
                 fldStartDate = "2023-01-01",
                 fldEndDate = "2023-12-31",
                 fldStatus = VoucherStatusType.INACTIVO
+            ),
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CuponCardPreview() {
+    HombreCamionTheme {
+        CuponCard(
+            coupon = Coupon(
+                fldCode = "CODE123",
+                fldTitle = "2x1 en Alineación",
+                fldDescription = "Obtén un 2x1 en el servicio de alineación y balanceo.",
+                fldDiscountType = VoucherDiscountType.PORCENTAJE,
+                fldDiscountValue = "50",
+                fldStartDate = "2024-01-01",
+                fldEndDate = "2024-12-31",
+                fldStatus = VoucherStatusType.VALIDO
             ),
             onClick = {}
         )

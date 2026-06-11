@@ -56,6 +56,9 @@ import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.data.model.couponbook.Coupon
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.DINERO
+import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.PORCENTAJE
 import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -409,6 +412,11 @@ private fun CouponRedeemDetails(
     coupon: Coupon,
     modifier: Modifier = Modifier
 ) {
+    val discount = when (coupon.fldDiscountType) {
+        PORCENTAJE -> "${coupon.fldDiscountValue}%"
+        DINERO -> "$${coupon.fldDiscountValue}"
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -436,6 +444,14 @@ private fun CouponRedeemDetails(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = "Descuento de $discount",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Text(
@@ -586,8 +602,8 @@ fun RedeemCouponPreview() {
                 fldCode = "KFKFKFKF-3KK",
                 fldTitle = "2×1 en alineación y balanceo",
                 fldDescription = "Your private life make me leave me out",
-                fldDiscountType = 1,
-                fldDiscountValue = "",
+                fldDiscountType = VoucherDiscountType.PORCENTAJE,
+                fldDiscountValue = "50",
                 fldStartDate = "2024-05-01",
                 fldEndDate = "2026-05-28",
                 fldStatus = VoucherStatusType.VALIDO
