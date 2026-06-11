@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.data.model.couponbook.Coupon
-import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType
 import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.DINERO
 import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.PORCENTAJE
 import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
@@ -612,7 +611,7 @@ fun RedeemCouponPreview() {
                 fldCode = "KFKFKFKF-3KK",
                 fldTitle = "2×1 en alineación y balanceo",
                 fldDescription = "Your private life make me leave me out",
-                fldDiscountType = VoucherDiscountType.PORCENTAJE,
+                fldDiscountType = PORCENTAJE,
                 fldDiscountValue = "50",
                 fldStartDate = "2024-05-01",
                 fldEndDate = "2026-05-28",
