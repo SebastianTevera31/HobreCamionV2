@@ -1,44 +1,59 @@
 package com.rfz.appflotal.presentation.ui.couponbook.screen.redeem
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.view.WindowManager
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.outlined.Adjust
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.data.model.couponbook.Coupon
 import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
@@ -48,218 +63,519 @@ import com.rfz.appflotal.presentation.ui.couponbook.QrCodeImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RedeemCoupon(coupon: Coupon, modifier: Modifier = Modifier, onBack: () -> Unit) {
-    Column {
-        CenterAlignedTopAppBar(
-            title = {
-                Surface(
-                    shape = CircleShape,
-                    color = Color.White,
-                    border = borderStroke()
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Adjust,
-                            contentDescription = null,
-                            tint = Color(0xFF3F7EE8),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = "Llantera Norte",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1A1C1E)
-                            )
-                        )
-                    }
-                }
-            },
-            navigationIcon = {
-                Box {
+fun RedeemCoupon(
+    coupon: Coupon,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isValid = coupon.fldStatus == VoucherStatusType.VALIDO
+
+    MaximizeBrightnessWhileVisible(
+        enabled = isValid
+    )
+
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    MerchantBadge()
+                },
+                navigationIcon = {
                     IconButton(
-                        onClick = onBack,
-                        colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.onTertiary),
-                        modifier = Modifier.clip(RoundedCornerShape(Dimens.PaddingSmall))
+                        onClick = onBack
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            tint = Color.Black
+                            contentDescription = stringResource(
+                                R.string.regresar
+                            ),
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                }
-            }
-        )
-
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = Color.Unspecified,
+                    navigationIconContentColor = Color.Unspecified,
+                    titleContentColor = Color.Unspecified,
+                    actionIconContentColor = Color.Unspecified
+                )
+            )
+        }
+    ) { innerPadding ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF2F8FF))
-                .padding(Dimens.ScreenHorizontalPadding),
+                .padding(innerPadding)
+                .background(
+                    MaterialTheme.colorScheme.surfaceVariant.copy(
+                        alpha = 0.30f
+                    )
+                )
+                .verticalScroll(
+                    rememberScrollState()
+                )
+                .padding(
+                    horizontal = Dimens.ScreenHorizontalPadding,
+                    vertical = Dimens.PaddingMedium
+                ),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing)
+            verticalArrangement = Arrangement.spacedBy(
+                Dimens.SectionSpacing
+            )
         ) {
-            // Main QR Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(32.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(Dimens.CardPaddingLarge),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(Dimens.ComponentSpacing)
-                ) {
-                    // Vigente Badge
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.secondary
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Circle,
-                                contentDescription = null,
-                                tint = Color(0xFF4CAF50),
-                                modifier = Modifier.size(8.dp)
-                            )
-                            Text(
-                                text = "VIGENTE",
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondary,
-                                    letterSpacing = 1.sp
-                                )
-                            )
-                        }
-                    }
+            RedeemQrCard(
+                coupon = coupon,
+                isValid = isValid
+            )
 
-                    // QR Placeholder
+            CouponRedeemDetails(
+                coupon = coupon
+            )
+
+            if (isValid) {
+                BrightnessInformationCard()
+            }
+
+            Text(
+                text = if (isValid) {
+                    stringResource(R.string.folio_valido_un_solo_uso)
+                } else {
+                    stringResource(R.string.cupon_no_disponible_para_canje)
+                },
+                modifier = Modifier.padding(
+                    vertical = Dimens.PaddingMedium
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun MerchantBadge(
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant
+        ),
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(
+                horizontal = 20.dp,
+                vertical = 8.dp
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Adjust,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = stringResource(
+                    R.string.llantera_norte_placeholder
+                ),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun RedeemQrCard(
+    coupon: Coupon,
+    isValid: Boolean,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 3.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimens.CardPaddingLarge),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(
+                Dimens.ComponentSpacing
+            )
+        ) {
+            CouponRedeemStatusBadge(
+                status = coupon.fldStatus
+            )
+
+            if (isValid) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
                     Surface(
                         modifier = Modifier
-                            .size(240.dp)
-                            .padding(8.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        color = Color(0xFFF2F8FF)
+                            .fillMaxWidth(0.82f)
+                            .widthIn(max = 260.dp)
+                            .aspectRatio(1f),
+                        shape = RoundedCornerShape(22.dp),
+                        color = Color.White,
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            QrCodeImage(
-                                content = coupon.fldCode,
-                                modifier = Modifier.size(260.dp)
-                            )
-                        }
+                        QrCodeImage(
+                            content = coupon.fldCode,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(14.dp)
+                        )
                     }
+                }
 
-                    // Folio Code
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.folio).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        letterSpacing = 1.sp
+                    )
+
                     Text(
                         text = coupon.fldCode,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.sp,
-                            textAlign = TextAlign.Center,
-                            color = Color(0xFF1A1C1E)
-                        )
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        letterSpacing = 1.5.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
+            } else {
+                UnavailableVoucherState()
             }
+        }
+    }
+}
 
-            // Promo Details
+@Composable
+private fun CouponRedeemStatusBadge(
+    status: VoucherStatusType,
+    modifier: Modifier = Modifier
+) {
+    val textResource = when (status) {
+        VoucherStatusType.VALIDO -> R.string.vigente
+        VoucherStatusType.RECLAMADO -> R.string.reclamado
+        VoucherStatusType.INACTIVO -> R.string.inactivo
+        VoucherStatusType.NO_VALIDO -> R.string.no_valido
+        VoucherStatusType.EXPIRADO -> R.string.expirado
+    }
+
+    val containerColor = when (status) {
+        VoucherStatusType.VALIDO ->
+            MaterialTheme.colorScheme.tertiaryContainer
+
+        VoucherStatusType.RECLAMADO ->
+            MaterialTheme.colorScheme.secondaryContainer
+
+        VoucherStatusType.NO_VALIDO ->
+            MaterialTheme.colorScheme.errorContainer
+
+        VoucherStatusType.INACTIVO,
+        VoucherStatusType.EXPIRADO ->
+            MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    val contentColor = when (status) {
+        VoucherStatusType.VALIDO ->
+            MaterialTheme.colorScheme.onTertiaryContainer
+
+        VoucherStatusType.RECLAMADO ->
+            MaterialTheme.colorScheme.onSecondaryContainer
+
+        VoucherStatusType.NO_VALIDO ->
+            MaterialTheme.colorScheme.onErrorContainer
+
+        VoucherStatusType.INACTIVO,
+        VoucherStatusType.EXPIRADO ->
+            MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Surface(
+        modifier = modifier,
+        shape = CircleShape,
+        color = containerColor,
+        contentColor = contentColor
+    ) {
+        Row(
+            modifier = Modifier.padding(
+                horizontal = 14.dp,
+                vertical = 6.dp
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Circle,
+                contentDescription = null,
+                modifier = Modifier.size(7.dp),
+                tint = contentColor
+            )
+
+            Text(
+                text = stringResource(textResource).uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun UnavailableVoucherState(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(
+            vertical = Dimens.PaddingLarge
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(
+            Dimens.PaddingSmall
+        )
+    ) {
+        Surface(
+            modifier = Modifier.size(72.dp),
+            shape = RoundedCornerShape(22.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.QrCode2,
+                    contentDescription = null,
+                    modifier = Modifier.size(38.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Text(
+            text = stringResource(
+                R.string.cupon_no_disponible
+            ),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = stringResource(
+                R.string.cupon_no_disponible_descripcion
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun CouponRedeemDetails(
+    coupon: Coupon,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(
+            Dimens.ElementSpacing
+        ),
+    ) {
+        OutlinedCard(
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.outlinedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(Dimens.ElementSpacing)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Dimens.PaddingMedium),
+                verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = coupon.fldTitle,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1C1E)
-                    ),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CalendarMonth,
-                        contentDescription = null,
-                        tint = Color(0xFF6F7785),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = "Vence el ${Commons.formatToLongDate(coupon.fldEndDate)}",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color(0xFF6F7785)
-                        )
-                    )
-                }
-            }
 
-            // Brightness Banner
+                Text(
+                    text = coupon.fldDescription,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 24.sp
+                )
+            }
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                Dimens.PaddingSmall
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.CalendarMonth,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                text = stringResource(
+                    R.string.vence_el,
+                    Commons.formatToLongDate(coupon.fldEndDate)
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun BrightnessInformationCard(
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(Dimens.PaddingMedium),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                Dimens.PaddingMedium
+            )
+        ) {
             Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.secondary
+                modifier = Modifier.size(44.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surface
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                Box(
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.LightMode,
                         contentDescription = null,
-                        tint = Color(0xFF3F7EE8),
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
-                    Column {
-                        Text(
-                            text = "Brillo al máximo automáticamente",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondary
-                            )
-                        )
-                        Text(
-                            text = "para facilitar el escaneo del QR",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.onSecondary
-                            )
-                        )
-                    }
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = stringResource(
+                        R.string.brillo_maximo_automatico
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
 
-            // Footer
-            Text(
-                text = "Folio válido para un solo uso",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = MaterialTheme.colorScheme.onSurface
-                ),
-                modifier = Modifier.padding(bottom = Dimens.PaddingLarge)
-            )
+                Text(
+                    text = stringResource(
+                        R.string.brillo_maximo_descripcion
+                    ),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
     }
-
 }
 
 @Composable
-private fun borderStroke() = BorderStroke(
-    width = 1.dp,
-    color = Color(0xFFD0E4FF)
-)
+private fun MaximizeBrightnessWhileVisible(
+    enabled: Boolean
+) {
+    val context = LocalContext.current
+    val activity = remember(context) {
+        context.findActivity()
+    }
+
+    val view = LocalView.current
+
+    DisposableEffect(activity, view, enabled) {
+        if (!enabled) {
+            return@DisposableEffect onDispose {}
+        }
+
+        val previousKeepScreenOn = view.keepScreenOn
+        val window = activity?.window
+        val previousBrightness = window?.attributes?.screenBrightness
+
+        view.keepScreenOn = true
+
+        if (window != null) {
+            val attributes = window.attributes
+            attributes.screenBrightness =
+                WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+            window.attributes = attributes
+        }
+
+        onDispose {
+            view.keepScreenOn = previousKeepScreenOn
+
+            if (window != null && previousBrightness != null) {
+                val attributes = window.attributes
+                attributes.screenBrightness = previousBrightness
+                window.attributes = attributes
+            }
+        }
+    }
+}
+
+private tailrec fun Context.findActivity(): Activity? {
+    return when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
+    }
+}
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -269,7 +585,7 @@ fun RedeemCouponPreview() {
             coupon = Coupon(
                 fldCode = "KFKFKFKF-3KK",
                 fldTitle = "2×1 en alineación y balanceo",
-                fldDescription = "",
+                fldDescription = "Your private life make me leave me out",
                 fldDiscountType = 1,
                 fldDiscountValue = "",
                 fldStartDate = "2024-05-01",

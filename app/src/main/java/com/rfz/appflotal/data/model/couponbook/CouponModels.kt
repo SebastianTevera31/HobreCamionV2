@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.model.couponbook
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
 data class RedeemDto(
     @SerializedName("fld_code") val code: String,
@@ -70,6 +71,7 @@ data class GetCouponsResponse(
     @SerializedName("fld_available_quantity") val fldAvailableQuantity: Int
 )
 
+@Serializable
 data class Coupon(
     val fldCode: String,
     val fldTitle: String,
@@ -81,6 +83,11 @@ data class Coupon(
     val fldStatus: VoucherStatusType
 )
 
+@Serializable
 enum class VoucherStatusType(val id: Int) {
     RECLAMADO(1), INACTIVO(2), NO_VALIDO(3), EXPIRADO(4), VALIDO(5)
+}
+
+enum class VoucherDiscountType(val id: Int) {
+    PORCENTAJE(1), DINERO(0)
 }

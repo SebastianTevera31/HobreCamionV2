@@ -1,12 +1,13 @@
 package com.rfz.appflotal.presentation.ui.couponbook.screen.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,27 +16,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.FireTruck
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,17 +64,17 @@ fun CouponBookRoute(
         is LoadState.Error -> {
             ErrorView(
                 errorMessage = screenStatus.message,
-                showRetryButton = true
-            ) {
-                onLoadData()
-            }
+                showRetryButton = true,
+                onRetry = onLoadData
+            )
         }
 
         LoadState.Loading -> {
-            Box(modifier = modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
 
@@ -85,14 +83,14 @@ fun CouponBookRoute(
                 nearbyCoupons = nearbyCoupons,
                 myCoupons = myCoupons,
                 onSeeAllCoupons = onSeeAllCoupons,
+                onSeeAllVouchers = onSeeAllVouchers,
                 onCouponClick = onCouponClick,
                 onVoucherClick = onVoucherClick,
-                onSeeAlVoucher = onSeeAllVouchers,
                 modifier = modifier
             )
         }
 
-        else -> {}
+        else -> Unit
     }
 }
 
@@ -101,220 +99,167 @@ fun CouponBookScreen(
     nearbyCoupons: List<Coupon>,
     myCoupons: List<Coupon>,
     onSeeAllCoupons: () -> Unit,
-    onSeeAlVoucher: () -> Unit,
+    onSeeAllVouchers: () -> Unit,
     onCouponClick: (String) -> Unit,
     onVoucherClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = Dimens.PaddingMedium)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .background(MaterialTheme.colorScheme.background),
+        contentPadding = PaddingValues(
+            horizontal = Dimens.PaddingMedium,
+            vertical = Dimens.PaddingMedium
+        ),
         verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(R.string.cupones_cercanos),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-            )
-            TextButton(onClick = onSeeAllCoupons) {
-                Text(
-                    text = stringResource(R.string.ver_todos),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                )
-            }
+        item {
+            CouponBookHeader()
         }
 
-        if (nearbyCoupons.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.no_hay_cupones_cercanos),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.align(Alignment.Center)
+        item {
+            SectionHeader(
+                title = stringResource(R.string.cupones_cercanos),
+                onSeeAllClick = onSeeAllCoupons
+            )
+        }
+
+        item {
+            if (nearbyCoupons.isEmpty()) {
+                EmptyCouponCard(
+                    message = stringResource(R.string.no_hay_cupones_cercanos)
                 )
-            }
-        } else {
-            LazyRow(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
-            ) {
-                items(nearbyCoupons.size) { index ->
-                    CuponCard(
-                        coupon = nearbyCoupons[index],
-                        onClick = { onCouponClick(nearbyCoupons[index].fldCode) }
-                    )
+            } else {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                    contentPadding = PaddingValues(end = Dimens.PaddingMedium)
+                ) {
+                    items(
+                        items = nearbyCoupons,
+                        key = { coupon -> coupon.fldCode }
+                    ) { coupon ->
+                        CuponCard(
+                            coupon = coupon,
+                            onClick = { onCouponClick(coupon.fldCode) }
+                        )
+                    }
                 }
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(R.string.mis_cupones),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.weight(1f)
+        item {
+            SectionHeader(
+                title = stringResource(R.string.mis_cupones),
+                onSeeAllClick = onSeeAllVouchers
             )
-
-            TextButton(onClick = onSeeAlVoucher) {
-                Text(
-                    text = stringResource(R.string.ver_todos),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                )
-            }
         }
-
 
         if (myCoupons.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.no_hay_cupones_cercanos),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.align(Alignment.Center)
+            item {
+                EmptyCouponCard(
+                    message = stringResource(R.string.no_hay_cupones_guardados)
                 )
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(360.dp),
-                verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+            items(
+                items = myCoupons,
+                key = { coupon -> coupon.fldCode }
+            ) { coupon ->
+                NearestCuponCard(
+                    coupon = coupon,
+                    onClick = { onVoucherClick(coupon.fldCode) }
+                )
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(Dimens.PaddingSmall))
+        }
+    }
+}
+
+@Composable
+private fun CouponBookHeader(
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.primaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(Dimens.PaddingLarge),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+        ) {
+            Surface(
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(18.dp),
+                color = MaterialTheme.colorScheme.primary
             ) {
-                items(myCoupons.size) { index ->
-                    NearestCuponCard(
-                        coupon = myCoupons[index],
-                        onClick = { onVoucherClick(myCoupons[index].fldCode) }
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.FireTruck,
+                        contentDescription = null,
+                        modifier = Modifier.size(30.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
+            }
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.cuponera_titulo),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Text(
+                    text = stringResource(R.string.cuponera_subtitulo),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             }
         }
     }
 }
 
 @Composable
-fun NearestCuponCard(
-    coupon: Coupon,
-    onClick: () -> Unit,
+private fun SectionHeader(
+    title: String,
+    onSeeAllClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable {
-                if (coupon.fldStatus == VoucherStatusType.VALIDO) onClick()
-            },
-        shape = RoundedCornerShape(Dimens.PaddingLarge),
-        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Dimens.PaddingMedium)
-        ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(RoundedCornerShape(Dimens.PaddingSmall))
-                        .background(MaterialTheme.colorScheme.onSecondary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(imageVector = Icons.Default.FireTruck, contentDescription = null)
-                }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
 
-                Column {
-                    if (coupon.fldStatus != VoucherStatusType.VALIDO) {
-                        Card(
-                            border = CardDefaults.outlinedCardBorder(enabled = true)
-                        ) {
-                            val textRes = when (coupon.fldStatus) {
-                                VoucherStatusType.RECLAMADO -> R.string.reclamado
+        TextButton(onClick = onSeeAllClick) {
+            Text(
+                text = stringResource(R.string.ver_todos),
+                fontWeight = FontWeight.SemiBold
+            )
 
-                                VoucherStatusType.INACTIVO -> R.string.inactivo
+            Spacer(modifier = Modifier.width(4.dp))
 
-                                VoucherStatusType.NO_VALIDO -> R.string.no_valido
-
-                                VoucherStatusType.EXPIRADO -> R.string.expirado
-
-                                else -> R.string.expirado
-                            }
-
-                            if (coupon.fldStatus != VoucherStatusType.VALIDO) {
-                                Text(
-                                    text = stringResource(textRes),
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    modifier = Modifier.padding(Dimens.PaddingSmall)
-                                )
-                            }
-                        }
-                    }
-
-                    Text(
-                        text = stringResource(R.string.llantera_norte_placeholder),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Text(
-                        text = coupon.fldTitle,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.coupon_expires,
-                            Commons.formatToLongDate(coupon.fldEndDate)
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
-            if (coupon.fldStatus == VoucherStatusType.VALIDO) {
-                IconButton(onClick = onClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSecondaryFixedVariant
-                    )
-                }
-            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.ArrowRight,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }
@@ -325,55 +270,307 @@ fun CuponCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    ElevatedCard(
         modifier = modifier
-            .width(240.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(Dimens.PaddingLarge),
-        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
+            .width(272.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 2.dp
+        )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Dimens.PaddingMedium)
+            modifier = Modifier.padding(Dimens.PaddingSmall),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(Dimens.PaddingLarge))
-                    .background(MaterialTheme.colorScheme.onSecondary),
+                    .height(128.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                Image(imageVector = Icons.Default.FireTruck, contentDescription = null)
+                Icon(
+                    imageVector = Icons.Default.FireTruck,
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                DiscountBadge(
+                    discount = coupon.fldDiscountValue.ifBlank {
+                        stringResource(R.string.promo_label)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(10.dp)
+                )
             }
 
-            SuggestionChip(
-                onClick = {},
-                label = {
-                    Text(
-                        text = coupon.fldDiscountValue.takeIf { it.isNotEmpty() } ?: stringResource(
-                            R.string.promo_label
-                        ),
-                        color = MaterialTheme.colorScheme.onTertiaryContainer
+            Column(
+                modifier = Modifier.padding(
+                    start = 4.dp,
+                    end = 4.dp,
+                    bottom = 6.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.llantera_norte_placeholder),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = coupon.fldTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = stringResource(
+                        R.string.coupon_expires,
+                        Commons.formatToLongDate(coupon.fldEndDate)
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DiscountBadge(
+    discount: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+    ) {
+        Text(
+            text = discount,
+            modifier = Modifier.padding(
+                horizontal = 10.dp,
+                vertical = 6.dp
+            ),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun NearestCuponCard(
+    coupon: Coupon,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isValid = coupon.fldStatus == VoucherStatusType.VALIDO
+
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = if (isValid) 2.dp else 0.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimens.PaddingMedium),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+        ) {
+            Surface(
+                modifier = Modifier.size(58.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = if (isValid) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                }
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.FireTruck,
+                        contentDescription = null,
+                        modifier = Modifier.size(30.dp),
+                        tint = if (isValid) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                     )
-                },
-                shape = RoundedCornerShape(Dimens.PaddingExtraLarge),
-                colors = SuggestionChipDefaults.suggestionChipColors(MaterialTheme.colorScheme.tertiaryContainer)
-            )
+                }
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                VoucherStatusBadge(status = coupon.fldStatus)
+
+                Text(
+                    text = stringResource(R.string.llantera_norte_placeholder),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = coupon.fldTitle,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = stringResource(
+                        R.string.coupon_expires,
+                        Commons.formatToLongDate(coupon.fldEndDate)
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            if (isValid) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.ArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VoucherStatusBadge(
+    status: VoucherStatusType,
+    modifier: Modifier = Modifier
+) {
+    val label = when (status) {
+        VoucherStatusType.VALIDO -> stringResource(R.string.disponible)
+        VoucherStatusType.RECLAMADO -> stringResource(R.string.reclamado)
+        VoucherStatusType.INACTIVO -> stringResource(R.string.inactivo)
+        VoucherStatusType.NO_VALIDO -> stringResource(R.string.no_valido)
+        VoucherStatusType.EXPIRADO -> stringResource(R.string.expirado)
+    }
+
+    val containerColor = when (status) {
+        VoucherStatusType.VALIDO ->
+            MaterialTheme.colorScheme.primaryContainer
+
+        VoucherStatusType.RECLAMADO ->
+            MaterialTheme.colorScheme.secondaryContainer
+
+        VoucherStatusType.INACTIVO,
+        VoucherStatusType.EXPIRADO ->
+            MaterialTheme.colorScheme.surfaceVariant
+
+        VoucherStatusType.NO_VALIDO ->
+            MaterialTheme.colorScheme.errorContainer
+    }
+
+    val contentColor = when (status) {
+        VoucherStatusType.VALIDO ->
+            MaterialTheme.colorScheme.onPrimaryContainer
+
+        VoucherStatusType.RECLAMADO ->
+            MaterialTheme.colorScheme.onSecondaryContainer
+
+        VoucherStatusType.INACTIVO,
+        VoucherStatusType.EXPIRADO ->
+            MaterialTheme.colorScheme.onSurfaceVariant
+
+        VoucherStatusType.NO_VALIDO ->
+            MaterialTheme.colorScheme.onErrorContainer
+    }
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(50),
+        color = containerColor,
+        contentColor = contentColor
+    ) {
+        Text(
+            text = label.uppercase(),
+            modifier = Modifier.padding(
+                horizontal = 8.dp,
+                vertical = 4.dp
+            ),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun EmptyCouponCard(
+    message: String,
+    modifier: Modifier = Modifier
+) {
+    OutlinedCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimens.PaddingLarge),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+        ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.FireTruck,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
 
             Text(
-                text = stringResource(R.string.llantera_norte_placeholder),
-                color = MaterialTheme.colorScheme.onSecondary,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = coupon.fldTitle,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -387,9 +584,9 @@ fun CouponBookScreenPreview() {
             nearbyCoupons = emptyList(),
             myCoupons = emptyList(),
             onSeeAllCoupons = {},
-            onCouponClick = {},
-            onVoucherClick = {},
-            onSeeAlVoucher = {}
+            onCouponClick = { _ -> },
+            onVoucherClick = { _ -> },
+            onSeeAllVouchers = {},
         )
     }
 }
