@@ -384,6 +384,7 @@
     <string name="reintentar">Reintentar</string>
     <string name="operacion_cancelada">La operación fue cancelada.</string>
     <string name="blog">Blog</string>
+    <string name="favorites">Gustados</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>
@@ -452,4 +453,5 @@
     <string name="forum_me">Yo</string>
     <string name="responder">Responder</string>
     <string name="autor">AUTOR</string>
+    <string name="publicar">Publicar</string>
 </resources>

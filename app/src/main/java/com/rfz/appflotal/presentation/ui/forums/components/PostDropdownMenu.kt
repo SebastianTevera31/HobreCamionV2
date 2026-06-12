@@ -14,6 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 @Composable
@@ -31,7 +33,7 @@ fun ForumDropdownMenu(onReport: () -> Unit) {
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
-                text = { Text("Reportar") },
+                text = { Text(stringResource(R.string.forum_report_title)) },
                 onClick = onReport
             )
         }

@@ -11,11 +11,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
+import androidx.compose.ui.res.stringResource
+import com.rfz.appflotal.R
+
 @Composable
 fun ForumErrorView(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
-    message: String = "Ha ocurrido un error inesperado"
+    message: String = stringResource(R.string.error_carga_datos)
 ) {
     Column(
         modifier = modifier
@@ -59,7 +62,7 @@ fun ForumErrorView(
             shape = MaterialTheme.shapes.medium
         ) {
             Text(
-                text = "Reintentar",
+                text = stringResource(R.string.reintentar),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
             )
         }

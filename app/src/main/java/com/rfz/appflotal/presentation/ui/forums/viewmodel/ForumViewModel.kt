@@ -58,7 +58,7 @@ class ForumViewModel @Inject constructor(
             val roomsResponse = getForumRoomsUseCase(1)
 
             asyncResponseHelper(roomsResponse, onError = {
-                _uiState.update { it.copy(roomState = LoadState.Error("Error al cargar salas")) }
+                _uiState.update { it.copy(roomState = LoadState.Error("")) }
             }) { rooms ->
                 _uiState.update {
                     it.copy(
@@ -80,7 +80,7 @@ class ForumViewModel @Inject constructor(
             asyncResponseHelper(
                 response,
                 onError = {
-                    _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar temas")) }
+                    _uiState.update { it.copy(screenState = LoadState.Error("")) }
                 }
             ) { result ->
                 val (currentRoom, topics) = result
@@ -105,13 +105,13 @@ class ForumViewModel @Inject constructor(
             asyncResponseHelper(
                 topicResponse,
                 onError = {
-                    _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar comentarios")) }
+                    _uiState.update { it.copy(screenState = LoadState.Error("")) }
                 }
             ) { topic ->
                 asyncResponseHelper(
                     response,
                     onError = {
-                        _uiState.update { it.copy(screenState = LoadState.Error("Error al cargar comentarios")) }
+                        _uiState.update { it.copy(screenState = LoadState.Error("")) }
                     }
                 ) { comments ->
                     _uiState.update {
@@ -263,13 +263,14 @@ class ForumViewModel @Inject constructor(
         publicationJob = viewModelScope.launch {
             val currentRoomId = _uiState.value.selectedRoom?.id ?: 0
             if (currentRoomId == 0) {
-                _uiState.update { it.copy(newTopicState = LoadState.Error("No se ha seleccionado una sala válida.")) }
+                _uiState.update { it.copy(newTopicState = LoadState.Error("")) }
                 return@launch
             }
 
             _uiState.update { it.copy(newTopicState = LoadState.Loading) }
 
-            val imageStr = (uiState.value.photoEvidence as? CameraUiState.Captured)?.uri?.toString() ?: ""
+            val imageStr =
+                (uiState.value.photoEvidence as? CameraUiState.Captured)?.uri?.toString() ?: ""
 
             val response = crudForumTopicUseCase(
                 title = title,
@@ -284,7 +285,7 @@ class ForumViewModel @Inject constructor(
             asyncResponseHelper(
                 response,
                 onError = {
-                    _uiState.update { it.copy(newTopicState = LoadState.Error("Error al publicar el tema")) }
+                    _uiState.update { it.copy(newTopicState = LoadState.Error("")) }
                 }
             ) {
                 // Actualizamos localmente para evitar el GET.
@@ -367,7 +368,7 @@ class ForumViewModel @Inject constructor(
             asyncResponseHelper(
                 response,
                 onError = {
-                    _uiState.update { it.copy(reportState = LoadState.Error("Error al enviar reporte")) }
+                    _uiState.update { it.copy(reportState = LoadState.Error("")) }
                 }
             ) {
                 _uiState.update { it.copy(reportState = LoadState.Success(Unit)) }
@@ -382,7 +383,8 @@ class ForumViewModel @Inject constructor(
         publicationJob = viewModelScope.launch {
             _uiState.update { it.copy(sendCommentState = LoadState.Loading) }
 
-            val imageStr = (uiState.value.photoEvidence as? CameraUiState.Captured)?.uri?.toString() ?: ""
+            val imageStr =
+                (uiState.value.photoEvidence as? CameraUiState.Captured)?.uri?.toString() ?: ""
 
             val response = crudForumCommentUseCase(
                 idTopic = topicId,
@@ -395,7 +397,7 @@ class ForumViewModel @Inject constructor(
             asyncResponseHelper(
                 response,
                 onError = {
-                    _uiState.update { it.copy(sendCommentState = LoadState.Error("Error al enviar comentario")) }
+                    _uiState.update { it.copy(sendCommentState = LoadState.Error("")) }
                 }
             ) {
                 val userList = getTasksUseCase().first()

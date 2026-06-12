@@ -594,7 +594,7 @@ fun NavGraphBuilder.forumsGraph(
         composable<SavedCommentsNav> {
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
-                    title = "Gustados",
+                    title = stringResource(R.string.favorites),
                     showBackButton = true,
                     showMenuButton = false,
                     onBackClick = {

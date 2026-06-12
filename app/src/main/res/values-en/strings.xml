@@ -400,6 +400,7 @@
     <string name="reintentar">Retry</string>
     <string name="operacion_cancelada">The operation was canceled.</string>
     <string name="blog">Vlog</string>
+    <string name="favorites">Favorites</string>
 
     <plurals name="description_field">
         <item quantity="one">Description</item>
@@ -468,4 +469,5 @@
     <string name="forum_me">Me</string>
     <string name="responder">Reply</string>
     <string name="autor">AUTHOR</string>
+    <string name="publicar">Post</string>
 </resources>
