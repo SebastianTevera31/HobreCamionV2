@@ -30,9 +30,14 @@ data class ForumTopBarConfig(
     val subtitle: String? = null,
     val showBackButton: Boolean = false,
     val showMenuButton: Boolean = false,
+    val showPublishButton: Boolean = false,
+    val isPublishing: Boolean = false,
+    val message: String? = null,
     val searchConfig: ForumSearchConfig? = null,
     val onBackClick: (() -> Unit)? = null,
-    val onMenuClick: (() -> Unit)? = null
+    val onMenuClick: (() -> Unit)? = null,
+    val onPublishClick: (() -> Unit)? = null,
+    val onCancelClick: (() -> Unit)? = null,
 )
 
 data class ForumSearchConfig(

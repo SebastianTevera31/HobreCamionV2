@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -37,6 +38,7 @@ import coil.compose.AsyncImage
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import androidx.core.net.toUri
 
 @Composable
 fun BottomCommentField(
@@ -74,6 +76,20 @@ fun BottomCommentField(
                 .fillMaxWidth()
                 .padding(Dimens.PaddingSmall)
         ) {
+            IconButton(
+                onClick = onAddImage,
+                enabled = !isLoading,
+                modifier = Modifier.size(48.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AddAPhoto,
+                    contentDescription = "Add Image"
+                )
+            }
+
             OutlinedTextField(
                 value = comment,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
@@ -181,7 +197,7 @@ fun BottomCommentFieldPreview() {
             comment = "",
             onCommentChange = {},
             onSend = {},
-            selectedImage = Uri.parse("https://example.com/image1.jpg")
+            selectedImage = "https://example.com/image1.jpg".toUri()
         )
     }
 }

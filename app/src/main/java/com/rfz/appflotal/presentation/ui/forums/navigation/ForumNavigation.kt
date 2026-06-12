@@ -16,9 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -259,7 +257,6 @@ fun NavGraphBuilder.forumsGraph(
             val args = backStackEntry.toRoute<TopicDiscussion>()
             val state by viewModel.uiState.collectAsState()
             val context = LocalContext.current
-            var commentText by remember { mutableStateOf("") }
             val errorMessage = stringResource(R.string.forum_capture_cancelled)
 
             val cameraLauncher = rememberLauncherForActivityResult(
@@ -269,6 +266,23 @@ fun NavGraphBuilder.forumsGraph(
                     viewModel.onPhotoCaptured()
                 } else {
                     viewModel.onPhotoError(errorMessage)
+                }
+            }
+
+            LaunchedEffect(state.shouldNavigateToReply) {
+                if (state.shouldNavigateToReply) {
+                    val currentRoute = navController.currentDestination?.route
+                    if (currentRoute?.contains("TopicDiscussion") == true) {
+                        state.selectedTopic?.let { topic ->
+                            navController.navigate(NewCommentNav(id = topic.id, isTopic = true))
+                            viewModel.onNavigatedToReply()
+                        }
+                    } else {
+                        // If we are not in TopicDiscussion, we still might want to reset the flag 
+                        // so it doesn't trigger later when we go back.
+                        // Or only reset if it was intended for this.
+                        viewModel.onNavigatedToReply()
+                    }
                 }
             }
 
@@ -299,11 +313,10 @@ fun NavGraphBuilder.forumsGraph(
                         color = Color.White
                     ) {
                         BottomCommentField(
-                            comment = commentText,
-                            onCommentChange = { commentText = it },
+                            comment = state.commentText,
+                            onCommentChange = viewModel::onCommentTextChanged,
                             onSend = {
-                                viewModel.sendComment(commentText)
-                                commentText = ""
+                                viewModel.sendComment(state.commentText)
                             },
                             isLoading = state.sendCommentState is LoadState.Loading,
                             onCancel = viewModel::cancelPublication,
@@ -333,7 +346,12 @@ fun NavGraphBuilder.forumsGraph(
                                 comments = comments,
                                 onReply = { comment ->
                                     viewModel.resetCommentState()
-                                    navController.navigate(NewCommentNav(commentId = comment.id))
+                                    navController.navigate(
+                                        NewCommentNav(
+                                            id = comment.id,
+                                            isTopic = false
+                                        )
+                                    )
                                 },
                                 onSave = { id, isTopic -> viewModel.doLike(id, isTopic) },
                                 onReport = { id, type ->
@@ -444,6 +462,18 @@ fun NavGraphBuilder.forumsGraph(
             }
             val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
+            val context = LocalContext.current
+            val errorMessage = stringResource(R.string.forum_capture_cancelled)
+
+            val cameraLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.TakePicture()
+            ) { success ->
+                if (success) {
+                    viewModel.onPhotoCaptured()
+                } else {
+                    viewModel.onPhotoError(errorMessage)
+                }
+            }
 
             LaunchedEffect(Unit) {
                 viewModel.resetNewTopicState()
@@ -455,24 +485,37 @@ fun NavGraphBuilder.forumsGraph(
                     subtitle = args.roomTitle,
                     showBackButton = true,
                     showMenuButton = false,
+                    showPublishButton = true,
+                    isPublishing = state.newTopicState is LoadState.Loading,
                     onBackClick = {
+                        viewModel.clearPhoto()
                         navController.popBackStack()
-                    }
+                    },
+                    onPublishClick = viewModel::sendTopic,
+                    onCancelClick = viewModel::cancelPublication
                 )
             ) { paddingValues ->
                 NewTopicScreen(
                     modifier = Modifier.padding(paddingValues),
                     newTopicStatus = state.newTopicState,
-                    onSend = { title, message, tags, color ->
-                        viewModel.sendTopic(
-                            title = title,
-                            description = message,
-                            tags = tags,
-                            color = color
-                        )
+                    onBack = {
+                        navController.popBackStack()
                     },
-                    onCancel = viewModel::cancelPublication,
-                    onBack = { navController.popBackStack() }
+                    selectedImage = (state.photoEvidence as? CameraUiState.Captured)?.uri,
+                    onAddImage = {
+                        viewModel.startCamera(context) { uri ->
+                            cameraLauncher.launch(uri)
+                        }
+                    },
+                    onRemoveImage = viewModel::clearPhoto,
+                    title = state.topicTitle,
+                    onTitleChange = viewModel::onTopicTitleChanged,
+                    description = state.topicDescription,
+                    onDescriptionChange = viewModel::onTopicDescriptionChanged,
+                    selectedColor = state.topicColor,
+                    onColorChange = viewModel::onTopicColorChanged,
+                    tags = state.topicTags,
+                    onTagsChange = viewModel::onTopicTagsChanged
                 )
             }
         }
@@ -487,16 +530,44 @@ fun NavGraphBuilder.forumsGraph(
             }
             val viewModel: ForumViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
+            val context = LocalContext.current
+            val errorMessage = stringResource(R.string.forum_capture_cancelled)
 
-            val commentToReply = state.comments.find { it.id == args.commentId }
+            val cameraLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.TakePicture()
+            ) { success ->
+                if (success) {
+                    viewModel.onPhotoCaptured()
+                } else {
+                    viewModel.onPhotoError(errorMessage)
+                }
+            }
+
+            val commentToReply = if (args.isTopic) {
+                state.selectedTopic?.toComment()
+            } else {
+                state.comments.find { it.id == args.id }
+            }
 
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = stringResource(R.string.forum_reply_title),
                     subtitle = state.selectedTopic?.title ?: "",
                     showBackButton = true,
+                    showPublishButton = true,
                     showMenuButton = false,
-                    onBackClick = { navController.popBackStack() }
+                    isPublishing = state.sendCommentState is LoadState.Loading,
+                    onBackClick = {
+                        viewModel.clearPhoto()
+                        navController.popBackStack()
+                    },
+                    onPublishClick = {
+                        viewModel.sendComment(
+                            state.commentText,
+                            parentId = if (args.isTopic) null else args.id
+                        )
+                    },
+                    onCancelClick = viewModel::cancelPublication
                 )
             ) { paddingValues ->
                 commentToReply?.let { comment ->
@@ -504,13 +575,18 @@ fun NavGraphBuilder.forumsGraph(
                         comment = comment,
                         modifier = Modifier.padding(paddingValues),
                         replyStatus = state.sendCommentState,
-                        onSend = { message: String ->
-                            viewModel.sendComment(message)
-                        },
-                        onCancel = viewModel::cancelPublication,
                         onBack = {
                             navController.popBackStack()
-                        }
+                        },
+                        selectedImage = (state.photoEvidence as? CameraUiState.Captured)?.uri,
+                        onAddImage = {
+                            viewModel.startCamera(context) { uri ->
+                                cameraLauncher.launch(uri)
+                            }
+                        },
+                        onRemoveImage = viewModel::clearPhoto,
+                        message = state.commentText,
+                        onMessageChange = viewModel::onCommentTextChanged
                     )
                 }
             }

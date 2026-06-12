@@ -237,12 +237,28 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun sendTopic(
-        title: String,
-        description: String,
-        tags: String,
-        color: String
-    ) {
+    fun onTopicTitleChanged(title: String) {
+        _uiState.update { it.copy(topicTitle = title) }
+    }
+
+    fun onTopicDescriptionChanged(description: String) {
+        _uiState.update { it.copy(topicDescription = description) }
+    }
+
+    fun onTopicColorChanged(color: String) {
+        _uiState.update { it.copy(topicColor = color) }
+    }
+
+    fun onTopicTagsChanged(tags: List<String>) {
+        _uiState.update { it.copy(topicTags = tags) }
+    }
+
+    fun sendTopic() {
+        val title = _uiState.value.topicTitle
+        val description = _uiState.value.topicDescription
+        val tags = _uiState.value.topicTags.joinToString(",")
+        val color = _uiState.value.topicColor
+
         publicationJob?.cancel()
         publicationJob = viewModelScope.launch {
             val currentRoomId = _uiState.value.selectedRoom?.id ?: 0
@@ -253,11 +269,13 @@ class ForumViewModel @Inject constructor(
 
             _uiState.update { it.copy(newTopicState = LoadState.Loading) }
 
+            val imageStr = (uiState.value.photoEvidence as? CameraUiState.Captured)?.uri?.toString() ?: ""
+
             val response = crudForumTopicUseCase(
                 title = title,
                 description = description,
                 color = color,
-                image = "",
+                image = imageStr,
                 idForum = currentRoomId,
                 tags = tags,
                 registrationDate = getCurrentDate()
@@ -279,7 +297,7 @@ class ForumViewModel @Inject constructor(
                             id = -(state.topics.size + 1), // ID temporal único
                             title = title,
                             description = description,
-                            imageUrl = "",
+                            imageUrl = imageStr,
                             author = user.fld_username,
                             numComments = 0,
                             time = getRelativeTime(getCurrentDate()),
@@ -292,16 +310,29 @@ class ForumViewModel @Inject constructor(
                         state.copy(
                             newTopicState = LoadState.Success(Unit),
                             topics = newList,
-                            filteredTopics = newList
+                            filteredTopics = newList,
+                            topicTitle = "",
+                            topicDescription = "",
+                            topicColor = "#F44336",
+                            topicTags = emptyList()
                         )
                     }
                 }
+                clearPhoto()
             }
         }
     }
 
     fun resetNewTopicState() {
-        _uiState.update { it.copy(newTopicState = LoadState.Idle) }
+        _uiState.update {
+            it.copy(
+                newTopicState = LoadState.Idle,
+                topicTitle = "",
+                topicDescription = "",
+                topicColor = "#F44336",
+                topicTags = emptyList()
+            )
+        }
     }
 
     fun resetCommentState() {
@@ -344,18 +375,21 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun sendComment(commentText: String) {
+    fun sendComment(commentText: String, parentId: Int? = null) {
         val topicId = _uiState.value.selectedTopic?.id ?: return
 
         publicationJob?.cancel()
         publicationJob = viewModelScope.launch {
             _uiState.update { it.copy(sendCommentState = LoadState.Loading) }
 
+            val imageStr = (uiState.value.photoEvidence as? CameraUiState.Captured)?.uri?.toString() ?: ""
+
             val response = crudForumCommentUseCase(
                 idTopic = topicId,
                 message = commentText,
                 registrationDate = getCurrentDate(),
-                image = ""
+                image = imageStr,
+                parentId = parentId
             )
 
             asyncResponseHelper(
@@ -374,7 +408,7 @@ class ForumViewModel @Inject constructor(
                             id = -(state.comments.size + 1), // ID temporal único
                             title = user.fld_username,
                             description = commentText,
-                            imageUrl = "",
+                            imageUrl = imageStr,
                             time = getRelativeTime(getCurrentDate()),
                             likes = 0,
                             firstInitial = first,
@@ -402,7 +436,8 @@ class ForumViewModel @Inject constructor(
                             filteredTopics = updateTopics(state.filteredTopics),
                             selectedTopic = state.selectedTopic?.copy(
                                 numComments = state.selectedTopic.numComments + 1
-                            )
+                            ),
+                            commentText = ""
                         )
                     }
                     clearPhoto()
@@ -420,7 +455,16 @@ class ForumViewModel @Inject constructor(
     fun onPhotoCaptured() {
         currentPhotoUri?.let { uri ->
             changePhotoStatus(CameraUiState.Captured(uri))
+            _uiState.update { it.copy(shouldNavigateToReply = true) }
         }
+    }
+
+    fun onNavigatedToReply() {
+        _uiState.update { it.copy(shouldNavigateToReply = false) }
+    }
+
+    fun onCommentTextChanged(text: String) {
+        _uiState.update { it.copy(commentText = text) }
     }
 
     fun onPhotoError(message: String) {
@@ -430,6 +474,7 @@ class ForumViewModel @Inject constructor(
     fun clearPhoto() {
         currentPhotoUri = null
         changePhotoStatus(CameraUiState.Idle)
+        _uiState.update { it.copy(shouldNavigateToReply = false) }
     }
 
     fun clearScreenState() {

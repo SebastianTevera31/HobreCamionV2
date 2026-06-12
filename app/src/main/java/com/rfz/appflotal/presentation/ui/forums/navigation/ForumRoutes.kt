@@ -36,7 +36,8 @@ data class NewTopicNav(
 
 @Serializable
 data class NewCommentNav(
-    val commentId: Int
+    val id: Int,
+    val isTopic: Boolean = false
 )
 
 @Serializable

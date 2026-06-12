@@ -111,7 +111,8 @@ class CrudForumCommentUseCase @Inject constructor(private val forumRepository: F
         idTopic: Int,
         message: String,
         registrationDate: String,
-        image: String = ""
+        image: String = "",
+        parentId: Int? = null
     ): ApiResult<List<TpmsResponse>?> {
         return forumRepository.crudComment(
             CrudTopicMessageRequest(
@@ -120,7 +121,7 @@ class CrudForumCommentUseCase @Inject constructor(private val forumRepository: F
                 registrationDate = registrationDate,
                 idTopic = idTopic,
                 image = image,
-                fkTopicMsg = null
+                fkTopicMsg = parentId
             )
         )
     }

@@ -19,7 +19,13 @@ data class ForumUiState(
     val selectedRoom: ForumRoom? = null,
     val comments: List<ForumComment> = emptyList(),
     val searchQuery: String = "",
-    val photoEvidence: CameraUiState = CameraUiState.Idle
+    val photoEvidence: CameraUiState = CameraUiState.Idle,
+    val commentText: String = "",
+    val shouldNavigateToReply: Boolean = false,
+    val topicTitle: String = "",
+    val topicDescription: String = "",
+    val topicColor: String = "#F44336",
+    val topicTags: List<String> = emptyList()
 )
 
 sealed class CameraUiState {

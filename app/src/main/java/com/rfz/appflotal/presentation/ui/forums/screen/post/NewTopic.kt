@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.forums.screen.post
 
+import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,18 +11,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,11 +44,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import coil.compose.AsyncImage
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -55,22 +60,25 @@ import com.rfz.appflotal.presentation.ui.utils.LoadState
 fun NewTopicScreen(
     modifier: Modifier = Modifier,
     newTopicStatus: LoadState<Unit>,
-    onSend: (String, String, String, String) -> Unit,
-    onCancel: () -> Unit = {},
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    selectedImage: Uri? = null,
+    onAddImage: () -> Unit = {},
+    onRemoveImage: () -> Unit = {},
+    title: String = "",
+    onTitleChange: (String) -> Unit = {},
+    description: String = "",
+    onDescriptionChange: (String) -> Unit = {},
+    selectedColor: String = "#F44336",
+    onColorChange: (String) -> Unit = {},
+    tags: List<String> = emptyList(),
+    onTagsChange: (List<String>) -> Unit = {}
 ) {
-    var title by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf("") }
-    var currentTag by remember { mutableStateOf("") }
-    val tagsList = remember { mutableStateListOf<String>() }
-
     val fixedColors = listOf(
         "#F44336", "#E91E63", "#9C27B0", "#673AB7",
         "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4",
         "#009688", "#4CAF50", "#8BC34A", "#CDDC39",
         "#FFEB3B", "#FFC107", "#FF9800", "#FF5722"
     )
-    var selectedColor by remember { mutableStateOf(fixedColors[0]) }
 
     val isLoading = newTopicStatus is LoadState.Loading
 
@@ -80,6 +88,11 @@ fun NewTopicScreen(
         }
     }
 
+    BackHandler {
+        onRemoveImage()
+        onBack()
+    }
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = Color.White
@@ -87,7 +100,8 @@ fun NewTopicScreen(
         Column(
             modifier = Modifier
                 .padding(Dimens.PaddingMedium)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
             Text(
@@ -103,7 +117,7 @@ fun NewTopicScreen(
             )
             OutlinedTextField(
                 value = title,
-                onValueChange = { title = it },
+                onValueChange = onTitleChange,
                 shape = RoundedCornerShape(Dimens.PaddingSmall),
                 placeholder = { Text(stringResource(R.string.forum_title_placeholder)) },
                 singleLine = true,
@@ -133,63 +147,24 @@ fun NewTopicScreen(
                                 color = if (isSelected) Color.Black else Color.Transparent,
                                 shape = CircleShape
                             )
-                            .clickable(enabled = !isLoading) { selectedColor = colorHex }
+                            .clickable(enabled = !isLoading) { onColorChange(colorHex) }
                     )
                 }
             }
-
-            // Tags
-//            Text(
-//                text = stringResource(R.string.forum_tags_label),
-//                style = MaterialTheme.typography.labelLarge,
-//                color = MaterialTheme.colorScheme.primary
-//            )
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
-//            ) {
-//                OutlinedTextField(
-//                    value = currentTag,
-//                    onValueChange = { currentTag = it },
-//                    shape = RoundedCornerShape(Dimens.PaddingSmall),
-//                    placeholder = { Text(stringResource(R.string.forum_new_tag_placeholder)) },
-//                    singleLine = true,
-//                    enabled = !isLoading,
-//                    modifier = Modifier.weight(1f)
-//                )
-//                IconButton(
-//                    onClick = {
-//                        if (currentTag.isNotBlank()) {
-//                            tagsList.add(currentTag.trim())
-//                            currentTag = ""
-//                        }
-//                    },
-//                    enabled = !isLoading,
-//                    modifier = Modifier
-//                        .background(
-//                            if (isLoading) Color.Gray else MaterialTheme.colorScheme.primary,
-//                            CircleShape
-//                        )
-//                        .size(48.dp)
-//                ) {
-//                    Icon(
-//                        imageVector = Icons.Default.Add,
-//                        contentDescription = stringResource(R.string.forum_add_tag_desc),
-//                        tint = Color.White
-//                    )
-//                }
-//            }
 
             // Display added tags
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(tagsList) { tag ->
+                items(tags) { tag ->
                     InputChip(
                         selected = false,
-                        onClick = { if (!isLoading) tagsList.remove(tag) },
+                        onClick = {
+                            if (!isLoading) {
+                                onTagsChange(tags.filter { it != tag })
+                            }
+                        },
                         label = { Text(tag) },
                         trailingIcon = {
                             Icon(
@@ -208,16 +183,41 @@ fun NewTopicScreen(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
-            OutlinedTextField(
-                value = message,
-                onValueChange = { message = it },
-                shape = RoundedCornerShape(Dimens.PaddingSmall),
-                placeholder = { Text(stringResource(R.string.forum_message_placeholder)) },
-                enabled = !isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            )
+
+            if (selectedImage != null) {
+                ImageThumbnail(
+                    uri = selectedImage,
+                    onRemove = onRemoveImage
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                IconButton(
+                    onClick = onAddImage,
+                    enabled = !isLoading,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddAPhoto,
+                        contentDescription = "Add Image",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = onDescriptionChange,
+                    shape = RoundedCornerShape(Dimens.PaddingSmall),
+                    placeholder = { Text(stringResource(R.string.forum_message_placeholder)) },
+                    enabled = !isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
+            }
 
             if (newTopicStatus is LoadState.Error) {
                 Text(
@@ -226,39 +226,42 @@ fun NewTopicScreen(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
+        }
+    }
+}
 
-            if (isLoading) {
-                Button(
-                    onClick = onCancel,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(Dimens.PaddingMedium),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
-                        Text(stringResource(R.string.forum_cancel_publication))
-                    }
-                }
-            } else {
-                Button(
-                    onClick = {
-                        val finalTags = tagsList.joinToString(",")
-                        onSend(title, message, finalTags, selectedColor)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(Dimens.PaddingMedium),
-                    enabled = title.isNotBlank() && message.isNotBlank()
-                ) {
-                    Text(stringResource(R.string.forum_publish_topic_button))
-                }
-            }
+@Composable
+private fun ImageThumbnail(
+    uri: Uri,
+    onRemove: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(80.dp)
+            .padding(4.dp)
+    ) {
+        AsyncImage(
+            model = uri,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+        )
+        IconButton(
+            onClick = onRemove,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 8.dp, y = (-8).dp)
+                .size(24.dp)
+                .background(Color.Red, CircleShape)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Remove",
+                tint = Color.White,
+                modifier = Modifier.size(16.dp)
+            )
         }
     }
 }
@@ -270,7 +273,6 @@ fun NewTopicPreview() {
         NewTopicScreen(
             modifier = Modifier.safeContentPadding(),
             newTopicStatus = LoadState.Success(Unit),
-            onSend = { _, _, _, _ -> },
             onBack = {}
         )
     }
