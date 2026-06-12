@@ -80,7 +80,6 @@ val menuItems = listOf(
 )
 
 val primaryColor = primaryLight
-val primaryLight = primaryLight
 val secondaryColor = secondaryLight
 val cardBackground = backgroundLight
 val surfaceColor = surfaceLight
