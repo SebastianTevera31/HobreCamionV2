@@ -171,7 +171,7 @@ fun ForumTopAppBar(
                                 config.onPublishClick?.invoke()
                             }) {
                             Text(
-                                text = stringResource(R.string.title_enviar),
+                                text = stringResource(R.string.publicar),
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }

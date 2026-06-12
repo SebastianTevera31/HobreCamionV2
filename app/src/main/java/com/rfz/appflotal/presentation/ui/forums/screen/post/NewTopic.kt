@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -22,9 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
@@ -35,11 +32,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +46,7 @@ import coil.compose.AsyncImage
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReplyEditor
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
@@ -191,41 +184,12 @@ fun NewTopicScreen(
                 )
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                IconButton(
-                    onClick = onAddImage,
-                    enabled = !isLoading,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AddAPhoto,
-                        contentDescription = "Add Image",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = onDescriptionChange,
-                    shape = RoundedCornerShape(Dimens.PaddingSmall),
-                    placeholder = { Text(stringResource(R.string.forum_message_placeholder)) },
-                    enabled = !isLoading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                )
-            }
-
-            if (newTopicStatus is LoadState.Error) {
-                Text(
-                    text = newTopicStatus.message,
-                    color = Color.Red,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            ReplyEditor(
+                message = description,
+                isLoading = isLoading,
+                onMessageChange = onDescriptionChange,
+                onAddImage = onAddImage
+            )
         }
     }
 }
