@@ -4,11 +4,12 @@ import androidx.annotation.StringRes
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
-import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.theme.surfaceLight
+import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
+import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 
 data class MenuItem(
     @param:StringRes val title: Int,
@@ -81,6 +82,11 @@ val menuItems = listOf(
     MenuItem(
         title = R.string.blog,
         route = ForumsGraph,
+        iconRes = R.drawable.servicios
+    ),
+    MenuItem(
+        title = R.string.cuponera,
+        route = CouponGraph,
         iconRes = R.drawable.servicios
     )
 )

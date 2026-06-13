@@ -469,5 +469,84 @@
     <string name="forum_me">Me</string>
     <string name="responder">Reply</string>
     <string name="autor">AUTHOR</string>
+    <string name="todos">All</string>
+    <string name="vigentes">Valid</string>
+    <string name="usados">Used</string>
+    <string name="expirados">Expired</string>
+    <string name="cuponera">Coupon Book</string>
+    <string name="cupones_cercanos">Nearby Coupons</string>
+    <string name="ver_todos">See all</string>
+    <string name="no_hay_cupones_cercanos">No nearby coupons available.</string>
+    <string name="mis_cupones">My coupons</string>
+    <string name="reclamado">Claimed</string>
+    <string name="inactivo">Inactive</string>
+    <string name="no_valido">Invalid</string>
+    <string name="expirado">Expired</string>
+    <string name="vigencia">VALIDITY</string>
+    <string name="hasta_fecha">Until %1$s</string>
+    <string name="terminos_y_condiciones_label">Terms and conditions</string>
+    <string name="no_acumulable_promociones">Not combinable with other promotions.</string>
+    <string name="obtener_cupon">Get coupon</string>
+    <string name="error_obtener_cupones">Could not retrieve coupons.</string>
+    <string name="error_cupon_utilizado">The coupon has already been used.</string>
+    <string name="error_obtener_cupon">Could not retrieve the coupon.</string>
+    <string name="promo_label">PROMO</string>
+    <string name="llantera_norte_placeholder">Northern Tire Shop</string>
+    <string name="coupon_vigente">VALID</string>
+    <string name="coupon_expires">Expires on %1$s</string>
+    <string name="coupon_brightness_title">Automatically set brightness to maximum</string>
+    <string name="coupon_brightness_subtitle">to facilitate QR scanning</string>
+    <string name="coupon_single_use">Folio valid for single use only</string>
+    <string name="coupon_qr_placeholder">[QR CODE]</string>
+
+    <string name="cuponera_titulo">Benefits for you</string>
+    <string name="cuponera_subtitulo">Discover nearby promotions and manage your coupons in one place.</string>
+    <string name="no_hay_cupones_guardados">You don’t have any saved coupons yet.</string>
+    <string name="disponible">Available</string>
+
+    <string name="detalle_del_cupon">Coupon detail</string>
+    <string name="cupon_adquirido">Coupon acquired</string>
+
+    <string name="filtrar_por">Filter by</string>
+
+    <string name="cupones_disponibles">Available coupons</string>
+    <string name="cupones_disponibles_descripcion">Find promotions and get new benefits.</string>
+
+    <string name="mis_cupones_descripcion">Check the status and validity of your coupons.</string>
+
+    <string name="sin_cupones_disponibles">No promotions available</string>
+
+    <string name="sin_cupones_con_este_filtro">You have no coupons with this filter</string>
+
+    <string name="sin_cupones_descripcion">Select another filter or check back later.</string>
+
+    <string name="folio">Folio</string>
+    <string name="vigente">Valid</string>
+
+    <string name="vence_el">Expires on %1$s</string>
+
+    <string name="brillo_maximo_automatico">
+    Maximum brightness automatically
+</string>
+
+    <string name="brillo_maximo_descripcion">
+    Facilitates scanning the QR code.
+</string>
+
+    <string name="folio_valido_un_solo_uso">
+    Folio valid for single use only
+</string>
+
+    <string name="cupon_no_disponible">
+    Coupon unavailable
+</string>
+
+    <string name="cupon_no_disponible_descripcion">
+    This coupon can no longer be used for redemption.
+</string>
+
+    <string name="cupon_no_disponible_para_canje">
+    This folio is not available for redemption.
+</string>
     <string name="publicar">Post</string>
 </resources>

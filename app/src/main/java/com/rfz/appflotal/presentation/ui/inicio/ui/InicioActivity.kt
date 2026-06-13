@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
@@ -104,9 +105,9 @@ import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewMode
 import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
 import com.rfz.appflotal.presentation.ui.cambiodestino.screen.CambioDestinoScreen
 import com.rfz.appflotal.presentation.ui.cambiodestino.viewmodel.CambioDestinoViewModel
+import com.rfz.appflotal.presentation.ui.couponbook.navigation.couponGraph
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.DisassemblyTireScreen
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.rfz.appflotal.presentation.ui.forums.navigation.forumsGraph
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.screen.ShareFeedbackScreen
@@ -750,14 +751,16 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(NavScreens.RENOVADOS) {
-                                        val retreatedDesignViewModel: RetreatedDesignViewModel = hiltViewModel()
+                                        val retreatedDesignViewModel: RetreatedDesignViewModel =
+                                            hiltViewModel()
                                         RetreatedDesignScreen(
                                             viewModel = retreatedDesignViewModel,
                                             onBackScreen = { navController.popBackStack() })
                                     }
 
                                     composable(NavScreens.MARCA_RENOVADA) {
-                                        val marcaRenovadosScreen: MarcaRenovadosViewModel = hiltViewModel()
+                                        val marcaRenovadosScreen: MarcaRenovadosViewModel =
+                                            hiltViewModel()
                                         MarcaRenovadosScreen(
                                             viewModel = marcaRenovadosScreen,
                                             onBackScreen = { navController.popBackStack() })
@@ -799,7 +802,8 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(NavScreens.REGISTRO_LLANTAS) {
-                                        val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel = hiltViewModel()
+                                        val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel =
+                                            hiltViewModel()
                                         NuevoRegistroLlantasScreen(
                                             navController = navController,
                                             viewModel = nuevoRegistroLllantasViewModel
@@ -905,7 +909,8 @@ class InicioActivity : ComponentActivity() {
                                             type = NavType.FloatType; defaultValue = 0
                                         })
                                     ) { backStackEntry ->
-                                        val inspectionViewModel: InspectionViewModel = hiltViewModel()
+                                        val inspectionViewModel: InspectionViewModel =
+                                            hiltViewModel()
                                         val tire = backStackEntry.arguments?.getString("tire") ?: ""
                                         val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
                                         val pressure =
@@ -939,7 +944,8 @@ class InicioActivity : ComponentActivity() {
                                                 type = NavType.StringType
                                             })
                                     ) { backStackEntry ->
-                                        val assemblyTireViewModel: AssemblyTireViewModel = hiltViewModel()
+                                        val assemblyTireViewModel: AssemblyTireViewModel =
+                                            hiltViewModel()
                                         val positionTire =
                                             backStackEntry.arguments?.getString("tire") ?: ""
                                         AssemblyTireScreen(
@@ -960,7 +966,8 @@ class InicioActivity : ComponentActivity() {
                                             type = NavType.FloatType; defaultValue = 0
                                         })
                                     ) { backStackEntry ->
-                                        val disassemblyTireViewModel: DisassemblyViewModel = hiltViewModel()
+                                        val disassemblyTireViewModel: DisassemblyViewModel =
+                                            hiltViewModel()
                                         val tire = backStackEntry.arguments?.getString("tire") ?: ""
                                         val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
                                         val pressure =
@@ -990,7 +997,8 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(route = NavScreens.REPARARRENOVAR) {
-                                        val repararRenovarViewModel: RepararRenovarViewModel = hiltViewModel()
+                                        val repararRenovarViewModel: RepararRenovarViewModel =
+                                            hiltViewModel()
                                         RepararRenovarScreen(
                                             onBack = { navController.popBackStack() },
                                             viewModel = repararRenovarViewModel,
@@ -998,7 +1006,8 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(route = NavScreens.CAMBIO_DESTINO) {
-                                        val cambioDestinoViewModel: CambioDestinoViewModel = hiltViewModel()
+                                        val cambioDestinoViewModel: CambioDestinoViewModel =
+                                            hiltViewModel()
                                         CambioDestinoScreen(
                                             onBack = { navController.popBackStack() },
                                             viewModel = cambioDestinoViewModel,
@@ -1021,7 +1030,8 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     composable(route = HombreCamionScreens.MAPA_VIAL.name) {
-                                        val vialStatusViewModel: VialStatusViewModel = hiltViewModel()
+                                        val vialStatusViewModel: VialStatusViewModel =
+                                            hiltViewModel()
                                         VialStatusScreen(
                                             onBack = { navController.popBackStack() },
                                             viewModel = vialStatusViewModel
@@ -1029,6 +1039,8 @@ class InicioActivity : ComponentActivity() {
                                     }
 
                                     forumsGraph(navController)
+
+                                    couponGraph(navController)
                                 }
 
                                 NotificationComponent(

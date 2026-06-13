@@ -454,4 +454,85 @@
     <string name="responder">Responder</string>
     <string name="autor">AUTOR</string>
     <string name="publicar">Publicar</string>
+
+    <!-- Coupon Book -->
+    <string name="coupon_vigente">VIGENTE</string>
+    <string name="coupon_expires">Vence el %1$s</string>
+    <string name="coupon_brightness_title">Brillo al máximo automáticamente</string>
+    <string name="coupon_brightness_subtitle">para facilitar el escaneo del QR</string>
+    <string name="coupon_single_use">Folio válido para un solo uso</string>
+    <string name="coupon_qr_placeholder">[CÓDIGO QR]</string>
+    <string name="todos">Todos</string>
+    <string name="vigentes">Vigentes</string>
+    <string name="usados">Usados</string>
+    <string name="expirados">Expirados</string>
+    <string name="cuponera">Cuponera</string>
+    <string name="cupones_cercanos">Cupones cercanos</string>
+    <string name="ver_todos">Ver todos</string>
+    <string name="no_hay_cupones_cercanos">No hay cupones cercanos.</string>
+    <string name="mis_cupones">Mis cupones</string>
+    <string name="reclamado">Reclamado</string>
+    <string name="inactivo">Inactivo</string>
+    <string name="no_valido">No valido</string>
+    <string name="expirado">Expirado</string>
+    <string name="vigencia">VIGENCIA</string>
+    <string name="hasta_fecha">Hasta %1$s</string>
+    <string name="terminos_y_condiciones_label">Terminos y conidiciones</string>
+    <string name="no_acumulable_promociones">No acumulable con otras promociones.</string>
+    <string name="obtener_cupon">Obtener cupon</string>
+    <string name="error_obtener_cupones">No se pudo obtener los cupones.</string>
+    <string name="error_cupon_utilizado">El cupon ya fue utilizado.</string>
+    <string name="error_obtener_cupon">No se pudo obtener el cupon.</string>
+    <string name="promo_label">PROMO</string>
+    <string name="llantera_norte_placeholder">Llantera Norte</string>
+
+    <string name="cuponera_titulo">Beneficios para ti</string>
+    <string name="cuponera_subtitulo">Descubre promociones cercanas y administra tus cupones desde un solo lugar.</string>
+    <string name="no_hay_cupones_guardados">Todavía no tienes cupones guardados.</string>
+    <string name="disponible">Disponible</string>
+
+    <string name="detalle_del_cupon">Detalle del cupón</string>
+    <string name="cupon_adquirido">Cupón adquirido</string>
+
+    <string name="filtrar_por">Filtrar por</string>
+
+    <string name="cupones_disponibles">Cupones disponibles</string>
+    <string name="cupones_disponibles_descripcion">Encuentra promociones y obtén nuevos beneficios.</string>
+
+    <string name="mis_cupones_descripcion">Consulta el estado y la vigencia de tus cupones.</string>
+
+    <string name="sin_cupones_disponibles">No hay promociones disponibles</string>
+
+    <string name="sin_cupones_con_este_filtro">No tienes cupones con este filtro</string>
+
+    <string name="sin_cupones_descripcion">Selecciona otro filtro o revisa nuevamente más tarde.</string>
+
+    <string name="folio">Folio</string>
+    <string name="vigente">Vigente</string>
+
+    <string name="vence_el">Vence el %1$s</string>
+
+    <string name="brillo_maximo_automatico">
+    Brillo al máximo automáticamente
+</string>
+
+    <string name="brillo_maximo_descripcion">
+    Facilita el escaneo del código QR.
+</string>
+
+    <string name="folio_valido_un_solo_uso">
+    Folio válido para un solo uso
+</string>
+
+    <string name="cupon_no_disponible">
+    Cupón no disponible
+</string>
+
+    <string name="cupon_no_disponible_descripcion">
+    Este cupón ya no puede utilizarse para realizar un canje.
+</string>
+
+    <string name="cupon_no_disponible_para_canje">
+    Este folio no está disponible para canje.
+</string>
 </resources>
