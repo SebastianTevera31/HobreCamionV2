@@ -143,6 +143,7 @@ import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewMod
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
 import com.rfz.appflotal.presentation.ui.repararrenovar.screen.RepararRenovarScreen
 import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.RepararRenovarViewModel
+import com.rfz.appflotal.presentation.ui.reportes.navigation.reportGraph
 import com.rfz.appflotal.presentation.ui.retreatedesign.screens.RetreatedDesignScreen
 import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesignViewModel
 import com.rfz.appflotal.presentation.ui.scrap.screens.TireWastePileScreen
@@ -1041,6 +1042,8 @@ class InicioActivity : ComponentActivity() {
                                     forumsGraph(navController)
 
                                     couponGraph(navController)
+
+                                    reportGraph(navController)
                                 }
 
                                 NotificationComponent(

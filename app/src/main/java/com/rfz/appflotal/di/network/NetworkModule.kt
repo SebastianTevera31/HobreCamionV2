@@ -32,6 +32,7 @@ import com.rfz.appflotal.data.network.client.product.ProductListClient
 import com.rfz.appflotal.data.network.client.provider.ProviderCrudClient
 import com.rfz.appflotal.data.network.client.provider.ProviderListClient
 import com.rfz.appflotal.data.network.client.repair.RepairService
+import com.rfz.appflotal.data.network.client.report.ReportService
 import com.rfz.appflotal.data.network.client.retreaband.RetreadBrandCrudClient
 import com.rfz.appflotal.data.network.client.retreaband.RetreadBrandListClient
 import com.rfz.appflotal.data.network.client.retreaddesign.RetreadDesignByIdClient
@@ -434,6 +435,12 @@ class NetworkModule {
     @Provides
     fun provideCouponBookClient(retrofit: Retrofit): CouponBookService {
         return retrofit.create(CouponBookService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideReportService(retrofit: Retrofit): ReportService {
+        return retrofit.create(ReportService::class.java)
     }
 }
 
