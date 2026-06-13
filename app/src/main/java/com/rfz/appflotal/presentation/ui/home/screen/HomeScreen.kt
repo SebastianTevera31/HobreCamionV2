@@ -130,7 +130,6 @@ fun HomeScreen(
         monitorViewModel.initMonitorData()
     }
 
-
     // BLOQUEAR BOTON DE RETROCESO DEL DISPOSITIVO
     BackHandler { }
 
@@ -199,8 +198,18 @@ fun HomeScreen(
                             )
                         },
                         onNavigate = { route ->
-                            navController.navigate(route) {
-                                launchSingleTop = true
+                            when (route) {
+                                is String -> {
+                                    navController.navigate(route) {
+                                        launchSingleTop = true
+                                    }
+                                }
+
+                                else -> {
+                                    navController.navigate(route) {
+                                        launchSingleTop = true
+                                    }
+                                }
                             }
                         },
                         plates = plates,

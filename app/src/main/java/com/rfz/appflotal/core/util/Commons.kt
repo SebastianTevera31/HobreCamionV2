@@ -11,7 +11,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import java.text.SimpleDateFormat
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -67,6 +66,7 @@ object Commons {
         val sdf = SimpleDateFormat(initialFormat, Locale.getDefault())
         val date = sdf.parse(date)!!
         val outDate = SimpleDateFormat(convertFormat, Locale.getDefault())
+
         return outDate.format(date)
     }
 
@@ -90,10 +90,77 @@ object Commons {
     }
 
     fun getDateFromNotification(fecha: String, hora: String): ZonedDateTime? {
-        val formattedDate = convertDate(date = fecha, initialFormat = "dd/MM/yyyy", convertFormat = "yyyy-MM-dd")
-        val localDate = LocalDate.parse( formattedDate)
+        val formattedDate =
+            convertDate(date = fecha, initialFormat = "dd/MM/yyyy", convertFormat = "yyyy-MM-dd")
+        val localDate = LocalDate.parse(formattedDate)
         val localHour = LocalTime.parse(hora.chunked(2).joinToString(":"))
         val horaFinal = LocalDateTime.of(localDate, localHour)
         return horaFinal.atZone(ZoneId.of("UTC"))
+    }
+
+    fun getRelativeTime(dateString: String, pattern: String = "yyyy-MM-dd'T'HH:mm:ss"): String {
+        return try {
+            val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+            val date = sdf.parse(dateString) ?: return dateString
+            val now = System.currentTimeMillis()
+            val diff = now - date.time
+
+            val seconds = diff / 1000
+            val minutes = seconds / 60
+            val hours = minutes / 60
+            val days = hours / 24
+            val months = days / 30
+            val years = days / 365
+
+            when {
+                seconds < 60 -> "ahora"
+                minutes < 60 -> "${minutes}min"
+                hours < 24 -> "${hours}h"
+                days < 30 -> "${days}d"
+                months < 12 -> "${months} meses"
+                else -> "${years} y"
+            }
+        } catch (e: Exception) {
+            dateString
+        }
+    }
+
+    fun getInitials(name: String): Pair<String, String> {
+        if (name.isBlank()) return Pair("", "")
+        val parts = name.trim().split("\\s+".toRegex()).filter { it.isNotBlank() }
+        val first = parts.firstOrNull()?.take(1)?.uppercase() ?: ""
+        val second = if (parts.size > 1) parts[1].take(1).uppercase() else ""
+        return Pair(first, second)
+    }
+
+    fun formatToLongDate(
+        dateString: String,
+        inputFormat: String = "yyyy-MM-dd"
+    ): String {
+        if (dateString.isBlank()) return ""
+        val locale = AppLocale.currentLocale.value
+        val outputPattern = if (locale.language == "es") {
+            "d 'de' MMMM, yyyy"
+        } else {
+            "MMMM d, yyyy"
+        }
+
+        return try {
+            val date = getDateObject(dateString, inputFormat)
+            SimpleDateFormat(outputPattern, locale).format(date)
+        } catch (e: Exception) {
+            try {
+                // Try ISO format as fallback
+                val date = getDateObject(dateString, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                SimpleDateFormat(outputPattern, locale).format(date)
+            } catch (e2: Exception) {
+                try {
+                    val date = getDateObject(dateString, "yyyy-MM-dd'T'HH:mm:ss")
+                    SimpleDateFormat(outputPattern, locale).format(date)
+                } catch (e3: Exception) {
+                    dateString
+                }
+            }
+        }
     }
 }

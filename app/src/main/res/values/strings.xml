@@ -364,7 +364,7 @@
     <string name="permiso_de_notificacion">Permiso de notificación</string>
     <string name="texto_permiso_de_notification">Permiso requerido para mantenerlo informado de actualizaciones y posibles mantenimientos</string>
     <string name="unidades_de_medida">Unidades de Medida</string>
-    <string name="auth_error">Ocurrio un error en la autorización. verifique su usuario o contraseña.</string>
+    <string name="auth_error">Ocurrio un error en la autorización. Verifique su usuario o contraseña.</string>
     <string name="error_inesperado">Ocurrió un error inesperado. Intenta nuevamente o vuelve más tarde.</string>
     <string name="politicas_de_privacidad">Politicas de privacidad</string>
     <string name="asi_como_nuestros">, así como nuestros </string>
@@ -381,6 +381,10 @@
     <string name="buscar_mapa_vial">Buscar mapa vial</string>
     <string name="selecciona_una_opcion">Selecciona una opción</string>
     <string name="sin_elementos_disponibles">Sin elementos disponibles</string>
+    <string name="reintentar">Reintentar</string>
+    <string name="operacion_cancelada">La operación fue cancelada.</string>
+    <string name="blog">Blog</string>
+    <string name="favorites">Gustados</string>
 
     <plurals name="description_field">
         <item quantity="one">Descripción</item>
@@ -401,4 +405,134 @@
         <item quantity="one">Diseño de renovado</item>
         <item quantity="other">Diseños de renovado</item>
     </plurals>
+
+    <string name="forum_title">Foros</string>
+    <string name="forum_subtitle">Comunidad Hombre Camión</string>
+    <string name="forum_search_placeholder">Buscar tema…</string>
+    <string name="forum_room_topics_subtitle">Temas de la sala</string>
+    <string name="forum_search_topics_placeholder">Buscar temas…</string>
+    <string name="forum_add_topic_desc">Agregar tema</string>
+    <string name="forum_new_topic_button">Nuevo tema</string>
+    <string name="forum_capture_cancelled">Captura cancelada</string>
+    <string name="forum_post_not_found">No se encontró la publicación.</string>
+    <string name="forum_report_title">Reportar</string>
+    <string name="forum_report_subtitle">Ayúdanos a mejorar la comunidad</string>
+    <string name="forum_new_topic_title">Nuevo Tema</string>
+    <string name="forum_reply_title">Responder</string>
+    <string name="forum_responses_format">%1$s · %2$d respuestas</string>
+
+    <string name="forum_report_post_title">Reportar publicación</string>
+    <string name="forum_report_reason_label">Selecciona el motivo del reporte:</string>
+    <string name="forum_report_details_label">Detalles adicionales (opcional)</string>
+    <string name="forum_report_details_placeholder">Describe el problema...</string>
+    <string name="forum_report_send_button">Enviar Reporte</string>
+    <string name="forum_report_success">Reporte enviado con éxito</string>
+
+    <string name="forum_report_type_inappropriate">Contenido inapropiado</string>
+    <string name="forum_report_type_harassment">Acoso</string>
+    <string name="forum_report_type_violence">Violencia</string>
+    <string name="forum_report_type_nudity">Desnudez</string>
+    <string name="forum_report_type_hate_speech">Discurso de odio</string>
+    <string name="forum_report_type_spam">Spam</string>
+
+    <string name="forum_cancel_publication">Cancelar publicación</string>
+    <string name="forum_publishing">Publicando…</string>
+    <string name="forum_new_topic_success">Tema publicado con éxito</string>
+    <string name="forum_new_comment_success">Comentario enviado con éxito</string>
+    <string name="forum_comment_placeholder">Escribe un comentario…</string>
+    <string name="forum_title_label">Título</string>
+    <string name="forum_title_placeholder">Introduce el título…</string>
+    <string name="forum_select_color">Selecciona un color</string>
+    <string name="forum_tags_label">Etiquetas</string>
+    <string name="forum_new_tag_placeholder">Nueva etiqueta</string>
+    <string name="forum_add_tag_desc">Agregar tag</string>
+    <string name="forum_message_label">Mensaje</string>
+    <string name="forum_message_placeholder">Escribe el contenido aquí…</string>
+    <string name="forum_publish_topic_button">Publicar Tema</string>
+    <string name="forum_just_now">Recién publicado</string>
+    <string name="forum_me">Yo</string>
+    <string name="responder">Responder</string>
+    <string name="autor">AUTOR</string>
+    <string name="publicar">Publicar</string>
+
+    <!-- Coupon Book -->
+    <string name="coupon_vigente">VIGENTE</string>
+    <string name="coupon_expires">Vence el %1$s</string>
+    <string name="coupon_brightness_title">Brillo al máximo automáticamente</string>
+    <string name="coupon_brightness_subtitle">para facilitar el escaneo del QR</string>
+    <string name="coupon_single_use">Folio válido para un solo uso</string>
+    <string name="coupon_qr_placeholder">[CÓDIGO QR]</string>
+    <string name="todos">Todos</string>
+    <string name="vigentes">Vigentes</string>
+    <string name="usados">Usados</string>
+    <string name="expirados">Expirados</string>
+    <string name="cuponera">Cuponera</string>
+    <string name="cupones_cercanos">Cupones cercanos</string>
+    <string name="ver_todos">Ver todos</string>
+    <string name="no_hay_cupones_cercanos">No hay cupones cercanos.</string>
+    <string name="mis_cupones">Mis cupones</string>
+    <string name="reclamado">Reclamado</string>
+    <string name="inactivo">Inactivo</string>
+    <string name="no_valido">No valido</string>
+    <string name="expirado">Expirado</string>
+    <string name="vigencia">VIGENCIA</string>
+    <string name="hasta_fecha">Hasta %1$s</string>
+    <string name="terminos_y_condiciones_label">Terminos y conidiciones</string>
+    <string name="no_acumulable_promociones">No acumulable con otras promociones.</string>
+    <string name="obtener_cupon">Obtener cupon</string>
+    <string name="error_obtener_cupones">No se pudo obtener los cupones.</string>
+    <string name="error_cupon_utilizado">El cupon ya fue utilizado.</string>
+    <string name="error_obtener_cupon">No se pudo obtener el cupon.</string>
+    <string name="promo_label">PROMO</string>
+    <string name="llantera_norte_placeholder">Llantera Norte</string>
+
+    <string name="cuponera_titulo">Beneficios para ti</string>
+    <string name="cuponera_subtitulo">Descubre promociones cercanas y administra tus cupones desde un solo lugar.</string>
+    <string name="no_hay_cupones_guardados">Todavía no tienes cupones guardados.</string>
+    <string name="disponible">Disponible</string>
+
+    <string name="detalle_del_cupon">Detalle del cupón</string>
+    <string name="cupon_adquirido">Cupón adquirido</string>
+
+    <string name="filtrar_por">Filtrar por</string>
+
+    <string name="cupones_disponibles">Cupones disponibles</string>
+    <string name="cupones_disponibles_descripcion">Encuentra promociones y obtén nuevos beneficios.</string>
+
+    <string name="mis_cupones_descripcion">Consulta el estado y la vigencia de tus cupones.</string>
+
+    <string name="sin_cupones_disponibles">No hay promociones disponibles</string>
+
+    <string name="sin_cupones_con_este_filtro">No tienes cupones con este filtro</string>
+
+    <string name="sin_cupones_descripcion">Selecciona otro filtro o revisa nuevamente más tarde.</string>
+
+    <string name="folio">Folio</string>
+    <string name="vigente">Vigente</string>
+
+    <string name="vence_el">Vence el %1$s</string>
+
+    <string name="brillo_maximo_automatico">
+    Brillo al máximo automáticamente
+</string>
+
+    <string name="brillo_maximo_descripcion">
+    Facilita el escaneo del código QR.
+</string>
+
+    <string name="folio_valido_un_solo_uso">
+    Folio válido para un solo uso
+</string>
+
+    <string name="cupon_no_disponible">
+    Cupón no disponible
+</string>
+
+    <string name="cupon_no_disponible_descripcion">
+    Este cupón ya no puede utilizarse para realizar un canje.
+</string>
+
+    <string name="cupon_no_disponible_para_canje">
+    Este folio no está disponible para canje.
+</string>
 </resources>

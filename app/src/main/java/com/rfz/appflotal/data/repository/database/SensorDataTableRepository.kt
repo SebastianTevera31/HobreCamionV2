@@ -111,13 +111,13 @@ class SensorDataTableRepository @Inject constructor(
             tire = update.tire,
             temperature = update.temperature,
             pressure = update.pressure,
+            timestamp = update.timestamp,
             highTemperatureAlert = update.highTemperatureAlert,
             highPressureAlert = update.highPressureAlert,
             lowPressureAlert = update.lowPressureAlert,
             lowBatteryAlert = update.lowBatteryAlert,
             punctureAlert = update.punctureAlert,
-            active = update.active,
-            timestamp = update.timestamp
+            active = update.active
         )
     }
 

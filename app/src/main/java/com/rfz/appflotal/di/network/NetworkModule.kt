@@ -15,10 +15,12 @@ import com.rfz.appflotal.data.network.client.brand.BrandCrudClient
 import com.rfz.appflotal.data.network.client.brand.BrandListClient
 import com.rfz.appflotal.data.network.client.catalog.CatalogClient
 import com.rfz.appflotal.data.network.client.controltype.ControlTypeClient
+import com.rfz.appflotal.data.network.client.couponbook.CouponBookService
 import com.rfz.appflotal.data.network.client.defaultparameter.DefaultParameterClient
 import com.rfz.appflotal.data.network.client.destination.DestinationClient
 import com.rfz.appflotal.data.network.client.diagram.DiagramClient
 import com.rfz.appflotal.data.network.client.disassembly.DisassemblyCauseService
+import com.rfz.appflotal.data.network.client.forum.ForumClient
 import com.rfz.appflotal.data.network.client.languaje.LanguajeClient
 import com.rfz.appflotal.data.network.client.login.LoginClient
 import com.rfz.appflotal.data.network.client.originaldesign.CrudOriginalDesignClient
@@ -420,6 +422,18 @@ class NetworkModule {
     @Provides
     fun provideVialStatusService(retrofit: Retrofit): VialStatusService {
         return retrofit.create(VialStatusService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideForumClient(retrofit: Retrofit): ForumClient {
+        return retrofit.create(ForumClient::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCouponBookClient(retrofit: Retrofit): CouponBookService {
+        return retrofit.create(CouponBookService::class.java)
     }
 }
 

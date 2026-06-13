@@ -31,4 +31,6 @@ object NavScreens {
     const val CAMBIO_DESTINO = "cambio_destino"
 
     const val COMENTARIOS = "comentarios"
+
+    const val BLOG = "blog"
 }

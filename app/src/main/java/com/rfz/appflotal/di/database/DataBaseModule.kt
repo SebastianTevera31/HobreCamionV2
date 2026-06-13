@@ -10,6 +10,7 @@ import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
 import com.rfz.appflotal.data.dao.DisassemblyTireDao
+import com.rfz.appflotal.data.dao.ForumDao
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
 import com.rfz.appflotal.data.dao.InspectionTireDao
 import com.rfz.appflotal.data.dao.SensorDataDao
@@ -70,14 +71,19 @@ class DataBaseModule {
         return database.inspectionCatalogDao()
     }
 
+    @Provides
+    fun provideForumDao(database: AppHombreCamionDatabase): ForumDao {
+        return database.forumDao()
+    }
+
     @Keep
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext appContext: Context): AppHombreCamionDatabase {
         return Room.databaseBuilder(
-                appContext,
-                AppHombreCamionDatabase::class.java,
-                BuildConfig.DB_NAME
-            ).fallbackToDestructiveMigration(false).build()
+            appContext,
+            AppHombreCamionDatabase::class.java,
+            BuildConfig.DB_NAME
+        ).fallbackToDestructiveMigration(false).build()
     }
 }
