@@ -23,17 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
-enum class RendimientoScreen {
-    MENU,
-    RENDIMIENTO
-}
-
 @Composable
-fun MenuRendimientoView(modifier: Modifier = Modifier) {
-    val wheels = listOf("P1", "P2", "P3", "P4")
+fun MenuRendimientoView(wheels: List<AssemblyTire>, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -73,7 +68,7 @@ fun MenuRendimientoView(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun WheelButton(wheel: String, modifier: Modifier = Modifier) {
+fun WheelButton(wheel: AssemblyTire, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -87,7 +82,7 @@ fun WheelButton(wheel: String, modifier: Modifier = Modifier) {
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            Text(text = wheel)
+            Text(text = wheel.positionTire)
         }
     }
 }
@@ -96,6 +91,17 @@ fun WheelButton(wheel: String, modifier: Modifier = Modifier) {
 @Composable
 fun MenuRendimientoScreenPreview() {
     HombreCamionTheme {
-        MenuRendimientoView()
+        MenuRendimientoView(
+            wheels = listOf(
+                AssemblyTire(
+                    idAxle = 1,
+                    idTire = 1,
+                    positionTire = "P1",
+                    odometer = 1000,
+                    assemblyDate = "15 de junio del 2026",
+                    updatedAt = 123449
+                )
+            )
+        )
     }
 }

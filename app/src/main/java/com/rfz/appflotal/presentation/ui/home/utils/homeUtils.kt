@@ -10,6 +10,7 @@ import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.theme.surfaceLight
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
+import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
 
 data class MenuItem(
     @param:StringRes val title: Int,
@@ -88,7 +89,12 @@ val menuItems = listOf(
         title = R.string.cuponera,
         route = CouponGraph,
         iconRes = R.drawable.servicios
-    )
+    ),
+    MenuItem(
+        R.string.Reportes,
+        ReportGraph,
+        R.drawable.servicios
+    ),
 )
 
 val primaryColor = primaryLight

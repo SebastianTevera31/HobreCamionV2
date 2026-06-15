@@ -1015,7 +1015,6 @@ class InicioActivity : ComponentActivity() {
                                         )
                                     }
 
-
                                     composable(route = NavScreens.COMENTARIOS) {
                                         val msgOperationState =
                                             homeViewModel.messageOperationState.collectAsState()

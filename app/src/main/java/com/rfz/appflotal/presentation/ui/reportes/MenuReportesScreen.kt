@@ -22,10 +22,12 @@ import com.rfz.appflotal.presentation.ui.home.screen.ElegantMenuCard
 import com.rfz.appflotal.presentation.ui.home.utils.cardBackground
 import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
 import com.rfz.appflotal.presentation.ui.home.utils.secondaryColor
-
+import com.rfz.appflotal.presentation.ui.reportes.navigation.CO2Emissions
+import com.rfz.appflotal.presentation.ui.reportes.navigation.FuelConsumption
+import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportMenu
 
 @Composable
-fun MenuReportesView(modifier: Modifier = Modifier) {
+fun MenuReportesView(onNavigate: (Any) -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -52,40 +54,16 @@ fun MenuReportesView(modifier: Modifier = Modifier) {
                 ElegantMenuCard(
                     title = "Rendimiento",
                     iconRes = R.drawable.rendimiento,
-                    onClick = {},
+                    onClick = { onNavigate(ReportMenu) },
                     primaryColor = primaryColor,
                     secondaryColor = secondaryColor,
                     cardBackground = cardBackground,
                     modifier = Modifier.weight(1f)
                 )
                 ElegantMenuCard(
-                    title = "Proyeccion",
+                    title = "Consumo de Combustible",
                     iconRes = R.drawable.proyeccion,
-                    onClick = {},
-                    primaryColor = primaryColor,
-                    secondaryColor = secondaryColor,
-                    cardBackground = cardBackground,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                ElegantMenuCard(
-                    title = "Pila de Desecho",
-                    iconRes = R.drawable.pila_desecho,
-                    onClick = {},
-                    primaryColor = primaryColor,
-                    secondaryColor = secondaryColor,
-                    cardBackground = cardBackground,
-                    modifier = Modifier.weight(1f)
-                )
-                ElegantMenuCard(
-                    title = "Semaforo",
-                    iconRes = R.drawable.semaforeo,
-                    onClick = {},
+                    onClick = { onNavigate(FuelConsumption) },
                     primaryColor = primaryColor,
                     secondaryColor = secondaryColor,
                     cardBackground = cardBackground,
@@ -99,9 +77,9 @@ fun MenuReportesView(modifier: Modifier = Modifier) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ElegantMenuCard(
-                    title = "Servicios",
+                    title = "Emisiones de CO2",
                     iconRes = R.drawable.servicios,
-                    onClick = {},
+                    onClick = { onNavigate(CO2Emissions) },
                     primaryColor = primaryColor,
                     secondaryColor = secondaryColor,
                     cardBackground = cardBackground,
@@ -116,6 +94,6 @@ fun MenuReportesView(modifier: Modifier = Modifier) {
 @Composable
 fun MenuReportesScreenPreview() {
     HombreCamionTheme {
-        MenuReportesView()
+        MenuReportesView({})
     }
 }
