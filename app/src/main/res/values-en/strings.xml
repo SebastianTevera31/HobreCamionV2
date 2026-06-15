@@ -525,28 +525,17 @@
 
     <string name="vence_el">Expires on %1$s</string>
 
-    <string name="brillo_maximo_automatico">
-    Maximum brightness automatically
-</string>
+    <string name="brillo_maximo_automatico">Maximum brightness automatically</string>
 
-    <string name="brillo_maximo_descripcion">
-    Facilitates scanning the QR code.
-</string>
+    <string name="brillo_maximo_descripcion">Facilitates scanning the QR code.</string>
 
-    <string name="folio_valido_un_solo_uso">
-    Folio valid for single use only
-</string>
+    <string name="folio_valido_un_solo_uso">Folio valid for single use only</string>
 
-    <string name="cupon_no_disponible">
-    Coupon unavailable
-</string>
+    <string name="cupon_no_disponible">Coupon unavailable</string>
 
-    <string name="cupon_no_disponible_descripcion">
-    This coupon can no longer be used for redemption.
-</string>
+    <string name="cupon_no_disponible_descripcion">This coupon can no longer be used for redemption.</string>
 
-    <string name="cupon_no_disponible_para_canje">
-    This folio is not available for redemption.
-</string>
+    <string name="cupon_no_disponible_para_canje">This folio is not available for redemption.</string>
     <string name="publicar">Post</string>
+    <string name="Reportes">Reports</string>
 </resources>

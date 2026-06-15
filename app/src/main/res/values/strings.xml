@@ -512,27 +512,16 @@
 
     <string name="vence_el">Vence el %1$s</string>
 
-    <string name="brillo_maximo_automatico">
-    Brillo al máximo automáticamente
-</string>
+    <string name="brillo_maximo_automatico">Brillo al máximo automáticamente</string>
 
-    <string name="brillo_maximo_descripcion">
-    Facilita el escaneo del código QR.
-</string>
+    <string name="brillo_maximo_descripcion">Facilita el escaneo del código QR.</string>
 
-    <string name="folio_valido_un_solo_uso">
-    Folio válido para un solo uso
-</string>
+    <string name="folio_valido_un_solo_uso">Folio válido para un solo uso</string>
 
-    <string name="cupon_no_disponible">
-    Cupón no disponible
-</string>
+    <string name="cupon_no_disponible">Cupón no disponible</string>
 
-    <string name="cupon_no_disponible_descripcion">
-    Este cupón ya no puede utilizarse para realizar un canje.
-</string>
+    <string name="cupon_no_disponible_descripcion">Este cupón ya no puede utilizarse para realizar un canje.</string>
 
-    <string name="cupon_no_disponible_para_canje">
-    Este folio no está disponible para canje.
-</string>
+    <string name="cupon_no_disponible_para_canje">Este folio no está disponible para canje.</string>
+    <string name="Reportes">Reportes</string>
 </resources>
