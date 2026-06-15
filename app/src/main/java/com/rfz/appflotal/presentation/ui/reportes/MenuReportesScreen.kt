@@ -23,17 +23,17 @@ import com.rfz.appflotal.presentation.ui.home.utils.cardBackground
 import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
 import com.rfz.appflotal.presentation.ui.home.utils.secondaryColor
 import com.rfz.appflotal.presentation.ui.reportes.navigation.CO2Emissions
+import com.rfz.appflotal.presentation.ui.reportes.navigation.CpkReport
 import com.rfz.appflotal.presentation.ui.reportes.navigation.FuelConsumption
-import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportMenu
 
 @Composable
-fun MenuReportesView(onNavigate: (Any) -> Unit, modifier: Modifier = Modifier) {
+fun MenuReportesView(onBack: () -> Unit, onNavigate: (Any) -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             SimpleTopBar(
                 title = "Reportes",
-                onBack = {},
+                onBack = onBack,
                 showBackButton = true,
                 subTitle = ""
             )
@@ -54,7 +54,7 @@ fun MenuReportesView(onNavigate: (Any) -> Unit, modifier: Modifier = Modifier) {
                 ElegantMenuCard(
                     title = "Rendimiento",
                     iconRes = R.drawable.rendimiento,
-                    onClick = { onNavigate(ReportMenu) },
+                    onClick = { onNavigate(CpkReport) },
                     primaryColor = primaryColor,
                     secondaryColor = secondaryColor,
                     cardBackground = cardBackground,
@@ -94,6 +94,9 @@ fun MenuReportesView(onNavigate: (Any) -> Unit, modifier: Modifier = Modifier) {
 @Composable
 fun MenuReportesScreenPreview() {
     HombreCamionTheme {
-        MenuReportesView({})
+        MenuReportesView(
+            onBack = {},
+            onNavigate = {}
+        )
     }
 }

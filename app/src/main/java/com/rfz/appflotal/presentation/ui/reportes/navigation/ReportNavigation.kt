@@ -9,6 +9,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.rfz.appflotal.presentation.ui.reportes.MenuReportesView
+import com.rfz.appflotal.presentation.ui.reportes.rendimiento.Co2EmissionsRoute
+import com.rfz.appflotal.presentation.ui.reportes.rendimiento.MenuRendimientoScreen
+import com.rfz.appflotal.presentation.ui.reportes.rendimiento.RendimientoRuedaScreen
 import com.rfz.appflotal.presentation.ui.reportes.viewmodel.ReportViewModel
 
 fun NavGraphBuilder.reportGraph(
@@ -33,6 +36,7 @@ fun NavGraphBuilder.reportGraph(
                 onNavigate = {
                     navController.navigate(it)
                 },
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -52,6 +56,7 @@ fun NavGraphBuilder.reportGraph(
                 onNavigate = {
                     navController.navigate(it)
                 },
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -65,6 +70,58 @@ fun NavGraphBuilder.reportGraph(
             }
             val viewModel: ReportViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
+
+            MenuRendimientoScreen(
+                wheels = state.tireList,
+                onLoadData = {
+                    viewModel.loadData()
+                },
+                loadState = state.menuLoadState,
+                onWheelSelected = {
+                    viewModel.getCpkReport(it)
+                    navController.navigate(CpkDetail)
+                },
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable<CpkDetail> { backstackEntry ->
+            val parentEntry = remember(backstackEntry) {
+                try {
+                    navController.getBackStackEntry<ReportGraph>()
+                } catch (_: Exception) {
+                    backstackEntry
+                }
+            }
+            val viewModel: ReportViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
+
+            RendimientoRuedaScreen(
+                onBack = {
+                    viewModel.resetReportState()
+                    navController.popBackStack()
+                },
+                loadState = state.reportLoadState,
+                report = state.cpkReport,
+                tire = state.tireInfo,
+                tirePosition = state.selectedTire?.positionTire ?: ""
+            )
+        }
+
+        composable<CO2Emissions> { backstackEntry ->
+            val parentEntry = remember(backstackEntry) {
+                try {
+                    navController.getBackStackEntry<ReportGraph>()
+                } catch (_: Exception) {
+                    backstackEntry
+                }
+            }
+            val viewModel: ReportViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
+
+            Co2EmissionsRoute()
         }
     }
 }

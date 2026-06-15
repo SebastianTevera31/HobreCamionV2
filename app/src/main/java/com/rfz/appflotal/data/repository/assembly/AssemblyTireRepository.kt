@@ -2,6 +2,7 @@ package com.rfz.appflotal.data.repository.assembly
 
 import android.util.Log
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
+import com.rfz.appflotal.data.model.assembly.AssemblyTireResponse
 import com.rfz.appflotal.data.model.assembly.toDomain
 import com.rfz.appflotal.data.model.assembly.toEntity
 import com.rfz.appflotal.data.network.service.assembly.AssemblySyncScheduler
@@ -18,8 +19,7 @@ interface AssemblyTireRepository {
     suspend fun addAssemblyTire(assemblyTire: AssemblyTire)
     suspend fun getAssemblyTire(positionTire: String): AssemblyTire?
     suspend fun confirmTireMounted(positionTire: String): Boolean
-
-    suspend fun refreshMountedTires()
+    suspend fun refreshMountedTires(): Result<List<AssemblyTireResponse>>
 }
 
 class AssemblyTireRepositoryImpl @Inject constructor(
@@ -51,11 +51,11 @@ class AssemblyTireRepositoryImpl @Inject constructor(
         return if (result.isSuccess) result.getOrNull()?.positionTire != null else false
     }
 
-    override suspend fun refreshMountedTires() {
+    override suspend fun refreshMountedTires(): Result<List<AssemblyTireResponse>> {
         val userData = getTasksUseCase().first()[0]
         val result =
             remoteAssemblyDataSource.fetchMountedTire(userData.fld_token, userData.id_monitor)
-        if (result.isSuccess) {
+        return if (result.isSuccess) {
             result.onSuccess {
                 it.forEach { assemblyTire ->
                     localAssemblyDataSource.saveAssemblyTire(
@@ -63,6 +63,8 @@ class AssemblyTireRepositoryImpl @Inject constructor(
                     )
                 }
             }
+        } else {
+            Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
         }
     }
 }

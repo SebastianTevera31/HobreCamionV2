@@ -6,14 +6,16 @@ import kotlinx.serialization.Serializable
 object ReportGraph
 
 @Serializable
-object CpkReport {
-}
+object ReportMenu
+
+@Serializable
+object CpkReport
+
+@Serializable
+object CpkDetail
 
 @Serializable
 object FuelConsumption
 
 @Serializable
 object CO2Emissions
-
-@Serializable
-object ReportMenu
