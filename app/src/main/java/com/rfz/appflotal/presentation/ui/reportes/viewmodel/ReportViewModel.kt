@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.reportes.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
@@ -9,6 +11,7 @@ import com.rfz.appflotal.data.model.tire.toTire
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.report.ReportRepository
 import com.rfz.appflotal.domain.tire.TireListUsecase
+import com.rfz.appflotal.presentation.ui.reportes.pdf.sharePdf
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,14 +28,16 @@ data class ReportUiState(
     val menuLoadState: LoadState<Unit> = LoadState.Idle,
     val reportLoadState: LoadState<Unit> = LoadState.Idle,
     val performanceReport: List<Any> = emptyList(),
-    val cpkReport: CpkReportResponse? = null
+    val cpkReport: CpkReportResponse? = null,
+    val exportPdfState: LoadState<Unit> = LoadState.Idle,
+    val pdfUri: Uri? = null
 )
 
 @HiltViewModel
 class ReportViewModel @Inject constructor(
     private val reportRepository: ReportRepository,
     private val assemblyTireRepository: AssemblyTireRepository,
-    private val tireUseCase: TireListUsecase
+    private val tireUseCase: TireListUsecase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ReportUiState())
@@ -76,11 +81,13 @@ class ReportViewModel @Inject constructor(
 
             val detailTires = _uiState.value.detailTireList.firstOrNull { it.id == id }
             val tire = _uiState.value.tireList.find { it.idTire == id }
-            
-            _uiState.update { it.copy(
-                selectedTire = tire,
-                tireInfo = detailTires
-            ) }
+
+            _uiState.update {
+                it.copy(
+                    selectedTire = tire,
+                    tireInfo = detailTires
+                )
+            }
 
             reportRepository.getCpkReport(id).onSuccess { reportList ->
                 _uiState.update { currentUiState ->
@@ -96,12 +103,18 @@ class ReportViewModel @Inject constructor(
     }
 
     fun resetReportState() {
-        _uiState.update { it.copy(
-            reportLoadState = LoadState.Idle,
-            cpkReport = null,
-            selectedTire = null,
-            tireInfo = null
-        ) }
+        _uiState.update {
+            it.copy(
+                reportLoadState = LoadState.Idle,
+                cpkReport = null,
+                selectedTire = null,
+                tireInfo = null
+            )
+        }
+    }
+
+    fun resetExportState() {
+        _uiState.update { it.copy(exportPdfState = LoadState.Idle, pdfUri = null) }
     }
 
     fun getCO2EmissionsReport() {
@@ -110,5 +123,25 @@ class ReportViewModel @Inject constructor(
 
     fun getFuelConsumptionReport() {
         // Implement as needed
+    }
+
+    fun updatePdfUri(uri: Uri?) {
+        _uiState.update {
+            it.copy(
+                pdfUri = uri,
+                exportPdfState = if (uri != null) {
+                    LoadState.Success(Unit)
+                } else {
+                    LoadState.Error("No se pudo generar el PDF")
+                }
+            )
+        }
+    }
+
+    fun sharePdfReport(
+        context: Context,
+        pdfUri: Uri
+    ) {
+        sharePdf(context, pdfUri)
     }
 }

@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.reportes.rendimiento
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -144,11 +142,9 @@ fun WheelButton(
             .clickable { onClick() },
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-        ),
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+            containerColor = MaterialTheme.colorScheme.primary.copy(
+                alpha = 0.10f
+            )
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 1.dp

@@ -3,6 +3,7 @@ package com.rfz.appflotal.presentation.ui.reportes.navigation
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -97,16 +98,26 @@ fun NavGraphBuilder.reportGraph(
             }
             val viewModel: ReportViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
+            val context = LocalContext.current
 
             RendimientoRuedaScreen(
                 onBack = {
                     viewModel.resetReportState()
+                    viewModel.resetExportState()
                     navController.popBackStack()
                 },
                 loadState = state.reportLoadState,
                 report = state.cpkReport,
                 tire = state.tireInfo,
-                tirePosition = state.selectedTire?.positionTire ?: ""
+                tirePosition = state.selectedTire?.positionTire ?: "",
+                exportLoadState = state.exportPdfState,
+                onExportPdf = { uri -> viewModel.updatePdfUri(uri) },
+                pdfUri = state.pdfUri,
+                onShareImage = { uri ->
+                    if (uri != null) {
+                        viewModel.sharePdfReport(context, uri)
+                    }
+                },
             )
         }
 

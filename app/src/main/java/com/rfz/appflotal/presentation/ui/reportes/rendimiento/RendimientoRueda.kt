@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.reportes.rendimiento
 
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,38 +26,88 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.report.CpkReportResponse
 import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
-import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
+import com.rfz.appflotal.presentation.ui.reportes.components.SharePdfReportBottomSheet
+import com.rfz.appflotal.presentation.ui.reportes.pdf.createRendimientoPdf
 import com.rfz.appflotal.presentation.ui.reportes.viewmodel.formatCurrency
 import com.rfz.appflotal.presentation.ui.reportes.viewmodel.formatDecimal
 import com.rfz.appflotal.presentation.ui.utils.LoadState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun RendimientoRuedaScreen(
     onBack: () -> Unit,
     tirePosition: String,
     loadState: LoadState<Unit>,
+    exportLoadState: LoadState<Unit>,
     report: CpkReportResponse?,
     tire: Tire?,
+    pdfUri: Uri?,
     modifier: Modifier = Modifier,
-    onExport: () -> Unit = {}
+    onExportPdf: (uri: Uri?) -> Unit,
+    onShareImage: (uri: Uri?) -> Unit
 ) {
     val canExport = loadState is LoadState.Success && report != null
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var showSharePdf by remember { mutableStateOf(false) }
 
+    LaunchedEffect(exportLoadState) {
+        if (exportLoadState is LoadState.Success) {
+            showSharePdf = true
+        }
+    }
+
+    when (exportLoadState) {
+        is LoadState.Loading -> {
+            LoadingDialog(message = R.string.guardando_reporte)
+        }
+
+        is LoadState.Error -> {
+            Toast.makeText(
+                context,
+                "Error al guardar el reporte",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        else -> Unit
+    }
+
+    SharePdfReportBottomSheet(
+        show = showSharePdf,
+        tirePosition = tirePosition,
+        pdfUri = pdfUri,
+        onDismiss = {
+            showSharePdf = false
+        },
+        title = "Reporte de rendimiento",
+        onSharePdf = { uri ->
+            onShareImage(uri)
+        }
+    )
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -75,9 +127,33 @@ fun RendimientoRuedaScreen(
             ) {
                 if (canExport) {
                     CompleteFormButton(
-                        text = "Exportar",
+                        text = "Guardar reporte",
                         isValid = true,
-                        onFinish = onExport,
+                        onFinish = {
+                            scope.launch {
+                                try {
+                                    val uri = withContext(Dispatchers.IO) {
+                                        createRendimientoPdf(
+                                            context = context,
+                                            tirePosition = tirePosition,
+                                            report = report!!,
+                                            tire = tire
+                                        )
+                                    }
+
+                                    onExportPdf(uri)
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    onExportPdf(null)
+
+                                    Toast.makeText(
+                                        context,
+                                        "Error al generar el reporte PDF",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
@@ -94,11 +170,14 @@ fun RendimientoRuedaScreen(
 
             is LoadState.Success -> {
                 if (report != null) {
+                    // Vista para el Usuario (UI Normal)
                     RendimientoRuedaContent(
                         tirePosition = tirePosition,
                         report = report,
                         tire = tire,
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize()
                     )
                 } else {
                     EmptyReportState(
@@ -391,41 +470,6 @@ private fun EmptyReportState(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(dimensionResource(R.dimen.medium_dimen))
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RendimientoRuedaScreenPreview() {
-    HombreCamionTheme {
-        RendimientoRuedaScreen(
-            onBack = {},
-            loadState = LoadState.Success(Unit),
-            report = CpkReportResponse(
-                idTire = 1,
-                differenceOdometer = 15000,
-                differenceInTreadDepth = 5,
-                kmPerMm = 3000.0,
-                lifeCycle = 1,
-                unitCost = 500.0,
-                costPerKm = 0.033,
-                renovatedDesign = "Regrabado",
-                costByMm = 100.0,
-                tireNumber = "T001"
-            ),
-            tire = Tire(
-                id = 101,
-                description = "Michelin - size: 205/55R16",
-                size = "205/55R16",
-                brand = "Michelin",
-                model = "Primacy 4",
-                thread = 7.5,
-                loadingCapacity = "615",
-                destination = "Eje delantero"
-            ),
-            tirePosition = "1",
-            onExport = {}
         )
     }
 }
