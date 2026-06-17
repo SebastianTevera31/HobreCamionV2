@@ -13,14 +13,11 @@ class ReportRepository @Inject constructor(
     private val remoteReportDataSource: RemoteReportDataSource,
     private val getTasksUseCase: GetTasksUseCase
 ) {
-    suspend fun getCpkReport(idTire: Int): Result<List<CpkReportResponse>> {
+    suspend fun getCpkReport(): Result<List<CpkReportResponse>> {
         val user = getTasksUseCase().first().first()
         return remoteReportDataSource.getCpkReport(
             token = user.fld_token,
-            body = CpkReportRequest(
-                idUser = user.idUser,
-                idTire = idTire
-            )
+            idUser = user.idUser
         )
     }
 

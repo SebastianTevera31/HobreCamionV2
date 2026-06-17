@@ -23,18 +23,7 @@ fun NavGraphBuilder.reportGraph(
     navigation<ReportGraph>(
         startDestination = ReportMenu
     ) {
-        composable<ReportMenu> { backstackEntry ->
-            val parentEntry = remember(backstackEntry) {
-                try {
-                    navController.getBackStackEntry<ReportGraph>()
-                } catch (_: Exception) {
-                    backstackEntry
-                }
-            }
-
-            val viewModel: ReportViewModel = hiltViewModel(parentEntry)
-            val state by viewModel.uiState.collectAsState()
-
+        composable<ReportMenu> {
             MenuReportesView(
                 onNavigate = {
                     navController.navigate(it)
@@ -123,6 +112,9 @@ fun NavGraphBuilder.reportGraph(
                         viewModel.sharePdfReport(context, uri)
                     }
                 },
+                onClearPdfState = {
+                    viewModel.resetExportState()
+                }
             )
         }
 

@@ -38,12 +38,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.report.CpkReportResponse
 import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
@@ -67,7 +69,8 @@ fun RendimientoRuedaScreen(
     pdfUri: Uri?,
     modifier: Modifier = Modifier,
     onExportPdf: (uri: Uri?) -> Unit,
-    onShareImage: (uri: Uri?) -> Unit
+    onShareImage: (uri: Uri?) -> Unit,
+    onClearPdfState: () -> Unit
 ) {
     val canExport = loadState is LoadState.Success && report != null
     val context = LocalContext.current
@@ -102,6 +105,7 @@ fun RendimientoRuedaScreen(
         pdfUri = pdfUri,
         onDismiss = {
             showSharePdf = false
+            onClearPdfState()
         },
         title = "Reporte de rendimiento",
         onSharePdf = { uri ->
@@ -136,7 +140,7 @@ fun RendimientoRuedaScreen(
                                         createRendimientoPdf(
                                             context = context,
                                             tirePosition = tirePosition,
-                                            report = report!!,
+                                            report = report,
                                             tire = tire
                                         )
                                     }
@@ -470,6 +474,45 @@ private fun EmptyReportState(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(dimensionResource(R.dimen.medium_dimen))
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RendimientoRuedaScreenPreview() {
+    HombreCamionTheme {
+        RendimientoRuedaScreen(
+            onBack = {},
+            tirePosition = "1",
+            loadState = LoadState.Success(Unit),
+            exportLoadState = LoadState.Idle,
+            report = CpkReportResponse(
+                idTire = 1,
+                differenceOdometer = 10000,
+                differenceInTreadDepth = 5,
+                kmPerMm = 2000.0,
+                lifeCycle = 1,
+                unitCost = 500.0,
+                costPerKm = 0.05,
+                renovatedDesign = "New Design",
+                costByMm = 100.0,
+                tireNumber = "T-123"
+            ),
+            tire = Tire(
+                id = 1,
+                description = "Tire Description",
+                size = "295/80R22.5",
+                brand = "Michelin",
+                model = "X Works",
+                thread = 15.0,
+                loadingCapacity = "152/148J",
+                destination = "Eje 1"
+            ),
+            pdfUri = null,
+            onExportPdf = {},
+            onShareImage = {},
+            onClearPdfState = {}
         )
     }
 }
