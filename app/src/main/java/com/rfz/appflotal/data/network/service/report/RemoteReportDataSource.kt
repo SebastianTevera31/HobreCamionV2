@@ -16,7 +16,8 @@ class RemoteReportDataSource @Inject constructor(private val reportService: Repo
         reportService.getCO2EmissionsReport("bearer $token")
     }
 
-    suspend fun getFuelConsumptionReport(token: String) = networkRequestHelper {
-        reportService.getFuelConsumptionReport("bearer $token")
-    }
+    suspend fun getFuelConsumptionReport(token: String) =
+        networkRequestHelper {
+            reportService.getFuelConsumptionReport("bearer $token")
+        }
 }

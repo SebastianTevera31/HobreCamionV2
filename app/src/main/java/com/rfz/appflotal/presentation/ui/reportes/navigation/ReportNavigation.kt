@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.reportes.navigation
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -10,9 +11,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.rfz.appflotal.presentation.ui.reportes.MenuReportesView
-import com.rfz.appflotal.presentation.ui.reportes.rendimiento.Co2EmissionsRoute
-import com.rfz.appflotal.presentation.ui.reportes.rendimiento.MenuRendimientoScreen
-import com.rfz.appflotal.presentation.ui.reportes.rendimiento.RendimientoRuedaScreen
+import com.rfz.appflotal.presentation.ui.reportes.rendimiento.co2.Co2EmissionReportRoute
+import com.rfz.appflotal.presentation.ui.reportes.rendimiento.cpk.MenuRendimientoScreen
+import com.rfz.appflotal.presentation.ui.reportes.rendimiento.cpk.RendimientoRuedaScreen
+import com.rfz.appflotal.presentation.ui.reportes.rendimiento.fuel.FuelConsumptionReportRoute
 import com.rfz.appflotal.presentation.ui.reportes.viewmodel.ReportViewModel
 
 fun NavGraphBuilder.reportGraph(
@@ -53,11 +55,14 @@ fun NavGraphBuilder.reportGraph(
             val viewModel: ReportViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
 
-            MenuReportesView(
-                onNavigate = {
-                    navController.navigate(it)
-                },
-                onBack = { navController.popBackStack() }
+            LaunchedEffect(Unit) {
+                viewModel.getFuelConsumption()
+            }
+
+            FuelConsumptionReportRoute(
+                onBack = { navController.popBackStack() },
+                reports = state.fuelConsumptionReport,
+                screenState = state.fuelScreenState
             )
         }
 
@@ -132,7 +137,17 @@ fun NavGraphBuilder.reportGraph(
             val viewModel: ReportViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
 
-            Co2EmissionsRoute()
+            LaunchedEffect(Unit) {
+                viewModel.getCO2EmissionsReport()
+            }
+
+            Co2EmissionReportRoute(
+                screenState = state.co2ScreenState,
+                reports = state.co2EmissionsReport,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

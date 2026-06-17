@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.reportes.rendimiento
+package com.rfz.appflotal.presentation.ui.reportes.rendimiento.cpk
 
 import android.net.Uri
 import android.widget.Toast

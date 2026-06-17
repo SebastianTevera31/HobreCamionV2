@@ -78,7 +78,7 @@ fun MenuReportesView(onBack: () -> Unit, onNavigate: (Any) -> Unit, modifier: Mo
             ) {
                 ElegantMenuCard(
                     title = "Emisiones de CO2",
-                    iconRes = R.drawable.servicios,
+                    iconRes = R.drawable.c02_icon,
                     onClick = { onNavigate(CO2Emissions) },
                     primaryColor = primaryColor,
                     secondaryColor = secondaryColor,

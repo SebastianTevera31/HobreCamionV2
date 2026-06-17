@@ -5,7 +5,9 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
+import com.rfz.appflotal.data.model.report.CO2EmissionsReportResponse
 import com.rfz.appflotal.data.model.report.CpkReportResponse
+import com.rfz.appflotal.data.model.report.FuelConsumptionReportResponse
 import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.data.model.tire.toTire
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
@@ -23,14 +25,17 @@ import javax.inject.Inject
 data class ReportUiState(
     val tireList: List<AssemblyTire> = emptyList(),
     val detailTireList: List<Tire> = emptyList(),
+    val fuelConsumptionReport: List<FuelConsumptionReportResponse> = emptyList(),
+    val co2EmissionsReport: List<CO2EmissionsReportResponse> = emptyList(),
     val selectedTire: AssemblyTire? = null,
     val tireInfo: Tire? = null,
+    val cpkReport: CpkReportResponse? = null,
+    val pdfUri: Uri? = null,
     val menuLoadState: LoadState<Unit> = LoadState.Idle,
     val reportLoadState: LoadState<Unit> = LoadState.Idle,
-    val performanceReport: List<Any> = emptyList(),
-    val cpkReport: CpkReportResponse? = null,
     val exportPdfState: LoadState<Unit> = LoadState.Idle,
-    val pdfUri: Uri? = null
+    val fuelScreenState: LoadState<Unit> = LoadState.Idle,
+    val co2ScreenState: LoadState<Unit> = LoadState.Idle,
 )
 
 @HiltViewModel
@@ -118,11 +123,26 @@ class ReportViewModel @Inject constructor(
     }
 
     fun getCO2EmissionsReport() {
-        // Implement as needed
-    }
-
-    fun getFuelConsumptionReport() {
-        // Implement as needed
+        viewModelScope.launch {
+            _uiState.update { it.copy(co2ScreenState = LoadState.Loading) }
+            reportRepository.getCO2EmissionsReport().fold(
+                onSuccess = {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            co2EmissionsReport = it,
+                            co2ScreenState = LoadState.Success(Unit)
+                        )
+                    }
+                },
+                onFailure = {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            co2ScreenState = LoadState.Error("Error loading data")
+                        )
+                    }
+                }
+            )
+        }
     }
 
     fun updatePdfUri(uri: Uri?) {
@@ -143,5 +163,28 @@ class ReportViewModel @Inject constructor(
         pdfUri: Uri
     ) {
         sharePdf(context, pdfUri)
+    }
+
+    fun getFuelConsumption() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(fuelScreenState = LoadState.Loading) }
+            reportRepository.getFuelConsumptionReport().fold(
+                onSuccess = {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            fuelConsumptionReport = it,
+                            fuelScreenState = LoadState.Success(Unit)
+                        )
+                    }
+                },
+                onFailure = {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            fuelScreenState = LoadState.Error("Error loading data")
+                        )
+                    }
+                }
+            )
+        }
     }
 }

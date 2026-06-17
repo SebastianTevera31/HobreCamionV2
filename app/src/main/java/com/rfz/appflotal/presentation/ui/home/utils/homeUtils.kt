@@ -83,17 +83,17 @@ val menuItems = listOf(
     MenuItem(
         title = R.string.blog,
         route = ForumsGraph,
-        iconRes = R.drawable.servicios
+        iconRes = R.drawable.foro
     ),
     MenuItem(
         title = R.string.cuponera,
         route = CouponGraph,
-        iconRes = R.drawable.servicios
+        iconRes = R.drawable.cuponera_icon
     ),
     MenuItem(
         R.string.Reportes,
         ReportGraph,
-        R.drawable.servicios
+        R.drawable.reportes_icon
     ),
 )
 

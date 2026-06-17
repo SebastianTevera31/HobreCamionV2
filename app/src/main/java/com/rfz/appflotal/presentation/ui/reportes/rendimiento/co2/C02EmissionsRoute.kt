@@ -1,9 +1,8 @@
-package com.rfz.appflotal.presentation.ui.reportes.rendimiento.fuel
+package com.rfz.appflotal.presentation.ui.reportes.rendimiento.co2
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,29 +18,31 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rfz.appflotal.data.model.report.FuelConsumptionReportResponse
+import com.rfz.appflotal.data.model.report.CO2EmissionsReportResponse
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.reportes.components.MonthSelector
+import com.rfz.appflotal.presentation.ui.reportes.rendimiento.fuel.InfoRow
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
-fun FuelConsumptionReportRoute(
+fun Co2EmissionReportRoute(
     screenState: LoadState<Unit>,
-    reports: List<FuelConsumptionReportResponse>,
+    reports: List<CO2EmissionsReportResponse>,
     onBack: () -> Unit
 ) {
     var selectedMonth by remember {
         mutableStateOf(reports.firstOrNull()?.month)
     }
 
-    FuelEmissionReportScreen(
+    CO2EmissionReportScreen(
         screenState = screenState,
         reports = reports,
         selectedMonth = selectedMonth,
@@ -53,9 +54,9 @@ fun FuelConsumptionReportRoute(
 }
 
 @Composable
-fun FuelEmissionReportScreen(
+fun CO2EmissionReportScreen(
     screenState: LoadState<Unit>,
-    reports: List<FuelConsumptionReportResponse>,
+    reports: List<CO2EmissionsReportResponse>,
     selectedMonth: String?,
     onMonthSelected: (String) -> Unit,
     onBack: () -> Unit,
@@ -68,7 +69,7 @@ fun FuelEmissionReportScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             SimpleTopBar(
-                title = "Consumo de Combustible",
+                title = "Emisiones de C02",
                 onBack = onBack,
                 showBackButton = true,
                 subTitle = ""
@@ -94,14 +95,14 @@ fun FuelEmissionReportScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = "Consumo de Combustible",
+                        text = "Emision de CO2",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold
                         )
                     )
 
                     Text(
-                        text = "Seleccione un periodo para ver la información de consumo de combustible.",
+                        text = "Seleccione un periodo para ver la información de emisiones de C02.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -112,7 +113,7 @@ fun FuelEmissionReportScreen(
                         onMonthSelected = onMonthSelected
                     )
 
-                    FuelConsumptionInfoCard(
+                    Co2EmissionsInfoCard(
                         report = selectedReport
                     )
                 }
@@ -124,8 +125,8 @@ fun FuelEmissionReportScreen(
 }
 
 @Composable
-fun FuelConsumptionInfoCard(
-    report: FuelConsumptionReportResponse?,
+fun Co2EmissionsInfoCard(
+    report: CO2EmissionsReportResponse?,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -175,54 +176,43 @@ fun FuelConsumptionInfoCard(
                 )
 
                 InfoRow(
-                    label = "Combustible mensual",
-                    value = report.monthlyFuel
-                )
-
-                InfoRow(
-                    label = "Número de cargas",
-                    value = report.loadCount.toString()
+                    label = "Emisiones mensuales",
+                    value = report.monthlyCO2Emissions
                 )
 
                 InfoRow(
                     label = "Tipo de combustible",
                     value = report.fuelTypeName
                 )
-
-                InfoRow(
-                    label = "Rendimiento mensual",
-                    value = report.monthlyPerformance
-                )
             }
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun InfoRow(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
+fun CO2EmissionReportScreenPreview() {
+    val sampleReports = listOf(
+        CO2EmissionsReportResponse(
+            month = "Enero",
+            monthlyOdometer = "1200 km",
+            monthlyCO2Emissions = "250 kg",
+            fuelTypeName = "Diesel"
+        ),
+        CO2EmissionsReportResponse(
+            month = "Febrero",
+            monthlyOdometer = "1100 km",
+            monthlyCO2Emissions = "230 kg",
+            fuelTypeName = "Diesel"
         )
-
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            textAlign = TextAlign.End,
-            modifier = Modifier.weight(1f)
+    )
+    HombreCamionTheme {
+        CO2EmissionReportScreen(
+            screenState = LoadState.Success(Unit),
+            reports = sampleReports,
+            selectedMonth = "Enero",
+            onMonthSelected = {},
+            onBack = {}
         )
     }
 }

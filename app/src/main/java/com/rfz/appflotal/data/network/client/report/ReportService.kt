@@ -18,9 +18,15 @@ interface ReportService {
         @Body request: CpkReportRequest
     ): Response<List<CpkReportResponse>>
 
+    @POST("api/Reports/CPKByIDUser")
+    suspend fun getCpkReportByIDUser(
+        @Header("Authorization") token: String,
+        @Body request: CpkReportRequest
+    ): Response<List<CpkReportResponse>>
+
     @GET("api/Reports/getC02Emissions")
     suspend fun getCO2EmissionsReport(@Header("Authorization") token: String): Response<List<CO2EmissionsReportResponse>>
 
-    @GET("api/Reports/FuelConsumptione")
+    @GET("api/Reports/FuelConsumption")
     suspend fun getFuelConsumptionReport(@Header("Authorization") token: String): Response<List<FuelConsumptionReportResponse>>
 }
