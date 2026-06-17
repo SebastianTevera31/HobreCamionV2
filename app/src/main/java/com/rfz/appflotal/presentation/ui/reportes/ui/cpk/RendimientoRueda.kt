@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.reportes.rendimiento.cpk
+package com.rfz.appflotal.presentation.ui.reportes.ui.cpk
 
 import android.net.Uri
 import android.widget.Toast
@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,6 +77,7 @@ fun RendimientoRuedaScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showSharePdf by remember { mutableStateOf(false) }
+    val errorMessage = stringResource(R.string.error_generar_pdf)
 
     LaunchedEffect(exportLoadState) {
         if (exportLoadState is LoadState.Success) {
@@ -91,7 +93,7 @@ fun RendimientoRuedaScreen(
         is LoadState.Error -> {
             Toast.makeText(
                 context,
-                "Error al guardar el reporte",
+                stringResource(R.string.error_guardar_reporte),
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -107,7 +109,7 @@ fun RendimientoRuedaScreen(
             showSharePdf = false
             onClearPdfState()
         },
-        title = "Reporte de rendimiento",
+        title = stringResource(R.string.reporte_rendimiento_title),
         onSharePdf = { uri ->
             onShareImage(uri)
         }
@@ -116,7 +118,7 @@ fun RendimientoRuedaScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             SimpleTopBar(
-                title = "Rendimiento - Rueda $tirePosition",
+                title = stringResource(R.string.rendimiento_rueda, tirePosition),
                 onBack = onBack,
                 showBackButton = true,
                 subTitle = ""
@@ -131,7 +133,7 @@ fun RendimientoRuedaScreen(
             ) {
                 if (canExport) {
                     CompleteFormButton(
-                        text = "Guardar reporte",
+                        text = stringResource(R.string.guardar_reporte),
                         isValid = true,
                         onFinish = {
                             scope.launch {
@@ -152,7 +154,7 @@ fun RendimientoRuedaScreen(
 
                                     Toast.makeText(
                                         context,
-                                        "Error al generar el reporte PDF",
+                                        errorMessage,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
@@ -228,28 +230,28 @@ private fun RendimientoRuedaContent(
 
         item {
             ReportSection(
-                title = "Resumen"
+                title = stringResource(R.string.resumen)
             ) {
                 MetricGrid(
                     items = listOf(
                         MetricItem(
-                            title = "Odómetro",
+                            title = stringResource(R.string.odometro_label),
                             value = "${report.differenceOdometer} km"
                         ),
                         MetricItem(
-                            title = "Profundidad final",
+                            title = stringResource(R.string.profundidad_final),
                             value = "${formatDecimal(finalDepth)} mm"
                         ),
                         MetricItem(
-                            title = "Distancia recorrida actual",
+                            title = stringResource(R.string.distancia_recorrida_actual),
                             value = "${report.differenceOdometer} km"
                         ),
                         MetricItem(
-                            title = "Desgaste total",
+                            title = stringResource(R.string.desgaste_total),
                             value = "${formatDecimal(report.differenceInTreadDepth.toDouble())} mm"
                         ),
                         MetricItem(
-                            title = "Ciclo actual",
+                            title = stringResource(R.string.ciclo_actual),
                             value = report.lifeCycle.toString()
                         )
                     )
@@ -259,12 +261,12 @@ private fun RendimientoRuedaContent(
 
         item {
             ReportSection(
-                title = "Promedios de desgaste"
+                title = stringResource(R.string.promedios_desgaste)
             ) {
                 MetricGrid(
                     items = listOf(
                         MetricItem(
-                            title = "Por distancia",
+                            title = stringResource(R.string.por_distancia),
                             value = "${formatDecimal(report.kmPerMm)} km/mm"
                         )
                     )
@@ -274,20 +276,20 @@ private fun RendimientoRuedaContent(
 
         item {
             ReportSection(
-                title = "Costos"
+                title = stringResource(R.string.costos)
             ) {
                 MetricGrid(
                     items = listOf(
                         MetricItem(
-                            title = "Costo unitario",
+                            title = stringResource(R.string.costo_unitario),
                             value = formatCurrency(report.unitCost)
                         ),
                         MetricItem(
-                            title = "Por distancia CPK",
+                            title = stringResource(R.string.por_distancia_cpk),
                             value = formatCurrency(report.costPerKm)
                         ),
                         MetricItem(
-                            title = "Por profundidad",
+                            title = stringResource(R.string.por_profundidad),
                             value = formatCurrency(report.costByMm)
                         )
                     )
@@ -323,7 +325,7 @@ private fun TireReportHeader(
             )
         ) {
             Text(
-                text = "Rueda $tirePosition",
+                text = stringResource(R.string.rueda_pos, tirePosition),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -338,7 +340,7 @@ private fun TireReportHeader(
                         .wrapContentHeight()
                 )
             } ?: Text(
-                text = "No hay información de la llanta",
+                text = stringResource(R.string.no_info_llanta),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -469,7 +471,7 @@ private fun EmptyReportState(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "No hay información disponible para este reporte",
+            text = stringResource(R.string.no_info_reporte),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

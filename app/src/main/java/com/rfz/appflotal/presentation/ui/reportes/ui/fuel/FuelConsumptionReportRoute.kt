@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.reportes.rendimiento.fuel
+package com.rfz.appflotal.presentation.ui.reportes.ui.fuel
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -21,9 +21,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.report.FuelConsumptionReportResponse
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
@@ -68,7 +70,7 @@ fun FuelEmissionReportScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             SimpleTopBar(
-                title = "Consumo de Combustible",
+                title = stringResource(R.string.consumo_combustible),
                 onBack = onBack,
                 showBackButton = true,
                 subTitle = ""
@@ -94,14 +96,14 @@ fun FuelEmissionReportScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = "Consumo de Combustible",
+                        text = stringResource(R.string.consumo_combustible),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold
                         )
                     )
 
                     Text(
-                        text = "Seleccione un periodo para ver la información de consumo de combustible.",
+                        text = stringResource(R.string.seleccione_periodo_fuel),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -145,7 +147,7 @@ fun FuelConsumptionInfoCard(
         ) {
 
             Text(
-                text = "Ficha informativa",
+                text = stringResource(R.string.ficha_informativa),
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -157,7 +159,7 @@ fun FuelConsumptionInfoCard(
 
             if (report == null) {
                 Text(
-                    text = "No hay información disponible para mostrar.",
+                    text = stringResource(R.string.no_info_mostrar),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
@@ -165,32 +167,32 @@ fun FuelConsumptionInfoCard(
                 )
             } else {
                 InfoRow(
-                    label = "Mes",
+                    label = stringResource(R.string.mes),
                     value = report.month
                 )
 
                 InfoRow(
-                    label = "Odómetro mensual",
+                    label = stringResource(R.string.odometro_mensual),
                     value = report.monthlyOdometer
                 )
 
                 InfoRow(
-                    label = "Combustible mensual",
+                    label = stringResource(R.string.combustible_mensual),
                     value = report.monthlyFuel
                 )
 
                 InfoRow(
-                    label = "Número de cargas",
+                    label = stringResource(R.string.numero_cargas),
                     value = report.loadCount.toString()
                 )
 
                 InfoRow(
-                    label = "Tipo de combustible",
+                    label = stringResource(R.string.tipo_combustible),
                     value = report.fuelTypeName
                 )
 
                 InfoRow(
-                    label = "Rendimiento mensual",
+                    label = stringResource(R.string.rendimiento_mensual),
                     value = report.monthlyPerformance
                 )
             }

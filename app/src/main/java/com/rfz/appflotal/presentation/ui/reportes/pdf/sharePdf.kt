@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
+import com.rfz.appflotal.R
 
 fun sharePdf(
     context: Context,
@@ -20,7 +21,7 @@ fun sharePdf(
 
     val chooser = Intent.createChooser(
         intent,
-        "Compartir PDF"
+        context.getString(R.string.share_pdf)
     )
 
     val activity = context.findActivity()

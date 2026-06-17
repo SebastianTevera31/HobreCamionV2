@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.reportes.rendimiento.co2
+package com.rfz.appflotal.presentation.ui.reportes.ui.co2
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

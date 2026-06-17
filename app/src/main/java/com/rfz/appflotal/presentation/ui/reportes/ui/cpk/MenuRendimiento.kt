@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.reportes.rendimiento.cpk
+package com.rfz.appflotal.presentation.ui.reportes.ui.cpk
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,10 +21,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
@@ -55,7 +57,7 @@ fun MenuRendimientoScreen(
                 modifier = modifier.fillMaxSize(),
                 topBar = {
                     SimpleTopBar(
-                        title = "Reporte de Rendimiento",
+                        title = stringResource(R.string.reporte_rendimiento),
                         onBack = onBack,
                         showBackButton = true,
                         subTitle = ""
@@ -73,7 +75,7 @@ fun MenuRendimientoScreen(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            text = "Seleccione una llanta",
+                            text = stringResource(R.string.seleccione_llanta),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold
                             ),
@@ -81,7 +83,7 @@ fun MenuRendimientoScreen(
                         )
 
                         Text(
-                            text = "${wheels.size} llantas disponibles",
+                            text = stringResource(R.string.llantas_disponibles, wheels.size),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -93,7 +95,7 @@ fun MenuRendimientoScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No hay llantas disponibles",
+                                text = stringResource(R.string.no_llantas_disponibles),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

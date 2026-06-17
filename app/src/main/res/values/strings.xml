@@ -524,4 +524,77 @@
 
     <string name="cupon_no_disponible_para_canje">Este folio no está disponible para canje.</string>
     <string name="Reportes">Reportes</string>
+    <string name="guardando_reporte">Guardando reporte...</string>
+
+    <!-- Reportes -->
+    <string name="reportes">Reportes</string>
+    <string name="rendimiento">Rendimiento</string>
+    <string name="consumo_combustible">Consumo de Combustible</string>
+    <string name="emisiones_co2">Emisiones de CO2</string>
+    <string name="reporte_rendimiento">Reporte de Rendimiento</string>
+    <string name="seleccione_llanta">Seleccione una llanta</string>
+    <string name="llantas_disponibles">%1$d llantas disponibles</string>
+    <string name="no_llantas_disponibles">No hay llantas disponibles</string>
+    <string name="rendimiento_rueda">Rendimiento - Rueda %1$s</string>
+    <string name="guardar_reporte">Guardar reporte</string>
+    <string name="error_guardar_reporte">Error al guardar el reporte</string>
+    <string name="error_generar_pdf">Error al generar el reporte PDF</string>
+    <string name="no_info_reporte">No hay información disponible para este reporte</string>
+    <string name="resumen">Resumen</string>
+    <string name="promedios_desgaste">Promedios de desgaste</string>
+    <string name="costos">Costos</string>
+    <string name="odometro_label">Odómetro</string>
+    <string name="profundidad_final">Profundidad final</string>
+    <string name="distancia_recorrida_actual">Distancia recorrida actual</string>
+    <string name="desgaste_total">Desgaste total</string>
+    <string name="ciclo_actual">Ciclo actual</string>
+    <string name="por_distancia">Por distancia</string>
+    <string name="costo_unitario">Costo unitario</string>
+    <string name="por_distancia_cpk">Por distancia CPK</string>
+    <string name="por_profundidad">Por profundidad</string>
+    <string name="rueda_pos">Rueda %1$s</string>
+    <string name="no_info_llanta">No hay información de la llanta</string>
+    <string name="reporte_rendimiento_title">Reporte de rendimiento</string>
+
+    <string name="seleccione_periodo_co2">Seleccione un periodo para ver la información de emisiones de CO2.</string>
+    <string name="ficha_informativa">Ficha informativa</string>
+    <string name="no_info_mostrar">No hay información disponible para mostrar.</string>
+    <string name="mes">Mes</string>
+    <string name="odometro_mensual">Odómetro mensual</string>
+    <string name="emisiones_mensuales">Emisiones mensuales</string>
+    <string name="tipo_combustible">Tipo de combustible</string>
+
+    <string name="seleccione_periodo_fuel">Seleccione un periodo para ver la información de consumo de combustible.</string>
+    <string name="combustible_mensual">Combustible mensual</string>
+    <string name="numero_cargas">Número de cargas</string>
+    <string name="rendimiento_mensual">Rendimiento mensual</string>
+
+    <!-- PDF Report Strings -->
+    <string name="pdf_header_title">REPORTE DE RENDIMIENTO</string>
+    <string name="pdf_label_date">Fecha</string>
+    <string name="pdf_system_name">Sistema Hombre Camión - Flotal</string>
+    <string name="pdf_label_position">Posición: Rueda %1$s</string>
+    <string name="pdf_label_id">ID Llanta: %1$d</string>
+    <string name="pdf_section_tire_info">Información del Neumático</string>
+    <string name="pdf_label_serial">Número de Serie</string>
+    <string name="pdf_label_brand">Marca</string>
+    <string name="pdf_label_model">Modelo</string>
+    <string name="pdf_label_size">Medida</string>
+    <string name="pdf_label_retread_design">Diseño Renovado</string>
+    <string name="pdf_section_operation">Resumen de Operación</string>
+    <string name="pdf_label_odometer">Odómetro Actual</string>
+    <string name="pdf_label_distance">Distancia Recorrida</string>
+    <string name="pdf_label_initial_depth">Profundidad Inicial</string>
+    <string name="pdf_label_wear">Desgaste de Piso</string>
+    <string name="pdf_label_current_depth">Profundidad Actual</string>
+    <string name="pdf_label_lifecycle">Ciclo de Vida</string>
+    <string name="pdf_section_efficiency">Eficiencia</string>
+    <string name="pdf_label_performance">Rendimiento (km/mm)</string>
+    <string name="pdf_section_costs">Análisis de Costos</string>
+    <string name="pdf_label_unit_cost">Costo Unitario</string>
+    <string name="pdf_label_cost_mm">Costo por mm</string>
+    <string name="pdf_label_cpk">Costo por km (CPK)</string>
+    <string name="pdf_signature">Firma Responsable</string>
+    <string name="pdf_footer">Este reporte es un documento informativo generado por la aplicación Flotal Hombre Camión.</string>
+    <string name="share_pdf">Compartir PDF</string>
 </resources>

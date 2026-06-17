@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.reportes.rendimiento.co2
+package com.rfz.appflotal.presentation.ui.reportes.ui.co2
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -19,17 +19,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.report.CO2EmissionsReportResponse
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.reportes.components.MonthSelector
-import com.rfz.appflotal.presentation.ui.reportes.rendimiento.fuel.InfoRow
+import com.rfz.appflotal.presentation.ui.reportes.ui.fuel.InfoRow
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
@@ -69,7 +71,7 @@ fun CO2EmissionReportScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             SimpleTopBar(
-                title = "Emisiones de C02",
+                title = stringResource(R.string.emisiones_co2),
                 onBack = onBack,
                 showBackButton = true,
                 subTitle = ""
@@ -95,14 +97,14 @@ fun CO2EmissionReportScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = "Emision de CO2",
+                        text = stringResource(R.string.emisiones_co2),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold
                         )
                     )
 
                     Text(
-                        text = "Seleccione un periodo para ver la información de emisiones de C02.",
+                        text = stringResource(R.string.seleccione_periodo_co2),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -146,7 +148,7 @@ fun Co2EmissionsInfoCard(
         ) {
 
             Text(
-                text = "Ficha informativa",
+                text = stringResource(R.string.ficha_informativa),
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -158,7 +160,7 @@ fun Co2EmissionsInfoCard(
 
             if (report == null) {
                 Text(
-                    text = "No hay información disponible para mostrar.",
+                    text = stringResource(R.string.no_info_mostrar),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
@@ -166,22 +168,22 @@ fun Co2EmissionsInfoCard(
                 )
             } else {
                 InfoRow(
-                    label = "Mes",
+                    label = stringResource(R.string.mes),
                     value = report.month
                 )
 
                 InfoRow(
-                    label = "Odómetro mensual",
+                    label = stringResource(R.string.odometro_mensual),
                     value = report.monthlyOdometer
                 )
 
                 InfoRow(
-                    label = "Emisiones mensuales",
+                    label = stringResource(R.string.emisiones_mensuales),
                     value = report.monthlyCO2Emissions
                 )
 
                 InfoRow(
-                    label = "Tipo de combustible",
+                    label = stringResource(R.string.tipo_combustible),
                     value = report.fuelTypeName
                 )
             }

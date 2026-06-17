@@ -1,12 +1,15 @@
 package com.rfz.appflotal.presentation.ui.reportes.pdf
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.FileProvider
+import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.report.CpkReportResponse
 import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.presentation.ui.reportes.viewmodel.formatCurrency
@@ -87,6 +90,19 @@ fun createRendimientoPdf(
         }
 
         var y = margin
+        var logoBottomY = y
+
+        // Draw Logo
+        try {
+            val logoBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.logo)
+            val logoWidth = 80
+            val logoHeight = (logoBitmap.height.toFloat() / logoBitmap.width.toFloat() * logoWidth).toInt()
+            val scaledLogo = Bitmap.createScaledBitmap(logoBitmap, logoWidth, logoHeight, true)
+            canvas.drawBitmap(scaledLogo, pageWidth - margin - logoWidth, 20f, null)
+            logoBottomY = margin + logoHeight
+        } catch (e: Exception) {
+            Log.e("PDF_GEN", "Logo could not be loaded", e)
+        }
 
         val finalDepth = maxOf(
             0.0,
@@ -100,29 +116,32 @@ fun createRendimientoPdf(
 
         // Header
         canvas.drawText(
-            "REPORTE DE RENDIMIENTO",
+            context.getString(R.string.pdf_header_title),
             margin,
             y,
             titlePaint
         )
+        
+        y += 20f
 
         canvas.drawText(
-            dateText,
-            pageWidth - margin - valuePaint.measureText(dateText),
-            y,
-            subtitlePaint
-        )
-
-        y += 16f
-
-        canvas.drawText(
-            "Sistema Hombre Camión - Flotal",
+            "${context.getString(R.string.pdf_label_date)}: $dateText",
             margin,
             y,
             subtitlePaint
         )
 
-        y += 18f
+        y += 12f
+
+        canvas.drawText(
+            context.getString(R.string.pdf_system_name),
+            margin,
+            y,
+            subtitlePaint
+        )
+
+        // Asegurarnos de que la línea esté debajo tanto del texto como del logo
+        y = maxOf(y + 20f, logoBottomY + 10f)
 
         canvas.drawLine(
             margin,
@@ -136,13 +155,13 @@ fun createRendimientoPdf(
 
         // Posición e ID
         canvas.drawText(
-            "Posición: Rueda $tirePosition",
+            context.getString(R.string.pdf_label_position, tirePosition),
             margin,
             y,
             labelPaint
         )
 
-        val idText = "ID Llanta: ${report.idTire}"
+        val idText = context.getString(R.string.pdf_label_id, report.idTire)
         canvas.drawText(
             idText,
             pageWidth - margin - valuePaint.measureText(idText),
@@ -156,7 +175,7 @@ fun createRendimientoPdf(
         if (tire != null) {
             y = drawSectionTitle(
                 canvas = canvas,
-                title = "Información del Neumático",
+                title = context.getString(R.string.pdf_section_tire_info),
                 x = margin,
                 y = y,
                 paint = sectionPaint
@@ -164,21 +183,21 @@ fun createRendimientoPdf(
 
             y = drawPdfRow(
                 canvas,
-                "Número de Serie",
+                context.getString(R.string.pdf_label_serial),
                 report.tireNumber,
                 margin,
                 y,
                 labelPaint,
                 valuePaint
             )
-            y = drawPdfRow(canvas, "Marca", tire.brand, margin, y, labelPaint, valuePaint)
-            y = drawPdfRow(canvas, "Modelo", tire.model, margin, y, labelPaint, valuePaint)
-            y = drawPdfRow(canvas, "Medida", tire.size, margin, y, labelPaint, valuePaint)
+            y = drawPdfRow(canvas, context.getString(R.string.pdf_label_brand), tire.brand, margin, y, labelPaint, valuePaint)
+            y = drawPdfRow(canvas, context.getString(R.string.pdf_label_model), tire.model, margin, y, labelPaint, valuePaint)
+            y = drawPdfRow(canvas, context.getString(R.string.pdf_label_size), tire.size, margin, y, labelPaint, valuePaint)
 
             if (report.renovatedDesign.isNotBlank()) {
                 y = drawPdfRow(
                     canvas,
-                    "Diseño Renovado",
+                    context.getString(R.string.pdf_label_retread_design),
                     report.renovatedDesign,
                     margin,
                     y,
@@ -193,7 +212,7 @@ fun createRendimientoPdf(
         // Resumen de operación
         y = drawSectionTitle(
             canvas = canvas,
-            title = "Resumen de Operación",
+            title = context.getString(R.string.pdf_section_operation),
             x = margin,
             y = y,
             paint = sectionPaint
@@ -201,7 +220,7 @@ fun createRendimientoPdf(
 
         y = drawPdfRow(
             canvas,
-            "Odómetro Actual",
+            context.getString(R.string.pdf_label_odometer),
             "${report.differenceOdometer} km",
             margin,
             y,
@@ -210,7 +229,7 @@ fun createRendimientoPdf(
         )
         y = drawPdfRow(
             canvas,
-            "Distancia Recorrida",
+            context.getString(R.string.pdf_label_distance),
             "${report.differenceOdometer} km",
             margin,
             y,
@@ -219,7 +238,7 @@ fun createRendimientoPdf(
         )
         y = drawPdfRow(
             canvas,
-            "Profundidad Inicial",
+            context.getString(R.string.pdf_label_initial_depth),
             "${formatDecimal(tire?.thread ?: 0.0)} mm",
             margin,
             y,
@@ -228,7 +247,7 @@ fun createRendimientoPdf(
         )
         y = drawPdfRow(
             canvas,
-            "Desgaste de Piso",
+            context.getString(R.string.pdf_label_wear),
             "${formatDecimal(report.differenceInTreadDepth.toDouble())} mm",
             margin,
             y,
@@ -237,7 +256,7 @@ fun createRendimientoPdf(
         )
         y = drawPdfRow(
             canvas,
-            "Profundidad Actual",
+            context.getString(R.string.pdf_label_current_depth),
             "${formatDecimal(finalDepth)} mm",
             margin,
             y,
@@ -246,7 +265,7 @@ fun createRendimientoPdf(
         )
         y = drawPdfRow(
             canvas,
-            "Ciclo de Vida",
+            context.getString(R.string.pdf_label_lifecycle),
             report.lifeCycle.toString(),
             margin,
             y,
@@ -259,7 +278,7 @@ fun createRendimientoPdf(
         // Eficiencia
         y = drawSectionTitle(
             canvas = canvas,
-            title = "Eficiencia",
+            title = context.getString(R.string.pdf_section_efficiency),
             x = margin,
             y = y,
             paint = sectionPaint
@@ -267,7 +286,7 @@ fun createRendimientoPdf(
 
         y = drawPdfRow(
             canvas,
-            "Rendimiento (km/mm)",
+            context.getString(R.string.pdf_label_performance),
             "${formatDecimal(report.kmPerMm)} km/mm",
             margin,
             y,
@@ -280,7 +299,7 @@ fun createRendimientoPdf(
         // Costos
         y = drawSectionTitle(
             canvas = canvas,
-            title = "Análisis de Costos",
+            title = context.getString(R.string.pdf_section_costs),
             x = margin,
             y = y,
             paint = sectionPaint
@@ -288,7 +307,7 @@ fun createRendimientoPdf(
 
         y = drawPdfRow(
             canvas,
-            "Costo Unitario",
+            context.getString(R.string.pdf_label_unit_cost),
             formatCurrency(report.unitCost),
             margin,
             y,
@@ -297,7 +316,7 @@ fun createRendimientoPdf(
         )
         y = drawPdfRow(
             canvas,
-            "Costo por mm",
+            context.getString(R.string.pdf_label_cost_mm),
             formatCurrency(report.costByMm),
             margin,
             y,
@@ -306,7 +325,7 @@ fun createRendimientoPdf(
         )
         y = drawPdfRow(
             canvas,
-            "Costo por km (CPK)",
+            context.getString(R.string.pdf_label_cpk),
             formatCurrency(report.costPerKm),
             margin,
             y,
@@ -327,7 +346,7 @@ fun createRendimientoPdf(
             grayLinePaint
         )
 
-        val signatureText = "Firma Responsable"
+        val signatureText = context.getString(R.string.pdf_signature)
         canvas.drawText(
             signatureText,
             (pageWidth - subtitlePaint.measureText(signatureText)) / 2f,
@@ -336,8 +355,7 @@ fun createRendimientoPdf(
         )
 
         // Footer
-        val footerText =
-            "Este reporte es un documento informativo generado por la aplicación Hombre Camión."
+        val footerText = context.getString(R.string.pdf_footer)
         canvas.drawText(
             footerText,
             (pageWidth - subtitlePaint.measureText(footerText)) / 2f,

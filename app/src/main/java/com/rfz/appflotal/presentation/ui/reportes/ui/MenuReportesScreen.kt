@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.reportes
+package com.rfz.appflotal.presentation.ui.reportes.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
@@ -32,7 +33,7 @@ fun MenuReportesView(onBack: () -> Unit, onNavigate: (Any) -> Unit, modifier: Mo
         modifier = modifier.fillMaxSize(),
         topBar = {
             SimpleTopBar(
-                title = "Reportes",
+                title = stringResource(R.string.reportes),
                 onBack = onBack,
                 showBackButton = true,
                 subTitle = ""
@@ -52,7 +53,7 @@ fun MenuReportesView(onBack: () -> Unit, onNavigate: (Any) -> Unit, modifier: Mo
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 ElegantMenuCard(
-                    title = "Rendimiento",
+                    title = stringResource(R.string.rendimiento),
                     iconRes = R.drawable.rendimiento,
                     onClick = { onNavigate(CpkReport) },
                     primaryColor = primaryColor,
@@ -61,7 +62,7 @@ fun MenuReportesView(onBack: () -> Unit, onNavigate: (Any) -> Unit, modifier: Mo
                     modifier = Modifier.weight(1f)
                 )
                 ElegantMenuCard(
-                    title = "Consumo de Combustible",
+                    title = stringResource(R.string.consumo_combustible),
                     iconRes = R.drawable.proyeccion,
                     onClick = { onNavigate(FuelConsumption) },
                     primaryColor = primaryColor,
@@ -77,7 +78,7 @@ fun MenuReportesView(onBack: () -> Unit, onNavigate: (Any) -> Unit, modifier: Mo
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ElegantMenuCard(
-                    title = "Emisiones de CO2",
+                    title = stringResource(R.string.emisiones_co2),
                     iconRes = R.drawable.c02_icon,
                     onClick = { onNavigate(CO2Emissions) },
                     primaryColor = primaryColor,

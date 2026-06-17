@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.reportes.rendimiento.cpk
+package com.rfz.appflotal.presentation.ui.reportes.ui.cpk
 
 import android.content.Context
 import android.net.Uri
