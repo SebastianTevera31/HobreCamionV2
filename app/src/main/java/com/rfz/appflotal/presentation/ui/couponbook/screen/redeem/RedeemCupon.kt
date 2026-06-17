@@ -446,7 +446,7 @@ private fun CouponRedeemDetails(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "Descuento de $discount",
+                        text = stringResource(R.string.cupon_descuento_valor, discount),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         lineHeight = 24.sp,

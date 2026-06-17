@@ -597,4 +597,7 @@
     <string name="pdf_signature">Firma Responsable</string>
     <string name="pdf_footer">Este reporte es un documento informativo generado por la aplicación Flotal Hombre Camión.</string>
     <string name="share_pdf">Compartir PDF</string>
+    <string name="cupon_descuento_valor">Descuento de %1$s</string>
+    <string name="cupones">Cupones</string>
+    <string name="mis_vouchers">Mis Vouchers</string>
 </resources>
