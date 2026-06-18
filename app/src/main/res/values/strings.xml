@@ -555,6 +555,8 @@
     <string name="rueda_pos">Rueda %1$s</string>
     <string name="no_info_llanta">No hay información de la llanta</string>
     <string name="reporte_rendimiento_title">Reporte de rendimiento</string>
+    <string name="reporte_rendimiento_general">Reporte de rendimiento general</string>
+    <string name="general">General</string>
 
     <string name="seleccione_periodo_co2">Seleccione un periodo para ver la información de emisiones de CO2.</string>
     <string name="ficha_informativa">Ficha informativa</string>
@@ -600,4 +602,5 @@
     <string name="cupon_descuento_valor">Descuento de %1$s</string>
     <string name="cupones">Cupones</string>
     <string name="mis_vouchers">Mis Vouchers</string>
+    <string name="guardar_reporte_general">Guardar reporte general</string>
 </resources>

@@ -33,10 +33,11 @@ class CpkReportViewModel @Inject constructor(
             getCpkReportUseCase().fold(
                 onSuccess = { data ->
                     allReports = data.allReports
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             tireList = data.pairedTires,
                             detailTireList = data.detailedTires,
+                            allReports = data.allReports,
                             menuLoadState = LoadState.Success(Unit)
                         )
                     }
@@ -95,6 +96,7 @@ class CpkReportViewModel @Inject constructor(
 data class CpkUiState(
     val tireList: List<AssemblyTire> = emptyList(),
     val detailTireList: List<Tire> = emptyList(),
+    val allReports: List<CpkReportResponse> = emptyList(),
     val selectedTire: AssemblyTire? = null,
     val tireInfo: Tire? = null,
     val cpkReport: CpkReportResponse? = null,

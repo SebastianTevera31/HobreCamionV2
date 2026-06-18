@@ -51,13 +51,25 @@ fun NavGraphBuilder.reportGraph(
         composable<CpkReport> {
             val viewModel: CpkReportViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsState()
+            val context = LocalContext.current
 
             MenuRendimientoScreen(
                 wheels = state.tireList,
+                reports = state.allReports,
+                tires = state.detailTireList,
                 onLoadData = {
                     viewModel.loadData()
                 },
                 loadState = state.menuLoadState,
+                exportLoadState = state.exportPdfState,
+                pdfUri = state.pdfUri,
+                onExportPdf = { uri -> viewModel.updatePdfUri(uri) },
+                onSharePdf = { uri ->
+                    viewModel.sharePdfReport(context, uri)
+                },
+                onClearPdfState = {
+                    viewModel.resetExportState()
+                },
                 onWheelSelected = {
                     viewModel.selectTire(it)
                     navController.navigate(CpkDetail)
