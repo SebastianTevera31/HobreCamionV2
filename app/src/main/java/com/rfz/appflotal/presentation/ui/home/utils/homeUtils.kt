@@ -95,6 +95,11 @@ val menuItems = listOf(
         ReportGraph,
         R.drawable.reportes_icon
     ),
+    MenuItem(
+        R.string.clima,
+        HombreCamionScreens.WEATHER.name,
+        R.drawable.weather_icon
+    )
 )
 
 val primaryColor = primaryLight

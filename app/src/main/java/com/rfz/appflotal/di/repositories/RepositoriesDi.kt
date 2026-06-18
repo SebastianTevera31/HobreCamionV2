@@ -12,6 +12,8 @@ import com.rfz.appflotal.data.repository.tire.TireRepository
 import com.rfz.appflotal.data.repository.tire.TireRepositoryImpl
 import com.rfz.appflotal.data.repository.vehicle.VehicleRepository
 import com.rfz.appflotal.data.repository.vehicle.VehicleRepositoryImpl
+import com.rfz.appflotal.data.repository.weather.WeatherRepository
+import com.rfz.appflotal.data.repository.weather.WeatherRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -45,4 +47,8 @@ abstract class DiRepository {
     @Binds
     @Singleton
     abstract fun bindRepositoryUserPreferences(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWeatherRepository(impl: WeatherRepositoryImpl): WeatherRepository
 }

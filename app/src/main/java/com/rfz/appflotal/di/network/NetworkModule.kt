@@ -57,6 +57,7 @@ import com.rfz.appflotal.data.network.client.vehicle.VehicleListClient
 import com.rfz.appflotal.data.network.client.vehicle.VehicleTypeClient
 import com.rfz.appflotal.data.network.client.vialstatus.VialStatusService
 import com.rfz.appflotal.data.network.client.waster.WasteService
+import com.rfz.appflotal.data.network.client.weather.WeatherClient
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepository
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepositoryImp
 import com.rfz.appflotal.data.repository.wifi.WifiRepository
@@ -441,6 +442,12 @@ class NetworkModule {
     @Provides
     fun provideReportService(retrofit: Retrofit): ReportService {
         return retrofit.create(ReportService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideWeatherClient(retrofit: Retrofit): WeatherClient {
+        return retrofit.create(WeatherClient::class.java)
     }
 }
 

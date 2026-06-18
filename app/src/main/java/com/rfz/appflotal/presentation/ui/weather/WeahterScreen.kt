@@ -761,7 +761,9 @@ private fun SunAndAirRow(city: City) {
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        city.aqiLabel, fontSize = 11.sp, fontWeight = FontWeight.Bold,
+                        city.aqiLabel,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
                         color = when {
                             city.aqi < 50 -> CieloPalette.Aqi1
                             city.aqi < 100 -> CieloPalette.Warm

@@ -197,17 +197,14 @@ class InicioActivity : ComponentActivity() {
     @Inject
     lateinit var utilizationUseCase: UtilizationUseCase
 
-
     @Inject
     lateinit var productByIdUseCase: ProductByIdUseCase
-
 
     @Inject
     lateinit var brandListUseCase: BrandListUseCase
 
     @Inject
     lateinit var crudOriginalDesignUseCase: CrudOriginalDesignUseCase
-
 
     @Inject
     lateinit var tireSizeCrudUseCase: TireSizeCrudUseCase
@@ -217,7 +214,6 @@ class InicioActivity : ComponentActivity() {
 
     @Inject
     lateinit var productCrudUseCase: ProductCrudUseCase
-
 
     @Inject
     lateinit var originalDesignUseCase: OriginalDesignUseCase
