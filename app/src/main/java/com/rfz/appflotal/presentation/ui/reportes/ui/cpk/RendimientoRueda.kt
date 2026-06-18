@@ -170,7 +170,7 @@ fun RendimientoRuedaScreen(
         }
     ) { innerPadding ->
         when (loadState) {
-            is LoadState.Loading, LoadState.Idle -> {
+            is LoadState.Loading -> {
                 LoadingDialog()
             }
 
