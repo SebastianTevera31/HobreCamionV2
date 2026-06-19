@@ -616,4 +616,5 @@
     <string name="cupones">Coupons</string>
     <string name="mis_vouchers">My Vouchers</string>
     <string name="guardar_reporte_general">Save general report</string>
+    <string name="clima">Weather</string>
 </resources>

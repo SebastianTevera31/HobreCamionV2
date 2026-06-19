@@ -4,18 +4,53 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.outlined.Air
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.CloudQueue
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.MoreHoriz
+import androidx.compose.material.icons.outlined.RemoveRedEye
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material.icons.outlined.Thermostat
+import androidx.compose.material.icons.outlined.Thunderstorm
+import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.material.icons.outlined.WbSunny
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +58,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
@@ -84,51 +122,82 @@ object CieloPalette {
 }
 
 @Composable
-fun HomeScreen(
+fun WeatherRoute(
     onOpenForecast: (cityId: String) -> Unit,
+    viewModel: WeatherViewModel,
+    modifier: Modifier = Modifier
 ) {
     val cities = SampleCities.all
     val pagerState = rememberPagerState(initialPage = 0) { cities.size }
+    val uiState = viewModel.weatherState.collectAsState()
+
+    WeatherScreen(
+        pagerState = pagerState,
+        onOpenForecast = onOpenForecast,
+        uiState = uiState.value,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun WeatherScreen(
+    pagerState: PagerState,
+    onOpenForecast: (cityId: String) -> Unit,
+    uiState: WeatherUiState,
+    modifier: Modifier = Modifier
+) {
+    val cities = SampleCities.all
     val scope = rememberCoroutineScope()
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-            ) { page ->
-                val city = cities[page]
-                Column(
+            val city = uiState.city
+            if (city != null) {
+                HorizontalPager(
+                    state = pagerState,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(bottom = 12.dp),
+                        .fillMaxWidth()
+                        .weight(1f),
+                ) { page ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(bottom = 12.dp),
+                    ) {
+                        Header(
+                            city = city,
+                            pageIndex = pagerState.currentPage,
+                            pageCount = cities.size,
+                            onSelectPage = { i ->
+                                scope.launch {
+                                    pagerState.animateScrollToPage(i)
+                                }
+                            },
+                        )
+                        HeroCard(city)
+                        ForecastCta(city) { onOpenForecast(city.id) }
+                        MetricsSection(city)
+                        SunAndAirRow(city)
+                    }
+                }
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Header(
-                        city = city,
-                        pageIndex = pagerState.currentPage,
-                        pageCount = cities.size,
-                        onSelectPage = { i ->
-                            scope.launch {
-                                pagerState.animateScrollToPage(i)
-                            }
-                        },
-                    )
-                    HeroCard(city)
-                    ForecastCta(city) { onOpenForecast(city.id) }
-                    MetricsSection(city)
-                    SunAndAirRow(city)
+                    Text("Sin datos disponibles.")
                 }
             }
+
             BottomNav(
                 active = "home",
-                onForecast = { onOpenForecast(cities[pagerState.currentPage].id) })
+                onForecast = { onOpenForecast(cities[pagerState.currentPage].id) }
+            )
         }
     }
 }
@@ -326,7 +395,11 @@ private fun HeroCard(city: City) {
                         color = CieloPalette.textDim(),
                     )
                     Text("·", color = CieloPalette.textFaint())
-                    Text("Sensación ${city.feels}°", fontSize = 13.sp, color = CieloPalette.textDim())
+                    Text(
+                        "Sensación ${city.feels}°",
+                        fontSize = 13.sp,
+                        color = CieloPalette.textDim()
+                    )
                 }
                 Spacer(Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -967,7 +1040,13 @@ fun BottomNav(active: String, onHome: () -> Unit = {}, onForecast: () -> Unit = 
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            NavItem("Hoy", Icons.Outlined.WbSunny, active == "home", Modifier.weight(1f), onHome)
+            NavItem(
+                "Hoy",
+                Icons.Outlined.WbSunny,
+                active == "home",
+                Modifier.weight(1f),
+                onHome
+            )
             NavItem(
                 "Pronóstico",
                 Icons.Outlined.ChevronRight,
@@ -1092,10 +1171,18 @@ object SampleCities {
     )
 }
 
-@Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
+@Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
+fun WeatherScreenPreview() {
+    val cities = SampleCities.all
+    val pagerState = rememberPagerState(initialPage = 0) { cities.size }
     HombreCamionTheme {
-        HomeScreen(onOpenForecast = {})
+        WeatherScreen(
+            pagerState = pagerState,
+            onOpenForecast = {},
+            uiState = WeatherUiState(
+                city = cities.first()
+            )
+        )
     }
 }

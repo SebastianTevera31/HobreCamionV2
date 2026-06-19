@@ -55,12 +55,12 @@ class WeatherViewModel @Inject constructor(
                 )
             }
             val result = weatherRepository.getLatest(lat, lon)
-//            _weatherState.update {
-//                it.copy(
-//                    isLoading = false,
-//                    screenState = LoadState.Success
-//                )
-//            }
+            _weatherState.update {
+                it.copy(
+                    isLoading = false,
+                    screenState = LoadState.Success(Unit)
+                )
+            }
         }
     }
 

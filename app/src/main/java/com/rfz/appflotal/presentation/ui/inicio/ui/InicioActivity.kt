@@ -153,8 +153,11 @@ import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserVi
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import com.rfz.appflotal.presentation.ui.vialstatus.view.VialStatusScreen
 import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
+import com.rfz.appflotal.presentation.ui.weather.WeatherRoute
+import com.rfz.appflotal.presentation.ui.weather.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -518,7 +521,7 @@ class InicioActivity : ComponentActivity() {
                                                             }
                                                         }
                                                     } else {
-                                                        delay(500)
+                                                        delay(500.milliseconds)
                                                         val permissionsGranted =
                                                             arePermissionsGranted(
                                                                 this@InicioActivity,
@@ -837,7 +840,7 @@ class InicioActivity : ComponentActivity() {
                                             languageSelected = uiState.value.selectedLanguage,
                                             signUpViewModel = signUpViewModel
                                         ) {
-                                            delay(500)
+                                            delay(500.milliseconds)
                                             val permissionsGranted = arePermissionsGranted(
                                                 this@InicioActivity,
                                                 getRequiredPermissions()
@@ -1039,6 +1042,15 @@ class InicioActivity : ComponentActivity() {
                                     couponGraph(navController)
 
                                     reportGraph(navController)
+
+                                    composable(route = HombreCamionScreens.WEATHER.name) {
+                                        val watherViewModel: WeatherViewModel = hiltViewModel()
+
+                                        WeatherRoute(
+                                            onOpenForecast = { },
+                                            viewModel = watherViewModel
+                                        )
+                                    }
                                 }
 
                                 NotificationComponent(
