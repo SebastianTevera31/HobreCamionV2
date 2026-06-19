@@ -153,8 +153,8 @@ import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserVi
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import com.rfz.appflotal.presentation.ui.vialstatus.view.VialStatusScreen
 import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
-import com.rfz.appflotal.presentation.ui.weather.WeatherRoute
-import com.rfz.appflotal.presentation.ui.weather.WeatherViewModel
+import com.rfz.appflotal.presentation.ui.weather.view.WeatherRoute
+import com.rfz.appflotal.presentation.ui.weather.viewmodel.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds

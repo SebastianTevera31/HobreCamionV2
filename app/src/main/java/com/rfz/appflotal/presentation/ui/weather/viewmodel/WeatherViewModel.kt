@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.weather
+package com.rfz.appflotal.presentation.ui.weather.viewmodel
 
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
@@ -38,28 +38,42 @@ class WeatherViewModel @Inject constructor(
     val weatherState = _weatherState.asStateFlow()
 
     @SuppressLint("MissingPermission")
-    fun getCurrentLocation() {
+    fun getCurrentWeather() {
         viewModelScope.launch {
-            val location = locationRepository.getLastLocation()
-            val name = "${location?.pais}, ${location?.estado}, ${location?.municipio}"
-
-        }
-    }
-
-    fun getLatestWeather(lat: Double, lon: Double) {
-        viewModelScope.launch {
-            _weatherState.update {
-                it.copy(
+            _weatherState.update { currentUiState ->
+                currentUiState.copy(
                     isLoading = true,
                     screenState = LoadState.Loading
                 )
             }
-            val result = weatherRepository.getLatest(lat, lon)
-            _weatherState.update {
-                it.copy(
-                    isLoading = false,
-                    screenState = LoadState.Success(Unit)
+            val location = locationRepository.getLastLocation()
+            // val name = "${location?.pais}, ${location?.estado}, ${location?.municipio}"
+            if (location != null) {
+                val result = weatherRepository.getLatest(
+                    lat = location.lat,
+                    lon = location.lng
                 )
+                when (result) {
+                    is ApiResult.Error -> {
+                        _weatherState.update { currentUiState ->
+                            currentUiState.copy(
+                                error = result.message,
+                                screenState = LoadState.Error("Error al obtener el clima.")
+                            )
+                        }
+                    }
+
+                    is ApiResult.Success -> {
+                        _weatherState.update { currentUiState ->
+                            currentUiState.copy(
+                                city = result.data,
+                                screenState = LoadState.Success(Unit)
+                            )
+                        }
+                    }
+
+                    else -> Unit
+                }
             }
         }
     }
