@@ -157,11 +157,11 @@ import com.rfz.appflotal.presentation.ui.weather.view.WeatherRoute
 import com.rfz.appflotal.presentation.ui.weather.viewmodel.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @AndroidEntryPoint
 class InicioActivity : ComponentActivity() {
@@ -1048,7 +1048,8 @@ class InicioActivity : ComponentActivity() {
 
                                         WeatherRoute(
                                             onOpenForecast = { },
-                                            viewModel = watherViewModel
+                                            viewModel = watherViewModel,
+                                            onBack = { navController.popBackStack() }
                                         )
                                     }
                                 }

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 interface WeatherRepository {
-    suspend fun getLatest(lat: Double, lon: Double): ApiResult<City>
+    suspend fun getLatest(lat: Double, lon: Double, locationName: String): ApiResult<City>
     suspend fun getWeatherApi(lat: Double, lon: Double, nombreUbicacion: String): ApiResult<City>
 }
 
@@ -18,20 +18,24 @@ class WeatherRepositoryImpl @Inject constructor(
     private val getTasksUseCase: GetTasksUseCase
 ) : WeatherRepository {
 
-    override suspend fun getLatest(lat: Double, lon: Double): ApiResult<City> {
+    override suspend fun getLatest(
+        lat: Double,
+        lon: Double,
+        locationName: String
+    ): ApiResult<City> {
         return try {
             val user = getTasksUseCase().first().firstOrNull()
             val token = user?.fld_token ?: ""
-            val response = weatherService.getLatest(token, lat, lon)
-            if (response.isSuccessful) {
-                val body = response.body()
+            val response = weatherService.getLatest(token, lat, lon, locationName)
+            if (response.isSuccess) {
+                val body = response.getOrNull()
                 if (body != null) {
-                    ApiResult.Success(body.toDomain())
+                    ApiResult.Success(body.toDomain(locationName))
                 } else {
                     ApiResult.Error(message = "Response body is null")
                 }
             } else {
-                ApiResult.Error(message = response.message())
+                ApiResult.Error(message = "Response was not successful")
             }
         } catch (e: Exception) {
             ApiResult.Error(e)
@@ -50,7 +54,7 @@ class WeatherRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-                    ApiResult.Success(body.toDomain())
+                    ApiResult.Success(body.toDomain(nombreUbicacion))
                 } else {
                     ApiResult.Error(message = "Response body is null")
                 }

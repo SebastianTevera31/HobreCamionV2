@@ -11,7 +11,8 @@ interface WeatherClient {
     suspend fun getLatest(
         @Header("Authorization") token: String,
         @Query("lat") lat: Double,
-        @Query("lon") lon: Double
+        @Query("lon") lon: Double,
+        @Query("nombreUbicacion") locationName: String,
     ): Response<WeatherResponse>
 
     @GET("api/Weather/WeatherApi")

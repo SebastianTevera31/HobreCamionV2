@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.truncate
 
 data class WeatherLocation(
     val lat: Double,
@@ -27,6 +28,8 @@ data class WeatherUiState(
     val error: String? = null,
     val screenState: LoadState<Unit> = LoadState.Idle
 )
+
+private const val factor = 1000000.0
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
@@ -46,12 +49,14 @@ class WeatherViewModel @Inject constructor(
                     screenState = LoadState.Loading
                 )
             }
+
             val location = locationRepository.getLastLocation()
-            // val name = "${location?.pais}, ${location?.estado}, ${location?.municipio}"
             if (location != null) {
+                if (location.ciudad == null) return@launch
                 val result = weatherRepository.getLatest(
-                    lat = location.lat,
-                    lon = location.lng
+                    lat = 16.764900, // Invertir
+                    lon = -93.183400, // Invertir
+                    locationName = "Tuxtla Gutierrez"
                 )
                 when (result) {
                     is ApiResult.Error -> {

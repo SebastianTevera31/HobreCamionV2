@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.weather.view
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,13 +8,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -22,22 +26,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Air
+import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.CloudQueue
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.RemoveRedEye
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material.icons.outlined.WbSunny
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.outlined.WbTwilight
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
@@ -47,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -56,8 +64,8 @@ import com.rfz.appflotal.domain.weather.City
 import com.rfz.appflotal.domain.weather.HourlyForecast
 import com.rfz.appflotal.domain.weather.WeatherCondition
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.utils.LoadState
+import com.rfz.appflotal.presentation.ui.vialstatus.view.CancellableLoadingDialog
 import com.rfz.appflotal.presentation.ui.weather.viewmodel.WeatherUiState
 import com.rfz.appflotal.presentation.ui.weather.viewmodel.WeatherViewModel
 import java.text.SimpleDateFormat
@@ -80,35 +88,12 @@ object CieloPalette {
     @Composable
     @ReadOnlyComposable
     fun textFaint() = MaterialTheme.colorScheme.outline
-
-    @Composable
-    @ReadOnlyComposable
-    fun chipBg() = MaterialTheme.colorScheme.surfaceVariant
-
-    @Composable
-    @ReadOnlyComposable
-    fun divider() = MaterialTheme.colorScheme.outlineVariant
-
-    @Composable
-    @ReadOnlyComposable
-    fun surfaceAlt() = MaterialTheme.colorScheme.surfaceContainer
-
-    val Warm = Color(0xFFFF5252)
-    val Cool = Color(0xFF448AFF)
-    val Sun = Color(0xFFFFD600)
-    val Alert = Color(0xFFFF6D00)
-
-    val Aqi1 = Color(0xFF4CAF50)
-    val Aqi2 = Color(0xFFFFEB3B)
-    val Aqi3 = Color(0xFFFF9800)
-    val Aqi4 = Color(0xFFF44336)
 }
-
-// ─── PANTALLA PRINCIPAL ──────────────────────────────────────
 
 @Composable
 fun WeatherRoute(
     onOpenForecast: (cityId: String) -> Unit,
+    onBack: () -> Unit,
     viewModel: WeatherViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -130,11 +115,11 @@ fun WeatherRoute(
         when (uiState.screenState) {
             is LoadState.Success -> {
                 uiState.city?.let { city ->
-                    WeatherScreen(city, onOpenForecast)
+                    WeatherScreen(city, onOpenForecast, onBack)
                 }
             }
 
-            LoadState.Loading -> LoadingDialog()
+            LoadState.Loading -> CancellableLoadingDialog(onCancel = onBack)
             else -> EmptyWeatherContent()
         }
     }
@@ -159,125 +144,153 @@ private fun EmptyWeatherContent(
 @Composable
 private fun WeatherScreen(
     city: City,
-    onOpenForecast: (cityId: String) -> Unit
+    onOpenForecast: (cityId: String) -> Unit,
+    onBack: () -> Unit
 ) {
     Scaffold(
-        containerColor = Color.Transparent,
-        topBar = { Header(city) }
-    ) { innerPadding ->
+        containerColor = Color(0xFFF8FAFC), // Fondo general muy limpio
+        topBar = {
+            Header(city, onBack)
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(32.dp) // Mucho aire entre secciones
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             HeroSection(city)
-            HourlySection(city, onOpenForecast)
+
+            // Sección de Pronóstico por horas con fondo resaltado
+            WeatherSection(title = "PRONÓSTICO HOY") {
+                HourlySection(city, onOpenForecast)
+            }
+
+            // Detalles en Grid
             DetailsGrid(city)
+
+            // Sol y Aire en tarjetas divididas
             SunAndAirSection(city)
         }
     }
 }
 
-// ─── SECCIÓN 1: HEADER (Minimalista) ─────────────────────────
-
 @Composable
-private fun Header(city: City) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.LocationOn, null, Modifier.size(16.dp), CieloPalette.accent())
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    city.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Text(
-                getTodayLabel(),
-                style = MaterialTheme.typography.labelMedium,
-                color = CieloPalette.textFaint()
-            )
-        }
-
-        IconButton(
-            onClick = { /* Search */ },
-            modifier = Modifier
-                .background(Color.White, CircleShape)
-                .size(40.dp)
-        ) {
-            Icon(Icons.Outlined.Search, null, modifier = Modifier.size(20.dp))
-        }
+fun WeatherSection(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            color = CieloPalette.textFaint(),
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
+        content()
     }
 }
 
-// ─── SECCIÓN 2: HERO (Sin caja, tipografía potente) ──────────
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Header(city: City, onBack: () -> Unit) {
+    TopAppBar(
+        // Eliminamos el padding manual ya que TopAppBar maneja sus propios insets
+        title = {
+            Column(verticalArrangement = Arrangement.Center) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = CieloPalette.accent()
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = city.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Text(
+                    text = getTodayLabel(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = CieloPalette.textFaint() // Usamos el color tenue definido antes
+                )
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Outlined.ArrowBackIosNew,
+                    contentDescription = "Regresar",
+                    modifier = Modifier.size(20.dp),
+                    tint = CieloPalette.accent()
+                )
+            }
+        },
+        // Configuración de colores y elevación
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent, // Para que se mezcle con el fondo de la pantalla
+            scrolledContainerColor = Color.White.copy(alpha = 0.95f), // Al hacer scroll se vuelve sólido
+            navigationIconContentColor = CieloPalette.accent(),
+            titleContentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        // Esto asegura que respete el área de la barra de estado automáticamente
+        windowInsets = WindowInsets.safeDrawing
+    )
+}
 
 @Composable
 private fun HeroSection(city: City) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        color = Color.White,
+        shape = RoundedCornerShape(32.dp),
+        shadowElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column {
-            Text(
-                text = "${city.temp}°",
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontSize = 88.sp,
-                    fontWeight = FontWeight.Light,
-                    letterSpacing = (-4).sp
-                )
-            )
-            Text(
-                text = city.condLabel,
-                style = MaterialTheme.typography.headlineSmall,
-                color = CieloPalette.textDim()
-            )
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(24.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "${city.temp}°",
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = 80.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(MaterialTheme.colorScheme.primary.value) // O un azul oscuro
+                        )
+                    )
+                    Text(
+                        text = city.condLabel.ifBlank { "Despejado" },
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+                WeatherIcon(city.cond, size = 100.dp)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 LabelValue("Sensación", "${city.feels}°")
                 LabelValue("Humedad", "${city.humidity}%")
             }
         }
-
-        WeatherIcon(city.cond, size = 130.dp)
     }
 }
 
-// ─── SECCIÓN 3: PRONÓSTICO (LazyRow sin bordes) ──────────────
 
 @Composable
 private fun HourlySection(city: City, onMore: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                "PRONÓSTICO HOY",
-                style = MaterialTheme.typography.labelLarge,
-                color = CieloPalette.textFaint()
-            )
-            TextButton(onClick = { onMore(city.id) }) {
-                Text("7 días", fontWeight = FontWeight.Bold, color = CieloPalette.accent())
-            }
-        }
-
         LazyRow(
             contentPadding = PaddingValues(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(24.dp)
@@ -303,140 +316,161 @@ private fun HourlySection(city: City, onMore: (String) -> Unit) {
     }
 }
 
-// ─── SECCIÓN 4: DETALLES (Agrupados en una sola zona) ────────
-
 @Composable
 private fun DetailsGrid(city: City) {
-    // Usamos una sola superficie sutil para agrupar todo, evitando "muchas cajas"
     Surface(
-        modifier = Modifier.padding(horizontal = 24.dp),
-        color = Color.White.copy(alpha = 0.5f),
-        shape = RoundedCornerShape(32.dp)
+        color = Color.White,
+        shape = RoundedCornerShape(28.dp),
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             val metrics = listOf(
-                Triple("Viento", "${city.wind} km/h", Icons.Outlined.Air),
-                Triple("Índice UV", city.uvLabel, Icons.Outlined.WbSunny),
-                Triple("Visibilidad", "${city.vis.toInt()} km", Icons.Outlined.RemoveRedEye),
-                Triple("Presión", "${city.pressure} hPa", Icons.Outlined.Speed)
+                MetricData("Viento", "${city.wind} km/h", Icons.Outlined.Air),
+                MetricData("UV", city.uvLabel, Icons.Outlined.WbSunny),
+                MetricData("Visibilidad", "${city.vis.toInt()} km", Icons.Outlined.Visibility),
+                MetricData("Presión", "${city.pressure} hPa", Icons.Outlined.Speed)
             )
 
             metrics.chunked(2).forEachIndexed { index, pair ->
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    pair.forEach { (label, value, icon) ->
-                        Row(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(icon, null, Modifier.size(18.dp), CieloPalette.accent())
-                            Spacer(Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    label,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = CieloPalette.textFaint()
-                                )
-                                Text(
-                                    value,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
+                    pair.forEach { metric ->
+                        Box(modifier = Modifier.weight(1f)) {
+                            MetricTile(metric)
                         }
                     }
                 }
-                if (index == 0) Divider(color = Color.Black.copy(alpha = 0.05f))
+                if (index == 0) HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    color = Color.Black.copy(alpha = 0.05f)
+                )
             }
         }
     }
 }
 
-// ─── SECCIÓN 5: SOL Y AIRE (Simplificado) ────────────────────
+@Composable
+private fun MetricTile(metric: MetricData) {
+    Row(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            metric.icon,
+            null,
+            Modifier.size(20.dp),
+            tint = CieloPalette.accent().copy(alpha = 0.8f)
+        )
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(
+                metric.label,
+                style = MaterialTheme.typography.labelSmall,
+                color = CieloPalette.textFaint()
+            )
+            Text(
+                metric.value.ifBlank { "--" },
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
 
 @Composable
 private fun SunAndAirSection(city: City) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Calidad del Aire (Caja sutil)
-        Surface(
-            Modifier.weight(1f),
-            color = Color.White.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(24.dp)
+        // Calidad del Aire mejorada
+        InfoCard(
+            modifier = Modifier.weight(1f),
+            title = "CALIDAD AIRE",
+            value = city.aqiLabel.ifBlank { "Normal" },
+            icon = Icons.Outlined.Cloud
         ) {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    "AIRE",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = CieloPalette.textFaint()
-                )
-                Text(
-                    city.aqiLabel,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                // Barra de AQI muy fina
+            // Barra de progreso de AQI
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .background(Color(0xFFE2E8F0), CircleShape)
+            ) {
                 Box(
                     Modifier
-                        .fillMaxWidth()
-                        .height(3.dp)
-                        .background(Color.LightGray.copy(0.3f), CircleShape)
-                ) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth(0.4f)
-                            .fillMaxHeight()
-                            .background(CieloPalette.accent(), CircleShape)
-                    )
-                }
+                        .fillMaxWidth(0.4f) // Dinámico basado en city.aqi
+                        .fillMaxHeight()
+                        .background(CieloPalette.accent(), CircleShape)
+                )
             }
         }
 
-        // Sol (Caja sutil)
-        Surface(
-            Modifier.weight(1f),
-            color = Color.White.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(24.dp)
+        // Amanecer/Ocaso
+        InfoCard(
+            modifier = Modifier.weight(1f),
+            title = "OCASO",
+            value = city.sunset.ifBlank { "--:--" },
+            icon = Icons.Outlined.WbTwilight
         ) {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    "OCASO",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = CieloPalette.textFaint()
-                )
-                Text(
-                    city.sunset,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    "Amanece ${city.sunrise}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = CieloPalette.textDim()
-                )
-            }
+            Text(
+                text = if (city.sunrise.isNotBlank()) "Amanece: ${city.sunrise}" else "Sin datos",
+                style = MaterialTheme.typography.labelSmall,
+                color = CieloPalette.textDim()
+            )
         }
     }
 }
 
-// ─── COMPONENTES ATÓMICOS ────────────────────────────────────
+@Composable
+private fun InfoCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    value: String,
+    icon: ImageVector,
+    footer: @Composable () -> Unit
+) {
+    Surface(
+        modifier = modifier,
+        color = Color.White,
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, null, Modifier.size(14.dp), CieloPalette.textFaint())
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    title,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = CieloPalette.textFaint(),
+                    letterSpacing = 1.sp
+                )
+            }
+            Text(
+                value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            footer()
+        }
+    }
+}
 
 @Composable
 fun LabelValue(label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = "$label ",
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelSmall,
             color = CieloPalette.textFaint()
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold
         )
     }
@@ -462,6 +496,8 @@ private fun getTodayLabel(): String {
     val formatter = SimpleDateFormat("EEEE, d MMMM", Locale("es", "MX"))
     return formatter.format(Date()).replaceFirstChar { it.uppercase() }
 }
+
+data class MetricData(val label: String, val value: String, val icon: ImageVector)
 
 @Preview(showBackground = true)
 @Composable
@@ -507,7 +543,8 @@ fun WeatherScreenPreview() {
     HombreCamionTheme {
         WeatherScreen(
             onOpenForecast = {},
-            city = sampleCity
+            city = sampleCity,
+            onBack = {}
         )
     }
 }
