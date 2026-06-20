@@ -55,11 +55,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.domain.weather.City
 import com.rfz.appflotal.domain.weather.HourlyForecast
 import com.rfz.appflotal.domain.weather.WeatherCondition
@@ -134,7 +136,7 @@ private fun EmptyWeatherContent(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Sin datos disponibles.",
+            text = stringResource(R.string.weather_no_data),
             color = CieloPalette.textDim(),
             style = MaterialTheme.typography.bodyMedium
         )
@@ -164,7 +166,7 @@ private fun WeatherScreen(
             HeroSection(city)
 
             // Sección de Pronóstico por horas con fondo resaltado
-            WeatherSection(title = "PRONÓSTICO HOY") {
+            WeatherSection(title = stringResource(R.string.weather_forecast_today)) {
                 HourlySection(city, onOpenForecast)
             }
 
@@ -226,7 +228,7 @@ private fun Header(city: City, onBack: () -> Unit) {
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.Outlined.ArrowBackIosNew,
-                    contentDescription = "Regresar",
+                    contentDescription = stringResource(R.string.regresar),
                     modifier = Modifier.size(20.dp),
                     tint = CieloPalette.accent()
                 )
@@ -272,7 +274,7 @@ private fun HeroSection(city: City) {
                         )
                     )
                     Text(
-                        text = city.condLabel.ifBlank { "Despejado" },
+                        text = translateCondition(city.cond),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -280,10 +282,21 @@ private fun HeroSection(city: City) {
                 WeatherIcon(city.cond, size = 100.dp)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                LabelValue("Sensación", "${city.feels}°")
-                LabelValue("Humedad", "${city.humidity}%")
+                LabelValue(stringResource(R.string.weather_feels_like), "${city.feels}°")
+                LabelValue(stringResource(R.string.weather_humidity), "${city.humidity}%")
             }
         }
+    }
+}
+
+@Composable
+fun translateCondition(cond: WeatherCondition): String {
+    return when (cond) {
+        WeatherCondition.Sunny -> stringResource(R.string.weather_condition_sunny)
+        WeatherCondition.Cloudy -> stringResource(R.string.weather_condition_cloudy)
+        WeatherCondition.Rainy -> stringResource(R.string.weather_condition_rainy)
+        WeatherCondition.Stormy -> stringResource(R.string.weather_condition_stormy)
+        WeatherCondition.PartlyCloudy -> stringResource(R.string.weather_condition_partly_cloudy)
     }
 }
 
@@ -326,10 +339,26 @@ private fun DetailsGrid(city: City) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             val metrics = listOf(
-                MetricData("Viento", "${city.wind} km/h", Icons.Outlined.Air),
-                MetricData("UV", city.uvLabel, Icons.Outlined.WbSunny),
-                MetricData("Visibilidad", "${city.vis.toInt()} km", Icons.Outlined.Visibility),
-                MetricData("Presión", "${city.pressure} hPa", Icons.Outlined.Speed)
+                MetricData(
+                    stringResource(R.string.weather_wind),
+                    "${city.wind} km/h",
+                    Icons.Outlined.Air
+                ),
+                MetricData(
+                    stringResource(R.string.weather_uv),
+                    translateUv(city.uvLabel),
+                    Icons.Outlined.WbSunny
+                ),
+                MetricData(
+                    stringResource(R.string.weather_visibility),
+                    "${city.vis.toInt()} km",
+                    Icons.Outlined.Visibility
+                ),
+                MetricData(
+                    stringResource(R.string.presion),
+                    "${city.pressure} hPa",
+                    Icons.Outlined.Speed
+                )
             )
 
             metrics.chunked(2).forEachIndexed { index, pair ->
@@ -389,8 +418,8 @@ private fun SunAndAirSection(city: City) {
         // Calidad del Aire mejorada
         InfoCard(
             modifier = Modifier.weight(1f),
-            title = "CALIDAD AIRE",
-            value = city.aqiLabel.ifBlank { "Normal" },
+            title = stringResource(R.string.weather_air_quality),
+            value = city.aqiLabel.ifBlank { stringResource(R.string.weather_normal) },
             icon = Icons.Outlined.Cloud
         ) {
             // Barra de progreso de AQI
@@ -412,12 +441,14 @@ private fun SunAndAirSection(city: City) {
         // Amanecer/Ocaso
         InfoCard(
             modifier = Modifier.weight(1f),
-            title = "OCASO",
+            title = stringResource(R.string.weather_sunset),
             value = city.sunset.ifBlank { "--:--" },
             icon = Icons.Outlined.WbTwilight
         ) {
             Text(
-                text = if (city.sunrise.isNotBlank()) "Amanece: ${city.sunrise}" else "Sin datos",
+                text = if (city.sunrise.isNotBlank()) "${stringResource(R.string.weather_sunrise_prefix)}${city.sunrise}" else stringResource(
+                    R.string.sin_datos
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 color = CieloPalette.textDim()
             )
@@ -461,6 +492,18 @@ private fun InfoCard(
 }
 
 @Composable
+fun translateUv(label: String): String {
+    return when (label) {
+        "Bajo" -> stringResource(R.string.weather_uv_low)
+        "Moderado" -> stringResource(R.string.weather_uv_moderate)
+        "Alto" -> stringResource(R.string.weather_uv_high)
+        "Muy Alto" -> stringResource(R.string.weather_uv_very_high)
+        "Extremo" -> stringResource(R.string.weather_uv_extreme)
+        else -> label
+    }
+}
+
+@Composable
 fun LabelValue(label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -493,7 +536,7 @@ fun WeatherIcon(cond: WeatherCondition, size: Dp) {
 }
 
 private fun getTodayLabel(): String {
-    val formatter = SimpleDateFormat("EEEE, d MMMM", Locale("es", "MX"))
+    val formatter = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault())
     return formatter.format(Date()).replaceFirstChar { it.uppercase() }
 }
 
