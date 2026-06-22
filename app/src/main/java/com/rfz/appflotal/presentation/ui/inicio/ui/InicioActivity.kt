@@ -1047,7 +1047,6 @@ class InicioActivity : ComponentActivity() {
                                         val watherViewModel: WeatherViewModel = hiltViewModel()
 
                                         WeatherRoute(
-                                            onOpenForecast = { },
                                             viewModel = watherViewModel,
                                             onBack = { navController.popBackStack() }
                                         )

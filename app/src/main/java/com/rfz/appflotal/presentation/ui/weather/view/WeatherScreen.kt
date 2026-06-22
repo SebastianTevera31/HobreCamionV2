@@ -8,13 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -68,7 +66,6 @@ import com.rfz.appflotal.domain.weather.WeatherCondition
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.vialstatus.view.CancellableLoadingDialog
-import com.rfz.appflotal.presentation.ui.weather.viewmodel.WeatherUiState
 import com.rfz.appflotal.presentation.ui.weather.viewmodel.WeatherViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -94,7 +91,6 @@ object CieloPalette {
 
 @Composable
 fun WeatherRoute(
-    onOpenForecast: (cityId: String) -> Unit,
     onBack: () -> Unit,
     viewModel: WeatherViewModel,
     modifier: Modifier = Modifier
@@ -117,7 +113,7 @@ fun WeatherRoute(
         when (uiState.screenState) {
             is LoadState.Success -> {
                 uiState.city?.let { city ->
-                    WeatherScreen(city, onOpenForecast, onBack)
+                    WeatherScreen(city, onBack)
                 }
             }
 
@@ -205,7 +201,6 @@ private fun EmptyWeatherContent(
 @Composable
 private fun WeatherScreen(
     city: City,
-    onOpenForecast: (cityId: String) -> Unit,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -215,7 +210,6 @@ private fun WeatherScreen(
             Header(city, onBack)
         }
     ) { innerPadding ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -230,7 +224,7 @@ private fun WeatherScreen(
             HeroSection(city)
 
             WeatherSection(title = stringResource(R.string.weather_forecast_today)) {
-                HourlySection(city, onOpenForecast)
+                HourlySection(city)
             }
 
             DetailsGrid(city)
@@ -362,7 +356,7 @@ fun translateCondition(cond: WeatherCondition): String {
 
 
 @Composable
-private fun HourlySection(city: City, onMore: (String) -> Unit) {
+private fun HourlySection(city: City) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         LazyRow(
             contentPadding = PaddingValues(horizontal = 24.dp),
@@ -639,13 +633,8 @@ fun WeatherScreenPreview() {
         )
     )
 
-    val sampleUiState = WeatherUiState(
-        city = sampleCity
-    )
-
     HombreCamionTheme {
         WeatherScreen(
-            onOpenForecast = {},
             city = sampleCity,
             onBack = {}
         )
