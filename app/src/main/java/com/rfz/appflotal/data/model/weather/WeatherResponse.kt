@@ -1,7 +1,7 @@
 package com.rfz.appflotal.data.model.weather
 
 import com.google.gson.annotations.SerializedName
-import com.rfz.appflotal.core.util.AppLocale
+import com.rfz.appflotal.core.util.WeatherMapper
 import com.rfz.appflotal.domain.weather.City
 import com.rfz.appflotal.domain.weather.HourlyForecast
 import com.rfz.appflotal.domain.weather.WeatherCondition
@@ -86,7 +86,7 @@ fun WeatherResponse.toDomain(name: String = "Ubicación Actual"): City {
         tz = "",
         temp = temp,
         cond = mapSymbolToCondition(symbol),
-        condLabel = mapSymbolToLabel(symbol),
+        condLabel = WeatherMapper.getConditionLabel(symbol),
         hi = properties?.timeseries?.take(24)
             ?.maxOfOrNull { it.data?.instant?.details?.airTemperature ?: -999.0 }?.toInt() ?: temp,
         lo = properties?.timeseries?.take(24)
@@ -98,7 +98,7 @@ fun WeatherResponse.toDomain(name: String = "Ubicación Actual"): City {
         aqi = 0,
         aqiLabel = "",
         uv = instant?.uvIndex?.toInt() ?: 0,
-        uvLabel = mapUvToLabel(instant?.uvIndex),
+        uvLabel = WeatherMapper.getUvLabel(instant?.uvIndex),
         humidity = (instant?.relativeHumidity ?: 0.0).toInt(),
         dew = (instant?.dewPoint ?: 0.0).toInt(),
         pressure = (instant?.airPressure ?: 0.0).toInt(),
@@ -124,34 +124,6 @@ private fun mapSymbolToCondition(symbol: String?): WeatherCondition {
     }
 }
 
-private fun mapSymbolToLabel(symbol: String?): String {
-    val lang = AppLocale.currentLocale.value.language
-    val isEn = lang == "en"
-
-    if (symbol == null) return if (isEn) "Clear" else "Despejado"
-
-    val base = symbol.substringBefore("_")
-    return when (base) {
-        "clearsky" -> if (isEn) "Clear Sky" else "Cielo Despejado"
-        "fair" -> if (isEn) "Fair" else "Buen Clima"
-        "partlycloudy" -> if (isEn) "Partly Cloudy" else "Parcialmente Nublado"
-        "cloudy" -> if (isEn) "Cloudy" else "Nublado"
-        "rainshowers" -> if (isEn) "Rain Showers" else "Chubascos"
-        "lightrainshowers" -> if (isEn) "Light Rain Showers" else "Llovizna"
-        "heavyrainshowers" -> if (isEn) "Heavy Rain Showers" else "Chubascos Fuertes"
-        "rain" -> if (isEn) "Rain" else "Lluvia"
-        "lightrain" -> if (isEn) "Light Rain" else "Lluvia Ligera"
-        "heavyrain" -> if (isEn) "Heavy Rain" else "Lluvia Fuerte"
-        "fog" -> if (isEn) "Fog" else "Niebla"
-        "sleet" -> if (isEn) "Sleet" else "Aguanieve"
-        "snow" -> if (isEn) "Snow" else "Nieve"
-        "thunderstorm" -> if (isEn) "Thunderstorm" else "Tormenta"
-        else -> symbol.replace("_", " ").replaceFirstChar {
-            if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
-        }
-    }
-}
-
 private fun mapDegreesToDirection(degrees: Double?): String {
     if (degrees == null) return "N"
     val lang = Locale.getDefault().language
@@ -161,19 +133,4 @@ private fun mapDegreesToDirection(degrees: Double?): String {
         listOf("N", "NE", "E", "SE", "S", "SO", "O", "NO", "N")
     }
     return directions[((degrees % 360) / 45).toInt()]
-}
-
-private fun mapUvToLabel(uv: Double?): String {
-    val lang = Locale.getDefault().language
-    val isEn = lang == "en"
-
-    if (uv == null) return ""
-    val v = uv
-    return when {
-        v < 3 -> if (isEn) "Low" else "Bajo"
-        v < 6 -> if (isEn) "Moderate" else "Moderado"
-        v < 8 -> if (isEn) "High" else "Alto"
-        v < 11 -> if (isEn) "Very High" else "Muy Alto"
-        else -> if (isEn) "Extreme" else "Extremo"
-    }
 }

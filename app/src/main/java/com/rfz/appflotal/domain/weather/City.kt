@@ -1,5 +1,7 @@
 package com.rfz.appflotal.domain.weather
 
+import androidx.annotation.StringRes
+
 data class City(
     val id: String,
     val name: String,
@@ -7,7 +9,7 @@ data class City(
     val tz: String,
     val temp: Int,
     val cond: WeatherCondition,
-    val condLabel: String,
+    @StringRes val condLabel: Int,
     val hi: Int,
     val lo: Int,
     val feels: Int,
@@ -17,7 +19,7 @@ data class City(
     val aqi: Int,
     val aqiLabel: String,
     val uv: Int,
-    val uvLabel: String,
+    @StringRes val uvLabel: Int,
     val humidity: Int,
     val dew: Int,
     val pressure: Int,

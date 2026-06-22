@@ -8,7 +8,7 @@ object WeatherMapper {
     @StringRes
     fun getConditionLabel(symbol: String?): Int {
         if (symbol == null) return R.string.clearsky
-        
+
         val base = symbol.substringBefore("_")
         return when (base) {
             "clearsky" -> R.string.clearsky
@@ -59,12 +59,11 @@ object WeatherMapper {
     @StringRes
     fun getUvLabel(uv: Double?): Int {
         if (uv == null) return R.string.sin_datos
-        val v = uv
         return when {
-            v < 3 -> R.string.weather_uv_low
-            v < 6 -> R.string.weather_uv_moderate
-            v < 8 -> R.string.weather_uv_high
-            v < 11 -> R.string.weather_uv_very_high
+            uv < 3 -> R.string.weather_uv_low
+            uv < 6 -> R.string.weather_uv_moderate
+            uv < 8 -> R.string.weather_uv_high
+            uv < 11 -> R.string.weather_uv_very_high
             else -> R.string.weather_uv_extreme
         }
     }

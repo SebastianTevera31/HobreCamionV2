@@ -328,7 +328,7 @@ private fun HeroSection(city: City) {
                         )
                     )
                     Text(
-                        text = city.condLabel,
+                        text = stringResource(city.condLabel),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -388,7 +388,7 @@ private fun DetailsGrid(city: City) {
                 ),
                 MetricData(
                     stringResource(R.string.weather_uv),
-                    translateUv(city.uvLabel),
+                    stringResource(city.uvLabel),
                     Icons.Outlined.WbSunny
                 ),
                 MetricData(
@@ -534,18 +534,6 @@ private fun InfoCard(
 }
 
 @Composable
-fun translateUv(label: String): String {
-    return when (label) {
-        "Bajo" -> stringResource(R.string.weather_uv_low)
-        "Moderado" -> stringResource(R.string.weather_uv_moderate)
-        "Alto" -> stringResource(R.string.weather_uv_high)
-        "Muy Alto" -> stringResource(R.string.weather_uv_very_high)
-        "Extremo" -> stringResource(R.string.weather_uv_extreme)
-        else -> label
-    }
-}
-
-@Composable
 fun LabelValue(label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -594,7 +582,7 @@ fun WeatherScreenPreview() {
         tz = "CST",
         temp = 28,
         cond = WeatherCondition.Sunny,
-        condLabel = "Despejado",
+        condLabel = R.string.clearsky,
         hi = 32,
         lo = 22,
         feels = 30,
@@ -604,7 +592,7 @@ fun WeatherScreenPreview() {
         aqi = 45,
         aqiLabel = "Buena",
         uv = 8,
-        uvLabel = "Muy Alto",
+        uvLabel = R.string.weather_uv_very_high,
         humidity = 60,
         dew = 18,
         pressure = 1015,
