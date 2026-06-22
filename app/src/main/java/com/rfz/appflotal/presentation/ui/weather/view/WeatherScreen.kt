@@ -122,24 +122,83 @@ fun WeatherRoute(
             }
 
             LoadState.Loading -> CancellableLoadingDialog(onCancel = onBack)
-            else -> EmptyWeatherContent()
+            is LoadState.Error -> EmptyWeatherContent(onBack = onBack)
+            else -> Unit
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EmptyWeatherContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit
 ) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(R.string.weather_no_data),
-            color = CieloPalette.textDim(),
-            style = MaterialTheme.typography.bodyMedium
-        )
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = Color(0xFFF8FAFC),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column(verticalArrangement = Arrangement.Center) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Outlined.LocationOn,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = CieloPalette.accent()
+                            )
+
+                            Spacer(Modifier.width(4.dp))
+
+                            Text(
+                                text = "Clima",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        Text(
+                            text = getTodayLabel(),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = CieloPalette.textFaint()
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowBackIosNew,
+                            contentDescription = stringResource(R.string.regresar),
+                            modifier = Modifier.size(20.dp),
+                            tint = CieloPalette.accent()
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFF8FAFC),
+                    scrolledContainerColor = Color(0xFFF8FAFC),
+                    navigationIconContentColor = CieloPalette.accent(),
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        }
+    ) { innerPadding ->
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.weather_no_data),
+                color = CieloPalette.textDim(),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
 
@@ -150,30 +209,32 @@ private fun WeatherScreen(
     onBack: () -> Unit
 ) {
     Scaffold(
-        containerColor = Color(0xFFF8FAFC), // Fondo general muy limpio
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color(0xFFF8FAFC),
         topBar = {
             Header(city, onBack)
         }
-    ) { paddingValues ->
+    ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                // Primero respeta el espacio del Scaffold: TopAppBar, status bar, etc.
+                .padding(innerPadding)
+                // Después haces scroll sobre el área útil
                 .verticalScroll(rememberScrollState())
+                // Y al final agregas el margen visual interno
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             HeroSection(city)
 
-            // Sección de Pronóstico por horas con fondo resaltado
             WeatherSection(title = stringResource(R.string.weather_forecast_today)) {
                 HourlySection(city, onOpenForecast)
             }
 
-            // Detalles en Grid
             DetailsGrid(city)
 
-            // Sol y Aire en tarjetas divididas
             SunAndAirSection(city)
         }
     }
@@ -199,7 +260,6 @@ fun WeatherSection(
 @Composable
 private fun Header(city: City, onBack: () -> Unit) {
     TopAppBar(
-        // Eliminamos el padding manual ya que TopAppBar maneja sus propios insets
         title = {
             Column(verticalArrangement = Arrangement.Center) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -209,7 +269,9 @@ private fun Header(city: City, onBack: () -> Unit) {
                         modifier = Modifier.size(16.dp),
                         tint = CieloPalette.accent()
                     )
+
                     Spacer(Modifier.width(4.dp))
+
                     Text(
                         text = city.name,
                         style = MaterialTheme.typography.titleMedium,
@@ -217,10 +279,11 @@ private fun Header(city: City, onBack: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
+
                 Text(
                     text = getTodayLabel(),
                     style = MaterialTheme.typography.labelMedium,
-                    color = CieloPalette.textFaint() // Usamos el color tenue definido antes
+                    color = CieloPalette.textFaint()
                 )
             }
         },
@@ -234,15 +297,12 @@ private fun Header(city: City, onBack: () -> Unit) {
                 )
             }
         },
-        // Configuración de colores y elevación
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent, // Para que se mezcle con el fondo de la pantalla
-            scrolledContainerColor = Color.White.copy(alpha = 0.95f), // Al hacer scroll se vuelve sólido
+            containerColor = Color(0xFFF8FAFC),
+            scrolledContainerColor = Color(0xFFF8FAFC),
             navigationIconContentColor = CieloPalette.accent(),
             titleContentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        // Esto asegura que respete el área de la barra de estado automáticamente
-        windowInsets = WindowInsets.safeDrawing
+        )
     )
 }
 
