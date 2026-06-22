@@ -54,9 +54,9 @@ class WeatherViewModel @Inject constructor(
             if (location != null) {
                 if (location.ciudad == null) return@launch
                 val result = weatherRepository.getLatest(
-                    lat = 16.764900, // Invertir
-                    lon = -93.183400, // Invertir
-                    locationName = "Tuxtla Gutierrez"
+                    lat = truncate(location.lat * factor) / factor, // Invertir
+                    lon = truncate(location.lng * factor) / factor, // Invertir
+                    locationName = location.ciudad
                 )
                 when (result) {
                     is ApiResult.Error -> {

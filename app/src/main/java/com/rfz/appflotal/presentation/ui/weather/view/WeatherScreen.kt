@@ -63,6 +63,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.domain.weather.City
 import com.rfz.appflotal.domain.weather.HourlyForecast
 import com.rfz.appflotal.domain.weather.WeatherCondition
+import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.vialstatus.view.CancellableLoadingDialog
@@ -167,7 +168,7 @@ private fun EmptyWeatherContent(
                         Icon(
                             imageVector = Icons.Outlined.ArrowBackIosNew,
                             contentDescription = stringResource(R.string.regresar),
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(Dimens.PaddingLarge),
                             tint = CieloPalette.accent()
                         )
                     }
@@ -181,12 +182,11 @@ private fun EmptyWeatherContent(
             )
         }
     ) { innerPadding ->
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(24.dp),
+                .padding(Dimens.PaddingLarge),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -218,8 +218,8 @@ private fun WeatherScreen(
                 // Después haces scroll sobre el área útil
                 .verticalScroll(rememberScrollState())
                 // Y al final agregas el margen visual interno
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .padding(horizontal = Dimens.PaddingLarge, vertical = Dimens.PaddingMedium),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
             HeroSection(city)
 
@@ -328,7 +328,7 @@ private fun HeroSection(city: City) {
                         )
                     )
                     Text(
-                        text = translateCondition(city.cond),
+                        text = city.condLabel,
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -342,18 +342,6 @@ private fun HeroSection(city: City) {
         }
     }
 }
-
-@Composable
-fun translateCondition(cond: WeatherCondition): String {
-    return when (cond) {
-        WeatherCondition.Sunny -> stringResource(R.string.weather_condition_sunny)
-        WeatherCondition.Cloudy -> stringResource(R.string.weather_condition_cloudy)
-        WeatherCondition.Rainy -> stringResource(R.string.weather_condition_rainy)
-        WeatherCondition.Stormy -> stringResource(R.string.weather_condition_stormy)
-        WeatherCondition.PartlyCloudy -> stringResource(R.string.weather_condition_partly_cloudy)
-    }
-}
-
 
 @Composable
 private fun HourlySection(city: City) {

@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.model.weather
 
 import com.google.gson.annotations.SerializedName
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.domain.weather.City
 import com.rfz.appflotal.domain.weather.HourlyForecast
 import com.rfz.appflotal.domain.weather.WeatherCondition
@@ -69,9 +70,12 @@ fun WeatherResponse.toDomain(name: String = "Ubicación Actual"): City {
         val tsData = ts.data
         HourlyForecast(
             hour = "$hourTime:00",
-            cond = mapSymbolToCondition(tsData?.next1Hours?.summary?.symbolCode ?: tsData?.next6Hours?.summary?.symbolCode),
+            cond = mapSymbolToCondition(
+                tsData?.next1Hours?.summary?.symbolCode ?: tsData?.next6Hours?.summary?.symbolCode
+            ),
             temp = tsData?.instant?.details?.airTemperature?.toInt() ?: 0,
-            pop = (tsData?.next1Hours?.details?.precipitationAmount ?: tsData?.next6Hours?.details?.precipitationAmount ?: 0.0).toInt()
+            pop = (tsData?.next1Hours?.details?.precipitationAmount
+                ?: tsData?.next6Hours?.details?.precipitationAmount ?: 0.0).toInt()
         )
     } ?: emptyList()
 
@@ -83,8 +87,10 @@ fun WeatherResponse.toDomain(name: String = "Ubicación Actual"): City {
         temp = temp,
         cond = mapSymbolToCondition(symbol),
         condLabel = mapSymbolToLabel(symbol),
-        hi = properties?.timeseries?.take(24)?.maxOfOrNull { it.data?.instant?.details?.airTemperature ?: -999.0 }?.toInt() ?: temp,
-        lo = properties?.timeseries?.take(24)?.minOfOrNull { it.data?.instant?.details?.airTemperature ?: 999.0 }?.toInt() ?: temp,
+        hi = properties?.timeseries?.take(24)
+            ?.maxOfOrNull { it.data?.instant?.details?.airTemperature ?: -999.0 }?.toInt() ?: temp,
+        lo = properties?.timeseries?.take(24)
+            ?.minOfOrNull { it.data?.instant?.details?.airTemperature ?: 999.0 }?.toInt() ?: temp,
         feels = temp, // Met Norway doesn't provide "feels like" directly in compact
         rainChance = (next1h?.details?.precipitationAmount ?: 0.0).toInt(),
         wind = (instant?.windSpeed ?: 0.0).toInt(),
@@ -119,26 +125,55 @@ private fun mapSymbolToCondition(symbol: String?): WeatherCondition {
 }
 
 private fun mapSymbolToLabel(symbol: String?): String {
-    if (symbol == null) return "Despejado"
-    return symbol.replace("_", " ").replaceFirstChar {
-        if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+    val lang = AppLocale.currentLocale.value.language
+    val isEn = lang == "en"
+
+    if (symbol == null) return if (isEn) "Clear" else "Despejado"
+
+    val base = symbol.substringBefore("_")
+    return when (base) {
+        "clearsky" -> if (isEn) "Clear Sky" else "Cielo Despejado"
+        "fair" -> if (isEn) "Fair" else "Buen Clima"
+        "partlycloudy" -> if (isEn) "Partly Cloudy" else "Parcialmente Nublado"
+        "cloudy" -> if (isEn) "Cloudy" else "Nublado"
+        "rainshowers" -> if (isEn) "Rain Showers" else "Chubascos"
+        "lightrainshowers" -> if (isEn) "Light Rain Showers" else "Llovizna"
+        "heavyrainshowers" -> if (isEn) "Heavy Rain Showers" else "Chubascos Fuertes"
+        "rain" -> if (isEn) "Rain" else "Lluvia"
+        "lightrain" -> if (isEn) "Light Rain" else "Lluvia Ligera"
+        "heavyrain" -> if (isEn) "Heavy Rain" else "Lluvia Fuerte"
+        "fog" -> if (isEn) "Fog" else "Niebla"
+        "sleet" -> if (isEn) "Sleet" else "Aguanieve"
+        "snow" -> if (isEn) "Snow" else "Nieve"
+        "thunderstorm" -> if (isEn) "Thunderstorm" else "Tormenta"
+        else -> symbol.replace("_", " ").replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+        }
     }
 }
 
 private fun mapDegreesToDirection(degrees: Double?): String {
     if (degrees == null) return "N"
-    val directions = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW", "N")
+    val lang = Locale.getDefault().language
+    val directions = if (lang == "en") {
+        listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW", "N")
+    } else {
+        listOf("N", "NE", "E", "SE", "S", "SO", "O", "NO", "N")
+    }
     return directions[((degrees % 360) / 45).toInt()]
 }
 
 private fun mapUvToLabel(uv: Double?): String {
+    val lang = Locale.getDefault().language
+    val isEn = lang == "en"
+
     if (uv == null) return ""
     val v = uv
     return when {
-        v < 3 -> "Bajo"
-        v < 6 -> "Moderado"
-        v < 8 -> "Alto"
-        v < 11 -> "Muy Alto"
-        else -> "Extremo"
+        v < 3 -> if (isEn) "Low" else "Bajo"
+        v < 6 -> if (isEn) "Moderate" else "Moderado"
+        v < 8 -> if (isEn) "High" else "Alto"
+        v < 11 -> if (isEn) "Very High" else "Muy Alto"
+        else -> if (isEn) "Extreme" else "Extremo"
     }
 }
