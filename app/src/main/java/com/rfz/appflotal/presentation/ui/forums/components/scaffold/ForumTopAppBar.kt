@@ -135,7 +135,7 @@ fun ForumTopAppBar(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        text = "Gustados"
+                                        text = stringResource(R.string.gustados)
                                     )
                                 },
                                 onClick = {
