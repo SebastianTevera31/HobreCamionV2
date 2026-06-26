@@ -24,11 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.report.FuelConsumptionReportResponse
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.reportes.components.MonthSelector
 import com.rfz.appflotal.presentation.ui.utils.LoadState
@@ -225,6 +227,38 @@ fun InfoRow(
             ),
             textAlign = TextAlign.End,
             modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FuelEmissionReportScreenPreview() {
+    val sampleReports = listOf(
+        FuelConsumptionReportResponse(
+            month = "Enero",
+            monthlyOdometer = "1200 km",
+            monthlyFuel = "100 gal",
+            loadCount = 5,
+            fuelTypeName = "Diesel",
+            monthlyPerformance = "12 km/gal"
+        ),
+        FuelConsumptionReportResponse(
+            month = "Febrero",
+            monthlyOdometer = "1100 km",
+            monthlyFuel = "90 gal",
+            loadCount = 4,
+            fuelTypeName = "Diesel",
+            monthlyPerformance = "12.2 km/gal"
+        )
+    )
+    HombreCamionTheme {
+        FuelEmissionReportScreen(
+            screenState = LoadState.Success(Unit),
+            reports = sampleReports,
+            selectedMonth = "Enero",
+            onMonthSelected = {},
+            onBack = {}
         )
     }
 }
