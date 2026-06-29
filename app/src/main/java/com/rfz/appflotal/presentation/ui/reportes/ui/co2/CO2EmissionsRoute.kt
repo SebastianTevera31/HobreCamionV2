@@ -30,7 +30,8 @@ import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
-import com.rfz.appflotal.presentation.ui.reportes.components.MonthSelector
+import com.rfz.appflotal.presentation.ui.reportes.ui.common.MonthYearPickerField
+import com.rfz.appflotal.presentation.ui.reportes.ui.common.MonthYearSelection
 import com.rfz.appflotal.presentation.ui.reportes.ui.fuel.InfoRow
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
@@ -40,16 +41,16 @@ fun Co2EmissionReportRoute(
     reports: List<CO2EmissionsReportResponse>,
     onBack: () -> Unit
 ) {
-    var selectedMonth by remember {
-        mutableStateOf(reports.firstOrNull()?.month)
+    var selectedMonthYear by remember {
+        mutableStateOf<MonthYearSelection?>(null)
     }
 
     CO2EmissionReportScreen(
         screenState = screenState,
         reports = reports,
-        selectedMonth = selectedMonth,
-        onMonthSelected = { month ->
-            selectedMonth = month
+        selectedMonthYear = selectedMonthYear,
+        onMonthYearSelected = { selection ->
+            selectedMonthYear = selection
         },
         onBack = onBack
     )
@@ -59,12 +60,12 @@ fun Co2EmissionReportRoute(
 fun CO2EmissionReportScreen(
     screenState: LoadState<Unit>,
     reports: List<CO2EmissionsReportResponse>,
-    selectedMonth: String?,
-    onMonthSelected: (String) -> Unit,
+    selectedMonthYear: MonthYearSelection?,
+    onMonthYearSelected: (MonthYearSelection) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val selectedReport = reports.firstOrNull { it.month == selectedMonth }
+    val selectedReport = reports.firstOrNull { it.month == selectedMonthYear?.toApiFormat() }
         ?: reports.firstOrNull()
 
     Scaffold(
@@ -109,10 +110,10 @@ fun CO2EmissionReportScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    MonthSelector(
-                        months = reports.map { it.month },
-                        selectedMonth = selectedReport?.month,
-                        onMonthSelected = onMonthSelected
+                    MonthYearPickerField(
+                        selectedMonthYear = selectedMonthYear,
+                        onMonthYearSelected = onMonthYearSelected,
+                        availableDates = reports.map { it.month }
                     )
 
                     Co2EmissionsInfoCard(
@@ -212,8 +213,8 @@ fun CO2EmissionReportScreenPreview() {
         CO2EmissionReportScreen(
             screenState = LoadState.Success(Unit),
             reports = sampleReports,
-            selectedMonth = "Enero",
-            onMonthSelected = {},
+            selectedMonthYear = null,
+            onMonthYearSelected = {},
             onBack = {}
         )
     }

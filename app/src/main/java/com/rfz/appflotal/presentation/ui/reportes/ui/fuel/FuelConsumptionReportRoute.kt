@@ -32,7 +32,8 @@ import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
-import com.rfz.appflotal.presentation.ui.reportes.components.MonthSelector
+import com.rfz.appflotal.presentation.ui.reportes.ui.common.MonthYearPickerField
+import com.rfz.appflotal.presentation.ui.reportes.ui.common.MonthYearSelection
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
@@ -41,16 +42,16 @@ fun FuelConsumptionReportRoute(
     reports: List<FuelConsumptionReportResponse>,
     onBack: () -> Unit
 ) {
-    var selectedMonth by remember {
-        mutableStateOf(reports.firstOrNull()?.month)
+    var selectedMonthYear by remember {
+        mutableStateOf<MonthYearSelection?>(null)
     }
 
     FuelEmissionReportScreen(
         screenState = screenState,
         reports = reports,
-        selectedMonth = selectedMonth,
-        onMonthSelected = { month ->
-            selectedMonth = month
+        selectedMonthYear = selectedMonthYear,
+        onMonthYearSelected = { selection ->
+            selectedMonthYear = selection
         },
         onBack = onBack
     )
@@ -60,12 +61,12 @@ fun FuelConsumptionReportRoute(
 fun FuelEmissionReportScreen(
     screenState: LoadState<Unit>,
     reports: List<FuelConsumptionReportResponse>,
-    selectedMonth: String?,
-    onMonthSelected: (String) -> Unit,
+    selectedMonthYear: MonthYearSelection?,
+    onMonthYearSelected: (MonthYearSelection) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val selectedReport = reports.firstOrNull { it.month == selectedMonth }
+    val selectedReport = reports.firstOrNull { it.month == selectedMonthYear?.toApiFormat() }
         ?: reports.firstOrNull()
 
     Scaffold(
@@ -110,10 +111,10 @@ fun FuelEmissionReportScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    MonthSelector(
-                        months = reports.map { it.month },
-                        selectedMonth = selectedReport?.month,
-                        onMonthSelected = onMonthSelected
+                    MonthYearPickerField(
+                        selectedMonthYear = selectedMonthYear,
+                        onMonthYearSelected = onMonthYearSelected,
+                        availableDates = reports.map { it.month }
                     )
 
                     FuelConsumptionInfoCard(
@@ -256,8 +257,8 @@ fun FuelEmissionReportScreenPreview() {
         FuelEmissionReportScreen(
             screenState = LoadState.Success(Unit),
             reports = sampleReports,
-            selectedMonth = "Enero",
-            onMonthSelected = {},
+            selectedMonthYear = null,
+            onMonthYearSelected = {},
             onBack = {}
         )
     }

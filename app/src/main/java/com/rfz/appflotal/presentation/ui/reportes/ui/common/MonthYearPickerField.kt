@@ -43,7 +43,10 @@ data class MonthYearSelection(
     val year: Int
 ) {
     fun toApiFormat(): String {
-        return "$year-${month.toString().padStart(2, '0')}"
+        val monthName = DateFormatSymbols(Locale("es", "MX"))
+            .months[month - 1]
+            .replaceFirstChar { it.uppercaseChar() }
+        return "$year / $monthName"
     }
 }
 
@@ -53,7 +56,8 @@ fun MonthYearPickerField(
     onMonthYearSelected: (MonthYearSelection) -> Unit,
     modifier: Modifier = Modifier,
     label: String = "Mes y año",
-    placeholder: String = "Seleccionar mes"
+    placeholder: String = "Seleccionar mes",
+    availableDates: List<String> = emptyList()
 ) {
     var showDialog by rememberSaveable {
         mutableStateOf(false)
@@ -90,6 +94,7 @@ fun MonthYearPickerField(
     if (showDialog) {
         MonthYearPickerDialog(
             selectedMonthYear = selectedMonthYear,
+            availableDates = availableDates,
             onDismiss = {
                 showDialog = false
             },
@@ -104,11 +109,19 @@ fun MonthYearPickerField(
 @Composable
 private fun MonthYearPickerDialog(
     selectedMonthYear: MonthYearSelection?,
+    availableDates: List<String>,
     onDismiss: () -> Unit,
     onMonthYearSelected: (MonthYearSelection) -> Unit
 ) {
     val currentYear = remember {
         Calendar.getInstance().get(Calendar.YEAR)
+    }
+
+    val minYear = remember(availableDates) {
+        availableDates.mapNotNull { it.take(4).toIntOrNull() }.minOrNull() ?: currentYear
+    }
+    val maxYear = remember(availableDates) {
+        availableDates.mapNotNull { it.take(4).toIntOrNull() }.maxOrNull() ?: currentYear
     }
 
     var selectedYear by rememberSaveable(selectedMonthYear) {
@@ -157,7 +170,9 @@ private fun MonthYearPickerDialog(
                         onNextYear = {
                             selectedYear++
                         },
-                        onShowYears = { showYearPicker = true }
+                        onShowYears = { showYearPicker = true },
+                        canGoPrevious = availableDates.isEmpty() || selectedYear > minYear,
+                        canGoNext = availableDates.isEmpty() || selectedYear < maxYear
                     )
 
                     LazyVerticalGrid(
@@ -167,10 +182,19 @@ private fun MonthYearPickerDialog(
                         contentPadding = PaddingValues(vertical = 4.dp)
                     ) {
                         items(months) { month ->
+                            val isAvailable = availableDates.isEmpty() ||
+                                    availableDates.contains(
+                                        MonthYearSelection(
+                                            month.number,
+                                            selectedYear
+                                        ).toApiFormat()
+                                    )
+
                             MonthButton(
                                 month = month,
                                 year = selectedYear,
                                 selectedMonthYear = selectedMonthYear,
+                                isAvailable = isAvailable,
                                 onClick = {
                                     onMonthYearSelected(
                                         MonthYearSelection(
@@ -186,13 +210,17 @@ private fun MonthYearPickerDialog(
                     val startYear = (selectedYear / 12) * 12
                     val years = (startYear until startYear + 12).toList()
 
+                    val canGoPreviousDecade = availableDates.isEmpty() || startYear > minYear
+                    val canGoNextDecade = availableDates.isEmpty() || (startYear + 12) <= maxYear
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(
-                            onClick = { selectedYear -= 12 }
+                            onClick = { selectedYear -= 12 },
+                            enabled = canGoPreviousDecade
                         ) {
                             Text("‹")
                         }
@@ -205,7 +233,8 @@ private fun MonthYearPickerDialog(
                         )
 
                         TextButton(
-                            onClick = { selectedYear += 12 }
+                            onClick = { selectedYear += 12 },
+                            enabled = canGoNextDecade
                         ) {
                             Text("›")
                         }
@@ -219,16 +248,21 @@ private fun MonthYearPickerDialog(
                     ) {
                         items(years) { year ->
                             val isSelected = year == selectedYear
+                            val isAvailable = availableDates.isEmpty() ||
+                                    availableDates.any { it.startsWith(year.toString()) }
+
                             ElevatedCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable {
+                                    .clickable(enabled = isAvailable) {
                                         selectedYear = year
                                         showYearPicker = false
                                     },
                                 colors = CardDefaults.elevatedCardColors(
                                     containerColor = if (isSelected) {
                                         MaterialTheme.colorScheme.primaryContainer
+                                    } else if (!isAvailable) {
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                                     } else {
                                         MaterialTheme.colorScheme.surface
                                     }
@@ -252,6 +286,8 @@ private fun MonthYearPickerDialog(
                                     ),
                                     color = if (isSelected) {
                                         MaterialTheme.colorScheme.onPrimaryContainer
+                                    } else if (!isAvailable) {
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                     } else {
                                         MaterialTheme.colorScheme.onSurface
                                     }
@@ -278,7 +314,9 @@ private fun YearSelector(
     year: Int,
     onPreviousYear: () -> Unit,
     onNextYear: () -> Unit,
-    onShowYears: () -> Unit
+    onShowYears: () -> Unit,
+    canGoPrevious: Boolean,
+    canGoNext: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -286,7 +324,8 @@ private fun YearSelector(
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextButton(
-            onClick = onPreviousYear
+            onClick = onPreviousYear,
+            enabled = canGoPrevious
         ) {
             Text("‹")
         }
@@ -304,7 +343,8 @@ private fun YearSelector(
         }
 
         TextButton(
-            onClick = onNextYear
+            onClick = onNextYear,
+            enabled = canGoNext
         ) {
             Text("›")
         }
@@ -316,6 +356,7 @@ private fun MonthButton(
     month: MonthItem,
     year: Int,
     selectedMonthYear: MonthYearSelection?,
+    isAvailable: Boolean,
     onClick: () -> Unit
 ) {
     val isSelected = selectedMonthYear?.month == month.number &&
@@ -324,14 +365,16 @@ private fun MonthButton(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
+            .clickable(enabled = isAvailable) {
                 onClick()
             },
         colors = CardDefaults.elevatedCardColors(
             containerColor = if (isSelected) {
                 MaterialTheme.colorScheme.primaryContainer
+            } else if (!isAvailable) {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
             } else {
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.onSecondaryContainer
             }
         ),
         elevation = CardDefaults.elevatedCardElevation(
@@ -348,11 +391,13 @@ private fun MonthButton(
                 fontWeight = if (isSelected) {
                     FontWeight.Bold
                 } else {
-                    FontWeight.Normal
+                    FontWeight.Bold
                 }
             ),
             color = if (isSelected) {
                 MaterialTheme.colorScheme.onPrimaryContainer
+            } else if (!isAvailable) {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             } else {
                 MaterialTheme.colorScheme.onSurface
             }
@@ -403,6 +448,7 @@ fun MonthYearPickerDialogPreview() {
     HombreCamionTheme {
         MonthYearPickerDialog(
             selectedMonthYear = MonthYearSelection(6, 2024),
+            availableDates = listOf("2024 / Junio", "2024 / Julio"),
             onDismiss = {},
             onMonthYearSelected = {}
         )
