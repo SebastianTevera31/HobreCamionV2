@@ -3,7 +3,9 @@ package com.rfz.appflotal.data.repository.bluetooth
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
+import android.os.Build
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
@@ -283,7 +285,8 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     @SuppressLint("MissingPermission")
     override val btReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED || intent?.action == BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED) {
+            val action = intent?.action
+            if (action == BluetoothAdapter.ACTION_STATE_CHANGED) {
                 when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
                     BluetoothAdapter.STATE_OFF -> {
                         AppLog.d("BluetoothRepositoriy", "BT OFF -> limpiar")
@@ -306,6 +309,32 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                         }
                     }
                 }
+            } else if (action == BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
+                val device: BluetoothDevice? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    @Suppress("NewApi")
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                }
+                val bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE)
+                AppLog.d("BluetoothRepository", "Bond state changed for ${device?.address}: $bondState")
+                if (bondState == BluetoothDevice.BOND_NONE && device?.address == lastMacAddress) {
+                    AppLog.d("BluetoothRepository", "Bond lost with current device, attempting to reconnect...")
+                }
+            } else if (action == "android.bluetooth.device.action.KEY_MISSING") { // ACTION_KEY_MISSING (API 36)
+                val device: BluetoothDevice? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    @Suppress("NewApi")
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                }
+                if (device?.address == lastMacAddress) {
+                    AppLog.w("BluetoothRepository", "Android 16: Bond loss detected (KEY_MISSING).")
+                }
+            } else if (action == "android.bluetooth.device.action.ENCRYPTION_CHANGE") { // ACTION_ENCRYPTION_CHANGE (API 36)
+                AppLog.d("BluetoothRepository", "Android 16: Encryption status changed.")
             }
         }
     }

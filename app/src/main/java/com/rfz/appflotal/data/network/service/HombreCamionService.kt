@@ -252,8 +252,17 @@ class HombreCamionService : Service() {
         if (btReceiver != null) {
             val filter = IntentFilter().apply {
                 addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+                addAction(android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+                if (Build.VERSION.SDK_INT >= 36) { // Android 16+
+                    addAction("android.bluetooth.device.action.KEY_MISSING")
+                    addAction("android.bluetooth.device.action.ENCRYPTION_CHANGE")
+                }
             }
-            this.registerReceiver(btReceiver, filter)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                this.registerReceiver(btReceiver, filter, RECEIVER_EXPORTED)
+            } else {
+                this.registerReceiver(btReceiver, filter)
+            }
         }
         serviceScope.launch {
             readBluetoothStatus()

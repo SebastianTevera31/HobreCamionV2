@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.domain.weather.City
 import com.rfz.appflotal.domain.weather.HourlyForecast
 import com.rfz.appflotal.domain.weather.WeatherCondition
@@ -70,7 +71,6 @@ import com.rfz.appflotal.presentation.ui.vialstatus.view.CancellableLoadingDialo
 import com.rfz.appflotal.presentation.ui.weather.viewmodel.WeatherViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 object CieloPalette {
     @Composable
@@ -566,7 +566,8 @@ fun WeatherIcon(cond: WeatherCondition, size: Dp) {
 }
 
 private fun getTodayLabel(): String {
-    val formatter = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault())
+    val locale = AppLocale.currentLocale
+    val formatter = SimpleDateFormat("EEEE, d MMMM", locale.value)
     return formatter.format(Date()).replaceFirstChar { it.uppercase() }
 }
 
