@@ -392,8 +392,8 @@ class HombreCamionService : Service() {
                                 isActive = true
                             )
 
-                            // Enviar datos a API
-                            sendDataToApi(dataFrame, timestamp, monitorId)
+                            // Enviar datos a API solo si hay alertas
+                            if (inAlert) sendDataToApi(dataFrame, timestamp, monitorId)
                         }
                     }
                 }
