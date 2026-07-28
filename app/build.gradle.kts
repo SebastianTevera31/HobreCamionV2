@@ -17,7 +17,7 @@ android {
         applicationId = "com.rfz.appflotal"
         minSdk = 29
         targetSdk = 36
-        versionCode = 23
+        versionCode = 24
         versionName = "4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -74,8 +74,6 @@ android {
 }
 
 dependencies {
-    implementation("androidx.compose.material3:material3:1.4.0")
-    implementation("androidx.compose.foundation:foundation:1.10.1")
     // Jetpack Compose BOM - Gestiona versiones automáticamente
     val composeBom = platform("androidx.compose:compose-bom:2025.12.01")
     implementation(composeBom)
@@ -144,7 +142,6 @@ dependencies {
     // Utilities
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("io.coil-kt:coil-gif:2.6.0")
-    implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("com.github.f0ris.sweetalert:library:1.5.6")
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")
     implementation("com.github.composeuisuite:ohteepee:1.0.6")
@@ -156,7 +153,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // Localizacion
-    implementation("com.google.android.gms:play-services-location:21.2.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
     // Testing
