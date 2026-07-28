@@ -232,14 +232,14 @@ private fun LoginContent(
                 TermsAndConditionsText(
                     text = stringResource(R.string.terminos_condiciones),
                     context = context,
-                    url = "https://www.flotal.com.mx/terminos-y-condiciones/",
+                    url = "https://www.flotal.ai/terminos-y-condiciones",
 
                     )
                 Spacer(modifier = Modifier.height(16.dp))
                 TermsAndConditionsText(
                     text = stringResource(R.string.politicas_de_privacidad),
                     context = context,
-                    url = "https://www.flotal.com.mx/aviso-de-privacidad",
+                    url = "https://www.flotal.ai/aviso-de-privacidad",
                 )
             }
         }

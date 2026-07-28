@@ -15,8 +15,8 @@ android {
 
     defaultConfig {
         applicationId = "com.rfz.appflotal"
-        minSdk = 28
-        targetSdk = 35
+        minSdk = 29
+        targetSdk = 36
         versionCode = 21
         versionName = "3.2"
 

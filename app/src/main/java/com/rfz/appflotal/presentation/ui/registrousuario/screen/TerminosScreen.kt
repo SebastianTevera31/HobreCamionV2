@@ -84,7 +84,7 @@ fun TerminosScreen(
         Spacer(modifier = Modifier.padding(16.dp))
         LinkText(
             text = stringResource(R.string.politicas_de_privacidad),
-            url = "https://www.flotal.com.mx/aviso-de-privacidad",
+            url = "https://www.flotal.ai/aviso-de-privacidad",
             context = context
         )
 
@@ -135,7 +135,7 @@ fun LinkText(text: String, url: String, context: Context) {
         append(stringResource(R.string.asi_como_nuestros))
         pushStringAnnotation(
             tag = "URL",
-            annotation = "https://www.flotal.com.mx/terminos-y-condiciones/"
+            annotation = "https://www.flotal.ai/terminos-y-condiciones"
         )
         withStyle(
             style = SpanStyle(
