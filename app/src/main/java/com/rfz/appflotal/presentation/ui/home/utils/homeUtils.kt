@@ -75,31 +75,31 @@ val menuItems = listOf(
         route = HombreCamionScreens.MONITOR.name,
         iconRes = R.drawable.monitor
     ),
-    MenuItem(
-        title = R.string.vial_status,
-        route = HombreCamionScreens.MAPA_VIAL.name,
-        iconRes = R.drawable.road_map
-    ),
-    MenuItem(
-        title = R.string.blog,
-        route = ForumsGraph,
-        iconRes = R.drawable.foro
-    ),
-    MenuItem(
-        title = R.string.cuponera,
-        route = CouponGraph,
-        iconRes = R.drawable.cuponera_icon
-    ),
-    MenuItem(
-        R.string.Reportes,
-        ReportGraph,
-        R.drawable.reportes_icon
-    ),
-    MenuItem(
-        R.string.clima,
-        HombreCamionScreens.WEATHER.name,
-        R.drawable.weather_icon
-    )
+//    MenuItem(
+//        title = R.string.vial_status,
+//        route = HombreCamionScreens.MAPA_VIAL.name,
+//        iconRes = R.drawable.road_map
+//    ),
+//    MenuItem(
+//        title = R.string.blog,
+//        route = ForumsGraph,
+//        iconRes = R.drawable.foro
+//    ),
+//    MenuItem(
+//        title = R.string.cuponera,
+//        route = CouponGraph,
+//        iconRes = R.drawable.cuponera_icon
+//    ),
+//    MenuItem(
+//        R.string.Reportes,
+//        ReportGraph,
+//        R.drawable.reportes_icon
+//    ),
+//    MenuItem(
+//        R.string.clima,
+//        HombreCamionScreens.WEATHER.name,
+//        R.drawable.weather_icon
+//    )
 )
 
 val primaryColor = primaryLight
