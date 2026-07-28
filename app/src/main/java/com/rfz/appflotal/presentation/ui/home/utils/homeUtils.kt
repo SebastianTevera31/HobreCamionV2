@@ -90,11 +90,11 @@ val menuItems = listOf(
 //        route = CouponGraph,
 //        iconRes = R.drawable.cuponera_icon
 //    ),
-//    MenuItem(
-//        R.string.Reportes,
-//        ReportGraph,
-//        R.drawable.reportes_icon
-//    ),
+    MenuItem(
+        R.string.Reportes,
+        ReportGraph,
+        R.drawable.reportes_icon
+    ),
 //    MenuItem(
 //        R.string.clima,
 //        HombreCamionScreens.WEATHER.name,
