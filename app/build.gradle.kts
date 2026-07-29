@@ -17,7 +17,7 @@ android {
         applicationId = "com.rfz.appflotal"
         minSdk = 29
         targetSdk = 36
-        versionCode = 24
+        versionCode = 25
         versionName = "4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
