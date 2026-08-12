@@ -37,12 +37,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertStatus
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertUi
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.BlogPost
@@ -59,6 +60,7 @@ import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.Complete
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.TealSoftBg
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.WeatherBg
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.bottomNavItems
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 
 @Composable
 fun CompletePlanScreen(
@@ -333,7 +335,17 @@ private fun AlertCard(alert: AlertUi) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(alert.icon, contentDescription = null, tint = TealMid)
+                    if (alert.status == AlertStatus.CRITICA) {
+                        Icon(
+                            painterResource(R.drawable.tire_pressure_warning),
+                            contentDescription = null,
+                            tint = TealMid,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Icon(alert.icon, contentDescription = null, tint = TealMid)
+                    }
+
                     Spacer(Modifier.width(10.dp))
                     Text(alert.title, fontWeight = FontWeight.SemiBold)
                 }
