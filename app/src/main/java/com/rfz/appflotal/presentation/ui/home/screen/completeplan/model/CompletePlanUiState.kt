@@ -1,0 +1,93 @@
+package com.rfz.appflotal.presentation.ui.home.screen.completeplan.model
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.GpsFixed
+import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.outlined.QueryStats
+import androidx.compose.material.icons.outlined.Warning
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import androidx.compose.ui.graphics.vector.ImageVector
+
+data class VehicleStat(
+    val icon: ImageVector,
+    val value: String,
+    val unit: String,
+    val label: String
+)
+
+data class AlertUi(
+    val icon: ImageVector,
+    val title: String,
+    val detailLabel: String,
+    val detailValue: String,
+    val detailExtra: String? = null,
+    val status: AlertStatus
+)
+
+enum class AlertStatus { CRITICA, PENDIENTE }
+
+data class SectionItem(val icon: ImageVector, val label: String)
+
+data class BlogPost(val category: String, val title: String, val excerpt: String)
+
+data class CompletePlanUiState(
+    val userName: String = "Miguel",
+    val vehicleName: String = "Mercedes Actros",
+    val vehiclePlate: String = "4521-KBX",
+    val paymentPlanType: PaymentPlanType = PaymentPlanType.Complete,
+    val periodLabel: String = "ESTA SEMANA",
+    val stats: List<VehicleStat> = listOf(
+        VehicleStat(Icons.Outlined.LocalShipping, "50", "km/lts", "Rendimiento"),
+        VehicleStat(Icons.Outlined.GpsFixed, "1000", "km/mm", "Desgaste"),
+        VehicleStat(Icons.Outlined.Cloud, "100", "kg", "Emisión CO2")
+    ),
+    val alerts: List<AlertUi> = listOf(
+        AlertUi(
+            icon = Icons.Outlined.Warning,
+            title = "TPMS · eje delantero izq.",
+            detailLabel = "Presión:",
+            detailValue = "2.1 bar",
+            detailExtra = "(mín. 6.5)",
+            status = AlertStatus.CRITICA
+        ),
+        AlertUi(
+            icon = Icons.Outlined.GpsFixed,
+            title = "Alerta de mm bajo",
+            detailLabel = "Profundidad baja ·",
+            detailValue = "4 mm",
+            status = AlertStatus.PENDIENTE
+        )
+    ),
+    val weatherTemp: String = "34°",
+    val weatherCity: String = "Madrid",
+    val weatherDesc: String = "Despejado · viento 12 km/h",
+    val sections: List<SectionItem> = listOf(
+        SectionItem(Icons.Outlined.GpsFixed, "Registrar"),
+        SectionItem(Icons.Filled.WaterDrop, "TPMS"),
+        SectionItem(Icons.Outlined.QueryStats, "Analytics"),
+        SectionItem(Icons.Filled.Map, "Mapa · Clima"),
+        SectionItem(Icons.AutoMirrored.Filled.Article, "Blog"),
+        SectionItem(Icons.Filled.LocalOffer, "Promociones / Descuentos"),
+        SectionItem(Icons.Filled.Build, "Servicios"),
+        SectionItem(Icons.Filled.Settings, "Settings")
+    ),
+    val blogPosts: List<BlogPost> = listOf(
+        BlogPost(
+            category = "MANTENIMIENTO",
+            title = "5 señales de desgaste irregular en llantas",
+            excerpt = "Aprende a detectar a tiempo el desgaste que puede costarte un pinchazo en carretera…"
+        ),
+        BlogPost(
+            category = "CONSUMO",
+            title = "Cómo bajar tu consumo un 10% este verano",
+            excerpt = "Presión, velocidad y climatización: tres ajustes sencillos que notarás en el depósito…"
+        )
+    )
+)
