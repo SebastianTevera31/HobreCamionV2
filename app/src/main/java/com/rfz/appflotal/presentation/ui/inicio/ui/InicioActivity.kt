@@ -137,6 +137,7 @@ import com.rfz.appflotal.presentation.ui.permission.PermissionScreen
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.NuevoRegistroLlantasScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
+import com.rfz.appflotal.presentation.ui.registrousuario.navigation.signUpGraph
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
@@ -832,14 +833,10 @@ class InicioActivity : ComponentActivity() {
 
                                     composable(NavScreens.INICIO) { InicioScreen(navController) }
 
-                                    composable(route = NavScreens.REGISTRAR_USUARIO) {
-                                        val signUpViewModel: SignUpViewModel = hiltViewModel()
-                                        val uiState = homeViewModel.uiState.collectAsState()
-                                        SignUpScreen(
-                                            navController,
-                                            languageSelected = uiState.value.selectedLanguage,
-                                            signUpViewModel = signUpViewModel
-                                        ) {
+                                    signUpGraph(
+                                        navController = navController,
+                                        languageSelected = homeViewModel.uiState.value.selectedLanguage,
+                                        navigateToMenu = { plan ->
                                             delay(500.milliseconds)
                                             val permissionsGranted = arePermissionsGranted(
                                                 this@InicioActivity,
@@ -859,7 +856,7 @@ class InicioActivity : ComponentActivity() {
                                                 }
                                             }
                                         }
-                                    }
+                                    )
 
                                     composable(route = NavScreens.INFORMACION_USUARIO) {
                                         UpdateUserScreen(

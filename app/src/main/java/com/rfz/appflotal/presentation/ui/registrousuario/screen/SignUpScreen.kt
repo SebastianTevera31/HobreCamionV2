@@ -47,8 +47,8 @@ import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpAlerts
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import kotlinx.coroutines.delay
 
-enum class SignUpViews() {
-    USER_DATA_VIEW, VEHICLE_DATA_VIEW, TERMS_VIEW
+enum class SignUpViews {
+    USER_DATA_VIEW, VEHICLE_DATA_VIEW, PREFERENCES, TIRES, TERMS_VIEW
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -206,6 +206,8 @@ fun SignUpScreen(
                             }
                         }
                     }
+
+                    else -> {}
                 }
             }
         }
