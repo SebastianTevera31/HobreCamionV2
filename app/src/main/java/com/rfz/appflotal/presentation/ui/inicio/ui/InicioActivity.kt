@@ -138,9 +138,7 @@ import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.NuevoRegistroLlantasScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
 import com.rfz.appflotal.presentation.ui.registrousuario.navigation.signUpGraph
-import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
-import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
 import com.rfz.appflotal.presentation.ui.repararrenovar.screen.RepararRenovarScreen
 import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.RepararRenovarViewModel

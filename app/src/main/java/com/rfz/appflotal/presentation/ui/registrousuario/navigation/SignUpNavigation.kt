@@ -32,11 +32,16 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.NavScreens
+import com.rfz.appflotal.data.repository.UnidadOdometro
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
+import com.rfz.appflotal.data.repository.UnitProvider
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.components.UserInfoTopBar
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.preferences.PreferencesScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.LoginStatus
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpStatus
 import com.rfz.appflotal.presentation.ui.registrousuario.screens.TermsDataScreen
@@ -44,6 +49,14 @@ import com.rfz.appflotal.presentation.ui.registrousuario.screens.UserDataScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screens.VehicleDataScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.AuthFlow
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
+
+enum class SignUpRoutes(val route: String) {
+    USER_DATA_VIEW("user_data"),
+    VEHICLE_DATA_VIEW("vehicle_data"),
+    PREFERENCES("preferences_data"),
+    TIRES("tire_data"),
+    TERMS_VIEW("terms_view")
+}
 
 /**
  * Registra el flujo de registro en el NavGraph principal.
@@ -75,6 +88,10 @@ fun SignUpFlowMainContainer(
     val uiState by viewModel.signUpUiState.collectAsState()
     val signUpRequestStatus = viewModel.signUpRequestStatus
     val loginRequestStatus = viewModel.loginRequestStatus
+
+    var temperatureUnit: UnitProvider by remember { mutableStateOf(UnidadTemperatura.CELCIUS) }
+    var odometerUnit: UnitProvider by remember { mutableStateOf(UnidadOdometro.MILLAS) }
+    var pressureUnit: UnitProvider by remember { mutableStateOf(UnidadPresion.BAR) }
 
     // NavController interno para los pasos del registro
     val internalNavController = rememberNavController()
@@ -155,13 +172,15 @@ fun SignUpFlowMainContainer(
                     startDestination = "user_data",
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    composable("user_data") {
+                    composable(SignUpRoutes.USER_DATA_VIEW.route) {
                         UserDataScreen(viewModel, internalNavController)
                     }
-                    composable("vehicle_data") {
-                        VehicleDataScreen(viewModel, internalNavController)
+                    composable(SignUpRoutes.VEHICLE_DATA_VIEW.route) {
+                        VehicleDataScreen(viewModel, internalNavController) {
+                            internalNavController.navigate(SignUpRoutes.PREFERENCES.route)
+                        }
                     }
-                    composable("terms_view") {
+                    composable(SignUpRoutes.TERMS_VIEW.route) {
                         TermsDataScreen(
                             viewModel,
                             internalNavController,
@@ -170,6 +189,27 @@ fun SignUpFlowMainContainer(
                                 snackbarHostState.showSnackbar(connectionError)
                             }
                         )
+                    }
+                    composable(SignUpRoutes.PREFERENCES.route) {
+                        PreferencesScreen(
+                            temperatureUnit = temperatureUnit,
+                            pressureUnit = pressureUnit,
+                            odometerUnit = odometerUnit,
+                            onTempChange = {
+                                temperatureUnit = it
+                            },
+                            onPressureChange = {
+                                pressureUnit = it
+                            },
+                            onOdometerChange = {
+                                odometerUnit = it
+                            }
+                        ) { _, _, _ ->
+                            internalNavController.navigate(SignUpRoutes.TIRES.route)
+                        }
+                    }
+                    composable(SignUpRoutes.TIRES.route) {
+
                     }
                 }
             }
@@ -193,6 +233,7 @@ fun SignUpFlowMainContainer(
                 viewModel.onLogin(ctx)
             }
         }
+
         AuthFlow.Login -> {
             LoginStatus(
                 ctx = ctx,
@@ -203,6 +244,7 @@ fun SignUpFlowMainContainer(
                 authFlow = AuthFlow.None
             }
         }
+
         else -> {}
     }
 }

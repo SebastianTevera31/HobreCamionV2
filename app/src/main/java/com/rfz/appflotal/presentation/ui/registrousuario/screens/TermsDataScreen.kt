@@ -18,7 +18,6 @@ fun TermsDataScreen(
     onShowConnectionError: suspend () -> Unit
 ) {
     val ctx = LocalContext.current
-    val uiState by viewModel.signUpUiState.collectAsState()
 
     TerminosScreen(
         context = ctx,
