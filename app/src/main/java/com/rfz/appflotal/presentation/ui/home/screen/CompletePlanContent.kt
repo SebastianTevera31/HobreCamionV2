@@ -6,6 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.rfz.appflotal.core.util.screens.HombreCamionScreens
+import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.CompletePlanScreen
@@ -34,15 +36,13 @@ fun CompletePlanContent(
         onNotificationsClick = { /* TODO: Implement notifications logic */ },
         onVehicleDetailClick = { /* TODO: Implement vehicle detail navigation */ },
         onAlertsSeeAllClick = { /* TODO: Implement alerts navigation */ },
-        onWeatherMapClick = { /* TODO: Implement weather map navigation */ },
-        onSectionClick = { section ->
-            // El usuario puede mapear las secciones a rutas aquí
-            // Ejemplo: onNavigate(section.route)
-        },
-        onBlogSeeAllClick = { /* TODO: Implement blog navigation */ },
+        onSectionClick = { section -> onNavigate(section.route) },
+        onBlogSeeAllClick = { onNavigate(NavScreens.BLOG) },
         onNavItemClick = { index ->
-            // El usuario puede manejar la navegación del bottom bar aquí
-        }
+            completePlanViewModel.onNavItemClick(index)
+        },
+        onMapClick = { onNavigate(HombreCamionScreens.MAPA_VIAL.name) },
+        onWeatherClick = { onNavigate(HombreCamionScreens.WEATHER.name) }
     )
 }
 

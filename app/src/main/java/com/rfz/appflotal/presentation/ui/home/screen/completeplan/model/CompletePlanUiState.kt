@@ -2,9 +2,7 @@ package com.rfz.appflotal.presentation.ui.home.screen.completeplan.model
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.Cloud
@@ -12,8 +10,13 @@ import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Warning
-import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.rfz.appflotal.core.util.screens.HombreCamionScreens
+import com.rfz.appflotal.core.util.screens.NavScreens
+import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
+import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
 
 data class VehicleStat(
     val icon: ImageVector,
@@ -33,11 +36,12 @@ data class AlertUi(
 
 enum class AlertStatus { CRITICA, PENDIENTE }
 
-data class SectionItem(val icon: ImageVector, val label: String)
+data class SectionItem(val icon: ImageVector, val label: String, val route: Any)
 
 data class BlogPost(val category: String, val title: String, val excerpt: String)
 
 data class CompletePlanUiState(
+    val currentScreen: Int = 0,
     val userName: String = "Miguel",
     val vehicleName: String = "Mercedes Actros",
     val vehiclePlate: String = "4521-KBX",
@@ -69,14 +73,36 @@ data class CompletePlanUiState(
     val weatherCity: String = "Madrid",
     val weatherDesc: String = "Despejado · viento 12 km/h",
     val sections: List<SectionItem> = listOf(
-        SectionItem(Icons.Outlined.GpsFixed, "Registrar"),
-        SectionItem(Icons.Filled.WaterDrop, "TPMS"),
-        SectionItem(Icons.Outlined.QueryStats, "Analytics"),
-        SectionItem(Icons.Filled.Map, "Mapa · Clima"),
-        SectionItem(Icons.AutoMirrored.Filled.Article, "Blog"),
-        SectionItem(Icons.Filled.LocalOffer, "Promociones / Descuentos"),
-        SectionItem(Icons.Filled.Build, "Servicios"),
-        SectionItem(Icons.Filled.Settings, "Settings")
+        SectionItem(
+            icon = Icons.Outlined.GpsFixed,
+            label = "Registrar",
+            route = NavScreens.REGISTRO_LLANTAS
+        ),
+        SectionItem(
+            icon = Icons.Filled.WaterDrop,
+            label = "TPMS",
+            route = HombreCamionScreens.MONITOR.name
+        ),
+        SectionItem(
+            icon = Icons.Outlined.QueryStats,
+            label = "Analytics",
+            route = ReportGraph
+        ),
+        SectionItem(
+            icon = Icons.AutoMirrored.Filled.Article,
+            label = "Blog",
+            route = ForumsGraph
+        ),
+        SectionItem(
+            icon = Icons.Filled.LocalOffer,
+            label = "Promociones / Descuentos",
+            route = CouponGraph
+        ),
+        SectionItem(
+            icon = Icons.Filled.Settings,
+            label = "Settings",
+            route = NavScreens.INFORMACION_USUARIO
+        )
     ),
     val blogPosts: List<BlogPost> = listOf(
         BlogPost(

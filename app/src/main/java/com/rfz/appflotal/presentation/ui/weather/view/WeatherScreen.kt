@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.CloudQueue
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.WaterDrop
@@ -41,6 +42,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -92,6 +94,7 @@ object CieloPalette {
 
 @Composable
 fun WeatherRoute(
+    onNavigateToMap: () -> Unit,
     onBack: () -> Unit,
     viewModel: WeatherViewModel,
     modifier: Modifier = Modifier
@@ -114,7 +117,7 @@ fun WeatherRoute(
         when (uiState.screenState) {
             is LoadState.Success -> {
                 uiState.city?.let { city ->
-                    WeatherScreen(city, onBack)
+                    WeatherScreen(city, onNavigateToMap, onBack)
                 }
             }
 
@@ -201,6 +204,7 @@ private fun EmptyWeatherContent(
 @Composable
 private fun WeatherScreen(
     city: City,
+    onNavigateToMap: () -> Unit,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -221,7 +225,7 @@ private fun WeatherScreen(
                 .padding(horizontal = Dimens.PaddingLarge, vertical = Dimens.PaddingMedium),
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
-            HeroSection(city)
+            HeroSection(city) { onNavigateToMap() }
 
             WeatherSection(title = stringResource(R.string.weather_forecast_today)) {
                 HourlySection(city)
@@ -301,7 +305,10 @@ private fun Header(city: City, onBack: () -> Unit) {
 }
 
 @Composable
-private fun HeroSection(city: City) {
+private fun HeroSection(
+    city: City,
+    onMapClick: () -> Unit
+) {
     Surface(
         color = Color.White,
         shape = RoundedCornerShape(32.dp),
@@ -314,30 +321,87 @@ private fun HeroSection(city: City) {
                 .wrapContentHeight()
                 .padding(24.dp)
         ) {
+
+            // Temperatura + icono del clima
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
                         text = "${city.temp}°",
                         style = MaterialTheme.typography.displayLarge.copy(
                             fontSize = 80.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color(MaterialTheme.colorScheme.primary.value) // O un azul oscuro
+                            color = MaterialTheme.colorScheme.primary
                         )
                     )
+
                     Text(
                         text = stringResource(city.condLabel),
                         style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = 0.7f
+                        )
                     )
                 }
-                WeatherIcon(city.cond, size = 100.dp)
+
+                WeatherIcon(
+                    city.cond,
+                    size = 100.dp
+                )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                LabelValue(stringResource(R.string.weather_feels_like), "${city.feels}°")
-                LabelValue(stringResource(R.string.weather_humidity), "${city.humidity}%")
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            // Información secundaria + acceso al mapa
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    LabelValue(
+                        stringResource(R.string.weather_feels_like),
+                        "${city.feels}°"
+                    )
+
+                    LabelValue(
+                        stringResource(R.string.weather_humidity),
+                        "${city.humidity}%"
+                    )
+                }
+
+                TextButton(
+                    onClick = onMapClick,
+                    contentPadding = PaddingValues(
+                        horizontal = 8.dp,
+                        vertical = 0.dp
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Map,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+
+                    Spacer(
+                        modifier = Modifier.width(4.dp)
+                    )
+
+                    Text(
+                        text = "Mapa",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
             }
         }
     }
@@ -613,6 +677,7 @@ fun WeatherScreenPreview() {
     HombreCamionTheme {
         WeatherScreen(
             city = sampleCity,
+            onNavigateToMap = {},
             onBack = {}
         )
     }

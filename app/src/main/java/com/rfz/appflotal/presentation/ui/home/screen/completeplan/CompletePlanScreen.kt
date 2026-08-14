@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.home.screen.completeplan
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -16,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,8 +54,6 @@ import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.SectionI
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.VehicleStat
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.CriticalBg
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.CriticalFg
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.PendingBg
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.PendingFg
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.SubtleText
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.TealDark
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.TealMid
@@ -64,18 +64,23 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 
 @Composable
 fun CompletePlanScreen(
-    state: CompletePlanUiState = CompletePlanUiState(),
-    onNotificationsClick: () -> Unit = {},
-    onVehicleDetailClick: () -> Unit = {},
-    onAlertsSeeAllClick: () -> Unit = {},
-    onWeatherMapClick: () -> Unit = {},
-    onSectionClick: (SectionItem) -> Unit = {},
-    onBlogSeeAllClick: () -> Unit = {},
-    onNavItemClick: (Int) -> Unit = {}
+    onNotificationsClick: () -> Unit,
+    onVehicleDetailClick: () -> Unit,
+    onAlertsSeeAllClick: () -> Unit,
+    onMapClick: () -> Unit,
+    onWeatherClick: () -> Unit,
+    onSectionClick: (SectionItem) -> Unit,
+    onBlogSeeAllClick: () -> Unit,
+    onNavItemClick: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    state: CompletePlanUiState = CompletePlanUiState()
 ) {
     Scaffold(
         containerColor = Color.White,
-        bottomBar = { HomeBottomBar(selected = 0, onItemClick = onNavItemClick) }
+        bottomBar = {
+            HomeBottomBar(selected = state.currentScreen, onItemClick = onNavItemClick)
+        },
+        modifier = modifier.navigationBarsPadding(),
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -85,58 +90,72 @@ fun CompletePlanScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item {
-                HomeTopBar(
-                    userName = state.userName,
-                    planType = state.paymentPlanType,
-                    plates = state.vehiclePlate,
-                    onNotificationsClick = onNotificationsClick
-                )
+                if (state.paymentPlanType == PaymentPlanType.Complete) {
+                    CompleteHomeTopBar(state.userName, onNotificationsClick)
+                } else {
+                    HomeTopBar(
+                        userName = state.userName,
+                        planType = state.paymentPlanType,
+                        plates = state.vehiclePlate,
+                        onNotificationsClick = onNotificationsClick,
+                    )
+                }
             }
 
             item {
-                SectionHeader("Rendimiento del vehículo", "Ver detalle", onVehicleDetailClick)
-            }
-            item {
-                VehiclePerformanceCard(
-                    state.vehicleName,
-                    state.vehiclePlate,
-                    state.periodLabel,
-                    state.stats
-                )
-            }
-
-            item {
-                SectionHeader("Alertas recientes", "Ver todas", onAlertsSeeAllClick)
-            }
-            items(state.alerts) { alert -> AlertCard(alert) }
-
-            item {
-                SectionHeader("Clima", "Ver mapa", onWeatherMapClick)
-            }
-            item {
-                WeatherCard(
-                    state.weatherTemp,
-                    state.weatherCity,
-                    state.weatherDesc,
-                    onWeatherMapClick
-                )
+                Column {
+                    SectionHeader("Rendimiento del vehículo", "Ver detalle", onVehicleDetailClick)
+                    VehiclePerformanceCard(
+                        state.vehicleName,
+                        state.vehiclePlate,
+                        state.periodLabel,
+                        state.stats
+                    )
+                }
             }
 
             item {
-                Text(
-                    "Secciones",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            item {
-                SectionsGrid(state.sections, onSectionClick)
+                Column {
+                    SectionHeader("Alertas recientes", "Ver todas", onAlertsSeeAllClick)
+                    state.alerts.forEach { alert ->
+                        AlertCard(alert)
+                    }
+                }
             }
 
             item {
-                SectionHeader("Blog", "Ver todas", onBlogSeeAllClick)
+                Column {
+                    SectionHeader("Clima", "Ver mapa", onMapClick)
+                    WeatherCard(
+                        state.weatherTemp,
+                        state.weatherCity,
+                        state.weatherDesc,
+                        onWeatherClick
+                    )
+                }
             }
-            items(state.blogPosts) { post -> BlogPostCard(post) }
+
+            item {
+                Column {
+                    Text(
+                        "Secciones",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    SectionsGrid(state.sections, onSectionClick)
+                }
+            }
+
+            item {
+                Column {
+                    SectionHeader("Blog", "Ver todas", onBlogSeeAllClick)
+                    state.blogPosts.forEach { post ->
+                        BlogPostCard(post)
+                    }
+                }
+            }
+
             item {
                 SeeAllPill("Ver todos", onBlogSeeAllClick)
             }
@@ -145,51 +164,109 @@ fun CompletePlanScreen(
 }
 
 @Composable
+private fun CompleteHomeTopBar(
+    userName: String,
+    onNotificationsClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 68.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(TealSoftBg),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    userName.take(2).uppercase(),
+                    color = TealMid,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(
+                    "¡Hola, $userName!",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Revisa tu camión",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = SubtleText
+                )
+            }
+        }
+
+        Box {
+            IconButton(
+                onClick = onNotificationsClick,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(TealSoftBg)
+            ) {
+                Icon(
+                    Icons.Outlined.Notifications,
+                    contentDescription = "Notificaciones",
+                    tint = TealDark
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .align(Alignment.TopEnd)
+                    .clip(CircleShape)
+                    .background(CriticalFg)
+            )
+        }
+    }
+}
+
+
+@Composable
 private fun HomeTopBar(
     userName: String,
     planType: PaymentPlanType,
     plates: String,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val isComplete = planType == PaymentPlanType.Complete
-    val horizontalArrangement = if (isComplete) Arrangement.Center else Arrangement.SpaceBetween
-    val textAlignment = if (isComplete) Alignment.CenterHorizontally else Alignment.Start
-
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = horizontalArrangement
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = if (isComplete) Modifier.weight(1f) else Modifier
-        ) {
-            if (!isComplete) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(TealSoftBg),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        userName.take(2).uppercase(),
-                        color = TealMid,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(Modifier.width(12.dp))
-            }
-
-            Column(
-                modifier = if (isComplete) Modifier.fillMaxWidth() else Modifier,
-                horizontalAlignment = textAlignment
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(TealSoftBg),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    if (isComplete) "Bienvenido, $userName" else "¡Hola, $userName!",
-                    style = if (isComplete) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+                    userName.take(2).uppercase(),
+                    color = TealMid,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(horizontalAlignment = Alignment.Start) {
+                Text(
+                    text = "¡Hola, $userName!",
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    textAlign = if (isComplete) TextAlign.Center else TextAlign.Start
+                    textAlign = TextAlign.Start
                 )
                 Text(
                     "Plan: ${planType.name}",
@@ -208,29 +285,27 @@ private fun HomeTopBar(
             }
         }
 
-        if (!isComplete) {
-            Box {
-                IconButton(
-                    onClick = onNotificationsClick,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(TealSoftBg)
-                ) {
-                    Icon(
-                        Icons.Outlined.Notifications,
-                        contentDescription = "Notificaciones",
-                        tint = TealDark
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .align(Alignment.TopEnd)
-                        .clip(CircleShape)
-                        .background(CriticalFg)
+        Box {
+            IconButton(
+                onClick = onNotificationsClick,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(TealSoftBg)
+            ) {
+                Icon(
+                    Icons.Outlined.Notifications,
+                    contentDescription = "Notificaciones",
+                    tint = TealDark
                 )
             }
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .align(Alignment.TopEnd)
+                    .clip(CircleShape)
+                    .background(CriticalFg)
+            )
         }
     }
 }
@@ -243,13 +318,15 @@ private fun SectionHeader(title: String, actionLabel: String, onActionClick: () 
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Text(
-            actionLabel,
-            color = TealMid,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(4.dp)
-        )
+        TextButton(onClick = onActionClick) {
+            Text(
+                actionLabel,
+                color = TealMid,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(4.dp)
+            )
+        }
     }
 }
 
@@ -268,7 +345,8 @@ private fun VehiclePerformanceCard(
         Column(Modifier.padding(20.dp)) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     "$vehicleName · $plate",
@@ -316,10 +394,6 @@ private fun VehicleStatItem(stat: VehicleStat) {
 
 @Composable
 private fun AlertCard(alert: AlertUi) {
-    val (bg, fg, label) = when (alert.status) {
-        AlertStatus.CRITICA -> Triple(CriticalBg, CriticalFg, "CRÍTICA")
-        AlertStatus.PENDIENTE -> Triple(PendingBg, PendingFg, "PENDIENTE")
-    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -334,7 +408,10 @@ private fun AlertCard(alert: AlertUi) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(3f)
+                ) {
                     if (alert.status == AlertStatus.CRITICA) {
                         Icon(
                             painterResource(R.drawable.tire_pressure_warning),
@@ -347,15 +424,28 @@ private fun AlertCard(alert: AlertUi) {
                     }
 
                     Spacer(Modifier.width(10.dp))
-                    Text(alert.title, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        alert.title,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(bg)
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                ) {
-                    Text(label, color = fg, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                if (alert.status == AlertStatus.CRITICA) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(CriticalBg)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "CRÍTICA",
+                            color = CriticalFg,
+                            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -392,7 +482,8 @@ private fun WeatherCard(temp: String, city: String, description: String, onClick
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = WeatherBg)
+        colors = CardDefaults.cardColors(containerColor = WeatherBg),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
@@ -431,26 +522,31 @@ private fun SectionsGrid(sections: List<SectionItem>, onSectionClick: (SectionIt
 
 @Composable
 private fun SectionIconItem(section: SectionItem, onClick: (SectionItem) -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+    Card(
+        onClick = { onClick(section) },
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(TealSoftBg),
-            contentAlignment = Alignment.Center
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Icon(section.icon, contentDescription = section.label, tint = TealDark)
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(TealSoftBg),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(section.icon, contentDescription = section.label, tint = TealDark)
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                section.label,
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 2
+            )
         }
-        Spacer(Modifier.height(6.dp))
-        Text(
-            section.label,
-            fontSize = 12.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 2
-        )
     }
 }
 
@@ -531,7 +627,7 @@ private fun HomeBottomBar(selected: Int, onItemClick: (Int) -> Unit) {
         ) {
             bottomNavItems.forEachIndexed { index, item ->
                 val isSelected = index == selected
-                Box {
+                Box(modifier = Modifier.clickable { onItemClick(index) }) {
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
@@ -571,5 +667,14 @@ private fun HomeBottomBar(selected: Int, onItemClick: (Int) -> Unit) {
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun CompletePlanScreenPreview() {
-    CompletePlanScreen()
+    CompletePlanScreen(
+        onNotificationsClick = {},
+        onVehicleDetailClick = {},
+        onAlertsSeeAllClick = {},
+        onSectionClick = {},
+        onBlogSeeAllClick = {},
+        onNavItemClick = {},
+        onMapClick = {},
+        onWeatherClick = {}
+    )
 }

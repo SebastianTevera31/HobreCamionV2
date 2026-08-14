@@ -985,7 +985,8 @@ class InicioActivity : ComponentActivity() {
                                                     launchSingleTop = true
                                                     popUpTo(HombreCamionScreens.MONITOR.name)
                                                 }
-                                            })
+                                            }
+                                        )
                                     }
 
                                     composable(route = NavScreens.DESECHO) {
@@ -1048,6 +1049,9 @@ class InicioActivity : ComponentActivity() {
 
                                         WeatherRoute(
                                             viewModel = watherViewModel,
+                                            onNavigateToMap = {
+                                                navController.navigate(HombreCamionScreens.MAPA_VIAL.name)
+                                            },
                                             onBack = { navController.popBackStack() }
                                         )
                                     }

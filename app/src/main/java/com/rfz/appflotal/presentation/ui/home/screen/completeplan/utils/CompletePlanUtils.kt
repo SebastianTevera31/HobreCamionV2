@@ -1,10 +1,9 @@
 package com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.GpsFixed
+import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -26,8 +25,7 @@ data class BottomNavItem(val icon: ImageVector, val label: String, val hasBadge:
 
 val bottomNavItems = listOf(
     BottomNavItem(Icons.Outlined.Home, "Inicio"),
-    BottomNavItem(Icons.Outlined.Notifications, "Alertas", hasBadge = true),
-    BottomNavItem(Icons.Outlined.GpsFixed, "Registrar"),
     BottomNavItem(Icons.Outlined.QueryStats, "Analytics"),
-    BottomNavItem(Icons.Outlined.Map, "Mapa")
+    BottomNavItem(Icons.Outlined.Map, "Mapa"),
+    BottomNavItem(Icons.Outlined.Forum, "Foro")
 )
