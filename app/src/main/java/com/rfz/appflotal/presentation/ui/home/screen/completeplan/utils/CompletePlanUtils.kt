@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Home
@@ -7,6 +8,7 @@ import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.rfz.appflotal.R
 
 // Paleta específica de esta pantalla
 object CompletePlanColors {
@@ -21,11 +23,11 @@ object CompletePlanColors {
     val SubtleText = Color(0xFF8A97A0)
 }
 
-data class BottomNavItem(val icon: ImageVector, val label: String, val hasBadge: Boolean = false)
+data class BottomNavItem(val icon: ImageVector, @StringRes val label: Int, val hasBadge: Boolean = false)
 
 val bottomNavItems = listOf(
-    BottomNavItem(Icons.Outlined.Home, "Inicio"),
-    BottomNavItem(Icons.Outlined.QueryStats, "Analytics"),
-    BottomNavItem(Icons.Outlined.Map, "Mapa"),
-    BottomNavItem(Icons.Outlined.Forum, "Foro")
+    BottomNavItem(Icons.Outlined.Home, R.string.title_inicio),
+    BottomNavItem(Icons.Outlined.QueryStats, R.string.analytics),
+    BottomNavItem(Icons.Outlined.Map, R.string.vial_status),
+    BottomNavItem(Icons.Outlined.Forum, R.string.forum_title)
 )

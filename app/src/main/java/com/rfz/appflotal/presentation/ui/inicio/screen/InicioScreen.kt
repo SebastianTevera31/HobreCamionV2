@@ -51,10 +51,7 @@ fun InicioScreen(
 
 
 ) {
-
     val context = LocalContext.current
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()

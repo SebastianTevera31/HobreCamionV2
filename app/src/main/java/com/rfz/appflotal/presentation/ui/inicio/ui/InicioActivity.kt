@@ -100,6 +100,7 @@ import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.commons.MaintenanceAppScreen
 import com.rfz.appflotal.presentation.commons.UpdateAppScreen
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.alertas.AlertsScreen
 import com.rfz.appflotal.presentation.ui.assembly.screen.AssemblyTireScreen
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
 import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
@@ -1054,6 +1055,10 @@ class InicioActivity : ComponentActivity() {
                                             },
                                             onBack = { navController.popBackStack() }
                                         )
+                                    }
+                                    
+                                    composable(route = HombreCamionScreens.ALERTS.name) {
+                                        AlertsScreen()
                                     }
                                 }
 

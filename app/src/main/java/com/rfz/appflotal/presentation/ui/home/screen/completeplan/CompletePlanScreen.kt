@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -40,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -393,7 +391,7 @@ private fun VehicleStatItem(stat: VehicleStat) {
 }
 
 @Composable
-private fun AlertCard(alert: AlertUi) {
+fun AlertCard(alert: AlertUi) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -510,13 +508,29 @@ private fun WeatherCard(temp: String, city: String, description: String, onClick
 
 @Composable
 private fun SectionsGrid(sections: List<SectionItem>, onSectionClick: (SectionItem) -> Unit) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(4),
-        modifier = Modifier.height(if (sections.size > 4) 190.dp else 95.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    val rows = sections.chunked(4)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(sections) { section -> SectionIconItem(section, onSectionClick) }
+        rows.forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                rowItems.forEach { section ->
+                    Box(modifier = Modifier.weight(1f)) {
+                        SectionIconItem(section, onSectionClick)
+                    }
+                }
+                // Completar el espacio si la fila tiene menos de 4 elementos
+                if (rowItems.size < 4) {
+                    repeat(4 - rowItems.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -537,12 +551,16 @@ private fun SectionIconItem(section: SectionItem, onClick: (SectionItem) -> Unit
                     .background(TealSoftBg),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(section.icon, contentDescription = section.label, tint = TealDark)
+                Icon(
+                    section.icon,
+                    contentDescription = stringResource(section.label),
+                    tint = TealDark
+                )
             }
             Spacer(Modifier.height(6.dp))
             Text(
-                section.label,
-                fontSize = 12.sp,
+                stringResource(section.label),
+                fontSize = MaterialTheme.typography.labelSmall.fontSize,
                 textAlign = TextAlign.Center,
                 maxLines = 2
             )
@@ -638,11 +656,15 @@ private fun HomeBottomBar(selected: Int, onItemClick: (Int) -> Unit) {
                             ),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(item.icon, contentDescription = item.label, tint = Color.White)
+                        Icon(
+                            item.icon,
+                            contentDescription = stringResource(item.label),
+                            tint = Color.White
+                        )
                         if (isSelected) {
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                item.label,
+                                stringResource(item.label),
                                 color = Color.White,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 13.sp

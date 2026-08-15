@@ -7,9 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
-import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.CompletePlanScreen
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.viewmodel.CompletePlanViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
@@ -37,10 +37,8 @@ fun CompletePlanContent(
         onVehicleDetailClick = { /* TODO: Implement vehicle detail navigation */ },
         onAlertsSeeAllClick = { /* TODO: Implement alerts navigation */ },
         onSectionClick = { section -> onNavigate(section.route) },
-        onBlogSeeAllClick = { onNavigate(NavScreens.BLOG) },
-        onNavItemClick = { index ->
-            completePlanViewModel.onNavItemClick(index)
-        },
+        onBlogSeeAllClick = { onNavigate(ForumsGraph) },
+        onNavItemClick = { index -> completePlanViewModel.onNavItemClick(index) },
         onMapClick = { onNavigate(HombreCamionScreens.MAPA_VIAL.name) },
         onWeatherClick = { onNavigate(HombreCamionScreens.WEATHER.name) }
     )

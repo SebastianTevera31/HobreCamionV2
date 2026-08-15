@@ -127,7 +127,7 @@
     <string name="error_desconocido_del_servidor">Error desconocido del servidor</string>
     <string name="cuerpo_de_la_respuesta_vac_o">Cuerpo de la respuesta vacío</string>
     <string name="direcci_n_mac">Dirección MAC</string>
-    <string name="configuraci_n">Configuración</string>
+    <string name="configuracion">Ajustes</string>
     <string name="monitor">Monitor</string>
     <string name="guardar">Guardar</string>
     <string name="cerrar">Cerrar</string>
@@ -383,7 +383,7 @@
     <string name="sin_elementos_disponibles">Sin elementos disponibles</string>
     <string name="reintentar">Reintentar</string>
     <string name="operacion_cancelada">La operación fue cancelada.</string>
-    <string name="blog">Blog</string>
+    <string name="foro">Foro</string>
     <string name="favorites">Gustados</string>
 
     <plurals name="description_field">
@@ -671,4 +671,8 @@
     <string name="snowshowers">Chubascos de nieve</string>
     <string name="snowshowersandthunder">Chubascos de nieve con truenos</string>
     <string name="gustados">Gustados</string>
+    <string name="analytics">Estadísticas</string>
+    <string name="promociones_descuentos">Promociones</string>
+    <string name="feedback_title">Tu opinión nos importa</string>
+    <string name="feedback_subtitle">Cuéntanos qué podemos mejorar de la aplicación</string>
 </resources>

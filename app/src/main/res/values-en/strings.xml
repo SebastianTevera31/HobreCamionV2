@@ -128,7 +128,7 @@
     <string name="error_desconocido_del_servidor">Unknown server error</string>
     <string name="cuerpo_de_la_respuesta_vac_o">Empty response body</string>
     <string name="direcci_n_mac">MAC address</string>
-    <string name="configuraci_n">Configuration</string>
+    <string name="configuracion">Settings</string>
     <string name="monitor">Monitor</string>
     <string name="guardar">Save</string>
     <string name="cerrar">Close</string>
@@ -399,7 +399,7 @@
     <string name="sin_elementos_disponibles">No items available</string>
     <string name="reintentar">Retry</string>
     <string name="operacion_cancelada">The operation was canceled.</string>
-    <string name="blog">Vlog</string>
+    <string name="foro">Forum</string>
     <string name="favorites">Favorites</string>
 
     <plurals name="description_field">
@@ -684,4 +684,8 @@
     <string name="snowshowers">Snow showers</string>
     <string name="snowshowersandthunder">Snow showers and thunder</string>
     <string name="gustados">Liked</string>
+    <string name="analytics">Analytics</string>
+    <string name="promociones_descuentos">Promotions</string>
+    <string name="feedback_title">Your opinion matters to us</string>
+    <string name="feedback_subtitle">Tell us what we can improve about the app</string>
 </resources>

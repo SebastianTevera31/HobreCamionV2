@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.home.screen.completeplan.model
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.LocalOffer
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
@@ -36,7 +38,7 @@ data class AlertUi(
 
 enum class AlertStatus { CRITICA, PENDIENTE }
 
-data class SectionItem(val icon: ImageVector, val label: String, val route: Any)
+data class SectionItem(val icon: ImageVector, @StringRes val label: Int, val route: Any)
 
 data class BlogPost(val category: String, val title: String, val excerpt: String)
 
@@ -75,32 +77,32 @@ data class CompletePlanUiState(
     val sections: List<SectionItem> = listOf(
         SectionItem(
             icon = Icons.Outlined.GpsFixed,
-            label = "Registrar",
+            label = R.string.registrar_vehiculo,
             route = NavScreens.REGISTRO_LLANTAS
         ),
         SectionItem(
             icon = Icons.Filled.WaterDrop,
-            label = "TPMS",
+            label = R.string.monitor,
             route = HombreCamionScreens.MONITOR.name
         ),
         SectionItem(
             icon = Icons.Outlined.QueryStats,
-            label = "Analytics",
+            label = R.string.analytics,
             route = ReportGraph
         ),
         SectionItem(
             icon = Icons.AutoMirrored.Filled.Article,
-            label = "Blog",
+            label = R.string.foro,
             route = ForumsGraph
         ),
         SectionItem(
             icon = Icons.Filled.LocalOffer,
-            label = "Promociones / Descuentos",
+            label = R.string.promociones_descuentos,
             route = CouponGraph
         ),
         SectionItem(
             icon = Icons.Filled.Settings,
-            label = "Settings",
+            label = R.string.configuracion,
             route = NavScreens.INFORMACION_USUARIO
         )
     ),
