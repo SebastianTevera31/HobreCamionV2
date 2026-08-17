@@ -11,24 +11,36 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.home.screen.ElegantMenuCard
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.VehiclePerformanceCard
 import com.rfz.appflotal.presentation.ui.home.utils.cardBackground
 import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
 import com.rfz.appflotal.presentation.ui.home.utils.secondaryColor
 import com.rfz.appflotal.presentation.ui.reportes.navigation.CO2Emissions
 import com.rfz.appflotal.presentation.ui.reportes.navigation.CpkReport
 import com.rfz.appflotal.presentation.ui.reportes.navigation.FuelConsumption
+import com.rfz.appflotal.presentation.ui.reportes.viewmodel.MenuReportsViewModel
 
 @Composable
-fun MenuReportesView(onBack: () -> Unit, onNavigate: (Any) -> Unit, modifier: Modifier = Modifier) {
+
+fun MenuReportesView(
+    onBack: () -> Unit,
+    onNavigate: (Any) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: MenuReportsViewModel = hiltViewModel(),
+) {
+    val uiState = viewModel.uiState.collectAsState()
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -48,6 +60,13 @@ fun MenuReportesView(onBack: () -> Unit, onNavigate: (Any) -> Unit, modifier: Mo
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            VehiclePerformanceCard(
+                vehicleName = uiState.value.vehicleName,
+                plate = uiState.value.vehiclePlate,
+                periodLabel = "ESTA SEMANA",
+                stats = uiState.value.stats
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

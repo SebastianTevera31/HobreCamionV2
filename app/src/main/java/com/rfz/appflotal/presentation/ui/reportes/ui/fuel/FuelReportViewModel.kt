@@ -16,7 +16,6 @@ import javax.inject.Inject
 class FuelReportViewModel @Inject constructor(
     private val getFuelConsumptionUseCase: GetFuelConsumptionUseCase
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(FuelUiState())
     val uiState = _uiState.asStateFlow()
 

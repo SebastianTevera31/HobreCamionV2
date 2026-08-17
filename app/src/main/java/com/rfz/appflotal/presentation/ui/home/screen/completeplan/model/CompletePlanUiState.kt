@@ -1,34 +1,42 @@
 package com.rfz.appflotal.presentation.ui.home.screen.completeplan.model
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.QueryStats
-import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
 
+sealed class IconResource {
+    data class Vector(val imageVector: ImageVector) : IconResource()
+    data class Drawable(@DrawableRes val resId: Int) : IconResource()
+}
+
+fun ImageVector.asIcon() = IconResource.Vector(this)
+fun Int.asIcon() = IconResource.Drawable(this)
+
 data class VehicleStat(
-    val icon: ImageVector,
+    val icon: IconResource,
     val value: String,
     val unit: String,
     val label: String
 )
 
 data class AlertUi(
-    val icon: ImageVector,
+    val icon: IconResource,
     val title: String,
     val detailLabel: String,
     val detailValue: String,
@@ -38,25 +46,24 @@ data class AlertUi(
 
 enum class AlertStatus { CRITICA, PENDIENTE }
 
-data class SectionItem(val icon: ImageVector, @StringRes val label: Int, val route: Any)
-
+data class SectionItem(val icon: IconResource, @StringRes val label: Int, val route: Any)
 data class BlogPost(val category: String, val title: String, val excerpt: String)
 
 data class CompletePlanUiState(
-    val currentScreen: Int = 0,
+    val currentScreen: BottomNavItems = BottomNavItems.HOME,
     val userName: String = "Miguel",
     val vehicleName: String = "Mercedes Actros",
     val vehiclePlate: String = "4521-KBX",
     val paymentPlanType: PaymentPlanType = PaymentPlanType.Complete,
     val periodLabel: String = "ESTA SEMANA",
     val stats: List<VehicleStat> = listOf(
-        VehicleStat(Icons.Outlined.LocalShipping, "50", "km/lts", "Rendimiento"),
-        VehicleStat(Icons.Outlined.GpsFixed, "1000", "km/mm", "Desgaste"),
-        VehicleStat(Icons.Outlined.Cloud, "100", "kg", "Emisión CO2")
+        VehicleStat(Icons.Outlined.LocalShipping.asIcon(), "50", "km/lts", "Rendimiento"),
+        VehicleStat(Icons.Outlined.GpsFixed.asIcon(), "1000", "km/mm", "Desgaste"),
+        VehicleStat(Icons.Outlined.Cloud.asIcon(), "100", "kg", "Emisión CO2")
     ),
     val alerts: List<AlertUi> = listOf(
         AlertUi(
-            icon = Icons.Outlined.Warning,
+            icon = R.drawable.tire_pressure_warning.asIcon(),
             title = "TPMS · eje delantero izq.",
             detailLabel = "Presión:",
             detailValue = "2.1 bar",
@@ -64,7 +71,7 @@ data class CompletePlanUiState(
             status = AlertStatus.CRITICA
         ),
         AlertUi(
-            icon = Icons.Outlined.GpsFixed,
+            icon = Icons.Outlined.GpsFixed.asIcon(),
             title = "Alerta de mm bajo",
             detailLabel = "Profundidad baja ·",
             detailValue = "4 mm",
@@ -76,32 +83,32 @@ data class CompletePlanUiState(
     val weatherDesc: String = "Despejado · viento 12 km/h",
     val sections: List<SectionItem> = listOf(
         SectionItem(
-            icon = Icons.Outlined.GpsFixed,
+            icon = Icons.Outlined.GpsFixed.asIcon(),
             label = R.string.registrar_vehiculo,
             route = NavScreens.REGISTRO_LLANTAS
         ),
         SectionItem(
-            icon = Icons.Filled.WaterDrop,
+            icon = R.drawable.tire_pressure_warning.asIcon(),
             label = R.string.monitor,
             route = HombreCamionScreens.MONITOR.name
         ),
         SectionItem(
-            icon = Icons.Outlined.QueryStats,
+            icon = Icons.Outlined.QueryStats.asIcon(),
             label = R.string.analytics,
             route = ReportGraph
         ),
         SectionItem(
-            icon = Icons.AutoMirrored.Filled.Article,
+            icon = Icons.AutoMirrored.Filled.Article.asIcon(),
             label = R.string.foro,
             route = ForumsGraph
         ),
         SectionItem(
-            icon = Icons.Filled.LocalOffer,
+            icon = Icons.Filled.LocalOffer.asIcon(),
             label = R.string.promociones_descuentos,
             route = CouponGraph
         ),
         SectionItem(
-            icon = Icons.Filled.Settings,
+            icon = Icons.Filled.Settings.asIcon(),
             label = R.string.configuracion,
             route = NavScreens.INFORMACION_USUARIO
         )

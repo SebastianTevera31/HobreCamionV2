@@ -13,6 +13,7 @@ import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.CompletePlanScreen
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.viewmodel.CompletePlanViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
 
 @Composable
 fun CompletePlanContent(
@@ -34,11 +35,11 @@ fun CompletePlanContent(
             paymentPlanType = paymentPlan
         ),
         onNotificationsClick = { /* TODO: Implement notifications logic */ },
-        onVehicleDetailClick = { /* TODO: Implement vehicle detail navigation */ },
-        onAlertsSeeAllClick = { /* TODO: Implement alerts navigation */ },
+        onVehicleDetailClick = { onNavigate(ReportGraph) },
+        onAlertsSeeAllClick = { onNavigate(HombreCamionScreens.ALERTS.name) },
         onSectionClick = { section -> onNavigate(section.route) },
         onBlogSeeAllClick = { onNavigate(ForumsGraph) },
-        onNavItemClick = { index -> completePlanViewModel.onNavItemClick(index) },
+        onNavItemClick = { item -> completePlanViewModel.onNavItemClick(item) },
         onMapClick = { onNavigate(HombreCamionScreens.MAPA_VIAL.name) },
         onWeatherClick = { onNavigate(HombreCamionScreens.WEATHER.name) }
     )

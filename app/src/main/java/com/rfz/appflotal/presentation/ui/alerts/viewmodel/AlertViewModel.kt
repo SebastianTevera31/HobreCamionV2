@@ -1,4 +1,4 @@
-package com.rfz.appflotal.presentation.ui.alertas.viewmodel
+package com.rfz.appflotal.presentation.ui.alerts.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertUi

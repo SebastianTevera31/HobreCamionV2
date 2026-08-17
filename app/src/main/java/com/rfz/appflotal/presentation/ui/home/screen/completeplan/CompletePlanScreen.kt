@@ -1,63 +1,38 @@
 package com.rfz.appflotal.presentation.ui.home.screen.completeplan
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ChevronRight
-import androidx.compose.material.icons.outlined.Error
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.WbSunny
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.rfz.appflotal.R
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertStatus
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertUi
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.BlogPost
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.AlertCard
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.BlogPostCard
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.CompleteHomeTopBar
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeBottomBar
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeTopBar
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SectionHeader
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SectionsGrid
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SeeAllPill
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.VehiclePerformanceCard
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.WeatherCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.SectionItem
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.VehicleStat
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.CriticalBg
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.CriticalFg
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.SubtleText
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.TealDark
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.TealMid
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.TealSoftBg
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.CompletePlanColors.WeatherBg
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.bottomNavItems
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 
 @Composable
@@ -69,7 +44,7 @@ fun CompletePlanScreen(
     onWeatherClick: () -> Unit,
     onSectionClick: (SectionItem) -> Unit,
     onBlogSeeAllClick: () -> Unit,
-    onNavItemClick: (Int) -> Unit,
+    onNavItemClick: (BottomNavItems) -> Unit,
     modifier: Modifier = Modifier,
     state: CompletePlanUiState = CompletePlanUiState()
 ) {
@@ -80,606 +55,145 @@ fun CompletePlanScreen(
         },
         modifier = modifier.navigationBarsPadding(),
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(padding),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            item {
-                if (state.paymentPlanType == PaymentPlanType.Complete) {
-                    CompleteHomeTopBar(state.userName, onNotificationsClick)
-                } else {
-                    HomeTopBar(
-                        userName = state.userName,
-                        planType = state.paymentPlanType,
-                        plates = state.vehiclePlate,
-                        onNotificationsClick = onNotificationsClick,
-                    )
-                }
-            }
-
-            item {
-                Column {
-                    SectionHeader("Rendimiento del vehículo", "Ver detalle", onVehicleDetailClick)
-                    VehiclePerformanceCard(
-                        state.vehicleName,
-                        state.vehiclePlate,
-                        state.periodLabel,
-                        state.stats
-                    )
-                }
-            }
-
-            item {
-                Column {
-                    SectionHeader("Alertas recientes", "Ver todas", onAlertsSeeAllClick)
-                    state.alerts.forEach { alert ->
-                        AlertCard(alert)
-                    }
-                }
-            }
-
-            item {
-                Column {
-                    SectionHeader("Clima", "Ver mapa", onMapClick)
-                    WeatherCard(
-                        state.weatherTemp,
-                        state.weatherCity,
-                        state.weatherDesc,
-                        onWeatherClick
-                    )
-                }
-            }
-
-            item {
-                Column {
-                    Text(
-                        "Secciones",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.padding(8.dp))
-                    SectionsGrid(state.sections, onSectionClick)
-                }
-            }
-
-            item {
-                Column {
-                    SectionHeader("Blog", "Ver todas", onBlogSeeAllClick)
-                    state.blogPosts.forEach { post ->
-                        BlogPostCard(post)
-                    }
-                }
-            }
-
-            item {
-                SeeAllPill("Ver todos", onBlogSeeAllClick)
-            }
-        }
-    }
-}
-
-@Composable
-private fun CompleteHomeTopBar(
-    userName: String,
-    onNotificationsClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 68.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(TealSoftBg),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    userName.take(2).uppercase(),
-                    color = TealMid,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text(
-                    "¡Hola, $userName!",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    "Revisa tu camión",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = SubtleText
-                )
-            }
-        }
-
-        Box {
-            IconButton(
-                onClick = onNotificationsClick,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(TealSoftBg)
-            ) {
-                Icon(
-                    Icons.Outlined.Notifications,
-                    contentDescription = "Notificaciones",
-                    tint = TealDark
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .align(Alignment.TopEnd)
-                    .clip(CircleShape)
-                    .background(CriticalFg)
-            )
-        }
-    }
-}
-
-
-@Composable
-private fun HomeTopBar(
-    userName: String,
-    planType: PaymentPlanType,
-    plates: String,
-    onNotificationsClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(TealSoftBg),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    userName.take(2).uppercase(),
-                    color = TealMid,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(Modifier.width(12.dp))
-
-            Column(horizontalAlignment = Alignment.Start) {
-                Text(
-                    text = "¡Hola, $userName!",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Start
-                )
-                Text(
-                    "Plan: ${planType.name}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TealMid,
-                    fontWeight = FontWeight.SemiBold
-                )
-                if (plates.isNotEmpty()) {
-                    Text(
-                        "Placas: $plates",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = SubtleText,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-        }
-
-        Box {
-            IconButton(
-                onClick = onNotificationsClick,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(TealSoftBg)
-            ) {
-                Icon(
-                    Icons.Outlined.Notifications,
-                    contentDescription = "Notificaciones",
-                    tint = TealDark
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .align(Alignment.TopEnd)
-                    .clip(CircleShape)
-                    .background(CriticalFg)
-            )
-        }
-    }
-}
-
-@Composable
-private fun SectionHeader(title: String, actionLabel: String, onActionClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        TextButton(onClick = onActionClick) {
-            Text(
-                actionLabel,
-                color = TealMid,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(4.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun VehiclePerformanceCard(
-    vehicleName: String,
-    plate: String,
-    periodLabel: String,
-    stats: List<VehicleStat>
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = TealDark)
-    ) {
-        Column(Modifier.padding(20.dp)) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    "$vehicleName · $plate",
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Box(
+        when (state.currentScreen) {
+            BottomNavItems.HOME -> {
+                LazyColumn(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.White.copy(alpha = 0.18f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .fillMaxWidth()
+                        .padding(padding),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    Text(
-                        periodLabel,
-                        color = Color.White,
-                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
-            Spacer(Modifier.height(20.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                stats.forEach { stat -> VehicleStatItem(stat) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun VehicleStatItem(stat: VehicleStat) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(stat.icon, contentDescription = null, tint = Color.White.copy(alpha = 0.85f))
-        Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(stat.value, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text(" ${stat.unit}", color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp)
-        }
-        Text(stat.label, color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
-    }
-}
-
-@Composable
-fun AlertCard(alert: AlertUi) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(3f)
-                ) {
-                    if (alert.status == AlertStatus.CRITICA) {
-                        Icon(
-                            painterResource(R.drawable.tire_pressure_warning),
-                            contentDescription = null,
-                            tint = TealMid,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    } else {
-                        Icon(alert.icon, contentDescription = null, tint = TealMid)
-                    }
-
-                    Spacer(Modifier.width(10.dp))
-                    Text(
-                        alert.title,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                if (alert.status == AlertStatus.CRITICA) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(CriticalBg)
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "CRÍTICA",
-                            color = CriticalFg,
-                            fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Outlined.Error,
-                    contentDescription = null,
-                    tint = SubtleText,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    alert.detailLabel,
-                    color = SubtleText,
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    alert.detailValue,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodySmall
-                )
-                alert.detailExtra?.let {
-                    Spacer(Modifier.width(4.dp))
-                    Text(it, color = SubtleText, style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun WeatherCard(temp: String, city: String, description: String, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = WeatherBg),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Outlined.WbSunny,
-                contentDescription = null,
-                tint = TealDark,
-                modifier = Modifier.size(40.dp)
-            )
-            Spacer(Modifier.width(16.dp))
-            Column(Modifier.weight(1f)) {
-                Text(temp, fontSize = 32.sp, fontWeight = FontWeight.Bold)
-                Text(city, fontWeight = FontWeight.SemiBold)
-                Text(description, color = SubtleText, style = MaterialTheme.typography.bodySmall)
-            }
-            Icon(Icons.Outlined.ChevronRight, contentDescription = "Ver mapa", tint = TealDark)
-        }
-    }
-}
-
-@Composable
-private fun SectionsGrid(sections: List<SectionItem>, onSectionClick: (SectionItem) -> Unit) {
-    val rows = sections.chunked(4)
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        rows.forEach { rowItems ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                rowItems.forEach { section ->
-                    Box(modifier = Modifier.weight(1f)) {
-                        SectionIconItem(section, onSectionClick)
-                    }
-                }
-                // Completar el espacio si la fila tiene menos de 4 elementos
-                if (rowItems.size < 4) {
-                    repeat(4 - rowItems.size) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SectionIconItem(section: SectionItem, onClick: (SectionItem) -> Unit) {
-    Card(
-        onClick = { onClick(section) },
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(TealSoftBg),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    section.icon,
-                    contentDescription = stringResource(section.label),
-                    tint = TealDark
-                )
-            }
-            Spacer(Modifier.height(6.dp))
-            Text(
-                stringResource(section.label),
-                fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                textAlign = TextAlign.Center,
-                maxLines = 2
-            )
-        }
-    }
-}
-
-@Composable
-private fun BlogPostCard(post: BlogPost) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(TealSoftBg)
-            )
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text(
-                    post.category,
-                    color = TealMid,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    post.title,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    post.excerpt,
-                    color = SubtleText,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 2
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SeeAllPill(label: String, onClick: () -> Unit) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(50)),
-        color = TealSoftBg,
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 14.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(label, color = TealDark, fontWeight = FontWeight.Bold)
-            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = TealDark)
-        }
-    }
-}
-
-@Composable
-private fun HomeBottomBar(selected: Int, onItemClick: (Int) -> Unit) {
-    Surface(
-        color = TealDark,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            bottomNavItems.forEachIndexed { index, item ->
-                val isSelected = index == selected
-                Box(modifier = Modifier.clickable { onItemClick(index) }) {
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(if (isSelected) Color.White.copy(alpha = 0.15f) else Color.Transparent)
-                            .padding(
-                                horizontal = if (isSelected) 14.dp else 10.dp,
-                                vertical = 10.dp
-                            ),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            item.icon,
-                            contentDescription = stringResource(item.label),
-                            tint = Color.White
-                        )
-                        if (isSelected) {
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                stringResource(item.label),
-                                color = Color.White,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp
+                    item {
+                        if (state.paymentPlanType == PaymentPlanType.Complete) {
+                            CompleteHomeTopBar(state.userName, onNotificationsClick)
+                        } else {
+                            HomeTopBar(
+                                userName = state.userName,
+                                planType = state.paymentPlanType,
+                                plates = state.vehiclePlate,
+                                onNotificationsClick = onNotificationsClick,
                             )
                         }
                     }
-                    if (item.hasBadge) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .align(Alignment.TopEnd)
-                                .clip(CircleShape)
-                                .background(Color(0xFFFFC107))
-                        )
+
+                    item {
+                        Column {
+                            SectionHeader(
+                                "Rendimiento del vehículo",
+                                "Ver detalle",
+                                onVehicleDetailClick
+                            )
+                            VehiclePerformanceCard(
+                                state.vehicleName,
+                                state.vehiclePlate,
+                                state.periodLabel,
+                                state.stats
+                            )
+                        }
                     }
+
+                    item {
+                        Column {
+                            SectionHeader("Alertas recientes", "Ver todas", onAlertsSeeAllClick)
+                            state.alerts.forEach { alert ->
+                                AlertCard(alert)
+                            }
+                        }
+                    }
+
+                    item {
+                        Column {
+                            SectionHeader("Clima", "Ver mapa", onMapClick)
+                            WeatherCard(
+                                state.weatherTemp,
+                                state.weatherCity,
+                                state.weatherDesc,
+                                onWeatherClick
+                            )
+                        }
+                    }
+
+                    item {
+                        Column {
+                            Text(
+                                "Secciones",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.padding(8.dp))
+                            SectionsGrid(state.sections, onSectionClick)
+                        }
+                    }
+
+                    item {
+                        Column {
+                            SectionHeader("Blog", "Ver todas", onBlogSeeAllClick)
+                            state.blogPosts.forEach { post ->
+                                BlogPostCard(post)
+                            }
+                        }
+                    }
+
+                    item {
+                        SeeAllPill("Ver todos", onBlogSeeAllClick)
+                    }
+                }
+            }
+
+            BottomNavItems.ANALYTICS -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Pantalla de Analytics (Contenido persistente)",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+            }
+
+            BottomNavItems.MAP -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Pantalla de Mapa Vial (Contenido persistente)",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+            }
+
+            BottomNavItems.FORUM -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Pantalla de Foro (Contenido persistente)",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+            }
+
+            BottomNavItems.MONITOR -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Pantalla de Monitor (Contenido persistente)",
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 }
             }
         }
