@@ -78,7 +78,7 @@ fun AdaptiveIcon(
         is IconResource.Vector -> Icon(
             imageVector = icon.imageVector,
             contentDescription = contentDescription,
-            modifier = modifier,
+            modifier = modifier.size(24.dp),
             tint = tint
         )
 
