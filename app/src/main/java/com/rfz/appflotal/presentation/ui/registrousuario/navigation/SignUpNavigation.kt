@@ -83,7 +83,6 @@ fun SignUpFlowMainContainer(
     navigateToMenu: suspend (PaymentPlanType) -> Unit
 ) {
     val ctx = LocalContext.current
-    // El ViewModel se asocia a esta pantalla principal (el contenedor de todo el flujo)
     val viewModel: SignUpViewModel = hiltViewModel()
     val uiState by viewModel.signUpUiState.collectAsState()
     val signUpRequestStatus = viewModel.signUpRequestStatus
@@ -114,7 +113,7 @@ fun SignUpFlowMainContainer(
             // Solo mostramos el TopBar si no estamos en términos
             if (currentInternalRoute != "terms_view") {
                 UserInfoTopBar(
-                    showNavigateUp = true, // Siempre mostramos atrás dentro del flujo
+                    showNavigateUp = currentInternalRoute == "user_data", // Siempre mostramos atrás dentro del flujo
                     onNavigateUp = {
                         if (currentInternalRoute == "user_data") {
                             // Si estamos en el primer paso, salimos del registro al Login
@@ -135,7 +134,6 @@ fun SignUpFlowMainContainer(
                 .padding(innerPadding)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // Fondo decorativo (estático para todo el flujo)
                 if (currentInternalRoute != "terms_view") {
                     Box(
                         modifier = Modifier
@@ -195,15 +193,11 @@ fun SignUpFlowMainContainer(
                             temperatureUnit = temperatureUnit,
                             pressureUnit = pressureUnit,
                             odometerUnit = odometerUnit,
-                            onTempChange = {
-                                temperatureUnit = it
-                            },
-                            onPressureChange = {
-                                pressureUnit = it
-                            },
-                            onOdometerChange = {
-                                odometerUnit = it
-                            }
+                            onTempChange = { temperatureUnit = it },
+                            onPressureChange = { pressureUnit = it },
+                            onOdometerChange = { odometerUnit = it },
+                            onBack = { internalNavController.popBackStack() },
+                            modifier = Modifier.padding(horizontal = 40.dp)
                         ) { _, _, _ ->
                             internalNavController.navigate(SignUpRoutes.TIRES.route)
                         }

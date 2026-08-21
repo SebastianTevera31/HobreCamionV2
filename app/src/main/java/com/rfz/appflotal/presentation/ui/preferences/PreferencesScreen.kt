@@ -2,10 +2,13 @@ package com.rfz.appflotal.presentation.ui.preferences
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,17 +36,26 @@ fun PreferencesScreen(
     onTempChange: (UnitProvider) -> Unit,
     onPressureChange: (UnitProvider) -> Unit,
     onOdometerChange: (UnitProvider) -> Unit,
+    onBack: () -> Unit,
     onConfirmUnits: (temperature: UnitProvider, pressure: UnitProvider, odometer: UnitProvider) -> Unit
 ) {
+    val scrollState = rememberScrollState()
+
     Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier.verticalScroll(scrollState),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
+            text = "PREFERENCIAS",
+            style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
+            textAlign = TextAlign.Start,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
             text = stringResource(R.string.unidades_de_medida),
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Start,
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -55,10 +67,7 @@ fun PreferencesScreen(
             selectedUnit = temperatureUnit,
             modifier = Modifier
 
-        )
-        {
-            onTempChange(it)
-        }
+        ) { onTempChange(it) }
 
         UnitToggle(
             title = R.string.presion,
@@ -66,10 +75,7 @@ fun PreferencesScreen(
             secondUnit = UnidadPresion.PSI,
             selectedUnit = pressureUnit,
             modifier = Modifier
-        )
-        {
-            onPressureChange(it)
-        }
+        ) { onPressureChange(it) }
 
         UnitToggle(
             title = R.string.odometro,
@@ -77,18 +83,29 @@ fun PreferencesScreen(
             secondUnit = UnidadOdometro.KILOMETROS,
             selectedUnit = odometerUnit,
             modifier = Modifier
-        )
-        {
-            onOdometerChange(it)
-        }
+        ) { onOdometerChange(it) }
 
-        Button(onClick = { onConfirmUnits(temperatureUnit, pressureUnit, odometerUnit) }) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = { onBack() },
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.tertiary),
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.weight(1f)
+            ) { Text(text = stringResource(R.string.regresar)) }
 
+            Button(
+                onClick = { onConfirmUnits(temperatureUnit, pressureUnit, odometerUnit) },
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.weight(1f)
+            ) { Text(text = stringResource(R.string.siguiente)) }
         }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 @Composable
 fun NotificationScreen() {
     HombreCamionTheme {
@@ -98,7 +115,9 @@ fun NotificationScreen() {
             odometerUnit = UnidadOdometro.KILOMETROS,
             onTempChange = {},
             onPressureChange = {},
-            onOdometerChange = {}
-        ) { _, _, _ -> }
+            onOdometerChange = {},
+            onBack = {},
+            onConfirmUnits = { _, _, _ -> }
+        )
     }
 }
