@@ -38,7 +38,7 @@ fun HomeContent(
     plates: String,
     userName: String,
     paddingValues: PaddingValues,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     when (paymentPlan) {
         PaymentPlanType.Complete -> CompletePlanContent(

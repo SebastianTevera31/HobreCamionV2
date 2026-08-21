@@ -74,6 +74,8 @@ import com.rfz.appflotal.domain.brand.BrandCrudUseCase
 import com.rfz.appflotal.domain.brand.BrandListUseCase
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
+import androidx.compose.ui.tooling.preview.Preview
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import kotlinx.coroutines.launch
 
 private const val ITEMS_PER_PAGE = 10
@@ -473,6 +475,22 @@ fun MarcasScreen(
             )
 
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BrandItemPreview() {
+    HombreCamionTheme {
+        BrandItem(
+            marca = BranListResponse(
+                idBrand = 1,
+                description = "Toyota"
+            ),
+            onEditClick = {},
+            primaryColor = MaterialTheme.colorScheme.primary,
+            secondaryColor = MaterialTheme.colorScheme.secondary
+        )
     }
 }
 

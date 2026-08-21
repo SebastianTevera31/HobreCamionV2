@@ -57,9 +57,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 
 import com.rfz.appflotal.data.model.brand.response.BranListResponse
 import com.rfz.appflotal.data.model.originaldesign.dto.CrudOriginalDesignDto
@@ -813,5 +815,26 @@ fun OriginalDesignItem(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun OriginalDesignItemPreview() {
+    val sampleDesign = OriginalDesignResponse(
+        idOriginalDesign = 1,
+        model = "R150",
+        description = "Description R150 for highway use",
+        brandId = "Bridgestone",
+        fld_utilization = "Highway"
+    )
+
+    HombreCamionTheme {
+        OriginalDesignItem(
+            design = sampleDesign,
+            onEditClick = {},
+            primaryColor = MaterialTheme.colorScheme.primary,
+            secondaryColor = MaterialTheme.colorScheme.secondary
+        )
     }
 }

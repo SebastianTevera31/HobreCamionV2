@@ -73,9 +73,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
@@ -89,6 +89,7 @@ import com.rfz.appflotal.domain.product.ProductCrudUseCase
 import com.rfz.appflotal.domain.product.ProductListUseCase
 import com.rfz.appflotal.domain.tire.LoadingCapacityUseCase
 import com.rfz.appflotal.domain.tire.TireSizeUseCase
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import kotlinx.coroutines.launch
@@ -816,6 +817,38 @@ fun NuevoProductoScreen(
                 }
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProductItemPreview() {
+    val sampleProduct = ProductResponse(
+        idProduct = 1,
+        descriptionProduct = "Bridgestone R150 295/80R22.5",
+        userId = 1,
+        treadDepth = 15
+    )
+    val sampleOriginalDesigns = listOf(
+        OriginalDesignResponse(1, "R150", "Description R150", "Bridgestone", "Highway")
+    )
+    val sampleTireSizes = listOf(
+        TireSizeResponse(1, "295/80R22.5", "Notes")
+    )
+    val sampleLoadCapacities = listOf(
+        LoadingCapacityResponse(1, "146/143L")
+    )
+
+    HombreCamionTheme {
+        ProductItem(
+            product = sampleProduct,
+            originalDesigns = sampleOriginalDesigns,
+            tireSizes = sampleTireSizes,
+            loadCapacities = sampleLoadCapacities,
+            onEditClick = {},
+            primaryColor = MaterialTheme.colorScheme.primary,
+            secondaryColor = MaterialTheme.colorScheme.secondary
+        )
     }
 }
 

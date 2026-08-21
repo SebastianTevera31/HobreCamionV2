@@ -63,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -71,6 +72,7 @@ import com.rfz.appflotal.data.model.tire.dto.TireSizeDto
 import com.rfz.appflotal.data.model.tire.response.TireSizeResponse
 import com.rfz.appflotal.domain.tire.TireSizeCrudUseCase
 import com.rfz.appflotal.domain.tire.TireSizeUseCase
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.backgroundLight
 import com.rfz.appflotal.presentation.theme.onPrimaryContainerLight
 import com.rfz.appflotal.presentation.theme.primaryLight
@@ -568,6 +570,26 @@ fun MedidaItem(
                     )
                 )
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MedidaItemPreview() {
+    val sampleMedida = TireSizeResponse(
+        id_tireSize = 1,
+        fld_size = "295/80 R22.5",
+        fld_notes = "Nota de ejemplo para la medida de llanta"
+    )
+    HombreCamionTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            MedidaItem(
+                medida = sampleMedida,
+                onEditClick = {},
+                primaryColor = primaryLight,
+                secondaryColor = secondaryLight
+            )
         }
     }
 }
