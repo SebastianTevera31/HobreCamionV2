@@ -71,10 +71,11 @@ class BluetoothScannerImp(
 
     private fun matchesTarget(result: ScanResult): Boolean {
         val deviceName = result.device.name ?: ""
+        Log.i("BluetoothScanner", "Device name: $deviceName")
 
         // 1. Caso específico para TPMS (Validación estricta)
         if (deviceName.startsWith("TPMS")) {
-            val mac = result.device.address.replace(":", "").take(6)
+            val mac = result.device.address.replace(":", "").takeLast(6)
             val hasProduct = MONITOR_PRODUCTOS.any { deviceName.contains(it) }
             val hasMac = deviceName.contains(mac)
 
@@ -93,8 +94,8 @@ class BluetoothScannerImp(
         // 3. Verificación por registros de servicio (UUIDs)
         val sr = result.scanRecord ?: return false
         val hasService = sr.serviceUuids?.any { it == TARGET_BLE4 || it == TARGET_BLE5 } == true
-        val hasServiceData =
-            sr.getServiceData(TARGET_BLE4) != null || sr.getServiceData(TARGET_BLE5) != null
+        val hasServiceData = sr.getServiceData(TARGET_BLE4) != null
+                || sr.getServiceData(TARGET_BLE5) != null
 
         return hasService || hasServiceData
     }

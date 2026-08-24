@@ -35,6 +35,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 interface BluetoothRepository {
     var sensorData: StateFlow<BluetoothData>
@@ -145,7 +146,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                     // reintento controlado
                     lastMacAddress?.let { mac ->
                         scope.launch {
-                            delay(5000)
+                            delay(5000.milliseconds)
                             connect(mac)
                         }
                     }
