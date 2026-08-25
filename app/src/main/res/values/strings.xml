@@ -675,4 +675,6 @@
     <string name="promociones_descuentos">Promociones</string>
     <string name="feedback_title">Tu opinión nos importa</string>
     <string name="feedback_subtitle">Cuéntanos qué podemos mejorar de la aplicación</string>
+    <string name="consumo_de_combustible">Consumo de Combustible</string>
+    <string name="emision_co2">Emisión CO2</string>
 </resources>

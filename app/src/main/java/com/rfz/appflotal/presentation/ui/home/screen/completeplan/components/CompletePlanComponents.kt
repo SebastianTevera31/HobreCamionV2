@@ -23,7 +23,6 @@ import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GpsFixed
-import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.WbSunny
@@ -261,7 +260,6 @@ fun SectionHeader(title: String, actionLabel: String, onActionClick: () -> Unit)
 fun VehiclePerformanceCard(
     vehicleName: String,
     plate: String,
-    periodLabel: String,
     stats: List<VehicleStat>
 ) {
     Card(
@@ -288,7 +286,7 @@ fun VehiclePerformanceCard(
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        periodLabel,
+                        "ÚLTIMOS DATOS",
                         color = Color.White,
                         fontSize = MaterialTheme.typography.labelSmall.fontSize,
                         fontWeight = FontWeight.Bold,
@@ -315,7 +313,8 @@ fun VehicleStatItem(stat: VehicleStat) {
             Text(stat.value, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Text(" ${stat.unit}", color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp)
         }
-        Text(stat.label, color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
+        val label = stringResource(stat.label)
+        Text(label, color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
     }
 }
 
@@ -625,15 +624,19 @@ fun HomeTopBarPreview() {
 @Composable
 fun VehiclePerformanceCardPreview() {
     val stats = listOf(
-        VehicleStat(Icons.Outlined.LocalShipping.asIcon(), "50", "km/lts", "Rendimiento"),
-        VehicleStat(Icons.Outlined.GpsFixed.asIcon(), "1000", "km/mm", "Desgaste"),
-        VehicleStat(Icons.Outlined.Cloud.asIcon(), "100", "kg", "Emisión CO2")
+        VehicleStat(
+            1,
+            Icons.Outlined.GpsFixed.asIcon(),
+            "1000",
+            "lts",
+            R.string.consumo_de_combustible
+        ),
+        VehicleStat(2, Icons.Outlined.Cloud.asIcon(), "100", "kg", R.string.emisiones_co2)
     )
     HombreCamionTheme {
         VehiclePerformanceCard(
             vehicleName = "Mercedes Actros",
             plate = "4521-KBX",
-            periodLabel = "ESTA SEMANA",
             stats = stats
         )
     }

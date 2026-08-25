@@ -87,7 +87,6 @@ fun CompletePlanScreen(
                             VehiclePerformanceCard(
                                 state.vehicleName,
                                 state.vehiclePlate,
-                                state.periodLabel,
                                 state.stats
                             )
                         }

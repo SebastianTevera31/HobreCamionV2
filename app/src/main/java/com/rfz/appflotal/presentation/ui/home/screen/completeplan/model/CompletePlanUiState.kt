@@ -8,7 +8,7 @@ import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.GpsFixed
-import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.outlined.OilBarrel
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.rfz.appflotal.R
@@ -29,10 +29,11 @@ fun ImageVector.asIcon() = IconResource.Vector(this)
 fun Int.asIcon() = IconResource.Drawable(this)
 
 data class VehicleStat(
+    val id: Int,
     val icon: IconResource,
     val value: String,
     val unit: String,
-    val label: String
+    @StringRes val label: Int
 )
 
 data class AlertUi(
@@ -50,16 +51,26 @@ data class SectionItem(val icon: IconResource, @StringRes val label: Int, val ro
 data class BlogPost(val category: String, val title: String, val excerpt: String)
 
 data class CompletePlanUiState(
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
     val currentScreen: BottomNavItems = BottomNavItems.HOME,
-    val userName: String = "Miguel",
-    val vehicleName: String = "Mercedes Actros",
-    val vehiclePlate: String = "4521-KBX",
+    val userName: String = "",
+    val vehicleName: String = "",
+    val vehiclePlate: String = "",
     val paymentPlanType: PaymentPlanType = PaymentPlanType.Complete,
-    val periodLabel: String = "ESTA SEMANA",
     val stats: List<VehicleStat> = listOf(
-        VehicleStat(Icons.Outlined.LocalShipping.asIcon(), "50", "km/lts", "Rendimiento"),
-        VehicleStat(Icons.Outlined.GpsFixed.asIcon(), "1000", "km/mm", "Desgaste"),
-        VehicleStat(Icons.Outlined.Cloud.asIcon(), "100", "kg", "Emisión CO2")
+        VehicleStat(
+            1,
+            Icons.Outlined.OilBarrel.asIcon(),
+            "0",
+            "lts",
+            R.string.consumo_de_combustible
+        ),
+        VehicleStat(
+            2,
+            Icons.Outlined.Cloud.asIcon(), "100", "kg",
+            R.string.emision_co2
+        )
     ),
     val alerts: List<AlertUi> = listOf(
         AlertUi(
