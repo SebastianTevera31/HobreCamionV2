@@ -17,8 +17,8 @@ android {
         applicationId = "com.rfz.appflotal"
         minSdk = 29
         targetSdk = 36
-        versionCode = 25
-        versionName = "4"
+        versionCode = 27
+        versionName = "4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -35,12 +35,12 @@ android {
         }
 
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            isMinifyEnabled = false
+//            isShrinkResources = true
+//            proguardFiles(
+//                getDefaultProguardFile("proguard-android-optimize.txt"),
+//                "proguard-rules.pro"
+//            )
             buildConfigField("String", "URL_API", "\"https://owneroperatorapi.azurewebsites.net/\"")
             buildConfigField("String", "DB_NAME", "\"AppFlotalDatabase\"")
             buildConfigField("String", "AD_UNIT_ID", "\"ca-app-pub-3415237437138959/2146418588\"")
