@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,10 +21,17 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,13 +46,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.tiremanagement.TireManagementItem
+import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.tiremanagment.viewmodel.TireManagementDestinations
 import com.rfz.appflotal.presentation.ui.tiremanagment.viewmodel.TireManagementUiState
 import com.rfz.appflotal.presentation.ui.tiremanagment.viewmodel.TireManagementViewModel
 
 @Composable
 fun TireManagementRoute(
+    onBack: () -> Unit,
+    onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TireManagementViewModel = hiltViewModel()
 ) {
@@ -56,31 +66,60 @@ fun TireManagementRoute(
 
     }
 
-    TireManagementScreen(uiState = uiState.value, onEditClick = editClick, modifier = modifier)
+    TireManagementScreen(
+        uiState = uiState.value,
+        onEditClick = editClick,
+        onBack = {},
+        onNavigate = {},
+        modifier = modifier
+    )
 }
 
 @Composable
 fun TireManagementScreen(
     uiState: TireManagementUiState,
     onEditClick: () -> Unit,
+    onNavigate: (String) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(topBar = {}, modifier = modifier) { innerPadding ->
-        Column(
-            modifier = modifier
-                .padding(innerPadding)
-                .padding(Dimens.PaddingMedium)
-        ) {
-            Text(
-                text = "Tire",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-            )
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(uiState.items) { item ->
-                    TireManagementCard(item = item, onEditClick = onEditClick)
+    val startDestination = TireManagementDestinations.Tire
+    var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
+
+    Scaffold(
+        topBar = {
+            Column {
+                SimpleTopBar(
+                    title = "Tire Management",
+                    onBack = onBack,
+                    showBackButton = true
+                )
+            }
+        },
+        bottomBar = {
+            NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+                TireManagementDestinations.entries.forEachIndexed { index, destination ->
+                    NavigationBarItem(
+                        selected = selectedDestination == index,
+                        onClick = {
+//                            navController.navigate(route = destination.route)
+                            selectedDestination = index
+                        },
+                        icon = {
+                            Icon(
+                                destination.icon,
+                                contentDescription = destination.contentDescription
+                            )
+                        },
+                        label = { Text(destination.label) }
+                    )
                 }
             }
-        }
+        },
+        modifier = modifier
+    ) { innerPadding ->
+        TireProductRoute(list = uiState.items, modifier = Modifier.padding(innerPadding).padding(
+            Dimens.PaddingMedium)) {}
     }
 }
 
@@ -164,7 +203,9 @@ fun TireManagementScreenPreview() {
     HombreCamionTheme {
         TireManagementScreen(
             uiState = uiState,
-            onEditClick = {}
+            onEditClick = {},
+            onNavigate = {},
+            onBack = {}
         )
     }
 }

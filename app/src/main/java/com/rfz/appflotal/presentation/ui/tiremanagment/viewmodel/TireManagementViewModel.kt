@@ -12,18 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-
-data class TireManagementUiState(
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val currentScreen: TireManagementScreen = TireManagementScreen.Tire,
-    val items: List<TireManagementItem> = emptyList()
-)
-
-enum class TireManagementScreen {
-    Tire, Brand, Design, Size
-}
-
 @HiltViewModel
 class TireManagementViewModel @Inject constructor(
     private val productUseCase: ProductListUseCase,
@@ -41,16 +29,14 @@ class TireManagementViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TireManagementUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun navigateToScreen(screen: TireManagementScreen) {
+    fun navigateToScreen(screen: TireManagementDestinations) {
         _uiState.update {
             it.copy(currentScreen = screen)
         }
 
         when (screen) {
-            TireManagementScreen.Tire -> if (_products.value.isEmpty()) loadProducts()
-            TireManagementScreen.Brand -> if (_brands.value.isEmpty()) loadBrands()
-            TireManagementScreen.Design -> if (_designs.value.isEmpty()) loadDesignData()
-            TireManagementScreen.Size -> if (_sizes.value.isEmpty()) loadSizeData()
+            TireManagementDestinations.Tire -> if (_products.value.isEmpty()) loadProducts()
+            TireManagementDestinations.Catalogs -> loadBrands()
         }
     }
 
