@@ -14,11 +14,11 @@
     <string name="copyright">© %1$d Flotal Control</string>
 
     <string name="title_activity_login">LoginActivity</string>
-    <string name="title_activity_recuperar_contraseña">RecuperarContraseñaActivity</string>
-    <string name="title_activity_otp">OtpActivity</string>
-    <string name="title_activity_nueva_contrasenia">NuevaContraseniaActivity</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_activity_home_dactivity">HomeDActivity</string>
+    <string name="title_activity_recuperar_contraseña">Recover Password</string>
+    <string name="title_activity_otp">OTP Verification</string>
+    <string name="title_activity_nueva_contrasenia">New Password</string>
+    <string name="title_activity_home">Home</string>
+    <string name="title_activity_home_dactivity">Home Dashboard</string>
 
     <string name="title_user">User</string>
     <string name="error_invalid_email">Enter a valid email address</string>
@@ -48,16 +48,16 @@
     <string name="content_description_home_close">Close home screen</string>
 
     <string name="title_contentdescription">eva:pin-fill</string>
-    <string name="title_gasolinerasautorizadas">Authorized gas stations</string>
-    <string name="title_activity_inicio">InicioActivity</string>
-    <string name="title_activity_change_data">ChangeDataActivity</string>
+    <string name="title_gasolinerasautorizadas">Authorized fueling stations</string>
+    <string name="title_activity_inicio">Home</string>
+    <string name="title_activity_change_data">Change Data</string>
     <string name="title_otp">OTP verification</string>
     <string name="title_otpdispositov">Device verification</string>
     <string name="title_bodydispositivo">Enter the verification code we sent to your email to authorize this login.</string>
     <string name="title_verificar">Verify</string>
     <string name="title_subtitle_verificar">Enter the verification code we just sent to your email address.</string>
-    <string name="title_activity_verify_code">VerifyCodeActivity</string>
-    <string name="title_activity_veriy_code_device">VerifyCodeDeviceActivity</string>
+    <string name="title_activity_verify_code">Verify Code</string>
+    <string name="title_activity_veriy_code_device">Verify Device</string>
 
     <string name="operator">Operator</string>
     <string name="logout">Logout</string>
@@ -110,7 +110,7 @@
     <string name="registrar_vehiculo">Register vehicle</string>
     <string name="tipo_vehiculo">Vehicle type</string>
     <string name="placas">License plate</string>
-    <string name="registro">Sign up</string>
+    <string name="registro">Registration</string>
 
     <string name="signup_name_alert">Enter your name</string>
     <string name="signup_email_alert">Enter a valid email</string>
@@ -153,7 +153,7 @@
     <string name="conceder_permisos_btn">Grant permissions</string>
     <string name="texto_permisos_app">Bluetooth and notification access is required to connect to your HawksHead TPMS monitor.</string>
     <string name="no_se_ha_asignado_ningun_monitor">Monitor could not be assigned</string>
-    <string name="hombrecamion_conexion_tpms">Flotal - TPMS connection</string>
+    <string name="hombrecamion_conexion_tpms">Flotal - TPMS Connection</string>
     <string name="recibiendo_datos_monitor">Receiving TPMS data...</string>
     <string name="excelente">Excellent</string>
     <string name="aceptable">Fair</string>
@@ -175,7 +175,7 @@
     <string name="aviso_conexion_blueotooth">Monitor data not available. Please check your connection.</string>
     <string name="main_term_text">IMPORTANT \\ CONFIDENTIAL: This message contains information from the company CENTRO CAMIONERO MONTAJES, S.A. DE C.V., located at Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, Mexico, C.P. 29020. The information is privileged, confidential, and access is restricted in accordance with applicable law.</string>
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. is responsible for the processing (use) of your personal data, which will be used to respond to communications generated through this channel and to provide you with the products or services entrusted to us.</string>
-    <string name="en_extraccion">Being removed</string>
+    <string name="en_extraccion">In Removal</string>
 
     <string name="registro_de_llantas">Tire registration</string>
     <string name="dise_os_renovados">Retread designs</string>
@@ -215,12 +215,12 @@
     <string name="tipo_de_adquisici_n">Acquisition type</string>
     <string name="costo">Cost</string>
     <string name="folio_factura">Invoice number</string>
-    <string name="profundidad">Depth (mm)</string>
+    <string name="profundidad">Tread Depth (mm)</string>
     <string name="numero_de_llanta">Tire number</string>
     <string name="dot">DOT</string>
     <string name="sin_llantas">No active tires</string>
     <string name="inspeccionar">Inspect</string>
-    <string name="inspeccion_exitosa_mensaje">Inspección registrada exitosamente</string>
+    <string name="inspeccion_exitosa_mensaje">Inspection recorded successfully</string>
     <string name="error_registrar_inspeccion">An error occurred while registering the inspection</string>
     <string name="inspeccion">Inspection</string>
     <string name="corregir_campos_marcados">Correct the highlighted fields.</string>
@@ -262,9 +262,9 @@
     <string name="advertencia_ingreso_odometro">* The odometer reading must be greater than or equal to the last recorded value: %1$s</string>
     <string name="error_enviar_desecho">An error occurred while sending the tire to the scrap pile</string>
     <string name="reporte_de_desecho">Scrap report</string>
-    <string name="enviar_a_desecho">SEND TO SCRAP</string>
+    <string name="enviar_a_desecho">SEND TO SCRAP PILE</string>
     <string name="pila_de_desecho">Scrap pile</string>
-    <string name="llanta_enviada_desecho">Tire sent to scrap</string>
+    <string name="llanta_enviada_desecho">Tire sent to scrap pile</string>
     <string name="mover_a_almacen">Move to storage</string>
     <string name="enviar_rueda_almacen">MOVE TIRE TO STORAGE</string>
     <string name="motivo_de_reparacion">Repair reason</string>
@@ -336,7 +336,7 @@
     <string name="tamano_de_llanta">Tire size</string>
     <string name="capacidad_de_carga">Load capacity</string>
     <string name="profundidad_de_la_banda_mm">Tread depth (mm)</string>
-    <string name="profundidad_mm">Depth: %1$d mm</string>
+    <string name="profundidad_mm">Tread Depth: %1$d mm</string>
     <string name="Campos_requeridos_por_completar">All required fields must be completed</string>
     <string name="dot_excedio_caracteres">The DOT must be 10 characters or fewer</string>
     <string name="numero_llanta_excedio_caracteres">The tire number must be 15 characters or fewer</string>
@@ -549,7 +549,7 @@
     <string name="seleccione_llanta">Select a tire</string>
     <string name="llantas_disponibles">%1$d tires available</string>
     <string name="no_llantas_disponibles">No tires available</string>
-    <string name="rendimiento_rueda">Performance - Wheel %1$s</string>
+    <string name="rendimiento_rueda">Performance - Tire %1$s</string>
     <string name="guardar_reporte">Save report</string>
     <string name="error_guardar_reporte">Error saving report</string>
     <string name="error_generar_pdf">Error generating PDF report</string>
@@ -558,7 +558,7 @@
     <string name="promedios_desgaste">Wear averages</string>
     <string name="costos">Costs</string>
     <string name="odometro_label">Odometer</string>
-    <string name="profundidad_final">Final depth</string>
+    <string name="profundidad_final">Final Tread Depth</string>
     <string name="distancia_recorrida_actual">Current distance traveled</string>
     <string name="desgaste_total">Total wear</string>
     <string name="ciclo_actual">Current cycle</string>
@@ -566,7 +566,7 @@
     <string name="costo_unitario">Unit cost</string>
     <string name="por_distancia_cpk">By distance CPK</string>
     <string name="por_profundidad">By depth</string>
-    <string name="rueda_pos">Wheel %1$s</string>
+    <string name="rueda_pos">Tire %1$s</string>
     <string name="no_info_llanta">No tire information</string>
     <string name="reporte_rendimiento_title">Performance report</string>
     <string name="reporte_rendimiento_general">General Performance Report</string>
@@ -587,8 +587,8 @@
     <!-- PDF Report Strings -->
     <string name="pdf_header_title">PERFORMANCE REPORT</string>
     <string name="pdf_label_date">Date</string>
-    <string name="pdf_system_name">Hombre Camión System - Flotal</string>
-    <string name="pdf_label_position">Position: Wheel %1$s</string>
+    <string name="pdf_system_name">Owner-Operator System - Flotal</string>
+    <string name="pdf_label_position">Position: Tire %1$s</string>
     <string name="pdf_label_id">Tire ID: %1$d</string>
     <string name="pdf_section_tire_info">Tire Information</string>
     <string name="pdf_label_serial">Serial Number</string>
@@ -599,9 +599,9 @@
     <string name="pdf_section_operation">Operation Summary</string>
     <string name="pdf_label_odometer">Current Odometer</string>
     <string name="pdf_label_distance">Distance Traveled</string>
-    <string name="pdf_label_initial_depth">Initial Depth</string>
+    <string name="pdf_label_initial_depth">Initial Tread Depth</string>
     <string name="pdf_label_wear">Tread Wear</string>
-    <string name="pdf_label_current_depth">Current Depth</string>
+    <string name="pdf_label_current_depth">Current Tread Depth</string>
     <string name="pdf_label_lifecycle">Life Cycle</string>
     <string name="pdf_section_efficiency">Efficiency</string>
     <string name="pdf_label_performance">Performance (km/mm)</string>
@@ -688,6 +688,13 @@
     <string name="promociones_descuentos">Promotions</string>
     <string name="feedback_title">Your opinion matters to us</string>
     <string name="feedback_subtitle">Tell us what we can improve about the app</string>
-    <string name="consumo_de_combustible">Consumo de Combustible</string>
-    <string name="emision_co2">Emisión CO2</string>
+    <string name="consumo_de_combustible">Fuel Consumption</string>
+    <string name="emision_co2">CO2 Emission</string>
+    <string name="ver_mas">See more</string>
+    <string name="rendimiento_del_vehiculo">Vehicle performance</string>
+    <string name="alertas_recientes">Recent alerts</string>
+    <string name="ver_todas">See all</string>
+    <string name="ver_mapa">See map</string>
+    <string name="secciones">Sections</string>
+    <string name="ultimos_datos">LATEST DATA</string>
 </resources>

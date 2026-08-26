@@ -340,21 +340,21 @@
     <string name="enter_your_feedback_here">Escribe tu opinión aquí...</string>
     <string name="submit">Enviar</string>
     <string name="share_feedback">Enviar comentarios</string>
-    <string name="error_enviar_comentarios">Ocurrio un error al enviar sus comentarios</string>
+    <string name="error_enviar_comentarios">Ocurrió un error al enviar sus comentarios</string>
     <string name="gracias_por_su_comentario">Gracias por su comentario</string>
     <string name="app_fcm_channel">app_fcm_channel</string>
     <string name="app_fcm_flotal_channel">app_fcm_flotal_channel</string>
     <string name="mensaje_mantenimiento_programado">La aplicación entrará en mantenimiento el %1$s hrs. Gracias por tu comprensión.</string>
-    <string name="notificacion_nueva">Notificacion nueva</string>
+    <string name="notificacion_nueva">Notificación nueva</string>
     <string name="actualizacion_disponible">Actualización disponible</string>
     <string name="aviso_actualizacion">Hay una nueva versión disponible. Por favor actualiza para seguir usando la app.</string>
     <string name="en_mantenimiento">En Mantenimiento</string>
     <string name="aviso_mantenimiento">Lamentamos los inconvenientes. El servicio se restablecerá el %1$s hrs.</string>
     <string name="aviso_mantenimiento_ii">Estamos realizando tareas de mantenimiento para garantizar el buen funcionamiento de la app.</string>
     <string name="mantenimiento_programado">Mantenimiento Programado</string>
-    <string name="actualizacion_de_terminos_y_condiciones">Actualizacion de terminos y condiciones</string>
+    <string name="actualizacion_de_terminos_y_condiciones">Actualización de términos y condiciones</string>
     <string name="actualizacion_de_plan">Actualizacion de Plan</string>
-    <string name="mantenimiento_message">El servicio no estara disponible por un momento.</string>
+    <string name="mantenimiento_message">El servicio no estará disponible por un momento.</string>
     <string name="terms_message">Hemos actualizado nuestros términos y condiciones. Revísalos para continuar.</string>
     <string name="paymentplan_message">Tu plan ha sido actualizado.</string>
     <string name="autoservice_message">Tu servicio automático ha sido procesado correctamente.</string>
@@ -364,9 +364,9 @@
     <string name="permiso_de_notificacion">Permiso de notificación</string>
     <string name="texto_permiso_de_notification">Permiso requerido para mantenerlo informado de actualizaciones y posibles mantenimientos</string>
     <string name="unidades_de_medida">Unidades de Medida</string>
-    <string name="auth_error">Ocurrio un error en la autorización. Verifique su usuario o contraseña.</string>
+    <string name="auth_error">Ocurrió un error en la autorización. Verifique su usuario o contraseña.</string>
     <string name="error_inesperado">Ocurrió un error inesperado. Intenta nuevamente o vuelve más tarde.</string>
-    <string name="politicas_de_privacidad">Politicas de privacidad</string>
+    <string name="politicas_de_privacidad">Políticas de privacidad</string>
     <string name="asi_como_nuestros">, así como nuestros </string>
     <string name="vial_status">Mapa vial</string>
     <string name="ubicacion">Ubicación</string>
@@ -477,12 +477,12 @@
     <string name="expirado">Expirado</string>
     <string name="vigencia">VIGENCIA</string>
     <string name="hasta_fecha">Hasta %1$s</string>
-    <string name="terminos_y_condiciones_label">Terminos y conidiciones</string>
+    <string name="terminos_y_condiciones_label">Términos y condiciones</string>
     <string name="no_acumulable_promociones">No acumulable con otras promociones.</string>
-    <string name="obtener_cupon">Obtener cupon</string>
+    <string name="obtener_cupon">Obtener cupón</string>
     <string name="error_obtener_cupones">No se pudo obtener los cupones.</string>
-    <string name="error_cupon_utilizado">El cupon ya fue utilizado.</string>
-    <string name="error_obtener_cupon">No se pudo obtener el cupon.</string>
+    <string name="error_cupon_utilizado">El cupón ya fue utilizado.</string>
+    <string name="error_obtener_cupon">No se pudo obtener el cupón.</string>
     <string name="promo_label">PROMO</string>
     <string name="llantera_norte_placeholder">Llantera Norte</string>
 
@@ -529,7 +529,7 @@
     <!-- Reportes -->
     <string name="reportes">Reportes</string>
     <string name="rendimiento">Rendimiento</string>
-    <string name="consumo_combustible">Consumo de Combustible</string>
+    <string name="consumo_combustible">Consumo de combustible</string>
     <string name="emisiones_co2">Emisiones de CO2</string>
     <string name="reporte_rendimiento">Reporte de Rendimiento</string>
     <string name="seleccione_llanta">Seleccione una llanta</string>
@@ -677,4 +677,11 @@
     <string name="feedback_subtitle">Cuéntanos qué podemos mejorar de la aplicación</string>
     <string name="consumo_de_combustible">Consumo de Combustible</string>
     <string name="emision_co2">Emisión CO2</string>
+    <string name="ver_mas">Ver más</string>
+    <string name="rendimiento_del_vehiculo">Rendimiento del vehículo</string>
+    <string name="alertas_recientes">Alertas recientes</string>
+    <string name="ver_todas">Ver todas</string>
+    <string name="ver_mapa">Ver mapa</string>
+    <string name="secciones">Secciones</string>
+    <string name="ultimos_datos">ÚLTIMOS DATOS</string>
 </resources>

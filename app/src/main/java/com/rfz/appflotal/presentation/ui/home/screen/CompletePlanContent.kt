@@ -1,11 +1,12 @@
 package com.rfz.appflotal.presentation.ui.home.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -24,9 +25,13 @@ fun CompletePlanContent(
     modifier: Modifier = Modifier,
     onShowMonitorDialog: (Boolean) -> Unit,
     onNavigate: (route: Any) -> Unit,
-    completePlanViewModel: CompletePlanViewModel = viewModel()
+    viewModel: CompletePlanViewModel = hiltViewModel()
 ) {
-    val state by completePlanViewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getInitialData()
+    }
 
     CompletePlanScreen(
         state = state.copy(
@@ -39,7 +44,7 @@ fun CompletePlanContent(
         onAlertsSeeAllClick = { onNavigate(HombreCamionScreens.ALERTS.name) },
         onSectionClick = { section -> onNavigate(section.route) },
         onBlogSeeAllClick = { onNavigate(ForumsGraph) },
-        onNavItemClick = { item -> completePlanViewModel.onNavItemClick(item) },
+        onNavItemClick = { item -> viewModel.onNavItemClick(item) },
         onMapClick = { onNavigate(HombreCamionScreens.MAPA_VIAL.name) },
         onWeatherClick = { onNavigate(HombreCamionScreens.WEATHER.name) }
     )

@@ -93,6 +93,7 @@ fun AdaptiveIcon(
 @Composable
 fun CompleteHomeTopBar(
     userName: String,
+    planType: PaymentPlanType,
     onNotificationsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -125,9 +126,10 @@ fun CompleteHomeTopBar(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Revisa tu camión",
+                    "Plan: ${planType.name}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = SubtleText
+                    color = TealMid,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -286,7 +288,7 @@ fun VehiclePerformanceCard(
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        "ÚLTIMOS DATOS",
+                        stringResource(R.string.ultimos_datos),
                         color = Color.White,
                         fontSize = MaterialTheme.typography.labelSmall.fontSize,
                         fontWeight = FontWeight.Bold,

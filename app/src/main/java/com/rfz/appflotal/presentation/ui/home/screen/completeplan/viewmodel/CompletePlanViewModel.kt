@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.truncate
 
-
 @HiltViewModel
 class CompletePlanViewModel @Inject constructor(
     private val currentPerformanceUseCase: CurrentPerformanceUseCase,
@@ -32,6 +31,7 @@ class CompletePlanViewModel @Inject constructor(
     fun getInitialData() {
         viewModelScope.launch {
             getCurrentPerformance()
+            getCurrentWeather()
         }
     }
 
@@ -42,7 +42,7 @@ class CompletePlanViewModel @Inject constructor(
     }
 
     suspend fun getCurrentPerformance() {
-        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        //_uiState.update { it.copy(isLoading = true, errorMessage = null) }
         try {
             val result = currentPerformanceUseCase()
             val newList = _uiState.value.stats.map { stat ->
@@ -55,12 +55,11 @@ class CompletePlanViewModel @Inject constructor(
             }
 
             _uiState.update { currentState ->
-                currentState.copy(stats = newList, isLoading = false)
+                currentState.copy(stats = newList)
             }
         } catch (e: Exception) {
             _uiState.update {
                 it.copy(
-                    isLoading = false,
                     errorMessage = e.message ?: "Error al obtener rendimiento"
                 )
             }
@@ -69,7 +68,7 @@ class CompletePlanViewModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     suspend fun getCurrentWeather() {
-        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        //_uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
         val location = locationRepository.getLastLocation()
         if (location != null) {
@@ -79,6 +78,7 @@ class CompletePlanViewModel @Inject constructor(
                 lon = truncate(location.lng * factor) / factor, // Invertir
                 locationName = location.ciudad
             )
+
             when (result) {
                 is ApiResult.Error -> {
 //                    _weatherState.update { currentUiState ->
@@ -94,8 +94,7 @@ class CompletePlanViewModel @Inject constructor(
                         currentState.copy(
                             weatherTemp = result.data.temp.toString(),
                             weatherCity = location.ciudad,
-                            weatherDesc = result.data.condLabel.toString(),
-                            isLoading = false
+                            weatherDesc = result.data.condLabel
                         )
                     }
                 }

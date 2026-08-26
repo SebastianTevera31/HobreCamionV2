@@ -17,9 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.AlertCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.BlogPostCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.CompleteHomeTopBar
@@ -66,7 +68,11 @@ fun CompletePlanScreen(
                 ) {
                     item {
                         if (state.paymentPlanType == PaymentPlanType.Complete) {
-                            CompleteHomeTopBar(state.userName, onNotificationsClick)
+                            CompleteHomeTopBar(
+                                state.userName,
+                                state.paymentPlanType,
+                                onNotificationsClick
+                            )
                         } else {
                             HomeTopBar(
                                 userName = state.userName,
@@ -80,8 +86,8 @@ fun CompletePlanScreen(
                     item {
                         Column {
                             SectionHeader(
-                                "Rendimiento del vehículo",
-                                "Ver detalle",
+                                stringResource(R.string.rendimiento_del_vehiculo),
+                                stringResource(R.string.ver_mas),
                                 onVehicleDetailClick
                             )
                             VehiclePerformanceCard(
@@ -94,7 +100,10 @@ fun CompletePlanScreen(
 
                     item {
                         Column {
-                            SectionHeader("Alertas recientes", "Ver todas", onAlertsSeeAllClick)
+                            SectionHeader(
+                                stringResource(R.string.alertas_recientes),
+                                stringResource(R.string.ver_todas), onAlertsSeeAllClick
+                            )
                             state.alerts.forEach { alert ->
                                 AlertCard(alert)
                             }
@@ -103,11 +112,14 @@ fun CompletePlanScreen(
 
                     item {
                         Column {
-                            SectionHeader("Clima", "Ver mapa", onMapClick)
+                            SectionHeader(
+                                stringResource(R.string.clima),
+                                stringResource(R.string.ver_mapa), onMapClick
+                            )
                             WeatherCard(
                                 state.weatherTemp,
                                 state.weatherCity,
-                                state.weatherDesc,
+                                stringResource(state.weatherDesc),
                                 onWeatherClick
                             )
                         }
@@ -116,7 +128,7 @@ fun CompletePlanScreen(
                     item {
                         Column {
                             Text(
-                                "Secciones",
+                                stringResource(R.string.secciones),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -127,7 +139,11 @@ fun CompletePlanScreen(
 
                     item {
                         Column {
-                            SectionHeader("Blog", "Ver todas", onBlogSeeAllClick)
+                            SectionHeader(
+                                stringResource(R.string.foro),
+                                stringResource(R.string.ver_todas),
+                                onBlogSeeAllClick
+                            )
                             state.blogPosts.forEach { post ->
                                 BlogPostCard(post)
                             }
@@ -135,7 +151,7 @@ fun CompletePlanScreen(
                     }
 
                     item {
-                        SeeAllPill("Ver todos", onBlogSeeAllClick)
+                        SeeAllPill(stringResource(R.string.ver_todos), onBlogSeeAllClick)
                     }
                 }
             }

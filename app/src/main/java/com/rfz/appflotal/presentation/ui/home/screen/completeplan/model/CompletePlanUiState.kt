@@ -91,7 +91,7 @@ data class CompletePlanUiState(
     ),
     val weatherTemp: String = "34°",
     val weatherCity: String = "Madrid",
-    val weatherDesc: String = "Despejado · viento 12 km/h",
+    @StringRes val weatherDesc: Int = R.string.clearsky,
     val sections: List<SectionItem> = listOf(
         SectionItem(
             icon = Icons.Outlined.GpsFixed.asIcon(),
