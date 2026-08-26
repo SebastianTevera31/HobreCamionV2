@@ -56,6 +56,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -109,8 +112,12 @@ import com.rfz.appflotal.presentation.ui.cambiodestino.viewmodel.CambioDestinoVi
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.couponGraph
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.DisassemblyTireScreen
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
+import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.forumsGraph
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeBottomBar
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
+import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
 import com.rfz.appflotal.presentation.ui.home.screen.ShareFeedbackScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.components.ObserveOnResume
@@ -295,6 +302,33 @@ class InicioActivity : ComponentActivity() {
                 else -> true
             }
 
+            val currentDestination = backStackEntry?.destination
+            val selectedNavItem = BottomNavItems.entries.firstOrNull { item ->
+                currentDestination?.hierarchy?.any { destination ->
+                    when (val route = item.route) {
+                        is String -> destination.route == route
+                        ReportGraph -> destination.hasRoute<ReportGraph>()
+                        ForumsGraph -> destination.hasRoute<ForumsGraph>()
+                        else -> false
+                    }
+                } == true
+            }
+
+            val onBottomNavItemClick: (BottomNavItems) -> Unit = { item ->
+                if (item != selectedNavItem) {
+                    val navOptions: NavOptionsBuilder.() -> Unit = {
+                        popUpTo(NavScreens.HOME) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                    when (val route = item.route) {
+                        is String -> navController.navigate(route, builder = navOptions)
+                        null -> Unit
+                        else -> navController.navigate(route, builder = navOptions)
+                    }
+                }
+            }
+
             val lifecycleOwner = LocalLifecycleOwner.current
             val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
 
@@ -461,7 +495,7 @@ class InicioActivity : ComponentActivity() {
                                 }
                             }
 
-                            Box {
+                            Box(modifier = Modifier.weight(1f)) {
                                 NetworkConfig.imei =
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                         Settings.Secure.getString(
@@ -1075,6 +1109,13 @@ class InicioActivity : ComponentActivity() {
                                         }
                                     },
                                     onCleanState = { appStatusManagerRepository.cleanNotificationsState() },
+                                )
+                            }
+
+                            if (selectedNavItem != null && inicioState.value.paymentPlanType == PaymentPlanType.Complete) {
+                                HomeBottomBar(
+                                    selected = selectedNavItem,
+                                    onItemClick = onBottomNavItemClick
                                 )
                             }
                         }

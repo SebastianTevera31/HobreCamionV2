@@ -16,7 +16,6 @@ import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
 
@@ -53,7 +52,6 @@ data class BlogPost(val category: String, val title: String, val excerpt: String
 data class CompletePlanUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val currentScreen: BottomNavItems = BottomNavItems.HOME,
     val userName: String = "",
     val vehicleName: String = "",
     val vehiclePlate: String = "",

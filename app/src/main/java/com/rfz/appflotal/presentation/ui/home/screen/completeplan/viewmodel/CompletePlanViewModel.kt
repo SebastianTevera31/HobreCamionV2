@@ -9,7 +9,6 @@ import com.rfz.appflotal.data.repository.location.LocationRepository
 import com.rfz.appflotal.data.repository.weather.WeatherRepository
 import com.rfz.appflotal.domain.performance.CurrentPerformanceUseCase
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,12 +31,6 @@ class CompletePlanViewModel @Inject constructor(
         viewModelScope.launch {
             getCurrentPerformance()
             getCurrentWeather()
-        }
-    }
-
-    fun onNavItemClick(item: BottomNavItems) {
-        _uiState.update { currentState ->
-            currentState.copy(currentScreen = item)
         }
     }
 

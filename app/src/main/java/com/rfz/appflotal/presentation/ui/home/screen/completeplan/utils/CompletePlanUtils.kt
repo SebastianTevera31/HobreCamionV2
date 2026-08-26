@@ -40,7 +40,7 @@ enum class BottomNavItems(
     MONITOR(
         R.drawable.tire_pressure_warning.asIcon(),
         R.string.monitor,
-        HombreCamionScreens.MONITOR
+        HombreCamionScreens.MONITOR.name
     ),
     ANALYTICS(Icons.Outlined.QueryStats.asIcon(), R.string.analytics, ReportGraph),
     MAP(Icons.Outlined.Map.asIcon(), R.string.vial_status, HombreCamionScreens.MAPA_VIAL.name),
