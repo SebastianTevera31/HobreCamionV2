@@ -520,24 +520,12 @@ class InicioActivity : ComponentActivity() {
                                         navController = navController,
                                         homeViewModel = homeViewModel,
                                         brandListUseCase = brandListUseCase,
-                                        brandCrudUseCase = brandCrudUseCase,
                                         originalDesignUseCase = originalDesignUseCase,
                                         originalDesignByIdUseCase = originalDesignByIdUseCase,
                                         crudOriginalDesignUseCase = crudOriginalDesignUseCase,
                                         utilizationUseCase = utilizationUseCase,
                                         tireSizeUseCase = tireSizeUseCase,
-                                        tireSizeCrudUseCase = tireSizeCrudUseCase,
-                                        productListUseCase = productListUseCase,
-                                        productCrudUseCase = productCrudUseCase,
-                                        productByIdUseCase = productByIdUseCase,
-                                        loadingCapacityUseCase = loadingCapacityUseCase,
-                                        vehicleListUseCase = vehicleListUseCase,
-                                        vehicleCrudUseCase = vehicleCrudUseCase,
-                                        vehicleByIdUseCase = vehicleByIdUseCase,
-                                        vehicleTypeUseCase = vehicleTypeUseCase,
-                                        controlTypeUseCase = controlTypeUseCase,
-                                        routeUseCase = routeUseCase,
-                                        baseUseCase = baseUseCase
+                                        tireSizeCrudUseCase = tireSizeCrudUseCase
                                     )
 
                                     operationsNavigation(

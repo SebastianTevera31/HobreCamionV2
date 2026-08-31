@@ -276,10 +276,11 @@ fun VehiclePerformanceCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    "$vehicleName · $plate",
+                    text = "$vehicleName · $plate",
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
                 )
                 Box(
                     modifier = Modifier
@@ -295,28 +296,62 @@ fun VehiclePerformanceCard(
                     )
                 }
             }
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(24.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Top
             ) {
-                stats.forEach { stat -> VehicleStatItem(stat) }
+                stats.forEach { stat ->
+                    VehicleStatItem(
+                        stat = stat,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun VehicleStatItem(stat: VehicleStat) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        AdaptiveIcon(stat.icon, contentDescription = null, tint = Color.White.copy(alpha = 0.85f))
+fun VehicleStatItem(stat: VehicleStat, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AdaptiveIcon(
+            icon = stat.icon,
+            contentDescription = null,
+            tint = Color.White.copy(alpha = 0.85f),
+            modifier = Modifier.size(22.dp)
+        )
         Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(stat.value, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text(" ${stat.unit}", color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp)
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stat.value,
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = " ${stat.unit}",
+                color = Color.White.copy(alpha = 0.85f),
+                fontSize = 11.sp
+            )
         }
+        Spacer(Modifier.height(2.dp))
         val label = stringResource(stat.label)
-        Text(label, color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
+        Text(
+            text = label,
+            color = Color.White.copy(alpha = 0.7f),
+            fontSize = 10.sp,
+            textAlign = TextAlign.Center,
+            lineHeight = 12.sp,
+            maxLines = 2
+        )
     }
 }
 
