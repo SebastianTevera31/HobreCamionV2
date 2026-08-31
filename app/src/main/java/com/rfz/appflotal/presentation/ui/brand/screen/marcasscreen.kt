@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -49,7 +48,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,15 +64,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
-import com.rfz.appflotal.data.model.brand.dto.BrandCrudDto
 import com.rfz.appflotal.data.model.brand.response.BranListResponse
-import com.rfz.appflotal.domain.brand.BrandCrudUseCase
-import com.rfz.appflotal.domain.brand.BrandListUseCase
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
-import kotlinx.coroutines.launch
 
 private const val ITEMS_PER_PAGE = 10
 
@@ -82,100 +77,44 @@ private const val ITEMS_PER_PAGE = 10
 @Composable
 fun MarcasScreen(
     navController: NavController,
-    brandListUseCase: BrandListUseCase,
     homeViewModel: HomeViewModel,
-    brandCrudUseCase: BrandCrudUseCase
+    viewModel: com.rfz.appflotal.presentation.ui.brand.viewmodel.BrandViewModel = hiltViewModel()
 ) {
-
     val primaryColor = MaterialTheme.colorScheme.primary
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val backgroundColor = Color(0xFFF8F7FF)
     val lightTextColor = Color.White
 
-    val uiState by homeViewModel.uiState.collectAsState()
+    val homeUiState by homeViewModel.uiState.collectAsState()
+    val brandUiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    val userData = uiState.userData
-
-    val scope = rememberCoroutineScope()
-
-    var allMarcas by remember { mutableStateOf<List<BranListResponse>>(emptyList()) }
-    var displayedMarcas by remember { mutableStateOf<List<BranListResponse>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var searchQuery by remember { mutableStateOf("") }
-    var currentPage by remember { mutableStateOf(1) }
-    var showLoadMoreButton by remember { mutableStateOf(false) }
+    val userData = homeUiState.userData
 
     var showDialog by remember { mutableStateOf(false) }
     var editingBrand by remember { mutableStateOf<BranListResponse?>(null) }
     var newBrandName by remember { mutableStateOf("") }
 
-    fun applyFilterAndPagination() {
-        val filtered = if (searchQuery.isBlank()) allMarcas else allMarcas.filter {
-            it.description.contains(searchQuery, ignoreCase = true)
-        }
+    val displayedMarcas = brandUiState.filteredBrands
+    val isLoading = brandUiState.isLoading
+    val errorMessage = brandUiState.errorMessage
+    val searchQuery = brandUiState.searchQuery
 
-        val totalItems = filtered.size
-        showLoadMoreButton = currentPage * ITEMS_PER_PAGE < totalItems
-        displayedMarcas = filtered.take(currentPage * ITEMS_PER_PAGE)
-    }
-
-    fun loadMoreItems() {
-        currentPage++
-        applyFilterAndPagination()
-    }
-
-    fun resetPagination() {
-        currentPage = 1
-        applyFilterAndPagination()
-    }
-
-    fun loadBrands() {
-        scope.launch {
-            isLoading = true
-            errorMessage = null
-            try {
-                val result =
-                    brandListUseCase("Bearer ${userData?.fld_token}" ?: "", userData?.idUser!!)
-                if (result.isSuccess) {
-                    allMarcas = result.getOrNull() ?: emptyList()
-                    resetPagination()
-                } else {
-                    errorMessage = result.exceptionOrNull()?.message
-                        ?: context.getString(R.string.error_al_cargar_marcas)
-                }
-            } catch (e: Exception) {
-                errorMessage = e.message ?: context.getString(R.string.error_desconocido)
-            } finally {
-                isLoading = false
-            }
+    LaunchedEffect(Unit) {
+        userData?.let {
+            viewModel.loadBrands(it.fld_token, it.idUser)
         }
     }
 
-    fun saveBrand() {
-        scope.launch {
-            val result = if (editingBrand == null) {
-                brandCrudUseCase(BrandCrudDto(0, newBrandName), "Bearer ${userData?.fld_token}")
-            } else {
-                brandCrudUseCase(
-                    BrandCrudDto(editingBrand!!.idBrand, newBrandName),
-                    "Bearer ${userData?.fld_token}"
-                )
-            }
-
-            if (result.isSuccess) {
-                showDialog = false
-                loadBrands()
-            } else {
-                errorMessage = result.exceptionOrNull()?.message
-                    ?: context.getString(R.string.error_al_guardar)
+    LaunchedEffect(brandUiState.operationStatus) {
+        if (brandUiState.operationStatus == com.rfz.appflotal.presentation.ui.utils.OperationStatus.Success) {
+            showDialog = false
+            viewModel.resetOperationStatus()
+            userData?.let {
+                viewModel.loadBrands(it.fld_token, it.idUser)
             }
         }
     }
-
-    LaunchedEffect(Unit) { loadBrands() }
-    LaunchedEffect(searchQuery) { resetPagination() }
 
     Scaffold(
         containerColor = backgroundColor,
@@ -260,7 +199,7 @@ fun MarcasScreen(
             ) {
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                    onValueChange = { viewModel.onSearchQueryChanged(it) },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Search,
@@ -270,7 +209,7 @@ fun MarcasScreen(
                     },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = "" }) {
+                            IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
                                 Icon(
                                     Icons.Default.Close,
                                     contentDescription = "Limpiar",
@@ -332,31 +271,6 @@ fun MarcasScreen(
                             primaryColor = primaryColor,
                             secondaryColor = secondaryColor
                         )
-                    }
-
-                    if (showLoadMoreButton) {
-                        item {
-                            OutlinedButton(
-                                onClick = { loadMoreItems() },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 16.dp, horizontal = 32.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = primaryColor
-                                ),
-                                border = BorderStroke(
-                                    1.dp,
-                                    Brush.horizontalGradient(
-                                        listOf(primaryColor, secondaryColor)
-                                    )
-                                )
-                            ) {
-                                Text(
-                                    stringResource(R.string.cargar_mas_marcas),
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
                     }
                 }
             }
@@ -442,8 +356,12 @@ fun MarcasScreen(
                 confirmButton = {
                     LocalizedApp {
                         Button(
-                            onClick = { saveBrand() },
-                            enabled = newBrandName.isNotBlank(),
+                            onClick = {
+                                userData?.let {
+                                    viewModel.saveBrand(it.fld_token, newBrandName, editingBrand)
+                                }
+                            },
+                            enabled = newBrandName.isNotBlank() && brandUiState.operationStatus != com.rfz.appflotal.presentation.ui.utils.OperationStatus.Loading,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = Color.White

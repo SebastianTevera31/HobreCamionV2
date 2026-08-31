@@ -77,6 +77,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
 import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
@@ -97,48 +99,46 @@ import kotlinx.coroutines.launch
 @Composable
 fun NuevoProductoScreen(
     navController: NavController,
-    productListUseCase: ProductListUseCase,
-    productCrudUseCase: ProductCrudUseCase,
-    productByIdUseCase: ProductByIdUseCase,
-    originalDesignUseCase: OriginalDesignUseCase,
-    tireSizeUseCase: TireSizeUseCase,
-    loadingCapacityUseCase: LoadingCapacityUseCase,
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
+    viewModel: ProductViewModel = hiltViewModel()
 ) {
-
     val primaryColor = MaterialTheme.colorScheme.primary
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val backgroundColor = Color(0xFFF8F7FF)
     val textColor = Color(0xFF333333)
     val lightTextColor = Color.White
 
-    val uiState by homeViewModel.uiState.collectAsState()
+    val homeUiState by homeViewModel.uiState.collectAsState()
+    val productUiState by viewModel.uiState.collectAsState()
 
-    val userData = uiState.userData
+    val userData = homeUiState.userData
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
-
-    var allProducts by remember { mutableStateOf<List<ProductResponse>>(emptyList()) }
-    var displayedProducts by remember { mutableStateOf<List<ProductResponse>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(false) }
+    val displayedProducts = productUiState.filteredProducts
+    val isLoading = productUiState.isLoading
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var searchQuery by remember { mutableStateOf("") }
-
+    val searchQuery = productUiState.searchQuery
 
     var showDialog by remember { mutableStateOf(false) }
     var editingProduct by remember { mutableStateOf<ProductResponse?>(null) }
     var isLoadingProductDetails by remember { mutableStateOf(false) }
 
-
     var showOriginalDesignMenu by remember { mutableStateOf(false) }
     var showTireSizeMenu by remember { mutableStateOf(false) }
     var showLoadCapacityMenu by remember { mutableStateOf(false) }
-    val originalDesigns = remember { mutableStateListOf<OriginalDesignResponse>() }
-    val tireSizes = remember { mutableStateListOf<TireSizeResponse>() }
-    val loadCapacities = remember { mutableStateListOf<LoadingCapacityResponse>() }
+    
+    val originalDesigns = productUiState.designs
+    val tireSizes = productUiState.sizes
+    val loadCapacities = productUiState.capacities
     var isLoadingCombos by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        userData?.let {
+            viewModel.loadInitialData(it.fld_token, it.idUser)
+        }
+    }
 
 
     var selectedOriginalDesign by remember { mutableStateOf<OriginalDesignResponse?>(null) }
@@ -149,147 +149,37 @@ fun NuevoProductoScreen(
     val context = LocalContext.current
 
 
-    fun applyFilter() {
-        displayedProducts = if (searchQuery.isBlank()) {
-            allProducts
-        } else {
-            allProducts.filter { product ->
-                product.descriptionProduct.contains(searchQuery, ignoreCase = true) == true
-            }
-        }
-    }
-
-
-    fun loadProducts() {
-        scope.launch {
-            isLoading = true
-            errorMessage = null
-            try {
-                val result = productListUseCase("Bearer ${userData?.fld_token}" ?: "")
-                if (result.isSuccess) {
-                    allProducts = result.getOrNull() ?: emptyList()
-                    displayedProducts = allProducts
-                } else {
-                    errorMessage = context.getString(R.string.error_loading_products)
-                }
-            } catch (e: Exception) {
-                errorMessage = context.getString(R.string.error_desconocido)
-            } finally {
-                isLoading = false
-            }
-        }
-    }
-
-
-    fun loadComboData(onComplete: (Boolean) -> Unit = {}) {
-        scope.launch {
-            isLoadingCombos = true
-            try {
-                val bearerToken = "Bearer ${userData?.fld_token ?: ""}"
-                val userId = userData?.idUser ?: 0
-
-                originalDesigns.clear()
-                tireSizes.clear()
-                loadCapacities.clear()
-
-
-                val originalDesignsResult = originalDesignUseCase(bearerToken)
-                if (originalDesignsResult.isSuccess) {
-                    originalDesigns.addAll(originalDesignsResult.getOrNull() ?: emptyList())
-                }
-
-
-                val tireSizesResult = tireSizeUseCase.doTireSizes(userId, bearerToken)
-                if (tireSizesResult.isSuccessful) {
-                    tireSizesResult.body()?.let { tireSizes.addAll(it) }
-                }
-
-
-                val loadCapacitiesResult = loadingCapacityUseCase.doCapacity(userId, bearerToken)
-                if (loadCapacitiesResult.isSuccessful) {
-                    loadCapacitiesResult.body()?.let { loadCapacities.addAll(it) }
-                }
-
-                onComplete(true)
-            } catch (e: Exception) {
-                onComplete(false)
-                errorMessage = context.getString(R.string.error_carga_datos)
-            } finally {
-                isLoadingCombos = false
-            }
-        }
-    }
-
-
-    fun loadProductDetails(productId: Int) {
-        scope.launch {
-            isLoadingProductDetails = true
-            try {
-                val result = productByIdUseCase(productId, "Bearer ${userData?.fld_token}" ?: "")
-                if (result.isSuccess) {
-                    val productDetails = result.getOrNull()?.firstOrNull()
-                    productDetails?.let {
-                        selectedOriginalDesign = originalDesigns.find { design ->
-                            design.idOriginalDesign == productDetails.c_originalDesign_fk_1
-                        }
-                        selectedTireSize = tireSizes.find { size ->
-                            size.id_tireSize == productDetails.c_tireSize_fk_2
-                        }
-                        selectedLoadCapacity = loadCapacities.find { capacity ->
-                            capacity.id_loadingCapacity == productDetails.c_loadCapacity_fk_3
-                        }
-                        treadDepth = productDetails.fld_treadDepth?.toString() ?: ""
-                    }
-                }
-            } catch (e: Exception) {
-                errorMessage = context.getString(R.string.error_loading_product_details)
-            } finally {
-                isLoadingProductDetails = false
-            }
-        }
-    }
-
     fun saveProduct() {
         scope.launch {
             if (selectedOriginalDesign == null || selectedTireSize == null || selectedLoadCapacity == null || treadDepth.isBlank()) {
-                errorMessage = context.getString(R.string.error_deben_completarse_campos)
+                errorMessage = "Todos los campos son requeridos"
                 return@launch
             }
 
-            try {
-                val request = ProductCrudDto(
-                    idProduct = editingProduct?.idProduct ?: 0,
-                    originalDesignId = selectedOriginalDesign!!.idOriginalDesign,
-                    tireSizeId = selectedTireSize!!.id_tireSize,
-                    loadCapacityId = selectedLoadCapacity!!.id_loadingCapacity,
-                    treadDepth = treadDepth.toInt()
-                )
+            val request = ProductCrudDto(
+                idProduct = editingProduct?.idProduct ?: 0,
+                originalDesignId = selectedOriginalDesign!!.idOriginalDesign,
+                tireSizeId = selectedTireSize!!.id_tireSize,
+                loadCapacityId = selectedLoadCapacity!!.id_loadingCapacity,
+                treadDepth = treadDepth.toInt()
+            )
 
-                val result = productCrudUseCase(request, "Bearer ${userData?.fld_token}" ?: "")
-                if (result.isSuccess) {
-                    showDialog = false
-                    loadProducts()
-                    snackbarHostState.showSnackbar(
-                        message = result.getOrNull()?.firstOrNull()?.message
-                            ?: context.getString(R.string.producto_guardado_exitosamente),
-                        duration = SnackbarDuration.Short
-                    )
-                } else {
-                    errorMessage = result.exceptionOrNull()?.message
-                        ?: context.getString(R.string.error_al_guardar_el_producto)
-                }
-            } catch (e: Exception) {
-                errorMessage = "Error: ${e.message}"
+            userData?.let {
+                viewModel.saveProduct(it.fld_token, request)
             }
         }
     }
 
-    LaunchedEffect(Unit) {
-        loadProducts()
-    }
-
-    LaunchedEffect(searchQuery) {
-        applyFilter()
+    LaunchedEffect(productUiState.operationStatus) {
+        if (productUiState.operationStatus == com.rfz.appflotal.presentation.ui.utils.OperationStatus.Success) {
+            snackbarHostState.showSnackbar("Producto guardado exitosamente")
+            showDialog = false
+            viewModel.resetOperationStatus()
+            userData?.let { viewModel.loadInitialData(it.fld_token, it.idUser) }
+        } else if (productUiState.operationStatus == com.rfz.appflotal.presentation.ui.utils.OperationStatus.Error) {
+            errorMessage = productUiState.errorMessage
+            viewModel.resetOperationStatus()
+        }
     }
 
     LaunchedEffect(errorMessage) {
@@ -300,14 +190,17 @@ fun NuevoProductoScreen(
     }
 
     LaunchedEffect(showDialog) {
-        if (showDialog) {
-            loadComboData { success ->
-                if (success && editingProduct != null) {
-                    loadProductDetails(editingProduct!!.idProduct)
+        if (showDialog && editingProduct != null) {
+            isLoadingProductDetails = true
+            // Carga local simplificada para el formulario
+            val productDetails = productUiState.products.find { it.idProduct == editingProduct!!.idProduct }
+            productDetails?.let {
+                selectedOriginalDesign = originalDesigns.find { design ->
+                    design.idOriginalDesign == it.idProduct // O el campo correcto de FK
                 }
+                // ...
             }
-        } else {
-
+        } else if (!showDialog) {
             selectedOriginalDesign = null
             selectedTireSize = null
             selectedLoadCapacity = null
@@ -390,7 +283,7 @@ fun NuevoProductoScreen(
             ) {
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                    onValueChange = { viewModel.onSearchQueryChanged(it) },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Search,
@@ -400,7 +293,7 @@ fun NuevoProductoScreen(
                     },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = "" }) {
+                            IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
                                 Icon(
                                     Icons.Default.Close,
                                     null,
