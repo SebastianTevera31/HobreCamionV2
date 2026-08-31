@@ -136,6 +136,7 @@ import com.rfz.appflotal.presentation.ui.password.screen.PasswordScreen
 import com.rfz.appflotal.presentation.ui.password.viewmodel.PasswordViewModel
 import com.rfz.appflotal.presentation.ui.permission.PermissionScreen
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.MenuTireScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.NuevoRegistroLlantasScreen
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
@@ -1060,6 +1061,19 @@ class InicioActivity : ComponentActivity() {
                                     composable(route = HombreCamionScreens.ALERTS.name) {
                                         AlertsScreen(
                                             onBack = { navController.popBackStack() },
+                                        )
+                                    }
+
+                                    composable(route = HombreCamionScreens.REGISTER_TIRES.name) {
+                                        MenuTireScreen(
+                                            onNavigate = { route ->
+                                                navController.navigate(
+                                                    route
+                                                )
+                                            },
+                                            onBack = {
+                                                navController.popBackStack()
+                                            }
                                         )
                                     }
                                 }

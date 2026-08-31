@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.OilBarrel
@@ -119,9 +118,9 @@ data class CompletePlanUiState(
             route = CouponGraph
         ),
         SectionItem(
-            icon = Icons.Filled.Settings.asIcon(),
-            label = R.string.configuracion,
-            route = NavScreens.INFORMACION_USUARIO
+            icon = R.drawable.tire_register.asIcon(),
+            label = R.string.registrar,
+            route = HombreCamionScreens.REGISTER_TIRES.name
         )
     ),
     val blogPosts: List<BlogPost> = listOf(
