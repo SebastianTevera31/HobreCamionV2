@@ -6,11 +6,14 @@ import com.rfz.appflotal.data.model.base.BaseResponse
 import com.rfz.appflotal.data.model.controltype.response.ControlTypeResponse
 import com.rfz.appflotal.data.model.route.response.RouteResponse
 import com.rfz.appflotal.data.model.vehicle.dto.VehicleCrudDto
-import com.rfz.appflotal.data.model.vehicle.response.*
+import com.rfz.appflotal.data.model.vehicle.response.TypeVehicleResponse
+import com.rfz.appflotal.data.model.vehicle.response.VehicleListResponse
 import com.rfz.appflotal.domain.base.BaseUseCase
 import com.rfz.appflotal.domain.controltype.ControlTypeUseCase
 import com.rfz.appflotal.domain.route.RouteUseCase
-import com.rfz.appflotal.domain.vehicle.*
+import com.rfz.appflotal.domain.vehicle.VehicleCrudUseCase
+import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
+import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +39,6 @@ data class VehicleUiState(
 class VehicleViewModel @Inject constructor(
     private val vehicleListUseCase: VehicleListUseCase,
     private val vehicleCrudUseCase: VehicleCrudUseCase,
-    private val vehicleByIdUseCase: VehicleByIdUseCase,
     private val vehicleTypeUseCase: VehicleTypeUseCase,
     private val controlTypeUseCase: ControlTypeUseCase,
     private val routeUseCase: RouteUseCase,
@@ -85,9 +87,9 @@ class VehicleViewModel @Inject constructor(
         val filtered = if (query.isBlank()) {
             all
         } else {
-            all.filter { 
-                it.fldVehicleNumber.contains(query, ignoreCase = true) || 
-                it.fldPlates.contains(query, ignoreCase = true) 
+            all.filter {
+                it.fldVehicleNumber.contains(query, ignoreCase = true) ||
+                        it.fldPlates.contains(query, ignoreCase = true)
             }
         }
         _uiState.update { it.copy(filteredVehicles = filtered) }
@@ -100,11 +102,11 @@ class VehicleViewModel @Inject constructor(
             if (result.isSuccess) {
                 _uiState.update { it.copy(operationStatus = OperationStatus.Success) }
             } else {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         operationStatus = OperationStatus.Error,
                         errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar"
-                    ) 
+                    )
                 }
             }
         }

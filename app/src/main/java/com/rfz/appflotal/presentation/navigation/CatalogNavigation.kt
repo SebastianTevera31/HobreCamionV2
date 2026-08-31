@@ -5,6 +5,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.rfz.appflotal.core.util.screens.NavScreens
+import com.rfz.appflotal.domain.brand.BrandListUseCase
+import com.rfz.appflotal.domain.originaldesign.CrudOriginalDesignUseCase
+import com.rfz.appflotal.domain.originaldesign.OriginalDesignByIdUseCase
+import com.rfz.appflotal.domain.originaldesign.OriginalDesignUseCase
+import com.rfz.appflotal.domain.tire.TireSizeCrudUseCase
+import com.rfz.appflotal.domain.tire.TireSizeUseCase
+import com.rfz.appflotal.domain.utilization.UtilizationUseCase
 import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
 import com.rfz.appflotal.presentation.ui.brand.viewmodel.BrandViewModel
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
@@ -21,49 +28,17 @@ import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVe
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.VehicleViewModel
 import com.rfz.appflotal.presentation.ui.retreatedesign.screens.RetreatedDesignScreen
 import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesignViewModel
-import com.rfz.appflotal.domain.brand.BrandCrudUseCase
-import com.rfz.appflotal.domain.brand.BrandListUseCase
-import com.rfz.appflotal.domain.originaldesign.CrudOriginalDesignUseCase
-import com.rfz.appflotal.domain.originaldesign.OriginalDesignByIdUseCase
-import com.rfz.appflotal.domain.originaldesign.OriginalDesignUseCase
-import com.rfz.appflotal.domain.product.ProductByIdUseCase
-import com.rfz.appflotal.domain.product.ProductCrudUseCase
-import com.rfz.appflotal.domain.product.ProductListUseCase
-import com.rfz.appflotal.domain.tire.LoadingCapacityUseCase
-import com.rfz.appflotal.domain.tire.TireSizeCrudUseCase
-import com.rfz.appflotal.domain.tire.TireSizeUseCase
-import com.rfz.appflotal.domain.utilization.UtilizationUseCase
-import com.rfz.appflotal.domain.base.BaseUseCase
-import com.rfz.appflotal.domain.controltype.ControlTypeUseCase
-import com.rfz.appflotal.domain.route.RouteUseCase
-import com.rfz.appflotal.domain.vehicle.VehicleByIdUseCase
-import com.rfz.appflotal.domain.vehicle.VehicleCrudUseCase
-import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
-import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 
 fun NavGraphBuilder.catalogGraph(
     navController: NavController,
     homeViewModel: HomeViewModel,
-    // Temporales hasta que movamos todo a ViewModels
     brandListUseCase: BrandListUseCase,
-    brandCrudUseCase: BrandCrudUseCase,
     originalDesignUseCase: OriginalDesignUseCase,
     originalDesignByIdUseCase: OriginalDesignByIdUseCase,
     crudOriginalDesignUseCase: CrudOriginalDesignUseCase,
     utilizationUseCase: UtilizationUseCase,
     tireSizeUseCase: TireSizeUseCase,
-    tireSizeCrudUseCase: TireSizeCrudUseCase,
-    productListUseCase: ProductListUseCase,
-    productCrudUseCase: ProductCrudUseCase,
-    productByIdUseCase: ProductByIdUseCase,
-    loadingCapacityUseCase: LoadingCapacityUseCase,
-    vehicleListUseCase: VehicleListUseCase,
-    vehicleCrudUseCase: VehicleCrudUseCase,
-    vehicleByIdUseCase: VehicleByIdUseCase,
-    vehicleTypeUseCase: VehicleTypeUseCase,
-    controlTypeUseCase: ControlTypeUseCase,
-    routeUseCase: RouteUseCase,
-    baseUseCase: BaseUseCase
+    tireSizeCrudUseCase: TireSizeCrudUseCase
 ) {
     composable(NavScreens.MARCAS) {
         val viewModel: BrandViewModel = hiltViewModel()

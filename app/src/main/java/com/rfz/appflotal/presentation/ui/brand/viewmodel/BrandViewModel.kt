@@ -39,7 +39,7 @@ class BrandViewModel @Inject constructor(
                 val result = brandListUseCase("Bearer $token", idUser)
                 if (result.isSuccess) {
                     val brands = result.getOrNull() ?: emptyList()
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             brands = brands,
                             isLoading = false
@@ -47,11 +47,12 @@ class BrandViewModel @Inject constructor(
                     }
                     applyFilter()
                 } else {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
-                            isLoading = false, 
-                            errorMessage = result.exceptionOrNull()?.message ?: "Error al cargar marcas"
-                        ) 
+                            isLoading = false,
+                            errorMessage = result.exceptionOrNull()?.message
+                                ?: "Error al cargar marcas"
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -89,16 +90,16 @@ class BrandViewModel @Inject constructor(
             if (result.isSuccess) {
                 _uiState.update { it.copy(operationStatus = OperationStatus.Success) }
             } else {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         operationStatus = OperationStatus.Error,
                         errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar"
-                    ) 
+                    )
                 }
             }
         }
     }
-    
+
     fun resetOperationStatus() {
         _uiState.update { it.copy(operationStatus = OperationStatus.Idle) }
     }

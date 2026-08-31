@@ -130,25 +130,44 @@ class InicioActivity : ComponentActivity() {
     lateinit var appStatusManagerRepository: AppStatusManagerRepository
 
     // Temporales para catalogGraph (idealmente mover a ViewModels después)
-    @Inject lateinit var brandListUseCase: BrandListUseCase
-    @Inject lateinit var brandCrudUseCase: BrandCrudUseCase
-    @Inject lateinit var originalDesignUseCase: OriginalDesignUseCase
-    @Inject lateinit var originalDesignByIdUseCase: OriginalDesignByIdUseCase
-    @Inject lateinit var crudOriginalDesignUseCase: CrudOriginalDesignUseCase
-    @Inject lateinit var utilizationUseCase: UtilizationUseCase
-    @Inject lateinit var tireSizeUseCase: TireSizeUseCase
-    @Inject lateinit var tireSizeCrudUseCase: TireSizeCrudUseCase
-    @Inject lateinit var productListUseCase: ProductListUseCase
-    @Inject lateinit var productCrudUseCase: ProductCrudUseCase
-    @Inject lateinit var productByIdUseCase: ProductByIdUseCase
-    @Inject lateinit var loadingCapacityUseCase: LoadingCapacityUseCase
-    @Inject lateinit var vehicleListUseCase: VehicleListUseCase
-    @Inject lateinit var vehicleCrudUseCase: VehicleCrudUseCase
-    @Inject lateinit var vehicleByIdUseCase: VehicleByIdUseCase
-    @Inject lateinit var vehicleTypeUseCase: VehicleTypeUseCase
-    @Inject lateinit var controlTypeUseCase: ControlTypeUseCase
-    @Inject lateinit var routeUseCase: RouteUseCase
-    @Inject lateinit var baseUseCase: BaseUseCase
+    @Inject
+    lateinit var brandListUseCase: BrandListUseCase
+    @Inject
+    lateinit var brandCrudUseCase: BrandCrudUseCase
+    @Inject
+    lateinit var originalDesignUseCase: OriginalDesignUseCase
+    @Inject
+    lateinit var originalDesignByIdUseCase: OriginalDesignByIdUseCase
+    @Inject
+    lateinit var crudOriginalDesignUseCase: CrudOriginalDesignUseCase
+    @Inject
+    lateinit var utilizationUseCase: UtilizationUseCase
+    @Inject
+    lateinit var tireSizeUseCase: TireSizeUseCase
+    @Inject
+    lateinit var tireSizeCrudUseCase: TireSizeCrudUseCase
+    @Inject
+    lateinit var productListUseCase: ProductListUseCase
+    @Inject
+    lateinit var productCrudUseCase: ProductCrudUseCase
+    @Inject
+    lateinit var productByIdUseCase: ProductByIdUseCase
+    @Inject
+    lateinit var loadingCapacityUseCase: LoadingCapacityUseCase
+    @Inject
+    lateinit var vehicleListUseCase: VehicleListUseCase
+    @Inject
+    lateinit var vehicleCrudUseCase: VehicleCrudUseCase
+    @Inject
+    lateinit var vehicleByIdUseCase: VehicleByIdUseCase
+    @Inject
+    lateinit var vehicleTypeUseCase: VehicleTypeUseCase
+    @Inject
+    lateinit var controlTypeUseCase: ControlTypeUseCase
+    @Inject
+    lateinit var routeUseCase: RouteUseCase
+    @Inject
+    lateinit var baseUseCase: BaseUseCase
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -479,7 +498,7 @@ class InicioActivity : ComponentActivity() {
                                             animationSpec = tween(400)
                                         ) + fadeOut(animationSpec = tween(400))
                                     }) {
-                                    
+
                                     authGraph(
                                         navController = navController,
                                         loginViewModel = loginViewModel,

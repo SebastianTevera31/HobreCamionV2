@@ -2,15 +2,16 @@ package com.rfz.appflotal.presentation.ui.productoscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
 import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
 import com.rfz.appflotal.data.model.product.response.ProductResponse
-import com.rfz.appflotal.data.model.originaldesign.response.OriginalDesignResponse
-import com.rfz.appflotal.data.model.tire.response.TireSizeResponse
 import com.rfz.appflotal.data.model.tire.response.LoadingCapacityResponse
-import com.rfz.appflotal.domain.product.*
+import com.rfz.appflotal.data.model.tire.response.TireSizeResponse
 import com.rfz.appflotal.domain.originaldesign.OriginalDesignUseCase
-import com.rfz.appflotal.domain.tire.TireSizeUseCase
+import com.rfz.appflotal.domain.product.ProductCrudUseCase
+import com.rfz.appflotal.domain.product.ProductListUseCase
 import com.rfz.appflotal.domain.tire.LoadingCapacityUseCase
+import com.rfz.appflotal.domain.tire.TireSizeUseCase
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +36,6 @@ data class ProductUiState(
 class ProductViewModel @Inject constructor(
     private val productListUseCase: ProductListUseCase,
     private val productCrudUseCase: ProductCrudUseCase,
-    private val productByIdUseCase: ProductByIdUseCase,
     private val originalDesignUseCase: OriginalDesignUseCase,
     private val tireSizeUseCase: TireSizeUseCase,
     private val loadingCapacityUseCase: LoadingCapacityUseCase
@@ -58,8 +58,10 @@ class ProductViewModel @Inject constructor(
                     current.copy(
                         products = productsResult.getOrNull() ?: emptyList(),
                         designs = designsResult.getOrNull() ?: emptyList(),
-                        sizes = if (sizesResult.isSuccessful) sizesResult.body() ?: emptyList() else emptyList(),
-                        capacities = if (capacitiesResult.isSuccessful) capacitiesResult.body() ?: emptyList() else emptyList(),
+                        sizes = if (sizesResult.isSuccessful) sizesResult.body()
+                            ?: emptyList() else emptyList(),
+                        capacities = if (capacitiesResult.isSuccessful) capacitiesResult.body()
+                            ?: emptyList() else emptyList(),
                         isLoading = false
                     )
                 }
@@ -93,11 +95,11 @@ class ProductViewModel @Inject constructor(
             if (result.isSuccess) {
                 _uiState.update { it.copy(operationStatus = OperationStatus.Success) }
             } else {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         operationStatus = OperationStatus.Error,
                         errorMessage = result.exceptionOrNull()?.message ?: "Error al guardar"
-                    ) 
+                    )
                 }
             }
         }
