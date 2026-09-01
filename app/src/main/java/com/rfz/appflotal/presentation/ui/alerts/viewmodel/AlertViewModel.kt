@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 data class AlertUiState(
     val alerts: List<AlertUi> = emptyList(),
-    val selectedAlert: AlertType? = null,
+    val selectedAlert: AlertType = AlertType.ALL,
     val wheels: List<String> = listOf("P1", "P2", "P3", "P4"),
     val selectedWheel: String = "",
     val date: String = "",
@@ -30,25 +30,11 @@ class AlertViewModel @Inject constructor() : ViewModel() {
 
     }
 
-    fun filterByTire(wheel: String) {
+    fun applyFilter(date: String, wheel: String, alert: AlertType) {
         _uiState.update { currentUiState ->
             currentUiState.copy(
-                selectedWheel = wheel
-            )
-        }
-    }
-
-    fun filterByAlert(alert: AlertType) {
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
-                selectedAlert = alert
-            )
-        }
-    }
-
-    fun filterByFecha(date: String) {
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
+                selectedWheel = wheel,
+                selectedAlert = alert,
                 date = date
             )
         }

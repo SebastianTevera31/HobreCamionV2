@@ -31,6 +31,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
@@ -52,18 +61,33 @@ fun BaseFilterField(
     value: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
     placeholder: String = ""
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall)
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary,
-            fontWeight = FontWeight.SemiBold
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(start = 4.dp)
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(Dimens.PaddingSmall))
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
         Box(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 value = value,
@@ -76,15 +100,17 @@ fun BaseFilterField(
                     Icon(
                         Icons.Filled.ArrowDropDown,
                         contentDescription = null,
-                        modifier = Modifier.clickable { onClick() }
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                    disabledBorderColor = Color.LightGray.copy(alpha = 0.5f),
+                    unfocusedBorderColor = Color.LightGray.copy(alpha = 0.3f),
+                    disabledBorderColor = Color.LightGray.copy(alpha = 0.3f),
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color(0xFFF8F9FA)
                 ),
-                textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                textStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
             )
             // Capa invisible para detectar click en todo el campo
             Box(
@@ -109,6 +135,7 @@ fun TireFilterField(
         BaseFilterField(
             label = "Rueda",
             value = selectedWheel.ifEmpty { "Todas" },
+            icon = Icons.Default.RadioButtonChecked,
             onClick = { expanded = true }
         )
 
@@ -142,6 +169,7 @@ fun AlertTypeFilterField(
         BaseFilterField(
             label = "Alerta",
             value = stringResource(selectedAlert?.title ?: AlertType.ALL.title),
+            icon = Icons.Default.NotificationsActive,
             onClick = { expanded = true }
         )
 
@@ -175,6 +203,7 @@ fun DateFilterField(
     BaseFilterField(
         label = "Fecha",
         value = selectedDate.ifEmpty { "Seleccionar fecha" },
+        icon = Icons.Default.CalendarMonth,
         onClick = { showDialog = true },
         modifier = modifier
     )
