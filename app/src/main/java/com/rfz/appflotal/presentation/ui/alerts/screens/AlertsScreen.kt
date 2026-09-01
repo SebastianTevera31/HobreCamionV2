@@ -1,59 +1,82 @@
-package com.rfz.appflotal.presentation.ui.alerts
+package com.rfz.appflotal.presentation.ui.alerts.screens
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.BatteryAlert
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Thermostat
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.alerts.viewmodel.AlertViewModel
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.AlertCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertStatus
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertUi
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.asIcon
 
 @Composable
-fun AlertsScreen(
+fun AlertsRoute(
     onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: AlertViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    AlertScreen(
+        selectedAlert = uiState.selectedAlert,
+        selectedDate = uiState.date,
+        selectedWheel = uiState.selectedWheel,
+        wheels = uiState.wheels,
+        onBack = onBack,
+        onDateSelect = { viewModel.filterByFecha(it) },
+        onSelectedWheel = { viewModel.filterByTire(it) },
+        onAlertType = { viewModel.filterByAlert(it) },
+        modifier = modifier
+    )
+}
+
+@Composable
+fun AlertScreen(
+    selectedAlert: AlertType?,
+    selectedDate: String,
+    selectedWheel: String,
+    wheels: List<String>,
+    onBack: () -> Unit,
+    onDateSelect: (String) -> Unit,
+    onSelectedWheel: (String) -> Unit,
+    onAlertType: (AlertType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
-        containerColor = Color(0xFFF8F9FA), // Un fondo suave para que las tarjetas resalten
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SimpleTopBar(
                 title = "Alertas",
@@ -67,9 +90,41 @@ fun AlertsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            FilterAlertComponent(
-                modifier = Modifier.padding(top = Dimens.PaddingMedium)
-            )
+            Card(
+                modifier = Modifier
+                    .padding(Dimens.PaddingMedium)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(Dimens.PaddingMedium),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+                ) {
+                    Text(
+                        text = "Filtrar por",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    TireFilterField(
+                        selectedWheel = selectedWheel,
+                        wheels = wheels,
+                        onSelectedWheel = onSelectedWheel
+                    )
+
+                    AlertTypeFilterField(
+                        selectedAlert = selectedAlert,
+                        onSelectAlert = onAlertType
+                    )
+
+                    DateFilterField(
+                        selectedDate = selectedDate,
+                        onDateSelected = onDateSelect
+                    )
+                }
+            }
 
             Text(
                 text = "Historial de alertas",
@@ -96,81 +151,6 @@ fun AlertsScreen(
     }
 }
 
-@Composable
-fun FilterAlertComponent(modifier: Modifier = Modifier) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedWheel by remember { mutableStateOf("Todas") }
-    val wheels = listOf("Todas", "Eje 1 Izq", "Eje 1 Der", "Eje 2 Izq", "Eje 2 Der", "Remolque")
-
-    Surface(
-        modifier = modifier
-            .padding(horizontal = Dimens.PaddingMedium)
-            .fillMaxWidth(),
-        color = Color.White,
-        shape = RoundedCornerShape(16.dp),
-        shadowElevation = 2.dp,
-    ) {
-        Column(
-            modifier = Modifier.padding(Dimens.PaddingMedium),
-            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
-        ) {
-            Text(
-                text = "Filtrar por rueda",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-                fontWeight = FontWeight.SemiBold
-            )
-            Box(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = selectedWheel,
-                    onValueChange = {},
-                    readOnly = true,
-                    enabled = true,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { expanded = true },
-                    trailingIcon = {
-                        Icon(
-                            Icons.Filled.ArrowDropDown,
-                            contentDescription = null,
-                            modifier = Modifier.clickable { expanded = true }
-                        )
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                        unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                        disabledBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                    ),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
-                )
-
-                // Este Box transparente cubre el TextField para detectar el click
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clickable { expanded = true }
-                )
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier.fillMaxWidth(0.9f)
-                ) {
-                    wheels.forEach { wheel ->
-                        DropdownMenuItem(
-                            text = { Text(wheel) },
-                            onClick = {
-                                selectedWheel = wheel
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 val sampleAlerts = listOf(
     AlertUi(
@@ -248,8 +228,17 @@ val sampleAlerts = listOf(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun AlertsScreenPreview() {
+fun AlertsRoutePreview() {
     HombreCamionTheme {
-        AlertsScreen(onBack = {})
+        AlertScreen(
+            selectedAlert = AlertType.PRESSURE,
+            selectedDate = "01/09/2026",
+            selectedWheel = "Eje 1 Izq",
+            wheels = listOf("Todas", "Eje 1 Izq"),
+            onBack = {},
+            onDateSelect = {},
+            onSelectedWheel = {},
+            onAlertType = {}
+        )
     }
 }

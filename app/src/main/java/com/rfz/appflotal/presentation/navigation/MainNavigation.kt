@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
-import com.rfz.appflotal.presentation.ui.alerts.AlertsScreen
+import com.rfz.appflotal.presentation.ui.alerts.screens.AlertsRoute
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
@@ -132,7 +132,7 @@ fun NavGraphBuilder.mainNavigation(
     }
 
     composable(route = HombreCamionScreens.ALERTS.name) {
-        AlertsScreen(
+        AlertsRoute(
             onBack = { navController.popBackStack() },
         )
     }
