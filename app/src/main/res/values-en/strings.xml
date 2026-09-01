@@ -698,4 +698,5 @@
     <string name="secciones">Sections</string>
     <string name="ultimos_datos">LATEST DATA</string>
     <string name="registrar">register</string>
+    <string name="todas">All</string>
 </resources>
