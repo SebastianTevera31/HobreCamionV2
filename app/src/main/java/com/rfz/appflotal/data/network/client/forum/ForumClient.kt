@@ -4,6 +4,7 @@ import com.rfz.appflotal.data.model.forum.CreateReportRequest
 import com.rfz.appflotal.data.model.forum.DoLikeRequest
 import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
+import com.rfz.appflotal.data.model.forum.GetPostsFeedResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
 import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
@@ -91,6 +92,14 @@ interface ForumClient {
     suspend fun getLikedPosts(
         @Header("Authorization") token: String
     ): Response<List<LikedPostResult>>
+
+    @GET("api/Blog/GetPostsFeed")
+    suspend fun getPostsFeed(
+        @Header("Authorization") token: String,
+        @Query("tipoFeed") tipoFeed: Int,
+        @Query("id_forum") idForum: Int,
+        @Query("pageNumber") pageNumber: Int,
+    ): Response<GetPostsFeedResponse>
 
     @POST("api/Blog/CreateReport")
     suspend fun createReport(

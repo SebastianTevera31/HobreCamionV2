@@ -6,6 +6,7 @@ import com.rfz.appflotal.data.model.forum.CrudTopicRequest
 import com.rfz.appflotal.data.model.forum.DoLikeRequest
 import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
+import com.rfz.appflotal.data.model.forum.GetPostsFeedResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
 import com.rfz.appflotal.data.model.forum.LikedPostResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
@@ -61,5 +62,17 @@ class ForumRepository @Inject constructor(
 
     suspend fun createReport(request: CreateReportRequest): ApiResult<List<TpmsResponse>?> {
         return forumService.createReport(request)
+    }
+
+    suspend fun getPostsFeed(
+        tipoFeed: Int,
+        idForum: Int,
+        pageNumber: Int
+    ): Result<GetPostsFeedResponse> {
+        return forumService.getPostsFeed(
+            tipoFeed = tipoFeed,
+            idForum = idForum,
+            pageNumber = pageNumber
+        )
     }
 }

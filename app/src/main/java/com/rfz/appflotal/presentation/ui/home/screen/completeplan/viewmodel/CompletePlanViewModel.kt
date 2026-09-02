@@ -4,9 +4,11 @@ import android.R.attr.factor
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.model.forum.toEntity
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.location.LocationRepository
 import com.rfz.appflotal.data.repository.weather.WeatherRepository
+import com.rfz.appflotal.domain.forum.GetPostsFeedUseCase
 import com.rfz.appflotal.domain.performance.CurrentPerformanceUseCase
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +25,7 @@ class CompletePlanViewModel @Inject constructor(
     private val currentPerformanceUseCase: CurrentPerformanceUseCase,
     private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository,
+    private val getPostFeedUseCase: GetPostsFeedUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CompletePlanUiState())
     val uiState: StateFlow<CompletePlanUiState> = _uiState.asStateFlow()
@@ -31,6 +34,7 @@ class CompletePlanViewModel @Inject constructor(
         viewModelScope.launch {
             getCurrentPerformance()
             getCurrentWeather()
+            getPostsFeed()
         }
     }
 
@@ -95,5 +99,27 @@ class CompletePlanViewModel @Inject constructor(
                 else -> Unit
             }
         }
+    }
+
+    suspend fun getPostsFeed() {
+        getPostFeedUseCase(
+            tipoFeed = 1,
+            idForum = 0,
+            pageNumber = 1
+        ).fold(
+            onSuccess = {
+                val posts = it.results.map { post -> post.toEntity() }.take(2)
+                _uiState.update { currentState ->
+                    currentState.copy(blogPosts = posts)
+                }
+            },
+            onFailure = {
+//                _uiState.update { currentState ->
+//                    currentState.copy(
+//                        errorMessage = it.message ?: "Error al obtener publicaciones"
+//                    )
+//                }
+            }
+        )
     }
 }

@@ -12,6 +12,6 @@ enum class HombreCamionScreens(screenName: String) {
     MONITOR(screenName = "monitorScreen"),
     MAPA_VIAL(screenName = "mapavial"),
     WEATHER(screenName = "weatherScreen"),
-
-    ALERTS(screenName = "alertsScreen")
+    ALERTS(screenName = "alertsScreen"),
+    REGISTER_TIRES(screenName = "registerTiresScreen")
 }

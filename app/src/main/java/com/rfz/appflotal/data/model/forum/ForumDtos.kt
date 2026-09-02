@@ -21,6 +21,28 @@ data class GetTopicsResponse(
     @SerializedName("total") val total: Int
 )
 
+data class GetPostsFeedResponse(
+    @SerializedName("results") val results: List<PostFeedResult>,
+    @SerializedName("total") val total: Int
+)
+
+data class PostFeedResult(
+    @SerializedName("id_topic") val idTopic: Int,
+    @SerializedName("fld_title") val title: String,
+    @SerializedName("fld_description") val description: String,
+    @SerializedName("fld_color") val color: String,
+    @SerializedName("fld_like") val like: Int,
+    @SerializedName("fld_messages") val messages: Int,
+    @SerializedName("fld_image") val imageLink: String,
+    @SerializedName("id_forum") val forumId: Int,
+    @SerializedName("fld_tags") val tags: String,
+    @SerializedName("fld_registrationDate") val registrationDate: String,
+    @SerializedName("id_user") val userId: Int,
+    @SerializedName("fld_userName") val userName: String,
+    @SerializedName("fld_edited") val isEdited: Boolean,
+    @SerializedName("isLiked") val isLiked: Boolean,
+)
+
 data class TopicResult(
     @SerializedName("id_topic") val idTopic: Int,
     @SerializedName("fld_title") val fldTitle: String,

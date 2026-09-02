@@ -195,3 +195,12 @@ class CreateForumReportUseCase @Inject constructor(private val forumRepository: 
         )
     }
 }
+
+class GetPostsFeedUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(tipoFeed: Int, idForum: Int, pageNumber: Int) =
+        forumRepository.getPostsFeed(
+            tipoFeed = tipoFeed,
+            idForum = idForum,
+            pageNumber = pageNumber
+        )
+}

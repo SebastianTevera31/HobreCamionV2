@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.OilBarrel
@@ -47,7 +46,12 @@ data class AlertUi(
 enum class AlertStatus { CRITICA, PENDIENTE }
 
 data class SectionItem(val icon: IconResource, @StringRes val label: Int, val route: Any)
-data class BlogPost(val category: String, val title: String, val excerpt: String)
+data class BlogPost(
+    val linkImage: String = "",
+    val categories: List<String>,
+    val title: String,
+    val excerpt: String
+)
 
 data class CompletePlanUiState(
     val isLoading: Boolean = false,
@@ -117,21 +121,10 @@ data class CompletePlanUiState(
             route = CouponGraph
         ),
         SectionItem(
-            icon = Icons.Filled.Settings.asIcon(),
-            label = R.string.configuracion,
-            route = NavScreens.INFORMACION_USUARIO
+            icon = R.drawable.tire_register.asIcon(),
+            label = R.string.registrar,
+            route = HombreCamionScreens.REGISTER_TIRES.name
         )
     ),
-    val blogPosts: List<BlogPost> = listOf(
-        BlogPost(
-            category = "MANTENIMIENTO",
-            title = "5 señales de desgaste irregular en llantas",
-            excerpt = "Aprende a detectar a tiempo el desgaste que puede costarte un pinchazo en carretera…"
-        ),
-        BlogPost(
-            category = "CONSUMO",
-            title = "Cómo bajar tu consumo un 10% este verano",
-            excerpt = "Presión, velocidad y climatización: tres ajustes sencillos que notarás en el depósito…"
-        )
-    )
+    val blogPosts: List<BlogPost> = emptyList()
 )
