@@ -55,6 +55,9 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -95,7 +98,10 @@ import com.rfz.appflotal.presentation.navigation.mainNavigation
 import com.rfz.appflotal.presentation.navigation.operationsNavigation
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.couponGraph
+import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.forumsGraph
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeBottomBar
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.components.ObserveOnResume
 import com.rfz.appflotal.presentation.ui.inicio.viewmodel.InicioScreenViewModel
@@ -105,6 +111,7 @@ import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import com.rfz.appflotal.presentation.ui.monitor.component.WarningSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
+import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
 import com.rfz.appflotal.presentation.ui.reportes.navigation.reportGraph
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
@@ -213,6 +220,33 @@ class InicioActivity : ComponentActivity() {
             val showBanner = when (backStackEntry?.destination?.route) {
                 NavScreens.LOGIN, NavScreens.TERMINOS, NavScreens.INFORMACION_USUARIO, NavScreens.PERMISOS, NavScreens.REGISTRAR_USUARIO -> false
                 else -> true
+            }
+
+            val currentDestination = backStackEntry?.destination
+            val selectedNavItem = BottomNavItems.entries.firstOrNull { item ->
+                currentDestination?.hierarchy?.any { destination ->
+                    when (val route = item.route) {
+                        is String -> destination.route == route
+                        ReportGraph -> destination.hasRoute<ReportGraph>()
+                        ForumsGraph -> destination.hasRoute<ForumsGraph>()
+                        else -> false
+                    }
+                } == true
+            }
+
+            val onBottomNavItemClick: (BottomNavItems) -> Unit = { item ->
+                if (item != selectedNavItem) {
+                    val navOptions: NavOptionsBuilder.() -> Unit = {
+                        popUpTo(NavScreens.HOME) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                    when (val route = item.route) {
+                        is String -> navController.navigate(route, builder = navOptions)
+                        null -> Unit
+                        else -> navController.navigate(route, builder = navOptions)
+                    }
+                }
             }
 
             val lifecycleOwner = LocalLifecycleOwner.current
@@ -381,7 +415,7 @@ class InicioActivity : ComponentActivity() {
                                 }
                             }
 
-                            Box {
+                            Box(modifier = Modifier.weight(1f)) {
                                 NetworkConfig.imei =
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                         Settings.Secure.getString(
@@ -549,6 +583,13 @@ class InicioActivity : ComponentActivity() {
                                         }
                                     },
                                     onCleanState = { appStatusManagerRepository.cleanNotificationsState() },
+                                )
+                            }
+
+                            if (selectedNavItem != null && inicioState.value.paymentPlanType == PaymentPlanType.Complete) {
+                                HomeBottomBar(
+                                    selected = selectedNavItem,
+                                    onItemClick = onBottomNavItemClick
                                 )
                             }
                         }
