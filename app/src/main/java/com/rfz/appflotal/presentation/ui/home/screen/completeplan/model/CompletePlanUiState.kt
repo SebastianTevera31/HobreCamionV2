@@ -47,7 +47,12 @@ data class AlertUi(
 enum class AlertStatus { CRITICA, PENDIENTE }
 
 data class SectionItem(val icon: IconResource, @StringRes val label: Int, val route: Any)
-data class BlogPost(val category: String, val title: String, val excerpt: String)
+data class BlogPost(
+    val linkImage: String = "",
+    val categories: List<String>,
+    val title: String,
+    val excerpt: String
+)
 
 data class CompletePlanUiState(
     val isLoading: Boolean = false,
@@ -123,16 +128,5 @@ data class CompletePlanUiState(
             route = HombreCamionScreens.REGISTER_TIRES.name
         )
     ),
-    val blogPosts: List<BlogPost> = listOf(
-        BlogPost(
-            category = "MANTENIMIENTO",
-            title = "5 señales de desgaste irregular en llantas",
-            excerpt = "Aprende a detectar a tiempo el desgaste que puede costarte un pinchazo en carretera…"
-        ),
-        BlogPost(
-            category = "CONSUMO",
-            title = "Cómo bajar tu consumo un 10% este verano",
-            excerpt = "Presión, velocidad y climatización: tres ajustes sencillos que notarás en el depósito…"
-        )
-    )
+    val blogPosts: List<BlogPost> = emptyList()
 )

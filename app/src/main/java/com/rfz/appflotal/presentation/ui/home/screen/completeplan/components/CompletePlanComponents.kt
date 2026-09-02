@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.TireRepair
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Cloud
@@ -40,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertStatus
@@ -91,79 +95,10 @@ fun AdaptiveIcon(
 }
 
 @Composable
-fun CompleteHomeTopBar(
-    userName: String,
-    planType: PaymentPlanType,
-    onNotificationsClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 68.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(TealSoftBg),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    userName.take(2).uppercase(),
-                    color = TealMid,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text(
-                    "¡Hola, $userName!",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    "Plan: ${planType.name}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TealMid,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-
-        Box {
-            IconButton(
-                onClick = onNotificationsClick,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(TealSoftBg)
-            ) {
-                Icon(
-                    Icons.Outlined.Notifications,
-                    contentDescription = "Notificaciones",
-                    tint = TealDark
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .align(Alignment.TopEnd)
-                    .clip(CircleShape)
-                    .background(CriticalFg)
-            )
-        }
-    }
-}
-
-@Composable
 fun HomeTopBar(
     userName: String,
     planType: PaymentPlanType,
-    plates: String,
+    plates: String = "",
     onNotificationsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -183,6 +118,7 @@ fun HomeTopBar(
                 Text(
                     userName.take(2).uppercase(),
                     color = TealMid,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -193,8 +129,7 @@ fun HomeTopBar(
                 Text(
                     text = "¡Hola, $userName!",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Start
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
                     "Plan: ${planType.name}",
@@ -356,14 +291,15 @@ fun VehicleStatItem(stat: VehicleStat, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun AlertCard(alert: AlertUi) {
+fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        onClick = onClick
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(
@@ -525,30 +461,42 @@ fun SectionIconItem(section: SectionItem, onClick: (SectionItem) -> Unit) {
 }
 
 @Composable
-fun BlogPostCard(post: BlogPost) {
+fun BlogPostCard(post: BlogPost, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        onClick = onClick
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(TealSoftBg)
-            )
+            Surface(
+                modifier = Modifier.size(64.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            ) {
+                if (post.linkImage.isNotEmpty()) {
+                    AsyncImage(
+                        model = post.linkImage,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.TireRepair,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
             Spacer(Modifier.width(12.dp))
             Column {
-                Text(
-                    post.category,
-                    color = TealMid,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
                 Text(
                     post.title,
                     fontWeight = FontWeight.Bold,
@@ -728,7 +676,7 @@ fun SectionsGridPreview() {
 @Composable
 fun BlogPostCardPreview() {
     val post = BlogPost(
-        category = "MANTENIMIENTO",
+        categories = listOf("MANTENIMIENTO"),
         title = "5 señales de desgaste irregular en llantas",
         excerpt = "Aprende a detectar a tiempo el desgaste que puede costarte un pinchazo en carretera…"
     )

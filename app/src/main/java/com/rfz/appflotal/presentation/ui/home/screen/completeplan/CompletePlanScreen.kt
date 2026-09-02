@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.AlertCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.BlogPostCard
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.CompleteHomeTopBar
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeBottomBar
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeTopBar
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SectionHeader
@@ -67,20 +66,13 @@ fun CompletePlanScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     item {
-                        if (state.paymentPlanType == PaymentPlanType.Complete) {
-                            CompleteHomeTopBar(
-                                state.userName,
-                                state.paymentPlanType,
-                                onNotificationsClick
-                            )
-                        } else {
-                            HomeTopBar(
-                                userName = state.userName,
-                                planType = state.paymentPlanType,
-                                plates = state.vehiclePlate,
-                                onNotificationsClick = onNotificationsClick,
-                            )
-                        }
+                        HomeTopBar(
+                            userName = state.userName,
+                            planType = state.paymentPlanType,
+                            plates = state.vehiclePlate,
+                            onNotificationsClick = onNotificationsClick,
+                            modifier = Modifier.padding(top = 68.dp)
+                        )
                     }
 
                     item {
@@ -105,7 +97,7 @@ fun CompletePlanScreen(
                                 stringResource(R.string.ver_todas), onAlertsSeeAllClick
                             )
                             state.alerts.forEach { alert ->
-                                AlertCard(alert)
+                                AlertCard(alert, onClick = onAlertsSeeAllClick)
                             }
                         }
                     }
@@ -139,13 +131,15 @@ fun CompletePlanScreen(
 
                     item {
                         Column {
-                            SectionHeader(
-                                stringResource(R.string.foro),
-                                stringResource(R.string.ver_todas),
-                                onBlogSeeAllClick
-                            )
-                            state.blogPosts.forEach { post ->
-                                BlogPostCard(post)
+                            if (!state.blogPosts.isEmpty()) {
+                                SectionHeader(
+                                    stringResource(R.string.foro),
+                                    stringResource(R.string.ver_todas),
+                                    onBlogSeeAllClick
+                                )
+                                state.blogPosts.forEach { post ->
+                                    BlogPostCard(post, onClick = onBlogSeeAllClick)
+                                }
                             }
                         }
                     }
