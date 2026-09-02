@@ -115,7 +115,7 @@ class CompletePlanViewModel @Inject constructor(
             pageNumber = 1
         ).fold(
             onSuccess = {
-                val posts = it.results.map { post -> post.toEntity() }.take(1)
+                val posts = it.results.map { post -> post.toEntity() }.take(2)
                 _uiState.update { currentState ->
                     currentState.copy(blogPosts = posts)
                 }
