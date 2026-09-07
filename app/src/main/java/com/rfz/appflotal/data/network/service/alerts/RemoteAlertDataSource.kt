@@ -11,7 +11,7 @@ class RemoteAlertDataSource @Inject constructor(private val alertService: Alerts
         endDate: String,
         position: String,
         alertType: String,
-        startPaging: String
+        startPaging: Int
     ) = networkRequestHelper {
         alertService.getAlerts(
             token = "Bearer $token",

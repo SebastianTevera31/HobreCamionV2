@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -127,7 +128,7 @@ fun AlertScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SimpleTopBar(
-                title = "Historial de Alertas",
+                title = stringResource(R.string.alertas_history_title),
                 onBack = onBack,
                 showBackButton = true,
             )
@@ -150,7 +151,8 @@ fun AlertScreen(
                             .padding(bottom = Dimens.PaddingSmall),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        onClick = { showFilters = !showFilters }
                     ) {
                         Column(
                             modifier = Modifier.padding(Dimens.PaddingMedium),
@@ -170,7 +172,7 @@ fun AlertScreen(
                                     )
                                     Spacer(modifier = Modifier.width(Dimens.PaddingSmall))
                                     Text(
-                                        text = "Filtros",
+                                        text = stringResource(R.string.filtros),
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         fontWeight = FontWeight.Bold
@@ -179,7 +181,9 @@ fun AlertScreen(
                                 IconButton(onClick = { showFilters = !showFilters }) {
                                     Icon(
                                         imageVector = if (showFilters) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                        contentDescription = if (showFilters) "Colapsar" else "Expandir",
+                                        contentDescription = stringResource(
+                                            if (showFilters) R.string.colapsar else R.string.expandir
+                                        ),
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
@@ -250,7 +254,7 @@ fun AlertScreen(
                                     )
                                 ) {
                                     Text(
-                                        text = "Aplicar Filtros",
+                                        text = stringResource(R.string.aplicar_filtros),
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -265,12 +269,12 @@ fun AlertScreen(
                                         horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
                                     ) {
                                         FilterChipSummary(
-                                            label = "Rueda",
-                                            value = wheel.ifEmpty { "Todas" },
+                                            label = stringResource(R.string.rueda_label),
+                                            value = wheel.ifEmpty { stringResource(R.string.todas) },
                                             modifier = Modifier.weight(1f)
                                         )
                                         FilterChipSummary(
-                                            label = "Alerta",
+                                            label = stringResource(R.string.alerta_label),
                                             value = stringResource(alert.title),
                                             modifier = Modifier.weight(1f)
                                         )
@@ -280,13 +284,13 @@ fun AlertScreen(
                                         horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
                                     ) {
                                         FilterChipSummary(
-                                            label = "De:",
-                                            value = startDate.ifEmpty { "Todas" },
+                                            label = stringResource(R.string.desde_label),
+                                            value = startDate.ifEmpty { stringResource(R.string.todas) },
                                             modifier = Modifier.weight(1f)
                                         )
                                         FilterChipSummary(
-                                            label = "A:",
-                                            value = endDate.ifEmpty { "Todas" },
+                                            label = stringResource(R.string.hasta_label),
+                                            value = endDate.ifEmpty { stringResource(R.string.todas) },
                                             modifier = Modifier.weight(1f)
                                         )
                                     }
@@ -296,7 +300,7 @@ fun AlertScreen(
                     }
 
                     Text(
-                        text = "Historial de alertas",
+                        text = stringResource(R.string.alertas_history_section_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
@@ -323,6 +327,7 @@ fun AlertScreen(
             }
 
             PageNavigator(
+                hasData = alerts.isNotEmpty(),
                 currentPage = currentPage,
                 hasNextPage = hasNextPage,
                 isLoading = isLoading,
@@ -334,6 +339,7 @@ fun AlertScreen(
 
 @Composable
 private fun PageNavigator(
+    hasData: Boolean,
     currentPage: Int,
     hasNextPage: Boolean,
     isLoading: Boolean,
@@ -354,16 +360,19 @@ private fun PageNavigator(
     ) {
         IconButton(
             onClick = { onPageSelected(currentPage - 1) },
-            enabled = !isLoading && currentPage > 1
+            enabled = !isLoading && currentPage > 1 && hasData
         ) {
-            Icon(Icons.Default.ChevronLeft, contentDescription = "Página anterior")
+            Icon(
+                Icons.Default.ChevronLeft,
+                contentDescription = stringResource(R.string.pagina_anterior)
+            )
         }
 
         (startPage..endPage).forEach { page ->
             PageChip(
                 page = page,
                 isSelected = page == currentPage,
-                enabled = !isLoading,
+                enabled = !isLoading && hasData,
                 onClick = { onPageSelected(page) }
             )
             Spacer(modifier = Modifier.width(Dimens.PaddingExtraSmall))
@@ -371,17 +380,21 @@ private fun PageNavigator(
 
         IconButton(
             onClick = { onPageSelected(currentPage + 1) },
-            enabled = !isLoading && hasNextPage
+            enabled = !isLoading && hasNextPage && hasData
         ) {
-            Icon(Icons.Default.ChevronRight, contentDescription = "Página siguiente")
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = stringResource(R.string.pagina_siguiente)
+            )
         }
     }
 }
 
 @Composable
 private fun PageChip(page: Int, isSelected: Boolean, enabled: Boolean, onClick: () -> Unit) {
-    val containerColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-    val contentColor = if (isSelected) Color.White else MaterialTheme.colorScheme.primary
+    val containerColor =
+        if (isSelected && enabled) MaterialTheme.colorScheme.primary else Color.Transparent
+    val contentColor = if (isSelected && enabled) Color.White else MaterialTheme.colorScheme.primary
 
     Box(
         modifier = Modifier
@@ -515,6 +528,20 @@ fun AlertsRoutePreview() {
             wheels = listOf("Todas", "Eje 1 Izq"),
             onBack = {},
             onApplyFilters = { _, _, _, _ -> },
+            onPageSelected = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PageNavigatorPreview() {
+    HombreCamionTheme {
+        PageNavigator(
+            hasData = false,
+            currentPage = 2,
+            hasNextPage = true,
+            isLoading = false,
             onPageSelected = {}
         )
     }

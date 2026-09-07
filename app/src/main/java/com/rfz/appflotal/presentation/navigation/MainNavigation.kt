@@ -6,9 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
@@ -134,8 +132,7 @@ fun NavGraphBuilder.mainNavigation(
     }
 
     composable(
-        route = "${HombreCamionScreens.ALERTS.name}/{idMonitor}", arguments = listOf(
-            navArgument("idMonitor") { type = NavType.StringType })
+        route = HombreCamionScreens.ALERTS.name
     ) {
         AlertsRoute(
             onBack = { navController.popBackStack() },

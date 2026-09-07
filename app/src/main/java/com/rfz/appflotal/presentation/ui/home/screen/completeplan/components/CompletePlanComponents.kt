@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QueryStats
+import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -121,12 +122,12 @@ fun CompleteHomeTopBar(
             Spacer(Modifier.width(12.dp))
             Column {
                 Text(
-                    "¡Hola, $userName!",
+                    stringResource(R.string.saludo_usuario, userName),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Plan: ${planType.name}",
+                    stringResource(R.string.plan_actual, planType.name),
                     style = MaterialTheme.typography.bodyMedium,
                     color = TealMid,
                     fontWeight = FontWeight.SemiBold
@@ -144,7 +145,7 @@ fun CompleteHomeTopBar(
             ) {
                 Icon(
                     Icons.Outlined.Notifications,
-                    contentDescription = "Notificaciones",
+                    contentDescription = stringResource(R.string.content_description_notificaciones),
                     tint = TealDark
                 )
             }
@@ -191,20 +192,20 @@ fun HomeTopBar(
 
             Column(horizontalAlignment = Alignment.Start) {
                 Text(
-                    text = "¡Hola, $userName!",
+                    text = stringResource(R.string.saludo_usuario, userName),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start
                 )
                 Text(
-                    "Plan: ${planType.name}",
+                    stringResource(R.string.plan_actual, planType.name),
                     style = MaterialTheme.typography.bodyMedium,
                     color = TealMid,
                     fontWeight = FontWeight.SemiBold
                 )
                 if (plates.isNotEmpty()) {
                     Text(
-                        "Placas: $plates",
+                        stringResource(R.string.placas_vehiculo, plates),
                         style = MaterialTheme.typography.bodySmall,
                         color = SubtleText,
                         fontWeight = FontWeight.Medium
@@ -223,7 +224,7 @@ fun HomeTopBar(
             ) {
                 Icon(
                     Icons.Outlined.Notifications,
-                    contentDescription = "Notificaciones",
+                    contentDescription = stringResource(R.string.content_description_notificaciones),
                     tint = TealDark
                 )
             }
@@ -259,6 +260,45 @@ fun SectionHeader(title: String, actionLabel: String, onActionClick: () -> Unit)
 }
 
 @Composable
+fun EmptyStateCard(
+    icon: IconResource,
+    message: String,
+    modifier: Modifier = Modifier,
+    containerColor: Color = TealSoftBg.copy(alpha = 0.5f),
+    contentColor: Color = TealMid
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(24.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            AdaptiveIcon(
+                icon = icon,
+                contentDescription = null,
+                tint = contentColor.copy(alpha = 0.6f),
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = contentColor,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
 fun VehiclePerformanceCard(
     vehicleName: String,
     plate: String,
@@ -276,7 +316,10 @@ fun VehiclePerformanceCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "$vehicleName · $plate",
+                    text = if (vehicleName.isNotEmpty())
+                        stringResource(R.string.vehiculo_placa_format, vehicleName, plate)
+                    else
+                        stringResource(R.string.vehiculo_no_asignado),
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyLarge,
@@ -297,16 +340,28 @@ fun VehiclePerformanceCard(
                 }
             }
             Spacer(Modifier.height(24.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.Top
-            ) {
-                stats.forEach { stat ->
-                    VehicleStatItem(
-                        stat = stat,
-                        modifier = Modifier.weight(1f)
-                    )
+            if (stats.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.no_datos_rendimiento),
+                    color = Color.White.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    stats.forEach { stat ->
+                        VehicleStatItem(
+                            stat = stat,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }
@@ -394,7 +449,7 @@ fun AlertCard(alert: AlertUi) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "CRÍTICA",
+                            stringResource(R.string.alerta_critica_label),
                             color = CriticalFg,
                             fontSize = MaterialTheme.typography.labelSmall.fontSize,
                             fontWeight = FontWeight.Bold
@@ -457,7 +512,11 @@ fun WeatherCard(temp: String, city: String, description: String, onClick: () -> 
                 Text(city, fontWeight = FontWeight.SemiBold)
                 Text(description, color = SubtleText, style = MaterialTheme.typography.bodySmall)
             }
-            Icon(Icons.Outlined.ChevronRight, contentDescription = "Ver mapa", tint = TealDark)
+            Icon(
+                Icons.Outlined.ChevronRight,
+                contentDescription = stringResource(R.string.ver_mapa),
+                tint = TealDark
+            )
         }
     }
 }

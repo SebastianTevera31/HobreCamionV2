@@ -71,25 +71,9 @@ data class CompletePlanUiState(
             R.string.emision_co2
         )
     ),
-    val alerts: List<AlertUi> = listOf(
-        AlertUi(
-            icon = R.drawable.tire_pressure_warning.asIcon(),
-            title = "TPMS · eje delantero izq.",
-            detailLabel = "Presión:",
-            detailValue = "2.1 bar",
-            detailExtra = "(mín. 6.5)",
-            status = AlertStatus.CRITICA
-        ),
-        AlertUi(
-            icon = Icons.Outlined.GpsFixed.asIcon(),
-            title = "Alerta de mm bajo",
-            detailLabel = "Profundidad baja ·",
-            detailValue = "4 mm",
-            status = AlertStatus.PENDIENTE
-        )
-    ),
-    val weatherTemp: String = "34°",
-    val weatherCity: String = "Madrid",
+    val alerts: List<AlertUi> = emptyList(),
+    val weatherTemp: String = "0",
+    val weatherCity: String = "",
     @StringRes val weatherDesc: Int = R.string.clearsky,
     val sections: List<SectionItem> = listOf(
         SectionItem(
@@ -123,16 +107,5 @@ data class CompletePlanUiState(
             route = HombreCamionScreens.REGISTER_TIRES.name
         )
     ),
-    val blogPosts: List<BlogPost> = listOf(
-        BlogPost(
-            category = "MANTENIMIENTO",
-            title = "5 señales de desgaste irregular en llantas",
-            excerpt = "Aprende a detectar a tiempo el desgaste que puede costarte un pinchazo en carretera…"
-        ),
-        BlogPost(
-            category = "CONSUMO",
-            title = "Cómo bajar tu consumo un 10% este verano",
-            excerpt = "Presión, velocidad y climatización: tres ajustes sencillos que notarás en el depósito…"
-        )
-    )
+    val blogPosts: List<BlogPost> = emptyList()
 )

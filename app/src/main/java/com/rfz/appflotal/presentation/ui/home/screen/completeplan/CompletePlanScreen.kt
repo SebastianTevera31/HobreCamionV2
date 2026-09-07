@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +28,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.AlertCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.BlogPostCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.CompleteHomeTopBar
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.EmptyStateCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeBottomBar
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeTopBar
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SectionHeader
@@ -34,6 +38,7 @@ import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.Veh
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.WeatherCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.SectionItem
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.asIcon
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 
@@ -104,8 +109,15 @@ fun CompletePlanScreen(
                                 stringResource(R.string.alertas_recientes),
                                 stringResource(R.string.ver_todas), onAlertsSeeAllClick
                             )
-                            state.alerts.forEach { alert ->
-                                AlertCard(alert)
+                            if (state.alerts.isEmpty()) {
+                                EmptyStateCard(
+                                    icon = Icons.Outlined.NotificationsNone.asIcon(),
+                                    message = stringResource(R.string.no_alertas_recientes)
+                                )
+                            } else {
+                                state.alerts.forEach { alert ->
+                                    AlertCard(alert)
+                                }
                             }
                         }
                     }
@@ -144,8 +156,15 @@ fun CompletePlanScreen(
                                 stringResource(R.string.ver_todas),
                                 onBlogSeeAllClick
                             )
-                            state.blogPosts.forEach { post ->
-                                BlogPostCard(post)
+                            if (state.blogPosts.isEmpty()) {
+                                EmptyStateCard(
+                                    icon = Icons.Outlined.SearchOff.asIcon(),
+                                    message = stringResource(R.string.sin_publicaciones_foro)
+                                )
+                            } else {
+                                state.blogPosts.forEach { post ->
+                                    BlogPostCard(post)
+                                }
                             }
                         }
                     }

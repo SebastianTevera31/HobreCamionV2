@@ -15,6 +15,6 @@ interface AlertsService {
         @Query("fechaFinal") endDate: String,
         @Query("position") position: String,
         @Query("tipoAlerta") alertType: String,
-        @Query("start") startPaging: String
+        @Query("start") startPaging: Int
     ): Response<List<AlertDto>>
 }

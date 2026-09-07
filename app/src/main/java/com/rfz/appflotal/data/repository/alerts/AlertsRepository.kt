@@ -2,6 +2,7 @@ package com.rfz.appflotal.data.repository.alerts
 
 import com.rfz.appflotal.data.model.alerts.Alert
 import com.rfz.appflotal.data.model.alerts.AlertDto
+import com.rfz.appflotal.data.model.alerts.toDomain
 import com.rfz.appflotal.data.network.service.alerts.RemoteAlertDataSource
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import kotlinx.coroutines.flow.first
@@ -12,7 +13,7 @@ private data class AlertsQuery(
     val endDate: String,
     val position: String,
     val alertType: String,
-    val startPaging: String
+    val startPaging: Int
 )
 
 private data class AlertsCacheEntry(
@@ -31,7 +32,7 @@ class AlertsRepository @Inject constructor(
         endDate: String,
         position: String,
         alertType: String,
-        startPaging: String
+        startPaging: Int
     ): Result<List<Alert>> {
         val query = AlertsQuery(startDate, endDate, position, alertType, startPaging)
 
@@ -61,12 +62,3 @@ class AlertsRepository @Inject constructor(
         const val CACHE_TTL_MS = 3 * 60 * 1000L
     }
 }
-
-private fun AlertDto.toDomain() = Alert(
-    idMonitor = idMonitor,
-    position = position,
-    temperature = temperature,
-    psi = psi,
-    alert = alert,
-    datedata = datedata
-)
