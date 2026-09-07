@@ -1,7 +1,10 @@
 package com.rfz.appflotal.presentation.ui.alerts.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,10 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FilterList
@@ -29,12 +35,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -65,35 +74,51 @@ fun AlertsRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.getData()
+    }
+
     AlertScreen(
+        alerts = uiState.alerts,
+        currentPage = uiState.currentPage,
+        hasNextPage = uiState.hasNextPage,
+        isLoading = uiState.isLoading,
         selectedAlert = uiState.selectedAlert,
-        selectedDate = uiState.date,
+        selectedDate = uiState.startDate,
         selectedWheel = uiState.selectedWheel,
         wheels = uiState.wheels,
         onBack = onBack,
-        onApplyFilters = { date, wheel, alert ->
+        onApplyFilters = { startDate, endDate, wheel, alert ->
             viewModel.applyFilter(
-                date = date,
+                startDate = startDate,
+                endDate = endDate,
                 wheel = wheel,
                 alert = alert
             )
         },
+        onPageSelected = { page -> viewModel.goToPage(page) },
         modifier = modifier
     )
 }
 
 @Composable
 fun AlertScreen(
+    alerts: List<AlertUi>,
+    currentPage: Int,
+    hasNextPage: Boolean,
+    isLoading: Boolean,
     selectedAlert: AlertType,
     selectedDate: String,
     selectedWheel: String,
     wheels: List<String>,
     onBack: () -> Unit,
-    onApplyFilters: (date: String, wheel: String, alert: AlertType) -> Unit,
+    onApplyFilters: (startDate: String, endDate: String, wheel: String, alert: AlertType) -> Unit,
+    onPageSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showFilters by remember { mutableStateOf(false) }
-    var date by remember { mutableStateOf(selectedDate) }
+    var startDate by remember { mutableStateOf(selectedDate) }
+    var endDate by remember { mutableStateOf(selectedDate) }
     var wheel by remember { mutableStateOf(selectedWheel) }
     var alert by remember { mutableStateOf(selectedAlert) }
 
@@ -180,8 +205,8 @@ fun AlertScreen(
                                                 modifier = Modifier.weight(1f)
                                             )
                                             DateFilterField(
-                                                selectedDate = date,
-                                                onDateSelected = { date = it },
+                                                selectedDate = startDate,
+                                                onDateSelected = { startDate = it },
                                                 modifier = Modifier.weight(1f)
                                             )
                                         }
@@ -200,8 +225,12 @@ fun AlertScreen(
                                                 onSelectAlert = { alert = it }
                                             )
                                             DateFilterField(
-                                                selectedDate = date,
-                                                onDateSelected = { date = it }
+                                                selectedDate = startDate,
+                                                onDateSelected = { startDate = it }
+                                            )
+                                            DateFilterField(
+                                                selectedDate = endDate,
+                                                onDateSelected = { endDate = it }
                                             )
                                         }
                                     }
@@ -211,7 +240,7 @@ fun AlertScreen(
 
                                 Button(
                                     onClick = {
-                                        onApplyFilters(date, wheel, alert)
+                                        onApplyFilters(startDate, endDate, wheel, alert)
                                         showFilters = false
                                     },
                                     shape = RoundedCornerShape(12.dp),
@@ -227,25 +256,40 @@ fun AlertScreen(
                                 }
                             } else {
                                 // Resumen de filtros aplicados cuando está colapsado
-                                Row(
+                                Column(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    FilterChipSummary(
-                                        label = "Rueda",
-                                        value = wheel.ifEmpty { "Todas" },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    FilterChipSummary(
-                                        label = "Alerta",
-                                        value = stringResource(alert.title),
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    FilterChipSummary(
-                                        label = "Fecha",
-                                        value = date.ifEmpty { "Todas" },
-                                        modifier = Modifier.weight(1f)
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+                                    ) {
+                                        FilterChipSummary(
+                                            label = "Rueda",
+                                            value = wheel.ifEmpty { "Todas" },
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        FilterChipSummary(
+                                            label = "Alerta",
+                                            value = stringResource(alert.title),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+                                    ) {
+                                        FilterChipSummary(
+                                            label = "De:",
+                                            value = startDate.ifEmpty { "Todas" },
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        FilterChipSummary(
+                                            label = "A:",
+                                            value = endDate.ifEmpty { "Todas" },
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -260,11 +304,99 @@ fun AlertScreen(
                     )
                 }
 
-                items(sampleAlerts) { alert ->
-                    AlertCard(alert)
+                items(alerts) { alertItem ->
+                    AlertCard(alertItem)
+                }
+
+                if (isLoading) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(Dimens.PaddingMedium)
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
                 }
             }
+
+            PageNavigator(
+                currentPage = currentPage,
+                hasNextPage = hasNextPage,
+                isLoading = isLoading,
+                onPageSelected = onPageSelected
+            )
         }
+    }
+}
+
+@Composable
+private fun PageNavigator(
+    currentPage: Int,
+    hasNextPage: Boolean,
+    isLoading: Boolean,
+    onPageSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // Sin total de páginas confiable del servidor: solo mostramos la anterior,
+    // la actual y la siguiente (si existe), en vez de una lista completa 1..N.
+    val startPage = (currentPage - 1).coerceAtLeast(1)
+    val endPage = if (hasNextPage) currentPage + 1 else currentPage.coerceAtLeast(1)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(Dimens.PaddingMedium),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = { onPageSelected(currentPage - 1) },
+            enabled = !isLoading && currentPage > 1
+        ) {
+            Icon(Icons.Default.ChevronLeft, contentDescription = "Página anterior")
+        }
+
+        (startPage..endPage).forEach { page ->
+            PageChip(
+                page = page,
+                isSelected = page == currentPage,
+                enabled = !isLoading,
+                onClick = { onPageSelected(page) }
+            )
+            Spacer(modifier = Modifier.width(Dimens.PaddingExtraSmall))
+        }
+
+        IconButton(
+            onClick = { onPageSelected(currentPage + 1) },
+            enabled = !isLoading && hasNextPage
+        ) {
+            Icon(Icons.Default.ChevronRight, contentDescription = "Página siguiente")
+        }
+    }
+}
+
+@Composable
+private fun PageChip(page: Int, isSelected: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    val containerColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+    val contentColor = if (isSelected) Color.White else MaterialTheme.colorScheme.primary
+
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(containerColor)
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                RoundedCornerShape(8.dp)
+            )
+            .clickable(enabled = enabled) { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = page.toString(), color = contentColor, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -373,12 +505,17 @@ val sampleAlerts = listOf(
 fun AlertsRoutePreview() {
     HombreCamionTheme {
         AlertScreen(
+            alerts = sampleAlerts,
+            currentPage = 2,
+            hasNextPage = true,
+            isLoading = false,
             selectedAlert = AlertType.PRESSURE,
             selectedDate = "01/09/2026",
             selectedWheel = "Eje 1 Izq",
             wheels = listOf("Todas", "Eje 1 Izq"),
             onBack = {},
-            onApplyFilters = { _, _, _ -> }
+            onApplyFilters = { _, _, _, _ -> },
+            onPageSelected = {}
         )
     }
 }

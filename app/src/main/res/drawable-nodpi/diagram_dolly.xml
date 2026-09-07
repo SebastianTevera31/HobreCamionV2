@@ -1,0 +1,19 @@
+<!-- PLACEHOLDER: reemplázalo importando art/diagram_dolly.svg
+     (Android Studio: clic derecho en res > New > Vector Asset > Local file,
+     nombre "diagram_dolly"). Contorno simple para que compile mientras. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1001dp"
+    android:height="415dp"
+    android:viewportWidth="1001"
+    android:viewportHeight="415">
+    <path
+        android:pathData="M20,207 L200,120 L200,295 Z"
+        android:strokeColor="#94A3B8"
+        android:strokeWidth="6"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M200,140 L950,140 M200,275 L950,275 M470,60 L470,355 M760,60 L760,355"
+        android:strokeColor="#94A3B8"
+        android:strokeWidth="6"
+        android:fillColor="#00000000" />
+</vector>
