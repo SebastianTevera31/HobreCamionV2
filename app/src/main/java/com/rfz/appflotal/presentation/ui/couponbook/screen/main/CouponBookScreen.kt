@@ -39,6 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material3.Button
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.data.model.couponbook.Coupon
@@ -59,6 +61,7 @@ fun CouponBookRoute(
     myCoupons: List<Coupon>,
     onSeeAllCoupons: () -> Unit,
     onSeeAllVouchers: () -> Unit,
+    onSeeAllPromotions: () -> Unit,
     onCouponClick: (String) -> Unit,
     onVoucherClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -87,6 +90,7 @@ fun CouponBookRoute(
                 myCoupons = myCoupons,
                 onSeeAllCoupons = onSeeAllCoupons,
                 onSeeAllVouchers = onSeeAllVouchers,
+                onSeeAllPromotions = onSeeAllPromotions,
                 onCouponClick = onCouponClick,
                 onVoucherClick = onVoucherClick,
                 modifier = modifier
@@ -103,6 +107,7 @@ fun CouponBookScreen(
     myCoupons: List<Coupon>,
     onSeeAllCoupons: () -> Unit,
     onSeeAllVouchers: () -> Unit,
+    onSeeAllPromotions: () -> Unit,
     onCouponClick: (String) -> Unit,
     onVoucherClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -119,6 +124,37 @@ fun CouponBookScreen(
     ) {
         item {
             CouponBookHeader()
+        }
+
+        item {
+            SectionHeader(
+                title = stringResource(R.string.promociones_cercanas),
+                onSeeAllClick = onSeeAllPromotions
+            )
+        }
+
+        item {
+            if (promotions.isEmpty()) {
+                EmptyCouponCard(
+                    message = stringResource(R.string.no_hay_promociones_cercanas)
+                )
+            } else {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                    contentPadding = PaddingValues(end = Dimens.PaddingMedium)
+                ) {
+                    items(
+                        items = promotions,
+                        key = { discount -> discount.productUrl }
+                    ) { discount ->
+                        PromotionCarouselCard(
+                            discount = discount,
+                            onClick = { onPromotionClick(discount.productUrl) }
+                        )
+                    }
+                }
+            }
         }
 
         item {
@@ -591,10 +627,13 @@ fun CouponBookScreenPreview() {
         CouponBookScreen(
             nearbyCoupons = emptyList(),
             myCoupons = emptyList(),
+            promotions = emptyList(),
             onSeeAllCoupons = {},
             onCouponClick = { _ -> },
             onVoucherClick = { _ -> },
             onSeeAllVouchers = {},
+            onSeeAllPromotions = {},
+            onPromotionClick = { _ -> },
         )
     }
 }

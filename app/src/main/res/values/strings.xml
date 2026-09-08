@@ -507,6 +507,17 @@
 
     <string name="sin_cupones_descripcion">Selecciona otro filtro o revisa nuevamente más tarde.</string>
 
+    <string name="promociones_cercanas">Promociones cercanas</string>
+    <string name="no_hay_promociones_cercanas">No hay promociones cercanas.</string>
+    <string name="sin_promociones_disponibles">No hay promociones disponibles</string>
+    <string name="sin_promociones_descripcion">Vuelve más tarde para ver nuevas promociones.</string>
+    <string name="detalle_promocion">Detalle de promoción</string>
+    <string name="ver_producto">Ver producto</string>
+    <string name="precio_regular">Precio regular</string>
+    <string name="precio_con_descuento">Precio con descuento</string>
+    <string name="ahorras_texto">Ahorras %1$s (%2$s%%)</string>
+    <string name="sku_label">SKU: %1$s</string>
+
     <string name="folio">Folio</string>
     <string name="vigente">Vigente</string>
 

@@ -520,6 +520,17 @@
 
     <string name="sin_cupones_descripcion">Select another filter or check back later.</string>
 
+    <string name="promociones_cercanas">Nearby promotions</string>
+    <string name="no_hay_promociones_cercanas">No nearby promotions available.</string>
+    <string name="sin_promociones_disponibles">No promotions available</string>
+    <string name="sin_promociones_descripcion">Check back later for new promotions.</string>
+    <string name="detalle_promocion">Promotion detail</string>
+    <string name="ver_producto">View product</string>
+    <string name="precio_regular">Regular price</string>
+    <string name="precio_con_descuento">Discounted price</string>
+    <string name="ahorras_texto">You save %1$s (%2$s%%)</string>
+    <string name="sku_label">SKU: %1$s</string>
+
     <string name="folio">Folio</string>
     <string name="vigente">Valid</string>
 

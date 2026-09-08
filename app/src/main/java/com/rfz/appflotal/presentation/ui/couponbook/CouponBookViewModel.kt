@@ -6,15 +6,22 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.couponbook.Coupon
 import com.rfz.appflotal.data.model.couponbook.ValidatedVoucher
 import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
+import com.rfz.appflotal.data.model.promotions.StoreDiscount
 import com.rfz.appflotal.data.repository.couponbook.CouponBookRepository
+import com.rfz.appflotal.data.repository.promotions.PromotionsRepository
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class CouponFilterOptions(val text: Int) {
     ALL(R.string.todos),
@@ -35,15 +42,70 @@ data class CouponBookUiState(
     val voucherId: Int = 0,
     val loadingScreen: LoadState<Unit> = LoadState.Idle,
     val validateState: LoadState<ValidatedVoucher> = LoadState.Idle,
-    val acquireState: LoadState<Unit> = LoadState.Idle
+    val acquireState: LoadState<Unit> = LoadState.Idle,
+    val promotions: List<StoreDiscount> = emptyList(),
+    val promotionsSearchQuery: String = "",
+    val selectedPromotion: StoreDiscount? = null,
+    val promotionsState: LoadState<Unit> = LoadState.Idle
 )
 
 @HiltViewModel
 class CouponBookViewModel @Inject constructor(
-    private val couponBookRepository: CouponBookRepository
+    private val couponBookRepository: CouponBookRepository,
+    private val promotionsRepository: PromotionsRepository
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(CouponBookUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val _promotionsQuery = MutableStateFlow("")
+
+    init {
+        observePromotionsSearch()
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observePromotionsSearch() {
+        viewModelScope.launch {
+            _promotionsQuery
+                .debounce(600.milliseconds)
+                .distinctUntilChanged()
+                .collectLatest { query -> loadPromotions(query) }
+        }
+    }
+
+    fun onPromotionsSearchChanged(query: String) {
+        _uiState.update { it.copy(promotionsSearchQuery = query) }
+        _promotionsQuery.value = query
+    }
+
+    fun loadPromotions(search: String = "") {
+        viewModelScope.launch {
+            _uiState.update { it.copy(promotionsState = LoadState.Loading) }
+            promotionsRepository.getDiscounts(search = search, store = "").fold(
+                onSuccess = { discounts ->
+                    _uiState.update {
+                        it.copy(
+                            promotions = discounts,
+                            promotionsState = LoadState.Success(Unit)
+                        )
+                    }
+                },
+                onFailure = {
+                    _uiState.update {
+                        it.copy(promotionsState = LoadState.Error("Error al consultar promociones"))
+                    }
+                }
+            )
+        }
+    }
+
+    fun selectPromotion(productUrl: String) {
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                selectedPromotion = currentUiState.promotions.find { it.productUrl == productUrl }
+            )
+        }
+    }
 
     fun getInitialData() {
         viewModelScope.launch {
@@ -75,6 +137,8 @@ class CouponBookViewModel @Inject constructor(
                     )
                 }
             }
+
+            loadPromotions()
         }
     }
 
