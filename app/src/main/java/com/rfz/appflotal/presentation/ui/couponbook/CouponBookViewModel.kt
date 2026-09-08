@@ -23,6 +23,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
+private const val PROMOTIONS_PAGE_SIZE = 10
+
 enum class CouponFilterOptions(val text: Int) {
     ALL(R.string.todos),
     VALID(R.string.vigentes),
@@ -46,7 +48,9 @@ data class CouponBookUiState(
     val promotions: List<StoreDiscount> = emptyList(),
     val promotionsSearchQuery: String = "",
     val selectedPromotion: StoreDiscount? = null,
-    val promotionsState: LoadState<Unit> = LoadState.Idle
+    val promotionsState: LoadState<Unit> = LoadState.Idle,
+    val promotionsPage: Int = 0,
+    val promotionsHasNextPage: Boolean = true
 )
 
 @HiltViewModel
@@ -69,7 +73,7 @@ class CouponBookViewModel @Inject constructor(
             _promotionsQuery
                 .debounce(600.milliseconds)
                 .distinctUntilChanged()
-                .collectLatest { query -> loadPromotions(query) }
+                .collectLatest { goToPromotionsPage(1) }
         }
     }
 
@@ -78,14 +82,25 @@ class CouponBookViewModel @Inject constructor(
         _promotionsQuery.value = query
     }
 
-    fun loadPromotions(search: String = "") {
+    fun goToPromotionsPage(page: Int) {
+        val state = _uiState.value
+        if (state.promotionsState is LoadState.Loading || page < 1) return
+        if (page > state.promotionsPage && !state.promotionsHasNextPage) return
+
+        _uiState.update { it.copy(promotionsState = LoadState.Loading) }
+
         viewModelScope.launch {
-            _uiState.update { it.copy(promotionsState = LoadState.Loading) }
-            promotionsRepository.getDiscounts(search = search, store = "").fold(
-                onSuccess = { discounts ->
+            promotionsRepository.getPromotionsPage(
+                page = page,
+                pageSize = PROMOTIONS_PAGE_SIZE,
+                search = state.promotionsSearchQuery
+            ).fold(
+                onSuccess = { pageResult ->
                     _uiState.update {
                         it.copy(
-                            promotions = discounts,
+                            promotions = pageResult.items,
+                            promotionsPage = page,
+                            promotionsHasNextPage = pageResult.hasNextPage,
                             promotionsState = LoadState.Success(Unit)
                         )
                     }

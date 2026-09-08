@@ -252,7 +252,7 @@ fun NavGraphBuilder.couponGraph(
             val state by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
-                viewModel.loadPromotions()
+                viewModel.goToPromotionsPage(1)
             }
 
             ForumModuleScaffold(
@@ -275,12 +275,17 @@ fun NavGraphBuilder.couponGraph(
                 PromotionListRoute(
                     promotionsState = state.promotionsState,
                     promotions = state.promotions,
+                    currentPage = state.promotionsPage,
+                    hasNextPage = state.promotionsHasNextPage,
                     onPromotionClick = { productUrl ->
                         viewModel.selectPromotion(productUrl)
                         navController.navigate(PromotionDetail)
                     },
+                    onPageSelected = { page ->
+                        viewModel.goToPromotionsPage(page)
+                    },
                     onRetry = {
-                        viewModel.loadPromotions(state.promotionsSearchQuery)
+                        viewModel.goToPromotionsPage(state.promotionsPage.coerceAtLeast(1))
                     },
                     modifier = Modifier.padding(paddingValue)
                 )
