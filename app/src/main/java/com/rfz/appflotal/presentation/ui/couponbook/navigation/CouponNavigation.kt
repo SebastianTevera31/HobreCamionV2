@@ -21,6 +21,8 @@ import com.rfz.appflotal.presentation.ui.couponbook.CouponBookViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.screen.info.CouponBookInfo
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookListRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookRoute
+import com.rfz.appflotal.presentation.ui.couponbook.screen.promotions.PromotionDetailScreen
+import com.rfz.appflotal.presentation.ui.couponbook.screen.promotions.PromotionListRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.redeem.RedeemCoupon
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleScaffold
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
@@ -89,6 +91,9 @@ fun NavGraphBuilder.couponGraph(
                     },
                     onSeeAllVouchers = {
                         navController.navigate(CouponList(false))
+                    },
+                    onSeeAllPromotions = {
+                        navController.navigate(PromotionList)
                     },
                     onCouponClick = { id ->
                         viewModel.selectCoupon(id)
@@ -227,6 +232,81 @@ fun NavGraphBuilder.couponGraph(
             state.selectedCoupon?.let { coupon ->
                 RedeemCoupon(
                     coupon = coupon,
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+        }
+
+        composable<PromotionList> { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<CouponGraph>()
+                } catch (_: Exception) {
+                    backStackEntry
+                }
+            }
+
+            val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.goToPromotionsPage(1)
+            }
+
+            ForumModuleScaffold(
+                topBarConfig = ForumTopBarConfig(
+                    title = stringResource(R.string.promociones_descuentos),
+                    showBackButton = true,
+                    showMenuButton = false,
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    searchConfig = ForumSearchConfig(
+                        value = state.promotionsSearchQuery,
+                        placeholder = stringResource(R.string.buscar),
+                        onValueChange = { query ->
+                            viewModel.onPromotionsSearchChanged(query)
+                        }
+                    )
+                )
+            ) { paddingValue ->
+                PromotionListRoute(
+                    promotionsState = state.promotionsState,
+                    promotions = state.promotions,
+                    currentPage = state.promotionsPage,
+                    hasNextPage = state.promotionsHasNextPage,
+                    onPromotionClick = { productUrl ->
+                        viewModel.selectPromotion(productUrl)
+                        navController.navigate(PromotionDetail)
+                    },
+                    onPageSelected = { page ->
+                        viewModel.goToPromotionsPage(page)
+                    },
+                    onRetry = {
+                        viewModel.goToPromotionsPage(state.promotionsPage.coerceAtLeast(1))
+                    },
+                    modifier = Modifier.padding(paddingValue)
+                )
+            }
+        }
+
+        composable<PromotionDetail> { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<CouponGraph>()
+                } catch (_: Exception) {
+                    backStackEntry
+                }
+            }
+
+            val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
+
+            state.selectedPromotion?.let { promotion ->
+                PromotionDetailScreen(
+                    discount = promotion,
                     onBack = {
                         navController.popBackStack()
                     }

@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.TireRepair
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Cloud
@@ -28,6 +25,7 @@ import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QueryStats
+import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -43,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -51,7 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertStatus
@@ -96,10 +92,79 @@ fun AdaptiveIcon(
 }
 
 @Composable
+fun CompleteHomeTopBar(
+    userName: String,
+    planType: PaymentPlanType,
+    onNotificationsClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 68.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(TealSoftBg),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    userName.take(2).uppercase(),
+                    color = TealMid,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(
+                    stringResource(R.string.saludo_usuario, userName),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    stringResource(R.string.plan_actual, planType.name),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TealMid,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+
+        Box {
+            IconButton(
+                onClick = onNotificationsClick,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(TealSoftBg)
+            ) {
+                Icon(
+                    Icons.Outlined.Notifications,
+                    contentDescription = stringResource(R.string.content_description_notificaciones),
+                    tint = TealDark
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .align(Alignment.TopEnd)
+                    .clip(CircleShape)
+                    .background(CriticalFg)
+            )
+        }
+    }
+}
+
+@Composable
 fun HomeTopBar(
     userName: String,
     planType: PaymentPlanType,
-    plates: String = "",
+    plates: String,
     onNotificationsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -119,7 +184,6 @@ fun HomeTopBar(
                 Text(
                     userName.take(2).uppercase(),
                     color = TealMid,
-                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -128,19 +192,20 @@ fun HomeTopBar(
 
             Column(horizontalAlignment = Alignment.Start) {
                 Text(
-                    text = "¡Hola, $userName!",
+                    text = stringResource(R.string.saludo_usuario, userName),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Start
                 )
                 Text(
-                    "Plan: ${planType.name}",
+                    stringResource(R.string.plan_actual, planType.name),
                     style = MaterialTheme.typography.bodyMedium,
                     color = TealMid,
                     fontWeight = FontWeight.SemiBold
                 )
                 if (plates.isNotEmpty()) {
                     Text(
-                        "Placas: $plates",
+                        stringResource(R.string.placas_vehiculo, plates),
                         style = MaterialTheme.typography.bodySmall,
                         color = SubtleText,
                         fontWeight = FontWeight.Medium
@@ -159,7 +224,7 @@ fun HomeTopBar(
             ) {
                 Icon(
                     Icons.Outlined.Notifications,
-                    contentDescription = "Notificaciones",
+                    contentDescription = stringResource(R.string.content_description_notificaciones),
                     tint = TealDark
                 )
             }
@@ -195,6 +260,45 @@ fun SectionHeader(title: String, actionLabel: String, onActionClick: () -> Unit)
 }
 
 @Composable
+fun EmptyStateCard(
+    icon: IconResource,
+    message: String,
+    modifier: Modifier = Modifier,
+    containerColor: Color = TealSoftBg.copy(alpha = 0.5f),
+    contentColor: Color = TealMid
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(24.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            AdaptiveIcon(
+                icon = icon,
+                contentDescription = null,
+                tint = contentColor.copy(alpha = 0.6f),
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = contentColor,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
 fun VehiclePerformanceCard(
     vehicleName: String,
     plate: String,
@@ -212,7 +316,10 @@ fun VehiclePerformanceCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "$vehicleName · $plate",
+                    text = if (vehicleName.isNotEmpty())
+                        stringResource(R.string.vehiculo_placa_format, vehicleName, plate)
+                    else
+                        stringResource(R.string.vehiculo_no_asignado),
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyLarge,
@@ -233,16 +340,28 @@ fun VehiclePerformanceCard(
                 }
             }
             Spacer(Modifier.height(24.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.Top
-            ) {
-                stats.forEach { stat ->
-                    VehicleStatItem(
-                        stat = stat,
-                        modifier = Modifier.weight(1f)
-                    )
+            if (stats.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.no_datos_rendimiento),
+                    color = Color.White.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    stats.forEach { stat ->
+                        VehicleStatItem(
+                            stat = stat,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }
@@ -292,15 +411,14 @@ fun VehicleStatItem(stat: VehicleStat, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
+fun AlertCard(alert: AlertUi) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        onClick = onClick
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(
@@ -331,7 +449,7 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "CRÍTICA",
+                            stringResource(R.string.alerta_critica_label),
                             color = CriticalFg,
                             fontSize = MaterialTheme.typography.labelSmall.fontSize,
                             fontWeight = FontWeight.Bold
@@ -394,7 +512,11 @@ fun WeatherCard(temp: String, city: String, description: String, onClick: () -> 
                 Text(city, fontWeight = FontWeight.SemiBold)
                 Text(description, color = SubtleText, style = MaterialTheme.typography.bodySmall)
             }
-            Icon(Icons.Outlined.ChevronRight, contentDescription = "Ver mapa", tint = TealDark)
+            Icon(
+                Icons.Outlined.ChevronRight,
+                contentDescription = stringResource(R.string.ver_mapa),
+                tint = TealDark
+            )
         }
     }
 }
@@ -462,42 +584,30 @@ fun SectionIconItem(section: SectionItem, onClick: (SectionItem) -> Unit) {
 }
 
 @Composable
-fun BlogPostCard(post: BlogPost, onClick: () -> Unit = {}) {
+fun BlogPostCard(post: BlogPost) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        onClick = onClick
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-            Surface(
-                modifier = Modifier.size(64.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            ) {
-                if (post.linkImage.isNotEmpty()) {
-                    AsyncImage(
-                        model = post.linkImage,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.TireRepair,
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(TealSoftBg)
+            )
             Spacer(Modifier.width(12.dp))
             Column {
+                Text(
+                    post.category,
+                    color = TealMid,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Text(
                     post.title,
                     fontWeight = FontWeight.Bold,
@@ -544,7 +654,6 @@ fun HomeBottomBar(selected: BottomNavItems, onItemClick: (BottomNavItems) -> Uni
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -678,7 +787,7 @@ fun SectionsGridPreview() {
 @Composable
 fun BlogPostCardPreview() {
     val post = BlogPost(
-        categories = listOf("MANTENIMIENTO"),
+        category = "MANTENIMIENTO",
         title = "5 señales de desgaste irregular en llantas",
         excerpt = "Aprende a detectar a tiempo el desgaste que puede costarte un pinchazo en carretera…"
     )

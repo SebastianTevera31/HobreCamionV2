@@ -39,6 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material3.Button
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.data.model.couponbook.Coupon
@@ -59,6 +61,7 @@ fun CouponBookRoute(
     myCoupons: List<Coupon>,
     onSeeAllCoupons: () -> Unit,
     onSeeAllVouchers: () -> Unit,
+    onSeeAllPromotions: () -> Unit,
     onCouponClick: (String) -> Unit,
     onVoucherClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -87,6 +90,7 @@ fun CouponBookRoute(
                 myCoupons = myCoupons,
                 onSeeAllCoupons = onSeeAllCoupons,
                 onSeeAllVouchers = onSeeAllVouchers,
+                onSeeAllPromotions = onSeeAllPromotions,
                 onCouponClick = onCouponClick,
                 onVoucherClick = onVoucherClick,
                 modifier = modifier
@@ -103,6 +107,7 @@ fun CouponBookScreen(
     myCoupons: List<Coupon>,
     onSeeAllCoupons: () -> Unit,
     onSeeAllVouchers: () -> Unit,
+    onSeeAllPromotions: () -> Unit,
     onCouponClick: (String) -> Unit,
     onVoucherClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -119,6 +124,12 @@ fun CouponBookScreen(
     ) {
         item {
             CouponBookHeader()
+        }
+
+        item {
+            PromotionsInviteCard(
+                onSeeAllPromotions = onSeeAllPromotions
+            )
         }
 
         item {
@@ -227,6 +238,66 @@ private fun CouponBookHeader(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PromotionsInviteCard(
+    onSeeAllPromotions: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(Dimens.PaddingLarge),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+        ) {
+            Surface(
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondary
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.LocalOffer,
+                        contentDescription = null,
+                        modifier = Modifier.size(26.dp),
+                        tint = MaterialTheme.colorScheme.onSecondary
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.promociones_descuentos),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Text(
+                    text = stringResource(R.string.promociones_invitacion_descripcion),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Button(onClick = onSeeAllPromotions) {
+                    Text(
+                        text = stringResource(R.string.ver_promociones),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
@@ -595,6 +666,7 @@ fun CouponBookScreenPreview() {
             onCouponClick = { _ -> },
             onVoucherClick = { _ -> },
             onSeeAllVouchers = {},
+            onSeeAllPromotions = {},
         )
     }
 }

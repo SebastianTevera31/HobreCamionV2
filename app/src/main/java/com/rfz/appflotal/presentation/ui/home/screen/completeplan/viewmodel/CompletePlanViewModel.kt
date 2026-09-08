@@ -2,15 +2,22 @@ package com.rfz.appflotal.presentation.ui.home.screen.completeplan.viewmodel
 
 import android.R.attr.factor
 import android.annotation.SuppressLint
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material.icons.outlined.Thermostat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.data.model.forum.toEntity
+import com.rfz.appflotal.data.model.alerts.Alert
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.location.LocationRepository
 import com.rfz.appflotal.data.repository.weather.WeatherRepository
-import com.rfz.appflotal.domain.forum.GetPostsFeedUseCase
+import com.rfz.appflotal.domain.alerts.GetAlertsUseCase
 import com.rfz.appflotal.domain.performance.CurrentPerformanceUseCase
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertStatus
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertUi
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.asIcon
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,13 +26,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.truncate
+import com.rfz.appflotal.data.model.alerts.AlertType as DomainAlertType
 
 @HiltViewModel
 class CompletePlanViewModel @Inject constructor(
     private val currentPerformanceUseCase: CurrentPerformanceUseCase,
     private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository,
-    private val getPostFeedUseCase: GetPostsFeedUseCase
+    private val alertsUseCase: GetAlertsUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CompletePlanUiState())
     val uiState: StateFlow<CompletePlanUiState> = _uiState.asStateFlow()
@@ -34,12 +42,17 @@ class CompletePlanViewModel @Inject constructor(
         viewModelScope.launch {
             getCurrentPerformance()
             getCurrentWeather()
-            getPostsFeed()
+            getAlerts()
+        }
+    }
+
+    fun onNavItemClick(item: BottomNavItems) {
+        _uiState.update { currentState ->
+            currentState.copy(currentScreen = item)
         }
     }
 
     suspend fun getCurrentPerformance() {
-        //_uiState.update { it.copy(isLoading = true, errorMessage = null) }
         try {
             val result = currentPerformanceUseCase()
             val newList = _uiState.value.stats.map { stat ->
@@ -63,29 +76,34 @@ class CompletePlanViewModel @Inject constructor(
         }
     }
 
+    private suspend fun getAlerts() {
+        alertsUseCase(
+            startDate = "",
+            endDate = "",
+            position = "",
+            alertType = "",
+            startPaging = 0
+        ).onSuccess { alerts ->
+            _uiState.update { currentState ->
+                currentState.copy(alerts = alerts.take(5).map(Alert::toAlertUi))
+            }
+        }.onFailure {
+            // Handle error
+        }
+    }
+
     @SuppressLint("MissingPermission")
     suspend fun getCurrentWeather() {
-        //_uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
         val location = locationRepository.getLastLocation()
         if (location != null) {
             if (location.ciudad == null) return
             val result = weatherRepository.getLatest(
-                lat = truncate(location.lat * factor) / factor, // Invertir
-                lon = truncate(location.lng * factor) / factor, // Invertir
+                lat = truncate(location.lat * factor) / factor,
+                lon = truncate(location.lng * factor) / factor,
                 locationName = location.ciudad
             )
 
             when (result) {
-                is ApiResult.Error -> {
-//                    _weatherState.update { currentUiState ->
-//                        currentUiState.copy(
-//                            error = result.message,
-//                            screenState = LoadState.Error("Error al obtener el clima.")
-//                        )
-//                    }
-                }
-
                 is ApiResult.Success -> {
                     _uiState.update { currentState ->
                         currentState.copy(
@@ -100,26 +118,20 @@ class CompletePlanViewModel @Inject constructor(
             }
         }
     }
+}
 
-    suspend fun getPostsFeed() {
-        getPostFeedUseCase(
-            tipoFeed = 1,
-            idForum = 0,
-            pageNumber = 1
-        ).fold(
-            onSuccess = {
-                val posts = it.results.map { post -> post.toEntity() }.take(2)
-                _uiState.update { currentState ->
-                    currentState.copy(blogPosts = posts)
-                }
-            },
-            onFailure = {
-//                _uiState.update { currentState ->
-//                    currentState.copy(
-//                        errorMessage = it.message ?: "Error al obtener publicaciones"
-//                    )
-//                }
-            }
-        )
-    }
+private fun Alert.toAlertUi(): AlertUi {
+    val isPressureAlert = alert == DomainAlertType.PRESSURE || alert == DomainAlertType.INFLATE
+    return AlertUi(
+        icon = (if (isPressureAlert) Icons.Outlined.Speed else Icons.Outlined.Thermostat).asIcon(),
+        title = when (alert) {
+            DomainAlertType.PRESSURE -> "Alerta de presión · $position"
+            DomainAlertType.TEMPERATURE -> "Alerta de temperatura · $position"
+            DomainAlertType.INFLATE -> "Alerta de inflado · $position"
+            DomainAlertType.NONE -> "Alerta · $position"
+        },
+        detailLabel = if (isPressureAlert) "Presión:" else "Temp:",
+        detailValue = if (isPressureAlert) "%.2f psi".format(psi) else "$temperature °C",
+        status = AlertStatus.CRITICA
+    )
 }

@@ -131,7 +131,9 @@ fun NavGraphBuilder.mainNavigation(
         )
     }
 
-    composable(route = HombreCamionScreens.ALERTS.name) {
+    composable(
+        route = HombreCamionScreens.ALERTS.name
+    ) {
         AlertsRoute(
             onBack = { navController.popBackStack() },
         )

@@ -13,6 +13,7 @@ import com.rfz.appflotal.data.dao.DisassemblyTireDao
 import com.rfz.appflotal.data.dao.ForumDao
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
 import com.rfz.appflotal.data.dao.InspectionTireDao
+import com.rfz.appflotal.data.dao.PromotionsDao
 import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.database.AppHombreCamionDatabase
 import dagger.Module
@@ -74,6 +75,11 @@ class DataBaseModule {
     @Provides
     fun provideForumDao(database: AppHombreCamionDatabase): ForumDao {
         return database.forumDao()
+    }
+
+    @Provides
+    fun providePromotionsDao(database: AppHombreCamionDatabase): PromotionsDao {
+        return database.promotionsDao()
     }
 
     @Keep

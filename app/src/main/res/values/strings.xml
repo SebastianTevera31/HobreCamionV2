@@ -507,6 +507,17 @@
 
     <string name="sin_cupones_descripcion">Selecciona otro filtro o revisa nuevamente más tarde.</string>
 
+    <string name="promociones_invitacion_descripcion">Descubre las promociones y descuentos disponibles.</string>
+    <string name="ver_promociones">Ver promociones</string>
+    <string name="sin_promociones_disponibles">No hay promociones disponibles</string>
+    <string name="sin_promociones_descripcion">Vuelve más tarde para ver nuevas promociones.</string>
+    <string name="detalle_promocion">Detalle de promoción</string>
+    <string name="ver_producto">Ver producto</string>
+    <string name="precio_regular">Precio regular</string>
+    <string name="precio_con_descuento">Precio con descuento</string>
+    <string name="ahorras_texto">Ahorras %1$s (%2$s%%)</string>
+    <string name="sku_label">SKU: %1$s</string>
+
     <string name="folio">Folio</string>
     <string name="vigente">Vigente</string>
 
@@ -686,4 +697,32 @@
     <string name="ultimos_datos">ÚLTIMOS DATOS</string>
     <string name="registrar">registrar</string>
     <string name="todas">Todas</string>
+
+    <!-- Complete Plan -->
+    <string name="content_description_notificaciones">Notificaciones</string>
+    <string name="saludo_usuario">¡Hola, %1$s!</string>
+    <string name="plan_actual">Plan: %1$s</string>
+    <string name="placas_vehiculo">Placas: %1$s</string>
+    <string name="vehiculo_placa_format">%1$s · %2$s</string>
+    <string name="vehiculo_no_asignado">Vehículo no asignado</string>
+    <string name="no_datos_rendimiento">No hay datos de rendimiento disponibles</string>
+    <string name="alerta_critica_label">CRÍTICA</string>
+
+    <!-- Alerts -->
+    <string name="alertas_history_title">Historial de Alertas</string>
+    <string name="alertas_history_section_title">Historial de alertas</string>
+    <string name="filtros">Filtros</string>
+    <string name="colapsar">Colapsar</string>
+    <string name="expandir">Expandir</string>
+    <string name="aplicar_filtros">Aplicar Filtros</string>
+    <string name="rueda_label">Rueda</string>
+    <string name="alerta_label">Alerta</string>
+    <string name="desde_label">De:</string>
+    <string name="hasta_label">A:</string>
+    <string name="pagina_anterior">Página anterior</string>
+    <string name="pagina_siguiente">Página siguiente</string>
+
+    <!-- Empty States -->
+    <string name="no_alertas_recientes">No tienes alertas recientes</string>
+    <string name="sin_publicaciones_foro">Aún no hay publicaciones en el foro</string>
 </resources>
