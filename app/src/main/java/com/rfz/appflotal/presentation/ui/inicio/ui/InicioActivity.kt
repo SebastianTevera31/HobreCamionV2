@@ -2,11 +2,9 @@ package com.rfz.appflotal.presentation.ui.inicio.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Context.ACTIVITY_SERVICE
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -115,6 +113,9 @@ import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
 import com.rfz.appflotal.presentation.ui.reportes.navigation.reportGraph
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
+import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
+import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
+import com.rfz.appflotal.presentation.ui.utils.isServiceRunning
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -274,6 +275,12 @@ class InicioActivity : ComponentActivity() {
                 } && wasRequestedBefore
 
                 inicioScreenViewModel.markPermissionsRequested(prefs)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (result[Manifest.permission.POST_NOTIFICATIONS] == true) {
+                        inicioScreenViewModel.updatePermissionState(NotificationPermissionState.Granted)
+                    }
+                }
 
                 if (deniedPermissions.isEmpty()) {
                     allGranted = true
@@ -650,38 +657,5 @@ fun NotificationComponent(
         }
 
         else -> {}
-    }
-}
-
-fun getRequiredPermissions(): Array<String> {
-    val permissions = mutableListOf<String>()
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        // Android 12+
-        permissions.add(Manifest.permission.BLUETOOTH_SCAN)
-        permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
-    } else {
-        // Android 11 o menor
-        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        // Android 13+
-        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-    }
-
-    return permissions.toTypedArray()
-}
-
-fun arePermissionsGranted(context: Context, permissions: Array<String>): Boolean {
-    return permissions.all { perm ->
-        ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
-    }
-}
-
-fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
-    val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
-    return manager.getRunningServices(Int.MAX_VALUE).any {
-        it.service.className == serviceClass.name
     }
 }

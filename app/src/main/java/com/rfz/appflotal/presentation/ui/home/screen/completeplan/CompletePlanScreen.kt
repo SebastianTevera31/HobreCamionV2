@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,166 +46,97 @@ fun CompletePlanScreen(
     onWeatherClick: () -> Unit,
     onSectionClick: (SectionItem) -> Unit,
     onBlogSeeAllClick: () -> Unit,
-    onNavItemClick: (BottomNavItems) -> Unit,
     modifier: Modifier = Modifier,
     state: CompletePlanUiState = CompletePlanUiState()
 ) {
-    Scaffold(
-        containerColor = Color.White,
-        bottomBar = {
-            HomeBottomBar(selected = state.currentScreen, onItemClick = onNavItemClick)
-        },
-        modifier = modifier.navigationBarsPadding(),
-    ) { padding ->
-        when (state.currentScreen) {
-            BottomNavItems.HOME -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(padding),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    item {
-                        HomeTopBar(
-                            userName = state.userName,
-                            planType = state.paymentPlanType,
-                            plates = state.vehiclePlate,
-                            onNotificationsClick = onNotificationsClick,
-                            modifier = Modifier.padding(top = 68.dp)
-                        )
-                    }
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        item {
+            Spacer(Modifier.height(8.dp))
+            HomeTopBar(
+                userName = state.userName,
+                planType = state.paymentPlanType,
+                plates = state.vehiclePlate,
+                onNotificationsClick = onNotificationsClick,
+                modifier = Modifier.padding(top = 82.dp)
+            )
+        }
 
-                    item {
-                        Column {
-                            SectionHeader(
-                                stringResource(R.string.rendimiento_del_vehiculo),
-                                stringResource(R.string.ver_mas),
-                                onVehicleDetailClick
-                            )
-                            VehiclePerformanceCard(
-                                state.vehicleName,
-                                state.vehiclePlate,
-                                state.stats
-                            )
-                        }
-                    }
+        item {
+            Column {
+                SectionHeader(
+                    stringResource(R.string.rendimiento_del_vehiculo),
+                    stringResource(R.string.ver_mas),
+                    onVehicleDetailClick
+                )
+                VehiclePerformanceCard(
+                    state.vehicleName,
+                    state.vehiclePlate,
+                    state.stats
+                )
+            }
+        }
 
-                    item {
-                        Column {
-                            SectionHeader(
-                                stringResource(R.string.alertas_recientes),
-                                stringResource(R.string.ver_todas), onAlertsSeeAllClick
-                            )
-                            state.alerts.forEach { alert ->
-                                AlertCard(alert, onClick = onAlertsSeeAllClick)
-                            }
-                        }
-                    }
-
-                    item {
-                        Column {
-                            SectionHeader(
-                                stringResource(R.string.clima),
-                                stringResource(R.string.ver_mapa), onMapClick
-                            )
-                            WeatherCard(
-                                state.weatherTemp,
-                                state.weatherCity,
-                                stringResource(state.weatherDesc),
-                                onWeatherClick
-                            )
-                        }
-                    }
-
-                    item {
-                        Column {
-                            Text(
-                                stringResource(R.string.secciones),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.padding(8.dp))
-                            SectionsGrid(state.sections, onSectionClick)
-                        }
-                    }
-
-                    item {
-                        Column {
-                            if (!state.blogPosts.isEmpty()) {
-                                SectionHeader(
-                                    stringResource(R.string.foro),
-                                    stringResource(R.string.ver_todas),
-                                    onBlogSeeAllClick
-                                )
-                                state.blogPosts.forEach { post ->
-                                    BlogPostCard(post, onClick = onBlogSeeAllClick)
-                                }
-                            }
-                        }
-                    }
-
-                    item {
-                        SeeAllPill(stringResource(R.string.ver_todos), onBlogSeeAllClick)
-                    }
+        item {
+            Column {
+                SectionHeader(
+                    stringResource(R.string.alertas_recientes),
+                    stringResource(R.string.ver_todas), onAlertsSeeAllClick
+                )
+                state.alerts.forEach { alert ->
+                    AlertCard(alert, onClick = onAlertsSeeAllClick)
                 }
             }
+        }
 
-            BottomNavItems.ANALYTICS -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Pantalla de Analytics (Contenido persistente)",
-                        style = MaterialTheme.typography.titleLarge
+        item {
+            Column {
+                SectionHeader(
+                    stringResource(R.string.clima),
+                    stringResource(R.string.ver_mapa), onMapClick
+                )
+                WeatherCard(
+                    state.weatherTemp,
+                    state.weatherCity,
+                    stringResource(state.weatherDesc),
+                    onWeatherClick
+                )
+            }
+        }
+
+        item {
+            Column {
+                Text(
+                    stringResource(R.string.secciones),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.padding(8.dp))
+                SectionsGrid(state.sections, onSectionClick)
+            }
+        }
+
+        item {
+            Column {
+                if (!state.blogPosts.isEmpty()) {
+                    SectionHeader(
+                        stringResource(R.string.foro),
+                        stringResource(R.string.ver_todas),
+                        onBlogSeeAllClick
                     )
+                    state.blogPosts.forEach { post ->
+                        BlogPostCard(post, onClick = onBlogSeeAllClick)
+                    }
                 }
             }
+        }
 
-            BottomNavItems.MAP -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Pantalla de Mapa Vial (Contenido persistente)",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-            }
-
-            BottomNavItems.FORUM -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Pantalla de Foro (Contenido persistente)",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-            }
-
-            BottomNavItems.MONITOR -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Pantalla de Monitor (Contenido persistente)",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-            }
+        item {
+            SeeAllPill(stringResource(R.string.ver_todos), onBlogSeeAllClick)
         }
     }
 }
@@ -218,7 +150,6 @@ private fun CompletePlanScreenPreview() {
         onAlertsSeeAllClick = {},
         onSectionClick = {},
         onBlogSeeAllClick = {},
-        onNavItemClick = {},
         onMapClick = {},
         onWeatherClick = {}
     )

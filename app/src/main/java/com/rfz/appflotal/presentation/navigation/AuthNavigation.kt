@@ -20,10 +20,8 @@ import com.rfz.appflotal.presentation.ui.permission.PermissionScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
 import com.rfz.appflotal.presentation.ui.registrousuario.viewmodel.SignUpViewModel
-import com.rfz.appflotal.presentation.ui.inicio.ui.arePermissionsGranted
-import com.rfz.appflotal.presentation.ui.inicio.ui.getRequiredPermissions
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
+import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
+import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
 
 fun NavGraphBuilder.authGraph(
     navController: NavController,
@@ -51,7 +49,7 @@ fun NavGraphBuilder.authGraph(
         val signUpViewModel: SignUpViewModel = hiltViewModel()
         val homeUiState = homeViewModel.uiState.collectAsState()
         val context = navController.context
-        
+
         SignUpScreen(
             navController,
             languageSelected = homeUiState.value.selectedLanguage,

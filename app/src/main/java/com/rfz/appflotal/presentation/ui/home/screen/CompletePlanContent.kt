@@ -45,8 +45,7 @@ fun CompletePlanContent(
         onSectionClick = { section -> onNavigate(section.route) },
         onBlogSeeAllClick = { onNavigate(ForumsGraph) },
         onMapClick = { onNavigate(HombreCamionScreens.MAPA_VIAL.name) },
-        onWeatherClick = { onNavigate(HombreCamionScreens.WEATHER.name) },
-        onNavItemClick = viewModel::onNavItemClick
+        onWeatherClick = { onNavigate(HombreCamionScreens.WEATHER.name) }
     )
 }
 

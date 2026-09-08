@@ -14,9 +14,9 @@ import com.rfz.appflotal.presentation.ui.alerts.screens.AlertsRoute
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
-import com.rfz.appflotal.presentation.ui.inicio.ui.arePermissionsGranted
-import com.rfz.appflotal.presentation.ui.inicio.ui.getRequiredPermissions
-import com.rfz.appflotal.presentation.ui.inicio.ui.isServiceRunning
+import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
+import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
+import com.rfz.appflotal.presentation.ui.utils.isServiceRunning
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
