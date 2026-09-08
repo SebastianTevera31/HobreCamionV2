@@ -86,7 +86,6 @@ fun NavGraphBuilder.couponGraph(
                 CouponBookRoute(
                     nearbyCoupons = state.filteredCoupons,
                     myCoupons = state.filteredVouchers,
-                    promotions = state.promotions,
                     onSeeAllCoupons = {
                         navController.navigate(CouponList(true))
                     },
@@ -103,10 +102,6 @@ fun NavGraphBuilder.couponGraph(
                     onVoucherClick = { id ->
                         viewModel.selectCoupon(id)
                         viewModel.validateVoucher(id)
-                    },
-                    onPromotionClick = { productUrl ->
-                        viewModel.selectPromotion(productUrl)
-                        navController.navigate(PromotionDetail)
                     },
                     modifier = Modifier.padding(paddingValues),
                     screenStatus = state.loadingScreen,
@@ -255,6 +250,10 @@ fun NavGraphBuilder.couponGraph(
 
             val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.loadPromotions()
+            }
 
             ForumModuleScaffold(
                 topBarConfig = ForumTopBarConfig(

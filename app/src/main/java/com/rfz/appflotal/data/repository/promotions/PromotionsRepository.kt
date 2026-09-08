@@ -14,7 +14,7 @@ class PromotionsRepository @Inject constructor(
     suspend fun getDiscounts(
         search: String = "",
         store: String = "",
-        limit: Int = 50,
+        limit: Int = 10,
         pagesPerStore: Int = 20
     ): Result<List<StoreDiscount>> {
         val token = getTasksUseCase().first().first().fld_token

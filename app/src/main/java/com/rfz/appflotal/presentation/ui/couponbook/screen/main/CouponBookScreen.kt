@@ -127,34 +127,9 @@ fun CouponBookScreen(
         }
 
         item {
-            SectionHeader(
-                title = stringResource(R.string.promociones_cercanas),
-                onSeeAllClick = onSeeAllPromotions
+            PromotionsInviteCard(
+                onSeeAllPromotions = onSeeAllPromotions
             )
-        }
-
-        item {
-            if (promotions.isEmpty()) {
-                EmptyCouponCard(
-                    message = stringResource(R.string.no_hay_promociones_cercanas)
-                )
-            } else {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                    contentPadding = PaddingValues(end = Dimens.PaddingMedium)
-                ) {
-                    items(
-                        items = promotions,
-                        key = { discount -> discount.productUrl }
-                    ) { discount ->
-                        PromotionCarouselCard(
-                            discount = discount,
-                            onClick = { onPromotionClick(discount.productUrl) }
-                        )
-                    }
-                }
-            }
         }
 
         item {
@@ -263,6 +238,66 @@ private fun CouponBookHeader(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PromotionsInviteCard(
+    onSeeAllPromotions: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(Dimens.PaddingLarge),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+        ) {
+            Surface(
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondary
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.LocalOffer,
+                        contentDescription = null,
+                        modifier = Modifier.size(26.dp),
+                        tint = MaterialTheme.colorScheme.onSecondary
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.promociones_descuentos),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Text(
+                    text = stringResource(R.string.promociones_invitacion_descripcion),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Button(onClick = onSeeAllPromotions) {
+                    Text(
+                        text = stringResource(R.string.ver_promociones),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
@@ -627,13 +662,11 @@ fun CouponBookScreenPreview() {
         CouponBookScreen(
             nearbyCoupons = emptyList(),
             myCoupons = emptyList(),
-            promotions = emptyList(),
             onSeeAllCoupons = {},
             onCouponClick = { _ -> },
             onVoucherClick = { _ -> },
             onSeeAllVouchers = {},
             onSeeAllPromotions = {},
-            onPromotionClick = { _ -> },
         )
     }
 }

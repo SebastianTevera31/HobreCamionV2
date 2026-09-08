@@ -137,8 +137,6 @@ class CouponBookViewModel @Inject constructor(
                     )
                 }
             }
-
-            loadPromotions()
         }
     }
 

@@ -507,8 +507,8 @@
 
     <string name="sin_cupones_descripcion">Selecciona otro filtro o revisa nuevamente más tarde.</string>
 
-    <string name="promociones_cercanas">Promociones cercanas</string>
-    <string name="no_hay_promociones_cercanas">No hay promociones cercanas.</string>
+    <string name="promociones_invitacion_descripcion">Descubre las promociones y descuentos disponibles.</string>
+    <string name="ver_promociones">Ver promociones</string>
     <string name="sin_promociones_disponibles">No hay promociones disponibles</string>
     <string name="sin_promociones_descripcion">Vuelve más tarde para ver nuevas promociones.</string>
     <string name="detalle_promocion">Detalle de promoción</string>

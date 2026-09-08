@@ -520,8 +520,8 @@
 
     <string name="sin_cupones_descripcion">Select another filter or check back later.</string>
 
-    <string name="promociones_cercanas">Nearby promotions</string>
-    <string name="no_hay_promociones_cercanas">No nearby promotions available.</string>
+    <string name="promociones_invitacion_descripcion">Discover the promotions and discounts available.</string>
+    <string name="ver_promociones">View promotions</string>
     <string name="sin_promociones_disponibles">No promotions available</string>
     <string name="sin_promociones_descripcion">Check back later for new promotions.</string>
     <string name="detalle_promocion">Promotion detail</string>

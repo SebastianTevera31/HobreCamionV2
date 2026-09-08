@@ -13,7 +13,7 @@ class RemotePromotionsDataSource @Inject constructor(
         token: String,
         search: String = "",
         store: String = "",
-        limit: Int = 50,
+        limit: Int = 10,
         pagesPerStore: Int = 20
     ): Result<DiscountsResponse> = networkRequestHelper {
         promotionsClient.getDiscounts(

@@ -1,16 +1,13 @@
 package com.rfz.appflotal.presentation.ui.couponbook.screen.promotions
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -36,95 +33,6 @@ import java.util.Locale
 
 internal fun formatPromotionPrice(value: Double, currency: String): String =
     "$%,.2f %s".format(Locale.US, value, currency)
-
-@Composable
-fun PromotionCarouselCard(
-    discount: StoreDiscount,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    ElevatedCard(
-        modifier = modifier
-            .width(272.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 2.dp
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(Dimens.PaddingSmall),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(128.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-            ) {
-                AsyncImage(
-                    model = discount.imageUrl,
-                    contentDescription = discount.title,
-                    modifier = Modifier.fillMaxWidth().height(128.dp),
-                    contentScale = ContentScale.Crop
-                )
-
-                PromotionDiscountBadge(
-                    percentOff = discount.percentOff,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(10.dp)
-                )
-            }
-
-            Column(
-                modifier = Modifier.padding(
-                    start = 4.dp,
-                    end = 4.dp,
-                    bottom = 6.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(3.dp)
-            ) {
-                Text(
-                    text = discount.store,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = discount.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = formatPromotionPrice(discount.regularPrice, discount.currency),
-                        style = MaterialTheme.typography.bodySmall,
-                        textDecoration = TextDecoration.LineThrough,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Text(
-                        text = " " + formatPromotionPrice(discount.finalPrice, discount.currency),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun PromotionCard(
