@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NotificationsNone
-import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,8 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.AlertCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.BlogPostCard
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.CompleteHomeTopBar
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.EmptyStateCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeBottomBar
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeTopBar
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SectionHeader
@@ -38,7 +33,6 @@ import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.Veh
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.WeatherCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.SectionItem
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.asIcon
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 
@@ -72,20 +66,13 @@ fun CompletePlanScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     item {
-                        if (state.paymentPlanType == PaymentPlanType.Complete) {
-                            CompleteHomeTopBar(
-                                state.userName,
-                                state.paymentPlanType,
-                                onNotificationsClick
-                            )
-                        } else {
-                            HomeTopBar(
-                                userName = state.userName,
-                                planType = state.paymentPlanType,
-                                plates = state.vehiclePlate,
-                                onNotificationsClick = onNotificationsClick,
-                            )
-                        }
+                        HomeTopBar(
+                            userName = state.userName,
+                            planType = state.paymentPlanType,
+                            plates = state.vehiclePlate,
+                            onNotificationsClick = onNotificationsClick,
+                            modifier = Modifier.padding(top = 68.dp)
+                        )
                     }
 
                     item {
@@ -109,15 +96,8 @@ fun CompletePlanScreen(
                                 stringResource(R.string.alertas_recientes),
                                 stringResource(R.string.ver_todas), onAlertsSeeAllClick
                             )
-                            if (state.alerts.isEmpty()) {
-                                EmptyStateCard(
-                                    icon = Icons.Outlined.NotificationsNone.asIcon(),
-                                    message = stringResource(R.string.no_alertas_recientes)
-                                )
-                            } else {
-                                state.alerts.forEach { alert ->
-                                    AlertCard(alert)
-                                }
+                            state.alerts.forEach { alert ->
+                                AlertCard(alert, onClick = onAlertsSeeAllClick)
                             }
                         }
                     }
@@ -151,19 +131,14 @@ fun CompletePlanScreen(
 
                     item {
                         Column {
-                            SectionHeader(
-                                stringResource(R.string.foro),
-                                stringResource(R.string.ver_todas),
-                                onBlogSeeAllClick
-                            )
-                            if (state.blogPosts.isEmpty()) {
-                                EmptyStateCard(
-                                    icon = Icons.Outlined.SearchOff.asIcon(),
-                                    message = stringResource(R.string.sin_publicaciones_foro)
+                            if (!state.blogPosts.isEmpty()) {
+                                SectionHeader(
+                                    stringResource(R.string.foro),
+                                    stringResource(R.string.ver_todas),
+                                    onBlogSeeAllClick
                                 )
-                            } else {
                                 state.blogPosts.forEach { post ->
-                                    BlogPostCard(post)
+                                    BlogPostCard(post, onClick = onBlogSeeAllClick)
                                 }
                             }
                         }

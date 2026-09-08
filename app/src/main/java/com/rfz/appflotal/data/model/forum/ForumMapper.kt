@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.RecordType
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.BlogPost
 
 fun ForumResult.toRoom(): ForumRoom {
     return ForumRoom(
@@ -113,3 +114,10 @@ fun LikedPostResult.toEntity(): LikedRecord? {
         )
     }.getOrNull()
 }
+
+fun PostFeedResult.toEntity() = BlogPost(
+
+    categories = this.tags.split(",").map { it.trim() },
+    title = title,
+    excerpt = description
+)

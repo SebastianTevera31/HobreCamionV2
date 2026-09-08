@@ -47,7 +47,12 @@ data class AlertUi(
 enum class AlertStatus { CRITICA, PENDIENTE }
 
 data class SectionItem(val icon: IconResource, @StringRes val label: Int, val route: Any)
-data class BlogPost(val category: String, val title: String, val excerpt: String)
+data class BlogPost(
+    val linkImage: String = "",
+    val categories: List<String>,
+    val title: String,
+    val excerpt: String
+)
 
 data class CompletePlanUiState(
     val isLoading: Boolean = false,
