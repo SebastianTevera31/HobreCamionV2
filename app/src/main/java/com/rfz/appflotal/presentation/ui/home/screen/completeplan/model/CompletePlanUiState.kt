@@ -17,6 +17,7 @@ import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 
 sealed class IconResource {
     data class Vector(val imageVector: ImageVector) : IconResource()
@@ -56,6 +57,7 @@ data class BlogPost(
 data class CompletePlanUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    val currentScreen: BottomNavItems = BottomNavItems.HOME,
     val userName: String = "",
     val vehicleName: String = "",
     val vehiclePlate: String = "",

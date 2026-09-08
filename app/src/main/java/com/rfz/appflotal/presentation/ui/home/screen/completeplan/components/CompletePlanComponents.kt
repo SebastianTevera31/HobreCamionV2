@@ -603,7 +603,7 @@ fun BlogPostCard(post: BlogPost) {
             Spacer(Modifier.width(12.dp))
             Column {
                 Text(
-                    post.category,
+                    post.categories.firstOrNull() ?: "",
                     color = TealMid,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
@@ -787,7 +787,7 @@ fun SectionsGridPreview() {
 @Composable
 fun BlogPostCardPreview() {
     val post = BlogPost(
-        category = "MANTENIMIENTO",
+        categories = listOf("MANTENIMIENTO"),
         title = "5 señales de desgaste irregular en llantas",
         excerpt = "Aprende a detectar a tiempo el desgaste que puede costarte un pinchazo en carretera…"
     )
