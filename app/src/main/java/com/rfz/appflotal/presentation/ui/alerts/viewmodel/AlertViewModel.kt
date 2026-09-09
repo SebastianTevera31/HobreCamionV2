@@ -104,7 +104,7 @@ class AlertViewModel @Inject constructor(
                 endDate = state.endDate,
                 position = state.selectedWheel,
                 alertType = if (state.selectedAlert == DomainAlertType.NONE) "" else state.selectedAlert.key,
-                startPaging = ((page - 1) * PAGE_SIZE)
+                startPaging = (page * PAGE_SIZE)
             )
 
             result.onSuccess { alerts ->
