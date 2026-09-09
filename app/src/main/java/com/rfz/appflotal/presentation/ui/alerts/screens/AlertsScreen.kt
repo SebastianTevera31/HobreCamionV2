@@ -39,8 +39,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -54,10 +56,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.alerts.AlertType
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -84,6 +88,7 @@ fun AlertsRoute(
         currentPage = uiState.currentPage,
         hasNextPage = uiState.hasNextPage,
         isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
         selectedAlert = uiState.selectedAlert,
         selectedDate = uiState.startDate,
         selectedWheel = uiState.selectedWheel,
@@ -108,6 +113,7 @@ fun AlertScreen(
     currentPage: Int,
     hasNextPage: Boolean,
     isLoading: Boolean,
+    errorMessage: String? = null,
     selectedAlert: AlertType,
     selectedDate: String,
     selectedWheel: String,
@@ -213,6 +219,11 @@ fun AlertScreen(
                                                 onDateSelected = { startDate = it },
                                                 modifier = Modifier.weight(1f)
                                             )
+                                            DateFilterField(
+                                                selectedDate = endDate,
+                                                onDateSelected = { endDate = it },
+                                                modifier = Modifier.weight(1f)
+                                            )
                                         }
                                     } else {
                                         Column(
@@ -242,21 +253,39 @@ fun AlertScreen(
 
                                 Spacer(modifier = Modifier.size(Dimens.PaddingSmall))
 
-                                Button(
-                                    onClick = {
-                                        onApplyFilters(startDate, endDate, wheel, alert)
-                                        showFilters = false
-                                    },
-                                    shape = RoundedCornerShape(12.dp),
+                                Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    )
+                                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
                                 ) {
-                                    Text(
-                                        text = stringResource(R.string.aplicar_filtros),
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    OutlinedButton(
+                                        onClick = {
+                                            startDate = ""
+                                            endDate = ""
+                                            onApplyFilters("", "", wheel, alert)
+                                            showFilters = false
+                                        },
+                                        enabled = startDate.isNotEmpty() || endDate.isNotEmpty(),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text(text = stringResource(R.string.limpiar))
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            onApplyFilters(startDate, endDate, wheel, alert)
+                                            showFilters = false
+                                        },
+                                        shape = RoundedCornerShape(12.dp),
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.aplicar_filtros),
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             } else {
                                 // Resumen de filtros aplicados cuando está colapsado
@@ -275,7 +304,7 @@ fun AlertScreen(
                                         )
                                         FilterChipSummary(
                                             label = stringResource(R.string.alerta_label),
-                                            value = stringResource(alert.title),
+                                            value = stringResource(alert.label),
                                             modifier = Modifier.weight(1f)
                                         )
                                     }
@@ -321,6 +350,41 @@ fun AlertScreen(
                                 .wrapContentWidth(Alignment.CenterHorizontally)
                         ) {
                             CircularProgressIndicator()
+                        }
+                    }
+                } else if (errorMessage != null) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(Dimens.PaddingMedium),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.error_al_cargar_alertas),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                            TextButton(onClick = { onPageSelected(currentPage + 1) }) {
+                                Text(stringResource(R.string.reintentar))
+                            }
+                        }
+                    }
+                } else if (alerts.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(Dimens.PaddingMedium)
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.sin_alertas),
+                                color = MaterialTheme.colorScheme.secondary,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
                 }
@@ -442,74 +506,88 @@ fun FilterChipSummary(label: String, value: String, modifier: Modifier = Modifie
 val sampleAlerts = listOf(
     AlertUi(
         icon = Icons.Outlined.Warning.asIcon(),
-        title = "Presión Crítica - Eje 1 Izq",
-        detailLabel = "Presión:",
+        titleRes = R.string.alert_sample_pressure_critical,
+        titleArgs = listOf("Eje 1 Izq"),
+        detailLabelRes = R.string.alert_label_pressure,
         detailValue = "2.1 bar",
         detailExtra = "(mín. 6.5)",
-        status = AlertStatus.CRITICA
+        status = AlertStatus.CRITICA,
+        date = "20/09/2023"
     ),
     AlertUi(
         icon = Icons.Outlined.Thermostat.asIcon(),
-        title = "Alta Temperatura - Eje 2 Der",
-        detailLabel = "Temp:",
+        titleRes = R.string.alert_sample_temperature_high,
+        titleArgs = listOf("Eje 2 Der"),
+        detailLabelRes = R.string.alert_label_temp,
         detailValue = "95°C",
-        status = AlertStatus.CRITICA
+        status = AlertStatus.CRITICA,
+        date = "20/09/2023"
     ),
     AlertUi(
         icon = Icons.Outlined.BatteryAlert.asIcon(),
-        title = "Batería Baja Sensor",
-        detailLabel = "Nivel:",
+        titleRes = R.string.alert_title_low_battery,
+        titleArgs = listOf("Sensor"),
+        detailLabelRes = R.string.alert_label_level,
         detailValue = "15%",
-        status = AlertStatus.PENDIENTE
+        status = AlertStatus.PENDIENTE,
+        date = "20/09/2023"
     ),
     AlertUi(
         icon = Icons.Outlined.GpsFixed.asIcon(),
-        title = "Desgaste de Piso Bajo",
-        detailLabel = "Profundidad:",
+        titleRes = R.string.alert_sample_tread_wear,
+        detailLabelRes = R.string.alert_label_depth,
         detailValue = "3.5 mm",
-        status = AlertStatus.PENDIENTE
+        status = AlertStatus.PENDIENTE,
+        date = "20/09/2023"
     ),
     AlertUi(
         icon = Icons.Outlined.Warning.asIcon(),
-        title = "Fuga Rápida Detectada",
-        detailLabel = "Pérdida:",
+        titleRes = R.string.alert_title_fast_leak,
+        titleArgs = listOf("Posición"),
+        detailLabelRes = R.string.alert_label_loss,
         detailValue = "0.5 bar/min",
-        status = AlertStatus.CRITICA
+        status = AlertStatus.CRITICA,
+        date = "20/09/2023"
     ),
     AlertUi(
         icon = Icons.Outlined.Timer.asIcon(),
-        title = "Inspección Programada",
-        detailLabel = "Vence en:",
+        titleRes = R.string.alert_sample_inspection,
+        detailLabelRes = R.string.alert_label_expires,
         detailValue = "2 días",
-        status = AlertStatus.PENDIENTE
+        status = AlertStatus.PENDIENTE,
+        date = "20/09/2023"
     ),
     AlertUi(
         icon = Icons.Outlined.Speed.asIcon(),
-        title = "Exceso de Velocidad",
-        detailLabel = "Máx:",
+        titleRes = R.string.alert_sample_speeding,
+        detailLabelRes = R.string.alert_label_max,
         detailValue = "110 km/h",
-        status = AlertStatus.PENDIENTE
+        status = AlertStatus.PENDIENTE,
+        date = "20/09/2023"
     ),
     AlertUi(
         icon = Icons.Outlined.Warning.asIcon(),
-        title = "Presión Alta - Remolque",
-        detailLabel = "Presión:",
+        titleRes = R.string.alert_sample_trailer_pressure,
+        detailLabelRes = R.string.alert_label_pressure,
         detailValue = "9.2 bar",
-        status = AlertStatus.CRITICA
+        status = AlertStatus.CRITICA,
+        date = "20/09/2023"
     ),
     AlertUi(
         icon = Icons.Outlined.Thermostat.asIcon(),
-        title = "Sobrecalentamiento Frenos",
-        detailLabel = "Eje:",
+        titleRes = R.string.alert_sample_brakes_overheating,
+        detailLabelRes = R.string.alert_label_temp,
         detailValue = "Trasero",
-        status = AlertStatus.CRITICA
+        status = AlertStatus.CRITICA,
+        date = "20/09/2023"
     ),
     AlertUi(
         icon = Icons.Outlined.GpsFixed.asIcon(),
-        title = "Alineación Requerida",
-        detailLabel = "Desviación:",
+        titleRes = R.string.alert_sample_alignment,
+        detailLabelRes = R.string.alert_label_deviation,
         detailValue = "Leve",
-        status = AlertStatus.PENDIENTE
+        status = AlertStatus.PENDIENTE,
+        date = "20/09/2023"
     )
 )
 
@@ -522,7 +600,7 @@ fun AlertsRoutePreview() {
             currentPage = 2,
             hasNextPage = true,
             isLoading = false,
-            selectedAlert = AlertType.PRESSURE,
+            selectedAlert = AlertType.LOW_PRESSURE,
             selectedDate = "01/09/2026",
             selectedWheel = "Eje 1 Izq",
             wheels = listOf("Todas", "Eje 1 Izq"),

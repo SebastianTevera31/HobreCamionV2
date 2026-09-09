@@ -1,15 +1,23 @@
 package com.rfz.appflotal.presentation.ui.alerts.screens
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -26,34 +34,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.RadioButtonChecked
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.alerts.AlertType
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-
-enum class AlertType(@StringRes val title: Int) {
-    ALL(R.string.todas),
-    PRESSURE(R.string.presion),
-    TEMPERATURE(R.string.temperatura),
-}
 
 @Composable
 fun BaseFilterField(
@@ -133,8 +130,8 @@ fun TireFilterField(
 
     Box(modifier = modifier) {
         BaseFilterField(
-            label = "Rueda",
-            value = selectedWheel.ifEmpty { "Todas" },
+            label = stringResource(R.string.rueda_label),
+            value = selectedWheel.ifEmpty { stringResource(R.string.todas) },
             icon = Icons.Default.RadioButtonChecked,
             onClick = { expanded = true }
         )
@@ -144,6 +141,13 @@ fun TireFilterField(
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth(0.8f)
         ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.todas)) },
+                onClick = {
+                    onSelectedWheel("")
+                    expanded = false
+                }
+            )
             wheels.forEach { wheel ->
                 DropdownMenuItem(
                     text = { Text(wheel) },
@@ -167,8 +171,8 @@ fun AlertTypeFilterField(
 
     Box(modifier = modifier) {
         BaseFilterField(
-            label = "Alerta",
-            value = stringResource(selectedAlert?.title ?: AlertType.ALL.title),
+            label = stringResource(R.string.alerta_label),
+            value = stringResource(selectedAlert?.label ?: AlertType.NONE.label),
             icon = Icons.Default.NotificationsActive,
             onClick = { expanded = true }
         )
@@ -180,7 +184,13 @@ fun AlertTypeFilterField(
         ) {
             AlertType.entries.forEach { alert ->
                 DropdownMenuItem(
-                    text = { Text(stringResource(alert.title)) },
+                    text = {
+                        LocalizedApp {
+                            Text(
+                                stringResource(alert.label)
+                            )
+                        }
+                    },
                     onClick = {
                         onSelectAlert(alert)
                         expanded = false
@@ -201,8 +211,8 @@ fun DateFilterField(
     var showDialog by remember { mutableStateOf(false) }
 
     BaseFilterField(
-        label = "Fecha",
-        value = selectedDate.ifEmpty { "Seleccionar fecha" },
+        label = stringResource(R.string.fecha),
+        value = selectedDate.ifEmpty { stringResource(R.string.seleccionar_fecha) },
         icon = Icons.Default.CalendarMonth,
         onClick = { showDialog = true },
         modifier = modifier
@@ -252,7 +262,7 @@ fun AlertFilterComponentsPreview() {
                 onSelectedWheel = {}
             )
             AlertTypeFilterField(
-                selectedAlert = AlertType.PRESSURE,
+                selectedAlert = AlertType.LOW_PRESSURE,
                 onSelectAlert = {}
             )
             DateFilterField(

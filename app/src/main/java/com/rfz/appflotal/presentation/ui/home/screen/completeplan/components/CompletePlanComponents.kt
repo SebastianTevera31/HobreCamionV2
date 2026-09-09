@@ -1,5 +1,7 @@
 package com.rfz.appflotal.presentation.ui.home.screen.completeplan.components
 
+import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -316,7 +319,7 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
 
                     Spacer(Modifier.width(10.dp))
                     Text(
-                        alert.title,
+                        stringResource(alert.titleRes, *alert.titleArgs.toTypedArray()),
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -331,7 +334,7 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "CRÍTICA",
+                            stringResource(R.string.alert_status_critical),
                             color = CriticalFg,
                             fontSize = MaterialTheme.typography.labelSmall.fontSize,
                             fontWeight = FontWeight.Bold
@@ -349,7 +352,7 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    alert.detailLabel,
+                    stringResource(alert.detailLabelRes),
                     color = SubtleText,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -593,7 +596,87 @@ fun HomeBottomBar(selected: BottomNavItems, onItemClick: (BottomNavItems) -> Uni
     }
 }
 
+@Composable
+fun EmptyDataCard(
+    modifier: Modifier = Modifier,
+    @StringRes title: Int? = null,
+    @StringRes message: Int = R.string.no_registros,
+    icon: IconResource = Icons.Outlined.Error.asIcon(),
+    onRetry: (() -> Unit)? = null
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = TealSoftBg),
+        border = BorderStroke(1.dp, TealMid.copy(alpha = 0.1f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            AdaptiveIcon(
+                icon = icon,
+                contentDescription = null,
+                tint = TealMid,
+                modifier = Modifier.size(40.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            if (title != null) {
+                Text(
+                    text = stringResource(title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = TealDark,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+            Text(
+                text = stringResource(message),
+                style = MaterialTheme.typography.bodyMedium,
+                color = SubtleText,
+                textAlign = TextAlign.Center
+            )
+            if (onRetry != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedButton(
+                    onClick = onRetry,
+                    shape = RoundedCornerShape(50),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, TealMid)
+                ) {
+                    Text(
+                        text = stringResource(R.string.reintentar),
+                        color = TealMid,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+}
+
 // Previews
+@Preview(showBackground = true)
+@Composable
+fun EmptyDataCardPreview() {
+    HombreCamionTheme {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            EmptyDataCard(
+                title = R.string.alertas_activas,
+                message = R.string.error_carga_datos,
+                onRetry = {}
+            )
+            EmptyDataCard(
+                message = R.string.sin_datos
+            )
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -635,11 +718,13 @@ fun VehiclePerformanceCardPreview() {
 fun AlertCardPreview() {
     val alert = AlertUi(
         icon = R.drawable.tire_pressure_warning.asIcon(),
-        title = "TPMS · eje delantero izq.",
-        detailLabel = "Presión:",
+        titleRes = R.string.alert_title_low_pressure,
+        titleArgs = listOf("Eje 1 Izq"),
+        detailLabelRes = R.string.alert_label_pressure,
         detailValue = "2.1 bar",
         detailExtra = "(mín. 6.5)",
-        status = AlertStatus.CRITICA
+        status = AlertStatus.CRITICA,
+        date = "2024-09-01"
     )
     HombreCamionTheme {
         AlertCard(alert = alert)

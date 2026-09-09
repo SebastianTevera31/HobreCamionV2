@@ -512,6 +512,11 @@
     <string name="sin_promociones_disponibles">No hay promociones disponibles</string>
     <string name="sin_promociones_descripcion">Vuelve más tarde para ver nuevas promociones.</string>
     <string name="detalle_promocion">Detalle de promoción</string>
+
+    <string name="buscar_cupones_promociones">Buscar cupones y promociones cercanas</string>
+    <string name="resultados_busqueda">Resultados para \"%1$s\"</string>
+    <string name="sin_cupones_resultado_busqueda">No hay cupones que coincidan con tu búsqueda.</string>
+    <string name="sin_promociones_resultado_busqueda">No hay promociones que coincidan con tu búsqueda.</string>
     <string name="ver_producto">Ver producto</string>
     <string name="precio_regular">Precio regular</string>
     <string name="precio_con_descuento">Precio con descuento</string>
@@ -721,8 +726,49 @@
     <string name="hasta_label">A:</string>
     <string name="pagina_anterior">Página anterior</string>
     <string name="pagina_siguiente">Página siguiente</string>
+    <string name="error_al_cargar_alertas">No se pudieron cargar las alertas. Intenta de nuevo.</string>
 
     <!-- Empty States -->
     <string name="no_alertas_recientes">No tienes alertas recientes</string>
     <string name="sin_publicaciones_foro">Aún no hay publicaciones en el foro</string>
+
+    <!-- Alert Titles -->
+    <string name="alert_title_low_pressure">Alerta de baja presión · %1$s</string>
+    <string name="alert_title_high_pressure">Alerta de alta presión · %1$s</string>
+    <string name="alert_title_temperature">Alerta de temperatura · %1$s</string>
+    <string name="alert_title_inflate">Alerta de inflado · %1$s</string>
+    <string name="alert_title_fast_leak">Fuga rápida detectada · %1$s</string>
+    <string name="alert_title_slow_leak">Fuga lenta detectada · %1$s</string>
+    <string name="alert_title_extraction">Extracción detectada · %1$s</string>
+    <string name="alert_title_low_battery">Batería baja sensor · %1$s</string>
+    <string name="alert_title_no_data">Sin datos de sensor · %1$s</string>
+    <string name="alert_title_generic">Alerta · %1$s</string>
+
+    <!-- Sample Alert Titles -->
+    <string name="alert_sample_pressure_critical">Presión Crítica - %1$s</string>
+    <string name="alert_sample_temperature_high">Alta Temperatura - %1$s</string>
+    <string name="alert_sample_tread_wear">Desgaste de Piso Bajo</string>
+    <string name="alert_sample_inspection">Inspección Programada</string>
+    <string name="alert_sample_speeding">Exceso de Velocidad</string>
+    <string name="alert_sample_trailer_pressure">Presión Alta - Remolque</string>
+    <string name="alert_sample_brakes_overheating">Sobrecalentamiento Frenos</string>
+    <string name="alert_sample_alignment">Alineación Requerida</string>
+
+    <!-- Alert Labels -->
+    <string name="alert_label_pressure">Presión:</string>
+    <string name="alert_label_temp">Temp:</string>
+    <string name="alert_label_level">Nivel:</string>
+    <string name="alert_label_depth">Profundidad:</string>
+    <string name="alert_label_loss">Pérdida:</string>
+    <string name="alert_label_expires">Vence en:</string>
+    <string name="alert_label_max">Máx:</string>
+    <string name="alert_label_deviation">Desviación:</string>
+
+    <!-- Alert Status -->
+    <string name="alert_status_critical">CRÍTICA</string>
+    <string name="alert_status_pending">PENDIENTE</string>
+
+    <string name="temperature">temperature</string>
+    <string name="inflate">inflado</string>
+    <string name="critica">CRÍTICA</string>
 </resources>

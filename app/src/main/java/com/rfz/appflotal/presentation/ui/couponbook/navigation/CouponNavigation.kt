@@ -80,12 +80,22 @@ fun NavGraphBuilder.couponGraph(
                     },
                     onMenuClick = {
                         navController.navigate(SavedCommentsNav)
-                    }
+                    },
+                    searchConfig = ForumSearchConfig(
+                        value = state.searchQuery,
+                        placeholder = stringResource(R.string.buscar_cupones_promociones),
+                        onValueChange = { query ->
+                            viewModel.onMainSearchChanged(query)
+                        }
+                    )
                 )
             ) { paddingValues ->
                 CouponBookRoute(
                     nearbyCoupons = state.filteredCoupons,
                     myCoupons = state.filteredVouchers,
+                    searchQuery = state.searchQuery,
+                    promotions = state.promotions,
+                    promotionsState = state.promotionsState,
                     onSeeAllCoupons = {
                         navController.navigate(CouponList(true))
                     },
@@ -102,6 +112,10 @@ fun NavGraphBuilder.couponGraph(
                     onVoucherClick = { id ->
                         viewModel.selectCoupon(id)
                         viewModel.validateVoucher(id)
+                    },
+                    onPromotionClick = { productUrl ->
+                        viewModel.selectPromotion(productUrl)
+                        navController.navigate(PromotionDetail)
                     },
                     modifier = Modifier.padding(paddingValues),
                     screenStatus = state.loadingScreen,

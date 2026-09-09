@@ -15,9 +15,9 @@ import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 
 sealed class IconResource {
     data class Vector(val imageVector: ImageVector) : IconResource()
@@ -37,11 +37,13 @@ data class VehicleStat(
 
 data class AlertUi(
     val icon: IconResource,
-    val title: String,
-    val detailLabel: String,
+    @StringRes val titleRes: Int,
+    val titleArgs: List<String> = emptyList(),
+    @StringRes val detailLabelRes: Int,
     val detailValue: String,
     val detailExtra: String? = null,
-    val status: AlertStatus
+    val status: AlertStatus,
+    val date: String
 )
 
 enum class AlertStatus { CRITICA, PENDIENTE }
@@ -72,14 +74,12 @@ data class CompletePlanUiState(
         ),
         VehicleStat(
             2,
-            Icons.Outlined.Cloud.asIcon(), "100", "kg",
+            Icons.Outlined.Cloud.asIcon(), "0", "kg",
             R.string.emision_co2
         )
     ),
     val alerts: List<AlertUi> = emptyList(),
-    val weatherTemp: String = "0",
-    val weatherCity: String = "",
-    @StringRes val weatherDesc: Int = R.string.clearsky,
+    val weatherState: WeatherState? = null,
     val sections: List<SectionItem> = listOf(
         SectionItem(
             icon = Icons.Outlined.GpsFixed.asIcon(),
@@ -113,4 +113,10 @@ data class CompletePlanUiState(
         )
     ),
     val blogPosts: List<BlogPost> = emptyList()
+)
+
+data class WeatherState(
+    val weatherTemp: String = "",
+    val weatherCity: String = "",
+    @StringRes val weatherDesc: Int = R.string.clearsky
 )

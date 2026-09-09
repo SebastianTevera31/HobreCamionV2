@@ -4,13 +4,17 @@ import android.R.attr.factor
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.model.alerts.Alert
 import com.rfz.appflotal.data.model.forum.toEntity
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.location.LocationRepository
 import com.rfz.appflotal.data.repository.weather.WeatherRepository
+import com.rfz.appflotal.domain.alerts.GetAlertsUseCase
 import com.rfz.appflotal.domain.forum.GetPostsFeedUseCase
 import com.rfz.appflotal.domain.performance.CurrentPerformanceUseCase
+import com.rfz.appflotal.presentation.ui.alerts.viewmodel.toAlertUi
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.WeatherState
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +30,8 @@ class CompletePlanViewModel @Inject constructor(
     private val currentPerformanceUseCase: CurrentPerformanceUseCase,
     private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository,
-    private val getPostFeedUseCase: GetPostsFeedUseCase
+    private val getPostFeedUseCase: GetPostsFeedUseCase,
+    private val alertsUseCase: GetAlertsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CompletePlanUiState())
     val uiState: StateFlow<CompletePlanUiState> = _uiState.asStateFlow()
@@ -36,6 +41,7 @@ class CompletePlanViewModel @Inject constructor(
             getCurrentPerformance()
             getCurrentWeather()
             getPostsFeed()
+            getCurrentAlerts()
         }
     }
 
@@ -44,6 +50,30 @@ class CompletePlanViewModel @Inject constructor(
             currentState.copy(currentScreen = item)
         }
     }
+
+    suspend fun getCurrentAlerts() {
+        val result = alertsUseCase(
+            startDate = "",
+            endDate = "",
+            position = "",
+            alertType = "",
+            startPaging = 1
+        )
+
+        result.onSuccess { alerts ->
+            _uiState.update {
+                it.copy(
+                    alerts = alerts.map(Alert::toAlertUi).take(2),
+                    isLoading = false
+                )
+            }
+        }.onFailure { error ->
+            _uiState.update {
+                it.copy(isLoading = false, errorMessage = error.message)
+            }
+        }
+    }
+
 
     suspend fun getCurrentPerformance() {
         //_uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -96,9 +126,11 @@ class CompletePlanViewModel @Inject constructor(
                 is ApiResult.Success -> {
                     _uiState.update { currentState ->
                         currentState.copy(
-                            weatherTemp = result.data.temp.toString(),
-                            weatherCity = location.ciudad,
-                            weatherDesc = result.data.condLabel
+                            weatherState = WeatherState(
+                                weatherTemp = result.data.temp.toString(),
+                                weatherCity = location.ciudad,
+                                weatherDesc = result.data.condLabel
+                            )
                         )
                     }
                 }

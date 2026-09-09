@@ -82,6 +82,11 @@ class CouponBookViewModel @Inject constructor(
         _promotionsQuery.value = query
     }
 
+    fun onMainSearchChanged(query: String) {
+        onSearchChanged(query)
+        onPromotionsSearchChanged(query)
+    }
+
     fun goToPromotionsPage(page: Int) {
         val state = _uiState.value
         if (state.promotionsState is LoadState.Loading || page < 1) return
@@ -170,9 +175,11 @@ class CouponBookViewModel @Inject constructor(
             currentUiState.copy(
                 selectedFilter = CouponFilterOptions.ALL,
                 searchQuery = "",
+                promotionsSearchQuery = "",
                 validateState = LoadState.Idle
             )
         }
+        _promotionsQuery.value = ""
         applyFilters()
     }
 

@@ -71,7 +71,6 @@ fun InicioScreen(
 fun Body(
     modifier: Modifier,
     navController: NavController,
-
 ) {
     val viewModelScope = rememberCoroutineScope()
     Column(

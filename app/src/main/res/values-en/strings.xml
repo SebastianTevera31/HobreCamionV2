@@ -525,6 +525,11 @@
     <string name="sin_promociones_disponibles">No promotions available</string>
     <string name="sin_promociones_descripcion">Check back later for new promotions.</string>
     <string name="detalle_promocion">Promotion detail</string>
+
+    <string name="buscar_cupones_promociones">Search nearby coupons and promotions</string>
+    <string name="resultados_busqueda">Results for \"%1$s\"</string>
+    <string name="sin_cupones_resultado_busqueda">No coupons match your search.</string>
+    <string name="sin_promociones_resultado_busqueda">No promotions match your search.</string>
     <string name="ver_producto">View product</string>
     <string name="precio_regular">Regular price</string>
     <string name="precio_con_descuento">Discounted price</string>
@@ -711,7 +716,72 @@
     <string name="registrar">register</string>
     <string name="todas">All</string>
 
+    <!-- Complete Plan -->
+    <string name="content_description_notificaciones">Notifications</string>
+    <string name="saludo_usuario">Hello, %1$s!</string>
+    <string name="plan_actual">Plan: %1$s</string>
+    <string name="placas_vehiculo">License plate: %1$s</string>
+    <string name="vehiculo_placa_format">%1$s · %2$s</string>
+    <string name="vehiculo_no_asignado">Vehicle not assigned</string>
+    <string name="no_datos_rendimiento">No performance data available</string>
+    <string name="alerta_critica_label">CRITICAL</string>
+
+    <!-- Alerts -->
+    <string name="alertas_history_title">Alert History</string>
+    <string name="alertas_history_section_title">Alert history</string>
+    <string name="filtros">Filters</string>
+    <string name="colapsar">Collapse</string>
+    <string name="expandir">Expand</string>
+    <string name="aplicar_filtros">Apply Filters</string>
+    <string name="rueda_label">Tire</string>
+    <string name="alerta_label">Alert</string>
+    <string name="desde_label">From:</string>
+    <string name="hasta_label">To:</string>
+    <string name="pagina_anterior">Previous page</string>
+    <string name="pagina_siguiente">Next page</string>
+    <string name="error_al_cargar_alertas">Alerts could not be loaded. Please try again.</string>
+
     <!-- Empty States -->
     <string name="no_alertas_recientes">You have no recent alerts</string>
     <string name="sin_publicaciones_foro">There are no forum posts yet</string>
+
+    <!-- Alert Titles -->
+    <string name="alert_title_low_pressure">Low pressure alert · %1$s</string>
+    <string name="alert_title_high_pressure">High pressure alert · %1$s</string>
+    <string name="alert_title_temperature">Temperature alert · %1$s</string>
+    <string name="alert_title_inflate">Inflation alert · %1$s</string>
+    <string name="alert_title_fast_leak">Fast leak detected · %1$s</string>
+    <string name="alert_title_slow_leak">Slow leak detected · %1$s</string>
+    <string name="alert_title_extraction">Extraction detected · %1$s</string>
+    <string name="alert_title_low_battery">Low sensor battery · %1$s</string>
+    <string name="alert_title_no_data">No sensor data · %1$s</string>
+    <string name="alert_title_generic">Alert · %1$s</string>
+
+    <!-- Sample Alert Titles -->
+    <string name="alert_sample_pressure_critical">Critical Pressure - %1$s</string>
+    <string name="alert_sample_temperature_high">High Temperature - %1$s</string>
+    <string name="alert_sample_tread_wear">Low Tread Wear</string>
+    <string name="alert_sample_inspection">Scheduled Inspection</string>
+    <string name="alert_sample_speeding">Speeding</string>
+    <string name="alert_sample_trailer_pressure">High Pressure - Trailer</string>
+    <string name="alert_sample_brakes_overheating">Brakes Overheating</string>
+    <string name="alert_sample_alignment">Alignment Required</string>
+
+    <!-- Alert Labels -->
+    <string name="alert_label_pressure">Pressure:</string>
+    <string name="alert_label_temp">Temp:</string>
+    <string name="alert_label_level">Level:</string>
+    <string name="alert_label_depth">Depth:</string>
+    <string name="alert_label_loss">Loss:</string>
+    <string name="alert_label_expires">Expires in:</string>
+    <string name="alert_label_max">Max:</string>
+    <string name="alert_label_deviation">Deviation:</string>
+
+    <!-- Alert Status -->
+    <string name="alert_status_critical">CRITICAL</string>
+    <string name="alert_status_pending">PENDING</string>
+
+    <string name="temperature">temperature</string>
+    <string name="inflate">inflate</string>
+    <string name="critica">CRITICAL</string>
 </resources>

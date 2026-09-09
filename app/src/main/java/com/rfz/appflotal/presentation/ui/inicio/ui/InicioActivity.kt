@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -140,40 +139,58 @@ class InicioActivity : ComponentActivity() {
     // Temporales para catalogGraph (idealmente mover a ViewModels después)
     @Inject
     lateinit var brandListUseCase: BrandListUseCase
+
     @Inject
     lateinit var brandCrudUseCase: BrandCrudUseCase
+
     @Inject
     lateinit var originalDesignUseCase: OriginalDesignUseCase
+
     @Inject
     lateinit var originalDesignByIdUseCase: OriginalDesignByIdUseCase
+
     @Inject
     lateinit var crudOriginalDesignUseCase: CrudOriginalDesignUseCase
+
     @Inject
     lateinit var utilizationUseCase: UtilizationUseCase
+
     @Inject
     lateinit var tireSizeUseCase: TireSizeUseCase
+
     @Inject
     lateinit var tireSizeCrudUseCase: TireSizeCrudUseCase
+
     @Inject
     lateinit var productListUseCase: ProductListUseCase
+
     @Inject
     lateinit var productCrudUseCase: ProductCrudUseCase
+
     @Inject
     lateinit var productByIdUseCase: ProductByIdUseCase
+
     @Inject
     lateinit var loadingCapacityUseCase: LoadingCapacityUseCase
+
     @Inject
     lateinit var vehicleListUseCase: VehicleListUseCase
+
     @Inject
     lateinit var vehicleCrudUseCase: VehicleCrudUseCase
+
     @Inject
     lateinit var vehicleByIdUseCase: VehicleByIdUseCase
+
     @Inject
     lateinit var vehicleTypeUseCase: VehicleTypeUseCase
+
     @Inject
     lateinit var controlTypeUseCase: ControlTypeUseCase
+
     @Inject
     lateinit var routeUseCase: RouteUseCase
+
     @Inject
     lateinit var baseUseCase: BaseUseCase
 

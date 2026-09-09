@@ -1,23 +1,17 @@
 package com.rfz.appflotal.presentation.ui.home.screen.completeplan
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.AlertCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.BlogPostCard
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeBottomBar
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.EmptyDataCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeTopBar
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SectionHeader
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SectionsGrid
@@ -34,8 +28,6 @@ import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.Veh
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.WeatherCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.SectionItem
-import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
-import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 
 @Composable
 fun CompletePlanScreen(
@@ -62,7 +54,7 @@ fun CompletePlanScreen(
                 planType = state.paymentPlanType,
                 plates = state.vehiclePlate,
                 onNotificationsClick = onNotificationsClick,
-                modifier = Modifier.padding(top = 82.dp)
+                modifier = Modifier.padding(top = 96.dp)
             )
         }
 
@@ -99,12 +91,19 @@ fun CompletePlanScreen(
                     stringResource(R.string.clima),
                     stringResource(R.string.ver_mapa), onMapClick
                 )
-                WeatherCard(
-                    state.weatherTemp,
-                    state.weatherCity,
-                    stringResource(state.weatherDesc),
-                    onWeatherClick
-                )
+                if (state.weatherState == null) {
+                    EmptyDataCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        message = R.string.sin_datos
+                    )
+                } else {
+                    WeatherCard(
+                        state.weatherState.weatherTemp,
+                        state.weatherState.weatherCity,
+                        stringResource(state.weatherState.weatherDesc),
+                        onWeatherClick
+                    )
+                }
             }
         }
 
