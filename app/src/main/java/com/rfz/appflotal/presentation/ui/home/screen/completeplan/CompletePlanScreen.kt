@@ -17,10 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.commons.NoInternetCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.AlertCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.BlogPostCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.EmptyDataCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeTopBar
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.RoadMapPromoCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SectionHeader
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SectionsGrid
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.SeeAllPill
@@ -58,6 +60,12 @@ fun CompletePlanScreen(
             )
         }
 
+        if (state.isOffline) {
+            item {
+                NoInternetCard(message = stringResource(R.string.sin_internet_home))
+            }
+        }
+
         item {
             Column {
                 SectionHeader(
@@ -66,9 +74,10 @@ fun CompletePlanScreen(
                     onVehicleDetailClick
                 )
                 VehiclePerformanceCard(
-                    state.vehicleName,
+                    state.vehicleType,
                     state.vehiclePlate,
-                    state.stats
+                    state.stats,
+                    updatedAtLabel = state.performanceDate
                 )
             }
         }
@@ -86,11 +95,8 @@ fun CompletePlanScreen(
         }
 
         item {
-            Column {
-                SectionHeader(
-                    stringResource(R.string.clima),
-                    stringResource(R.string.ver_mapa), onMapClick
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SectionHeader(stringResource(R.string.clima))
                 if (state.weatherState == null) {
                     EmptyDataCard(
                         modifier = Modifier.fillMaxWidth(),
@@ -104,6 +110,7 @@ fun CompletePlanScreen(
                         onWeatherClick
                     )
                 }
+                RoadMapPromoCard(onClick = onMapClick)
             }
         }
 

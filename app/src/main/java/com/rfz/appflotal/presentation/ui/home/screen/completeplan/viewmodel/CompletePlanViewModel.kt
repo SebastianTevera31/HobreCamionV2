@@ -22,6 +22,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.truncate
 
@@ -87,9 +90,14 @@ class CompletePlanViewModel @Inject constructor(
                 }
                 stat.copy(value = newValue)
             }
+            val performanceDate = if (result.calculatedAt > 0) {
+                SimpleDateFormat("dd MMM, HH:mm", Locale("es", "MX")).format(Date(result.calculatedAt))
+            } else {
+                ""
+            }
 
             _uiState.update { currentState ->
-                currentState.copy(stats = newList)
+                currentState.copy(stats = newList, performanceDate = performanceDate)
             }
         } catch (e: Exception) {
             _uiState.update {

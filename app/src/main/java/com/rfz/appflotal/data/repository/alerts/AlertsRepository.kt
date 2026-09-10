@@ -23,7 +23,8 @@ private data class AlertsCacheEntry(
 
 class AlertsRepository @Inject constructor(
     private val remoteAlertDataSource: RemoteAlertDataSource,
-    private val getTasksUseCase: GetTasksUseCase
+    private val getTasksUseCase: GetTasksUseCase,
+    private val alertsLocalCache: AlertsLocalCache
 ) {
     private val cache = mutableMapOf<AlertsQuery, AlertsCacheEntry>()
 
@@ -35,6 +36,7 @@ class AlertsRepository @Inject constructor(
         startPaging: Int
     ): Result<List<Alert>> {
         val query = AlertsQuery(startDate, endDate, position, alertType, startPaging)
+        val isMostRecentPage = startPaging <= 1
 
         cache[query]?.let { entry ->
             if (System.currentTimeMillis() - entry.timestampMs < CACHE_TTL_MS) {
@@ -42,18 +44,31 @@ class AlertsRepository @Inject constructor(
             }
         }
 
-        val token = getTasksUseCase().first().first().fld_token
-        val result = remoteAlertDataSource.getAlerts(
-            token = token,
-            startDate = startDate,
-            endDate = endDate,
-            position = position,
-            alertType = alertType,
-            startPaging = startPaging
-        ).map { dtoList -> dtoList.map(AlertDto::toDomain) }
+        val result = runCatching {
+            val token = getTasksUseCase().first().first().fld_token
+            remoteAlertDataSource.getAlerts(
+                token = token,
+                startDate = startDate,
+                endDate = endDate,
+                position = position,
+                alertType = alertType,
+                startPaging = startPaging
+            ).map { dtoList -> dtoList.map(AlertDto::toDomain) }.getOrThrow()
+        }
 
         if (result.isSuccess) {
             cache[query] = AlertsCacheEntry(result, System.currentTimeMillis())
+            if (isMostRecentPage) {
+                alertsLocalCache.saveRecent(result.getOrThrow())
+            }
+            return result
+        }
+
+        if (isMostRecentPage) {
+            val cachedAlerts = alertsLocalCache.getCached()
+            if (cachedAlerts.isNotEmpty()) {
+                return Result.success(cachedAlerts)
+            }
         }
         return result
     }

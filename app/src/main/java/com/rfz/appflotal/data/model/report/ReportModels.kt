@@ -1,12 +1,14 @@
 package com.rfz.appflotal.data.model.report
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
 data class CpkReportRequest(
     @SerializedName("id_user") val idUser: Int,
     @SerializedName("id_tire") val idTire: Int,
 )
 
+@Serializable
 data class CpkReportResponse(
     @SerializedName("id_tire") val idTire: Int,
     @SerializedName("fld_diferenceOdometer") val differenceOdometer: Int,
@@ -20,6 +22,7 @@ data class CpkReportResponse(
     @SerializedName("fld_tireNumber") val tireNumber: String
 )
 
+@Serializable
 data class FuelConsumptionReportResponse(
     @SerializedName("mes") val month: String,
     @SerializedName("odometroMensual") val monthlyOdometer: String,
@@ -29,6 +32,7 @@ data class FuelConsumptionReportResponse(
     @SerializedName("rendimientoMensual") val monthlyPerformance: String
 )
 
+@Serializable
 data class CO2EmissionsReportResponse(
     @SerializedName("mes") val month: String,
     @SerializedName("odometroMensual") val monthlyOdometer: String,

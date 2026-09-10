@@ -6,7 +6,9 @@ import androidx.compose.material.icons.outlined.OilBarrel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.domain.performance.CurrentPerformanceUseCase
+import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.VehicleStat
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.asIcon
 import com.rfz.appflotal.presentation.ui.utils.LoadState
@@ -21,6 +23,7 @@ data class MenuReportsUi(
     val vehicleName: String = "Mercedes Actros",
     val vehiclePlate: String = "4521-KBX",
     val cardState: LoadState<Unit> = LoadState.Idle,
+    val isOffline: Boolean = false,
     val stats: List<VehicleStat> = listOf(
         VehicleStat(
             1,
@@ -39,10 +42,19 @@ data class MenuReportsUi(
 
 @HiltViewModel
 class MenuReportsViewModel @Inject constructor(
-    private val currentPerformanceUseCase: CurrentPerformanceUseCase
+    private val currentPerformanceUseCase: CurrentPerformanceUseCase,
+    private val wifiUseCase: WifiUseCase
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(MenuReportsUi())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            wifiUseCase().collect { status ->
+                _uiState.update { it.copy(isOffline = status != NetworkStatus.Connected) }
+            }
+        }
+    }
 
     fun getInitialData() {
         viewModelScope.launch {

@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.commons.RequiresInternetNotice
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.home.screen.ElegantMenuCard
@@ -127,6 +128,9 @@ fun MenuReportesView(
                 else -> Unit
             }
 
+            if (uiState.value.isOffline) {
+                RequiresInternetNotice(message = stringResource(R.string.reportes_requiere_internet))
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

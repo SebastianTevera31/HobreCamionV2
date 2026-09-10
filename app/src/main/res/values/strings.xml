@@ -700,6 +700,14 @@
     <string name="ver_mapa">Ver mapa</string>
     <string name="secciones">Secciones</string>
     <string name="ultimos_datos">ÚLTIMOS DATOS</string>
+    <string name="rendimiento_actualizado">Calculado el %1$s</string>
+    <string name="sin_internet_home">Sin conexión a internet. Se muestra la última información guardada.</string>
+    <string name="alertas_requiere_internet">Sin conexión: se muestran las alertas más recientes guardadas. Conéctate a internet para ver más resultados o aplicar filtros.</string>
+    <string name="reportes_requiere_internet">Sin conexión: se muestra el último reporte descargado. Conéctate a internet para ver información actualizada.</string>
+    <string name="foro_sin_internet">Sin conexión a internet. Conéctate a una red para ver el foro.</string>
+    <string name="mapa_vial_titulo">Mapa vial</string>
+    <string name="mapa_vial_subtitulo">Consulta el estado de las vías en tiempo real</string>
+    <string name="requiere_internet_badge">Requiere internet</string>
     <string name="registrar">registrar</string>
     <string name="todas">Todas</string>
 

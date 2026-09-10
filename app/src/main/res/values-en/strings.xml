@@ -784,4 +784,16 @@
     <string name="temperature">temperature</string>
     <string name="inflate">inflate</string>
     <string name="critica">CRITICAL</string>
+
+    <!-- Connectivity & Offline states -->
+    <string name="rendimiento_actualizado">Calculated on %1$s</string>
+    <string name="sin_internet_home">No internet connection. Showing the last saved information.</string>
+    <string name="alertas_requiere_internet">No connection: showing the most recent saved alerts. Connect to the internet to see more results or apply filters.</string>
+    <string name="reportes_requiere_internet">No connection: showing the last downloaded report. Connect to the internet to see updated information.</string>
+    <string name="foro_sin_internet">No internet connection. Connect to a network to view the forum.</string>
+    <string name="requiere_internet_badge">Requires internet</string>
+
+    <!-- Maps -->
+    <string name="mapa_vial_titulo">Road Map</string>
+    <string name="mapa_vial_subtitulo">Check road status in real time</string>
 </resources>

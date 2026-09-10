@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.getRelativeTime
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.forum.ForumComment
 import com.rfz.appflotal.data.model.forum.ForumTopic
 import com.rfz.appflotal.domain.database.GetTasksUseCase
@@ -22,6 +23,7 @@ import com.rfz.appflotal.domain.forum.GetForumRoomWithTopicsUseCase
 import com.rfz.appflotal.domain.forum.GetForumRoomsUseCase
 import com.rfz.appflotal.domain.forum.GetForumTopicByIdUseCase
 import com.rfz.appflotal.domain.forum.GetForumTopicMessagesUseCase
+import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,12 +45,21 @@ class ForumViewModel @Inject constructor(
     private val crudForumTopicUseCase: CrudForumTopicUseCase,
     private val createForumReportUseCase: CreateForumReportUseCase,
     private val crudForumCommentUseCase: CrudForumCommentUseCase,
-    private val getTasksUseCase: GetTasksUseCase
+    private val getTasksUseCase: GetTasksUseCase,
+    private val wifiUseCase: WifiUseCase
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(ForumUiState())
     val uiState = _uiState.asStateFlow()
     private var currentPhotoUri: Uri? = null
     private var publicationJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            wifiUseCase().collect { status ->
+                _uiState.update { it.copy(isOffline = status != NetworkStatus.Connected) }
+            }
+        }
+    }
 
     fun getInitialData(forceRefresh: Boolean = false) {
         if (_uiState.value.rooms.isNotEmpty() && !forceRefresh) return

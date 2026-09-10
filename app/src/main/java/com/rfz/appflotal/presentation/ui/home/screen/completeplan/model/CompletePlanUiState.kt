@@ -61,9 +61,11 @@ data class CompletePlanUiState(
     val errorMessage: String? = null,
     val currentScreen: BottomNavItems = BottomNavItems.HOME,
     val userName: String = "",
-    val vehicleName: String = "",
+    val vehicleType: String = "",
     val vehiclePlate: String = "",
     val paymentPlanType: PaymentPlanType = PaymentPlanType.Complete,
+    val isOffline: Boolean = false,
+    val performanceDate: String = "",
     val stats: List<VehicleStat> = listOf(
         VehicleStat(
             1,

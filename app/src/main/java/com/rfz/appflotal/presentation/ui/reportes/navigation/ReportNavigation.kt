@@ -44,7 +44,8 @@ fun NavGraphBuilder.reportGraph(
             FuelConsumptionReportRoute(
                 onBack = { navController.popBackStack() },
                 reports = state.reports,
-                screenState = state.loadState
+                screenState = state.loadState,
+                isOffline = state.isOffline
             )
         }
 
@@ -63,6 +64,7 @@ fun NavGraphBuilder.reportGraph(
                 loadState = state.menuLoadState,
                 exportLoadState = state.exportPdfState,
                 pdfUri = state.pdfUri,
+                isOffline = state.isOffline,
                 onExportPdf = { uri -> viewModel.updatePdfUri(uri) },
                 onSharePdf = { uri ->
                     viewModel.sharePdfReport(context, uri)
@@ -122,6 +124,7 @@ fun NavGraphBuilder.reportGraph(
             Co2EmissionReportRoute(
                 screenState = state.loadState,
                 reports = state.reports,
+                isOffline = state.isOffline,
                 onBack = {
                     navController.popBackStack()
                 }

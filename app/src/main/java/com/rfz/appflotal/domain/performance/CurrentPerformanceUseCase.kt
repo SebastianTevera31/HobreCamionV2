@@ -1,5 +1,6 @@
 package com.rfz.appflotal.domain.performance
 
+import com.rfz.appflotal.data.repository.performance.PerformanceCacheRepository
 import com.rfz.appflotal.domain.report.GetCO2EmissionsUseCase
 import com.rfz.appflotal.domain.report.GetFuelConsumptionUseCase
 import kotlinx.coroutines.async
@@ -12,7 +13,8 @@ import javax.inject.Inject
 class CurrentPerformanceUseCase @Inject constructor(
     private val getFuelConsumptionUseCase: GetFuelConsumptionUseCase,
 //    private val getCpkReportUseCase: GetCpkReportUseCase,
-    private val getCO2EmissionsUseCase: GetCO2EmissionsUseCase
+    private val getCO2EmissionsUseCase: GetCO2EmissionsUseCase,
+    private val performanceCacheRepository: PerformanceCacheRepository
 ) {
 
     suspend operator fun invoke(): PerformanceData = coroutineScope {
@@ -40,10 +42,22 @@ class CurrentPerformanceUseCase @Inject constructor(
         val latestCO2 = co2EmissionsResult?.find { it.month == currentMonthApiFormat }
             ?: co2EmissionsResult?.firstOrNull()
 
-        // 4. Retornar datos estructurados
-        PerformanceData(
+        // 4. Si no hubo datos remotos (sin internet o error), usar el último rendimiento
+        // calculado y guardado localmente.
+        if (fuelConsumptionResult == null && co2EmissionsResult == null) {
+            return@coroutineScope performanceCacheRepository.get() ?: PerformanceData(
+                fuelConsumption = "0",
+                co2Emissions = "0",
+                calculatedAt = 0L
+            )
+        }
+
+        val performanceData = PerformanceData(
             fuelConsumption = latestFuel?.monthlyPerformance ?: "0",
-            co2Emissions = latestCO2?.monthlyCO2Emissions ?: "0"
+            co2Emissions = latestCO2?.monthlyCO2Emissions ?: "0",
+            calculatedAt = System.currentTimeMillis()
         )
+        performanceCacheRepository.save(performanceData)
+        performanceData
     }
 }

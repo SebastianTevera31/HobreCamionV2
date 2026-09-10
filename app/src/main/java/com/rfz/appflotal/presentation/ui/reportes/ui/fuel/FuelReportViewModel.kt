@@ -2,8 +2,10 @@ package com.rfz.appflotal.presentation.ui.reportes.ui.fuel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.report.FuelConsumptionReportResponse
 import com.rfz.appflotal.domain.report.GetFuelConsumptionUseCase
+import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,10 +16,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FuelReportViewModel @Inject constructor(
-    private val getFuelConsumptionUseCase: GetFuelConsumptionUseCase
+    private val getFuelConsumptionUseCase: GetFuelConsumptionUseCase,
+    private val wifiUseCase: WifiUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FuelUiState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            wifiUseCase().collect { status ->
+                _uiState.update { it.copy(isOffline = status != NetworkStatus.Connected) }
+            }
+        }
+    }
 
     fun loadData() {
         viewModelScope.launch {
@@ -41,5 +52,6 @@ class FuelReportViewModel @Inject constructor(
 
 data class FuelUiState(
     val reports: List<FuelConsumptionReportResponse> = emptyList(),
-    val loadState: LoadState<Unit> = LoadState.Idle
+    val loadState: LoadState<Unit> = LoadState.Idle,
+    val isOffline: Boolean = false
 )

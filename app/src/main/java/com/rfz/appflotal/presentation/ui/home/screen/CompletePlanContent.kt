@@ -21,6 +21,7 @@ fun CompletePlanContent(
     paymentPlan: PaymentPlanType,
     userName: String,
     plates: String,
+    vehicleType: String,
     wifiStatus: NetworkStatus,
     modifier: Modifier = Modifier,
     onShowMonitorDialog: (Boolean) -> Unit,
@@ -35,9 +36,11 @@ fun CompletePlanContent(
 
     CompletePlanScreen(
         state = state.copy(
+            vehicleType = vehicleType,
             userName = userName,
             vehiclePlate = plates,
-            paymentPlanType = paymentPlan
+            paymentPlanType = paymentPlan,
+            isOffline = wifiStatus != NetworkStatus.Connected
         ),
         onNotificationsClick = { /* TODO: Implement notifications logic */ },
         onVehicleDetailClick = { onNavigate(ReportGraph) },
@@ -56,6 +59,7 @@ fun CompletePlanContentPreview() {
         CompletePlanContent(
             paymentPlan = PaymentPlanType.Complete,
             userName = "Juan Perez",
+            vehicleType = "Camioneta",
             plates = "ABC-123",
             wifiStatus = NetworkStatus.Connected,
             onShowMonitorDialog = {},

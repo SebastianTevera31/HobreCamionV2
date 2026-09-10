@@ -24,10 +24,12 @@ import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.TireRepair
 import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GpsFixed
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.WbSunny
@@ -45,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -178,21 +181,23 @@ fun HomeTopBar(
 }
 
 @Composable
-fun SectionHeader(title: String, actionLabel: String, onActionClick: () -> Unit) {
+fun SectionHeader(title: String, actionLabel: String? = null, onActionClick: (() -> Unit)? = null) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        TextButton(onClick = onActionClick) {
-            Text(
-                actionLabel,
-                color = TealMid,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(4.dp)
-            )
+        if (actionLabel != null && onActionClick != null) {
+            TextButton(onClick = onActionClick) {
+                Text(
+                    actionLabel,
+                    color = TealMid,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(4.dp)
+                )
+            }
         }
     }
 }
@@ -201,14 +206,15 @@ fun SectionHeader(title: String, actionLabel: String, onActionClick: () -> Unit)
 fun VehiclePerformanceCard(
     vehicleName: String,
     plate: String,
-    stats: List<VehicleStat>
+    stats: List<VehicleStat>,
+    updatedAtLabel: String? = null
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = TealDark)
     ) {
-        Column(Modifier.padding(20.dp)) {
+        Column(Modifier.padding(14.dp)) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -218,14 +224,14 @@ fun VehiclePerformanceCard(
                     text = "$vehicleName · $plate",
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .background(Color.White.copy(alpha = 0.18f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .padding(horizontal = 12.dp, vertical = 5.dp)
                 ) {
                     Text(
                         stringResource(R.string.ultimos_datos),
@@ -234,8 +240,15 @@ fun VehiclePerformanceCard(
                         fontWeight = FontWeight.Bold,
                     )
                 }
+                if (!updatedAtLabel.isNullOrEmpty()) {
+                    Text(
+                        text = stringResource(R.string.rendimiento_actualizado, updatedAtLabel),
+                        color = Color.White.copy(alpha = 0.65f),
+                        fontSize = 10.sp
+                    )
+                }
             }
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -262,9 +275,9 @@ fun VehicleStatItem(stat: VehicleStat, modifier: Modifier = Modifier) {
             icon = stat.icon,
             contentDescription = null,
             tint = Color.White.copy(alpha = 0.85f),
-            modifier = Modifier.size(22.dp)
+            modifier = Modifier.size(18.dp)
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(4.dp))
         Row(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.Center
@@ -272,7 +285,7 @@ fun VehicleStatItem(stat: VehicleStat, modifier: Modifier = Modifier) {
             Text(
                 text = stat.value,
                 color = Color.White,
-                fontSize = 20.sp,
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
@@ -398,6 +411,80 @@ fun WeatherCard(temp: String, city: String, description: String, onClick: () -> 
                 Text(description, color = SubtleText, style = MaterialTheme.typography.bodySmall)
             }
             Icon(Icons.Outlined.ChevronRight, contentDescription = "Ver mapa", tint = TealDark)
+        }
+    }
+}
+
+@Composable
+fun RoadMapPromoCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        onClick = onClick
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.horizontalGradient(listOf(TealDark, TealMid))
+                )
+                .padding(18.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color.White.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Outlined.Map,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
+                Spacer(Modifier.width(14.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.mapa_vial_titulo),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        stringResource(R.string.mapa_vial_subtitulo),
+                        color = Color.White.copy(alpha = 0.85f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.White.copy(alpha = 0.18f))
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Filled.WifiOff,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            stringResource(R.string.requiere_internet_badge),
+                            color = Color.White,
+                            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = Color.White)
+            }
         }
     }
 }
@@ -741,6 +828,14 @@ fun WeatherCardPreview() {
             description = "Despejado · viento 12 km/h",
             onClick = {}
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RoadMapPromoCardPreview() {
+    HombreCamionTheme {
+        RoadMapPromoCard(onClick = {})
     }
 }
 

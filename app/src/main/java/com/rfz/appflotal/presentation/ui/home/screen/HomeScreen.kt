@@ -213,6 +213,7 @@ fun HomeScreen(
                             }
                         },
                         plates = plates,
+                        vehicleType = uiState.userData?.vehicleType ?: "",
                         userName = userName,
                         onInspectClick = onInspectClick,
                         onAssemblyClick = onAssemblyClick,

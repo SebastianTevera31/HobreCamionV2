@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.alerts.AlertType
+import com.rfz.appflotal.presentation.commons.RequiresInternetNotice
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -89,6 +90,7 @@ fun AlertsRoute(
         hasNextPage = uiState.hasNextPage,
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,
+        isOffline = uiState.isOffline,
         selectedAlert = uiState.selectedAlert,
         selectedDate = uiState.startDate,
         selectedWheel = uiState.selectedWheel,
@@ -114,6 +116,7 @@ fun AlertScreen(
     hasNextPage: Boolean,
     isLoading: Boolean,
     errorMessage: String? = null,
+    isOffline: Boolean = false,
     selectedAlert: AlertType,
     selectedDate: String,
     selectedWheel: String,
@@ -150,6 +153,15 @@ fun AlertScreen(
                 verticalArrangement = Arrangement.spacedBy(Dimens.ListItemSpacing),
                 modifier = Modifier.weight(1f)
             ) {
+                if (isOffline) {
+                    item {
+                        RequiresInternetNotice(
+                            message = stringResource(R.string.alertas_requiere_internet),
+                            modifier = Modifier.padding(bottom = Dimens.PaddingSmall)
+                        )
+                    }
+                }
+
                 item {
                     Card(
                         modifier = Modifier
@@ -275,6 +287,7 @@ fun AlertScreen(
                                             onApplyFilters(startDate, endDate, wheel, alert)
                                             showFilters = false
                                         },
+                                        enabled = !isOffline,
                                         shape = RoundedCornerShape(12.dp),
                                         modifier = Modifier.weight(1f),
                                         colors = ButtonDefaults.buttonColors(
@@ -393,7 +406,7 @@ fun AlertScreen(
             PageNavigator(
                 hasData = alerts.isNotEmpty(),
                 currentPage = currentPage,
-                hasNextPage = hasNextPage,
+                hasNextPage = hasNextPage && !isOffline,
                 isLoading = isLoading,
                 onPageSelected = onPageSelected
             )

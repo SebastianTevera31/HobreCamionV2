@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.model.alerts
 import androidx.annotation.StringRes
 import com.google.gson.annotations.SerializedName
 import com.rfz.appflotal.R
+import kotlinx.serialization.Serializable
 
 data class AlertDto(
     @SerializedName("id_monitor") val idMonitor: Int,
@@ -13,6 +14,7 @@ data class AlertDto(
     @SerializedName("fld_datedata") val datedata: String,
 )
 
+@Serializable
 data class Alert(
     val idMonitor: Int,
     val position: String,
@@ -22,6 +24,7 @@ data class Alert(
     val datedata: String
 )
 
+@Serializable
 enum class AlertType(val key: String, @StringRes val label: Int) {
     NONE("none", R.string.todas),
     HIGH_TEMPERATURE("temperature", R.string.temperatura),

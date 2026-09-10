@@ -121,6 +121,11 @@ fun NavGraphBuilder.forumsGraph(
                     is LoadState.Error -> {
                         ForumErrorView(
                             onRetry = { viewModel.getInitialData() },
+                            message = if (state.isOffline) {
+                                stringResource(R.string.foro_sin_internet)
+                            } else {
+                                stringResource(R.string.error_carga_datos)
+                            },
                             modifier = Modifier.padding(paddingValues)
                         )
                     }
@@ -237,6 +242,11 @@ fun NavGraphBuilder.forumsGraph(
                     is LoadState.Error -> {
                         ForumErrorView(
                             onRetry = { viewModel.loadTopicsByRoom(args.roomId) },
+                            message = if (state.isOffline) {
+                                stringResource(R.string.foro_sin_internet)
+                            } else {
+                                stringResource(R.string.error_carga_datos)
+                            },
                             modifier = Modifier.padding(paddingValues)
                         )
                     }
@@ -372,6 +382,11 @@ fun NavGraphBuilder.forumsGraph(
                     is LoadState.Error -> {
                         ForumErrorView(
                             onRetry = { viewModel.loadTopicMessages(args.topicId.toInt()) },
+                            message = if (state.isOffline) {
+                                stringResource(R.string.foro_sin_internet)
+                            } else {
+                                stringResource(R.string.error_carga_datos)
+                            },
                             modifier = Modifier.padding(paddingValues)
                         )
                     }

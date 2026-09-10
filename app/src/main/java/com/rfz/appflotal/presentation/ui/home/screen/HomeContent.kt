@@ -36,6 +36,7 @@ fun HomeContent(
     onUpdateSelectedTire: (String) -> Unit,
     onGetSensorDataByWheel: (String) -> Unit,
     plates: String,
+    vehicleType: String,
     userName: String,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
@@ -43,6 +44,7 @@ fun HomeContent(
     when (paymentPlan) {
         PaymentPlanType.Complete -> CompletePlanContent(
             paymentPlan = paymentPlan,
+            vehicleType = vehicleType,
             userName = userName,
             plates = plates,
             wifiStatus = wifiStatus,
@@ -119,7 +121,8 @@ fun HomeContentPreview() {
             onGetSensorDataByWheel = {},
             plates = "ABC-123",
             userName = "Juan Perez",
-            paddingValues = PaddingValues()
+            paddingValues = PaddingValues(),
+            vehicleType = ""
         )
     }
 }

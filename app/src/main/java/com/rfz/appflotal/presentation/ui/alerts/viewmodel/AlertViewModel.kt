@@ -39,6 +39,7 @@ data class AlertUiState(
     val hasNextPage: Boolean = true,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    val isOffline: Boolean = false,
 )
 
 @HiltViewModel
@@ -55,6 +56,11 @@ class AlertViewModel @Inject constructor(
     init {
         getData()
         goToPage(1)
+        viewModelScope.launch {
+            wifiUseCase().collect { status ->
+                _uiState.update { it.copy(isOffline = status != NetworkStatus.Connected) }
+            }
+        }
     }
 
     fun getData() {
