@@ -232,8 +232,7 @@ fun NavGraphBuilder.forumsGraph(
                             onSaved = {
                                 viewModel.doLike(
                                     id = it,
-                                    isComment = false,
-                                    fromPostsView = true
+                                    isComment = false
                                 )
                             }
                         )

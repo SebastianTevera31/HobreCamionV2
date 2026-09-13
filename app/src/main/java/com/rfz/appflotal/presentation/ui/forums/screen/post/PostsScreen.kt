@@ -78,7 +78,7 @@ fun TopicsScreenPreview() {
             idUser = 1,
             color = MaterialTheme.colorScheme.primary,
             isLiked = false,
-            likes = 0,
+            likes = 12,
         ),
         ForumTopic(
             id = 2,
@@ -91,7 +91,7 @@ fun TopicsScreenPreview() {
             idUser = 2,
             color = MaterialTheme.colorScheme.primary,
             isLiked = true,
-            likes = 0
+            likes = 8
         ),
         ForumTopic(
             id = 3,
