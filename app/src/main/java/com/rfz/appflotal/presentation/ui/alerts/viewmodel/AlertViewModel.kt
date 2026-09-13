@@ -6,6 +6,7 @@ import androidx.compose.material.icons.outlined.Thermostat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.alerts.Alert
 import com.rfz.appflotal.domain.alerts.GetAlertsUseCase
@@ -170,6 +171,6 @@ fun Alert.toAlertUi(): AlertUi {
         detailLabelRes = if (isPressureAlert) R.string.alert_label_pressure else R.string.alert_label_temp,
         detailValue = if (isPressureAlert) "%.2f psi".format(psi) else "$temperature °C",
         status = AlertStatus.CRITICA,
-        date = datedata
+        date = convertDate(datedata),
     )
 }

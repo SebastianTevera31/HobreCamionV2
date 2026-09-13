@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -312,6 +313,7 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .wrapContentHeight()
             .padding(top = 8.dp),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -379,6 +381,19 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
                     Spacer(Modifier.width(4.dp))
                     Text(it, color = SubtleText, style = MaterialTheme.typography.bodySmall)
                 }
+            }
+            Row {
+                Text(
+                    stringResource(R.string.fecha),
+                    color = SubtleText,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    alert.date,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }
