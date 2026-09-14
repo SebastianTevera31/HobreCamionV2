@@ -108,7 +108,11 @@ fun NavGraphBuilder.authGraph(
                 navController.popBackStack()
             }) {
             loginViewModel.acceptTermsConditions(onNavigate = {
-                navController.navigate(it)
+                navController.navigate(it) {
+                    // Al aceptar términos y pasar a HOME/PERMISOS, saca LOGIN y TERMINOS
+                    // de la pila (el back en Home está bloqueado y quedarían inaccesibles).
+                    popUpTo(NavScreens.LOGIN) { inclusive = true }
+                }
             }) {
                 !arePermissionsGranted(
                     context, getRequiredPermissions()

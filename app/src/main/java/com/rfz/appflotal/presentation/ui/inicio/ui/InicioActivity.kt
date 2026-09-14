@@ -574,6 +574,10 @@ class InicioActivity : ComponentActivity() {
                                         // Estar logueado garantiza existe un userId y navegacion al menu principal
                                         if (inicioState.value.userId != null) {
                                             navController.navigate(NavScreens.HOME) {
+                                                // Limpia toda la pila para no apilar HOME
+                                                // sobre destinos previos (el back en Home
+                                                // está bloqueado y no podría drenarlos).
+                                                popUpTo(0) { inclusive = true }
                                                 launchSingleTop = true
                                             }
                                         }

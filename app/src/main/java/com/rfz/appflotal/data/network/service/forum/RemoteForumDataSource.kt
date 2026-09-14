@@ -140,10 +140,7 @@ class ForumService @Inject constructor(
     }
 
     private fun prepareImagePart(imagePath: String): MultipartBody.Part? {
-        if (imagePath.isEmpty()) {
-            val emptyBody = ByteArray(0).toRequestBody("image/jpeg".toMediaTypeOrNull())
-            return MultipartBody.Part.createFormData("image", "empty.jpg", emptyBody)
-        }
+        if (imagePath.isEmpty()) return null
 
         return try {
             val uri = imagePath.toUri()

@@ -4,13 +4,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +40,6 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.services.components.ServiceDropdownField
 import com.rfz.appflotal.presentation.ui.services.components.ServiceTextField
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
 import com.rfz.appflotal.presentation.ui.services.model.sampleServiceCatalog
@@ -73,8 +72,6 @@ fun NewServiceOrderScreen(
     var odometer by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
-
-    val vehicleName = vehicles.firstOrNull { it.id == vehicleId }?.name ?: ""
     val isValid = vehicleId != null && odometer.toIntOrNull() != null && date.isNotBlank()
 
     Scaffold(

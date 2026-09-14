@@ -176,11 +176,15 @@ fun HomeScreen(
                         onLogout = { onLogout() },
                         onShare = {
                             homeViewModel.cleanOperationStatus()
-                            navController.navigate(NavScreens.COMENTARIOS)
+                            navController.navigate(NavScreens.COMENTARIOS) {
+                                launchSingleTop = true
+                            }
                         },
                         onProfile = {
                             updateUserData(uiState.selectedLanguage)
-                            navController.navigate(NavScreens.INFORMACION_USUARIO)
+                            navController.navigate(NavScreens.INFORMACION_USUARIO) {
+                                launchSingleTop = true
+                            }
                         },
                         showDialog = {
                             monitorViewModel.showMonitorDialog(true)

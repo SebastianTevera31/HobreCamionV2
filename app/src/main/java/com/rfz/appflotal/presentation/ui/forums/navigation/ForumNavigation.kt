@@ -93,7 +93,9 @@ fun NavGraphBuilder.forumsGraph(
                         }
                     },
                     onMenuClick = {
-                        navController.navigate(SavedCommentsNav)
+                        navController.navigate(SavedCommentsNav) {
+                            launchSingleTop = true
+                        }
                     }
                 )
             ) { paddingValues ->
@@ -170,7 +172,9 @@ fun NavGraphBuilder.forumsGraph(
                         navController.popBackStack()
                     },
                     onMenuClick = {
-                        navController.navigate(SavedCommentsNav)
+                        navController.navigate(SavedCommentsNav) {
+                            launchSingleTop = true
+                        }
                     }
                 ),
                 floatingActionButton = {

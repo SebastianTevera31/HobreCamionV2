@@ -79,7 +79,9 @@ fun NavGraphBuilder.couponGraph(
                         }
                     },
                     onMenuClick = {
-                        navController.navigate(SavedCommentsNav)
+                        navController.navigate(SavedCommentsNav) {
+                            launchSingleTop = true
+                        }
                     },
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,

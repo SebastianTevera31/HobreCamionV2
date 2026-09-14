@@ -125,7 +125,9 @@ fun NavGraphBuilder.mainNavigation(
         WeatherRoute(
             viewModel = watherViewModel,
             onNavigateToMap = {
-                navController.navigate(HombreCamionScreens.MAPA_VIAL.name)
+                navController.navigate(HombreCamionScreens.MAPA_VIAL.name) {
+                    launchSingleTop = true
+                }
             },
             onBack = { navController.popBackStack() }
         )
@@ -141,7 +143,9 @@ fun NavGraphBuilder.mainNavigation(
 
     composable(route = HombreCamionScreens.REGISTER_TIRES.name) {
         MenuTireScreen(
-            onNavigate = { route -> navController.navigate(route) },
+            onNavigate = { route ->
+                navController.navigate(route) { launchSingleTop = true }
+            },
             onBack = { navController.popBackStack() },
         )
     }
