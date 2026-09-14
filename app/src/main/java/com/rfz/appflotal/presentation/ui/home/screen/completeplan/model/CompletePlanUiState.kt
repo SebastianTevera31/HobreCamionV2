@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
+import com.rfz.appflotal.presentation.navigation.ServiceGraph
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
@@ -112,6 +113,11 @@ data class CompletePlanUiState(
             icon = R.drawable.tire_register.asIcon(),
             label = R.string.registrar,
             route = HombreCamionScreens.REGISTER_TIRES.name
+        ),
+        SectionItem(
+            icon = R.drawable.services_icon.asIcon(),
+            label = R.string.servicios,
+            route = ServiceGraph
         )
     ),
     val blogPosts: List<BlogPost> = emptyList()

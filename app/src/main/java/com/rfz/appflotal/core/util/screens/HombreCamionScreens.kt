@@ -13,5 +13,7 @@ enum class HombreCamionScreens(screenName: String) {
     MAPA_VIAL(screenName = "mapavial"),
     WEATHER(screenName = "weatherScreen"),
     ALERTS(screenName = "alertsScreen"),
-    REGISTER_TIRES(screenName = "registerTiresScreen")
+    REGISTER_TIRES(screenName = "registerTiresScreen"),
+
+    SERVICES(screenName = "services")
 }

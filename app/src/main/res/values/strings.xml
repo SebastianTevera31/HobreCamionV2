@@ -151,6 +151,14 @@
     <string name="permiso_bluetooth_notificaciones">Permisos de Bluetooth y notificaciones</string>
     <string name="conceder_permisos_btn">Conceder permisos</string>
     <string name="texto_permisos_app">Se requiere acceso a Bluetooth y notificaciones para conectarse con tu monitor HawksHead TPMS.</string>
+    <string name="permiso_grupo_ubicacion_titulo">Ubicación</string>
+    <string name="permiso_grupo_ubicacion_rationale">Necesitamos tu ubicación para mostrar la posición de tus unidades y conectarlas con el monitor TPMS.</string>
+    <string name="permiso_grupo_bluetooth_titulo">Bluetooth</string>
+    <string name="permiso_grupo_bluetooth_rationale">El acceso a Bluetooth es necesario para vincular y leer los datos de tu monitor HawksHead TPMS.</string>
+    <string name="permiso_grupo_notificaciones_titulo">Notificaciones</string>
+    <string name="permiso_grupo_notificaciones_rationale">Las notificaciones te avisan de alertas importantes de tus unidades y del monitor TPMS.</string>
+    <string name="permisos_estado_algunos_denegados">Algunos permisos fueron denegados. Puedes intentar concederlos de nuevo.</string>
+    <string name="permisos_estado_permanentemente_denegados">Uno o más permisos fueron denegados permanentemente. Actívalos manualmente en Ajustes.</string>
     <string name="no_se_ha_asignado_ningun_monitor">No se pudo asignar un monitor</string>
     <string name="hombrecamion_conexion_tpms">Flotal - Conexión TPMS</string>
     <string name="recibiendo_datos_monitor">Recibiendo datos del monitor...</string>
@@ -779,4 +787,68 @@
     <string name="temperature">temperature</string>
     <string name="inflate">inflado</string>
     <string name="critica">CRÍTICA</string>
+
+    <!-- ============ Módulo de Servicios ============ -->
+    <string name="srv_title">Servicios</string>
+    <string name="srv_ordenes_section">Órdenes</string>
+    <string name="srv_buscar_orden">Buscar orden</string>
+    <string name="srv_nueva_orden">Nueva orden</string>
+    <string name="srv_sin_ordenes">No hay órdenes de servicio para este vehículo.</string>
+    <string name="srv_error_cargar">No se pudieron cargar las órdenes.</string>
+    <string name="srv_requiere_internet">Sin conexión: se muestran las órdenes guardadas. Conéctate para ver o editar más.</string>
+
+    <!-- Vehículo -->
+    <string name="srv_vehiculo_label">Vehículo</string>
+    <string name="srv_tipo_label">Tipo</string>
+    <string name="srv_odometro_label">Odómetro</string>
+    <string name="srv_seleccionar_vehiculo">Selecciona un vehículo</string>
+
+    <!-- Orden -->
+    <string name="srv_orden_folio">Orden #%1$s</string>
+    <string name="srv_orden_apertura">Fecha de apertura</string>
+    <string name="srv_orden_finalizado">Fecha de finalizado</string>
+    <string name="srv_orden_en_proceso">En proceso</string>
+    <string name="srv_orden_total">Total</string>
+    <string name="srv_orden_servicios_count">%1$d servicio(s)</string>
+    <string name="srv_estado_abierta">Abierta</string>
+    <string name="srv_estado_finalizada">Finalizada</string>
+
+    <!-- Acciones de orden -->
+    <string name="srv_accion_modificar_orden">Modificar orden de servicio</string>
+    <string name="srv_accion_agregar_servicio">Agregar servicios</string>
+    <string name="srv_accion_eliminar_orden">Eliminar orden de servicio</string>
+    <string name="srv_accion_eliminar_servicio">Eliminar servicio</string>
+
+    <!-- Detalle de orden -->
+    <string name="srv_detalle_orden_title">Detalles de orden</string>
+    <string name="srv_detalle_servicios_section">Servicios</string>
+    <string name="srv_detalle_sin_servicios">Esta orden aún no tiene servicios.</string>
+
+    <!-- Formulario de servicio -->
+    <string name="srv_form_nuevo_title">Nuevo servicio</string>
+    <string name="srv_form_detalle_title">Detalles de servicio</string>
+    <string name="srv_servicio_label">Servicio</string>
+    <string name="srv_servicio_seleccionar">Selecciona un servicio</string>
+    <string name="srv_costo_unitario_label">Costo unitario</string>
+    <string name="srv_cantidad_label">Cantidad</string>
+    <string name="srv_total_label">Total</string>
+    <string name="srv_proveedor_label">Proveedor</string>
+    <string name="srv_tipo_ocurrencia_label">Tipo de ocurrencia</string>
+    <string name="srv_descripcion_label">Descripción</string>
+    <string name="srv_descripcion_placeholder">Detalles del servicio (opcional)</string>
+    <string name="srv_agregar_servicio_btn">Agregar servicio</string>
+    <string name="srv_actualizar_btn">Actualizar</string>
+
+    <!-- Nueva orden -->
+    <string name="srv_nueva_orden_title">Nueva orden</string>
+    <string name="srv_notas_label">Notas</string>
+    <string name="srv_notas_placeholder">Observaciones de la orden (opcional)</string>
+    <string name="srv_crear_orden_btn">Crear orden</string>
+
+    <!-- Confirmaciones -->
+    <string name="srv_confirmar_eliminar_titulo">¿Eliminar?</string>
+    <string name="srv_confirmar_eliminar_orden_msg">Se eliminará la orden #%1$s y todos sus servicios. Esta acción no se puede deshacer.</string>
+    <string name="srv_confirmar_eliminar_servicio_msg">Se eliminará este servicio de la orden. Esta acción no se puede deshacer.</string>
+    <string name="srv_eliminar_btn">Eliminar</string>
+    <string name="servicios">Servicios</string>
 </resources>

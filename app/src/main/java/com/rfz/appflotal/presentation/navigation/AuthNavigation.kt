@@ -1,7 +1,11 @@
 package com.rfz.appflotal.presentation.navigation
 
+import android.app.Activity
 import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -28,7 +32,8 @@ fun NavGraphBuilder.authGraph(
     loginViewModel: LoginViewModel,
     inicioScreenViewModel: InicioScreenViewModel,
     homeViewModel: HomeViewModel,
-    allGranted: Boolean,
+    wasRequestedBefore: () -> Boolean,
+    markRequested: () -> Unit,
     permissionLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
 ) {
     composable(NavScreens.LOADING) { SplashScreen() }
@@ -76,10 +81,16 @@ fun NavGraphBuilder.authGraph(
     }
 
     composable(route = NavScreens.PERMISOS) {
+        val activity = navController.context as Activity
         PermissionScreen(
-            context = navController.context,
-            allGranted = allGranted,
+            modifier = Modifier
+                .safeContentPadding()
+                .navigationBarsPadding(),
+            activity = activity,
             launcher = permissionLauncher,
+            wasRequestedBefore = wasRequestedBefore,
+            markRequested = markRequested,
+            onOpenSettings = { inicioScreenViewModel.openAppSettings(activity) },
             onGranted = {
                 navController.navigate(NavScreens.HOME) {
                     popUpTo(0) { inclusive = true }

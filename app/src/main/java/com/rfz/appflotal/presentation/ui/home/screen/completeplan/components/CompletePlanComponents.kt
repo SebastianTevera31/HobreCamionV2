@@ -320,7 +320,7 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         onClick = onClick
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -357,7 +357,6 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     Icons.Outlined.Error,

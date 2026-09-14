@@ -10,7 +10,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.telephony.TelephonyManager
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -37,13 +36,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -64,7 +59,6 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.ConsentManager
-import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.data.repository.fcmessaging.AppNotificationState
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.fcmessaging.MaintenanceStatus
@@ -93,6 +87,7 @@ import com.rfz.appflotal.presentation.navigation.authGraph
 import com.rfz.appflotal.presentation.navigation.catalogGraph
 import com.rfz.appflotal.presentation.navigation.mainNavigation
 import com.rfz.appflotal.presentation.navigation.operationsNavigation
+import com.rfz.appflotal.presentation.navigation.serviceGraph
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.couponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
@@ -114,7 +109,6 @@ import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserVi
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
 import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
 import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
-import com.rfz.appflotal.presentation.ui.utils.isServiceRunning
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -232,7 +226,6 @@ class InicioActivity : ComponentActivity() {
             val prefs by lazy {
                 getSharedPreferences("permissions_prefs", MODE_PRIVATE)
             }
-            var allGranted by remember { mutableStateOf(false) }
             val navController = rememberNavController()
             val backStackEntry by navController.currentBackStackEntryAsState()
             val showBanner = when (backStackEntry?.destination?.route) {
@@ -270,8 +263,6 @@ class InicioActivity : ComponentActivity() {
             val lifecycleOwner = LocalLifecycleOwner.current
             val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
 
-            val context = LocalContext.current
-
             val inicioState = appStatusManagerRepository.appState.collectAsState()
 
             val uiState = inicioScreenViewModel.uiState.collectAsState()
@@ -281,37 +272,12 @@ class InicioActivity : ComponentActivity() {
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
             ) { result ->
-                val wasRequestedBefore = inicioScreenViewModel.permissionsRequested(prefs)
-
-                val deniedPermissions = result.filterValues { granted -> !granted }.keys
-
-                val permanentlyDenied = deniedPermissions.any { permission ->
-                    !ActivityCompat.shouldShowRequestPermissionRationale(
-                        this@InicioActivity, permission
-                    )
-                } && wasRequestedBefore
-
-                inicioScreenViewModel.markPermissionsRequested(prefs)
-
+                // El resto de la evaluación (denegados, permanentemente denegados,
+                // arranque de servicio, navegación) la maneja PermissionScreen, que
+                // se re-evalúa a sí misma en cada composición/resume.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     if (result[Manifest.permission.POST_NOTIFICATIONS] == true) {
                         inicioScreenViewModel.updatePermissionState(NotificationPermissionState.Granted)
-                    }
-                }
-
-                if (deniedPermissions.isEmpty()) {
-                    allGranted = true
-                    if (!isServiceRunning(this@InicioActivity, HombreCamionService::class.java)) {
-                        HombreCamionService.startService(this@InicioActivity)
-                    }
-                } else {
-                    allGranted = false
-
-                    if (permanentlyDenied) {
-                        Log.d("Permiso", "Denegado permanentemente")
-                        inicioScreenViewModel.openAppSettings(context)
-                    } else {
-                        Log.d("Permiso", "Denegado temporalmente")
                     }
                 }
             }
@@ -562,7 +528,12 @@ class InicioActivity : ComponentActivity() {
                                         loginViewModel = loginViewModel,
                                         inicioScreenViewModel = inicioScreenViewModel,
                                         homeViewModel = homeViewModel,
-                                        allGranted = allGranted,
+                                        wasRequestedBefore = {
+                                            inicioScreenViewModel.permissionsRequested(prefs)
+                                        },
+                                        markRequested = {
+                                            inicioScreenViewModel.markPermissionsRequested(prefs)
+                                        },
                                         permissionLauncher = permissionLauncher
                                     )
 
@@ -594,6 +565,7 @@ class InicioActivity : ComponentActivity() {
                                     forumsGraph(navController)
                                     couponGraph(navController)
                                     reportGraph(navController)
+                                    serviceGraph(navController)
                                 }
 
                                 NotificationComponent(

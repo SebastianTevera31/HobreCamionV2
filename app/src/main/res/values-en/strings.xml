@@ -152,6 +152,14 @@
     <string name="permiso_bluetooth_notificaciones">Bluetooth and notifications permission</string>
     <string name="conceder_permisos_btn">Grant permissions</string>
     <string name="texto_permisos_app">Bluetooth and notification access is required to connect to your HawksHead TPMS monitor.</string>
+    <string name="permiso_grupo_ubicacion_titulo">Location</string>
+    <string name="permiso_grupo_ubicacion_rationale">We need your location to show your fleet\'s position and connect with the TPMS monitor.</string>
+    <string name="permiso_grupo_bluetooth_titulo">Bluetooth</string>
+    <string name="permiso_grupo_bluetooth_rationale">Bluetooth access is required to pair with and read data from your HawksHead TPMS monitor.</string>
+    <string name="permiso_grupo_notificaciones_titulo">Notifications</string>
+    <string name="permiso_grupo_notificaciones_rationale">Notifications alert you to important updates about your fleet and TPMS monitor.</string>
+    <string name="permisos_estado_algunos_denegados">Some permissions were denied. You can try granting them again.</string>
+    <string name="permisos_estado_permanentemente_denegados">One or more permissions were permanently denied. Enable them manually in Settings.</string>
     <string name="no_se_ha_asignado_ningun_monitor">Monitor could not be assigned</string>
     <string name="hombrecamion_conexion_tpms">Flotal - TPMS Connection</string>
     <string name="recibiendo_datos_monitor">Receiving TPMS data...</string>
@@ -796,4 +804,68 @@
     <!-- Maps -->
     <string name="mapa_vial_titulo">Road Map</string>
     <string name="mapa_vial_subtitulo">Check road status in real time</string>
+
+    <!-- ============ Services module ============ -->
+    <string name="srv_title">Services</string>
+    <string name="srv_ordenes_section">Orders</string>
+    <string name="srv_buscar_orden">Search order</string>
+    <string name="srv_nueva_orden">New order</string>
+    <string name="srv_sin_ordenes">There are no service orders for this vehicle.</string>
+    <string name="srv_error_cargar">Orders could not be loaded.</string>
+    <string name="srv_requiere_internet">No connection: showing saved orders. Connect to view or edit more.</string>
+
+    <!-- Vehicle -->
+    <string name="srv_vehiculo_label">Vehicle</string>
+    <string name="srv_tipo_label">Type</string>
+    <string name="srv_odometro_label">Odometer</string>
+    <string name="srv_seleccionar_vehiculo">Select a vehicle</string>
+
+    <!-- Order -->
+    <string name="srv_orden_folio">Order #%1$s</string>
+    <string name="srv_orden_apertura">Opening date</string>
+    <string name="srv_orden_finalizado">Closing date</string>
+    <string name="srv_orden_en_proceso">In progress</string>
+    <string name="srv_orden_total">Total</string>
+    <string name="srv_orden_servicios_count">%1$d service(s)</string>
+    <string name="srv_estado_abierta">Open</string>
+    <string name="srv_estado_finalizada">Closed</string>
+
+    <!-- Order actions -->
+    <string name="srv_accion_modificar_orden">Edit service order</string>
+    <string name="srv_accion_agregar_servicio">Add services</string>
+    <string name="srv_accion_eliminar_orden">Delete service order</string>
+    <string name="srv_accion_eliminar_servicio">Delete service</string>
+
+    <!-- Order detail -->
+    <string name="srv_detalle_orden_title">Order details</string>
+    <string name="srv_detalle_servicios_section">Services</string>
+    <string name="srv_detalle_sin_servicios">This order has no services yet.</string>
+
+    <!-- Service form -->
+    <string name="srv_form_nuevo_title">New service</string>
+    <string name="srv_form_detalle_title">Service details</string>
+    <string name="srv_servicio_label">Service</string>
+    <string name="srv_servicio_seleccionar">Select a service</string>
+    <string name="srv_costo_unitario_label">Unit cost</string>
+    <string name="srv_cantidad_label">Quantity</string>
+    <string name="srv_total_label">Total</string>
+    <string name="srv_proveedor_label">Provider</string>
+    <string name="srv_tipo_ocurrencia_label">Occurrence type</string>
+    <string name="srv_descripcion_label">Description</string>
+    <string name="srv_descripcion_placeholder">Service details (optional)</string>
+    <string name="srv_agregar_servicio_btn">Add service</string>
+    <string name="srv_actualizar_btn">Update</string>
+
+    <!-- New order -->
+    <string name="srv_nueva_orden_title">New order</string>
+    <string name="srv_notas_label">Notes</string>
+    <string name="srv_notas_placeholder">Order notes (optional)</string>
+    <string name="srv_crear_orden_btn">Create order</string>
+
+    <!-- Confirmations -->
+    <string name="srv_confirmar_eliminar_titulo">Delete?</string>
+    <string name="srv_confirmar_eliminar_orden_msg">Order #%1$s and all its services will be deleted. This action cannot be undone.</string>
+    <string name="srv_confirmar_eliminar_servicio_msg">This service will be removed from the order. This action cannot be undone.</string>
+    <string name="srv_eliminar_btn">Delete</string>
+    <string name="servicios">Services</string>
 </resources>

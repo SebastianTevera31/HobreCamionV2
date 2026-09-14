@@ -103,6 +103,10 @@ class VialStatusViewModel @Inject constructor(
             if (currentCountry != null) {
                 _uiState.update { it.copy(selectedCountry = currentCountry) }
                 fetchStates(currentCountry.id, result.estado)
+            } else {
+                // El geocoder no devolvió país (pais == null) o no coincide con el catálogo.
+                // Sin este reset, gettingStatesStatus se quedaría en Loading indefinidamente.
+                _uiState.update { it.copy(gettingStatesStatus = LoadState.Idle) }
             }
         }
     }
