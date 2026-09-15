@@ -1,4 +1,7 @@
 package com.rfz.appflotal.presentation.ui.home.screen
+import com.rfz.appflotal.presentation.navigation.isBottomBarTabRoute
+import com.rfz.appflotal.presentation.navigation.navigateAsBottomBarTab
+import com.rfz.appflotal.presentation.navigation.navigateUpSafely
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -202,15 +205,19 @@ fun HomeScreen(
                             )
                         },
                         onNavigate = { route ->
-                            when (route) {
-                                is String -> {
-                                    navController.navigate(route) {
+                            // Si el destino es una pestaña del bottom bar, navegar igual
+                            // que la barra (saveState/restoreState + marca), para que una
+                            // pestaña nunca quede en la pila en "dos modos". El resto,
+                            // navegación normal conservando el botón back.
+                            if (isBottomBarTabRoute(route)) {
+                                navController.navigateAsBottomBarTab(route)
+                            } else {
+                                when (route) {
+                                    is String -> navController.navigate(route) {
                                         launchSingleTop = true
                                     }
-                                }
 
-                                else -> {
-                                    navController.navigate(route) {
+                                    else -> navController.navigate(route) {
                                         launchSingleTop = true
                                     }
                                 }
@@ -241,7 +248,7 @@ fun HomeScreen(
                         uiState = monitorUiState,
                         positionUiState = positionsUiState,
                         onBack = {
-                            navController.navigateUp()
+                            navController.navigateUpSafely()
                         },
                         monitorTireUiState = monitorTireUiState,
                         tireUiState = tireUiState,

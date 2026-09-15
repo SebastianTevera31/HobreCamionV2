@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.brand.screen
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -132,7 +133,7 @@ fun MarcasScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = { navController.popBackStack() },
+                        onClick = { navController.popBackStackSafely() },
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Icon(

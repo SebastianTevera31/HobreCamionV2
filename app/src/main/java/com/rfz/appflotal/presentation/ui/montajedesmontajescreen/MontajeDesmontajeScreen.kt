@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.montajedesmontajescreen
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -87,7 +88,7 @@ fun MontajeDesmontajeScreen(navController: NavController) {
                 containerColor = Color(0xFF2E3192), // Color de fondo
                 titleContentColor = Color.White // Color del título
             ),title = { Text("Montaje y Desmontaje") }, navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = { navController.popBackStackSafely() }) {
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
                 }
             })

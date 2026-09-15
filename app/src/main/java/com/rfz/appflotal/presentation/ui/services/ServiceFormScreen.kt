@@ -71,9 +71,7 @@ fun ServiceFormScreen(
     modifier: Modifier = Modifier,
     initial: ServiceItemUi? = null
 ) {
-    var serviceId by remember { mutableStateOf(initial?.serviceId) }
     var providerName by remember { mutableStateOf(initial?.provider ?: "") }
-    var providerId by remember { mutableStateOf(providers.firstOrNull { it.name == initial?.provider }?.id) }
     var occurrenceName by remember { mutableStateOf(initial?.occurrenceType ?: "") }
     var occurrenceId by remember {
         mutableStateOf(occurrenceTypes.firstOrNull { it.name == initial?.occurrenceType }?.id)
@@ -86,9 +84,9 @@ fun ServiceFormScreen(
     }
     var notes by remember { mutableStateOf(initial?.notes ?: "") }
 
-    val serviceName = services.firstOrNull { it.id == serviceId }?.name ?: ""
+    var serviceName by remember { mutableStateOf(initial?.serviceName ?: "") }
     val total = (unitCost.toDoubleOrNull() ?: 0.0) * (quantity.toDoubleOrNull() ?: 0.0)
-    val isValid = serviceId != null && unitCost.toDoubleOrNull() != null &&
+    val isValid = serviceName.isNotEmpty() && unitCost.toDoubleOrNull() != null &&
             (quantity.toDoubleOrNull() ?: 0.0) > 0.0
 
     val title = stringResource(
@@ -114,20 +112,16 @@ fun ServiceFormScreen(
                 .padding(Dimens.PaddingMedium),
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
         ) {
-            ServiceDropdownField(
+            ServiceTextField(
                 label = stringResource(R.string.srv_servicio_label),
-                selected = serviceName,
-                placeholder = stringResource(R.string.srv_servicio_seleccionar),
-                options = services.map { it.name },
-                onSelect = { serviceId = services[it].id }
+                value = serviceName,
+                onValueChange = { serviceName = it }
             )
 
-            ServiceDropdownField(
+            ServiceTextField(
                 label = stringResource(R.string.srv_proveedor_label),
-                selected = providerName,
-                placeholder = stringResource(R.string.srv_servicio_seleccionar),
-                options = providers.map { it.name },
-                onSelect = { providerName = providers[it].name; providerId = providers[it].id }
+                value = providerName,
+                onValueChange = { providerName = it }
             )
 
             ServiceDropdownField(
@@ -150,6 +144,7 @@ fun ServiceFormScreen(
                     keyboardType = KeyboardType.Decimal,
                     modifier = Modifier.weight(1f)
                 )
+
                 ServiceTextField(
                     label = stringResource(R.string.srv_cantidad_label),
                     value = quantity,
@@ -181,8 +176,8 @@ fun ServiceFormScreen(
                 onClick = {
                     onSubmit(
                         ServiceFormData(
-                            serviceId = serviceId,
-                            providerId = providerId,
+                            serviceId = 0,
+                            providerId = 0,
                             occurrenceTypeId = occurrenceId,
                             unitCost = unitCost,
                             quantity = quantity,

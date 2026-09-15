@@ -105,7 +105,7 @@ fun NavGraphBuilder.authGraph(
             buttonText = R.string.confirmar,
             onBack = {
                 inicioScreenViewModel.deleteUserData()
-                navController.popBackStack()
+                navController.popBackStackSafely()
             }) {
             loginViewModel.acceptTermsConditions(onNavigate = {
                 navController.navigate(it) {

@@ -65,14 +65,14 @@ fun NavGraphBuilder.catalogGraph(
         val retreatedDesignViewModel: RetreatedDesignViewModel = hiltViewModel()
         RetreatedDesignScreen(
             viewModel = retreatedDesignViewModel,
-            onBackScreen = { navController.popBackStack() })
+            onBackScreen = { navController.popBackStackSafely() })
     }
 
     composable(NavScreens.MARCA_RENOVADA) {
         val marcaRenovadosScreen: MarcaRenovadosViewModel = hiltViewModel()
         MarcaRenovadosScreen(
             viewModel = marcaRenovadosScreen,
-            onBackScreen = { navController.popBackStack() })
+            onBackScreen = { navController.popBackStackSafely() })
     }
 
     composable(NavScreens.MEDIDAS_LLANTAS) {

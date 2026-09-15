@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.productoscreen
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -224,7 +225,7 @@ fun NuevoProductoScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navController.popBackStackSafely() }) {
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Back",

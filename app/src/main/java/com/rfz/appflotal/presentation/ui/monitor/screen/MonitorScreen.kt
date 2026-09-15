@@ -67,6 +67,7 @@ fun MonitorScreen(
     onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = true,
 ) {
     val monitorUiState by monitorViewModel.monitorUiState.collectAsState()
     val positionsUiState by monitorViewModel.positionsUiState.collectAsState()
@@ -92,6 +93,7 @@ fun MonitorScreen(
         wifiStatus = wifiStatus,
         paymentPlan = paymentPlan,
         navigateUp = navigateUp,
+        showBackButton = showBackButton,
         onInspectClick = onInspectClick,
         onAssemblyClick = onAssemblyClick,
         onDisassemblyClick = onDisassemblyClick,
@@ -130,6 +132,7 @@ fun MonitorScreenContent(
     wifiStatus: NetworkStatus,
     paymentPlan: PaymentPlanType,
     navigateUp: () -> Unit,
+    showBackButton: Boolean = true,
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,
     onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
@@ -151,14 +154,17 @@ fun MonitorScreenContent(
 
     Scaffold(
         topBar = {
-            if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar(showDialog = {
-                if (wifiStatus == NetworkStatus.Connected) onShowMonitorDialog(true)
-                else Toast.makeText(
-                    context,
-                    R.string.error_conexion_internet,
-                    Toast.LENGTH_LONG
-                ).show()
-            }) { navigateUp() }
+            if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar(
+                showDialog = {
+                    if (wifiStatus == NetworkStatus.Connected) onShowMonitorDialog(true)
+                    else Toast.makeText(
+                        context,
+                        R.string.error_conexion_internet,
+                        Toast.LENGTH_LONG
+                    ).show()
+                },
+                showNavigationButton = showBackButton
+            ) { navigateUp() }
         },
         bottomBar = {
             MonitorBottomNavBar(

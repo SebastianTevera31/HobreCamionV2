@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.couponbook.navigation
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -167,7 +168,7 @@ fun NavGraphBuilder.couponGraph(
                     showBackButton = true,
                     showMenuButton = false,
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     },
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
@@ -215,7 +216,7 @@ fun NavGraphBuilder.couponGraph(
 
             LaunchedEffect(state.acquireState) {
                 if (state.acquireState is LoadState.Success) {
-                    navController.popBackStack()
+                    navController.popBackStackSafely()
                     viewModel.resetAcquireState()
                 }
             }
@@ -225,7 +226,7 @@ fun NavGraphBuilder.couponGraph(
                     coupon = coupon,
                     modifier = Modifier.safeContentPadding(),
                     onBack = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     },
                     onGettingVoucher = { code ->
                         viewModel.acquireVoucher(code.toIntOrNull() ?: 0)
@@ -249,7 +250,7 @@ fun NavGraphBuilder.couponGraph(
                 RedeemCoupon(
                     coupon = coupon,
                     onBack = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     }
                 )
             }
@@ -277,7 +278,7 @@ fun NavGraphBuilder.couponGraph(
                     showBackButton = true,
                     showMenuButton = false,
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     },
                     searchConfig = ForumSearchConfig(
                         value = state.promotionsSearchQuery,
@@ -324,7 +325,7 @@ fun NavGraphBuilder.couponGraph(
                 PromotionDetailScreen(
                     discount = promotion,
                     onBack = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     }
                 )
             }

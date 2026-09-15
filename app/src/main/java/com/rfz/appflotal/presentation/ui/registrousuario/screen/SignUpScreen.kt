@@ -1,4 +1,6 @@
 package com.rfz.appflotal.presentation.ui.registrousuario.screen
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
+import com.rfz.appflotal.presentation.navigation.navigateUpSafely
 
 import android.content.Context
 import android.os.Build
@@ -86,7 +88,7 @@ fun SignUpScreen(
                 showNavigateUp = !isNextScreen,
                 onNavigateUp = {
                     signUpViewModel.cleanSignUpData()
-                    navController.navigateUp()
+                    navController.navigateUpSafely()
                 }
             )
         }
@@ -194,7 +196,7 @@ fun SignUpScreen(
                         TerminosScreen(
                             context = ctx,
                             onBack = {
-                                navController.popBackStack()
+                                navController.popBackStackSafely()
                             }
                         ) {
                             authFlow = AuthFlow.SignUp

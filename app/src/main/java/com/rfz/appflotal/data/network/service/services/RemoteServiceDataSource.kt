@@ -4,6 +4,7 @@ import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.services.dto.ServiceDetailDto
 import com.rfz.appflotal.data.model.services.dto.ServiceOrderDto
 import com.rfz.appflotal.data.model.services.response.ServiceResponseDto
+import com.rfz.appflotal.data.model.services.response.TypeServiceDto
 import com.rfz.appflotal.data.network.client.services.ServiceClient
 import com.rfz.appflotal.data.network.networkRequestHelper
 import javax.inject.Inject
@@ -26,12 +27,11 @@ class RemoteServiceDataSource @Inject constructor(
         }
     }
 
-    suspend fun doCrudServiceOrder(
-        requestBody: ServiceOrderDto,
+    suspend fun doGetServiceType(
         token: String
-    ): Result<GeneralResponse> {
+    ): Result<TypeServiceDto> {
         return networkRequestHelper {
-            serviceClient.doCrudServiceOrder(requestBody, token)
+            serviceClient.doGetServiceType(token)
         }
     }
 }

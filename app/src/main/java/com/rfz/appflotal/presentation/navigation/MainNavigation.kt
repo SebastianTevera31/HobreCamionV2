@@ -80,14 +80,15 @@ fun NavGraphBuilder.mainNavigation(
         MonitorScreen(
             monitorViewModel = monitorViewModel,
             registerMonitorViewModel = registerMonitorViewModel,
-            navigateUp = { navController.navigateUp() },
+            navigateUp = { navController.navigateUpSafely() },
+            showBackButton = false,
             paymentPlan = PaymentPlanType.Complete,
             onDialogCancel = { monitorId ->
                 registerMonitorViewModel.stopScan()
                 if (monitorId != 0) {
                     monitorViewModel.showMonitorDialog(false)
                 } else {
-                    navController.navigateUp()
+                    navController.navigateUpSafely()
                 }
             },
             modifier = Modifier.fillMaxSize(),
@@ -108,14 +109,15 @@ fun NavGraphBuilder.mainNavigation(
         UpdateUserScreen(
             updateUserViewModel = updateUserViewModel,
         ) {
-            navController.popBackStack()
+            navController.popBackStackSafely()
         }
     }
 
     composable(route = HombreCamionScreens.MAPA_VIAL.name) {
         val vialStatusViewModel: VialStatusViewModel = hiltViewModel()
         VialStatusScreen(
-            onBack = { navController.popBackStack() },
+            onBack = { navController.popBackStackSafely() },
+            showBackButton = false,
             viewModel = vialStatusViewModel
         )
     }
@@ -129,7 +131,7 @@ fun NavGraphBuilder.mainNavigation(
                     launchSingleTop = true
                 }
             },
-            onBack = { navController.popBackStack() }
+            onBack = { navController.popBackStackSafely() }
         )
     }
 
@@ -137,7 +139,7 @@ fun NavGraphBuilder.mainNavigation(
         route = HombreCamionScreens.ALERTS.name
     ) {
         AlertsRoute(
-            onBack = { navController.popBackStack() },
+            onBack = { navController.popBackStackSafely() },
         )
     }
 
@@ -146,7 +148,7 @@ fun NavGraphBuilder.mainNavigation(
             onNavigate = { route ->
                 navController.navigate(route) { launchSingleTop = true }
             },
-            onBack = { navController.popBackStack() },
+            onBack = { navController.popBackStackSafely() },
         )
     }
 }

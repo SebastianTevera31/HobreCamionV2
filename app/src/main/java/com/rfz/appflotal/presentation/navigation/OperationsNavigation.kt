@@ -76,7 +76,7 @@ fun NavGraphBuilder.operationsNavigation(
             positionTire = positionTire,
             viewModel = assemblyTireViewModel,
             onBack = {
-                navController.popBackStack()
+                navController.popBackStackSafely()
             })
     }
 
@@ -100,7 +100,7 @@ fun NavGraphBuilder.operationsNavigation(
             initialPressure = pressure.toFloat(),
             viewModel = disassemblyTireViewModel,
             onBack = {
-                navController.popBackStack()
+                navController.popBackStackSafely()
             },
             onFinish = {
                 navController.navigate(HombreCamionScreens.MONITOR.name) {
@@ -114,7 +114,7 @@ fun NavGraphBuilder.operationsNavigation(
     composable(route = NavScreens.DESECHO) {
         val tireWasteViewModel: TireWasteViewModel = hiltViewModel()
         TireWastePileScreen(
-            onBack = { navController.popBackStack() },
+            onBack = { navController.popBackStackSafely() },
             viewModel = tireWasteViewModel,
         )
     }
@@ -122,7 +122,7 @@ fun NavGraphBuilder.operationsNavigation(
     composable(route = NavScreens.REPARARRENOVAR) {
         val repararRenovarViewModel: RepararRenovarViewModel = hiltViewModel()
         RepararRenovarScreen(
-            onBack = { navController.popBackStack() },
+            onBack = { navController.popBackStackSafely() },
             viewModel = repararRenovarViewModel,
         )
     }
@@ -130,7 +130,7 @@ fun NavGraphBuilder.operationsNavigation(
     composable(route = NavScreens.CAMBIO_DESTINO) {
         val cambioDestinoViewModel: CambioDestinoViewModel = hiltViewModel()
         CambioDestinoScreen(
-            onBack = { navController.popBackStack() },
+            onBack = { navController.popBackStackSafely() },
             viewModel = cambioDestinoViewModel,
         )
     }
@@ -143,7 +143,7 @@ fun NavGraphBuilder.operationsNavigation(
                     feedback
                 )
             },
-            onBack = { navController.popBackStack() },
+            onBack = { navController.popBackStackSafely() },
             messageOperationState = msgOperationState.value,
         )
     }

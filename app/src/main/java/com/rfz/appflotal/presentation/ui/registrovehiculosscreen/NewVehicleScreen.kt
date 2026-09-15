@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.registrovehiculosscreen
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -269,7 +270,7 @@ fun NuevoRegistroVehiculoScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navController.popBackStackSafely() }) {
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Back",

@@ -86,6 +86,7 @@ import com.rfz.appflotal.presentation.commons.UpdateAppScreen
 import com.rfz.appflotal.presentation.navigation.authGraph
 import com.rfz.appflotal.presentation.navigation.catalogGraph
 import com.rfz.appflotal.presentation.navigation.mainNavigation
+import com.rfz.appflotal.presentation.navigation.navigateAsBottomBarTab
 import com.rfz.appflotal.presentation.navigation.operationsNavigation
 import com.rfz.appflotal.presentation.navigation.serviceGraph
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -247,16 +248,7 @@ class InicioActivity : ComponentActivity() {
 
             val onBottomNavItemClick: (BottomNavItems) -> Unit = { item ->
                 if (item != selectedNavItem) {
-                    val navOptions: NavOptionsBuilder.() -> Unit = {
-                        popUpTo(NavScreens.HOME) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                    when (val route = item.route) {
-                        is String -> navController.navigate(route, builder = navOptions)
-                        null -> Unit
-                        else -> navController.navigate(route, builder = navOptions)
-                    }
+                    item.route?.let { route -> navController.navigateAsBottomBarTab(route) }
                 }
             }
 

@@ -52,6 +52,7 @@ fun MenuReportesView(
     onBack: () -> Unit,
     onNavigate: (Any) -> Unit,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = true,
     viewModel: MenuReportsViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsState()
@@ -66,7 +67,7 @@ fun MenuReportesView(
             SimpleTopBar(
                 title = stringResource(R.string.reportes),
                 onBack = onBack,
-                showBackButton = true,
+                showBackButton = showBackButton,
                 subTitle = ""
             )
         }

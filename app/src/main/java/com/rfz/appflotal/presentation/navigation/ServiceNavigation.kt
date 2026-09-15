@@ -47,7 +47,7 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
                 isLoading = state.isLoading,
                 errorMessage = state.errorMessage,
                 isOffline = state.isOffline,
-                onBack = { navController.popBackStack() },
+                onBack = { navController.popBackStackSafely() },
                 onOpenOrder = { orderId ->
                     navController.navigate(ServiceOrderDetailRoute(orderId))
                 },
@@ -71,14 +71,14 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
 
             // Si la orden ya no existe (p. ej. se eliminó), volvemos atrás.
             if (order == null) {
-                LaunchedEffect(Unit) { navController.popBackStack() }
+                LaunchedEffect(Unit) { navController.popBackStackSafely() }
                 return@composable
             }
 
             ServiceOrderDetailScreen(
                 order = order,
                 items = viewModel.itemsOfOrder(args.orderId),
-                onBack = { navController.popBackStack() },
+                onBack = { navController.popBackStackSafely() },
                 onEditOrder = {
                     navController.navigate(ServiceOrderFormRoute(args.orderId))
                 },
@@ -91,7 +91,7 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
                 onDeleteService = { serviceId -> viewModel.deleteService(serviceId) },
                 onDeleteOrder = {
                     viewModel.deleteOrder(args.orderId)
-                    navController.popBackStack()
+                    navController.popBackStackSafely()
                 }
             )
         }
@@ -111,10 +111,10 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
                 providers = state.providers,
                 occurrenceTypes = state.occurrenceTypes,
                 initial = args.serviceId?.let { viewModel.itemById(it) },
-                onBack = { navController.popBackStack() },
+                onBack = { navController.popBackStackSafely() },
                 onSubmit = { data ->
                     viewModel.saveService(args.orderId, args.serviceId, data)
-                    navController.popBackStack()
+                    navController.popBackStackSafely()
                 }
             )
         }
@@ -128,10 +128,10 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
             NewServiceOrderScreen(
                 vehicles = vehicles,
                 preselectedVehicleId = vehicles.firstOrNull()?.id,
-                onBack = { navController.popBackStack() },
+                onBack = { navController.popBackStackSafely() },
                 onSubmit = { data ->
                     viewModel.saveOrder(args.orderId, data)
-                    navController.popBackStack()
+                    navController.popBackStackSafely()
                 }
             )
         }

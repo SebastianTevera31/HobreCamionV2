@@ -76,6 +76,7 @@ import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialUiStatus
 fun VialStatusScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = true,
     viewModel: VialStatusViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -88,6 +89,7 @@ fun VialStatusScreen(
         modifier = modifier,
         uiState = uiState,
         onBack = onBack,
+        showBackButton = showBackButton,
         onCountryChange = viewModel::changeCountry,
         onStateChange = viewModel::changeState,
         onSearch = viewModel::getMap,
@@ -105,6 +107,7 @@ fun VialStatusScreen(
 fun VialStatusView(
     uiState: VialUiStatus,
     onBack: () -> Unit,
+    showBackButton: Boolean = true,
     onCountryChange: (Int) -> Unit,
     onStateChange: (Int) -> Unit,
     onSearch: () -> Unit,
@@ -143,15 +146,17 @@ fun VialStatusView(
                     )
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.padding(start = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.regresar),
-                            modifier = Modifier.size(24.dp)
-                        )
+                    if (showBackButton) {
+                        IconButton(
+                            onClick = onBack,
+                            modifier = Modifier.padding(start = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.regresar),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 },
                 actions = {
