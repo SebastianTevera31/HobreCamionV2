@@ -1,5 +1,4 @@
 package com.rfz.appflotal.presentation.ui.registrollantasscreen.screens
-import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -61,7 +59,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -74,6 +71,7 @@ import androidx.navigation.NavController
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.AddItemDialog
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ItemDialog
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
@@ -82,7 +80,6 @@ import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRe
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.text.filter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -443,7 +440,7 @@ private fun TireDialog(
 }
 
 @Composable
-private fun DialogTextField(
+fun DialogTextField(
     label: String,
     value: String,
     modifier: Modifier = Modifier,

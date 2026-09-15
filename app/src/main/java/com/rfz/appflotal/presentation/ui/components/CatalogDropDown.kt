@@ -4,10 +4,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
@@ -21,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
@@ -35,7 +40,9 @@ fun CatalogDropdown(
     errorText: Int?,
     onSelected: (CatalogItem?) -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "Catalog"
+    label: String = "Catalog",
+    onAddNewItem: (() -> Unit)? = null,
+    addNewItemLabel: String? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
     val defaultText = stringResource(R.string.ninguno)
@@ -87,6 +94,30 @@ fun CatalogDropdown(
                         },
                         onClick = {
                             onSelected(item)
+                            expanded = false
+                        }
+                    )
+                }
+
+                onAddNewItem?.let {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = addNewItemLabel ?: stringResource(R.string.agregar_elemento, ""),
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        onClick = {
+                            it()
                             expanded = false
                         }
                     )
