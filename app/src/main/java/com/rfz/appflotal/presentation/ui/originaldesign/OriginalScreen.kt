@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.originaldesign
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -313,7 +314,7 @@ fun OriginalScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navController.popBackStackSafely() }) {
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Back",

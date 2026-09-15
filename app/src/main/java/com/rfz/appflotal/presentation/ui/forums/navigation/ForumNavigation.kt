@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.forums.navigation
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -78,7 +79,7 @@ fun NavGraphBuilder.forumsGraph(
                 topBarConfig = ForumTopBarConfig(
                     title = stringResource(R.string.forum_title),
                     subtitle = stringResource(R.string.forum_subtitle),
-                    showBackButton = true,
+                    showBackButton = false,
                     showMenuButton = true,
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
@@ -93,7 +94,9 @@ fun NavGraphBuilder.forumsGraph(
                         }
                     },
                     onMenuClick = {
-                        navController.navigate(SavedCommentsNav)
+                        navController.navigate(SavedCommentsNav) {
+                            launchSingleTop = true
+                        }
                     }
                 )
             ) { paddingValues ->
@@ -121,6 +124,11 @@ fun NavGraphBuilder.forumsGraph(
                     is LoadState.Error -> {
                         ForumErrorView(
                             onRetry = { viewModel.getInitialData() },
+                            message = if (state.isOffline) {
+                                stringResource(R.string.foro_sin_internet)
+                            } else {
+                                stringResource(R.string.error_carga_datos)
+                            },
                             modifier = Modifier.padding(paddingValues)
                         )
                     }
@@ -162,10 +170,12 @@ fun NavGraphBuilder.forumsGraph(
                         }
                     ),
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     },
                     onMenuClick = {
-                        navController.navigate(SavedCommentsNav)
+                        navController.navigate(SavedCommentsNav) {
+                            launchSingleTop = true
+                        }
                     }
                 ),
                 floatingActionButton = {
@@ -227,8 +237,7 @@ fun NavGraphBuilder.forumsGraph(
                             onSaved = {
                                 viewModel.doLike(
                                     id = it,
-                                    isComment = false,
-                                    fromPostsView = true
+                                    isComment = false
                                 )
                             }
                         )
@@ -237,6 +246,11 @@ fun NavGraphBuilder.forumsGraph(
                     is LoadState.Error -> {
                         ForumErrorView(
                             onRetry = { viewModel.loadTopicsByRoom(args.roomId) },
+                            message = if (state.isOffline) {
+                                stringResource(R.string.foro_sin_internet)
+                            } else {
+                                stringResource(R.string.error_carga_datos)
+                            },
                             modifier = Modifier.padding(paddingValues)
                         )
                     }
@@ -304,7 +318,7 @@ fun NavGraphBuilder.forumsGraph(
                     showBackButton = true,
                     showMenuButton = false,
                     searchConfig = null,
-                    onBackClick = { navController.popBackStack() },
+                    onBackClick = { navController.popBackStackSafely() },
                     onMenuClick = {}
                 ),
                 bottomBar = {
@@ -372,6 +386,11 @@ fun NavGraphBuilder.forumsGraph(
                     is LoadState.Error -> {
                         ForumErrorView(
                             onRetry = { viewModel.loadTopicMessages(args.topicId.toInt()) },
+                            message = if (state.isOffline) {
+                                stringResource(R.string.foro_sin_internet)
+                            } else {
+                                stringResource(R.string.error_carga_datos)
+                            },
                             modifier = Modifier.padding(paddingValues)
                         )
                     }
@@ -405,7 +424,7 @@ fun NavGraphBuilder.forumsGraph(
             LaunchedEffect(message) {
                 if (message == null) {
                     Toast.makeText(context, forumNotFoundMsg, Toast.LENGTH_LONG).show()
-                    navController.popBackStack()
+                    navController.popBackStackSafely()
                 }
             }
 
@@ -413,7 +432,7 @@ fun NavGraphBuilder.forumsGraph(
                 when (val reportState = uiState.value.reportState) {
                     is LoadState.Success -> {
                         Toast.makeText(context, reportSuccessMsg, Toast.LENGTH_SHORT).show()
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                         viewModel.resetReportState()
                     }
 
@@ -433,7 +452,7 @@ fun NavGraphBuilder.forumsGraph(
                         subtitle = stringResource(R.string.forum_report_subtitle),
                         showBackButton = true,
                         showMenuButton = false,
-                        onBackClick = { navController.popBackStack() }
+                        onBackClick = { navController.popBackStackSafely() }
                     )
                 ) { paddingValues ->
                     ReportScreen(
@@ -490,7 +509,7 @@ fun NavGraphBuilder.forumsGraph(
                     isPublishing = state.newTopicState is LoadState.Loading,
                     onBackClick = {
                         viewModel.clearPhoto()
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     },
                     onPublishClick = viewModel::sendTopic,
                     onCancelClick = viewModel::cancelPublication
@@ -500,7 +519,7 @@ fun NavGraphBuilder.forumsGraph(
                     modifier = Modifier.padding(paddingValues),
                     newTopicStatus = state.newTopicState,
                     onBack = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     },
                     selectedImage = (state.photoEvidence as? CameraUiState.Captured)?.uri,
                     onAddImage = {
@@ -560,7 +579,7 @@ fun NavGraphBuilder.forumsGraph(
                     isPublishing = state.sendCommentState is LoadState.Loading,
                     onBackClick = {
                         viewModel.clearPhoto()
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     },
                     onPublishClick = {
                         viewModel.sendComment(
@@ -577,7 +596,7 @@ fun NavGraphBuilder.forumsGraph(
                         modifier = Modifier.padding(paddingValues),
                         replyStatus = state.sendCommentState,
                         onBack = {
-                            navController.popBackStack()
+                            navController.popBackStackSafely()
                         },
                         selectedImage = (state.photoEvidence as? CameraUiState.Captured)?.uri,
                         onAddImage = {
@@ -599,7 +618,7 @@ fun NavGraphBuilder.forumsGraph(
                     showBackButton = true,
                     showMenuButton = false,
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     }
                 )
             ) { paddingValues ->

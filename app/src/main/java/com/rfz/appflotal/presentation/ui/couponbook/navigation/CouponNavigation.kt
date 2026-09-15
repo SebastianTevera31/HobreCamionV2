@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.couponbook.navigation
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -21,6 +22,8 @@ import com.rfz.appflotal.presentation.ui.couponbook.CouponBookViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.screen.info.CouponBookInfo
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookListRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookRoute
+import com.rfz.appflotal.presentation.ui.couponbook.screen.promotions.PromotionDetailScreen
+import com.rfz.appflotal.presentation.ui.couponbook.screen.promotions.PromotionListRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.redeem.RedeemCoupon
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleScaffold
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
@@ -77,18 +80,33 @@ fun NavGraphBuilder.couponGraph(
                         }
                     },
                     onMenuClick = {
-                        navController.navigate(SavedCommentsNav)
-                    }
+                        navController.navigate(SavedCommentsNav) {
+                            launchSingleTop = true
+                        }
+                    },
+                    searchConfig = ForumSearchConfig(
+                        value = state.searchQuery,
+                        placeholder = stringResource(R.string.buscar_cupones_promociones),
+                        onValueChange = { query ->
+                            viewModel.onMainSearchChanged(query)
+                        }
+                    )
                 )
             ) { paddingValues ->
                 CouponBookRoute(
                     nearbyCoupons = state.filteredCoupons,
                     myCoupons = state.filteredVouchers,
+                    searchQuery = state.searchQuery,
+                    promotions = state.promotions,
+                    promotionsState = state.promotionsState,
                     onSeeAllCoupons = {
                         navController.navigate(CouponList(true))
                     },
                     onSeeAllVouchers = {
                         navController.navigate(CouponList(false))
+                    },
+                    onSeeAllPromotions = {
+                        navController.navigate(PromotionList)
                     },
                     onCouponClick = { id ->
                         viewModel.selectCoupon(id)
@@ -97,6 +115,10 @@ fun NavGraphBuilder.couponGraph(
                     onVoucherClick = { id ->
                         viewModel.selectCoupon(id)
                         viewModel.validateVoucher(id)
+                    },
+                    onPromotionClick = { productUrl ->
+                        viewModel.selectPromotion(productUrl)
+                        navController.navigate(PromotionDetail)
                     },
                     modifier = Modifier.padding(paddingValues),
                     screenStatus = state.loadingScreen,
@@ -146,7 +168,7 @@ fun NavGraphBuilder.couponGraph(
                     showBackButton = true,
                     showMenuButton = false,
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     },
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
@@ -194,7 +216,7 @@ fun NavGraphBuilder.couponGraph(
 
             LaunchedEffect(state.acquireState) {
                 if (state.acquireState is LoadState.Success) {
-                    navController.popBackStack()
+                    navController.popBackStackSafely()
                     viewModel.resetAcquireState()
                 }
             }
@@ -204,7 +226,7 @@ fun NavGraphBuilder.couponGraph(
                     coupon = coupon,
                     modifier = Modifier.safeContentPadding(),
                     onBack = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
                     },
                     onGettingVoucher = { code ->
                         viewModel.acquireVoucher(code.toIntOrNull() ?: 0)
@@ -228,7 +250,82 @@ fun NavGraphBuilder.couponGraph(
                 RedeemCoupon(
                     coupon = coupon,
                     onBack = {
-                        navController.popBackStack()
+                        navController.popBackStackSafely()
+                    }
+                )
+            }
+        }
+
+        composable<PromotionList> { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<CouponGraph>()
+                } catch (_: Exception) {
+                    backStackEntry
+                }
+            }
+
+            val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.goToPromotionsPage(1)
+            }
+
+            ForumModuleScaffold(
+                topBarConfig = ForumTopBarConfig(
+                    title = stringResource(R.string.promociones_descuentos),
+                    showBackButton = true,
+                    showMenuButton = false,
+                    onBackClick = {
+                        navController.popBackStackSafely()
+                    },
+                    searchConfig = ForumSearchConfig(
+                        value = state.promotionsSearchQuery,
+                        placeholder = stringResource(R.string.buscar),
+                        onValueChange = { query ->
+                            viewModel.onPromotionsSearchChanged(query)
+                        }
+                    )
+                )
+            ) { paddingValue ->
+                PromotionListRoute(
+                    promotionsState = state.promotionsState,
+                    promotions = state.promotions,
+                    currentPage = state.promotionsPage,
+                    hasNextPage = state.promotionsHasNextPage,
+                    onPromotionClick = { productUrl ->
+                        viewModel.selectPromotion(productUrl)
+                        navController.navigate(PromotionDetail)
+                    },
+                    onPageSelected = { page ->
+                        viewModel.goToPromotionsPage(page)
+                    },
+                    onRetry = {
+                        viewModel.goToPromotionsPage(state.promotionsPage.coerceAtLeast(1))
+                    },
+                    modifier = Modifier.padding(paddingValue)
+                )
+            }
+        }
+
+        composable<PromotionDetail> { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<CouponGraph>()
+                } catch (_: Exception) {
+                    backStackEntry
+                }
+            }
+
+            val viewModel: CouponBookViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
+
+            state.selectedPromotion?.let { promotion ->
+                PromotionDetailScreen(
+                    discount = promotion,
+                    onBack = {
+                        navController.popBackStackSafely()
                     }
                 )
             }

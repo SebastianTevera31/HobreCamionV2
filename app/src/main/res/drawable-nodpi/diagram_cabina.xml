@@ -1,0 +1,25 @@
+<!-- PLACEHOLDER: reemplázalo importando art/diagram_cabina.svg
+     (Android Studio: clic derecho en res > New > Vector Asset > Local file,
+     nombre "diagram_cabina"). Mientras tanto dibuja un contorno simple
+     para que el proyecto compile y el preview funcione. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1024dp"
+    android:height="691dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="691">
+    <path
+        android:pathData="M40,80 L560,80 Q620,80 620,140 L620,551 Q620,611 560,611 L40,611 Q20,611 20,591 L20,100 Q20,80 40,80 Z"
+        android:strokeColor="#94A3B8"
+        android:strokeWidth="6"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M620,300 L1000,300 M620,391 L1000,391"
+        android:strokeColor="#94A3B8"
+        android:strokeWidth="6"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M150,180 L980,180 M150,511 L980,511"
+        android:strokeColor="#CBD5E1"
+        android:strokeWidth="10"
+        android:fillColor="#00000000" />
+</vector>

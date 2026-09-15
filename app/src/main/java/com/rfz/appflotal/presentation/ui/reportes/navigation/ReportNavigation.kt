@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.reportes.navigation
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,7 +30,8 @@ fun NavGraphBuilder.reportGraph(
                 onNavigate = {
                     navController.navigate(it)
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStackSafely() },
+                showBackButton = false
             )
         }
 
@@ -42,9 +44,10 @@ fun NavGraphBuilder.reportGraph(
             }
 
             FuelConsumptionReportRoute(
-                onBack = { navController.popBackStack() },
+                onBack = { navController.popBackStackSafely() },
                 reports = state.reports,
-                screenState = state.loadState
+                screenState = state.loadState,
+                isOffline = state.isOffline
             )
         }
 
@@ -63,6 +66,7 @@ fun NavGraphBuilder.reportGraph(
                 loadState = state.menuLoadState,
                 exportLoadState = state.exportPdfState,
                 pdfUri = state.pdfUri,
+                isOffline = state.isOffline,
                 onExportPdf = { uri -> viewModel.updatePdfUri(uri) },
                 onSharePdf = { uri ->
                     viewModel.sharePdfReport(context, uri)
@@ -75,7 +79,7 @@ fun NavGraphBuilder.reportGraph(
                     navController.navigate(CpkDetail)
                 },
                 onBack = {
-                    navController.popBackStack()
+                    navController.popBackStackSafely()
                 }
             )
         }
@@ -91,7 +95,7 @@ fun NavGraphBuilder.reportGraph(
                 onBack = {
                     viewModel.resetReportState()
                     viewModel.resetExportState()
-                    navController.popBackStack()
+                    navController.popBackStackSafely()
                 },
                 loadState = state.reportLoadState,
                 report = state.cpkReport,
@@ -122,8 +126,9 @@ fun NavGraphBuilder.reportGraph(
             Co2EmissionReportRoute(
                 screenState = state.loadState,
                 reports = state.reports,
+                isOffline = state.isOffline,
                 onBack = {
-                    navController.popBackStack()
+                    navController.popBackStackSafely()
                 }
             )
         }

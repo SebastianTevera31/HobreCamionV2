@@ -76,6 +76,7 @@ import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialUiStatus
 fun VialStatusScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = true,
     viewModel: VialStatusViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -88,6 +89,7 @@ fun VialStatusScreen(
         modifier = modifier,
         uiState = uiState,
         onBack = onBack,
+        showBackButton = showBackButton,
         onCountryChange = viewModel::changeCountry,
         onStateChange = viewModel::changeState,
         onSearch = viewModel::getMap,
@@ -105,6 +107,7 @@ fun VialStatusScreen(
 fun VialStatusView(
     uiState: VialUiStatus,
     onBack: () -> Unit,
+    showBackButton: Boolean = true,
     onCountryChange: (Int) -> Unit,
     onStateChange: (Int) -> Unit,
     onSearch: () -> Unit,
@@ -143,15 +146,17 @@ fun VialStatusView(
                     )
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.padding(start = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.regresar),
-                            modifier = Modifier.size(24.dp)
-                        )
+                    if (showBackButton) {
+                        IconButton(
+                            onClick = onBack,
+                            modifier = Modifier.padding(start = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.regresar),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 },
                 actions = {
@@ -395,6 +400,9 @@ fun VialStatusWebView(
     var canGoBack by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
     var isLoadingPage by remember { mutableStateOf(true) }
+    // URL realmente cargada. Evita recargar la página en cada recomposición (p. ej. al
+    // hacer zoom) cuando el servidor redirige y view.url deja de coincidir con la URL pedida.
+    var loadedUrl by remember { mutableStateOf<String?>(null) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -432,6 +440,9 @@ fun VialStatusWebView(
                         override fun onPageFinished(view: WebView, url: String) {
                             super.onPageFinished(view, url)
 
+                            // El viewport fija el ancho del contenido; el nivel de zoom se
+                            // controla con body.style.zoom, que sí re-escala tras la carga
+                            // (cambiar initial-scale del meta no re-aplica en una página ya cargada).
                             view.evaluateJavascript(
                                 """
                             (function() {
@@ -441,7 +452,8 @@ fun VialStatusWebView(
                                     meta.name = 'viewport';
                                     document.head.appendChild(meta);
                                 }
-                                meta.content = 'width=700, initial-scale=0.5, minimum-scale=0.1, maximum-scale=5.0';
+                                meta.content = 'width=700, initial-scale=1.0, minimum-scale=0.1, maximum-scale=5.0';
+                                if (document.body) { document.body.style.zoom = '${initScale}'; }
                             })();
                             """.trimIndent(),
                                 null
@@ -461,29 +473,31 @@ fun VialStatusWebView(
                         displayZoomControls = false
                         setSupportZoom(true)
 
-                        userAgentString = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) " +
+                        userAgentString =
+                            "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) " +
                                     "AppleWebKit/537.36 (KHTML, like Gecko)" +
-                                " Chrome/148.0.0.0 Mobile Safari/537.36"
+                                    " Chrome/148.0.0.0 Mobile Safari/537.36"
                     }
 
                     loadUrl(url)
                 }.also {
                     webView = it
+                    loadedUrl = url
                 }
             },
             update = { view ->
-                if (view.url != url) {
+                // Solo recarga cuando cambia la URL solicitada, no cuando el servidor
+                // redirige (view.url puede diferir de url tras un redirect).
+                if (loadedUrl != url) {
                     view.loadUrl(url)
+                    loadedUrl = url
                 }
 
-                // Actualizar la escala sin recargar la página completa
+                // Actualizar la escala sin recargar la página completa.
                 view.evaluateJavascript(
                     """
                 (function() {
-                    var meta = document.querySelector('meta[name="viewport"]');
-                    if (meta) {
-                        meta.content = 'width=700, initial-scale=${initScale}, minimum-scale=0.1, maximum-scale=5.0';
-                    }
+                    if (document.body) { document.body.style.zoom = '${initScale}'; }
                 })();
                 """.trimIndent(),
                     null

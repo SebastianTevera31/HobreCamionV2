@@ -39,6 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material3.Button
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.data.model.couponbook.Coupon
@@ -46,9 +48,11 @@ import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType
 import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.DINERO
 import com.rfz.appflotal.data.model.couponbook.VoucherDiscountType.PORCENTAJE
 import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
+import com.rfz.appflotal.data.model.promotions.StoreDiscount
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.couponbook.screen.promotions.PromotionCard
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
@@ -57,10 +61,15 @@ fun CouponBookRoute(
     onLoadData: () -> Unit,
     nearbyCoupons: List<Coupon>,
     myCoupons: List<Coupon>,
+    searchQuery: String,
+    promotions: List<StoreDiscount>,
+    promotionsState: LoadState<Unit>,
     onSeeAllCoupons: () -> Unit,
     onSeeAllVouchers: () -> Unit,
+    onSeeAllPromotions: () -> Unit,
     onCouponClick: (String) -> Unit,
     onVoucherClick: (String) -> Unit,
+    onPromotionClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (screenStatus) {
@@ -85,10 +94,15 @@ fun CouponBookRoute(
             CouponBookScreen(
                 nearbyCoupons = nearbyCoupons,
                 myCoupons = myCoupons,
+                searchQuery = searchQuery,
+                promotions = promotions,
+                promotionsState = promotionsState,
                 onSeeAllCoupons = onSeeAllCoupons,
                 onSeeAllVouchers = onSeeAllVouchers,
+                onSeeAllPromotions = onSeeAllPromotions,
                 onCouponClick = onCouponClick,
                 onVoucherClick = onVoucherClick,
+                onPromotionClick = onPromotionClick,
                 modifier = modifier
             )
         }
@@ -103,10 +117,17 @@ fun CouponBookScreen(
     myCoupons: List<Coupon>,
     onSeeAllCoupons: () -> Unit,
     onSeeAllVouchers: () -> Unit,
+    onSeeAllPromotions: () -> Unit,
     onCouponClick: (String) -> Unit,
     onVoucherClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    searchQuery: String = "",
+    promotions: List<StoreDiscount> = emptyList(),
+    promotionsState: LoadState<Unit> = LoadState.Idle,
+    onPromotionClick: (String) -> Unit = {}
 ) {
+    val isSearching = searchQuery.isNotBlank()
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -121,64 +142,172 @@ fun CouponBookScreen(
             CouponBookHeader()
         }
 
-        item {
-            SectionHeader(
-                title = stringResource(R.string.cupones_cercanos),
-                onSeeAllClick = onSeeAllCoupons
-            )
-        }
-
-        item {
-            if (nearbyCoupons.isEmpty()) {
-                EmptyCouponCard(
-                    message = stringResource(R.string.no_hay_cupones_cercanos)
+        if (isSearching) {
+            item {
+                SearchResultsSection(
+                    searchQuery = searchQuery,
+                    nearbyCoupons = nearbyCoupons,
+                    promotions = promotions,
+                    promotionsState = promotionsState,
+                    onCouponClick = onCouponClick,
+                    onPromotionClick = onPromotionClick
                 )
-            } else {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
-                    contentPadding = PaddingValues(end = Dimens.PaddingMedium)
-                ) {
-                    items(
-                        items = nearbyCoupons,
-                        key = { coupon -> coupon.fldCode }
-                    ) { coupon ->
-                        CuponCard(
-                            coupon = coupon,
-                            onClick = { onCouponClick(coupon.fldCode) }
-                        )
+            }
+        } else {
+            item {
+                PromotionsInviteCard(
+                    onSeeAllPromotions = onSeeAllPromotions
+                )
+            }
+
+            item {
+                SectionHeader(
+                    title = stringResource(R.string.cupones_cercanos),
+                    onSeeAllClick = onSeeAllCoupons
+                )
+            }
+
+            item {
+                if (nearbyCoupons.isEmpty()) {
+                    EmptyCouponCard(
+                        message = stringResource(R.string.no_hay_cupones_cercanos)
+                    )
+                } else {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                        contentPadding = PaddingValues(end = Dimens.PaddingMedium)
+                    ) {
+                        items(
+                            items = nearbyCoupons,
+                            key = { coupon -> coupon.fldCode }
+                        ) { coupon ->
+                            CuponCard(
+                                coupon = coupon,
+                                onClick = { onCouponClick(coupon.fldCode) }
+                            )
+                        }
                     }
+                }
+            }
+
+            item {
+                SectionHeader(
+                    title = stringResource(R.string.mis_cupones),
+                    onSeeAllClick = onSeeAllVouchers
+                )
+            }
+
+            if (myCoupons.isEmpty()) {
+                item {
+                    EmptyCouponCard(
+                        message = stringResource(R.string.no_hay_cupones_guardados)
+                    )
+                }
+            } else {
+                items(
+                    items = myCoupons,
+                    key = { coupon -> coupon.fldCode }
+                ) { coupon ->
+                    NearestCuponCard(
+                        coupon = coupon,
+                        onClick = { onVoucherClick(coupon.fldCode) }
+                    )
                 }
             }
         }
 
         item {
-            SectionHeader(
-                title = stringResource(R.string.mis_cupones),
-                onSeeAllClick = onSeeAllVouchers
-            )
-        }
-
-        if (myCoupons.isEmpty()) {
-            item {
-                EmptyCouponCard(
-                    message = stringResource(R.string.no_hay_cupones_guardados)
-                )
-            }
-        } else {
-            items(
-                items = myCoupons,
-                key = { coupon -> coupon.fldCode }
-            ) { coupon ->
-                NearestCuponCard(
-                    coupon = coupon,
-                    onClick = { onVoucherClick(coupon.fldCode) }
-                )
-            }
-        }
-
-        item {
             Spacer(modifier = Modifier.height(Dimens.PaddingSmall))
+        }
+    }
+}
+
+@Composable
+private fun SearchResultsSection(
+    searchQuery: String,
+    nearbyCoupons: List<Coupon>,
+    promotions: List<StoreDiscount>,
+    promotionsState: LoadState<Unit>,
+    onCouponClick: (String) -> Unit,
+    onPromotionClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+    ) {
+        Text(
+            text = stringResource(R.string.resultados_busqueda, searchQuery),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Text(
+            text = stringResource(R.string.cupones_cercanos),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        if (nearbyCoupons.isEmpty()) {
+            EmptyCouponCard(
+                message = stringResource(R.string.sin_cupones_resultado_busqueda)
+            )
+        } else {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                contentPadding = PaddingValues(end = Dimens.PaddingMedium)
+            ) {
+                items(
+                    items = nearbyCoupons,
+                    key = { coupon -> coupon.fldCode }
+                ) { coupon ->
+                    CuponCard(
+                        coupon = coupon,
+                        onClick = { onCouponClick(coupon.fldCode) }
+                    )
+                }
+            }
+        }
+
+        Text(
+            text = stringResource(R.string.promociones_descuentos),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        when {
+            promotionsState is LoadState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Dimens.PaddingLarge),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            promotions.isEmpty() -> {
+                EmptyCouponCard(
+                    message = stringResource(R.string.sin_promociones_resultado_busqueda)
+                )
+            }
+
+            else -> {
+                Column(verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)) {
+                    promotions.forEach { discount ->
+                        PromotionCard(
+                            discount = discount,
+                            onClick = { onPromotionClick(discount.productUrl) }
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -227,6 +356,66 @@ private fun CouponBookHeader(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PromotionsInviteCard(
+    onSeeAllPromotions: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(Dimens.PaddingLarge),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+        ) {
+            Surface(
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondary
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.LocalOffer,
+                        contentDescription = null,
+                        modifier = Modifier.size(26.dp),
+                        tint = MaterialTheme.colorScheme.onSecondary
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.promociones_descuentos),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Text(
+                    text = stringResource(R.string.promociones_invitacion_descripcion),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Button(onClick = onSeeAllPromotions) {
+                    Text(
+                        text = stringResource(R.string.ver_promociones),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
@@ -595,6 +784,7 @@ fun CouponBookScreenPreview() {
             onCouponClick = { _ -> },
             onVoucherClick = { _ -> },
             onSeeAllVouchers = {},
+            onSeeAllPromotions = {},
         )
     }
 }

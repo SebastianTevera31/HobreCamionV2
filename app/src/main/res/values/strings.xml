@@ -127,7 +127,7 @@
     <string name="error_desconocido_del_servidor">Error desconocido del servidor</string>
     <string name="cuerpo_de_la_respuesta_vac_o">Cuerpo de la respuesta vacío</string>
     <string name="direcci_n_mac">Dirección MAC</string>
-    <string name="configuraci_n">Configuración</string>
+    <string name="configuracion">Ajustes</string>
     <string name="monitor">Monitor</string>
     <string name="guardar">Guardar</string>
     <string name="cerrar">Cerrar</string>
@@ -151,6 +151,14 @@
     <string name="permiso_bluetooth_notificaciones">Permisos de Bluetooth y notificaciones</string>
     <string name="conceder_permisos_btn">Conceder permisos</string>
     <string name="texto_permisos_app">Se requiere acceso a Bluetooth y notificaciones para conectarse con tu monitor HawksHead TPMS.</string>
+    <string name="permiso_grupo_ubicacion_titulo">Ubicación</string>
+    <string name="permiso_grupo_ubicacion_rationale">Necesitamos tu ubicación para mostrar la posición de tus unidades y conectarlas con el monitor TPMS.</string>
+    <string name="permiso_grupo_bluetooth_titulo">Bluetooth</string>
+    <string name="permiso_grupo_bluetooth_rationale">El acceso a Bluetooth es necesario para vincular y leer los datos de tu monitor HawksHead TPMS.</string>
+    <string name="permiso_grupo_notificaciones_titulo">Notificaciones</string>
+    <string name="permiso_grupo_notificaciones_rationale">Las notificaciones te avisan de alertas importantes de tus unidades y del monitor TPMS.</string>
+    <string name="permisos_estado_algunos_denegados">Algunos permisos fueron denegados. Puedes intentar concederlos de nuevo.</string>
+    <string name="permisos_estado_permanentemente_denegados">Uno o más permisos fueron denegados permanentemente. Actívalos manualmente en Ajustes.</string>
     <string name="no_se_ha_asignado_ningun_monitor">No se pudo asignar un monitor</string>
     <string name="hombrecamion_conexion_tpms">Flotal - Conexión TPMS</string>
     <string name="recibiendo_datos_monitor">Recibiendo datos del monitor...</string>
@@ -340,21 +348,21 @@
     <string name="enter_your_feedback_here">Escribe tu opinión aquí...</string>
     <string name="submit">Enviar</string>
     <string name="share_feedback">Enviar comentarios</string>
-    <string name="error_enviar_comentarios">Ocurrio un error al enviar sus comentarios</string>
+    <string name="error_enviar_comentarios">Ocurrió un error al enviar sus comentarios</string>
     <string name="gracias_por_su_comentario">Gracias por su comentario</string>
     <string name="app_fcm_channel">app_fcm_channel</string>
     <string name="app_fcm_flotal_channel">app_fcm_flotal_channel</string>
     <string name="mensaje_mantenimiento_programado">La aplicación entrará en mantenimiento el %1$s hrs. Gracias por tu comprensión.</string>
-    <string name="notificacion_nueva">Notificacion nueva</string>
+    <string name="notificacion_nueva">Notificación nueva</string>
     <string name="actualizacion_disponible">Actualización disponible</string>
     <string name="aviso_actualizacion">Hay una nueva versión disponible. Por favor actualiza para seguir usando la app.</string>
     <string name="en_mantenimiento">En Mantenimiento</string>
     <string name="aviso_mantenimiento">Lamentamos los inconvenientes. El servicio se restablecerá el %1$s hrs.</string>
     <string name="aviso_mantenimiento_ii">Estamos realizando tareas de mantenimiento para garantizar el buen funcionamiento de la app.</string>
     <string name="mantenimiento_programado">Mantenimiento Programado</string>
-    <string name="actualizacion_de_terminos_y_condiciones">Actualizacion de terminos y condiciones</string>
+    <string name="actualizacion_de_terminos_y_condiciones">Actualización de términos y condiciones</string>
     <string name="actualizacion_de_plan">Actualizacion de Plan</string>
-    <string name="mantenimiento_message">El servicio no estara disponible por un momento.</string>
+    <string name="mantenimiento_message">El servicio no estará disponible por un momento.</string>
     <string name="terms_message">Hemos actualizado nuestros términos y condiciones. Revísalos para continuar.</string>
     <string name="paymentplan_message">Tu plan ha sido actualizado.</string>
     <string name="autoservice_message">Tu servicio automático ha sido procesado correctamente.</string>
@@ -364,9 +372,9 @@
     <string name="permiso_de_notificacion">Permiso de notificación</string>
     <string name="texto_permiso_de_notification">Permiso requerido para mantenerlo informado de actualizaciones y posibles mantenimientos</string>
     <string name="unidades_de_medida">Unidades de Medida</string>
-    <string name="auth_error">Ocurrio un error en la autorización. Verifique su usuario o contraseña.</string>
+    <string name="auth_error">Ocurrió un error en la autorización. Verifique su usuario o contraseña.</string>
     <string name="error_inesperado">Ocurrió un error inesperado. Intenta nuevamente o vuelve más tarde.</string>
-    <string name="politicas_de_privacidad">Politicas de privacidad</string>
+    <string name="politicas_de_privacidad">Políticas de privacidad</string>
     <string name="asi_como_nuestros">, así como nuestros </string>
     <string name="vial_status">Mapa vial</string>
     <string name="ubicacion">Ubicación</string>
@@ -383,7 +391,7 @@
     <string name="sin_elementos_disponibles">Sin elementos disponibles</string>
     <string name="reintentar">Reintentar</string>
     <string name="operacion_cancelada">La operación fue cancelada.</string>
-    <string name="blog">Blog</string>
+    <string name="foro">Foro</string>
     <string name="favorites">Gustados</string>
 
     <plurals name="description_field">
@@ -477,12 +485,12 @@
     <string name="expirado">Expirado</string>
     <string name="vigencia">VIGENCIA</string>
     <string name="hasta_fecha">Hasta %1$s</string>
-    <string name="terminos_y_condiciones_label">Terminos y conidiciones</string>
+    <string name="terminos_y_condiciones_label">Términos y condiciones</string>
     <string name="no_acumulable_promociones">No acumulable con otras promociones.</string>
-    <string name="obtener_cupon">Obtener cupon</string>
+    <string name="obtener_cupon">Obtener cupón</string>
     <string name="error_obtener_cupones">No se pudo obtener los cupones.</string>
-    <string name="error_cupon_utilizado">El cupon ya fue utilizado.</string>
-    <string name="error_obtener_cupon">No se pudo obtener el cupon.</string>
+    <string name="error_cupon_utilizado">El cupón ya fue utilizado.</string>
+    <string name="error_obtener_cupon">No se pudo obtener el cupón.</string>
     <string name="promo_label">PROMO</string>
     <string name="llantera_norte_placeholder">Llantera Norte</string>
 
@@ -507,6 +515,22 @@
 
     <string name="sin_cupones_descripcion">Selecciona otro filtro o revisa nuevamente más tarde.</string>
 
+    <string name="promociones_invitacion_descripcion">Descubre las promociones y descuentos disponibles.</string>
+    <string name="ver_promociones">Ver promociones</string>
+    <string name="sin_promociones_disponibles">No hay promociones disponibles</string>
+    <string name="sin_promociones_descripcion">Vuelve más tarde para ver nuevas promociones.</string>
+    <string name="detalle_promocion">Detalle de promoción</string>
+
+    <string name="buscar_cupones_promociones">Buscar cupones y promociones cercanas</string>
+    <string name="resultados_busqueda">Resultados para \"%1$s\"</string>
+    <string name="sin_cupones_resultado_busqueda">No hay cupones que coincidan con tu búsqueda.</string>
+    <string name="sin_promociones_resultado_busqueda">No hay promociones que coincidan con tu búsqueda.</string>
+    <string name="ver_producto">Ver producto</string>
+    <string name="precio_regular">Precio regular</string>
+    <string name="precio_con_descuento">Precio con descuento</string>
+    <string name="ahorras_texto">Ahorras %1$s (%2$s%%)</string>
+    <string name="sku_label">SKU: %1$s</string>
+
     <string name="folio">Folio</string>
     <string name="vigente">Vigente</string>
 
@@ -529,7 +553,7 @@
     <!-- Reportes -->
     <string name="reportes">Reportes</string>
     <string name="rendimiento">Rendimiento</string>
-    <string name="consumo_combustible">Consumo de Combustible</string>
+    <string name="consumo_combustible">Consumo de combustible</string>
     <string name="emisiones_co2">Emisiones de CO2</string>
     <string name="reporte_rendimiento">Reporte de Rendimiento</string>
     <string name="seleccione_llanta">Seleccione una llanta</string>
@@ -671,5 +695,163 @@
     <string name="snowshowers">Chubascos de nieve</string>
     <string name="snowshowersandthunder">Chubascos de nieve con truenos</string>
     <string name="gustados">Gustados</string>
-    <string name="preferencias">Preferencias</string>
+    <string name="analytics">Estadísticas</string>
+    <string name="promociones_descuentos">Promociones</string>
+    <string name="feedback_title">Tu opinión nos importa</string>
+    <string name="feedback_subtitle">Cuéntanos qué podemos mejorar de la aplicación</string>
+    <string name="consumo_de_combustible">Consumo de Combustible</string>
+    <string name="emision_co2">Emisión CO2</string>
+    <string name="ver_mas">Ver más</string>
+    <string name="rendimiento_del_vehiculo">Rendimiento del vehículo</string>
+    <string name="alertas_recientes">Alertas recientes</string>
+    <string name="ver_todas">Ver todas</string>
+    <string name="ver_mapa">Ver mapa</string>
+    <string name="secciones">Secciones</string>
+    <string name="ultimos_datos">ÚLTIMOS DATOS</string>
+    <string name="rendimiento_actualizado">Calculado el %1$s</string>
+    <string name="sin_internet_home">Sin conexión a internet. Se muestra la última información guardada.</string>
+    <string name="alertas_requiere_internet">Sin conexión: se muestran las alertas más recientes guardadas. Conéctate a internet para ver más resultados o aplicar filtros.</string>
+    <string name="reportes_requiere_internet">Sin conexión: se muestra el último reporte descargado. Conéctate a internet para ver información actualizada.</string>
+    <string name="foro_sin_internet">Sin conexión a internet. Conéctate a una red para ver el foro.</string>
+    <string name="mapa_vial_titulo">Mapa vial</string>
+    <string name="mapa_vial_subtitulo">Consulta el estado de las vías en tiempo real</string>
+    <string name="requiere_internet_badge">Requiere internet</string>
+    <string name="registrar">registrar</string>
+    <string name="todas">Todas</string>
+
+    <!-- Complete Plan -->
+    <string name="content_description_notificaciones">Notificaciones</string>
+    <string name="saludo_usuario">¡Hola, %1$s!</string>
+    <string name="plan_actual">Plan: %1$s</string>
+    <string name="placas_vehiculo">Placas: %1$s</string>
+    <string name="vehiculo_placa_format">%1$s · %2$s</string>
+    <string name="vehiculo_no_asignado">Vehículo no asignado</string>
+    <string name="no_datos_rendimiento">No hay datos de rendimiento disponibles</string>
+    <string name="alerta_critica_label">CRÍTICA</string>
+
+    <!-- Alerts -->
+    <string name="alertas_history_title">Historial de Alertas</string>
+    <string name="alertas_history_section_title">Historial de alertas</string>
+    <string name="filtros">Filtros</string>
+    <string name="colapsar">Colapsar</string>
+    <string name="expandir">Expandir</string>
+    <string name="aplicar_filtros">Aplicar Filtros</string>
+    <string name="rueda_label">Rueda</string>
+    <string name="alerta_label">Alerta</string>
+    <string name="desde_label">De:</string>
+    <string name="hasta_label">A:</string>
+    <string name="pagina_anterior">Página anterior</string>
+    <string name="pagina_siguiente">Página siguiente</string>
+    <string name="error_al_cargar_alertas">No se pudieron cargar las alertas. Intenta de nuevo.</string>
+
+    <!-- Empty States -->
+    <string name="no_alertas_recientes">No tienes alertas recientes</string>
+    <string name="sin_publicaciones_foro">Aún no hay publicaciones en el foro</string>
+
+    <!-- Alert Titles -->
+    <string name="alert_title_low_pressure">Alerta de baja presión · %1$s</string>
+    <string name="alert_title_high_pressure">Alerta de alta presión · %1$s</string>
+    <string name="alert_title_temperature">Alerta de temperatura · %1$s</string>
+    <string name="alert_title_inflate">Alerta de inflado · %1$s</string>
+    <string name="alert_title_fast_leak">Fuga rápida detectada · %1$s</string>
+    <string name="alert_title_slow_leak">Fuga lenta detectada · %1$s</string>
+    <string name="alert_title_extraction">Extracción detectada · %1$s</string>
+    <string name="alert_title_low_battery">Batería baja sensor · %1$s</string>
+    <string name="alert_title_no_data">Sin datos de sensor · %1$s</string>
+    <string name="alert_title_generic">Alerta · %1$s</string>
+
+    <!-- Sample Alert Titles -->
+    <string name="alert_sample_pressure_critical">Presión Crítica - %1$s</string>
+    <string name="alert_sample_temperature_high">Alta Temperatura - %1$s</string>
+    <string name="alert_sample_tread_wear">Desgaste de Piso Bajo</string>
+    <string name="alert_sample_inspection">Inspección Programada</string>
+    <string name="alert_sample_speeding">Exceso de Velocidad</string>
+    <string name="alert_sample_trailer_pressure">Presión Alta - Remolque</string>
+    <string name="alert_sample_brakes_overheating">Sobrecalentamiento Frenos</string>
+    <string name="alert_sample_alignment">Alineación Requerida</string>
+
+    <!-- Alert Labels -->
+    <string name="alert_label_pressure">Presión:</string>
+    <string name="alert_label_temp">Temp:</string>
+    <string name="alert_label_level">Nivel:</string>
+    <string name="alert_label_depth">Profundidad:</string>
+    <string name="alert_label_loss">Pérdida:</string>
+    <string name="alert_label_expires">Vence en:</string>
+    <string name="alert_label_max">Máx:</string>
+    <string name="alert_label_deviation">Desviación:</string>
+
+    <!-- Alert Status -->
+    <string name="alert_status_critical">CRÍTICA</string>
+    <string name="alert_status_pending">PENDIENTE</string>
+
+    <string name="temperature">temperature</string>
+    <string name="inflate">inflado</string>
+    <string name="critica">CRÍTICA</string>
+
+    <!-- ============ Módulo de Servicios ============ -->
+    <string name="srv_title">Servicios</string>
+    <string name="srv_ordenes_section">Órdenes</string>
+    <string name="srv_buscar_orden">Buscar orden</string>
+    <string name="srv_nueva_orden">Nueva orden</string>
+    <string name="srv_sin_ordenes">No hay órdenes de servicio para este vehículo.</string>
+    <string name="srv_error_cargar">No se pudieron cargar las órdenes.</string>
+    <string name="srv_requiere_internet">Sin conexión: se muestran las órdenes guardadas. Conéctate para ver o editar más.</string>
+
+    <!-- Vehículo -->
+    <string name="srv_vehiculo_label">Vehículo</string>
+    <string name="srv_tipo_label">Tipo</string>
+    <string name="srv_odometro_label">Odómetro</string>
+    <string name="srv_seleccionar_vehiculo">Selecciona un vehículo</string>
+
+    <!-- Orden -->
+    <string name="srv_orden_folio">Orden #%1$s</string>
+    <string name="srv_orden_apertura">Fecha de apertura</string>
+    <string name="srv_orden_finalizado">Fecha de finalizado</string>
+    <string name="srv_orden_en_proceso">En proceso</string>
+    <string name="srv_orden_total">Total</string>
+    <string name="srv_orden_servicios_count">%1$d servicio(s)</string>
+    <string name="srv_estado_abierta">Abierta</string>
+    <string name="srv_estado_finalizada">Finalizada</string>
+
+    <!-- Acciones de orden -->
+    <string name="srv_accion_modificar_orden">Modificar orden de servicio</string>
+    <string name="srv_accion_agregar_servicio">Agregar servicios</string>
+    <string name="srv_accion_eliminar_orden">Eliminar orden de servicio</string>
+    <string name="srv_accion_eliminar_servicio">Eliminar servicio</string>
+
+    <!-- Detalle de orden -->
+    <string name="srv_detalle_orden_title">Detalles de orden</string>
+    <string name="srv_detalle_servicios_section">Servicios</string>
+    <string name="srv_detalle_sin_servicios">Esta orden aún no tiene servicios.</string>
+
+    <!-- Formulario de servicio -->
+    <string name="srv_form_nuevo_title">Nuevo servicio</string>
+    <string name="srv_form_detalle_title">Detalles de servicio</string>
+    <string name="srv_servicio_label">Servicio</string>
+    <string name="srv_servicio_seleccionar">Selecciona un servicio</string>
+    <string name="srv_costo_unitario_label">Costo unitario</string>
+    <string name="srv_cantidad_label">Cantidad</string>
+    <string name="srv_total_label">Total</string>
+    <string name="srv_proveedor_label">Proveedor</string>
+    <string name="srv_tipo_ocurrencia_label">Tipo de ocurrencia</string>
+    <string name="srv_tipo_servicio_label">Tipo de servicio</string>
+    <string name="srv_buscar_servicio">Buscar servicio</string>
+    <string name="srv_sin_servicios">No hay servicios registrados para este vehículo.</string>
+    <string name="srv_descripcion_label">Descripción</string>
+    <string name="srv_descripcion_placeholder">Detalles del servicio (opcional)</string>
+    <string name="srv_agregar_servicio_btn">Agregar servicio</string>
+    <string name="srv_actualizar_btn">Actualizar</string>
+
+    <!-- Nueva orden -->
+    <string name="srv_nueva_orden_title">Nueva orden</string>
+    <string name="srv_notas_label">Notas</string>
+    <string name="srv_notas_placeholder">Observaciones de la orden (opcional)</string>
+    <string name="srv_crear_orden_btn">Crear orden</string>
+
+    <!-- Confirmaciones -->
+    <string name="srv_confirmar_eliminar_titulo">¿Eliminar?</string>
+    <string name="srv_confirmar_eliminar_orden_msg">Se eliminará la orden #%1$s y todos sus servicios. Esta acción no se puede deshacer.</string>
+    <string name="srv_confirmar_eliminar_servicio_msg">Se eliminará este servicio de la orden. Esta acción no se puede deshacer.</string>
+    <string name="srv_eliminar_btn">Eliminar</string>
+    <string name="servicios">Servicios</string>
 </resources>

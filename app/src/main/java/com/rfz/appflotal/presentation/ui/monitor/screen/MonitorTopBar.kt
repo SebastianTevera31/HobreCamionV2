@@ -22,7 +22,12 @@ import com.rfz.appflotal.presentation.theme.primaryLight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MonitorTopBar(showDialog: () -> Unit, modifier: Modifier = Modifier, popBackStack: () -> Unit) {
+fun MonitorTopBar(
+    showNavigationButton: Boolean = true,
+    showDialog: () -> Unit,
+    modifier: Modifier = Modifier,
+    popBackStack: () -> Unit
+) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = primaryLight, // Color de fondo
@@ -30,12 +35,14 @@ fun MonitorTopBar(showDialog: () -> Unit, modifier: Modifier = Modifier, popBack
         ),
         title = { Text("Monitor") },
         navigationIcon = {
-            IconButton(onClick = { popBackStack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White
-                )
+            if (showNavigationButton) {
+                IconButton(onClick = { popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
+                }
             }
         },
         actions = {

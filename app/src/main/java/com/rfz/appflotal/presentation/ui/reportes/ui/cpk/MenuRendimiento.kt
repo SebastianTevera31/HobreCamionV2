@@ -49,6 +49,7 @@ import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.report.CpkReportResponse
 import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.presentation.commons.ErrorView
+import com.rfz.appflotal.presentation.commons.RequiresInternetNotice
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
@@ -74,6 +75,7 @@ fun MenuRendimientoScreen(
     onSharePdf: (Uri) -> Unit,
     onClearPdfState: () -> Unit,
     pdfUri: Uri?,
+    isOffline: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -203,6 +205,10 @@ fun MenuRendimientoScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+
+                    if (isOffline) {
+                        RequiresInternetNotice(message = stringResource(R.string.reportes_requiere_internet))
                     }
 
                     if (wheels.isEmpty()) {

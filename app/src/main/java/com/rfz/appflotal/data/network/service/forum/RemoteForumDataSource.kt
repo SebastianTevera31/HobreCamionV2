@@ -14,6 +14,7 @@ import com.rfz.appflotal.data.model.forum.TopicMessageResult
 import com.rfz.appflotal.data.model.forum.TopicResult
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
 import com.rfz.appflotal.data.network.client.forum.ForumClient
+import com.rfz.appflotal.data.network.networkRequestHelper
 import com.rfz.appflotal.data.network.requestHelper
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.domain.database.GetTasksUseCase
@@ -139,10 +140,7 @@ class ForumService @Inject constructor(
     }
 
     private fun prepareImagePart(imagePath: String): MultipartBody.Part? {
-        if (imagePath.isEmpty()) {
-            val emptyBody = ByteArray(0).toRequestBody("image/jpeg".toMediaTypeOrNull())
-            return MultipartBody.Part.createFormData("image", "empty.jpg", emptyBody)
-        }
+        if (imagePath.isEmpty()) return null
 
         return try {
             val uri = imagePath.toUri()
@@ -186,5 +184,19 @@ class ForumService @Inject constructor(
             val token = getTasksUseCase().first()[0].fld_token
             forumClient.createReport("bearer $token", request)
         }
+    }
+
+    suspend fun getPostsFeed(
+        tipoFeed: Int,
+        idForum: Int,
+        pageNumber: Int
+    ) = networkRequestHelper {
+        val token = getTasksUseCase().first()[0].fld_token
+        forumClient.getPostsFeed(
+            token = "bearer $token",
+            tipoFeed = tipoFeed,
+            idForum = idForum,
+            pageNumber = pageNumber
+        )
     }
 }

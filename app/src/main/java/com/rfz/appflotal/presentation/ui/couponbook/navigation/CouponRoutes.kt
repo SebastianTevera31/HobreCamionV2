@@ -17,3 +17,9 @@ data class CouponList(val areCoupons: Boolean)
 
 @Serializable
 data class RedeemCoupon(val couponId: String)
+
+@Serializable
+object PromotionList
+
+@Serializable
+object PromotionDetail

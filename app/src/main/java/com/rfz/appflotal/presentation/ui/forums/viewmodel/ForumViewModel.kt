@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.getRelativeTime
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.forum.ForumComment
 import com.rfz.appflotal.data.model.forum.ForumTopic
 import com.rfz.appflotal.domain.database.GetTasksUseCase
@@ -22,6 +23,7 @@ import com.rfz.appflotal.domain.forum.GetForumRoomWithTopicsUseCase
 import com.rfz.appflotal.domain.forum.GetForumRoomsUseCase
 import com.rfz.appflotal.domain.forum.GetForumTopicByIdUseCase
 import com.rfz.appflotal.domain.forum.GetForumTopicMessagesUseCase
+import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,12 +45,21 @@ class ForumViewModel @Inject constructor(
     private val crudForumTopicUseCase: CrudForumTopicUseCase,
     private val createForumReportUseCase: CreateForumReportUseCase,
     private val crudForumCommentUseCase: CrudForumCommentUseCase,
-    private val getTasksUseCase: GetTasksUseCase
+    private val getTasksUseCase: GetTasksUseCase,
+    private val wifiUseCase: WifiUseCase
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(ForumUiState())
     val uiState = _uiState.asStateFlow()
     private var currentPhotoUri: Uri? = null
     private var publicationJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            wifiUseCase().collect { status ->
+                _uiState.update { it.copy(isOffline = status != NetworkStatus.Connected) }
+            }
+        }
+    }
 
     fun getInitialData(forceRefresh: Boolean = false) {
         if (_uiState.value.rooms.isNotEmpty() && !forceRefresh) return
@@ -171,7 +182,7 @@ class ForumViewModel @Inject constructor(
         }
     }
 
-    fun doLike(id: Int, isComment: Boolean, fromPostsView: Boolean = false) {
+    fun doLike(id: Int, isComment: Boolean) {
         viewModelScope.launch {
             val response = doForumLikeUseCase(
                 likedDate = getCurrentDate(),
@@ -187,35 +198,26 @@ class ForumViewModel @Inject constructor(
             ) {
                 // Actualizar UI localmente o recargar datos
                 if (!isComment) {
-                    if (fromPostsView) {
-                        _uiState.update { currentUiState ->
-                            val updatedTopics = currentUiState.filteredTopics.map { topic ->
-                                if (topic.id == id) {
-                                    val newIsSaved = !topic.isLiked
-                                    topic.copy(
-                                        isLiked = newIsSaved,
-                                        likes = if (newIsSaved) topic.likes + 1 else topic.likes - 1
-                                    )
-                                } else {
-                                    topic
-                                }
-                            }
-                            currentUiState.copy(filteredTopics = updatedTopics)
+                    _uiState.update { currentUiState ->
+                        // Se toma un único estado de referencia para que el toggle sea
+                        // consistente sin importar desde qué lista se originó el like.
+                        val reference = currentUiState.topics.find { it.id == id }
+                            ?: currentUiState.filteredTopics.find { it.id == id }
+                            ?: currentUiState.selectedTopic?.takeIf { it.id == id }
+
+                        val newIsLiked = reference?.isLiked?.not() ?: true
+                        val delta = if (newIsLiked) 1 else -1
+
+                        fun updateTopic(topic: ForumTopic): ForumTopic {
+                            if (topic.id != id) return topic
+                            return topic.copy(isLiked = newIsLiked, likes = topic.likes + delta)
                         }
-                    } else {
-                        val currentTopicId = _uiState.value.selectedTopic?.id
-                        if (currentTopicId != null) {
-                            _uiState.update { currentUiState ->
-                                val newIsSaved = !currentUiState.selectedTopic!!.isLiked
-                                val topic = currentUiState.selectedTopic
-                                currentUiState.copy(
-                                    selectedTopic = topic.copy(
-                                        isLiked = newIsSaved,
-                                        likes = if (newIsSaved) topic.likes + 1 else topic.likes - 1
-                                    )
-                                )
-                            }
-                        }
+
+                        currentUiState.copy(
+                            topics = currentUiState.topics.map(::updateTopic),
+                            filteredTopics = currentUiState.filteredTopics.map(::updateTopic),
+                            selectedTopic = currentUiState.selectedTopic?.let(::updateTopic)
+                        )
                     }
                 } else {
                     _uiState.update { currentUiState ->

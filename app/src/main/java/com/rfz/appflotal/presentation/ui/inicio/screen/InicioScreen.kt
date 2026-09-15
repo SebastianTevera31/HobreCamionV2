@@ -51,10 +51,7 @@ fun InicioScreen(
 
 
 ) {
-
     val context = LocalContext.current
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -74,7 +71,6 @@ fun InicioScreen(
 fun Body(
     modifier: Modifier,
     navController: NavController,
-
 ) {
     val viewModelScope = rememberCoroutineScope()
     Column(

@@ -14,11 +14,13 @@ import com.rfz.appflotal.data.repository.vehicle.VehicleRepository
 import com.rfz.appflotal.data.repository.vehicle.VehicleRepositoryImpl
 import com.rfz.appflotal.data.repository.weather.WeatherRepository
 import com.rfz.appflotal.data.repository.weather.WeatherRepositoryImpl
+import com.rfz.appflotal.data.repository.services.ServicesRepository
+import com.rfz.appflotal.data.repository.services.ServicesRepositoryImp
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import jakarta.inject.Singleton
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -51,4 +53,8 @@ abstract class DiRepository {
     @Binds
     @Singleton
     abstract fun bindWeatherRepository(impl: WeatherRepositoryImpl): WeatherRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindServicesRepository(impl: ServicesRepositoryImp): ServicesRepository
 }

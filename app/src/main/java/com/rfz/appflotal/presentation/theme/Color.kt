@@ -1,9 +1,10 @@
 package com.rfz.appflotal.presentation.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
 
 
-val primaryLight = Color(0xFF11197E)
+val primaryLight = Color("#2c3192".toColorInt())
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFF2C3494)
 val onPrimaryContainerLight = Color(0xFF9DA5FF)

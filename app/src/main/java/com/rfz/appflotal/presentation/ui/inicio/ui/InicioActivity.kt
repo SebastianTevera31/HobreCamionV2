@@ -2,18 +2,14 @@ package com.rfz.appflotal.presentation.ui.inicio.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
-import android.content.Context.ACTIVITY_SERVICE
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.telephony.TelephonyManager
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -40,40 +36,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
-import androidx.navigation.NavType
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.google.android.gms.ads.MobileAds
 import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.network.NetworkConfig
-import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.ConsentManager
-import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.data.repository.fcmessaging.AppNotificationState
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.fcmessaging.MaintenanceStatus
-import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.base.BaseUseCase
 import com.rfz.appflotal.domain.brand.BrandCrudUseCase
 import com.rfz.appflotal.domain.brand.BrandListUseCase
@@ -84,12 +72,8 @@ import com.rfz.appflotal.domain.originaldesign.OriginalDesignUseCase
 import com.rfz.appflotal.domain.product.ProductByIdUseCase
 import com.rfz.appflotal.domain.product.ProductCrudUseCase
 import com.rfz.appflotal.domain.product.ProductListUseCase
-import com.rfz.appflotal.domain.provider.ProviderListUseCase
 import com.rfz.appflotal.domain.route.RouteUseCase
 import com.rfz.appflotal.domain.tire.LoadingCapacityUseCase
-import com.rfz.appflotal.domain.tire.TireCrudUseCase
-import com.rfz.appflotal.domain.tire.TireGetUseCase
-import com.rfz.appflotal.domain.tire.TireListUsecase
 import com.rfz.appflotal.domain.tire.TireSizeCrudUseCase
 import com.rfz.appflotal.domain.tire.TireSizeUseCase
 import com.rfz.appflotal.domain.utilization.UtilizationUseCase
@@ -99,61 +83,33 @@ import com.rfz.appflotal.domain.vehicle.VehicleListUseCase
 import com.rfz.appflotal.domain.vehicle.VehicleTypeUseCase
 import com.rfz.appflotal.presentation.commons.MaintenanceAppScreen
 import com.rfz.appflotal.presentation.commons.UpdateAppScreen
+import com.rfz.appflotal.presentation.navigation.authGraph
+import com.rfz.appflotal.presentation.navigation.catalogGraph
+import com.rfz.appflotal.presentation.navigation.mainNavigation
+import com.rfz.appflotal.presentation.navigation.navigateAsBottomBarTab
+import com.rfz.appflotal.presentation.navigation.operationsNavigation
+import com.rfz.appflotal.presentation.navigation.serviceGraph
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.assembly.screen.AssemblyTireScreen
-import com.rfz.appflotal.presentation.ui.assembly.viewmodel.AssemblyTireViewModel
-import com.rfz.appflotal.presentation.ui.brand.screen.MarcasScreen
-import com.rfz.appflotal.presentation.ui.cambiodestino.screen.CambioDestinoScreen
-import com.rfz.appflotal.presentation.ui.cambiodestino.viewmodel.CambioDestinoViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.couponGraph
-import com.rfz.appflotal.presentation.ui.dissassembly.screen.DisassemblyTireScreen
-import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
+import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.forumsGraph
-import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
-import com.rfz.appflotal.presentation.ui.home.screen.ShareFeedbackScreen
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.HomeBottomBar
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.components.ObserveOnResume
-import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
 import com.rfz.appflotal.presentation.ui.inicio.viewmodel.InicioScreenViewModel
 import com.rfz.appflotal.presentation.ui.inicio.viewmodel.NotificationPermissionState
-import com.rfz.appflotal.presentation.ui.inspection.screens.InspectionRoute
-import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionViewModel
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
-import com.rfz.appflotal.presentation.ui.loading.screen.SplashScreen
-import com.rfz.appflotal.presentation.ui.login.screen.LoginScreen
 import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
-import com.rfz.appflotal.presentation.ui.marcarenovados.screens.MarcaRenovadosScreen
-import com.rfz.appflotal.presentation.ui.marcarenovados.viewmodel.MarcaRenovadosViewModel
-import com.rfz.appflotal.presentation.ui.medidasllantasscreen.MedidasLlantasScreen
 import com.rfz.appflotal.presentation.ui.monitor.component.WarningSnackBanner
-import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
-import com.rfz.appflotal.presentation.ui.montajedesmontajescreen.MontajeDesmontajeScreen
-import com.rfz.appflotal.presentation.ui.originaldesign.OriginalScreen
-import com.rfz.appflotal.presentation.ui.password.screen.PasswordScreen
-import com.rfz.appflotal.presentation.ui.password.viewmodel.PasswordViewModel
-import com.rfz.appflotal.presentation.ui.permission.PermissionScreen
-import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
-import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.NuevoRegistroLlantasScreen
-import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
-import com.rfz.appflotal.presentation.ui.registrousuario.navigation.signUpGraph
-import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
-import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
-import com.rfz.appflotal.presentation.ui.repararrenovar.screen.RepararRenovarScreen
-import com.rfz.appflotal.presentation.ui.repararrenovar.viewmodel.RepararRenovarViewModel
+import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
 import com.rfz.appflotal.presentation.ui.reportes.navigation.reportGraph
-import com.rfz.appflotal.presentation.ui.retreatedesign.screens.RetreatedDesignScreen
-import com.rfz.appflotal.presentation.ui.retreatedesign.viewmodel.RetreatedDesignViewModel
-import com.rfz.appflotal.presentation.ui.scrap.screens.TireWastePileScreen
-import com.rfz.appflotal.presentation.ui.scrap.viewmodel.TireWasteViewModel
-import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
 import com.rfz.appflotal.presentation.ui.utils.FireCloudMessagingType
-import com.rfz.appflotal.presentation.ui.vialstatus.view.VialStatusScreen
-import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
-import com.rfz.appflotal.presentation.ui.weather.view.WeatherRoute
-import com.rfz.appflotal.presentation.ui.weather.viewmodel.WeatherViewModel
+import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
+import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -173,40 +129,29 @@ class InicioActivity : ComponentActivity() {
     private val updateUserViewModel: UpdateUserViewModel by viewModels()
 
     @Inject
-    lateinit var acquisitionTypeUseCase: AcquisitionTypeUseCase
-
-    @Inject
-    lateinit var providerListUseCase: ProviderListUseCase
-
-    @Inject
     lateinit var appStatusManagerRepository: AppStatusManagerRepository
 
+    // Temporales para catalogGraph (idealmente mover a ViewModels después)
     @Inject
-    lateinit var tireCrudUseCase: TireCrudUseCase
-
-    @Inject
-    lateinit var tireListUsecase: TireListUsecase
-
-    @Inject
-    lateinit var tireGetUseCase: TireGetUseCase
+    lateinit var brandListUseCase: BrandListUseCase
 
     @Inject
     lateinit var brandCrudUseCase: BrandCrudUseCase
 
     @Inject
+    lateinit var originalDesignUseCase: OriginalDesignUseCase
+
+    @Inject
     lateinit var originalDesignByIdUseCase: OriginalDesignByIdUseCase
+
+    @Inject
+    lateinit var crudOriginalDesignUseCase: CrudOriginalDesignUseCase
 
     @Inject
     lateinit var utilizationUseCase: UtilizationUseCase
 
     @Inject
-    lateinit var productByIdUseCase: ProductByIdUseCase
-
-    @Inject
-    lateinit var brandListUseCase: BrandListUseCase
-
-    @Inject
-    lateinit var crudOriginalDesignUseCase: CrudOriginalDesignUseCase
+    lateinit var tireSizeUseCase: TireSizeUseCase
 
     @Inject
     lateinit var tireSizeCrudUseCase: TireSizeCrudUseCase
@@ -218,10 +163,7 @@ class InicioActivity : ComponentActivity() {
     lateinit var productCrudUseCase: ProductCrudUseCase
 
     @Inject
-    lateinit var originalDesignUseCase: OriginalDesignUseCase
-
-    @Inject
-    lateinit var tireSizeUseCase: TireSizeUseCase
+    lateinit var productByIdUseCase: ProductByIdUseCase
 
     @Inject
     lateinit var loadingCapacityUseCase: LoadingCapacityUseCase
@@ -285,7 +227,6 @@ class InicioActivity : ComponentActivity() {
             val prefs by lazy {
                 getSharedPreferences("permissions_prefs", MODE_PRIVATE)
             }
-            var allGranted by remember { mutableStateOf(false) }
             val navController = rememberNavController()
             val backStackEntry by navController.currentBackStackEntryAsState()
             val showBanner = when (backStackEntry?.destination?.route) {
@@ -293,10 +234,26 @@ class InicioActivity : ComponentActivity() {
                 else -> true
             }
 
+            val currentDestination = backStackEntry?.destination
+            val selectedNavItem = BottomNavItems.entries.firstOrNull { item ->
+                currentDestination?.hierarchy?.any { destination ->
+                    when (val route = item.route) {
+                        is String -> destination.route == route
+                        ReportGraph -> destination.hasRoute<ReportGraph>()
+                        ForumsGraph -> destination.hasRoute<ForumsGraph>()
+                        else -> false
+                    }
+                } == true
+            }
+
+            val onBottomNavItemClick: (BottomNavItems) -> Unit = { item ->
+                if (item != selectedNavItem) {
+                    item.route?.let { route -> navController.navigateAsBottomBarTab(route) }
+                }
+            }
+
             val lifecycleOwner = LocalLifecycleOwner.current
             val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
-
-            val context = LocalContext.current
 
             val inicioState = appStatusManagerRepository.appState.collectAsState()
 
@@ -307,31 +264,12 @@ class InicioActivity : ComponentActivity() {
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
             ) { result ->
-                val wasRequestedBefore = inicioScreenViewModel.permissionsRequested(prefs)
-
-                val deniedPermissions = result.filterValues { granted -> !granted }.keys
-
-                val permanentlyDenied = deniedPermissions.any { permission ->
-                    !ActivityCompat.shouldShowRequestPermissionRationale(
-                        this@InicioActivity, permission
-                    )
-                } && wasRequestedBefore
-
-                inicioScreenViewModel.markPermissionsRequested(prefs)
-
-                if (deniedPermissions.isEmpty()) {
-                    allGranted = true
-                    if (!isServiceRunning(this@InicioActivity, HombreCamionService::class.java)) {
-                        HombreCamionService.startService(this@InicioActivity)
-                    }
-                } else {
-                    allGranted = false
-
-                    if (permanentlyDenied) {
-                        Log.d("Permiso", "Denegado permanentemente")
-                        inicioScreenViewModel.openAppSettings(context)
-                    } else {
-                        Log.d("Permiso", "Denegado temporalmente")
+                // El resto de la evaluación (denegados, permanentemente denegados,
+                // arranque de servicio, navegación) la maneja PermissionScreen, que
+                // se re-evalúa a sí misma en cada composición/resume.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (result[Manifest.permission.POST_NOTIFICATIONS] == true) {
+                        inicioScreenViewModel.updatePermissionState(NotificationPermissionState.Granted)
                     }
                 }
             }
@@ -459,7 +397,7 @@ class InicioActivity : ComponentActivity() {
                                 }
                             }
 
-                            Box {
+                            Box(modifier = Modifier.weight(1f)) {
                                 NetworkConfig.imei =
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                         Settings.Secure.getString(
@@ -470,24 +408,6 @@ class InicioActivity : ComponentActivity() {
                                             getSystemService(TELEPHONY_SERVICE) as TelephonyManager
                                         tel.imei
                                     }
-//
-//                                    LaunchedEffect(Unit) {
-//                                        loginViewModel.navigationEvent.collect { event ->
-//                                            when (event) {
-//                                                NavigationEvent.NavigateToHome -> {
-//                                                    navController.navigate(NavScreens.HOME) {
-//                                                        popUpTo(0) { inclusive = true }
-//                                                    }
-//                                                }
-//
-//                                                NavigationEvent.NavigateToPermissions -> {
-//                                                    navController.navigate(NavScreens.PERMISOS) {
-//                                                        popUpTo(0) { inclusive = true }
-//                                                    }
-//                                                }
-//                                            }
-//                                        }
-//                                    }
 
                                 // Control de traslado de pantalla cuando se inicia la aplicacion
                                 LaunchedEffect(hasInitialValidation, userData, lifecycleState) {
@@ -567,25 +487,6 @@ class InicioActivity : ComponentActivity() {
                                     }
                                 }
 
-//                                    loginViewModel.navigateToHome.observe(this@InicioActivity) { shouldNavigate ->
-//                                        if (shouldNavigate.first) {
-//                                            if (!arePermissionsGranted(
-//                                                    this@InicioActivity, getRequiredPermissions()
-//                                                )
-//                                            ) {
-//                                                navController.navigate(NavScreens.PERMISOS) {
-//                                                    popUpTo(NavScreens.LOGIN) { inclusive = true }
-//                                                }
-//                                            } else {
-//                                                navController.navigate(NavScreens.HOME) {
-//                                                    popUpTo(NavScreens.LOGIN) { inclusive = true }
-//                                                }
-//                                            }
-//
-//                                            loginViewModel.onNavigateToHomeCompleted()
-//                                        }
-//                                    }
-
                                 NavHost(
                                     navController = navController,
                                     startDestination = NavScreens.LOADING,
@@ -613,439 +514,50 @@ class InicioActivity : ComponentActivity() {
                                             animationSpec = tween(400)
                                         ) + fadeOut(animationSpec = tween(400))
                                     }) {
-                                    composable(NavScreens.HOME) {
-                                        // Efecto: si ya están concedidos, arrancar servicio automáticamente
-                                        LaunchedEffect(Unit) {
-                                            if (arePermissionsGranted(
-                                                    this@InicioActivity, getRequiredPermissions()
-                                                )
-                                            ) {
-                                                if (!isServiceRunning(
-                                                        this@InicioActivity,
-                                                        HombreCamionService::class.java
-                                                    )
-                                                ) {
-                                                    HombreCamionService.startService(this@InicioActivity)
-                                                }
-                                            }
-                                        }
 
-                                        HomeScreen(
-                                            navController = navController,
-                                            homeViewModel = homeViewModel,
-                                            registerMonitorViewModel = registerMonitorViewModel,
-                                            onInspectClick = { tire, temp, pressure ->
-                                                val route =
-                                                    "${NavScreens.INSPECCION}/$tire?temp=$temp&pressure=$pressure"
-                                                navController.navigate(route) {
-                                                    launchSingleTop = true
-                                                }
-                                            },
-                                            onAssemblyClick = { tire ->
-                                                navController.navigate("${NavScreens.MONTAJE}/$tire") {
-                                                    launchSingleTop = true
-                                                }
-                                            },
-                                            onDisassemblyClick = { tire, temp, pressure ->
-                                                val route =
-                                                    "${NavScreens.DESMONTAJE}/$tire?temp=$temp&pressure=$pressure"
-                                                navController.navigate(route) {
-                                                    launchSingleTop = true
-                                                }
-                                            },
-                                            updateUserData = { selectedLanguage ->
-                                                updateUserViewModel.fetchUserData(
-                                                    selectedLanguage
-                                                )
-                                            },
-                                            monitorViewModel = monitorViewModel
-                                        )
-                                    }
-
-                                    composable(HombreCamionScreens.MONITOR.name) {
-                                        // Efecto: si ya están concedidos, arrancar servicio automáticamente
-                                        LaunchedEffect(Unit) {
-                                            if (arePermissionsGranted(
-                                                    this@InicioActivity, getRequiredPermissions()
-                                                )
-                                            ) {
-                                                if (!isServiceRunning(
-                                                        this@InicioActivity,
-                                                        HombreCamionService::class.java
-                                                    )
-                                                ) {
-                                                    HombreCamionService.startService(this@InicioActivity)
-                                                }
-                                            }
-                                        }
-
-                                        MonitorScreen(
-                                            monitorViewModel = monitorViewModel,
-                                            registerMonitorViewModel = registerMonitorViewModel,
-                                            navigateUp = { navController.navigateUp() },
-                                            paymentPlan = PaymentPlanType.Complete,
-                                            onDialogCancel = { monitorId ->
-                                                registerMonitorViewModel.stopScan()
-                                                if (monitorId != 0) {
-                                                    monitorViewModel.showMonitorDialog(false)
-                                                } else {
-                                                    navController.navigateUp()
-                                                }
-                                            },
-                                            modifier = Modifier.fillMaxSize(),
-                                            onInspectClick = { tire, temp, pressure ->
-                                                val route =
-                                                    "${NavScreens.INSPECCION}/$tire?temp=$temp&pressure=$pressure"
-                                                navController.navigate(route) {
-                                                    launchSingleTop = true
-                                                }
-                                            },
-                                            onAssemblyClick = { tire ->
-                                                navController.navigate("${NavScreens.MONTAJE}/$tire") {
-                                                    launchSingleTop = true
-                                                }
-                                            },
-                                            onDisassemblyClick = { tire, temp, pressure ->
-                                                val route =
-                                                    "${NavScreens.DESMONTAJE}/$tire?temp=$temp&pressure=$pressure"
-                                                navController.navigate(route) {
-                                                    launchSingleTop = true
-                                                }
-                                            })
-                                    }
-
-                                    composable(NavScreens.RECUPERAR_CONTRASENIA) {
-                                        val passwordViewModel: PasswordViewModel = hiltViewModel()
-                                        PasswordScreen(passwordViewModel)
-                                    }
-
-                                    composable(NavScreens.LOADING) { SplashScreen() }
-
-                                    composable(NavScreens.LOGIN) {
-                                        LoginScreen(
-                                            loginViewModel = loginViewModel,
-                                            navController = navController
-                                        )
-                                    }
-
-                                    composable(NavScreens.MARCAS) {
-                                        MarcasScreen(
-                                            navController = navController,
-                                            brandListUseCase = brandListUseCase,
-                                            homeViewModel = homeViewModel,
-                                            brandCrudUseCase = brandCrudUseCase
-                                        )
-                                    }
-
-                                    composable(NavScreens.ORIGINAL) {
-                                        OriginalScreen(
-                                            navController,
-                                            originalDesignUseCase = originalDesignUseCase,
-                                            originalDesignByIdUseCase,
-                                            crudOriginalDesignUseCase,
-                                            brandListUseCase,
-                                            utilizationUseCase,
-                                            homeViewModel
-                                        )
-                                    }
-
-                                    composable(NavScreens.RENOVADOS) {
-                                        val retreatedDesignViewModel: RetreatedDesignViewModel =
-                                            hiltViewModel()
-                                        RetreatedDesignScreen(
-                                            viewModel = retreatedDesignViewModel,
-                                            onBackScreen = { navController.popBackStack() })
-                                    }
-
-                                    composable(NavScreens.MARCA_RENOVADA) {
-                                        val marcaRenovadosScreen: MarcaRenovadosViewModel =
-                                            hiltViewModel()
-                                        MarcaRenovadosScreen(
-                                            viewModel = marcaRenovadosScreen,
-                                            onBackScreen = { navController.popBackStack() })
-                                    }
-
-                                    composable(NavScreens.MEDIDAS_LLANTAS) {
-                                        MedidasLlantasScreen(
-                                            navController,
-                                            tireSizeUseCase,
-                                            homeViewModel,
-                                            tireSizeCrudUseCase
-                                        )
-                                    }
-
-                                    composable(NavScreens.PRODUCTOS) {
-                                        NuevoProductoScreen(
-                                            navController,
-                                            productListUseCase,
-                                            productCrudUseCase,
-                                            productByIdUseCase,
-                                            originalDesignUseCase,
-                                            tireSizeUseCase,
-                                            loadingCapacityUseCase,
-                                            homeViewModel
-                                        )
-                                    }
-
-                                    composable(NavScreens.NUEVO_PRODUCTO) {
-                                        NuevoProductoScreen(
-                                            navController,
-                                            productListUseCase,
-                                            productCrudUseCase,
-                                            productByIdUseCase,
-                                            originalDesignUseCase,
-                                            tireSizeUseCase,
-                                            loadingCapacityUseCase,
-                                            homeViewModel
-                                        )
-                                    }
-
-                                    composable(NavScreens.REGISTRO_LLANTAS) {
-                                        val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel =
-                                            hiltViewModel()
-                                        NuevoRegistroLlantasScreen(
-                                            navController = navController,
-                                            viewModel = nuevoRegistroLllantasViewModel
-                                        )
-                                    }
-
-                                    composable(NavScreens.REGISTRO_VEHICULOS) {
-                                        NuevoRegistroVehiculoScreen(
-                                            navController,
-                                            vehicleListUseCase,
-                                            vehicleCrudUseCase,
-                                            vehicleByIdUseCase,
-                                            vehicleTypeUseCase,
-                                            controlTypeUseCase,
-                                            routeUseCase,
-                                            baseUseCase,
-                                            homeViewModel
-                                        )
-                                    }
-
-                                    composable(NavScreens.MONTAJE_DESMONTAJE) {
-                                        MontajeDesmontajeScreen(
-                                            navController
-                                        )
-                                    }
-
-                                    composable(NavScreens.INICIO) { InicioScreen(navController) }
-
-                                    signUpGraph(
+                                    authGraph(
                                         navController = navController,
-                                        languageSelected = homeViewModel.uiState.value.selectedLanguage,
-                                        navigateToMenu = { plan ->
-                                            delay(500.milliseconds)
-                                            val permissionsGranted = arePermissionsGranted(
-                                                this@InicioActivity,
-                                                getRequiredPermissions()
-                                            )
-                                            if (!permissionsGranted) {
-                                                navController.navigate(NavScreens.PERMISOS) {
-                                                    popUpTo(NavScreens.REGISTRAR_USUARIO) {
-                                                        inclusive = true
-                                                    }
-                                                }
-                                            } else {
-                                                navController.navigate(NavScreens.HOME) {
-                                                    popUpTo(NavScreens.REGISTRAR_USUARIO) {
-                                                        inclusive = true
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        loginViewModel = loginViewModel,
+                                        inicioScreenViewModel = inicioScreenViewModel,
+                                        homeViewModel = homeViewModel,
+                                        wasRequestedBefore = {
+                                            inicioScreenViewModel.permissionsRequested(prefs)
+                                        },
+                                        markRequested = {
+                                            inicioScreenViewModel.markPermissionsRequested(prefs)
+                                        },
+                                        permissionLauncher = permissionLauncher
                                     )
 
-                                    composable(route = NavScreens.INFORMACION_USUARIO) {
-                                        UpdateUserScreen(
-                                            updateUserViewModel = updateUserViewModel,
-                                        ) {
-                                            navController.popBackStack()
-                                        }
-                                    }
+                                    mainNavigation(
+                                        navController = navController,
+                                        homeViewModel = homeViewModel,
+                                        monitorViewModel = monitorViewModel,
+                                        registerMonitorViewModel = registerMonitorViewModel,
+                                        updateUserViewModel = updateUserViewModel
+                                    )
 
-                                    composable(route = NavScreens.PERMISOS) {
-                                        PermissionScreen(
-                                            context = this@InicioActivity,
-                                            allGranted = allGranted,
-                                            launcher = permissionLauncher,
-                                            onGranted = {
-                                                navController.navigate(NavScreens.HOME) {
-                                                    popUpTo(0) { inclusive = true }
-                                                }
-                                            })
-                                    }
+                                    catalogGraph(
+                                        navController = navController,
+                                        homeViewModel = homeViewModel,
+                                        brandListUseCase = brandListUseCase,
+                                        originalDesignUseCase = originalDesignUseCase,
+                                        originalDesignByIdUseCase = originalDesignByIdUseCase,
+                                        crudOriginalDesignUseCase = crudOriginalDesignUseCase,
+                                        utilizationUseCase = utilizationUseCase,
+                                        tireSizeUseCase = tireSizeUseCase,
+                                        tireSizeCrudUseCase = tireSizeCrudUseCase
+                                    )
 
-                                    composable(route = NavScreens.TERMINOS) {
-                                        TerminosScreen(
-                                            context = this@InicioActivity,
-                                            buttonText = R.string.confirmar,
-                                            onBack = {
-                                                inicioScreenViewModel.deleteUserData()
-                                                navController.popBackStack()
-                                            }) {
-                                            loginViewModel.acceptTermsConditions(onNavigate = {
-                                                navController.navigate(it)
-                                            }) {
-                                                !arePermissionsGranted(
-                                                    this@InicioActivity, getRequiredPermissions()
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    composable(
-                                        route = "${NavScreens.INSPECCION}/{tire}?temp={temp}&pressure={pressure}",
-                                        arguments = listOf(navArgument("tire") {
-                                            type = NavType.StringType
-                                        }, navArgument("temp") {
-                                            type = NavType.FloatType; defaultValue = 0
-                                        }, navArgument("pressure") {
-                                            type = NavType.FloatType; defaultValue = 0
-                                        })
-                                    ) { backStackEntry ->
-                                        val inspectionViewModel: InspectionViewModel =
-                                            hiltViewModel()
-                                        val tire = backStackEntry.arguments?.getString("tire") ?: ""
-                                        val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
-                                        val pressure =
-                                            backStackEntry.arguments?.getFloat("pressure") ?: 0.0
-
-                                        InspectionRoute(
-                                            tire = tire,
-                                            temperature = temp.toFloat(),
-                                            pressure = pressure.toFloat(),
-                                            onBack = {
-                                                navController.navigate(HombreCamionScreens.MONITOR.name) {
-                                                    launchSingleTop = true
-                                                    restoreState = true
-                                                    popUpTo(HombreCamionScreens.MONITOR.name)
-                                                }
-                                            },
-                                            onFinish = { tire ->
-                                                navController.navigate(HombreCamionScreens.MONITOR.name) {
-                                                    launchSingleTop = true
-                                                    popUpTo(HombreCamionScreens.MONITOR.name)
-                                                }
-//                                                    monitorViewModel.getSensorDataByWheel(tire)
-                                            },
-                                            viewModel = inspectionViewModel
-                                        )
-                                    }
-
-                                    composable(
-                                        route = "${NavScreens.MONTAJE}/{tire}", arguments = listOf(
-                                            navArgument("tire") {
-                                                type = NavType.StringType
-                                            })
-                                    ) { backStackEntry ->
-                                        val assemblyTireViewModel: AssemblyTireViewModel =
-                                            hiltViewModel()
-                                        val positionTire =
-                                            backStackEntry.arguments?.getString("tire") ?: ""
-                                        AssemblyTireScreen(
-                                            positionTire = positionTire,
-                                            viewModel = assemblyTireViewModel,
-                                            onBack = {
-                                                navController.popBackStack()
-                                            })
-                                    }
-
-                                    composable(
-                                        route = "${NavScreens.DESMONTAJE}/{tire}?temp={temp}&pressure={pressure}",
-                                        arguments = listOf(navArgument("tire") {
-                                            type = NavType.StringType
-                                        }, navArgument("temp") {
-                                            type = NavType.FloatType; defaultValue = 0
-                                        }, navArgument("pressure") {
-                                            type = NavType.FloatType; defaultValue = 0
-                                        })
-                                    ) { backStackEntry ->
-                                        val disassemblyTireViewModel: DisassemblyViewModel =
-                                            hiltViewModel()
-                                        val tire = backStackEntry.arguments?.getString("tire") ?: ""
-                                        val temp = backStackEntry.arguments?.getFloat("temp") ?: 0.0
-                                        val pressure =
-                                            backStackEntry.arguments?.getFloat("pressure") ?: 0.0
-                                        DisassemblyTireScreen(
-                                            positionTire = tire,
-                                            initialTemperature = temp.toFloat(),
-                                            initialPressure = pressure.toFloat(),
-                                            viewModel = disassemblyTireViewModel,
-                                            onBack = {
-                                                navController.popBackStack()
-                                            },
-                                            onFinish = {
-                                                navController.navigate(HombreCamionScreens.MONITOR.name) {
-                                                    launchSingleTop = true
-                                                    popUpTo(HombreCamionScreens.MONITOR.name)
-                                                }
-                                            })
-                                    }
-
-                                    composable(route = NavScreens.DESECHO) {
-                                        val tireWasteViewModel: TireWasteViewModel = hiltViewModel()
-                                        TireWastePileScreen(
-                                            onBack = { navController.popBackStack() },
-                                            viewModel = tireWasteViewModel,
-                                        )
-                                    }
-
-                                    composable(route = NavScreens.REPARARRENOVAR) {
-                                        val repararRenovarViewModel: RepararRenovarViewModel =
-                                            hiltViewModel()
-                                        RepararRenovarScreen(
-                                            onBack = { navController.popBackStack() },
-                                            viewModel = repararRenovarViewModel,
-                                        )
-                                    }
-
-                                    composable(route = NavScreens.CAMBIO_DESTINO) {
-                                        val cambioDestinoViewModel: CambioDestinoViewModel =
-                                            hiltViewModel()
-                                        CambioDestinoScreen(
-                                            onBack = { navController.popBackStack() },
-                                            viewModel = cambioDestinoViewModel,
-                                        )
-                                    }
-
-                                    composable(route = NavScreens.COMENTARIOS) {
-                                        val msgOperationState =
-                                            homeViewModel.messageOperationState.collectAsState()
-                                        ShareFeedbackScreen(
-                                            onShare = { feedback ->
-                                                homeViewModel.onSendFeedback(
-                                                    feedback
-                                                )
-                                            },
-                                            onBack = { navController.popBackStack() },
-                                            messageOperationState = msgOperationState.value,
-                                        )
-                                    }
-
-                                    composable(route = HombreCamionScreens.MAPA_VIAL.name) {
-                                        val vialStatusViewModel: VialStatusViewModel =
-                                            hiltViewModel()
-                                        VialStatusScreen(
-                                            onBack = { navController.popBackStack() },
-                                            viewModel = vialStatusViewModel
-                                        )
-                                    }
+                                    operationsNavigation(
+                                        navController = navController,
+                                        homeViewModel = homeViewModel
+                                    )
 
                                     forumsGraph(navController)
-
                                     couponGraph(navController)
-
                                     reportGraph(navController)
-
-                                    composable(route = HombreCamionScreens.WEATHER.name) {
-                                        val watherViewModel: WeatherViewModel = hiltViewModel()
-
-                                        WeatherRoute(
-                                            viewModel = watherViewModel,
-                                            onBack = { navController.popBackStack() }
-                                        )
-                                    }
+                                    serviceGraph(navController)
                                 }
 
                                 NotificationComponent(
@@ -1054,11 +566,22 @@ class InicioActivity : ComponentActivity() {
                                         // Estar logueado garantiza existe un userId y navegacion al menu principal
                                         if (inicioState.value.userId != null) {
                                             navController.navigate(NavScreens.HOME) {
+                                                // Limpia toda la pila para no apilar HOME
+                                                // sobre destinos previos (el back en Home
+                                                // está bloqueado y no podría drenarlos).
+                                                popUpTo(0) { inclusive = true }
                                                 launchSingleTop = true
                                             }
                                         }
                                     },
                                     onCleanState = { appStatusManagerRepository.cleanNotificationsState() },
+                                )
+                            }
+
+                            if (selectedNavItem != null && inicioState.value.paymentPlanType == PaymentPlanType.Complete) {
+                                HomeBottomBar(
+                                    selected = selectedNavItem,
+                                    onItemClick = onBottomNavItemClick
                                 )
                             }
                         }
@@ -1119,38 +642,5 @@ fun NotificationComponent(
         }
 
         else -> {}
-    }
-}
-
-fun getRequiredPermissions(): Array<String> {
-    val permissions = mutableListOf<String>()
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        // Android 12+
-        permissions.add(Manifest.permission.BLUETOOTH_SCAN)
-        permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
-    } else {
-        // Android 11 o menor
-        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        // Android 13+
-        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-    }
-
-    return permissions.toTypedArray()
-}
-
-fun arePermissionsGranted(context: Context, permissions: Array<String>): Boolean {
-    return permissions.all { perm ->
-        ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
-    }
-}
-
-fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
-    val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
-    return manager.getRunningServices(Int.MAX_VALUE).any {
-        it.service.className == serviceClass.name
     }
 }

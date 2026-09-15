@@ -11,23 +11,42 @@ import javax.inject.Inject
 
 class ReportRepository @Inject constructor(
     private val remoteReportDataSource: RemoteReportDataSource,
-    private val getTasksUseCase: GetTasksUseCase
+    private val getTasksUseCase: GetTasksUseCase,
+    private val reportLocalCache: ReportLocalCache
 ) {
     suspend fun getCpkReport(): Result<List<CpkReportResponse>> {
-        val user = getTasksUseCase().first().first()
-        return remoteReportDataSource.getCpkReport(
-            token = user.fld_token,
-            idUser = user.idUser
-        )
+        val result = runCatching {
+            val user = getTasksUseCase().first().first()
+            remoteReportDataSource.getCpkReport(
+                token = user.fld_token,
+                idUser = user.idUser
+            ).getOrThrow()
+        }
+        result.onSuccess { reportLocalCache.saveCpkReport(it) }
+        return result.recoverCatching {
+            reportLocalCache.getCpkReport().ifEmpty { throw it }
+        }
     }
 
     suspend fun getCO2EmissionsReport(): Result<List<CO2EmissionsReportResponse>> {
-        val user = getTasksUseCase().first().first()
-        return remoteReportDataSource.getCO2EmissionsReport(token = user.fld_token)
+        val result = runCatching {
+            val user = getTasksUseCase().first().first()
+            remoteReportDataSource.getCO2EmissionsReport(token = user.fld_token).getOrThrow()
+        }
+        result.onSuccess { reportLocalCache.saveCO2Report(it) }
+        return result.recoverCatching {
+            reportLocalCache.getCO2Report().ifEmpty { throw it }
+        }
     }
 
     suspend fun getFuelConsumptionReport(): Result<List<FuelConsumptionReportResponse>> {
-        val user = getTasksUseCase().first().first()
-        return remoteReportDataSource.getFuelConsumptionReport(token = user.fld_token)
+        val result = runCatching {
+            val user = getTasksUseCase().first().first()
+            remoteReportDataSource.getFuelConsumptionReport(token = user.fld_token).getOrThrow()
+        }
+        result.onSuccess { reportLocalCache.saveFuelReport(it) }
+        return result.recoverCatching {
+            reportLocalCache.getFuelReport().ifEmpty { throw it }
+        }
     }
 }

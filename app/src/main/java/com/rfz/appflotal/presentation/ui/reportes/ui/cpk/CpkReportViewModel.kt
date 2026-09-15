@@ -4,10 +4,12 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.report.CpkReportResponse
 import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.domain.report.GetCpkReportUseCase
+import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.reportes.pdf.sharePdf
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,13 +21,22 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CpkReportViewModel @Inject constructor(
-    private val getCpkReportUseCase: GetCpkReportUseCase
+    private val getCpkReportUseCase: GetCpkReportUseCase,
+    private val wifiUseCase: WifiUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CpkUiState())
     val uiState = _uiState.asStateFlow()
 
     private var allReports: List<CpkReportResponse> = emptyList()
+
+    init {
+        viewModelScope.launch {
+            wifiUseCase().collect { status ->
+                _uiState.update { it.copy(isOffline = status != NetworkStatus.Connected) }
+            }
+        }
+    }
 
     fun loadData() {
         viewModelScope.launch {
@@ -104,4 +115,5 @@ data class CpkUiState(
     val menuLoadState: LoadState<Unit> = LoadState.Idle,
     val reportLoadState: LoadState<Unit> = LoadState.Idle,
     val exportPdfState: LoadState<Unit> = LoadState.Idle,
+    val isOffline: Boolean = false,
 )

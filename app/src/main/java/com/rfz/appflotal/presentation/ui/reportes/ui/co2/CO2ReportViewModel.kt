@@ -2,8 +2,10 @@ package com.rfz.appflotal.presentation.ui.reportes.ui.co2
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.report.CO2EmissionsReportResponse
 import com.rfz.appflotal.domain.report.GetCO2EmissionsUseCase
+import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,11 +16,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CO2ReportViewModel @Inject constructor(
-    private val getCO2EmissionsUseCase: GetCO2EmissionsUseCase
+    private val getCO2EmissionsUseCase: GetCO2EmissionsUseCase,
+    private val wifiUseCase: WifiUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CO2UiState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            wifiUseCase().collect { status ->
+                _uiState.update { it.copy(isOffline = status != NetworkStatus.Connected) }
+            }
+        }
+    }
 
     fun loadData() {
         viewModelScope.launch {
@@ -42,5 +53,6 @@ class CO2ReportViewModel @Inject constructor(
 
 data class CO2UiState(
     val reports: List<CO2EmissionsReportResponse> = emptyList(),
-    val loadState: LoadState<Unit> = LoadState.Idle
+    val loadState: LoadState<Unit> = LoadState.Idle,
+    val isOffline: Boolean = false
 )

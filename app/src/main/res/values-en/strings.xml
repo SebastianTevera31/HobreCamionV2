@@ -14,11 +14,11 @@
     <string name="copyright">© %1$d Flotal Control</string>
 
     <string name="title_activity_login">LoginActivity</string>
-    <string name="title_activity_recuperar_contraseña">RecuperarContraseñaActivity</string>
-    <string name="title_activity_otp">OtpActivity</string>
-    <string name="title_activity_nueva_contrasenia">NuevaContraseniaActivity</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_activity_home_dactivity">HomeDActivity</string>
+    <string name="title_activity_recuperar_contraseña">Recover Password</string>
+    <string name="title_activity_otp">OTP Verification</string>
+    <string name="title_activity_nueva_contrasenia">New Password</string>
+    <string name="title_activity_home">Home</string>
+    <string name="title_activity_home_dactivity">Home Dashboard</string>
 
     <string name="title_user">User</string>
     <string name="error_invalid_email">Enter a valid email address</string>
@@ -48,16 +48,16 @@
     <string name="content_description_home_close">Close home screen</string>
 
     <string name="title_contentdescription">eva:pin-fill</string>
-    <string name="title_gasolinerasautorizadas">Authorized gas stations</string>
-    <string name="title_activity_inicio">InicioActivity</string>
-    <string name="title_activity_change_data">ChangeDataActivity</string>
+    <string name="title_gasolinerasautorizadas">Authorized fueling stations</string>
+    <string name="title_activity_inicio">Home</string>
+    <string name="title_activity_change_data">Change Data</string>
     <string name="title_otp">OTP verification</string>
     <string name="title_otpdispositov">Device verification</string>
     <string name="title_bodydispositivo">Enter the verification code we sent to your email to authorize this login.</string>
     <string name="title_verificar">Verify</string>
     <string name="title_subtitle_verificar">Enter the verification code we just sent to your email address.</string>
-    <string name="title_activity_verify_code">VerifyCodeActivity</string>
-    <string name="title_activity_veriy_code_device">VerifyCodeDeviceActivity</string>
+    <string name="title_activity_verify_code">Verify Code</string>
+    <string name="title_activity_veriy_code_device">Verify Device</string>
 
     <string name="operator">Operator</string>
     <string name="logout">Logout</string>
@@ -110,7 +110,7 @@
     <string name="registrar_vehiculo">Register vehicle</string>
     <string name="tipo_vehiculo">Vehicle type</string>
     <string name="placas">License plate</string>
-    <string name="registro">Sign up</string>
+    <string name="registro">Registration</string>
 
     <string name="signup_name_alert">Enter your name</string>
     <string name="signup_email_alert">Enter a valid email</string>
@@ -128,7 +128,7 @@
     <string name="error_desconocido_del_servidor">Unknown server error</string>
     <string name="cuerpo_de_la_respuesta_vac_o">Empty response body</string>
     <string name="direcci_n_mac">MAC address</string>
-    <string name="configuraci_n">Configuration</string>
+    <string name="configuracion">Settings</string>
     <string name="monitor">Monitor</string>
     <string name="guardar">Save</string>
     <string name="cerrar">Close</string>
@@ -152,8 +152,16 @@
     <string name="permiso_bluetooth_notificaciones">Bluetooth and notifications permission</string>
     <string name="conceder_permisos_btn">Grant permissions</string>
     <string name="texto_permisos_app">Bluetooth and notification access is required to connect to your HawksHead TPMS monitor.</string>
+    <string name="permiso_grupo_ubicacion_titulo">Location</string>
+    <string name="permiso_grupo_ubicacion_rationale">We need your location to show your fleet\'s position and connect with the TPMS monitor.</string>
+    <string name="permiso_grupo_bluetooth_titulo">Bluetooth</string>
+    <string name="permiso_grupo_bluetooth_rationale">Bluetooth access is required to pair with and read data from your HawksHead TPMS monitor.</string>
+    <string name="permiso_grupo_notificaciones_titulo">Notifications</string>
+    <string name="permiso_grupo_notificaciones_rationale">Notifications alert you to important updates about your fleet and TPMS monitor.</string>
+    <string name="permisos_estado_algunos_denegados">Some permissions were denied. You can try granting them again.</string>
+    <string name="permisos_estado_permanentemente_denegados">One or more permissions were permanently denied. Enable them manually in Settings.</string>
     <string name="no_se_ha_asignado_ningun_monitor">Monitor could not be assigned</string>
-    <string name="hombrecamion_conexion_tpms">Flotal - TPMS connection</string>
+    <string name="hombrecamion_conexion_tpms">Flotal - TPMS Connection</string>
     <string name="recibiendo_datos_monitor">Receiving TPMS data...</string>
     <string name="excelente">Excellent</string>
     <string name="aceptable">Fair</string>
@@ -175,7 +183,7 @@
     <string name="aviso_conexion_blueotooth">Monitor data not available. Please check your connection.</string>
     <string name="main_term_text">IMPORTANT \\ CONFIDENTIAL: This message contains information from the company CENTRO CAMIONERO MONTAJES, S.A. DE C.V., located at Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, Mexico, C.P. 29020. The information is privileged, confidential, and access is restricted in accordance with applicable law.</string>
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. is responsible for the processing (use) of your personal data, which will be used to respond to communications generated through this channel and to provide you with the products or services entrusted to us.</string>
-    <string name="en_extraccion">Being removed</string>
+    <string name="en_extraccion">In Removal</string>
 
     <string name="registro_de_llantas">Tire registration</string>
     <string name="dise_os_renovados">Retread designs</string>
@@ -215,12 +223,12 @@
     <string name="tipo_de_adquisici_n">Acquisition type</string>
     <string name="costo">Cost</string>
     <string name="folio_factura">Invoice number</string>
-    <string name="profundidad">Depth (mm)</string>
+    <string name="profundidad">Tread Depth (mm)</string>
     <string name="numero_de_llanta">Tire number</string>
     <string name="dot">DOT</string>
     <string name="sin_llantas">No active tires</string>
     <string name="inspeccionar">Inspect</string>
-    <string name="inspeccion_exitosa_mensaje">Inspección registrada exitosamente</string>
+    <string name="inspeccion_exitosa_mensaje">Inspection recorded successfully</string>
     <string name="error_registrar_inspeccion">An error occurred while registering the inspection</string>
     <string name="inspeccion">Inspection</string>
     <string name="corregir_campos_marcados">Correct the highlighted fields.</string>
@@ -262,9 +270,9 @@
     <string name="advertencia_ingreso_odometro">* The odometer reading must be greater than or equal to the last recorded value: %1$s</string>
     <string name="error_enviar_desecho">An error occurred while sending the tire to the scrap pile</string>
     <string name="reporte_de_desecho">Scrap report</string>
-    <string name="enviar_a_desecho">SEND TO SCRAP</string>
+    <string name="enviar_a_desecho">SEND TO SCRAP PILE</string>
     <string name="pila_de_desecho">Scrap pile</string>
-    <string name="llanta_enviada_desecho">Tire sent to scrap</string>
+    <string name="llanta_enviada_desecho">Tire sent to scrap pile</string>
     <string name="mover_a_almacen">Move to storage</string>
     <string name="enviar_rueda_almacen">MOVE TIRE TO STORAGE</string>
     <string name="motivo_de_reparacion">Repair reason</string>
@@ -336,7 +344,7 @@
     <string name="tamano_de_llanta">Tire size</string>
     <string name="capacidad_de_carga">Load capacity</string>
     <string name="profundidad_de_la_banda_mm">Tread depth (mm)</string>
-    <string name="profundidad_mm">Depth: %1$d mm</string>
+    <string name="profundidad_mm">Tread Depth: %1$d mm</string>
     <string name="Campos_requeridos_por_completar">All required fields must be completed</string>
     <string name="dot_excedio_caracteres">The DOT must be 10 characters or fewer</string>
     <string name="numero_llanta_excedio_caracteres">The tire number must be 15 characters or fewer</string>
@@ -399,7 +407,7 @@
     <string name="sin_elementos_disponibles">No items available</string>
     <string name="reintentar">Retry</string>
     <string name="operacion_cancelada">The operation was canceled.</string>
-    <string name="blog">Vlog</string>
+    <string name="foro">Forum</string>
     <string name="favorites">Favorites</string>
 
     <plurals name="description_field">
@@ -520,6 +528,22 @@
 
     <string name="sin_cupones_descripcion">Select another filter or check back later.</string>
 
+    <string name="promociones_invitacion_descripcion">Discover the promotions and discounts available.</string>
+    <string name="ver_promociones">View promotions</string>
+    <string name="sin_promociones_disponibles">No promotions available</string>
+    <string name="sin_promociones_descripcion">Check back later for new promotions.</string>
+    <string name="detalle_promocion">Promotion detail</string>
+
+    <string name="buscar_cupones_promociones">Search nearby coupons and promotions</string>
+    <string name="resultados_busqueda">Results for \"%1$s\"</string>
+    <string name="sin_cupones_resultado_busqueda">No coupons match your search.</string>
+    <string name="sin_promociones_resultado_busqueda">No promotions match your search.</string>
+    <string name="ver_producto">View product</string>
+    <string name="precio_regular">Regular price</string>
+    <string name="precio_con_descuento">Discounted price</string>
+    <string name="ahorras_texto">You save %1$s (%2$s%%)</string>
+    <string name="sku_label">SKU: %1$s</string>
+
     <string name="folio">Folio</string>
     <string name="vigente">Valid</string>
 
@@ -549,7 +573,7 @@
     <string name="seleccione_llanta">Select a tire</string>
     <string name="llantas_disponibles">%1$d tires available</string>
     <string name="no_llantas_disponibles">No tires available</string>
-    <string name="rendimiento_rueda">Performance - Wheel %1$s</string>
+    <string name="rendimiento_rueda">Performance - Tire %1$s</string>
     <string name="guardar_reporte">Save report</string>
     <string name="error_guardar_reporte">Error saving report</string>
     <string name="error_generar_pdf">Error generating PDF report</string>
@@ -558,7 +582,7 @@
     <string name="promedios_desgaste">Wear averages</string>
     <string name="costos">Costs</string>
     <string name="odometro_label">Odometer</string>
-    <string name="profundidad_final">Final depth</string>
+    <string name="profundidad_final">Final Tread Depth</string>
     <string name="distancia_recorrida_actual">Current distance traveled</string>
     <string name="desgaste_total">Total wear</string>
     <string name="ciclo_actual">Current cycle</string>
@@ -566,7 +590,7 @@
     <string name="costo_unitario">Unit cost</string>
     <string name="por_distancia_cpk">By distance CPK</string>
     <string name="por_profundidad">By depth</string>
-    <string name="rueda_pos">Wheel %1$s</string>
+    <string name="rueda_pos">Tire %1$s</string>
     <string name="no_info_llanta">No tire information</string>
     <string name="reporte_rendimiento_title">Performance report</string>
     <string name="reporte_rendimiento_general">General Performance Report</string>
@@ -587,8 +611,8 @@
     <!-- PDF Report Strings -->
     <string name="pdf_header_title">PERFORMANCE REPORT</string>
     <string name="pdf_label_date">Date</string>
-    <string name="pdf_system_name">Hombre Camión System - Flotal</string>
-    <string name="pdf_label_position">Position: Wheel %1$s</string>
+    <string name="pdf_system_name">Owner-Operator System - Flotal</string>
+    <string name="pdf_label_position">Position: Tire %1$s</string>
     <string name="pdf_label_id">Tire ID: %1$d</string>
     <string name="pdf_section_tire_info">Tire Information</string>
     <string name="pdf_label_serial">Serial Number</string>
@@ -599,9 +623,9 @@
     <string name="pdf_section_operation">Operation Summary</string>
     <string name="pdf_label_odometer">Current Odometer</string>
     <string name="pdf_label_distance">Distance Traveled</string>
-    <string name="pdf_label_initial_depth">Initial Depth</string>
+    <string name="pdf_label_initial_depth">Initial Tread Depth</string>
     <string name="pdf_label_wear">Tread Wear</string>
-    <string name="pdf_label_current_depth">Current Depth</string>
+    <string name="pdf_label_current_depth">Current Tread Depth</string>
     <string name="pdf_label_lifecycle">Life Cycle</string>
     <string name="pdf_section_efficiency">Efficiency</string>
     <string name="pdf_label_performance">Performance (km/mm)</string>
@@ -684,5 +708,167 @@
     <string name="snowshowers">Snow showers</string>
     <string name="snowshowersandthunder">Snow showers and thunder</string>
     <string name="gustados">Liked</string>
-    <string name="preferencias">Preferences</string>
+    <string name="analytics">Analytics</string>
+    <string name="promociones_descuentos">Promotions</string>
+    <string name="feedback_title">Your opinion matters to us</string>
+    <string name="feedback_subtitle">Tell us what we can improve about the app</string>
+    <string name="consumo_de_combustible">Fuel Consumption</string>
+    <string name="emision_co2">CO2 Emission</string>
+    <string name="ver_mas">See more</string>
+    <string name="rendimiento_del_vehiculo">Vehicle performance</string>
+    <string name="alertas_recientes">Recent alerts</string>
+    <string name="ver_todas">See all</string>
+    <string name="ver_mapa">See map</string>
+    <string name="secciones">Sections</string>
+    <string name="ultimos_datos">LATEST DATA</string>
+    <string name="registrar">register</string>
+    <string name="todas">All</string>
+
+    <!-- Complete Plan -->
+    <string name="content_description_notificaciones">Notifications</string>
+    <string name="saludo_usuario">Hello, %1$s!</string>
+    <string name="plan_actual">Plan: %1$s</string>
+    <string name="placas_vehiculo">License plate: %1$s</string>
+    <string name="vehiculo_placa_format">%1$s · %2$s</string>
+    <string name="vehiculo_no_asignado">Vehicle not assigned</string>
+    <string name="no_datos_rendimiento">No performance data available</string>
+    <string name="alerta_critica_label">CRITICAL</string>
+
+    <!-- Alerts -->
+    <string name="alertas_history_title">Alert History</string>
+    <string name="alertas_history_section_title">Alert history</string>
+    <string name="filtros">Filters</string>
+    <string name="colapsar">Collapse</string>
+    <string name="expandir">Expand</string>
+    <string name="aplicar_filtros">Apply Filters</string>
+    <string name="rueda_label">Tire</string>
+    <string name="alerta_label">Alert</string>
+    <string name="desde_label">From:</string>
+    <string name="hasta_label">To:</string>
+    <string name="pagina_anterior">Previous page</string>
+    <string name="pagina_siguiente">Next page</string>
+    <string name="error_al_cargar_alertas">Alerts could not be loaded. Please try again.</string>
+
+    <!-- Empty States -->
+    <string name="no_alertas_recientes">You have no recent alerts</string>
+    <string name="sin_publicaciones_foro">There are no forum posts yet</string>
+
+    <!-- Alert Titles -->
+    <string name="alert_title_low_pressure">Low pressure alert · %1$s</string>
+    <string name="alert_title_high_pressure">High pressure alert · %1$s</string>
+    <string name="alert_title_temperature">Temperature alert · %1$s</string>
+    <string name="alert_title_inflate">Inflation alert · %1$s</string>
+    <string name="alert_title_fast_leak">Fast leak detected · %1$s</string>
+    <string name="alert_title_slow_leak">Slow leak detected · %1$s</string>
+    <string name="alert_title_extraction">Extraction detected · %1$s</string>
+    <string name="alert_title_low_battery">Low sensor battery · %1$s</string>
+    <string name="alert_title_no_data">No sensor data · %1$s</string>
+    <string name="alert_title_generic">Alert · %1$s</string>
+
+    <!-- Sample Alert Titles -->
+    <string name="alert_sample_pressure_critical">Critical Pressure - %1$s</string>
+    <string name="alert_sample_temperature_high">High Temperature - %1$s</string>
+    <string name="alert_sample_tread_wear">Low Tread Wear</string>
+    <string name="alert_sample_inspection">Scheduled Inspection</string>
+    <string name="alert_sample_speeding">Speeding</string>
+    <string name="alert_sample_trailer_pressure">High Pressure - Trailer</string>
+    <string name="alert_sample_brakes_overheating">Brakes Overheating</string>
+    <string name="alert_sample_alignment">Alignment Required</string>
+
+    <!-- Alert Labels -->
+    <string name="alert_label_pressure">Pressure:</string>
+    <string name="alert_label_temp">Temp:</string>
+    <string name="alert_label_level">Level:</string>
+    <string name="alert_label_depth">Depth:</string>
+    <string name="alert_label_loss">Loss:</string>
+    <string name="alert_label_expires">Expires in:</string>
+    <string name="alert_label_max">Max:</string>
+    <string name="alert_label_deviation">Deviation:</string>
+
+    <!-- Alert Status -->
+    <string name="alert_status_critical">CRITICAL</string>
+    <string name="alert_status_pending">PENDING</string>
+
+    <string name="temperature">temperature</string>
+    <string name="inflate">inflate</string>
+    <string name="critica">CRITICAL</string>
+
+    <!-- Connectivity & Offline states -->
+    <string name="rendimiento_actualizado">Calculated on %1$s</string>
+    <string name="sin_internet_home">No internet connection. Showing the last saved information.</string>
+    <string name="alertas_requiere_internet">No connection: showing the most recent saved alerts. Connect to the internet to see more results or apply filters.</string>
+    <string name="reportes_requiere_internet">No connection: showing the last downloaded report. Connect to the internet to see updated information.</string>
+    <string name="foro_sin_internet">No internet connection. Connect to a network to view the forum.</string>
+    <string name="requiere_internet_badge">Requires internet</string>
+
+    <!-- Maps -->
+    <string name="mapa_vial_titulo">Road Map</string>
+    <string name="mapa_vial_subtitulo">Check road status in real time</string>
+
+    <!-- ============ Services module ============ -->
+    <string name="srv_title">Services</string>
+    <string name="srv_ordenes_section">Orders</string>
+    <string name="srv_buscar_orden">Search order</string>
+    <string name="srv_nueva_orden">New order</string>
+    <string name="srv_sin_ordenes">There are no service orders for this vehicle.</string>
+    <string name="srv_error_cargar">Orders could not be loaded.</string>
+    <string name="srv_requiere_internet">No connection: showing saved orders. Connect to view or edit more.</string>
+
+    <!-- Vehicle -->
+    <string name="srv_vehiculo_label">Vehicle</string>
+    <string name="srv_tipo_label">Type</string>
+    <string name="srv_odometro_label">Odometer</string>
+    <string name="srv_seleccionar_vehiculo">Select a vehicle</string>
+
+    <!-- Order -->
+    <string name="srv_orden_folio">Order #%1$s</string>
+    <string name="srv_orden_apertura">Opening date</string>
+    <string name="srv_orden_finalizado">Closing date</string>
+    <string name="srv_orden_en_proceso">In progress</string>
+    <string name="srv_orden_total">Total</string>
+    <string name="srv_orden_servicios_count">%1$d service(s)</string>
+    <string name="srv_estado_abierta">Open</string>
+    <string name="srv_estado_finalizada">Closed</string>
+
+    <!-- Order actions -->
+    <string name="srv_accion_modificar_orden">Edit service order</string>
+    <string name="srv_accion_agregar_servicio">Add services</string>
+    <string name="srv_accion_eliminar_orden">Delete service order</string>
+    <string name="srv_accion_eliminar_servicio">Delete service</string>
+
+    <!-- Order detail -->
+    <string name="srv_detalle_orden_title">Order details</string>
+    <string name="srv_detalle_servicios_section">Services</string>
+    <string name="srv_detalle_sin_servicios">This order has no services yet.</string>
+
+    <!-- Service form -->
+    <string name="srv_form_nuevo_title">New service</string>
+    <string name="srv_form_detalle_title">Service details</string>
+    <string name="srv_servicio_label">Service</string>
+    <string name="srv_servicio_seleccionar">Select a service</string>
+    <string name="srv_costo_unitario_label">Unit cost</string>
+    <string name="srv_cantidad_label">Quantity</string>
+    <string name="srv_total_label">Total</string>
+    <string name="srv_proveedor_label">Provider</string>
+    <string name="srv_tipo_ocurrencia_label">Occurrence type</string>
+    <string name="srv_tipo_servicio_label">Service type</string>
+    <string name="srv_buscar_servicio">Search service</string>
+    <string name="srv_sin_servicios">There are no services for this vehicle.</string>
+    <string name="srv_descripcion_label">Description</string>
+    <string name="srv_descripcion_placeholder">Service details (optional)</string>
+    <string name="srv_agregar_servicio_btn">Add service</string>
+    <string name="srv_actualizar_btn">Update</string>
+
+    <!-- New order -->
+    <string name="srv_nueva_orden_title">New order</string>
+    <string name="srv_notas_label">Notes</string>
+    <string name="srv_notas_placeholder">Order notes (optional)</string>
+    <string name="srv_crear_orden_btn">Create order</string>
+
+    <!-- Confirmations -->
+    <string name="srv_confirmar_eliminar_titulo">Delete?</string>
+    <string name="srv_confirmar_eliminar_orden_msg">Order #%1$s and all its services will be deleted. This action cannot be undone.</string>
+    <string name="srv_confirmar_eliminar_servicio_msg">This service will be removed from the order. This action cannot be undone.</string>
+    <string name="srv_eliminar_btn">Delete</string>
+    <string name="servicios">Services</string>
 </resources>

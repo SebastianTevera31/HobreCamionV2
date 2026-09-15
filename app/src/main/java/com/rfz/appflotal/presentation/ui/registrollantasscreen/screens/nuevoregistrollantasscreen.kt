@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.registrollantasscreen.screens
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -113,7 +114,7 @@ fun NuevoRegistroLlantasScreen(
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = { navController.popBackStack() },
+                            onClick = { navController.popBackStackSafely() },
                             modifier = Modifier.padding(start = 8.dp)
                         ) {
                             Icon(

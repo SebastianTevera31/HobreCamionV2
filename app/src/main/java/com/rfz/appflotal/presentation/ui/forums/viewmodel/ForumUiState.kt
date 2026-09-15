@@ -25,7 +25,8 @@ data class ForumUiState(
     val topicTitle: String = "",
     val topicDescription: String = "",
     val topicColor: String = "#F44336",
-    val topicTags: List<String> = emptyList()
+    val topicTags: List<String> = emptyList(),
+    val isOffline: Boolean = false
 )
 
 sealed class CameraUiState {

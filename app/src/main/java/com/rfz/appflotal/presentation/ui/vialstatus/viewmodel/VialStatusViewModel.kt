@@ -85,12 +85,12 @@ class VialStatusViewModel @Inject constructor(
     fun getCurrentLocation() {
         currentJob?.cancel()
         currentJob = viewModelScope.launch {
-            _uiState.update { 
+            _uiState.update {
                 it.copy(
-                    mapUrl = "", 
+                    mapUrl = "",
                     gettingStatesStatus = LoadState.Loading,
-                    gettingMapStatus = LoadState.Idle
-                ) 
+                    gettingMapStatus =  LoadState.Idle
+                )
             }
 
             val result = locationRepository.getLastLocation() ?: run {
@@ -103,6 +103,11 @@ class VialStatusViewModel @Inject constructor(
             if (currentCountry != null) {
                 _uiState.update { it.copy(selectedCountry = currentCountry) }
                 fetchStates(currentCountry.id, result.estado)
+                getMap()
+            } else {
+                // El geocoder no devolvió país (pais == null) o no coincide con el catálogo.
+                // Sin este reset, gettingStatesStatus se quedaría en Loading indefinidamente.
+                _uiState.update { it.copy(gettingStatesStatus = LoadState.Idle) }
             }
         }
     }
@@ -164,7 +169,12 @@ class VialStatusViewModel @Inject constructor(
                 }
 
                 val link = result.first().link
-                _uiState.update { it.copy(mapUrl = link, gettingMapStatus = LoadState.Success(link)) }
+                _uiState.update {
+                    it.copy(
+                        mapUrl = link,
+                        gettingMapStatus = LoadState.Success(link)
+                    )
+                }
             }.onFailure {
                 _uiState.update { it.copy(gettingMapStatus = LoadState.Error(VialError.SERVER_ERROR.name)) }
             }

@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.login.viewmodel
 
+import android.content.Context
 import android.util.Patterns
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -13,12 +14,14 @@ import com.rfz.appflotal.data.model.login.response.AppFlotalMapper
 import com.rfz.appflotal.data.model.login.response.LoginResponse
 import com.rfz.appflotal.data.model.login.response.Result
 import com.rfz.appflotal.data.repository.vehicle.VehicleRepository
+import com.rfz.appflotal.data.worker.triggerPromotionsSync
 import com.rfz.appflotal.domain.database.AddTaskUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -58,6 +61,7 @@ sealed interface LoginUiState {
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val loginUseCase: LoginUseCase,
     private val addTaskUseCase: AddTaskUseCase,
     private val getTasksUseCase: GetTasksUseCase,
@@ -146,6 +150,7 @@ class LoginViewModel @Inject constructor(
         when (response.id) {
             200 -> {
                 onTaskCreated(response)
+                triggerPromotionsSync(context)
 
                 val plan = when (response.paymentPlan) {
                     PaymentPlanType.Complete.planName -> PaymentPlanType.Complete

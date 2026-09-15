@@ -29,6 +29,7 @@ import com.rfz.appflotal.data.network.client.originaldesign.OriginalDesignClient
 import com.rfz.appflotal.data.network.client.product.ProductByIdClient
 import com.rfz.appflotal.data.network.client.product.ProductCrudClient
 import com.rfz.appflotal.data.network.client.product.ProductListClient
+import com.rfz.appflotal.data.network.client.promotions.PromotionsService
 import com.rfz.appflotal.data.network.client.provider.ProviderCrudClient
 import com.rfz.appflotal.data.network.client.provider.ProviderListClient
 import com.rfz.appflotal.data.network.client.repair.RepairService
@@ -40,6 +41,7 @@ import com.rfz.appflotal.data.network.client.retreaddesign.RetreadDesignCrudClie
 import com.rfz.appflotal.data.network.client.retreaddesign.RetreadDesignListClient
 import com.rfz.appflotal.data.network.client.route.RouteClient
 import com.rfz.appflotal.data.network.client.scrap.ScrapReportClient
+import com.rfz.appflotal.data.network.client.services.ServiceClient
 import com.rfz.appflotal.data.network.client.tire.DisassemblyTireCrudClient
 import com.rfz.appflotal.data.network.client.tire.InspectionTireCrudClient
 import com.rfz.appflotal.data.network.client.tire.LoadingCapacityClient
@@ -440,6 +442,12 @@ class NetworkModule {
 
     @Singleton
     @Provides
+    fun providePromotionsClient(retrofit: Retrofit): PromotionsService {
+        return retrofit.create(PromotionsService::class.java)
+    }
+
+    @Singleton
+    @Provides
     fun provideReportService(retrofit: Retrofit): ReportService {
         return retrofit.create(ReportService::class.java)
     }
@@ -448,6 +456,12 @@ class NetworkModule {
     @Provides
     fun provideWeatherClient(retrofit: Retrofit): WeatherClient {
         return retrofit.create(WeatherClient::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideServiceClient(retrofit: Retrofit): ServiceClient {
+        return retrofit.create(ServiceClient::class.java)
     }
 }
 

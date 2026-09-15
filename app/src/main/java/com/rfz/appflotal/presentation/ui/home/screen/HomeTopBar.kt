@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -109,7 +110,7 @@ fun HomeTopBar(
                     }
                 }) {
                     Icon(
-                        Icons.Filled.AccountCircle,
+                        Icons.Filled.Settings,
                         contentDescription = stringResource(R.string.profile),
                         tint = Color.White
                     )
@@ -149,7 +150,11 @@ fun HomeTopBar(
 
 @Composable
 fun LogoHeader(userType: PaymentPlanType, showDialog: () -> Unit) {
-    Row(modifier = Modifier.wrapContentWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.wrapContentWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Box(
             modifier = Modifier
                 .size(64.dp)

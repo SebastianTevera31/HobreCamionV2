@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.report.FuelConsumptionReportResponse
 import com.rfz.appflotal.presentation.commons.ErrorView
+import com.rfz.appflotal.presentation.commons.RequiresInternetNotice
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
@@ -40,6 +41,7 @@ import com.rfz.appflotal.presentation.ui.utils.LoadState
 fun FuelConsumptionReportRoute(
     screenState: LoadState<Unit>,
     reports: List<FuelConsumptionReportResponse>,
+    isOffline: Boolean = false,
     onBack: () -> Unit
 ) {
     var selectedMonthYear by remember {
@@ -49,6 +51,7 @@ fun FuelConsumptionReportRoute(
     FuelEmissionReportScreen(
         screenState = screenState,
         reports = reports,
+        isOffline = isOffline,
         selectedMonthYear = selectedMonthYear,
         onMonthYearSelected = { selection ->
             selectedMonthYear = selection
@@ -64,6 +67,7 @@ fun FuelEmissionReportScreen(
     selectedMonthYear: MonthYearSelection?,
     onMonthYearSelected: (MonthYearSelection) -> Unit,
     onBack: () -> Unit,
+    isOffline: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val selectedReport = reports.firstOrNull { it.month == selectedMonthYear?.toApiFormat() }
@@ -110,6 +114,10 @@ fun FuelEmissionReportScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
+                    if (isOffline) {
+                        RequiresInternetNotice(message = stringResource(R.string.reportes_requiere_internet))
+                    }
 
                     MonthYearPickerField(
                         selectedMonthYear = selectedMonthYear,

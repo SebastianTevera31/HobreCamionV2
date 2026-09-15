@@ -79,6 +79,9 @@ dependencies {
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
+    // Iconos
+    implementation("androidx.compose.material:material-icons-extended")
+
     // Core & Lifecycle
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
@@ -132,7 +135,7 @@ dependencies {
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.10.2")
 
-    // CameraX
+    // CameraXi
     val cameraVersion = "1.4.2"
     implementation("androidx.camera:camera-core:$cameraVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraVersion")
