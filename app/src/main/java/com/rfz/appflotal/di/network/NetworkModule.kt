@@ -62,8 +62,6 @@ import com.rfz.appflotal.data.network.client.waster.WasteService
 import com.rfz.appflotal.data.network.client.weather.WeatherClient
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepository
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothRepositoryImp
-import com.rfz.appflotal.data.repository.services.ServicesRepository
-import com.rfz.appflotal.data.repository.services.ServicesRepositoryImp
 import com.rfz.appflotal.data.repository.wifi.WifiRepository
 import com.rfz.appflotal.data.repository.wifi.WifiRepositoryImp
 import dagger.Binds
@@ -465,14 +463,6 @@ class NetworkModule {
     fun provideServiceClient(retrofit: Retrofit): ServiceClient {
         return retrofit.create(ServiceClient::class.java)
     }
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class ServicesModule {
-    @Binds
-    @Singleton
-    abstract fun bindServicesRepository(impl: ServicesRepositoryImp): ServicesRepository
 }
 
 @Module

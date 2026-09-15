@@ -1,6 +1,8 @@
 package com.rfz.appflotal.presentation.ui.services
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,9 +18,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,56 +44,56 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.services.components.ServiceDropdownField
 import com.rfz.appflotal.presentation.ui.services.components.ServiceTextField
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
-import com.rfz.appflotal.presentation.ui.services.model.ServiceItemUi
-import com.rfz.appflotal.presentation.ui.services.model.sampleOccurrenceTypes
-import com.rfz.appflotal.presentation.ui.services.model.sampleProviders
-import com.rfz.appflotal.presentation.ui.services.model.sampleServiceCatalog
+import com.rfz.appflotal.presentation.ui.services.model.ServiceUi
+import com.rfz.appflotal.presentation.ui.services.model.sampleServiceTypes
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 enum class ServiceFormMode { CREATE, EDIT }
 
-/** Estado editable del formulario de un servicio (ServiceDetailDto en construcción). */
+/** Estado editable del formulario de un servicio (mapea a ServiceDetailDto). */
 data class ServiceFormData(
-    val serviceId: Int? = null,
-    val providerId: Int? = null,
-    val occurrenceTypeId: Int? = null,
-    val unitCost: String = "",
-    val quantity: String = "",
-    val notes: String = ""
+    val typeId: Int?,          // id_serviceType
+    val description: String,   // fld_description (lo captura el usuario)
+    val provider: String,      // fld_provider (lo captura el usuario)
+    val price: String,         // fld_price
+    val quantity: String,      // fld_cant
+    val date: String           // fld_date (ISO 8601)
 )
 
 /**
- * Formulario compartido para "Nuevo servicio" (CREATE) y "Detalles de servicio" (EDIT).
- * Los campos Proveedor y Tipo de ocurrencia se agregan porque el ServiceDetailDto los
- * exige y en el mockup no aparecían. El total se calcula en vivo (cantidad × costo).
+ * Formulario compartido para "Nuevo servicio" (CREATE) y edición (EDIT).
+ *
+ * Nota: el endpoint de lectura no devuelve proveedor ni fecha, por lo que al
+ * editar esos dos campos inician vacíos.
  */
 @Composable
 fun ServiceFormScreen(
     mode: ServiceFormMode,
-    services: List<CatalogItemUi>,
-    providers: List<CatalogItemUi>,
-    occurrenceTypes: List<CatalogItemUi>,
+    serviceTypes: List<CatalogItemUi>,
     onBack: () -> Unit,
     onSubmit: (ServiceFormData) -> Unit,
     modifier: Modifier = Modifier,
-    initial: ServiceItemUi? = null
+    initial: ServiceUi? = null
 ) {
-    var providerName by remember { mutableStateOf(initial?.provider ?: "") }
-    var occurrenceName by remember { mutableStateOf(initial?.occurrenceType ?: "") }
-    var occurrenceId by remember {
-        mutableStateOf(occurrenceTypes.firstOrNull { it.name == initial?.occurrenceType }?.id)
+    var typeName by remember { mutableStateOf(initial?.type ?: "") }
+    var typeId by remember {
+        mutableStateOf(serviceTypes.firstOrNull { it.name == initial?.type }?.id)
     }
-    var unitCost by remember {
-        mutableStateOf(initial?.unitCost?.let { formatInput(it) } ?: "")
-    }
+    var description by remember { mutableStateOf(initial?.description ?: "") }
+    var provider by remember { mutableStateOf(initial?.provider ?: "") }
+    var price by remember { mutableStateOf(initial?.price?.takeIf { it > 0 }?.toString() ?: "") }
     var quantity by remember {
-        mutableStateOf(initial?.quantity?.let { formatInput(it) } ?: "")
+        mutableStateOf(initial?.quantity?.takeIf { it > 0 }?.toString() ?: "")
     }
-    var notes by remember { mutableStateOf(initial?.notes ?: "") }
+    var dateMillis by remember { mutableStateOf<Long?>(null) }
 
-    var serviceName by remember { mutableStateOf(initial?.serviceName ?: "") }
-    val total = (unitCost.toDoubleOrNull() ?: 0.0) * (quantity.toDoubleOrNull() ?: 0.0)
-    val isValid = serviceName.isNotEmpty() && unitCost.toDoubleOrNull() != null &&
-            (quantity.toDoubleOrNull() ?: 0.0) > 0.0
+    val total = (price.toIntOrNull() ?: 0) * (quantity.toIntOrNull() ?: 0)
+    val isValid = typeId != null && description.isNotBlank() &&
+            (price.toIntOrNull() ?: 0) > 0 && (quantity.toIntOrNull() ?: 0) > 0 &&
+            dateMillis != null
 
     val title = stringResource(
         if (mode == ServiceFormMode.CREATE) R.string.srv_form_nuevo_title
@@ -112,62 +118,59 @@ fun ServiceFormScreen(
                 .padding(Dimens.PaddingMedium),
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
         ) {
+            ServiceDropdownField(
+                label = stringResource(R.string.srv_tipo_servicio_label),
+                selected = typeName,
+                placeholder = stringResource(R.string.srv_servicio_seleccionar),
+                options = serviceTypes.map { it.name },
+                onSelect = {
+                    typeName = serviceTypes[it].name
+                    typeId = serviceTypes[it].id
+                }
+            )
+
             ServiceTextField(
                 label = stringResource(R.string.srv_servicio_label),
-                value = serviceName,
-                onValueChange = { serviceName = it }
+                value = description,
+                onValueChange = { description = it }
             )
 
             ServiceTextField(
                 label = stringResource(R.string.srv_proveedor_label),
-                value = providerName,
-                onValueChange = { providerName = it }
-            )
-
-            ServiceDropdownField(
-                label = stringResource(R.string.srv_tipo_ocurrencia_label),
-                selected = occurrenceName,
-                placeholder = stringResource(R.string.srv_servicio_seleccionar),
-                options = occurrenceTypes.map { it.name },
-                onSelect = {
-                    occurrenceName = occurrenceTypes[it].name
-                    occurrenceId = occurrenceTypes[it].id
-                }
+                value = provider,
+                onValueChange = { provider = it }
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)) {
                 ServiceTextField(
                     label = stringResource(R.string.srv_costo_unitario_label),
-                    value = unitCost,
-                    onValueChange = { unitCost = it.filter { c -> c.isDigit() || c == '.' } },
+                    value = price,
+                    onValueChange = { price = it.filter { c -> c.isDigit() } },
                     prefix = "$",
-                    keyboardType = KeyboardType.Decimal,
+                    keyboardType = KeyboardType.Number,
                     modifier = Modifier.weight(1f)
                 )
 
                 ServiceTextField(
                     label = stringResource(R.string.srv_cantidad_label),
                     value = quantity,
-                    onValueChange = { quantity = it.filter { c -> c.isDigit() || c == '.' } },
-                    keyboardType = KeyboardType.Decimal,
+                    onValueChange = { quantity = it.filter { c -> c.isDigit() } },
+                    keyboardType = KeyboardType.Number,
                     modifier = Modifier.weight(1f)
                 )
             }
 
-            ServiceTextField(
-                label = stringResource(R.string.srv_total_label),
-                value = "$%,.2f".format(total),
-                onValueChange = {},
-                enabled = false
+            ServiceDateField(
+                label = stringResource(R.string.fecha),
+                dateMillis = dateMillis,
+                onDateSelected = { dateMillis = it }
             )
 
             ServiceTextField(
-                label = stringResource(R.string.srv_descripcion_label),
-                value = notes,
-                onValueChange = { notes = it },
-                placeholder = stringResource(R.string.srv_descripcion_placeholder),
-                singleLine = false,
-                minLines = 3
+                label = stringResource(R.string.srv_total_label),
+                value = "$%,d".format(total),
+                onValueChange = {},
+                enabled = false
             )
 
             Spacer(modifier = Modifier.size(Dimens.PaddingSmall))
@@ -176,12 +179,12 @@ fun ServiceFormScreen(
                 onClick = {
                     onSubmit(
                         ServiceFormData(
-                            serviceId = 0,
-                            providerId = 0,
-                            occurrenceTypeId = occurrenceId,
-                            unitCost = unitCost,
+                            typeId = typeId,
+                            description = description,
+                            provider = provider,
+                            price = price,
                             quantity = quantity,
-                            notes = notes
+                            date = dateMillis.toIsoDate()
                         )
                     )
                 },
@@ -203,8 +206,65 @@ fun ServiceFormScreen(
     }
 }
 
-private fun formatInput(value: Double): String =
-    if (value % 1.0 == 0.0) value.toInt().toString() else value.toString()
+/** Campo de solo lectura que abre un selector de fecha. */
+@Composable
+private fun ServiceDateField(
+    label: String,
+    dateMillis: Long?,
+    onDateSelected: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        ServiceTextField(
+            label = label,
+            value = dateMillis?.let { formatDisplayDate(it) } ?: "",
+            onValueChange = {},
+            placeholder = stringResource(R.string.seleccionar_fecha),
+            enabled = false
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { showDialog = true }
+        )
+    }
+
+    if (showDialog) {
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dateMillis)
+        DatePickerDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let(onDateSelected)
+                    showDialog = false
+                }) { Text(stringResource(R.string.confirmar)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text(stringResource(R.string.cancelar))
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+}
+
+private fun formatDisplayDate(millis: Long): String {
+    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    sdf.timeZone = TimeZone.getTimeZone("UTC")
+    return sdf.format(Date(millis))
+}
+
+/** Fecha en el formato ISO 8601 UTC que espera el backend (fld_date). */
+private fun Long?.toIsoDate(): String {
+    if (this == null) return ""
+    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+    sdf.timeZone = TimeZone.getTimeZone("UTC")
+    return sdf.format(Date(this))
+}
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -212,9 +272,7 @@ private fun ServiceFormCreatePreview() {
     HombreCamionTheme {
         ServiceFormScreen(
             mode = ServiceFormMode.CREATE,
-            services = sampleServiceCatalog,
-            providers = sampleProviders,
-            occurrenceTypes = sampleOccurrenceTypes,
+            serviceTypes = sampleServiceTypes,
             onBack = {},
             onSubmit = {}
         )
@@ -227,12 +285,10 @@ private fun ServiceFormEditPreview() {
     HombreCamionTheme {
         ServiceFormScreen(
             mode = ServiceFormMode.EDIT,
-            services = sampleServiceCatalog,
-            providers = sampleProviders,
-            occurrenceTypes = sampleOccurrenceTypes,
+            serviceTypes = sampleServiceTypes,
             onBack = {},
             onSubmit = {},
-            initial = com.rfz.appflotal.presentation.ui.services.model.sampleServiceItems.first()
+            initial = com.rfz.appflotal.presentation.ui.services.model.sampleServices.first()
         )
     }
 }

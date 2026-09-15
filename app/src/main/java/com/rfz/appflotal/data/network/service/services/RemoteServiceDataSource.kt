@@ -2,7 +2,6 @@ package com.rfz.appflotal.data.network.service.services
 
 import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.model.services.dto.ServiceDetailDto
-import com.rfz.appflotal.data.model.services.dto.ServiceOrderDto
 import com.rfz.appflotal.data.model.services.response.ServiceResponseDto
 import com.rfz.appflotal.data.model.services.response.TypeServiceDto
 import com.rfz.appflotal.data.network.client.services.ServiceClient
@@ -12,9 +11,9 @@ import javax.inject.Inject
 class RemoteServiceDataSource @Inject constructor(
     private val serviceClient: ServiceClient
 ) {
-    suspend fun getServices(): Result<List<ServiceResponseDto>> {
+    suspend fun getServices(token: String): Result<List<ServiceResponseDto>> {
         return networkRequestHelper {
-            serviceClient.getServices()
+            serviceClient.getServices("Bearer $token")
         }
     }
 
@@ -23,15 +22,15 @@ class RemoteServiceDataSource @Inject constructor(
         token: String
     ): Result<GeneralResponse> {
         return networkRequestHelper {
-            serviceClient.doCrudServiceDetail(requestBody, token)
+            serviceClient.doCrudServiceDetail(requestBody, "Bearer $token")
         }
     }
 
     suspend fun doGetServiceType(
         token: String
-    ): Result<TypeServiceDto> {
+    ): Result<List<TypeServiceDto>> {
         return networkRequestHelper {
-            serviceClient.doGetServiceType(token)
+            serviceClient.doGetServiceType("Bearer $token")
         }
     }
 }

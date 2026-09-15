@@ -13,5 +13,5 @@ data class ServiceResponseDto(
 
 data class TypeServiceDto(
     @SerializedName("id_serviceType") val idTypeService: Int,
-    @SerializedName("fld_serviceType") val description: Int,
+    @SerializedName("fld_serviceType") val description: String
 )

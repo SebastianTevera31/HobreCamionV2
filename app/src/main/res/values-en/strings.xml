@@ -851,6 +851,9 @@
     <string name="srv_total_label">Total</string>
     <string name="srv_proveedor_label">Provider</string>
     <string name="srv_tipo_ocurrencia_label">Occurrence type</string>
+    <string name="srv_tipo_servicio_label">Service type</string>
+    <string name="srv_buscar_servicio">Search service</string>
+    <string name="srv_sin_servicios">There are no services for this vehicle.</string>
     <string name="srv_descripcion_label">Description</string>
     <string name="srv_descripcion_placeholder">Service details (optional)</string>
     <string name="srv_agregar_servicio_btn">Add service</string>

@@ -15,10 +15,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ListAlt
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.DirectionsBus
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,34 +52,26 @@ import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.services.components.ConfirmDeleteDialog
 import com.rfz.appflotal.presentation.ui.services.components.InfoPair
-import com.rfz.appflotal.presentation.ui.services.components.ServiceOrderActionsSheet
 import com.rfz.appflotal.presentation.ui.services.components.ServiceSectionHeader
-import com.rfz.appflotal.presentation.ui.services.components.StatusBadge
-import com.rfz.appflotal.presentation.ui.services.model.ServiceOrderUi
+import com.rfz.appflotal.presentation.ui.services.model.ServiceUi
 import com.rfz.appflotal.presentation.ui.services.model.VehicleHeaderUi
-import com.rfz.appflotal.presentation.ui.services.model.sampleServiceOrders
+import com.rfz.appflotal.presentation.ui.services.model.sampleServices
 import com.rfz.appflotal.presentation.ui.services.model.sampleVehicleHeader
 
 /**
- * Pantalla de lista de órdenes de servicio de un vehículo.
- *
- * Mejoras de UX sobre el mockup:
- *  - La tabla apretada se sustituye por tarjetas (consistente con el módulo de alertas).
- *  - Estado por orden con pastilla (Abierta / Finalizada) y fecha de finalizado explícita.
- *  - FAB "Nueva orden" (entrada que faltaba para crear órdenes).
- *  - Estados de vacío / carga / error / offline.
- *  - Confirmación antes de eliminar.
+ * Lista de servicios del vehículo (flujo "solo servicios").
+ *  - Tarjeta por servicio; tocar = editar.
+ *  - FAB "Nuevo servicio".
+ *  - Estados vacío / carga / error / offline y borrado con confirmación.
  */
 @Composable
 fun ServicesScreen(
     vehicle: VehicleHeaderUi?,
-    orders: List<ServiceOrderUi>,
+    services: List<ServiceUi>,
     onBack: () -> Unit,
-    onOpenOrder: (Int) -> Unit,
-    onNewOrder: () -> Unit,
-    onEditOrder: (Int) -> Unit,
-    onAddServices: (Int) -> Unit,
-    onDeleteOrder: (Int) -> Unit,
+    onNewService: () -> Unit,
+    onEditService: (Int) -> Unit,
+    onDeleteService: (Int) -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
     errorMessage: String? = null,
@@ -87,13 +79,12 @@ fun ServicesScreen(
     onRetry: () -> Unit = {}
 ) {
     var query by remember { mutableStateOf("") }
-    var actionsOrder by remember { mutableStateOf<ServiceOrderUi?>(null) }
-    var orderToDelete by remember { mutableStateOf<ServiceOrderUi?>(null) }
+    var toDelete by remember { mutableStateOf<ServiceUi?>(null) }
 
-    val filtered = remember(orders, query) {
-        if (query.isBlank()) orders
-        else orders.filter {
-            it.folio.contains(query, true) || it.summary.contains(query, true)
+    val filtered = remember(services, query) {
+        if (query.isBlank()) services
+        else services.filter {
+            it.description.contains(query, true) || it.type.contains(query, true)
         }
     }
 
@@ -109,11 +100,11 @@ fun ServicesScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onNewOrder,
+                onClick = onNewService,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.srv_nueva_orden)) }
+                text = { Text(stringResource(R.string.srv_form_nuevo_title)) }
             )
         }
     ) { innerPadding ->
@@ -133,12 +124,14 @@ fun ServicesScreen(
                 }
             }
 
-            item { VehicleHeaderCard(vehicle) }
+            if (vehicle != null) {
+                item { VehicleHeaderCard(vehicle) }
+            }
 
             item {
                 ServiceSectionHeader(
-                    icon = Icons.AutoMirrored.Outlined.ListAlt,
-                    title = stringResource(R.string.srv_ordenes_section),
+                    icon = Icons.Outlined.Build,
+                    title = stringResource(R.string.srv_detalle_servicios_section),
                     modifier = Modifier.padding(top = Dimens.PaddingSmall)
                 )
             }
@@ -147,7 +140,7 @@ fun ServicesScreen(
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    placeholder = { Text(stringResource(R.string.srv_buscar_orden)) },
+                    placeholder = { Text(stringResource(R.string.srv_buscar_servicio)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
@@ -159,11 +152,11 @@ fun ServicesScreen(
                 )
             }
 
-            items(filtered, key = { it.id }) { order ->
-                ServiceOrderCard(
-                    order = order,
-                    onClick = { onOpenOrder(order.id) },
-                    onActions = { actionsOrder = order }
+            items(filtered, key = { it.id }) { service ->
+                ServiceCard(
+                    service = service,
+                    onClick = { onEditService(service.id) },
+                    onDelete = { toDelete = service }
                 )
             }
 
@@ -175,31 +168,18 @@ fun ServicesScreen(
         }
     }
 
-    actionsOrder?.let { order ->
-        ServiceOrderActionsSheet(
-            folio = order.folio,
-            onEditOrder = { actionsOrder = null; onEditOrder(order.id) },
-            onAddServices = { actionsOrder = null; onAddServices(order.id) },
-            onDeleteOrder = {
-                actionsOrder = null
-                orderToDelete = order
-            },
-            onDismiss = { actionsOrder = null }
-        )
-    }
-
-    orderToDelete?.let { order ->
+    toDelete?.let { service ->
         ConfirmDeleteDialog(
             title = stringResource(R.string.srv_confirmar_eliminar_titulo),
-            message = stringResource(R.string.srv_confirmar_eliminar_orden_msg, order.folio),
-            onConfirm = { orderToDelete = null; onDeleteOrder(order.id) },
-            onDismiss = { orderToDelete = null }
+            message = stringResource(R.string.srv_confirmar_eliminar_servicio_msg),
+            onConfirm = { toDelete = null; onDeleteService(service.id) },
+            onDismiss = { toDelete = null }
         )
     }
 }
 
 @Composable
-private fun VehicleHeaderCard(vehicle: VehicleHeaderUi?, modifier: Modifier = Modifier) {
+private fun VehicleHeaderCard(vehicle: VehicleHeaderUi, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -229,12 +209,12 @@ private fun VehicleHeaderCard(vehicle: VehicleHeaderUi?, modifier: Modifier = Mo
             ) {
                 InfoPair(
                     label = stringResource(R.string.srv_tipo_label),
-                    value = "${vehicle?.economicNumber} · ${vehicle?.description}",
+                    value = "${vehicle.economicNumber} · ${vehicle.description}",
                     modifier = Modifier.weight(1f)
                 )
                 InfoPair(
                     label = stringResource(R.string.srv_odometro_label),
-                    value = vehicle?.odometer ?: "",
+                    value = vehicle.odometer,
                     alignment = Alignment.End,
                     modifier = Modifier.weight(1f)
                 )
@@ -244,10 +224,10 @@ private fun VehicleHeaderCard(vehicle: VehicleHeaderUi?, modifier: Modifier = Mo
 }
 
 @Composable
-private fun ServiceOrderCard(
-    order: ServiceOrderUi,
+private fun ServiceCard(
+    service: ServiceUi,
     onClick: () -> Unit,
-    onActions: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -263,51 +243,44 @@ private fun ServiceOrderCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(R.string.srv_orden_folio, order.folio),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(Dimens.PaddingSmall))
-                    StatusBadge(order.status)
-                }
-                IconButton(onClick = onActions) {
+                Text(
+                    text = service.description,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onDelete) {
                     Icon(
-                        Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.srv_ordenes_section),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        Icons.Outlined.DeleteOutline,
+                        contentDescription = stringResource(R.string.srv_accion_eliminar_servicio),
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
             }
-
             Text(
-                text = order.summary,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+                text = service.type,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
             Spacer(modifier = Modifier.size(Dimens.PaddingMedium))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 InfoPair(
-                    label = stringResource(R.string.srv_orden_apertura),
-                    value = order.openingDate,
+                    label = stringResource(R.string.srv_cantidad_label),
+                    value = service.quantity.toString(),
                     modifier = Modifier.weight(1f)
                 )
                 InfoPair(
-                    label = stringResource(R.string.srv_orden_finalizado),
-                    value = order.closingDate ?: stringResource(R.string.srv_orden_en_proceso),
+                    label = stringResource(R.string.srv_costo_unitario_label),
+                    value = "$%,d".format(service.price),
                     modifier = Modifier.weight(1f)
                 )
                 InfoPair(
-                    label = stringResource(R.string.srv_orden_total),
-                    value = order.total,
+                    label = stringResource(R.string.srv_total_label),
+                    value = "$%,d".format(service.total),
                     alignment = Alignment.End,
                     valueColor = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f)
@@ -338,7 +311,7 @@ private fun EmptyState() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(R.string.srv_sin_ordenes),
+            text = stringResource(R.string.srv_sin_servicios),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.secondary,
             textAlign = TextAlign.Center
@@ -371,13 +344,11 @@ private fun ServicesScreenPreview() {
     HombreCamionTheme {
         ServicesScreen(
             vehicle = sampleVehicleHeader,
-            orders = sampleServiceOrders,
+            services = sampleServices,
             onBack = {},
-            onOpenOrder = {},
-            onNewOrder = {},
-            onEditOrder = {},
-            onAddServices = {},
-            onDeleteOrder = {}
+            onNewService = {},
+            onEditService = {},
+            onDeleteService = {}
         )
     }
 }
@@ -388,13 +359,11 @@ private fun ServicesScreenEmptyPreview() {
     HombreCamionTheme {
         ServicesScreen(
             vehicle = sampleVehicleHeader,
-            orders = emptyList(),
+            services = emptyList(),
             onBack = {},
-            onOpenOrder = {},
-            onNewOrder = {},
-            onEditOrder = {},
-            onAddServices = {},
-            onDeleteOrder = {}
+            onNewService = {},
+            onEditService = {},
+            onDeleteService = {}
         )
     }
 }

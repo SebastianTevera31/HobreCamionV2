@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.services.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,32 +7,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.outlined.AddCircleOutline
-import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,12 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.AlertDialog
-import androidx.compose.foundation.text.KeyboardOptions
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.services.model.ServiceOrderStatus
 
 private val FieldShape = RoundedCornerShape(12.dp)
 
@@ -174,7 +162,7 @@ fun ServiceDropdownField(
     }
 }
 
-/** Encabezado de sección con icono, al estilo de los mockups ("Órdenes", "Servicios"). */
+/** Encabezado de sección con icono. */
 @Composable
 fun ServiceSectionHeader(
     icon: ImageVector,
@@ -206,7 +194,7 @@ fun ServiceSectionHeader(
     }
 }
 
-/** Etiqueta arriba, valor abajo (Apertura/Finalizado, Costo/Cantidad/Total, etc.). */
+/** Etiqueta arriba, valor abajo (Cantidad/Precio/Total, etc.). */
 @Composable
 fun InfoPair(
     label: String,
@@ -228,121 +216,6 @@ fun InfoPair(
             style = MaterialTheme.typography.bodyLarge,
             color = valueColor,
             fontWeight = FontWeight.SemiBold
-        )
-    }
-}
-
-/** Pastilla de estado de la orden (Abierta / Finalizada). */
-@Composable
-fun StatusBadge(status: ServiceOrderStatus, modifier: Modifier = Modifier) {
-    val open = status == ServiceOrderStatus.ABIERTA
-    val bg = if (open) MaterialTheme.colorScheme.tertiaryContainer else Color(0xFFDDF3E0)
-    val fg = if (open) MaterialTheme.colorScheme.onTertiaryContainer else Color(0xFF1F7A34)
-    val text = stringResource(
-        if (open) R.string.srv_estado_abierta else R.string.srv_estado_finalizada
-    )
-    Box(
-        modifier = modifier
-            .background(bg, RoundedCornerShape(50))
-            .padding(horizontal = Dimens.PaddingSmall, vertical = 3.dp)
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            color = fg,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-/** Bottom sheet de acciones sobre una orden (lista y detalle de orden). */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ServiceOrderActionsSheet(
-    folio: String,
-    onEditOrder: () -> Unit,
-    onAddServices: () -> Unit,
-    onDeleteOrder: () -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-    showAddServices: Boolean = true
-) {
-    val sheetState = rememberModalBottomSheetState()
-
-    ModalBottomSheet(
-        modifier = modifier,
-        sheetState = sheetState,
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        dragHandle = { BottomSheetDefaults.DragHandle() }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = Dimens.PaddingLarge, vertical = Dimens.PaddingSmall)
-        ) {
-            Text(
-                text = stringResource(R.string.srv_orden_folio, folio),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.size(Dimens.PaddingSmall))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-            SheetAction(
-                icon = Icons.Outlined.Edit,
-                text = stringResource(R.string.srv_accion_modificar_orden),
-                onClick = onEditOrder
-            )
-            if (showAddServices) {
-                SheetAction(
-                    icon = Icons.Outlined.AddCircleOutline,
-                    text = stringResource(R.string.srv_accion_agregar_servicio),
-                    onClick = onAddServices
-                )
-            }
-            SheetAction(
-                icon = Icons.Outlined.DeleteOutline,
-                text = stringResource(R.string.srv_accion_eliminar_orden),
-                onClick = onDeleteOrder,
-                destructive = true
-            )
-            Spacer(modifier = Modifier.size(Dimens.PaddingSmall))
-        }
-    }
-}
-
-@Composable
-private fun SheetAction(
-    icon: ImageVector,
-    text: String,
-    onClick: () -> Unit,
-    destructive: Boolean = false
-) {
-    val color =
-        if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = Dimens.PaddingMedium),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = color,
-            modifier = Modifier.size(22.dp)
-        )
-        Spacer(modifier = Modifier.width(Dimens.PaddingMedium))
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge,
-            color = color,
-            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -387,9 +260,9 @@ private fun ServiceComponentsPreview() {
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
         ) {
             ServiceDropdownField(
-                label = stringResource(R.string.srv_servicio_label),
-                selected = "Balanceo",
-                options = listOf("Balanceo", "Renovado"),
+                label = stringResource(R.string.srv_tipo_servicio_label),
+                selected = "Preventivo",
+                options = listOf("Preventivo", "Correctivo"),
                 onSelect = {}
             )
             ServiceTextField(
@@ -399,10 +272,6 @@ private fun ServiceComponentsPreview() {
                 prefix = "$",
                 keyboardType = KeyboardType.Number
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)) {
-                StatusBadge(ServiceOrderStatus.ABIERTA)
-                StatusBadge(ServiceOrderStatus.FINALIZADA)
-            }
         }
     }
 }
