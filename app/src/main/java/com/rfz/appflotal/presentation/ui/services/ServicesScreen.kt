@@ -214,7 +214,7 @@ private fun VehicleHeaderCard(vehicle: VehicleHeaderUi, modifier: Modifier = Mod
                 )
                 InfoPair(
                     label = stringResource(R.string.srv_odometro_label),
-                    value = vehicle.odometer,
+                    value = "%,d".format(vehicle.odometer.toIntOrNull() ?: 0),
                     alignment = Alignment.End,
                     modifier = Modifier.weight(1f)
                 )

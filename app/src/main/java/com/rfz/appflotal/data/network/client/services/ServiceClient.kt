@@ -16,13 +16,13 @@ interface ServiceClient {
         @Header("Authorization") token: String
     ): Response<List<ServiceResponseDto>>
 
-    @POST("api/ServiceDetail/CrudService")
+    @POST("api/Service/CrudService")
     suspend fun doCrudServiceDetail(
         @Body requestBody: ServiceDetailDto,
         @Header("Authorization") token: String
     ): Response<GeneralResponse>
 
-    @GET("api/ServiceOrder/GetTypeService")
+    @GET("api/Service/GetTypeService")
     suspend fun doGetServiceType(
         @Header("Authorization") token: String
     ): Response<List<TypeServiceDto>>
