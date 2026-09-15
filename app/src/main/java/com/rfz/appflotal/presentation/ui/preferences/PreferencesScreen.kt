@@ -47,7 +47,7 @@ fun PreferencesScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.preferencias),
+            text = stringResource(R.string.preferences),
             style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Start,
             modifier = Modifier.fillMaxWidth()
