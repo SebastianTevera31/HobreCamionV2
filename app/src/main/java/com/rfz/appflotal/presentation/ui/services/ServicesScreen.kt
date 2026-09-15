@@ -244,8 +244,8 @@ private fun ServiceCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = service.description,
-                    style = MaterialTheme.typography.titleSmall,
+                    text = "Servicio #${service.id}",
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
@@ -258,6 +258,12 @@ private fun ServiceCard(
                     )
                 }
             }
+            Text(
+                text = service.description,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             Text(
                 text = service.type,
                 style = MaterialTheme.typography.bodySmall,
