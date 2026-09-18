@@ -371,6 +371,7 @@
     <string name="notifications_permission_granted">Permiso de notificaciones aceptados</string>
     <string name="permiso_de_notificacion">Permiso de notificación</string>
     <string name="texto_permiso_de_notification">Permiso requerido para mantenerlo informado de actualizaciones y posibles mantenimientos</string>
+    <string name="preferences">Preferencias</string>
     <string name="unidades_de_medida">Unidades de Medida</string>
     <string name="auth_error">Ocurrió un error en la autorización. Verifique su usuario o contraseña.</string>
     <string name="error_inesperado">Ocurrió un error inesperado. Intenta nuevamente o vuelve más tarde.</string>

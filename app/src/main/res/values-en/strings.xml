@@ -386,6 +386,7 @@
     <string name="notifications_permission_granted">Notifications permission granted</string>
     <string name="permiso_de_notificacion">Notification permission</string>
     <string name="texto_permiso_de_notification">Permission required to keep you informed about updates and possible maintenance.</string>
+    <string name="preferences">Preferences</string>
     <string name="unidades_de_medida">Measurement units</string>
     <string name="error_carga_datos">There was an error loading the data</string>
     <string name="auth_error">An error occurred during authentication.</string>
