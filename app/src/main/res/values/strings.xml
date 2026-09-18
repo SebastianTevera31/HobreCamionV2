@@ -150,11 +150,11 @@
     <string name="credenciales_incorrectas">Usuario o contraseña incorrectos</string>
     <string name="permiso_bluetooth_notificaciones">Permisos de Bluetooth y notificaciones</string>
     <string name="conceder_permisos_btn">Conceder permisos</string>
-    <string name="texto_permisos_app">Se requiere acceso a Bluetooth y notificaciones para conectarse con tu monitor HawksHead TPMS.</string>
+    <string name="texto_permisos_app">Se requiere acceso a Bluetooth y notificaciones para conectarse con tu monitor TPMS.</string>
     <string name="permiso_grupo_ubicacion_titulo">Ubicación</string>
     <string name="permiso_grupo_ubicacion_rationale">Necesitamos tu ubicación para mostrar la posición de tus unidades y conectarlas con el monitor TPMS.</string>
     <string name="permiso_grupo_bluetooth_titulo">Bluetooth</string>
-    <string name="permiso_grupo_bluetooth_rationale">El acceso a Bluetooth es necesario para vincular y leer los datos de tu monitor HawksHead TPMS.</string>
+    <string name="permiso_grupo_bluetooth_rationale">El acceso a Bluetooth es necesario para vincular y leer los datos de tu monitor TPMS.</string>
     <string name="permiso_grupo_notificaciones_titulo">Notificaciones</string>
     <string name="permiso_grupo_notificaciones_rationale">Las notificaciones te avisan de alertas importantes de tus unidades y del monitor TPMS.</string>
     <string name="permisos_estado_algunos_denegados">Algunos permisos fueron denegados. Puedes intentar concederlos de nuevo.</string>

@@ -151,11 +151,11 @@
     <string name="credenciales_incorrectas">Incorrect username or password</string>
     <string name="permiso_bluetooth_notificaciones">Bluetooth and notifications permission</string>
     <string name="conceder_permisos_btn">Grant permissions</string>
-    <string name="texto_permisos_app">Bluetooth and notification access is required to connect to your HawksHead TPMS monitor.</string>
+    <string name="texto_permisos_app">Bluetooth and notification access is required to connect to your TPMS monitor.</string>
     <string name="permiso_grupo_ubicacion_titulo">Location</string>
     <string name="permiso_grupo_ubicacion_rationale">We need your location to show your fleet\'s position and connect with the TPMS monitor.</string>
     <string name="permiso_grupo_bluetooth_titulo">Bluetooth</string>
-    <string name="permiso_grupo_bluetooth_rationale">Bluetooth access is required to pair with and read data from your HawksHead TPMS monitor.</string>
+    <string name="permiso_grupo_bluetooth_rationale">Bluetooth access is required to pair with and read data from your TPMS monitor.</string>
     <string name="permiso_grupo_notificaciones_titulo">Notifications</string>
     <string name="permiso_grupo_notificaciones_rationale">Notifications alert you to important updates about your fleet and TPMS monitor.</string>
     <string name="permisos_estado_algunos_denegados">Some permissions were denied. You can try granting them again.</string>
