@@ -66,6 +66,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @AndroidEntryPoint
 class HombreCamionService : Service() {
@@ -134,6 +135,7 @@ class HombreCamionService : Service() {
         sendBroadcast(restartIntent)
         hasStarted = false
 
+        bluetoothUseCase.disconnect()
         hcServiceController.stopService()
 
         serviceScope.cancel()
@@ -532,7 +534,7 @@ class HombreCamionService : Service() {
                 } catch (t: Throwable) {
                     Log.e("Updater", "Error actualizando sensores", t)
                 }
-                delay(4 * 60_000L) // 8 minutos
+                delay((4 * 60_000L).milliseconds) // 8 minutos
             }
         }
     }

@@ -14,9 +14,11 @@ import android.bluetooth.BluetoothProfile
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLog
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
@@ -88,6 +90,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
     private val mutex = Mutex()
 
     private var rssiJob: Job? = null
+    private var reconnectJob: Job? = null
 
     private val bluetoothManager: BluetoothManager? by lazy {
         context.getSystemService(BluetoothManager::class.java)
@@ -144,7 +147,8 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                     }
 
                     // reintento controlado
-                    lastMacAddress?.let { mac ->
+                    reconnectJob?.cancel()
+                    reconnectJob = lastMacAddress?.let { mac ->
                         scope.launch {
                             delay(5000.milliseconds)
                             connect(mac)
@@ -166,41 +170,84 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                AppLog.e("BLE_TRAMA", "onServicesDiscovered con status de error: $status")
+                return
+            }
+
+            AppLog.d(
+                "BLE_TRAMA",
+                "Servicios descubiertos: ${gatt.services.joinToString { it.uuid.toString() }}"
+            )
+
             val service = gatt.getService(UUID.fromString("00001000-0000-1000-8000-00805f9b34fb"))
             val serviceBle5 =
                 gatt.getService(UUID.fromString("0000A002-0000-1000-8000-00805F9B34FB"))
 
-            when {
-                serviceBle5 != null -> {
-                    // BLE 5
-                    val notifyChar =
-                        serviceBle5.getCharacteristic(UUID.fromString("0000C306-0000-1000-8000-00805F9B34FB"))
+            try {
+                when {
+                    serviceBle5 != null -> {
+                        // BLE 5
+                        AppLog.d("BLE_TRAMA", "Servicio BLE5 (0000A002) encontrado")
+                        val notifyChar =
+                            serviceBle5.getCharacteristic(UUID.fromString("0000C306-0000-1000-8000-00805F9B34FB"))
 
-                    if (notifyChar != null) {
+                        if (notifyChar == null) {
+                            AppLog.e("BLE_TRAMA", "Característica 0000C306 no encontrada en el servicio BLE5")
+                            return
+                        }
+
                         gatt.setCharacteristicNotification(notifyChar, true)
 
                         val descriptor = notifyChar.getDescriptor(
                             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
                         )
 
-                        descriptor.value = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
-                        gatt.writeDescriptor(descriptor)
-                    }
-                }
+                        if (descriptor == null) {
+                            AppLog.e("BLE_TRAMA", "Descriptor CCCD no encontrado para 0000C306")
+                            return
+                        }
 
-                service != null -> {
-                    // BLE 4
-                    val characteristic =
-                        service.getCharacteristic(UUID.fromString("00001002-0000-1000-8000-00805f9b34fb")) // UUID característico
-                    if (characteristic != null) {
+                        descriptor.value = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+                        val writeStarted = gatt.writeDescriptor(descriptor)
+                        AppLog.d("BLE_TRAMA", "writeDescriptor(CCCD indicación 0000C306) iniciado: $writeStarted")
+                    }
+
+                    service != null -> {
+                        // BLE 4
+                        AppLog.d("BLE_TRAMA", "Servicio BLE4 (00001000) encontrado")
+                        val characteristic =
+                            service.getCharacteristic(UUID.fromString("00001002-0000-1000-8000-00805f9b34fb")) // UUID característico
+
+                        if (characteristic == null) {
+                            AppLog.e("BLE_TRAMA", "Característica 00001002 no encontrada en el servicio BLE4")
+                            return
+                        }
+
                         gatt.setCharacteristicNotification(characteristic, true)
 
                         val descriptor = characteristic
                             .getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
+
+                        if (descriptor == null) {
+                            AppLog.e("BLE_TRAMA", "Descriptor CCCD no encontrado para 00001002")
+                            return
+                        }
+
                         descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                        gatt.writeDescriptor(descriptor)
+                        val writeStarted = gatt.writeDescriptor(descriptor)
+                        AppLog.d("BLE_TRAMA", "writeDescriptor(CCCD notificación 00001002) iniciado: $writeStarted")
+                    }
+
+                    else -> {
+                        AppLog.e(
+                            "BLE_TRAMA",
+                            "Ningún servicio compatible encontrado. Servicios disponibles: ${gatt.services.joinToString { it.uuid.toString() }}"
+                        )
                     }
                 }
+            } catch (e: SecurityException) {
+                AppLog.e("BLE_TRAMA", "Sin permiso BLUETOOTH_CONNECT al suscribir características", e)
             }
         }
 
@@ -210,11 +257,22 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             value: ByteArray
         ) {
             super.onCharacteristicChanged(gatt, characteristic, value)
-            _sensorData.update { currentState ->
-                currentState.copy(
-                    dataFrame = verifyDataFrame(value),
-                    timestamp = getCurrentDate()
-                )
+            AppLog.d(
+                "BLE_TRAMA",
+                "Trama cruda recibida de ${characteristic.uuid} (${value.size} bytes): ${value.toPrettyHex()}"
+            )
+            val dataframes = processIncomingDataFrames(value)
+            if (dataframes.isEmpty()) {
+                AppLog.d("BLE_TRAMA", "No se extrajo ninguna trama válida de este paquete")
+            }
+            dataframes.forEach {
+                AppLog.d("BLE_TRAMA", "Trama entregada a sensorData: $it")
+                _sensorData.update { currentState ->
+                    currentState.copy(
+                        dataFrame = it,
+                        timestamp = getCurrentDate()
+                    )
+                }
             }
         }
 
@@ -245,17 +303,35 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             status: Int
         ) {
             super.onDescriptorWrite(gatt, descriptor, status)
+            val charUuid = descriptor?.characteristic?.uuid
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 ready = true
-                AppLog.d("BLE", "✅ Suscripción confirmada (CCCD OK)")
+                AppLog.d("BLE_TRAMA", "✅ Suscripción confirmada (CCCD OK) para $charUuid")
             } else {
-                AppLog.e("BLE", "❌ Error escribiendo CCCD: $status")
+                val hint = when (status) {
+                    5, 15 -> " (posible falta de emparejamiento/bonding con el dispositivo)"
+                    else -> ""
+                }
+                AppLog.e("BLE_TRAMA", "❌ Error escribiendo CCCD para $charUuid: status $status$hint")
             }
         }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override suspend fun connect(macAddress: String) {
+        reconnectJob?.cancel()
+        reconnectJob = null
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            AppLog.e("BLE_TRAMA", "No se puede conectar: falta el permiso BLUETOOTH_CONNECT")
+            return
+        }
+
         scope.launch {
             mutex.withLock {
                 val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
@@ -276,8 +352,13 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                 bluetoothGatt = null
                 stopRSSIMonitoring()
 
-                val device = bluetoothAdapter?.getRemoteDevice(macAddress)
-                bluetoothGatt = device?.connectGatt(context, false, gattCallback)
+                try {
+                    val device = bluetoothAdapter?.getRemoteDevice(macAddress)
+                    bluetoothGatt = device?.connectGatt(context, false, gattCallback)
+                    AppLog.d("BLE_TRAMA", "connectGatt solicitado para $macAddress")
+                } catch (e: SecurityException) {
+                    AppLog.e("BLE_TRAMA", "Sin permiso para conectar a $macAddress", e)
+                }
 
             }
         }
@@ -302,9 +383,10 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                         _sensorData.update { currentState ->
                             currentState.copy(isBluetoothOn = true)
                         }
-                        lastMacAddress?.let { mac ->
+                        reconnectJob?.cancel()
+                        reconnectJob = lastMacAddress?.let { mac ->
                             scope.launch {
-                                delay(2000)
+                                delay(2000.milliseconds)
                                 connect(mac)
                             }
                         }
@@ -342,17 +424,33 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
     @SuppressLint("MissingPermission")
     override fun disconnect() {
-        stopRSSIMonitoring()
-        bluetoothGatt?.let {
-            try {
-                it.disconnect()
-                it.close()
-            } catch (_: Exception) {
+        reconnectJob?.cancel()
+        reconnectJob = null
+        lastMacAddress = null
+
+        scope.launch {
+            mutex.withLock {
+                stopRSSIMonitoring()
+                bluetoothGatt?.let {
+                    try {
+                        it.disconnect()
+                        it.close()
+                    } catch (_: Exception) {
+                    }
+                }
+                bluetoothGatt = null
+                isConnected = false
             }
         }
-        bluetoothGatt = null
-        isConnected = false
-        lastMacAddress = null
+
+        _sensorData.update { currentState ->
+            currentState.copy(
+                dataFrame = null,
+                bluetoothSignalQuality = BluetoothSignalQuality.Desconocida,
+                rssi = null,
+                timestamp = null
+            )
+        }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
@@ -370,7 +468,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
         rssiJob?.cancel()
         rssiJob = scope.launch {
             while (isActive) {
-                delay(5000)
+                delay(5000.milliseconds)
                 bluetoothGatt?.let { gatt ->
                     try {
                         gatt.readRemoteRssi()
@@ -387,30 +485,11 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
         rssiJob = null
     }
 
-    private fun verifyDataFrame(dataFrame: ByteArray): String? {
-        val dataFrameToHex = dataFrame.toHexString()
-        AppLog.d("BLE", "Current dataframe $dataFrameToHex")
-        // Verificación de longitud
-        if (dataFrameToHex.length == 28) {
-            val calculatedDataFrame =
-                dataFrame.dropLast(1).sumOf { data -> data.toUByte().toInt() } % 256
-
-            AppLog.d("BLE", "CalculatedDataFrame $calculatedDataFrame")
-            AppLog.d("BLE", "CheckSum ${dataFrame.last().toUByte().toInt()}")
-
-            // Verificación de CheckSum
-            if (calculatedDataFrame == dataFrame.last().toUByte().toInt()
-                && verifyTemperature(dataFrameToHex)
-            ) {
-                AppLog.d("BLE", "Trama correcta")
-                return dataFrameToHex
-            } else AppLog.d("BLE", "Trama incorrecta")
-        }
-        return null
-    }
-
     private fun ByteArray.toHexString(): String =
         joinToString("") { "%02x".format(it) }
+
+    private fun ByteArray.toPrettyHex(): String =
+        joinToString("-") { "%02X".format(it) }
 
     private fun rssiToQuality(rssi: Int?): BluetoothSignalQuality {
         return if (rssi == null) BluetoothSignalQuality.Desconocida
@@ -432,8 +511,8 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             val headerIndex = findHeaderIndex(bleFrameBuffer)
 
             if (headerIndex == -1) {
-                val discarded = bleFrameBuffer.toByteArray().toHexString()
-                AppLog.d("BLE", "Sin header válido, descartando: $discarded")
+                val discarded = bleFrameBuffer.toByteArray()
+                AppLog.d("BLE_TRAMA", "Sin header válido, descartando: ${discarded.toPrettyHex()}")
 
 //                scope.launch {
 //                    bleLogRepository.sendDataFrame(discarded)
@@ -444,8 +523,8 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             }
 
             if (headerIndex > 0) {
-                val discarded = bleFrameBuffer.take(headerIndex).toByteArray().toHexString()
-                AppLog.d("BLE", "Bytes basura antes del header: $discarded")
+                val discarded = bleFrameBuffer.take(headerIndex).toByteArray()
+                AppLog.d("BLE_TRAMA", "Bytes basura antes del header: ${discarded.toPrettyHex()}")
 
 //                scope.launch {
 //                    bleLogRepository.sendDataFrame(discarded)
@@ -464,13 +543,13 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
             if (expectedLength < MIN_FRAME_LENGTH) {
                 val invalidByte = bleFrameBuffer.removeAt(0)
-                AppLog.d("BLE", "Longitud inválida, descartando byte: ${byteToHex(invalidByte)}")
+                AppLog.d("BLE_TRAMA", "Longitud inválida, descartando byte: ${byteToHex(invalidByte)}")
                 continue
             }
 
             if (bleFrameBuffer.size < expectedLength) {
                 AppLog.d(
-                    "BLE",
+                    "BLE_TRAMA",
                     "Trama incompleta. Esperados: $expectedLength, recibidos: ${bleFrameBuffer.size}"
                 )
                 break
@@ -480,14 +559,17 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             val frameHex = frame.toHexString()
 
             if (isValidFrame(frame)) {
-                AppLog.d("BLE", "Trama correcta: $frameHex")
+                AppLog.d("BLE_TRAMA", "Trama correcta (${frame.size} bytes): ${frame.toPrettyHex()}")
                 validFrames.add(frameHex)
 
                 repeat(expectedLength) {
                     bleFrameBuffer.removeAt(0)
                 }
             } else {
-                AppLog.d("BLE", "Trama incorrecta, intentando resincronizar: $frameHex")
+                AppLog.d(
+                    "BLE_TRAMA",
+                    "Trama incorrecta, intentando resincronizar: ${frame.toPrettyHex()}"
+                )
 
 //                scope.launch {
 //                    bleLogRepository.sendDataFrame(frameHex)
@@ -521,7 +603,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
         val expectedLength = frame[LENGTH_INDEX].toUByte().toInt()
 
         if (frame.size != expectedLength) {
-            AppLog.d("BLE", "Longitud incorrecta. Esperada: $expectedLength, real: ${frame.size}")
+            AppLog.d("BLE_TRAMA", "Longitud incorrecta. Esperada: $expectedLength, real: ${frame.size}")
             return false
         }
 
@@ -531,12 +613,14 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
 
         val receivedChecksum = frame.last().toUByte().toInt()
 
-        AppLog.d("BLE", "Current dataframe $frameHex")
-        AppLog.d("BLE", "CalculatedDataFrame $calculatedChecksum")
-        AppLog.d("BLE", "CheckSum $receivedChecksum")
+        val temperatureOk = verifyTemperature(frameHex)
 
-        return calculatedChecksum == receivedChecksum &&
-                verifyTemperature(frameHex)
+        AppLog.d(
+            "BLE_TRAMA",
+            "Trama: ${frame.toPrettyHex()} | checksum calculado: $calculatedChecksum, recibido: $receivedChecksum | temperatura válida: $temperatureOk"
+        )
+
+        return calculatedChecksum == receivedChecksum && temperatureOk
     }
 
     private fun byteToHex(byte: Byte): String {

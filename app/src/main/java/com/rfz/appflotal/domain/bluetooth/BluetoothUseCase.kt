@@ -22,6 +22,8 @@ class BluetoothUseCase @Inject constructor(private val bluetoothRepository: Blue
         bluetoothRepository.connect(mac)
     }
 
+    fun disconnect() = bluetoothRepository.disconnect()
+
     fun startScan() = bluetoothRepository.startScan()
 
     fun stopScan() = bluetoothRepository.stopScan()
