@@ -66,8 +66,8 @@ data class ServiceFormData(
 /**
  * Formulario compartido para "Nuevo servicio" (CREATE) y edición (EDIT).
  *
- * Nota: el endpoint de lectura no devuelve proveedor ni fecha, por lo que al
- * editar esos dos campos inician vacíos.
+ * El estado se reinicia cuando cambia el servicio a editar (`initial?.id`), por
+ * si llega después de la primera composición.
  */
 @Composable
 fun ServiceFormScreen(
@@ -78,17 +78,20 @@ fun ServiceFormScreen(
     modifier: Modifier = Modifier,
     initial: ServiceUi? = null
 ) {
-    var typeName by remember { mutableStateOf(initial?.type ?: "") }
-    var typeId by remember {
+    val key = initial?.id
+    var typeName by remember(key) { mutableStateOf(initial?.type ?: "") }
+    var typeId by remember(key, serviceTypes) {
         mutableStateOf(serviceTypes.firstOrNull { it.name == initial?.type }?.id)
     }
-    var description by remember { mutableStateOf(initial?.description ?: "") }
-    var provider by remember { mutableStateOf(initial?.provider ?: "") }
-    var price by remember { mutableStateOf(initial?.price?.takeIf { it > 0 }?.toString() ?: "") }
-    var quantity by remember {
+    var description by remember(key) { mutableStateOf(initial?.description ?: "") }
+    var provider by remember(key) { mutableStateOf(initial?.provider ?: "") }
+    var price by remember(key) {
+        mutableStateOf(initial?.price?.takeIf { it > 0 }?.toString() ?: "")
+    }
+    var quantity by remember(key) {
         mutableStateOf(initial?.quantity?.takeIf { it > 0 }?.toString() ?: "")
     }
-    var dateMillis by remember { mutableStateOf<Long?>(null) }
+    var dateMillis by remember(key) { mutableStateOf(initial?.date?.toDateMillis()) }
 
     val total = (price.toIntOrNull() ?: 0) * (quantity.toIntOrNull() ?: 0)
     val isValid = typeId != null && description.isNotBlank() &&
@@ -264,6 +267,18 @@ private fun Long?.toIsoDate(): String {
     val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
     sdf.timeZone = TimeZone.getTimeZone("UTC")
     return sdf.format(Date(this))
+}
+
+/**
+ * Convierte la fecha del backend (ISO 8601, con o sin hora/zona) a los millis
+ * a medianoche UTC que usa el DatePicker. Solo se toma la parte yyyy-MM-dd.
+ */
+private fun String.toDateMillis(): Long? {
+    if (length < 10) return null
+    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    sdf.timeZone = TimeZone.getTimeZone("UTC")
+    sdf.isLenient = false
+    return runCatching { sdf.parse(substring(0, 10))?.time }.getOrNull()
 }
 
 @Preview(showBackground = true, showSystemUi = true)
