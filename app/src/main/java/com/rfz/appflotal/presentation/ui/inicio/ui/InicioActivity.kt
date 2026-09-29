@@ -368,8 +368,10 @@ class InicioActivity : ComponentActivity() {
                                 )
                             ), color = MaterialTheme.colorScheme.primary
                     ) {
+                        val monitorUiState by monitorViewModel.monitorUiState.collectAsState()
                         val showBottomBar = selectedNavItem != null &&
-                                inicioState.value.paymentPlanType == PaymentPlanType.Complete
+                                inicioState.value.paymentPlanType == PaymentPlanType.Complete &&
+                                !monitorUiState.showSetupWizard
 
                         Column(modifier = Modifier.fillMaxSize()) {
                             if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
