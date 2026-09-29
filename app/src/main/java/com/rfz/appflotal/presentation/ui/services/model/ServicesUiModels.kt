@@ -16,6 +16,9 @@ data class VehicleHeaderUi(
 
 /**
  * Un servicio. Mapea a ServiceResponseDto (lectura) / ServiceDetailDto (CRUD).
+ *
+ * Nota: el endpoint de lectura no devuelve `provider` ni `date`, así que en la
+ * lista y al editar esos campos llegan vacíos (limitación del backend actual).
  */
 data class ServiceUi(
     val id: Int,
@@ -24,7 +27,8 @@ data class ServiceUi(
     val price: Int,              // fld_price (unitario)
     val quantity: Int,           // fld_cant
     val provider: String = "",   // fld_provider
-    val date: String = ""        // fld_date (ISO 8601)
+    val date: String = "",       // fld_date
+    val rawDate: String = ""     // fld_date original ISO
 ) {
     val total: Int get() = price * quantity
 }
@@ -48,21 +52,27 @@ val sampleServices = listOf(
         type = "Preventivo",
         description = "Balanceo de eje delantero",
         price = 600,
-        quantity = 1
+        quantity = 1,
+        date = "2023-09-15",
+        provider = "Taller Mecánico S.A."
     ),
     ServiceUi(
         id = 2,
         type = "Correctivo",
         description = "Renovado de dos llantas traseras",
         price = 1200,
-        quantity = 2
+        quantity = 2,
+        date = "2023-09-20",
+        provider = "Taller Mecánico S.A."
     ),
     ServiceUi(
         id = 3,
         type = "Preventivo",
         description = "Alineación",
         price = 450,
-        quantity = 1
+        quantity = 1,
+        date = "2023-09-25",
+        provider = "Taller Mecánico S.A."
     )
 )
 

@@ -91,6 +91,14 @@ class ServiceViewModel @Inject constructor(
     /** Alta (serviceId == null) o edición (serviceId != null) de un servicio. */
     fun saveService(serviceId: Int?, data: ServiceFormData) {
         viewModelScope.launch {
+            if (vehicleId == 0) {
+                runCatching {
+                    val driverData = getTasksUseCase().first().firstOrNull()
+                    if (driverData != null) {
+                        vehicleId = driverData.idVehicle
+                    }
+                }
+            }
             val dto = ServiceDetailDto(
                 idService = serviceId ?: 0,
                 description = data.description,

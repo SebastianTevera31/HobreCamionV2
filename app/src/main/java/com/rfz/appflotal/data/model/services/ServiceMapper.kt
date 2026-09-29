@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.model.services
 
+import com.rfz.appflotal.core.util.Commons.formatToLongDate
 import com.rfz.appflotal.data.model.services.response.ServiceResponseDto
 import com.rfz.appflotal.data.model.services.response.TypeServiceDto
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
@@ -12,8 +13,9 @@ fun ServiceResponseDto.toDomain(): ServiceUi {
         description = description,
         price = price,
         quantity = quantity,
-        provider = provider.orEmpty(),
-        date = date.orEmpty()
+        provider = provider,
+        date = formatToLongDate(dateString = date, inputFormat = "yyyy-MM-dd'T'HH:mm:ss"),
+        rawDate = date
     )
 }
 

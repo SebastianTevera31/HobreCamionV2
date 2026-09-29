@@ -66,8 +66,8 @@ data class ServiceFormData(
 /**
  * Formulario compartido para "Nuevo servicio" (CREATE) y edición (EDIT).
  *
- * El estado se reinicia cuando cambia el servicio a editar (`initial?.id`), por
- * si llega después de la primera composición.
+ * Nota: el endpoint de lectura no devuelve proveedor ni fecha, por lo que al
+ * editar esos dos campos inician vacíos.
  */
 @Composable
 fun ServiceFormScreen(
@@ -78,20 +78,27 @@ fun ServiceFormScreen(
     modifier: Modifier = Modifier,
     initial: ServiceUi? = null
 ) {
-    val key = initial?.id
-    var typeName by remember(key) { mutableStateOf(initial?.type ?: "") }
-    var typeId by remember(key, serviceTypes) {
-        mutableStateOf(serviceTypes.firstOrNull { it.name == initial?.type }?.id)
+    var typeName by remember(initial) { mutableStateOf(initial?.type ?: "") }
+    var typeId by remember(initial, serviceTypes) {
+        mutableStateOf(
+            serviceTypes.firstOrNull {
+                it.name.trim().equals(initial?.type?.trim(), ignoreCase = true)
+            }?.id ?: serviceTypes.firstOrNull()?.id
+        )
     }
-    var description by remember(key) { mutableStateOf(initial?.description ?: "") }
-    var provider by remember(key) { mutableStateOf(initial?.provider ?: "") }
-    var price by remember(key) {
-        mutableStateOf(initial?.price?.takeIf { it > 0 }?.toString() ?: "")
-    }
-    var quantity by remember(key) {
+    var description by remember(initial) { mutableStateOf(initial?.description ?: "") }
+    var provider by remember(initial) { mutableStateOf(initial?.provider ?: "") }
+    var price by remember(initial) { mutableStateOf(initial?.price?.takeIf { it > 0 }?.toString() ?: "") }
+    var quantity by remember(initial) {
         mutableStateOf(initial?.quantity?.takeIf { it > 0 }?.toString() ?: "")
     }
-    var dateMillis by remember(key) { mutableStateOf(initial?.date?.toDateMillis()) }
+    var dateMillis by remember(initial) {
+        mutableStateOf<Long?>(
+            initial?.let { s ->
+                parseDateToMillis(s.rawDate.ifBlank { s.date })
+            }
+        )
+    }
 
     val total = (price.toIntOrNull() ?: 0) * (quantity.toIntOrNull() ?: 0)
     val isValid = typeId != null && description.isNotBlank() &&
@@ -261,24 +268,38 @@ private fun formatDisplayDate(millis: Long): String {
     return sdf.format(Date(millis))
 }
 
+private fun parseDateToMillis(dateStr: String): Long? {
+    if (dateStr.isBlank()) return null
+    val patterns = arrayOf(
+        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        "yyyy-MM-dd'T'HH:mm:ss.SSS",
+        "yyyy-MM-dd'T'HH:mm:ss",
+        "yyyy-MM-dd",
+        "dd/MM/yyyy",
+        "d 'de' MMMM, yyyy",
+        "MMMM d, yyyy"
+    )
+    for (pattern in patterns) {
+        try {
+            val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+            if (pattern.contains("Z") || pattern.contains("T")) {
+                sdf.timeZone = TimeZone.getTimeZone("UTC")
+            }
+            val parsed = sdf.parse(dateStr)
+            if (parsed != null) return parsed.time
+        } catch (_: Exception) {
+            // Continuar con el siguiente patrón
+        }
+    }
+    return null
+}
+
 /** Fecha en el formato ISO 8601 UTC que espera el backend (fld_date). */
 private fun Long?.toIsoDate(): String {
     if (this == null) return ""
     val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
     sdf.timeZone = TimeZone.getTimeZone("UTC")
     return sdf.format(Date(this))
-}
-
-/**
- * Convierte la fecha del backend (ISO 8601, con o sin hora/zona) a los millis
- * a medianoche UTC que usa el DatePicker. Solo se toma la parte yyyy-MM-dd.
- */
-private fun String.toDateMillis(): Long? {
-    if (length < 10) return null
-    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-    sdf.timeZone = TimeZone.getTimeZone("UTC")
-    sdf.isLenient = false
-    return runCatching { sdf.parse(substring(0, 10))?.time }.getOrNull()
 }
 
 @Preview(showBackground = true, showSystemUi = true)
