@@ -154,7 +154,7 @@
     <string name="permiso_grupo_ubicacion_titulo">Ubicación</string>
     <string name="permiso_grupo_ubicacion_rationale">Necesitamos tu ubicación para mostrar la posición de tus unidades y conectarlas con el monitor TPMS.</string>
     <string name="permiso_grupo_bluetooth_titulo">Bluetooth</string>
-    <string name="permiso_grupo_bluetooth_rationale">El acceso a Bluetooth es necesario para vincular y leer los datos de tu monitor HawksHead TPMS.</string>
+    <string name="permiso_grupo_bluetooth_rationale">El acceso a Bluetooth es necesario para vincular y leer los datos de tu monitor TPMS.</string>
     <string name="permiso_grupo_notificaciones_titulo">Notificaciones</string>
     <string name="permiso_grupo_notificaciones_rationale">Las notificaciones te avisan de alertas importantes de tus unidades y del monitor TPMS.</string>
     <string name="permisos_estado_algunos_denegados">Algunos permisos fueron denegados. Puedes intentar concederlos de nuevo.</string>
@@ -371,6 +371,7 @@
     <string name="notifications_permission_granted">Permiso de notificaciones aceptados</string>
     <string name="permiso_de_notificacion">Permiso de notificación</string>
     <string name="texto_permiso_de_notification">Permiso requerido para mantenerlo informado de actualizaciones y posibles mantenimientos</string>
+    <string name="preferences">Preferencias</string>
     <string name="unidades_de_medida">Unidades de Medida</string>
     <string name="auth_error">Ocurrió un error en la autorización. Verifique su usuario o contraseña.</string>
     <string name="error_inesperado">Ocurrió un error inesperado. Intenta nuevamente o vuelve más tarde.</string>

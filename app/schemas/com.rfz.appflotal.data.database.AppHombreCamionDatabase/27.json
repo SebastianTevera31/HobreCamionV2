@@ -1,0 +1,802 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 27,
+    "identityHash": "523d09ef635dced2b832b8f285004350",
+    "entities": [
+      {
+        "tableName": "user",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `idUser` INTEGER NOT NULL, `fld_name` TEXT NOT NULL, `fld_username` TEXT NOT NULL, `fld_email` TEXT NOT NULL, `fld_token` TEXT NOT NULL, `id_monitor` INTEGER NOT NULL, `country` INTEGER NOT NULL, `industry` INTEGER NOT NULL, `vehicleType` TEXT NOT NULL, `monitorMac` TEXT NOT NULL, `baseConfiguration` TEXT NOT NULL, `idVehicle` INTEGER NOT NULL, `vehiclePlates` TEXT NOT NULL, `paymentPlan` TEXT NOT NULL, `fecha` TEXT NOT NULL, `termsGranted` INTEGER NOT NULL, `odometer` INTEGER NOT NULL, `dateLastOdometer` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idUser",
+            "columnName": "idUser",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fld_name",
+            "columnName": "fld_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fld_username",
+            "columnName": "fld_username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fld_email",
+            "columnName": "fld_email",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fld_token",
+            "columnName": "fld_token",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id_monitor",
+            "columnName": "id_monitor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "country",
+            "columnName": "country",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "industry",
+            "columnName": "industry",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vehicleType",
+            "columnName": "vehicleType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "monitorMac",
+            "columnName": "monitorMac",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baseConfiguration",
+            "columnName": "baseConfiguration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idVehicle",
+            "columnName": "idVehicle",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vehiclePlates",
+            "columnName": "vehiclePlates",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paymentPlan",
+            "columnName": "paymentPlan",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "termsGranted",
+            "columnName": "termsGranted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "odometer",
+            "columnName": "odometer",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateLastOdometer",
+            "columnName": "dateLastOdometer",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "dataframe",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_record` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `monitor_id` INTEGER NOT NULL, `sensor_id` TEXT NOT NULL, `data_frame` TEXT NOT NULL, `timestamp` TEXT NOT NULL, `sendStatus` INTEGER NOT NULL, `active` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "idRecord",
+            "columnName": "id_record",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "monitorId",
+            "columnName": "monitor_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sensorId",
+            "columnName": "sensor_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataFrame",
+            "columnName": "data_frame",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sent",
+            "columnName": "sendStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id_record"
+          ]
+        }
+      },
+      {
+        "tableName": "coordinates",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `monitor_id` INTEGER NOT NULL, `idPosition` TEXT NOT NULL, `isAssembled` INTEGER NOT NULL, `inAlert` INTEGER NOT NULL, `inActive` INTEGER NOT NULL, `xPosition` INTEGER NOT NULL, `yPosition` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "monitorId",
+            "columnName": "monitor_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idPosition",
+            "columnName": "idPosition",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isAssembled",
+            "columnName": "isAssembled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inAlert",
+            "columnName": "inAlert",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "inActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xPosition",
+            "columnName": "xPosition",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "yPosition",
+            "columnName": "yPosition",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "sensor_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `monitor_id` INTEGER NOT NULL, `tire` TEXT NOT NULL, `tire_number` TEXT NOT NULL, `timestamp` TEXT NOT NULL, `last_inspection` TEXT, `temperature` INTEGER NOT NULL, `pressure` INTEGER NOT NULL, `high_temperature_alert` INTEGER NOT NULL, `high_pressure_alert` INTEGER NOT NULL, `low_pressure_alert` INTEGER NOT NULL, `low_battery_alert` INTEGER NOT NULL, `puncture_alert` INTEGER NOT NULL, `active` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idMonitor",
+            "columnName": "monitor_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tire",
+            "columnName": "tire",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tireNumber",
+            "columnName": "tire_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastInspection",
+            "columnName": "last_inspection",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "temperature",
+            "columnName": "temperature",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pressure",
+            "columnName": "pressure",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "highTemperatureAlert",
+            "columnName": "high_temperature_alert",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "highPressureAlert",
+            "columnName": "high_pressure_alert",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lowPressureAlert",
+            "columnName": "low_pressure_alert",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lowBatteryAlert",
+            "columnName": "low_battery_alert",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "punctureAlert",
+            "columnName": "puncture_alert",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "assembly_tire_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`positionTire` TEXT NOT NULL, `id_axle` INTEGER NOT NULL, `id_tire` INTEGER NOT NULL, `id_monitor` INTEGER NOT NULL, `fld_odometer` INTEGER NOT NULL, `fld_assemblyDate` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`positionTire`))",
+        "fields": [
+          {
+            "fieldPath": "positionTire",
+            "columnName": "positionTire",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idAxle",
+            "columnName": "id_axle",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idTire",
+            "columnName": "id_tire",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idMonitor",
+            "columnName": "id_monitor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "odometer",
+            "columnName": "fld_odometer",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assemblyDate",
+            "columnName": "fld_assemblyDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "positionTire"
+          ]
+        }
+      },
+      {
+        "tableName": "axle_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_axle` INTEGER NOT NULL, `fld_description` TEXT NOT NULL, `fld_letter` TEXT NOT NULL, PRIMARY KEY(`id_axle`))",
+        "fields": [
+          {
+            "fieldPath": "idAxle",
+            "columnName": "id_axle",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fldDescription",
+            "columnName": "fld_description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fldLetter",
+            "columnName": "fld_letter",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_axle"
+          ]
+        }
+      },
+      {
+        "tableName": "disassembly_tire_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`positionTire` TEXT NOT NULL, `disassemblyCause` INTEGER NOT NULL, `destination` INTEGER NOT NULL, `dateOperation` TEXT NOT NULL, `odometer` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`positionTire`))",
+        "fields": [
+          {
+            "fieldPath": "positionTire",
+            "columnName": "positionTire",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "disassemblyCause",
+            "columnName": "disassemblyCause",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destination",
+            "columnName": "destination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateOperation",
+            "columnName": "dateOperation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "odometer",
+            "columnName": "odometer",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "positionTire"
+          ]
+        }
+      },
+      {
+        "tableName": "inspection_tire_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`positionTire` TEXT NOT NULL, `treadDepth` REAL NOT NULL, `treadDepth2` REAL NOT NULL, `treadDepth3` REAL NOT NULL, `treadDepth4` REAL NOT NULL, `tireInspectionReportId` INTEGER NOT NULL, `pressureInspected` INTEGER NOT NULL, `dateInspection` TEXT NOT NULL, `odometer` INTEGER NOT NULL, `temperatureInspected` INTEGER NOT NULL, `pressureAdjusted` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`positionTire`))",
+        "fields": [
+          {
+            "fieldPath": "positionTire",
+            "columnName": "positionTire",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "treadDepth",
+            "columnName": "treadDepth",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "treadDepth2",
+            "columnName": "treadDepth2",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "treadDepth3",
+            "columnName": "treadDepth3",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "treadDepth4",
+            "columnName": "treadDepth4",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tireInspectionReportId",
+            "columnName": "tireInspectionReportId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pressureInspected",
+            "columnName": "pressureInspected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateInspection",
+            "columnName": "dateInspection",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "odometer",
+            "columnName": "odometer",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "temperatureInspected",
+            "columnName": "temperatureInspected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pressureAdjusted",
+            "columnName": "pressureAdjusted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "positionTire"
+          ]
+        }
+      },
+      {
+        "tableName": "inspection_catalog",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`idTireInspectionReport` INTEGER NOT NULL, `description` TEXT NOT NULL, `isActive` INTEGER NOT NULL, PRIMARY KEY(`idTireInspectionReport`))",
+        "fields": [
+          {
+            "fieldPath": "idTireInspectionReport",
+            "columnName": "idTireInspectionReport",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "isActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "idTireInspectionReport"
+          ]
+        }
+      },
+      {
+        "tableName": "forum_comment",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`idMsg` INTEGER NOT NULL, `idTopic` INTEGER NOT NULL, `idUser` INTEGER NOT NULL, `username` TEXT NOT NULL, `messages` TEXT NOT NULL, `likes` INTEGER NOT NULL, `date` TEXT NOT NULL, `edited` INTEGER NOT NULL, PRIMARY KEY(`idMsg`))",
+        "fields": [
+          {
+            "fieldPath": "idMsg",
+            "columnName": "idMsg",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idTopic",
+            "columnName": "idTopic",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idUser",
+            "columnName": "idUser",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "messages",
+            "columnName": "messages",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "likes",
+            "columnName": "likes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edited",
+            "columnName": "edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "idMsg"
+          ]
+        }
+      },
+      {
+        "tableName": "forum_topic",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`idTopic` INTEGER NOT NULL, `idRoom` INTEGER NOT NULL, `idUser` INTEGER NOT NULL, `username` TEXT NOT NULL, `image` TEXT NOT NULL, `likes` INTEGER NOT NULL, `color` TEXT NOT NULL, `numMessages` INTEGER NOT NULL, `tags` TEXT NOT NULL, `date` TEXT NOT NULL, `edited` INTEGER NOT NULL, PRIMARY KEY(`idTopic`))",
+        "fields": [
+          {
+            "fieldPath": "idTopic",
+            "columnName": "idTopic",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idRoom",
+            "columnName": "idRoom",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idUser",
+            "columnName": "idUser",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "image",
+            "columnName": "image",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "likes",
+            "columnName": "likes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "color",
+            "columnName": "color",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numMessages",
+            "columnName": "numMessages",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tags",
+            "columnName": "tags",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edited",
+            "columnName": "edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "idTopic"
+          ]
+        }
+      },
+      {
+        "tableName": "promotion_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`productUrl` TEXT NOT NULL, `position` INTEGER NOT NULL, `store` TEXT NOT NULL, `title` TEXT NOT NULL, `sku` TEXT, `regularPrice` REAL NOT NULL, `finalPrice` REAL NOT NULL, `percentOff` REAL NOT NULL, `currency` TEXT NOT NULL, `imageUrl` TEXT, PRIMARY KEY(`productUrl`))",
+        "fields": [
+          {
+            "fieldPath": "productUrl",
+            "columnName": "productUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "store",
+            "columnName": "store",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sku",
+            "columnName": "sku",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "regularPrice",
+            "columnName": "regularPrice",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "finalPrice",
+            "columnName": "finalPrice",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "percentOff",
+            "columnName": "percentOff",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currency",
+            "columnName": "currency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUrl",
+            "columnName": "imageUrl",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "productUrl"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '523d09ef635dced2b832b8f285004350')"
+    ]
+  }
+}
