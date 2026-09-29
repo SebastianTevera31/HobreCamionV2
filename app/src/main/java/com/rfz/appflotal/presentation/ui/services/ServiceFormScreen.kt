@@ -78,17 +78,27 @@ fun ServiceFormScreen(
     modifier: Modifier = Modifier,
     initial: ServiceUi? = null
 ) {
-    var typeName by remember { mutableStateOf(initial?.type ?: "") }
-    var typeId by remember {
-        mutableStateOf(serviceTypes.firstOrNull { it.name == initial?.type }?.id)
+    var typeName by remember(initial) { mutableStateOf(initial?.type ?: "") }
+    var typeId by remember(initial, serviceTypes) {
+        mutableStateOf(
+            serviceTypes.firstOrNull {
+                it.name.trim().equals(initial?.type?.trim(), ignoreCase = true)
+            }?.id ?: serviceTypes.firstOrNull()?.id
+        )
     }
-    var description by remember { mutableStateOf(initial?.description ?: "") }
-    var provider by remember { mutableStateOf(initial?.provider ?: "") }
-    var price by remember { mutableStateOf(initial?.price?.takeIf { it > 0 }?.toString() ?: "") }
-    var quantity by remember {
+    var description by remember(initial) { mutableStateOf(initial?.description ?: "") }
+    var provider by remember(initial) { mutableStateOf(initial?.provider ?: "") }
+    var price by remember(initial) { mutableStateOf(initial?.price?.takeIf { it > 0 }?.toString() ?: "") }
+    var quantity by remember(initial) {
         mutableStateOf(initial?.quantity?.takeIf { it > 0 }?.toString() ?: "")
     }
-    var dateMillis by remember { mutableStateOf<Long?>(null) }
+    var dateMillis by remember(initial) {
+        mutableStateOf<Long?>(
+            initial?.let { s ->
+                parseDateToMillis(s.rawDate.ifBlank { s.date })
+            }
+        )
+    }
 
     val total = (price.toIntOrNull() ?: 0) * (quantity.toIntOrNull() ?: 0)
     val isValid = typeId != null && description.isNotBlank() &&
@@ -256,6 +266,32 @@ private fun formatDisplayDate(millis: Long): String {
     val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     sdf.timeZone = TimeZone.getTimeZone("UTC")
     return sdf.format(Date(millis))
+}
+
+private fun parseDateToMillis(dateStr: String): Long? {
+    if (dateStr.isBlank()) return null
+    val patterns = arrayOf(
+        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        "yyyy-MM-dd'T'HH:mm:ss.SSS",
+        "yyyy-MM-dd'T'HH:mm:ss",
+        "yyyy-MM-dd",
+        "dd/MM/yyyy",
+        "d 'de' MMMM, yyyy",
+        "MMMM d, yyyy"
+    )
+    for (pattern in patterns) {
+        try {
+            val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+            if (pattern.contains("Z") || pattern.contains("T")) {
+                sdf.timeZone = TimeZone.getTimeZone("UTC")
+            }
+            val parsed = sdf.parse(dateStr)
+            if (parsed != null) return parsed.time
+        } catch (_: Exception) {
+            // Continuar con el siguiente patrón
+        }
+    }
+    return null
 }
 
 /** Fecha en el formato ISO 8601 UTC que espera el backend (fld_date). */
