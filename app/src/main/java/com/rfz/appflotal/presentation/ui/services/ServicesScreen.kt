@@ -112,7 +112,13 @@ fun ServicesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(Dimens.PaddingMedium),
+            contentPadding = PaddingValues(
+                start = Dimens.PaddingMedium,
+                top = Dimens.PaddingMedium,
+                end = Dimens.PaddingMedium,
+                // Altura del FAB (56dp) + su margen (16dp) + separación
+                bottom = Dimens.PaddingMedium + 80.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(Dimens.ListItemSpacing)
         ) {
             if (isOffline) {
