@@ -896,6 +896,4 @@
     <string name="srv_confirmar_eliminar_servicio_msg">This service will be removed from the order. This action cannot be undone.</string>
     <string name="srv_eliminar_btn">Delete</string>
     <string name="servicios">Services</string>
-
-    <string name="preferences">Preferences</string>
 </resources>

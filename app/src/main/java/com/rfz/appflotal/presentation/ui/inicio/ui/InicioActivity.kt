@@ -27,7 +27,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
@@ -365,6 +368,9 @@ class InicioActivity : ComponentActivity() {
                                 )
                             ), color = MaterialTheme.colorScheme.primary
                     ) {
+                        val showBottomBar = selectedNavItem != null &&
+                                inicioState.value.paymentPlanType == PaymentPlanType.Complete
+
                         Column(modifier = Modifier.fillMaxSize()) {
                             if (showBanner && inicioState.value.paymentPlanType == PaymentPlanType.Free) {
                                 GlobalAdMobBanner(
@@ -397,7 +403,20 @@ class InicioActivity : ComponentActivity() {
                                 }
                             }
 
-                            Box(modifier = Modifier.weight(1f)) {
+                            // HomeBottomBar ya aplica navigationBarsPadding(); se consume
+                            // ese inset aquí para que los Scaffold/NavigationBar de las
+                            // pantallas no lo vuelvan a sumar sobre la barra.
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .then(
+                                        if (showBottomBar) {
+                                            Modifier.consumeWindowInsets(WindowInsets.navigationBars)
+                                        } else {
+                                            Modifier
+                                        }
+                                    )
+                            ) {
                                 NetworkConfig.imei =
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                         Settings.Secure.getString(
@@ -513,8 +532,8 @@ class InicioActivity : ComponentActivity() {
                                             AnimatedContentTransitionScope.SlideDirection.Right,
                                             animationSpec = tween(400)
                                         ) + fadeOut(animationSpec = tween(400))
-                                    }) {
-
+                                    }
+                                ) {
                                     authGraph(
                                         navController = navController,
                                         loginViewModel = loginViewModel,
@@ -578,7 +597,7 @@ class InicioActivity : ComponentActivity() {
                                 )
                             }
 
-                            if (selectedNavItem != null && inicioState.value.paymentPlanType == PaymentPlanType.Complete) {
+                            if (showBottomBar && selectedNavItem != null) {
                                 HomeBottomBar(
                                     selected = selectedNavItem,
                                     onItemClick = onBottomNavItemClick

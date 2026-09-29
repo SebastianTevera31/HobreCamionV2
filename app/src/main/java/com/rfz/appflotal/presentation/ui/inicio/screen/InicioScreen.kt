@@ -1,11 +1,6 @@
 package com.rfz.appflotal.presentation.ui.inicio.screen
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,35 +18,22 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
 
 
 @Composable
-fun InicioScreen(
-    navController: NavController,
-
-
-) {
-    val context = LocalContext.current
+fun InicioScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -70,9 +52,8 @@ fun InicioScreen(
 @Composable
 fun Body(
     modifier: Modifier,
-    navController: NavController,
+    navController: NavController
 ) {
-    val viewModelScope = rememberCoroutineScope()
     Column(
         modifier = modifier
             .fillMaxWidth()
