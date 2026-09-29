@@ -264,17 +264,57 @@ private fun ServiceCard(
                     )
                 }
             }
-            Text(
-                text = service.description,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = service.type,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = service.description,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Text(
+                    text = service.date,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.size(Dimens.PaddingSmall))
+            }
+
+            Row {
+                Text(
+                    text = stringResource(R.string.srv_tipo_label),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = ": ${service.type}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Row {
+                Text(
+                    text = stringResource(R.string.srv_proveedor_label),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = ": ${service.provider}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             Spacer(modifier = Modifier.size(Dimens.PaddingMedium))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -376,6 +416,18 @@ private fun ServicesScreenEmptyPreview() {
             onNewService = {},
             onEditService = {},
             onDeleteService = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ServiceCardPreview() {
+    HombreCamionTheme {
+        ServiceCard(
+            service = sampleServices.first(),
+            onClick = {},
+            onDelete = {}
         )
     }
 }

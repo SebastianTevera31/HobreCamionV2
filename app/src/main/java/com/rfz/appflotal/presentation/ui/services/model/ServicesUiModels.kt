@@ -26,8 +26,9 @@ data class ServiceUi(
     val description: String,     // fld_description
     val price: Int,              // fld_price (unitario)
     val quantity: Int,           // fld_cant
-    val provider: String = "",   // fld_provider (no viene en lectura)
-    val date: String = ""        // fld_date (no viene en lectura)
+    val provider: String = "",   // fld_provider
+    val date: String = "",       // fld_date
+    val rawDate: String = ""     // fld_date original ISO
 ) {
     val total: Int get() = price * quantity
 }
@@ -51,21 +52,27 @@ val sampleServices = listOf(
         type = "Preventivo",
         description = "Balanceo de eje delantero",
         price = 600,
-        quantity = 1
+        quantity = 1,
+        date = "2023-09-15",
+        provider = "Taller Mecánico S.A."
     ),
     ServiceUi(
         id = 2,
         type = "Correctivo",
         description = "Renovado de dos llantas traseras",
         price = 1200,
-        quantity = 2
+        quantity = 2,
+        date = "2023-09-20",
+        provider = "Taller Mecánico S.A."
     ),
     ServiceUi(
         id = 3,
         type = "Preventivo",
         description = "Alineación",
         price = 450,
-        quantity = 1
+        quantity = 1,
+        date = "2023-09-25",
+        provider = "Taller Mecánico S.A."
     )
 )
 
