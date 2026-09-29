@@ -99,6 +99,16 @@ class RegisterTireViewModel @Inject constructor(
         }
     }
 
+    fun reloadProducts() {
+        if (_uiState.value.screenLoadStatus != OperationStatus.Success) return
+
+        viewModelScope.launch {
+            val userData = getTasksUseCase().first { it.isNotEmpty() }[0]
+            val products = productListUseCase("Bearer ${userData.fld_token}").getOrNull() ?: return@launch
+            _uiState.update { it.copy(products = products) }
+        }
+    }
+
     fun updateAcquisitionType(item: CatalogItem?) {
         val match = _uiState.value.acquisitionTypes.find { it.idAcquisitionType == item?.id }
         _uiState.update { it.copy(selectedAcquisitionType = match) }

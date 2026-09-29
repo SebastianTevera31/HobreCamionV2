@@ -6,7 +6,9 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
@@ -14,15 +16,17 @@ import com.rfz.appflotal.presentation.ui.alerts.screens.AlertsRoute
 import com.rfz.appflotal.presentation.ui.home.screen.HomeScreen
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
-import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
-import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
-import com.rfz.appflotal.presentation.ui.utils.isServiceRunning
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
+import com.rfz.appflotal.presentation.ui.registertires.RegisterTireScreen
+import com.rfz.appflotal.presentation.ui.registertires.RegisterTireViewModel
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.MenuTireScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.screen.UpdateUserScreen
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.UpdateUserViewModel
+import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
+import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
+import com.rfz.appflotal.presentation.ui.utils.isServiceRunning
 import com.rfz.appflotal.presentation.ui.vialstatus.view.VialStatusScreen
 import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
 import com.rfz.appflotal.presentation.ui.weather.view.WeatherRoute
@@ -102,7 +106,29 @@ fun NavGraphBuilder.mainNavigation(
             onDisassemblyClick = { tire, temp, pressure ->
                 val route = "${NavScreens.DESMONTAJE}/$tire?temp=$temp&pressure=$pressure"
                 navController.navigate(route) { launchSingleTop = true }
+            },
+            onMountTireClick = { position ->
+                navController.navigate("${NavScreens.REGISTRO_MONTAJE}/$position") {
+                    launchSingleTop = true
+                }
             })
+    }
+
+    composable(
+        route = "${NavScreens.REGISTRO_MONTAJE}/{position}",
+        arguments = listOf(navArgument("position") { type = NavType.StringType })
+    ) { backStackEntry ->
+        val registerTireViewModel: RegisterTireViewModel = hiltViewModel()
+        val position = backStackEntry.arguments?.getString("position") ?: ""
+
+        RegisterTireScreen(
+            positionTire = position,
+            viewModel = registerTireViewModel,
+            onBack = { navController.popBackStackSafely() },
+            onNavigateToProducts = {
+                navController.navigate(NavScreens.PRODUCTOS) { launchSingleTop = true }
+            }
+        )
     }
 
     composable(route = NavScreens.INFORMACION_USUARIO) {

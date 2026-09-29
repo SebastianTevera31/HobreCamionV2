@@ -539,6 +539,7 @@ fun DatePickerField(selectedDate: String, onDateSelected: (String) -> Unit) {
                 modifier = Modifier.clickable { showDatePicker = true; focusManager.clearFocus() }
             )
         },
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)

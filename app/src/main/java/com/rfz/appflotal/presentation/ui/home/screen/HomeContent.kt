@@ -39,21 +39,26 @@ fun HomeContent(
     vehicleType: String,
     userName: String,
     paddingValues: PaddingValues,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    setupWizardSlot: @Composable () -> Unit = {}
 ) {
     when (paymentPlan) {
-        PaymentPlanType.Complete -> CompletePlanContent(
-            paymentPlan = paymentPlan,
-            vehicleType = vehicleType,
-            userName = userName,
-            plates = plates,
-            wifiStatus = wifiStatus,
-            onShowMonitorDialog = {
-                onShowMonitorDialog(it)
-            },
-            onNavigate = onNavigate,
-            modifier = modifier,
-        )
+        PaymentPlanType.Complete -> if (uiState.showSetupWizard) {
+            setupWizardSlot()
+        } else {
+            CompletePlanContent(
+                paymentPlan = paymentPlan,
+                vehicleType = vehicleType,
+                userName = userName,
+                plates = plates,
+                wifiStatus = wifiStatus,
+                onShowMonitorDialog = {
+                    onShowMonitorDialog(it)
+                },
+                onNavigate = onNavigate,
+                modifier = modifier,
+            )
+        }
 
         else -> {
             MonitorScreenContent(

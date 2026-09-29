@@ -54,7 +54,11 @@ class RegisterMonitorViewModel @Inject constructor(
     private var _monitorConfigUiState = MutableStateFlow(MonitorConfigurationUiState())
     val monitorConfigUiState = _monitorConfigUiState.asStateFlow()
 
-    init {
+    fun loadConfigurationsIfEmpty() {
+        if (_configurationsList.value.isEmpty()) loadConfigurations()
+    }
+
+    private fun loadConfigurations() {
         viewModelScope.launch {
             val response = apiTpmsUseCase.doGetConfigurations()
             responseHelper(response = response) { result ->
@@ -104,53 +108,80 @@ class RegisterMonitorViewModel @Inject constructor(
             return
         }
 
-        if (mac.isEmpty()) {
-            ApiResult.Error(message = context.getString(RegisterMonitorMessage.EMPTY_MONITOR.message))
-            return
-        }
+//        if (mac.isEmpty()) {
+//            ApiResult.Error(message = context.getString(RegisterMonitorMessage.EMPTY_MONITOR.message))
+//            return
+//        }
 
         viewModelScope.launch {
-            val userData = getTasksUseCase().filter { it.isNotEmpty() }.first()[0]
-
-            val response = apiTpmsUseCase.doPostCrudMonitor(
+            submitMonitorConfiguration(
                 idMonitor = idMonitor,
-                fldMac = mac,
-                fldDate = getCurrentDate(),
-                idVehicle = userData.idVehicle,
-                idConfiguration = configurationSelected.first
+                mac = mac,
+                configurationSelected = configurationSelected,
+                context = context,
+                notifySuccess = true,
+                restartBleOnSuccess = mac.isNotEmpty(),
+                onResult = { _registeredMonitorState.value = it }
             )
+        }
+    }
 
-            responseHelper(response = response) { result ->
-                if (!result.isNullOrEmpty()) {
-                    val fields = result[0].message.split(":")
-                    if (fields.size == 2 && !fields.contains("error")) {
-                        val idMonitor = fields[1].trim().toIntOrNull()
-                        if (idMonitor != null) {
-                            updateMonitorDataDB(
-                                idMonitor,
-                                mac,
-                                "BASE ${configurationSelected.second.split(" ")[1]}",
-                                userData.idUser
-                            )
+    private suspend fun submitMonitorConfiguration(
+        idMonitor: Int,
+        mac: String,
+        configurationSelected: Pair<Int, String>,
+        context: Context,
+        notifySuccess: Boolean,
+        restartBleOnSuccess: Boolean,
+        onResult: (ApiResult<Int>) -> Unit
+    ) {
+        val userData = getTasksUseCase().first { it.isNotEmpty() }[0]
+
+        val response = apiTpmsUseCase.doPostCrudMonitor(
+            idMonitor = idMonitor,
+            fldMac = mac,
+            fldDate = getCurrentDate(),
+            idVehicle = userData.idVehicle,
+            idConfiguration = configurationSelected.first
+        )
+
+        responseHelper(
+            response = response,
+            onError = {
+                onResult(ApiResult.Error(message = context.getString(RegisterMonitorMessage.UNKNOWN_ERROR.message)))
+            }
+        ) { result ->
+            if (!result.isNullOrEmpty()) {
+                val fields = result[0].message.split(":")
+                if (fields.size == 2 && !fields.contains("error")) {
+                    val newIdMonitor = fields[1].trim().toIntOrNull()
+                    if (newIdMonitor != null) {
+                        updateMonitorDataDB(
+                            newIdMonitor,
+                            mac,
+                            "BASE ${configurationSelected.second.split(" ")[1]}",
+                            userData.idUser
+                        )
+                        if (notifySuccess) {
                             showAlert(context, message = RegisterMonitorMessage.REGISTERED.message)
-
-                            onRestartBleConnection(context)
-
-                            _registeredMonitorState.value = ApiResult.Success(data = idMonitor)
-                        } else {
-                            _registeredMonitorState.value = ApiResult.Error(
-                                message = context.getString(
-                                    R.string.no_se_ha_asignado_ningun_monitor
-                                )
-                            )
                         }
+                        if (restartBleOnSuccess) {
+                            onRestartBleConnection(context)
+                        }
+
+                        onResult(ApiResult.Success(data = newIdMonitor))
                     } else {
-                        _registeredMonitorState.value = ApiResult.Error(message = result[0].message)
+                        onResult(
+                            ApiResult.Error(
+                                message = context.getString(R.string.no_se_ha_asignado_ningun_monitor)
+                            )
+                        )
                     }
                 } else {
-                    _registeredMonitorState.value =
-                        ApiResult.Error(message = context.getString(RegisterMonitorMessage.UNKNOWN_ERROR.message))
+                    onResult(ApiResult.Error(message = result[0].message))
                 }
+            } else {
+                onResult(ApiResult.Error(message = context.getString(RegisterMonitorMessage.UNKNOWN_ERROR.message)))
             }
         }
     }
@@ -184,7 +215,7 @@ class RegisterMonitorViewModel @Inject constructor(
 
     fun getMonitorConfiguration() {
         viewModelScope.launch {
-            val result = getTasksUseCase().filter { it.isNotEmpty() }.first()
+            val result = getTasksUseCase().first { it.isNotEmpty() }
             if (result.isNotEmpty()) {
                 val values = result[0]
                 val monitorType = values.baseConfiguration.replace("BASE", "TALON")

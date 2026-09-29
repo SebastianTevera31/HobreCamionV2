@@ -11,7 +11,9 @@ fun ServiceResponseDto.toDomain(): ServiceUi {
         type = typeService,
         description = description,
         price = price,
-        quantity = quantity
+        quantity = quantity,
+        provider = provider.orEmpty(),
+        date = date.orEmpty()
     )
 }
 

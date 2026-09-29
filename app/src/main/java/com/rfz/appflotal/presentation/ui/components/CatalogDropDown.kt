@@ -3,21 +3,26 @@ package com.rfz.appflotal.presentation.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +50,17 @@ fun CatalogDropdown(
     addNewItemLabel: String? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     val defaultText = stringResource(R.string.ninguno)
+
+    val filteredCatalog = remember(catalog, searchQuery) {
+        if (searchQuery.isEmpty()) catalog
+        else catalog.filter { it.description.contains(searchQuery, ignoreCase = true) }
+    }
+
+    LaunchedEffect(expanded) {
+        if (!expanded) searchQuery = ""
+    }
 
     Column(modifier = modifier) {
         ExposedDropdownMenuBox(
@@ -76,6 +91,42 @@ fun CatalogDropdown(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    placeholder = { Text(stringResource(R.string.buscar)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    Icons.Default.Clear,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF6A5DD9),
+                        unfocusedBorderColor = Color(0xFFAAAAAA),
+                        focusedLabelColor = Color(0xFF6A5DD9),
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                )
+
                 DropdownMenuItem(
                     text = { Text(defaultText) },
                     onClick = {
@@ -83,7 +134,7 @@ fun CatalogDropdown(
                         expanded = false
                     }
                 )
-                catalog.forEach { item ->
+                filteredCatalog.forEach { item ->
                     DropdownMenuItem(
                         text = {
                             Text(

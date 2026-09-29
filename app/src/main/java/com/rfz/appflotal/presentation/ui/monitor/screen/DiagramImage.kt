@@ -1,16 +1,19 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,9 +38,22 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import kotlin.math.max
+
+/** Orientación en la que se dibuja el diagrama. VERTICAL rota la imagen y las coordenadas 90° en sentido horario. */
+enum class DiagramOrientation { HORIZONTAL, VERTICAL }
+
+/** Rota un punto normalizado [0f..1f] 90° en sentido horario dentro del cuadrado unitario. */
+fun Offset.rotate90Clockwise(): Offset = Offset(1f - y, x)
+
+/** Rota un bitmap 90° en sentido horario (intercambia ancho/alto). */
+fun Bitmap.rotated90Clockwise(): Bitmap {
+    val matrix = Matrix().apply { postRotate(90f) }
+    return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
+}
 
 @Composable
 fun DiagramImage(
@@ -47,9 +63,14 @@ fun DiagramImage(
     height: Int,
     tireSelected: String,
     modifier: Modifier = Modifier,
+    orientation: DiagramOrientation = DiagramOrientation.HORIZONTAL,
+    onHotspotClick: (String) -> Unit = {},
+    sizeDp: Dp = 200.dp,
+    showAssemblyStatus: Boolean = false,
+    scrollable: Boolean = true,
 ) {
-    val tireMapped = tires.map {
-        Hotspot.fromPixelCenter(
+    val hotspots = tires.map {
+        val hotspot = Hotspot.fromPixelCenter(
             id = it.sensorPosition,
             px = it.xPosition.toFloat(),
             py = it.yPosition.toFloat(),
@@ -57,17 +78,35 @@ fun DiagramImage(
             isActive = it.isActive,
             imageHeightPx = height,
             imageWidthPx = width,
-            label = it.sensorPosition
+            label = it.sensorPosition,
+            isAssembled = showAssemblyStatus && it.isAssembled
         )
+        if (orientation == DiagramOrientation.VERTICAL) {
+            hotspot.copy(center01 = hotspot.center01.rotate90Clockwise())
+        } else {
+            hotspot
+        }
+    }
+
+    val displayedImage = remember(image, orientation) {
+        if (orientation == DiagramOrientation.VERTICAL) image.rotated90Clockwise() else image
+    }
+
+    val defaultModifier = if (orientation == DiagramOrientation.VERTICAL) {
+        if (scrollable) Modifier.fillMaxHeight().width(220.dp) else Modifier.fillMaxWidth()
+    } else {
+        Modifier.fillMaxWidth().height(170.dp)
     }
 
     ImageWithHotspotsProportional(
-        img = image.asImageBitmap(),
-        hotspots = tireMapped,
+        img = displayedImage.asImageBitmap(),
+        hotspots = hotspots,
         tireSelected = tireSelected,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(170.dp)
+        orientation = orientation,
+        onHotspotClick = onHotspotClick,
+        sizeDp = sizeDp,
+        scrollable = scrollable,
+        modifier = defaultModifier.then(modifier)
     )
 }
 
@@ -77,43 +116,55 @@ fun ImageWithHotspotsProportional(
     hotspots: List<Hotspot>,
     tireSelected: String,
     modifier: Modifier = Modifier,
+    orientation: DiagramOrientation = DiagramOrientation.HORIZONTAL,
+    onHotspotClick: (String) -> Unit = {},
+    sizeDp: Dp = 200.dp,
+    scrollable: Boolean = true,
 ) {
     val textMeasurer = rememberTextMeasurer()
     val scrollState = rememberScrollState()
+    val isVertical = orientation == DiagramOrientation.VERTICAL
 
-    var viewportWidthPx by remember { mutableIntStateOf(0) }
-    var targetContentX by remember { mutableStateOf<Int?>(null) }
+    var viewportSizePx by remember { mutableIntStateOf(0) }
+    var targetContentPos by remember { mutableStateOf<Int?>(null) }
     val bubbleBounds = remember { mutableStateMapOf<String, Rect>() }
 
     // Calculamos la proporción de la imagen
-    val imageHeightDp = 200.dp
+    val fixedDimenDp = sizeDp
     val aspectRatio = img.width.toFloat() / img.height.toFloat()
-    val imageWidthDp = imageHeightDp * aspectRatio
+    val imageWidthDp = if (isVertical) fixedDimenDp else fixedDimenDp * aspectRatio
+    val imageHeightDp = if (isVertical) fixedDimenDp / aspectRatio else fixedDimenDp
 
-    LaunchedEffect(targetContentX, viewportWidthPx) {
-        val x = targetContentX ?: return@LaunchedEffect
-        if (viewportWidthPx == 0) return@LaunchedEffect
-        scrollState.animateScrollTo((x - viewportWidthPx / 2).coerceAtLeast(0))
+    LaunchedEffect(targetContentPos, viewportSizePx) {
+        val pos = targetContentPos ?: return@LaunchedEffect
+        if (viewportSizePx == 0) return@LaunchedEffect
+        scrollState.animateScrollTo((pos - viewportSizePx / 2).coerceAtLeast(0))
     }
 
     Box(
         modifier = modifier
-            .pointerInput(hotspots) {
-                detectTapGestures { tap ->
-                    bubbleBounds.entries.reversed().firstOrNull { it.value.contains(tap) }
-                        ?.let { (id, _) ->
-                            // onHotspotClick(id)
-                        }
+            .onSizeChanged { viewportSizePx = if (isVertical) it.height else it.width }
+            .let {
+                when {
+                    !scrollable -> it
+                    isVertical -> it.verticalScroll(scrollState)
+                    else -> it.horizontalScroll(scrollState)
                 }
-            }
-            .onSizeChanged { viewportWidthPx = it.width }
-            .horizontalScroll(scrollState),
+            },
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
                 .height(imageHeightDp)
                 .width(imageWidthDp)
+                .pointerInput(hotspots) {
+                    detectTapGestures { tap ->
+                        bubbleBounds.entries.reversed().firstOrNull { it.value.contains(tap) }
+                            ?.let { (id, _) ->
+                                onHotspotClick(id)
+                            }
+                    }
+                }
         ) {
             // Imagen proporcional
             Image(
@@ -127,20 +178,22 @@ fun ImageWithHotspotsProportional(
             Canvas(modifier = Modifier.fillMaxSize()) {
                 bubbleBounds.clear()
                 hotspots.forEach { h ->
-                    val colorStatus = if (h.isActive) {
-                        if (h.inAlert) Pair(Color.Red, Color.White)
-                        else Pair(h.bubbleBg, Color.Black)
-                    } else Pair(Color.Gray, Color.Gray)
+                    val colorStatus = when {
+                        h.isAssembled -> Pair(Color(0xFF2E7D32), Color.White)
+                        h.isActive -> {
+                            if (h.inAlert) Pair(Color.Red, Color.White)
+                            else Pair(h.bubbleBg, Color.Black)
+                        }
+                        else -> Pair(Color.Gray, Color.Gray)
+                    }
 
                     // Posición del centro en pixeles del canvas
                     val cx = h.center01.x * size.width
                     val cy = h.center01.y * size.height
 
-                    // Tamaño de burbuja
-                    val padH = 22.dp.toPx()
-                    val padV = 10.dp.toPx()
-                    val bw = padH * 2f
-                    val bh = padV * 2f
+                    // Tamaño de burbuja (pastilla alta y estrecha en vertical)
+                    val bw = (if (isVertical) 34.dp else 44.dp).toPx()
+                    val bh = (if (isVertical) 64.dp else 20.dp).toPx()
 
                     val left = cx - bw / 2f
                     val top = cy - bh / 2f
@@ -175,7 +228,7 @@ fun ImageWithHotspotsProportional(
 
                     // Scroll automático
                     if (tireSelected == h.id) {
-                        targetContentX = cx.toInt()
+                        targetContentPos = (if (isVertical) cy else cx).toInt()
                     }
                 }
             }
@@ -190,6 +243,7 @@ data class Hotspot(
     val inAlert: Boolean,
     val isActive: Boolean,
     val label: String,
+    val isAssembled: Boolean = false,
     val bubbleBg: Color = Color(0xCC212121),
     val bubbleText: Color = Color.White,
     val bubbleStroke: Color = Color(0x55FFFFFF)
@@ -205,6 +259,7 @@ data class Hotspot(
             imageWidthPx: Int,
             imageHeightPx: Int,
             label: String,
+            isAssembled: Boolean = false,
             bubbleBg: Color = Color(0xCC212121),
             bubbleText: Color = Color.White,
             bubbleStroke: Color = Color(0x55FFFFFF)
@@ -212,6 +267,7 @@ data class Hotspot(
             id = id,
             center01 = Offset(px / imageWidthPx.toFloat(), py / imageHeightPx.toFloat()),
             label = label,
+            isAssembled = isAssembled,
             inAlert = inAlert,
             isActive = isActive,
             bubbleBg = bubbleBg,

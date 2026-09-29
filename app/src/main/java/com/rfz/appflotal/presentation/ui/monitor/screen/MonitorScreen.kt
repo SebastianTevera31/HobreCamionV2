@@ -49,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorConfigurationUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 
@@ -65,6 +66,7 @@ fun MonitorScreen(
     onInspectClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onAssemblyClick: (tire: String) -> Unit,
     onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
+    onMountTireClick: (position: String) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
     showBackButton: Boolean = true,
@@ -105,8 +107,22 @@ fun MonitorScreen(
         onSwitchTempUnit = { monitorViewModel.switchTemperatureUnit() },
         onGetTireDataByDate = { pos, date -> monitorViewModel.getTireDataByDate(pos, date) },
         onCleanFilteredTire = { monitorViewModel.cleanFilteredTire() },
+        setupWizardSlot = if (paymentPlan == PaymentPlanType.Complete) {
+            {
+                MonitorSetupWizard(
+                    monitorUiState = monitorUiState,
+                    registerMonitorViewModel = registerMonitorViewModel,
+                    paymentPlan = paymentPlan,
+                    onMountTireClick = onMountTireClick,
+                    onLinkedSensor = { monitorViewModel.initMonitorData() },
+                    onFinish = { monitorViewModel.finishSetupWizard() },
+                )
+            }
+        } else null,
         registerDialogSlot = {
-            if (monitorUiState.showView && monitorUiState.showDialog) {
+            if (monitorUiState.showDialog &&
+                (paymentPlan != PaymentPlanType.Complete || monitorUiState.monitorId != 0)
+            ) {
                 ShowMonitorRegisterDialog(
                     monitorId = monitorUiState.monitorId,
                     cancelButtonText = buttonCancelText,
@@ -116,6 +132,7 @@ fun MonitorScreen(
                         monitorViewModel.initMonitorData()
                     },
                     context = context,
+                    paymentPlan = paymentPlan,
                 )
             }
         },
@@ -145,96 +162,102 @@ fun MonitorScreenContent(
     onGetTireDataByDate: (position: String, date: String) -> Unit,
     onCleanFilteredTire: () -> Unit,
     modifier: Modifier = Modifier,
+    setupWizardSlot: (@Composable () -> Unit)? = null,
     registerDialogSlot: @Composable () -> Unit = {},
 ) {
     val context = LocalContext.current
     var selectedOption by rememberSaveable { mutableStateOf(MonitorScreenViews.DIAGRAMA) }
 
-    registerDialogSlot()
+    if (!monitorUiState.showView) {
+        LoadingView(modifier = modifier.fillMaxSize())
+        return
+    }
 
-    Scaffold(
-        topBar = {
-            if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar(
-                showDialog = {
-                    if (wifiStatus == NetworkStatus.Connected) onShowMonitorDialog(true)
-                    else Toast.makeText(
-                        context,
-                        R.string.error_conexion_internet,
-                        Toast.LENGTH_LONG
-                    ).show()
+    when {
+        setupWizardSlot != null && monitorUiState.showSetupWizard -> setupWizardSlot()
+        else -> {
+            registerDialogSlot()
+
+            Scaffold(
+                topBar = {
+                    if (paymentPlan == PaymentPlanType.Complete) MonitorTopBar(
+                        showDialog = {
+                            if (wifiStatus == NetworkStatus.Connected) onShowMonitorDialog(true)
+                            else Toast.makeText(
+                                context,
+                                R.string.error_conexion_internet,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        },
+                        showNavigationButton = showBackButton
+                    ) { navigateUp() }
                 },
-                showNavigationButton = showBackButton
-            ) { navigateUp() }
-        },
-        bottomBar = {
-            MonitorBottomNavBar(
-                onClick = { view ->
-                    if (view == MonitorScreenViews.POSICION) onGetLastedSensorData()
-                    selectedOption = view
+                bottomBar = {
+                    MonitorBottomNavBar(
+                        onClick = { view ->
+                            if (view == MonitorScreenViews.POSICION) onGetLastedSensorData()
+                            selectedOption = view
+                        },
+                        selectedView = selectedOption
+                    )
                 },
-                selectedView = selectedOption
-            )
-        },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        modifier = modifier
-    ) { innerPadding ->
-        Surface(modifier = Modifier.padding(innerPadding)) {
-            if (monitorUiState.showView) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    val isSignalUnknown =
-                        monitorUiState.signalIntensity.first == BluetoothSignalQuality.Desconocida
-                                && monitorUiState.monitorId != 0
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                modifier = modifier
+            ) { innerPadding ->
+                Surface(modifier = Modifier.padding(innerPadding)) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        val isSignalUnknown =
+                            monitorUiState.signalIntensity.first == BluetoothSignalQuality.Desconocida
+                                    && monitorUiState.monitorId != 0
+                                    && monitorUiState.monitorMac.isNotBlank()
 
-                    //onGetBitmapImage()
+                        if (isSignalUnknown) {
+                            val text = stringResource(
+                                monitorUiState.signalIntensity.first.alertMessage!!
+                            )
 
-                    if (isSignalUnknown) {
-                        val text = stringResource(
-                            monitorUiState.signalIntensity.first.alertMessage!!
-                        )
-
-                        WarningSnackBanner(
-                            visible = true,
-                            message = text
-                        )
-                    }
-                    if (selectedOption == MonitorScreenViews.DIAGRAMA) {
-                        DiagramaMonitorScreen(
-                            paymentPlan = paymentPlan,
-                            tireUiState = tireUiState,
-                            temperatureUnit = monitorUiState.temperatureUnit.symbol,
-                            pressureUnit = monitorUiState.pressureUnit.symbol,
-                            image = monitorUiState.imageBitmap,
-                            updateSelectedTire = onUpdateSelectedTire,
-                            getSensorData = onGetSensorDataByWheel,
-                            tires = monitorUiState.listOfTires,
-                            imageDimens = monitorUiState.imageDimen,
-                            onInspectClick = onInspectClick,
-                            onAssemblyClick = onAssemblyClick,
-                            onDisassemblyClick = onDisassemblyClick,
-                            onSwitchPressureUnit = onSwitchPressureUnit,
-                            onSwitchTempUnit = onSwitchTempUnit,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    } else {
-                        PositionScreenContentInternal(
-                            paymentPlan = paymentPlan,
-                            pressureUnit = monitorUiState.pressureUnit.symbol,
-                            temperatureUnit = monitorUiState.temperatureUnit.symbol,
-                            positionsUiState = positionsUiState,
-                            monitorTireUiState = monitorTireUiState,
-                            listOfTires = monitorUiState.listOfTires,
-                            onGetTireDataByDate = onGetTireDataByDate,
-                            onCleanFilteredTire = onCleanFilteredTire
-                        )
+                            WarningSnackBanner(
+                                visible = true,
+                                message = text
+                            )
+                        }
+                        if (selectedOption == MonitorScreenViews.DIAGRAMA) {
+                            DiagramaMonitorScreen(
+                                paymentPlan = paymentPlan,
+                                tireUiState = tireUiState,
+                                temperatureUnit = monitorUiState.temperatureUnit.symbol,
+                                pressureUnit = monitorUiState.pressureUnit.symbol,
+                                image = monitorUiState.imageBitmap,
+                                updateSelectedTire = onUpdateSelectedTire,
+                                getSensorData = onGetSensorDataByWheel,
+                                tires = monitorUiState.listOfTires,
+                                imageDimens = monitorUiState.imageDimen,
+                                onInspectClick = onInspectClick,
+                                onAssemblyClick = onAssemblyClick,
+                                onDisassemblyClick = onDisassemblyClick,
+                                onSwitchPressureUnit = onSwitchPressureUnit,
+                                onSwitchTempUnit = onSwitchTempUnit,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        } else {
+                            PositionScreenContentInternal(
+                                paymentPlan = paymentPlan,
+                                pressureUnit = monitorUiState.pressureUnit.symbol,
+                                temperatureUnit = monitorUiState.temperatureUnit.symbol,
+                                positionsUiState = positionsUiState,
+                                monitorTireUiState = monitorTireUiState,
+                                listOfTires = monitorUiState.listOfTires,
+                                onGetTireDataByDate = onGetTireDataByDate,
+                                onCleanFilteredTire = onCleanFilteredTire
+                            )
+                        }
                     }
                 }
-            } else {
-                LoadingView()
             }
         }
     }
@@ -247,11 +270,16 @@ fun ShowMonitorRegisterDialog(
     registerMonitorViewModel: RegisterMonitorViewModel,
     onDialogCancel: () -> Unit,
     onSuccessRegister: (mac: Int) -> Unit,
-    context: Context
+    context: Context,
+    paymentPlan: PaymentPlanType,
 ) {
     val configurationsUiState by registerMonitorViewModel.configurationList.collectAsState()
     val registerMonitorStatus by registerMonitorViewModel.registeredMonitorState.collectAsState()
     val monitorConfigUiState by registerMonitorViewModel.monitorConfigUiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        registerMonitorViewModel.loadConfigurationsIfEmpty()
+    }
 
     LaunchedEffect(monitorId) {
         if (monitorId == 0) {
@@ -267,31 +295,65 @@ fun ShowMonitorRegisterDialog(
         registerMonitorViewModel.stopScan()
     }
 
+    ShowMonitorRegisterDialogContent(
+        configurations = configurationsUiState,
+        registerMonitorStatus = registerMonitorStatus,
+        monitorConfigUiState = monitorConfigUiState,
+        cancelButtonText = cancelButtonText,
+        onDialogCancel = onDialogCancel,
+        onScan = { registerMonitorViewModel.startScan() },
+        onSuccessRegister = {
+            onSuccessRegister(it)
+            registerMonitorViewModel.clearMonitorRegistrationData()
+        },
+        onError = { registerMonitorViewModel.clearMonitorRegistrationData() },
+        onMonitorConfiguration = { config ->
+            registerMonitorViewModel.updateMonitorConfiguration(config)
+        },
+        onRegister = { mac, configuration ->
+            registerMonitorViewModel.registerMonitor(
+                idMonitor = monitorId,
+                mac = mac,
+                configurationSelected = configuration,
+                context = context
+            )
+        },
+        paymentPlan = paymentPlan
+    )
+}
+
+@Composable
+fun ShowMonitorRegisterDialogContent(
+    configurations: Map<Int, String>,
+    registerMonitorStatus: ApiResult<Int>,
+    monitorConfigUiState: MonitorConfigurationUiState,
+    cancelButtonText: String,
+    onDialogCancel: () -> Unit,
+    onScan: () -> Unit,
+    onSuccessRegister: (mac: Int) -> Unit,
+    onError: () -> Unit,
+    onMonitorConfiguration: (Pair<Int, String>?) -> Unit,
+    onRegister: (String, Pair<Int, String>?) -> Unit,
+    paymentPlan: PaymentPlanType,
+    modifier: Modifier = Modifier
+) {
     MonitorRegisterDialog(
         macValue = monitorConfigUiState.mac,
         monitorSelected = monitorConfigUiState.configurationSelected,
         registerMonitorStatus = registerMonitorStatus,
         isScanning = monitorConfigUiState.isScanning,
         showCloseButton = true,
-        onScan = { registerMonitorViewModel.startScan() },
-        configurations = configurationsUiState,
+        onScan = onScan,
+        configurations = configurations,
         onCloseButton = onDialogCancel,
-        onSuccessRegister = {
-            onSuccessRegister(it)
-            registerMonitorViewModel.clearMonitorRegistrationData()
-        },
-        onError = { registerMonitorViewModel.clearMonitorRegistrationData() },
+        onSuccessRegister = onSuccessRegister,
+        onError = onError,
         closeText = cancelButtonText,
-        onMonitorConfiguration = { config ->
-            registerMonitorViewModel.updateMonitorConfiguration(config)
-        }
-    ) { mac, configuration ->
-        registerMonitorViewModel.registerMonitor(
-            mac = mac,
-            configurationSelected = configuration,
-            context = context
-        )
-    }
+        onMonitorConfiguration = onMonitorConfiguration,
+        onContinueButton = onRegister,
+        paymentPlan = paymentPlan,
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -538,8 +600,34 @@ fun MonitorScreenPreview() {
             onSwitchPressureUnit = {},
             onSwitchTempUnit = {},
             onGetTireDataByDate = { _, _ -> },
-            onCleanFilteredTire = {},
-            registerDialogSlot = {}
+            onCleanFilteredTire = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ShowMonitorRegisterDialogPreview() {
+    val configurations = mapOf(1 to "TALON 1", 2 to "TALON 2")
+    val monitorConfigUiState = MonitorConfigurationUiState(
+        mac = "00:11:22:33:44:55",
+        configurationSelected = Pair(1, "TALON 1"),
+        isScanning = false
+    )
+
+    HombreCamionTheme {
+        ShowMonitorRegisterDialogContent(
+            configurations = configurations,
+            registerMonitorStatus = ApiResult.Loading,
+            monitorConfigUiState = monitorConfigUiState,
+            cancelButtonText = "Cancelar",
+            onDialogCancel = {},
+            onScan = {},
+            onSuccessRegister = {},
+            onError = {},
+            onMonitorConfiguration = {},
+            onRegister = { _, _ -> },
+            paymentPlan = PaymentPlanType.Complete
         )
     }
 }

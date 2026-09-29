@@ -160,6 +160,30 @@
     <string name="permisos_estado_algunos_denegados">Algunos permisos fueron denegados. Puedes intentar concederlos de nuevo.</string>
     <string name="permisos_estado_permanentemente_denegados">Uno o más permisos fueron denegados permanentemente. Actívalos manualmente en Ajustes.</string>
     <string name="no_se_ha_asignado_ningun_monitor">No se pudo asignar un monitor</string>
+    <string name="definir_configuracion">Define tu configuración</string>
+    <string name="montaje_sin_configuracion">Aún no has definido la configuración de tu unidad.</string>
+    <string name="montar_llanta_titulo">Montar llanta</string>
+    <string name="montar_llanta_mensaje">¿Deseas montar una llanta en la posición %1$s?</string>
+    <string name="montar_llanta_confirmar">Montar</string>
+    <string name="finalizar">Finalizar</string>
+    <string name="llantas_montadas_contador">%1$d de %2$d montadas</string>
+    <string name="leyenda_pendiente">Pendiente</string>
+    <string name="leyenda_montada">Montada</string>
+    <string name="agregar_producto">Agregar producto</string>
+    <string name="producto_llanta">Producto (tamaño de llanta)</string>
+    <string name="sensor_vinculado">Sensor vinculado</string>
+    <string name="tiene_sensor_tpms">¿Cuentas con un monitor TPMS?</string>
+    <string name="si">Sí</string>
+    <string name="no">No</string>
+    <string name="monitor_configuracion_titulo">Configura tu monitor</string>
+    <string name="monitor_configuracion_descripcion">Selecciona la configuración de llantas de tu unidad para continuar.</string>
+    <string name="monitor_configuracion_error">No se pudieron cargar las configuraciones disponibles</string>
+    <string name="montaje_ruedas_titulo">Montaje de llantas</string>
+    <string name="montaje_ruedas_descripcion">Toca una posición del diagrama para registrar y montar una llanta.</string>
+    <string name="vincular_sensor">Vincular sensor</string>
+    <string name="configuracion_no_soportada">Esta configuración aún no es compatible con la app</string>
+    <string name="registro_montaje_llanta_titulo">Montar llanta en %1$s</string>
+    <string name="llanta_registrada_y_montada">Llanta registrada y montada correctamente</string>
     <string name="hombrecamion_conexion_tpms">Flotal - Conexión TPMS</string>
     <string name="recibiendo_datos_monitor">Recibiendo datos del monitor...</string>
     <string name="excelente">Excelente</string>
@@ -855,4 +879,5 @@
     <string name="srv_confirmar_eliminar_servicio_msg">Se eliminará este servicio de la orden. Esta acción no se puede deshacer.</string>
     <string name="srv_eliminar_btn">Eliminar</string>
     <string name="servicios">Servicios</string>
+    <string name="preferences">Preferencias</string>
 </resources>

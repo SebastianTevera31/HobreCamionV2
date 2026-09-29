@@ -58,6 +58,7 @@ import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorSetupWizard
 import com.rfz.appflotal.presentation.ui.monitor.screen.ShowMonitorRegisterDialog
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
@@ -253,7 +254,22 @@ fun HomeScreen(
                         monitorTireUiState = monitorTireUiState,
                         tireUiState = tireUiState,
                         paddingValues = innerPadding,
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        setupWizardSlot = {
+                            MonitorSetupWizard(
+                                monitorUiState = monitorUiState,
+                                registerMonitorViewModel = registerMonitorViewModel,
+                                paymentPlan = paymentPlan,
+                                onMountTireClick = { position ->
+                                    navController.navigate("${NavScreens.REGISTRO_MONTAJE}/$position") {
+                                        launchSingleTop = true
+                                    }
+                                },
+                                onLinkedSensor = { monitorViewModel.initMonitorData() },
+                                onFinish = { monitorViewModel.finishSetupWizard() },
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
                     )
 
                     if (uiState.showTermsAndConditions) {
@@ -267,7 +283,9 @@ fun HomeScreen(
                         }
                     }
 
-                    if (monitorUiState.showView && monitorUiState.showDialog) {
+                    if (monitorUiState.showView && monitorUiState.showDialog &&
+                        (paymentPlan != PaymentPlanType.Complete || monitorUiState.monitorId != 0)
+                    ) {
                         val buttonCancelText =
                             if (paymentPlan == PaymentPlanType.Complete || monitorUiState.monitorId != 0) {
                                 stringResource(R.string.cerrar)
@@ -288,6 +306,7 @@ fun HomeScreen(
                                 monitorViewModel.initMonitorData()
                             },
                             context = context,
+                            paymentPlan = paymentPlan,
                         )
                     }
                 }

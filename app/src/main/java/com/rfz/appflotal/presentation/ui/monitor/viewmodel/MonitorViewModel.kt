@@ -131,6 +131,13 @@ class MonitorViewModel @Inject constructor(
 
     var shouldReadAuto = true // true = Automático, false = Manual (Bloqueado)
 
+    private var wizardFinished = false
+
+    fun finishSetupWizard() {
+        wizardFinished = true
+        _monitorUiState.update { it.copy(showSetupWizard = false, showDialog = false) }
+    }
+
     init {
         viewModelScope.launch {
             getTasksUseCase().collect { data ->
@@ -139,6 +146,7 @@ class MonitorViewModel @Inject constructor(
                     _monitorUiState.update { currentUiState ->
                         currentUiState.copy(
                             monitorId = user.id_monitor,
+                            monitorMac = user.monitorMac,
                             showDialog = user.id_monitor == 0
                         )
                     }
@@ -181,8 +189,11 @@ class MonitorViewModel @Inject constructor(
                     _monitorUiState.update { currentUiState ->
                         currentUiState.copy(
                             monitorId = user.id_monitor,
+                            monitorMac = user.monitorMac,
                             baseConfig = baseConfig,
-                            showDialog = user.id_monitor == 0
+                            showDialog = user.id_monitor == 0,
+                            showSetupWizard = currentUiState.showSetupWizard ||
+                                    (user.id_monitor == 0 && !wizardFinished)
                         )
                     }
 
@@ -538,6 +549,8 @@ class MonitorViewModel @Inject constructor(
     }
 
     fun cleanMonitorData() {
+        //bluetoothUseCase.disconnect()
+        wizardFinished = false
         _monitorUiState.value = MonitorUiState()
         _positionsUiState.value = ApiResult.Loading
         cleanFilteredTire()

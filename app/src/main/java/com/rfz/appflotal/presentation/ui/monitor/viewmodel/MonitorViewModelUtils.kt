@@ -60,12 +60,13 @@ fun getIsTireInAlertByApi(
             || flatTireStatus == true
 }
 
-fun getBaseConfigImage(baseConfig: Int): BaseConfig {
+fun getBaseConfigImage(baseConfig: Int): BaseConfig? {
     return when (baseConfig) {
         6 -> BaseConfig.BASE6
         10 -> BaseConfig.BASE10
         22 -> BaseConfig.BASE22
-        else -> BaseConfig.BASE38
+        38 -> BaseConfig.BASE38
+        else -> null
     }
 }
 

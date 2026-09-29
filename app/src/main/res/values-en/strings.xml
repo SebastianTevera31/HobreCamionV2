@@ -140,6 +140,30 @@
     <string name="error_desconocido">Unknown error</string>
     <string name="connection_error">Connection error</string>
     <string name="mac_no_disponible">MAC address not found</string>
+    <string name="definir_configuracion">Set up your configuration</string>
+    <string name="montaje_sin_configuracion">You have not set up your unit\'s configuration yet.</string>
+    <string name="montar_llanta_titulo">Mount tire</string>
+    <string name="montar_llanta_mensaje">Do you want to mount a tire at position %1$s?</string>
+    <string name="montar_llanta_confirmar">Mount</string>
+    <string name="finalizar">Finish</string>
+    <string name="llantas_montadas_contador">%1$d of %2$d mounted</string>
+    <string name="leyenda_pendiente">Pending</string>
+    <string name="leyenda_montada">Mounted</string>
+    <string name="agregar_producto">Add product</string>
+    <string name="producto_llanta">Product (tire size)</string>
+    <string name="sensor_vinculado">Sensor linked</string>
+    <string name="tiene_sensor_tpms">Do you have a TPMS sensor?</string>
+    <string name="si">Yes</string>
+    <string name="no">No</string>
+    <string name="monitor_configuracion_titulo">Set up your monitor</string>
+    <string name="monitor_configuracion_descripcion">Select your unit\'s tire configuration to continue.</string>
+    <string name="monitor_configuracion_error">The available configurations could not be loaded</string>
+    <string name="montaje_ruedas_titulo">Tire mounting</string>
+    <string name="montaje_ruedas_descripcion">Tap a position on the diagram to register and mount a tire.</string>
+    <string name="vincular_sensor">Link sensor</string>
+    <string name="configuracion_no_soportada">This configuration is not supported by the app yet</string>
+    <string name="registro_montaje_llanta_titulo">Mount tire at %1$s</string>
+    <string name="llanta_registrada_y_montada">Tire registered and mounted successfully</string>
     <string name="escanear">Search monitor</string>
     <string name="vehiculo">Vehicle</string>
     <string name="perfil">Profile</string>
@@ -872,4 +896,6 @@
     <string name="srv_confirmar_eliminar_servicio_msg">This service will be removed from the order. This action cannot be undone.</string>
     <string name="srv_eliminar_btn">Delete</string>
     <string name="servicios">Services</string>
+
+    <string name="preferences">Preferences</string>
 </resources>

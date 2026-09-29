@@ -25,6 +25,8 @@ data class MonitorUiState(
     val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
     val showDialog: Boolean = false,
     val showView: Boolean = false,
+    val monitorMac: String = "",
+    val showSetupWizard: Boolean = false,
     val isBluetoothOn: Boolean = false,
     val temperatureUnit: UnidadTemperatura = UnidadTemperatura.CELCIUS,
     val pressureUnit: UnidadPresion = UnidadPresion.PSI

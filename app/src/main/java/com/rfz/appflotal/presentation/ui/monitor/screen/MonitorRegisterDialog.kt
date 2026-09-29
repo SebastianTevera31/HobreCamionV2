@@ -57,6 +57,7 @@ import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
 import com.rfz.appflotal.presentation.theme.tertiaryLight
 import com.rfz.appflotal.presentation.ui.components.MacTextField
+import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 
 @Composable
@@ -65,6 +66,7 @@ fun MonitorRegisterDialog(
     isScanning: Boolean,
     registerMonitorStatus: ApiResult<Int>,
     onSuccessRegister: (mac: Int) -> Unit,
+    paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
     showCloseButton: Boolean = false,
     monitorSelected: Pair<Int, String>? = null,
@@ -79,6 +81,9 @@ fun MonitorRegisterDialog(
     val ctx = LocalContext.current
     var configurationSelected by remember(monitorSelected) { mutableStateOf(monitorSelected) }
 
+    val canChooseNoTpms = paymentPlan == PaymentPlanType.Complete
+    var hasTpms by remember { mutableStateOf(true) }
+
     val currentMacAddress = if (isScanning) {
         stringResource(R.string.escaneando)
     } else {
@@ -86,6 +91,7 @@ fun MonitorRegisterDialog(
     }
 
     val isMacAddressValid = remember(currentMacAddress) { isValidMacAddress(currentMacAddress) }
+    val canContinue = if (canChooseNoTpms && !hasTpms) true else !isScanning && isMacAddressValid
 
     LaunchedEffect(registerMonitorStatus) {
         when (registerMonitorStatus) {
@@ -93,9 +99,11 @@ fun MonitorRegisterDialog(
                 Toast.makeText(ctx, registerMonitorStatus.message, Toast.LENGTH_SHORT).show()
                 onError()
             }
+
             is ApiResult.Success -> {
                 onSuccessRegister(registerMonitorStatus.data)
             }
+
             else -> {}
         }
     }
@@ -118,7 +126,10 @@ fun MonitorRegisterDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = stringResource(R.string.ingresar_datos_monitor),
+                        text = stringResource(
+                            if (canChooseNoTpms) R.string.definir_configuracion
+                            else R.string.ingresar_datos_monitor
+                        ),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
@@ -133,21 +144,58 @@ fun MonitorRegisterDialog(
                         onMonitorConfiguration(it)
                     }
 
-                    MacTextField(
-                        title = R.string.direcci_n_mac,
-                        value = currentMacAddress
-                    )
+                    if (canChooseNoTpms) {
+                        Text(
+                            text = stringResource(R.string.tiene_sensor_tpms),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold
+                        )
 
-                    Button(
-                        onClick = {
-                            onScan()
-                        },
-                        colors = ButtonDefaults.buttonColors(tertiaryLight),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !isScanning
-                    ) {
-                        Text(stringResource(R.string.escanear))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = { hasTpms = true },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (hasTpms) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                )
+                            ) {
+                                Text(stringResource(R.string.si))
+                            }
+
+                            Button(
+                                onClick = { hasTpms = false },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (!hasTpms) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                )
+                            ) {
+                                Text(stringResource(R.string.no))
+                            }
+                        }
+                    }
+
+                    if (!canChooseNoTpms || hasTpms) {
+                        MacTextField(
+                            title = R.string.direcci_n_mac,
+                            value = currentMacAddress
+                        )
+
+                        Button(
+                            onClick = {
+                                onScan()
+                            },
+                            colors = ButtonDefaults.buttonColors(tertiaryLight),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !isScanning
+                        ) {
+                            Text(stringResource(R.string.escanear))
+                        }
                     }
 
                     Row(
@@ -174,9 +222,11 @@ fun MonitorRegisterDialog(
 
                         Button(
                             onClick = {
-                                onContinueButton(currentMacAddress, configurationSelected)
+                                val macToSend =
+                                    if (canChooseNoTpms && !hasTpms) "" else currentMacAddress
+                                onContinueButton(macToSend, configurationSelected)
                             },
-                            enabled = !isScanning && isMacAddressValid,
+                            enabled = canContinue,
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.weight(1f),
                             contentPadding = PaddingValues(horizontal = 8.dp)
@@ -272,6 +322,7 @@ fun MonitorRegisterDialogPreview() {
             isScanning = false,
             registerMonitorStatus = ApiResult.Loading,
             onSuccessRegister = {},
+            paymentPlan = PaymentPlanType.Complete,
             showCloseButton = true,
             monitorSelected = 1 to "Configuración A",
             macValue = "AA:BB:CC:DD:EE:FF",
@@ -297,6 +348,7 @@ fun MonitorRegisterDialogScanningPreview() {
             isScanning = true,
             registerMonitorStatus = ApiResult.Loading,
             onSuccessRegister = {},
+            paymentPlan = PaymentPlanType.Complete,
             showCloseButton = true,
             closeText = "Cerrar",
             onMonitorConfiguration = {},

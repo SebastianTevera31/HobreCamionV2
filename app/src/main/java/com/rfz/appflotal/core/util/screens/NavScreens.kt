@@ -23,6 +23,7 @@ object NavScreens {
     const val TERMINOS = "terminos"
     const val INSPECCION = "inspeccion"
     const val MONTAJE = "montaje"
+    const val REGISTRO_MONTAJE = "registroMontaje"
     const val DESMONTAJE = "desmontaje"
     const val DESECHO = "desecho"
 

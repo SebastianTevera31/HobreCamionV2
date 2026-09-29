@@ -19,9 +19,11 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,57 +61,59 @@ fun TerminosScreen(
     val scrollState = rememberScrollState()
     var checked by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .background(Color.White)
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(28.dp)
-            .verticalScroll(scrollState)
-    ) {
-        Text(
-            stringResource(R.string.terminos_condiciones),
-            style = MaterialTheme.typography.displayLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.padding(4.dp))
-        Text(
-            text = stringResource(R.string.main_term_text)
-        )
-
-        Spacer(modifier = Modifier.padding(4.dp))
-        Text(text = stringResource(R.string.body_terms_text))
-
-        Spacer(modifier = Modifier.padding(16.dp))
-        LinkText(
-            text = stringResource(R.string.politicas_de_privacidad),
-            url = "https://www.flotal.ai/aviso-de-privacidad",
-            context = context
-        )
-
-        Spacer(modifier = Modifier.padding(4.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+    CompositionLocalProvider(LocalContentColor provides Color.Black) {
+        Column(
+            modifier = modifier
+                .background(Color.White)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(28.dp)
+                .verticalScroll(scrollState)
         ) {
-            Checkbox(
-                checked = checked,
-                onCheckedChange = { checked = it }
-            )
             Text(
-                stringResource(R.string.aceptar_terminos_condiciones)
+                stringResource(R.string.terminos_condiciones),
+                style = MaterialTheme.typography.displayLarge,
+                fontWeight = FontWeight.Bold
             )
-        }
 
-        Spacer(modifier = Modifier.padding(12.dp))
-        Button(
-            onClick = onGranted,
-            enabled = checked,
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .width(200.dp)
-                .height(60.dp)
-        ) { Text(text = stringResource(buttonText)) }
+            Spacer(modifier = Modifier.padding(4.dp))
+            Text(
+                text = stringResource(R.string.main_term_text)
+            )
+
+            Spacer(modifier = Modifier.padding(4.dp))
+            Text(text = stringResource(R.string.body_terms_text))
+
+            Spacer(modifier = Modifier.padding(16.dp))
+            LinkText(
+                text = stringResource(R.string.politicas_de_privacidad),
+                url = "https://www.flotal.ai/aviso-de-privacidad",
+                context = context
+            )
+
+            Spacer(modifier = Modifier.padding(4.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = { checked = it }
+                )
+                Text(
+                    stringResource(R.string.aceptar_terminos_condiciones)
+                )
+            }
+
+            Spacer(modifier = Modifier.padding(12.dp))
+            Button(
+                onClick = onGranted,
+                enabled = checked,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(60.dp)
+            ) { Text(text = stringResource(buttonText)) }
+        }
     }
 }
 
