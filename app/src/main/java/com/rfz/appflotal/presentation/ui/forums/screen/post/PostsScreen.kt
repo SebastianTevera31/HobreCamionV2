@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.data.model.forum.ForumTopic
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -34,8 +35,14 @@ fun TopicsScreen(
             ForumShimmerList()
         } else {
             LazyColumn(
-                contentPadding = PaddingValues(Dimens.PaddingSmall),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = Dimens.PaddingSmall,
+                    top = Dimens.PaddingSmall,
+                    end = Dimens.PaddingSmall,
+                    // Altura del FAB (56dp) + su margen (16dp) + separación
+                    bottom = Dimens.PaddingSmall + 80.dp
+                ),
             ) {
                 items(topics) { topic ->
                     ForumCard(
