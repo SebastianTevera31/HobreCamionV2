@@ -328,7 +328,7 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(3f)
+                    modifier = Modifier.weight(2f)
                 ) {
                     AdaptiveIcon(alert.icon, contentDescription = null, tint = TealMid)
 
@@ -336,6 +336,7 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
                     Text(
                         stringResource(alert.titleRes, *alert.titleArgs.toTypedArray()),
                         fontWeight = FontWeight.SemiBold,
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

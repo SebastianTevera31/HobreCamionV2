@@ -18,7 +18,6 @@ import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -31,9 +30,15 @@ enum class RegisterMonitorMessage(@StringRes val message: Int) {
     UNKNOWN_ERROR(R.string.error_desconocido),
 }
 
+data class ConfigurationItem(
+    val id: Int,
+    val rawDescription: String,
+    val tireCount: String
+)
+
 data class MonitorConfigurationUiState(
     val mac: String = "",
-    val configurationSelected: Pair<Int, String>? = null,
+    val configurationSelected: ConfigurationItem? = null,
     val isScanning: Boolean = false
 )
 
@@ -45,7 +50,7 @@ class RegisterMonitorViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var _configurationsList =
-        MutableStateFlow<Map<Int, String>>(emptyMap())
+        MutableStateFlow<List<ConfigurationItem>>(emptyList())
     val configurationList = _configurationsList.asStateFlow()
 
     private var _registeredMonitorState = MutableStateFlow<ApiResult<Int>>(ApiResult.Loading)
@@ -65,10 +70,17 @@ class RegisterMonitorViewModel @Inject constructor(
                 if (result != null) {
                     val products = result
                         .filterNot { it.idConfiguration == 2 }
-                        .associate {
-                            it.idConfiguration to it.fldDescription.replace("BASE", "TALON")
+                        .map {
+                            val count = it.fldDescription
+                                .replace("TALON", "", ignoreCase = true)
+                                .replace("BASE", "", ignoreCase = true)
+                                .trim()
+                            ConfigurationItem(
+                                id = it.idConfiguration,
+                                rawDescription = it.fldDescription,
+                                tireCount = count
+                            )
                         }
-
                     _configurationsList.value = products
                 }
             }
@@ -93,7 +105,7 @@ class RegisterMonitorViewModel @Inject constructor(
     fun registerMonitor(
         idMonitor: Int = 0,
         mac: String,
-        configurationSelected: Pair<Int, String>?,
+        configurationSelected: ConfigurationItem?,
         context: Context
     ) {
         _registeredMonitorState.value = ApiResult.Loading
@@ -107,11 +119,6 @@ class RegisterMonitorViewModel @Inject constructor(
                 ApiResult.Error(message = context.getString(RegisterMonitorMessage.EMPTY_CONFIGURATION.message))
             return
         }
-
-//        if (mac.isEmpty()) {
-//            ApiResult.Error(message = context.getString(RegisterMonitorMessage.EMPTY_MONITOR.message))
-//            return
-//        }
 
         viewModelScope.launch {
             submitMonitorConfiguration(
@@ -129,7 +136,7 @@ class RegisterMonitorViewModel @Inject constructor(
     private suspend fun submitMonitorConfiguration(
         idMonitor: Int,
         mac: String,
-        configurationSelected: Pair<Int, String>,
+        configurationSelected: ConfigurationItem,
         context: Context,
         notifySuccess: Boolean,
         restartBleOnSuccess: Boolean,
@@ -142,7 +149,7 @@ class RegisterMonitorViewModel @Inject constructor(
             fldMac = mac,
             fldDate = getCurrentDate(),
             idVehicle = userData.idVehicle,
-            idConfiguration = configurationSelected.first
+            idConfiguration = configurationSelected.id
         )
 
         responseHelper(
@@ -156,10 +163,16 @@ class RegisterMonitorViewModel @Inject constructor(
                 if (fields.size == 2 && !fields.contains("error")) {
                     val newIdMonitor = fields[1].trim().toIntOrNull()
                     if (newIdMonitor != null) {
+                        val baseConfig = if (configurationSelected.tireCount.isNotEmpty()) {
+                            "BASE ${configurationSelected.tireCount}"
+                        } else {
+                            configurationSelected.rawDescription
+                        }
+
                         updateMonitorDataDB(
                             newIdMonitor,
                             mac,
-                            "BASE ${configurationSelected.second.split(" ")[1]}",
+                            baseConfig,
                             userData.idUser
                         )
                         if (notifySuccess) {
@@ -186,7 +199,7 @@ class RegisterMonitorViewModel @Inject constructor(
         }
     }
 
-    fun updateMonitorConfiguration(config: Pair<Int, String>?) {
+    fun updateMonitorConfiguration(config: ConfigurationItem?) {
         _monitorConfigUiState.update { currentUiState ->
             currentUiState.copy(
                 configurationSelected = config
@@ -218,16 +231,16 @@ class RegisterMonitorViewModel @Inject constructor(
             val result = getTasksUseCase().first { it.isNotEmpty() }
             if (result.isNotEmpty()) {
                 val values = result[0]
-                val monitorType = values.baseConfiguration.replace("BASE", "TALON")
-                val configSelected = configurationList.value.filterValues { it == monitorType }
-                    .map { Pair(it.key, it.value) }
-                if (configSelected.isNotEmpty()) {
-                    _monitorConfigUiState.update { currentUiState ->
-                        currentUiState.copy(
-                            mac = values.monitorMac,
-                            configurationSelected = configSelected[0]
-                        )
-                    }
+                val baseNum = values.baseConfiguration.replace("BASE", "").trim()
+                val configSelected = configurationList.value.find { item ->
+                    item.tireCount == baseNum || item.rawDescription.contains(baseNum)
+                }
+
+                _monitorConfigUiState.update { currentUiState ->
+                    currentUiState.copy(
+                        mac = values.monitorMac,
+                        configurationSelected = configSelected
+                    )
                 }
             }
         }

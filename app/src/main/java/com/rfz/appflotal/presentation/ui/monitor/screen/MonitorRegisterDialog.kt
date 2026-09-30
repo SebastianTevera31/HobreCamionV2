@@ -59,24 +59,25 @@ import com.rfz.appflotal.presentation.theme.tertiaryLight
 import com.rfz.appflotal.presentation.ui.components.MacTextField
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.ConfigurationItem
 
 @Composable
 fun MonitorRegisterDialog(
-    configurations: Map<Int, String>,
+    configurations: List<ConfigurationItem>,
     isScanning: Boolean,
     registerMonitorStatus: ApiResult<Int>,
     onSuccessRegister: (mac: Int) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
     showCloseButton: Boolean = false,
-    monitorSelected: Pair<Int, String>? = null,
+    monitorSelected: ConfigurationItem? = null,
     macValue: String = "",
     closeText: String,
-    onMonitorConfiguration: (Pair<Int, String>?) -> Unit,
+    onMonitorConfiguration: (ConfigurationItem?) -> Unit,
     onScan: () -> Unit,
     onError: () -> Unit,
     onCloseButton: () -> Unit = {},
-    onContinueButton: (String, Pair<Int, String>?) -> Unit
+    onContinueButton: (String, ConfigurationItem?) -> Unit
 ) {
     val ctx = LocalContext.current
     var configurationSelected by remember(monitorSelected) { mutableStateOf(monitorSelected) }
@@ -136,9 +137,9 @@ fun MonitorRegisterDialog(
                     )
 
                     DropDownConfigurationMenu(
-                        title = R.string.monitor,
+                        title = R.string.configuracion_monitor,
                         values = configurations,
-                        defaultOption = configurationSelected?.second ?: ""
+                        defaultOption = configurationSelected
                     ) {
                         configurationSelected = it
                         onMonitorConfiguration(it)
@@ -248,14 +249,24 @@ fun MonitorRegisterDialog(
 @Composable
 fun DropDownConfigurationMenu(
     @StringRes title: Int,
-    values: Map<Int, String>,
+    values: List<ConfigurationItem>,
     modifier: Modifier = Modifier,
-    defaultOption: String = "",
-    selectedOption: (Pair<Int, String>) -> Unit
+    defaultOption: ConfigurationItem? = null,
+    selectedOption: (ConfigurationItem) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var parentSize by remember { mutableStateOf(Size.Zero) }
-    var selectedValue by remember(defaultOption) { mutableStateOf(defaultOption) }
+    var selectedItem by remember(defaultOption) { mutableStateOf(defaultOption) }
+
+    val displayedText = if (selectedItem != null) {
+        if (selectedItem!!.tireCount.isNotEmpty()) {
+            stringResource(R.string.llantas_number, selectedItem!!.tireCount)
+        } else {
+            selectedItem!!.rawDescription
+        }
+    } else {
+        ""
+    }
 
     Box(
         modifier = modifier
@@ -277,7 +288,7 @@ fun DropDownConfigurationMenu(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = selectedValue.ifEmpty { stringResource(title) },
+                text = displayedText.ifEmpty { stringResource(title) },
                 color = secondaryLight,
                 modifier = Modifier.weight(1f)
             )
@@ -293,13 +304,18 @@ fun DropDownConfigurationMenu(
             modifier = Modifier
                 .width(with(LocalDensity.current) { parentSize.width.toDp() })
         ) {
-            values.forEach { value ->
+            values.forEach { item ->
                 LocalizedApp {
+                    val itemText = if (item.tireCount.isNotEmpty()) {
+                        stringResource(R.string.llantas_number, item.tireCount)
+                    } else {
+                        item.rawDescription
+                    }
                     DropdownMenuItem(
-                        text = { Text(text = value.value) },
+                        text = { Text(text = itemText) },
                         onClick = {
-                            selectedValue = value.value
-                            selectedOption(value.toPair())
+                            selectedItem = item
+                            selectedOption(item)
                             expanded = false
                         }
                     )
@@ -314,17 +330,16 @@ fun DropDownConfigurationMenu(
 fun MonitorRegisterDialogPreview() {
     HombreCamionTheme {
         MonitorRegisterDialog(
-            configurations = mapOf(
-                1 to "Configuración A",
-                2 to "Configuración B",
-                3 to "Configuración C"
+            configurations = listOf(
+                ConfigurationItem(1, "TALON 10", "10"),
+                ConfigurationItem(2, "TALON 22", "22")
             ),
             isScanning = false,
             registerMonitorStatus = ApiResult.Loading,
             onSuccessRegister = {},
             paymentPlan = PaymentPlanType.Complete,
             showCloseButton = true,
-            monitorSelected = 1 to "Configuración A",
+            monitorSelected = ConfigurationItem(1, "TALON 10", "10"),
             macValue = "AA:BB:CC:DD:EE:FF",
             closeText = "Cerrar",
             onMonitorConfiguration = {},
@@ -341,9 +356,9 @@ fun MonitorRegisterDialogPreview() {
 fun MonitorRegisterDialogScanningPreview() {
     HombreCamionTheme {
         MonitorRegisterDialog(
-            configurations = mapOf(
-                1 to "Configuración A",
-                2 to "Configuración B"
+            configurations = listOf(
+                ConfigurationItem(1, "TALON 10", "10"),
+                ConfigurationItem(2, "TALON 22", "22")
             ),
             isScanning = true,
             registerMonitorStatus = ApiResult.Loading,

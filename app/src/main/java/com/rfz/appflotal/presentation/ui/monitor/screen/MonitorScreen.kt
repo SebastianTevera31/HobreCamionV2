@@ -33,24 +33,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.WarningSnackBanner
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.ConfigurationItem
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.ListOfTireData
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorConfigurationUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
-import androidx.compose.ui.tooling.preview.Preview
-import com.rfz.appflotal.data.repository.UnidadPresion
-import com.rfz.appflotal.data.repository.UnidadTemperatura
-import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorConfigurationUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 
 enum class PositionView {
@@ -324,7 +325,7 @@ fun ShowMonitorRegisterDialog(
 
 @Composable
 fun ShowMonitorRegisterDialogContent(
-    configurations: Map<Int, String>,
+    configurations: List<ConfigurationItem>,
     registerMonitorStatus: ApiResult<Int>,
     monitorConfigUiState: MonitorConfigurationUiState,
     cancelButtonText: String,
@@ -332,8 +333,8 @@ fun ShowMonitorRegisterDialogContent(
     onScan: () -> Unit,
     onSuccessRegister: (mac: Int) -> Unit,
     onError: () -> Unit,
-    onMonitorConfiguration: (Pair<Int, String>?) -> Unit,
-    onRegister: (String, Pair<Int, String>?) -> Unit,
+    onMonitorConfiguration: (ConfigurationItem?) -> Unit,
+    onRegister: (String, ConfigurationItem?) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier
 ) {
@@ -608,10 +609,13 @@ fun MonitorScreenPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ShowMonitorRegisterDialogPreview() {
-    val configurations = mapOf(1 to "TALON 1", 2 to "TALON 2")
+    val configurations = listOf(
+        ConfigurationItem(1, "TALON 10", "10"),
+        ConfigurationItem(2, "TALON 22", "22")
+    )
     val monitorConfigUiState = MonitorConfigurationUiState(
         mac = "00:11:22:33:44:55",
-        configurationSelected = Pair(1, "TALON 1"),
+        configurationSelected = ConfigurationItem(1, "TALON 10", "10"),
         isScanning = false
     )
 
