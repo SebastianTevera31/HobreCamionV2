@@ -17,8 +17,8 @@ android {
         applicationId = "com.rfz.appflotal"
         minSdk = 29
         targetSdk = 36
-        versionCode = 30
-        versionName = "4.9"
+        versionCode = 31
+        versionName = "4.91"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
