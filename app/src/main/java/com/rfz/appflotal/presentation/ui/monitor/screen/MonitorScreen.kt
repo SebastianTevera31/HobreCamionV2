@@ -117,6 +117,9 @@ fun MonitorScreen(
                     onMountTireClick = onMountTireClick,
                     onLinkedSensor = { monitorViewModel.initMonitorData() },
                     onFinish = { monitorViewModel.finishSetupWizard() },
+                    onSwitchTemperature = { monitorViewModel.switchTemperatureUnit() },
+                    onSwitchPressure = { monitorViewModel.switchPressureUnit() },
+                    onSwitchOdometer = { monitorViewModel.switchOdometerUnit() },
                 )
             }
         } else null,

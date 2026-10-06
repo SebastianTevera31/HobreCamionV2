@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.assembly.viewmodel.OdometerValidation
@@ -149,6 +150,8 @@ private fun RegisterTireScreenContent(
     onAddProduct: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val language = AppLocale.currentLocale.collectAsState().value.language
+
     val dotWarning =
         if (uiState.dot.trim().length > 10) stringResource(R.string.dot_excedio_caracteres) else ""
 
@@ -260,8 +263,8 @@ private fun RegisterTireScreenContent(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 CatalogDropdown(
-                    catalog = uiState.acquisitionTypes.map { it.asCatalogItem() },
-                    selected = uiState.selectedAcquisitionType?.description,
+                    catalog = uiState.acquisitionTypes.map { it.asCatalogItem(language) },
+                    selected = uiState.selectedAcquisitionType?.localizedDescription(language),
                     errorText = null,
                     onSelected = onAcquisitionTypeSelected,
                     label = stringResource(R.string.tipo_de_adquisici_n)
@@ -319,12 +322,31 @@ private fun RegisterTireScreenContent(
                     warningMessage = dotWarning
                 ) { value -> onDotChange(value) }
 
-                DialogTextField(
-                    label = stringResource(R.string.odometro),
-                    value = uiState.odometer,
-                    keyboardType = KeyboardType.NumberPassword,
-                    warningMessage = odometerWarning
-                ) { value -> onOdometerChange(value.filter { c -> c.isDigit() }) }
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    DialogTextField(
+                        label = stringResource(
+                            R.string.odometro_con_unidad,
+                            uiState.odometerUnit.symbol
+                        ),
+                        value = uiState.odometer,
+                        keyboardType = KeyboardType.NumberPassword,
+                        warningMessage = odometerWarning
+                    ) { value -> onOdometerChange(value.filter { c -> c.isDigit() }) }
+
+                    Text(
+                        text = stringResource(
+                            R.string.odometro_actual_ayuda,
+                            uiState.currentOdometer,
+                            uiState.odometerUnit.symbol
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                }
             }
         }
     }

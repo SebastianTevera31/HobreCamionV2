@@ -38,6 +38,10 @@ class CatalogRepository @Inject constructor(
         }
     }
 
+    suspend fun clearTireReports() {
+        inspectionCatalogDao.clearCatalog()
+    }
+
     suspend fun refreshTireReports() {
         val remote = catalogService.getTireInspectionReport()
         if (remote is ApiResult.Success) {

@@ -64,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -72,28 +73,58 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
 import com.rfz.appflotal.presentation.navigation.popBackStackSafely
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.AddItemDialog
 import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ItemDialog
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasUiState
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.TireDialogState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NuevoRegistroLlantasScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: NuevoRegistroLlantasViewModel = hiltViewModel(),
 ) {
-    val uiState = viewModel.uiState.collectAsState()
-    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadData()
     }
+
+    NuevoRegistroLlantasContent(
+        uiState = uiState,
+        onBackClick = { navController.popBackStackSafely() },
+        onClearQuery = viewModel::onClearQuery,
+        onSearchQueryChanged = viewModel::onSearchQueryChanged,
+        onAddNewTireClicked = viewModel::onAddNewTireClicked,
+        onEditTireClicked = viewModel::onEditTireClicked,
+        onDialogFieldChange = viewModel::onDialogFieldChange,
+        onSaveTire = viewModel::saveTire,
+        onDismissDialog = viewModel::onDismissDialog,
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NuevoRegistroLlantasContent(
+    uiState: NuevoRegistroLlantasUiState,
+    onBackClick: () -> Unit,
+    onClearQuery: () -> Unit,
+    onSearchQueryChanged: (String) -> Unit,
+    onAddNewTireClicked: () -> Unit,
+    onEditTireClicked: (TireListResponse) -> Unit,
+    modifier: Modifier = Modifier,
+    onDialogFieldChange: (((TireDialogState) -> TireDialogState)) -> Unit = {},
+    onSaveTire: () -> Unit = {},
+    onDismissDialog: () -> Unit = {},
+) {
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -111,7 +142,7 @@ fun NuevoRegistroLlantasScreen(
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = { navController.popBackStackSafely() },
+                            onClick = onBackClick,
                             modifier = Modifier.padding(start = 8.dp)
                         ) {
                             Icon(
@@ -151,20 +182,19 @@ fun NuevoRegistroLlantasScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     SearchBar(
-                        uiState.value.searchQuery,
-                        onClearSearchQuery = viewModel::onClearQuery,
-                        onQueryChanged = viewModel::onSearchQueryChanged,
+                        uiState.searchQuery,
+                        onClearSearchQuery = onClearQuery,
+                        onQueryChanged = onSearchQueryChanged,
                         modifier = Modifier
                             .fillMaxWidth()
                             .shadow(4.dp, RoundedCornerShape(16.dp)),
                     )
                 }
             }
-
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = viewModel::onAddNewTireClicked,
+                onClick = onAddNewTireClicked,
                 modifier = Modifier.shadow(elevation = 8.dp)
             ) {
                 Icon(
@@ -182,27 +212,33 @@ fun NuevoRegistroLlantasScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiState.value.isLoading && uiState.value.tires.isEmpty()) {
+            if (uiState.isLoading && uiState.tires.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else {
                 TireList(
-                    tires = uiState.value.displayedTires,
-                    onEdit = viewModel::onEditTireClicked,
+                    tires = uiState.displayedTires,
+                    onEdit = onEditTireClicked,
                     modifier = Modifier
                 )
             }
         }
 
-        if (uiState.value.isDialogShown) {
-            TireDialog(uiState = uiState.value, viewModel = viewModel, onShowMessage = {
-                if (uiState.value.isSending) {
-                    uiState.value.errorMessage?.let {
-                        Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+        if (uiState.isDialogShown) {
+            TireDialog(
+                uiState = uiState,
+                onDialogFieldChange = onDialogFieldChange,
+                onSaveTire = onSaveTire,
+                onDismissDialog = onDismissDialog,
+                onShowMessage = {
+                    if (uiState.isSending) {
+                        uiState.errorMessage?.let {
+                            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
-            })
+            )
         }
     }
 }
@@ -336,7 +372,9 @@ private fun TireItem(tire: TireListResponse, onEdit: () -> Unit, modifier: Modif
 @Composable
 private fun TireDialog(
     uiState: NuevoRegistroLlantasUiState,
-    viewModel: NuevoRegistroLlantasViewModel,
+    onDialogFieldChange: (((TireDialogState) -> TireDialogState)) -> Unit,
+    onSaveTire: () -> Unit,
+    onDismissDialog: () -> Unit,
     onShowMessage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -366,7 +404,7 @@ private fun TireDialog(
                     else it.enDescription
                 },
                 onValueSelected = { selected ->
-                    viewModel.onDialogFieldChange { state ->
+                    onDialogFieldChange { state ->
                         state.copy(selectedAcquisitionType = uiState.acquisitionTypes.find {
                             (if (currentLanguage == "es") it.description
                             else it.enDescription) == selected
@@ -381,7 +419,7 @@ private fun TireDialog(
                     ?: "",
                 values = uiState.products.map { it.descriptionProduct },
                 onValueSelected = { selected ->
-                    viewModel.onDialogFieldChange {
+                    onDialogFieldChange {
                         it.copy(
                             selectedProduct = uiState.products.find { p ->
                                 p.descriptionProduct == selected
@@ -395,7 +433,7 @@ private fun TireDialog(
             )
 
             DatePickerField(uiState.dialogState.acquisitionDate) { date ->
-                viewModel.onDialogFieldChange {
+                onDialogFieldChange {
                     it.copy(
                         acquisitionDate = date
                     )
@@ -405,35 +443,35 @@ private fun TireDialog(
             DialogTextField(
                 label = stringResource(R.string.folio_factura),
                 value = uiState.dialogState.folioFactura
-            ) { value -> viewModel.onDialogFieldChange { it.copy(folioFactura = value) } }
+            ) { value -> onDialogFieldChange { it.copy(folioFactura = value) } }
 
             DialogTextField(
                 label = stringResource(R.string.costo),
                 value = uiState.dialogState.cost,
                 keyboardType = KeyboardType.NumberPassword
-            ) { value -> viewModel.onDialogFieldChange { it.copy(cost = value.filter { c -> c.isDigit() || c == '.' }) } }
+            ) { value -> onDialogFieldChange { it.copy(cost = value.filter { c -> c.isDigit() || c == '.' }) } }
 
             DialogTextField(
                 label = stringResource(R.string.profundidad),
                 value = uiState.dialogState.treadDepth,
                 keyboardType = KeyboardType.NumberPassword,
                 isEditable = false
-            ) { value -> viewModel.onDialogFieldChange { it.copy(treadDepth = value.filter { c -> c.isDigit() }) } }
+            ) { value -> onDialogFieldChange { it.copy(treadDepth = value.filter { c -> c.isDigit() }) } }
 
             DialogTextField(
                 label = stringResource(R.string.numero_de_llanta),
                 value = uiState.dialogState.tireNumber,
                 warningMessage = tireNumber
-            ) { value -> viewModel.onDialogFieldChange { it.copy(tireNumber = value) } }
+            ) { value -> onDialogFieldChange { it.copy(tireNumber = value) } }
 
             DialogTextField(
                 label = stringResource(R.string.dot),
                 value = uiState.dialogState.dot,
                 warningMessage = dotWarning
-            ) { value -> viewModel.onDialogFieldChange { it.copy(dot = value) } }
+            ) { value -> onDialogFieldChange { it.copy(dot = value) } }
         },
-        onConfirm = viewModel::saveTire,
-        onDismiss = viewModel::onDismissDialog,
+        onConfirm = onSaveTire,
+        onDismiss = onDismissDialog,
         isEntryValid = true,
         modifier = modifier
     )
@@ -579,5 +617,69 @@ fun DatePickerField(selectedDate: String, onDateSelected: (String) -> Unit) {
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun NuevoRegistroLlantasScreenPreview() {
+    val sampleTires = listOf(
+        TireListResponse(
+            idTire = 1,
+            provider = "Michelin Provider",
+            size = "295/80R22.5",
+            brand = "Michelin",
+            model = "X Multi Z",
+            loadingCapacity = "3550 kg",
+            destination = "Dirección",
+            typeAcquisition = "Compra",
+            lastMountedPosition = "Eje 1 Izq",
+            descriptionLastRenovatedDesign = "N/A",
+            lastMountedPositionDate = "2023-01-15",
+            vehicleNumber = "TR-01",
+            dateEventAssembly = "2023-01-15",
+            dateEventA = "2023-01-15",
+            treadDepthAssembly = 16.0,
+            odometerAssembly = 120000,
+            typeVehicle = "Camión"
+        ),
+        TireListResponse(
+            idTire = 2,
+            provider = "Bridgestone Provider",
+            size = "295/80R22.5",
+            brand = "Bridgestone",
+            model = "R249",
+            loadingCapacity = "3550 kg",
+            destination = "Tracción",
+            typeAcquisition = "Compra",
+            lastMountedPosition = "Eje 2 Der",
+            descriptionLastRenovatedDesign = "N/A",
+            lastMountedPositionDate = "2023-02-20",
+            vehicleNumber = "TR-02",
+            dateEventAssembly = "2023-02-20",
+            dateEventA = "2023-02-20",
+            treadDepthAssembly = 15.5,
+            odometerAssembly = 95000,
+            typeVehicle = "Camión"
+        )
+    )
+    val sampleUiState = NuevoRegistroLlantasUiState(
+        tires = sampleTires,
+        displayedTires = sampleTires,
+        isLoading = false
+    )
+
+    HombreCamionTheme {
+        NuevoRegistroLlantasContent(
+            uiState = sampleUiState,
+            onBackClick = {},
+            onClearQuery = {},
+            onSearchQueryChanged = {},
+            onAddNewTireClicked = {},
+            onEditTireClicked = {},
+            onDialogFieldChange = {},
+            onSaveTire = {},
+            onDismissDialog = {}
+        )
     }
 }

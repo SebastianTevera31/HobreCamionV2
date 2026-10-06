@@ -57,7 +57,6 @@ fun UpdateVehicleScreen(
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
-            .safeContentPadding()
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {

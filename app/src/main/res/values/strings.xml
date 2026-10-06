@@ -166,6 +166,9 @@
     <string name="montar_llanta_mensaje">¿Deseas montar una llanta en la posición %1$s?</string>
     <string name="montar_llanta_confirmar">Montar</string>
     <string name="finalizar">Finalizar</string>
+    <string name="odometro_con_unidad">Odómetro (%1$s)</string>
+    <string name="odometro_actual_ayuda">Odómetro actual: %1$s %2$s. Puedes aumentarlo si la unidad ya avanzó, pero no puede ser menor.</string>
+    <string name="unidades_wizard_descripcion">Elige las unidades que prefieres usar. Puedes cambiarlas después desde tu perfil.</string>
     <string name="llantas_montadas_contador">%1$d de %2$d montadas</string>
     <string name="leyenda_pendiente">Pendiente</string>
     <string name="leyenda_montada">Montada</string>
@@ -881,4 +884,21 @@
     <string name="srv_eliminar_btn">Eliminar</string>
     <string name="servicios">Servicios</string>
     <string name="configuracion_monitor">Sin configuración</string>
+
+    <!-- Selector de Mes y Año -->
+    <string name="mes_y_ano">Mes y año</string>
+    <string name="seleccionar_mes">Seleccionar mes</string>
+    <string name="seleccionar_mes_y_ano">Seleccionar mes y año</string>
+    <string name="enero">Enero</string>
+    <string name="febrero">Febrero</string>
+    <string name="marzo">Marzo</string>
+    <string name="abril">Abril</string>
+    <string name="mayo">Mayo</string>
+    <string name="junio">Junio</string>
+    <string name="julio">Julio</string>
+    <string name="agosto">Agosto</string>
+    <string name="septiembre">Septiembre</string>
+    <string name="octubre">Octubre</string>
+    <string name="noviembre">Noviembre</string>
+    <string name="diciembre">Diciembre</string>
 </resources>

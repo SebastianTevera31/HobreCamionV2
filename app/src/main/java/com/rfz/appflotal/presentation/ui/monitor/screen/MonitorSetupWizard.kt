@@ -25,6 +25,9 @@ fun MonitorSetupWizard(
     onMountTireClick: (position: String) -> Unit,
     onLinkedSensor: () -> Unit,
     onFinish: () -> Unit,
+    onSwitchTemperature: () -> Unit,
+    onSwitchPressure: () -> Unit,
+    onSwitchOdometer: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -34,6 +37,9 @@ fun MonitorSetupWizard(
         monitorUiState = monitorUiState,
         onMountTireClick = onMountTireClick,
         onFinish = onFinish,
+        onSwitchTemperature = onSwitchTemperature,
+        onSwitchPressure = onSwitchPressure,
+        onSwitchOdometer = onSwitchOdometer,
         modifier = modifier,
         dialogContent = { onDismiss ->
             ShowMonitorRegisterDialog(
@@ -61,10 +67,28 @@ fun MonitorSetupWizardContent(
     onMountTireClick: (position: String) -> Unit,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
+    onSwitchTemperature: () -> Unit = {},
+    onSwitchPressure: () -> Unit = {},
+    onSwitchOdometer: () -> Unit = {},
     dialogContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
 ) {
     val hasConfiguration = monitorUiState.monitorId != 0
     var showDialog by rememberSaveable { mutableStateOf(!hasConfiguration) }
+    var unitsConfirmed by rememberSaveable { mutableStateOf(false) }
+
+    if (!unitsConfirmed) {
+        WizardUnitsScreen(
+            temperatureUnit = monitorUiState.temperatureUnit,
+            pressureUnit = monitorUiState.pressureUnit,
+            odometerUnit = monitorUiState.odometerUnit,
+            onSwitchTemperature = onSwitchTemperature,
+            onSwitchPressure = onSwitchPressure,
+            onSwitchOdometer = onSwitchOdometer,
+            onContinue = { unitsConfirmed = true },
+            modifier = modifier
+        )
+        return
+    }
 
     WheelMountingScreen(
         hasConfiguration = hasConfiguration,

@@ -7,7 +7,9 @@ import com.rfz.appflotal.data.model.product.dto.ProductCrudDto
 import com.rfz.appflotal.data.model.product.response.ProductResponse
 import com.rfz.appflotal.data.model.tire.response.LoadingCapacityResponse
 import com.rfz.appflotal.data.model.tire.response.TireSizeResponse
+import com.rfz.appflotal.data.model.product.response.ProductByIdResponse
 import com.rfz.appflotal.domain.originaldesign.OriginalDesignUseCase
+import com.rfz.appflotal.domain.product.ProductByIdUseCase
 import com.rfz.appflotal.domain.product.ProductCrudUseCase
 import com.rfz.appflotal.domain.product.ProductListUseCase
 import com.rfz.appflotal.domain.tire.LoadingCapacityUseCase
@@ -38,7 +40,8 @@ class ProductViewModel @Inject constructor(
     private val productCrudUseCase: ProductCrudUseCase,
     private val originalDesignUseCase: OriginalDesignUseCase,
     private val tireSizeUseCase: TireSizeUseCase,
-    private val loadingCapacityUseCase: LoadingCapacityUseCase
+    private val loadingCapacityUseCase: LoadingCapacityUseCase,
+    private val productByIdUseCase: ProductByIdUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProductUiState())
@@ -107,5 +110,10 @@ class ProductViewModel @Inject constructor(
 
     fun resetOperationStatus() {
         _uiState.update { it.copy(operationStatus = OperationStatus.Idle) }
+    }
+
+    suspend fun getProductById(productId: Int, token: String): ProductByIdResponse? {
+        val result = productByIdUseCase(productId, "Bearer $token")
+        return result.getOrNull()?.firstOrNull()
     }
 }

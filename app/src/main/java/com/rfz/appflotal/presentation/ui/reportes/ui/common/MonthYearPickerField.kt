@@ -29,10 +29,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import java.text.DateFormatSymbols
 import java.util.Calendar
@@ -55,8 +57,8 @@ fun MonthYearPickerField(
     selectedMonthYear: MonthYearSelection?,
     onMonthYearSelected: (MonthYearSelection) -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "Mes y año",
-    placeholder: String = "Seleccionar mes",
+    label: String = stringResource(R.string.mes_y_ano),
+    placeholder: String = stringResource(R.string.seleccionar_mes),
     availableDates: List<String> = emptyList()
 ) {
     var showDialog by rememberSaveable {
@@ -130,28 +132,26 @@ private fun MonthYearPickerDialog(
 
     var showYearPicker by rememberSaveable { mutableStateOf(false) }
 
-    val months = remember {
-        listOf(
-            MonthItem(1, "Enero"),
-            MonthItem(2, "Febrero"),
-            MonthItem(3, "Marzo"),
-            MonthItem(4, "Abril"),
-            MonthItem(5, "Mayo"),
-            MonthItem(6, "Junio"),
-            MonthItem(7, "Julio"),
-            MonthItem(8, "Agosto"),
-            MonthItem(9, "Septiembre"),
-            MonthItem(10, "Octubre"),
-            MonthItem(11, "Noviembre"),
-            MonthItem(12, "Diciembre")
-        )
-    }
+    val months = listOf(
+        MonthItem(1, stringResource(R.string.enero)),
+        MonthItem(2, stringResource(R.string.febrero)),
+        MonthItem(3, stringResource(R.string.marzo)),
+        MonthItem(4, stringResource(R.string.abril)),
+        MonthItem(5, stringResource(R.string.mayo)),
+        MonthItem(6, stringResource(R.string.junio)),
+        MonthItem(7, stringResource(R.string.julio)),
+        MonthItem(8, stringResource(R.string.agosto)),
+        MonthItem(9, stringResource(R.string.septiembre)),
+        MonthItem(10, stringResource(R.string.octubre)),
+        MonthItem(11, stringResource(R.string.noviembre)),
+        MonthItem(12, stringResource(R.string.diciembre))
+    )
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Seleccionar mes y año",
+                text = stringResource(R.string.seleccionar_mes_y_ano),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 )
@@ -303,7 +303,7 @@ private fun MonthYearPickerDialog(
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancelar))
             }
         }
     )
@@ -410,10 +410,23 @@ private data class MonthItem(
     val name: String
 )
 
+@Composable
 private fun MonthYearSelection.toDisplayText(): String {
-    val monthName = DateFormatSymbols(Locale("es", "MX"))
-        .months[month - 1]
-        .replaceFirstChar { it.uppercaseChar() }
+    val monthNames = listOf(
+        stringResource(R.string.enero),
+        stringResource(R.string.febrero),
+        stringResource(R.string.marzo),
+        stringResource(R.string.abril),
+        stringResource(R.string.mayo),
+        stringResource(R.string.junio),
+        stringResource(R.string.julio),
+        stringResource(R.string.agosto),
+        stringResource(R.string.septiembre),
+        stringResource(R.string.octubre),
+        stringResource(R.string.noviembre),
+        stringResource(R.string.diciembre)
+    )
+    val monthName = monthNames.getOrElse(month - 1) { "" }
 
     return "$monthName $year"
 }

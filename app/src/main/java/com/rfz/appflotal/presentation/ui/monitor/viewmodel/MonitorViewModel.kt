@@ -5,11 +5,13 @@ import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getBitmapFromDrawable
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
@@ -23,7 +25,9 @@ import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
 import com.rfz.appflotal.domain.tpms.GetSensorDataByWheelUseCase
 import com.rfz.appflotal.domain.tpms.MonitorUnitConversionUseCase
 import com.rfz.appflotal.domain.tpms.UpdateSensorDataUseCase
+import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.SwitchOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchPressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchTemperatureUnitUseCase
@@ -71,6 +75,8 @@ class MonitorViewModel @Inject constructor(
     observePressureUnitUseCase: ObservePressureUnitUseCase,
     private val switchTemperatureUnitUseCase: SwitchTemperatureUnitUseCase,
     private val switchPressureUnitUseCase: SwitchPressureUnitUseCase,
+    observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
+    private val switchOdometerUnitUseCase: SwitchOdometerUnitUseCase,
     private val monitorUnitConversionUseCase: MonitorUnitConversionUseCase,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -88,6 +94,12 @@ class MonitorViewModel @Inject constructor(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         UnidadPresion.PSI
+    )
+
+    private val odometerUnit = observeOdometerUnitUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UnidadOdometro.KILOMETROS
     )
 
     private val _positionsUiState =
@@ -132,6 +144,9 @@ class MonitorViewModel @Inject constructor(
     var shouldReadAuto = true // true = Automático, false = Manual (Bloqueado)
 
     private var wizardFinished = false
+
+    // TODO: solo para pruebas. Fuerza el wizard aunque el usuario ya tenga monitor. Regresar a false.
+    private val FORCE_SETUP_WIZARD = BuildConfig.DEBUG && false
 
     fun finishSetupWizard() {
         wizardFinished = true
@@ -193,7 +208,7 @@ class MonitorViewModel @Inject constructor(
                             baseConfig = baseConfig,
                             showDialog = user.id_monitor == 0,
                             showSetupWizard = currentUiState.showSetupWizard ||
-                                    (user.id_monitor == 0 && !wizardFinished)
+                                    ((user.id_monitor == 0 || FORCE_SETUP_WIZARD) && !wizardFinished)
                         )
                     }
 
@@ -248,6 +263,14 @@ class MonitorViewModel @Inject constructor(
             temperatureUnit.collect { unit ->
                 _monitorUiState.update { currentUiState ->
                     currentUiState.copy(temperatureUnit = unit)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            odometerUnit.collect { unit ->
+                _monitorUiState.update { currentUiState ->
+                    currentUiState.copy(odometerUnit = unit)
                 }
             }
         }
@@ -496,7 +519,7 @@ class MonitorViewModel @Inject constructor(
                     psi = sensorValue.pressure
                 )
             }.sortedBy {
-                it.tirePosition.replace("P", "").toInt()
+                it.tirePosition.replace("P", "").trim().toIntOrNull() ?: Int.MAX_VALUE
             }
 
             if (sensorData.isNotEmpty()) {
@@ -576,6 +599,12 @@ class MonitorViewModel @Inject constructor(
     fun switchTemperatureUnit() {
         viewModelScope.launch {
             switchTemperatureUnitUseCase()
+        }
+    }
+
+    fun switchOdometerUnit() {
+        viewModelScope.launch {
+            switchOdometerUnitUseCase()
         }
     }
 

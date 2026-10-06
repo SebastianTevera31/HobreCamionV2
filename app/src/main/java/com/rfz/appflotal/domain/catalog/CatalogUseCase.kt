@@ -23,4 +23,8 @@ class CatalogUseCase @Inject constructor(private val catalogRepository: CatalogR
     suspend fun refreshTireReportCatalog() {
         catalogRepository.refreshTireReports()
     }
+
+    suspend fun clearTireReportCatalog() {
+        catalogRepository.clearTireReports()
+    }
 }

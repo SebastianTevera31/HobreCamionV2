@@ -266,6 +266,9 @@ fun HomeScreen(
                                     }
                                 },
                                 onLinkedSensor = { monitorViewModel.initMonitorData() },
+                                onSwitchTemperature = { monitorViewModel.switchTemperatureUnit() },
+                                onSwitchPressure = { monitorViewModel.switchPressureUnit() },
+                                onSwitchOdometer = { monitorViewModel.switchOdometerUnit() },
                                 onFinish = { monitorViewModel.finishSetupWizard() },
                                 modifier = Modifier.padding(innerPadding)
                             )

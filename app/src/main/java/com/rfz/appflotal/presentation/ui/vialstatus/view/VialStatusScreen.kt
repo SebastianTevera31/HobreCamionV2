@@ -67,6 +67,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialStatusViewModel
 import com.rfz.appflotal.presentation.ui.vialstatus.viewmodel.VialUiStatus
@@ -289,24 +290,28 @@ fun CancellableLoadingDialog(
         onDismissRequest = { },
         title = {},
         text = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp),
-                    strokeWidth = 4.dp
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = stringResource(message),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
+            LocalizedApp {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp),
+                        strokeWidth = 4.dp
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = stringResource(message),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         },
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onCancel) {
-                Text(stringResource(R.string.cancelar))
+            LocalizedApp {
+                TextButton(onClick = onCancel) {
+                    Text(stringResource(R.string.cancelar))
+                }
             }
         },
         shape = RoundedCornerShape(16.dp),

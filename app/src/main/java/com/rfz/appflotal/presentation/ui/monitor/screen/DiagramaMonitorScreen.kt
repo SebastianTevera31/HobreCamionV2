@@ -72,6 +72,7 @@ import com.rfz.appflotal.presentation.ui.monitor.component.MonitorMenuButton
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 
 @Composable
 fun DiagramaMonitorScreen(
@@ -444,7 +445,7 @@ fun PanelSensor(
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Text(
-                                text = if (!timestamp.isNullOrEmpty()) {
+                                text = if (!timestamp.isNullOrEmpty() && timestamp != VOID_DATE) {
                                     stringResource(
                                         R.string.actualizado,
                                         timestamp
@@ -647,7 +648,7 @@ fun PanelSensorViewPreview() {
             temperature = "40 C",
             pressureUnit = "PSI",
             pressure = "3",
-            timestamp = "",
+            timestamp = VOID_DATE,
             isInspectionAvailable = false,
             isAssembled = true,
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
@@ -664,6 +665,83 @@ fun PanelSensorViewPreview() {
                 .safeDrawingPadding()
                 .height(460.dp)
                 .padding(bottom = dimensionResource(R.dimen.small_dimen))
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun PanelLlantasPreview() {
+    val sampleTires = listOf(
+        MonitorTire(
+            "P1",
+            inAlert = false,
+            isAssembled = true,
+            isActive = true,
+            xPosition = 100,
+            yPosition = 100
+        ),
+        MonitorTire(
+            "P2",
+            inAlert = true,
+            isAssembled = true,
+            isActive = true,
+            xPosition = 200,
+            yPosition = 100
+        ),
+        MonitorTire(
+            "P3",
+            inAlert = false,
+            isAssembled = false,
+            isActive = true,
+            xPosition = 300,
+            yPosition = 100
+        ),
+        MonitorTire(
+            "P4",
+            inAlert = false,
+            isAssembled = true,
+            isActive = true,
+            xPosition = 400,
+            yPosition = 100
+        )
+    )
+    HombreCamionTheme {
+        PanelLlantas(
+            tiresList = sampleTires,
+            tireSelected = "P1",
+            updateSelectedTire = {},
+            getSensorData = {}
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun PanelSensorPreview() {
+    HombreCamionTheme {
+        PanelSensor(
+            paymentPlan = PaymentPlanType.Complete,
+            isAssembled = true,
+            isInspectionAvailable = true,
+            wheel = "P2",
+            temperature = "32 °C",
+            pressureUnit = "PSI",
+            pressure = "110",
+            timestamp = "12/05/2024 10:30",
+            temperatureStatus = SensorAlerts.NO_DATA,
+            pressureStatus = SensorAlerts.NO_DATA,
+            flatTireStatus = SensorAlerts.NO_DATA,
+            tireRemovingStatus = SensorAlerts.NO_DATA,
+            batteryStatus = SensorAlerts.NO_DATA,
+            onInspectClick = {},
+            onAssemblyClick = {},
+            onSwitchTempUnit = {},
+            onSwitchPressureUnit = {},
+            onDisassemblyClick = {},
+            modifier = Modifier
+                .height(460.dp)
+                .padding(8.dp)
         )
     }
 }

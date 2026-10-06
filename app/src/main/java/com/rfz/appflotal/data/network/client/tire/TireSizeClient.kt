@@ -11,7 +11,7 @@ interface TireSizeClient {
 
     @GET("api/Catalog/TireSize")
     suspend fun getTireSizes(
-        @Query("id_user") idUser: Int,
+        //@Query("id_user") idUser: Int,
         @Header("Authorization") token: String
     ): Response<List<TireSizeResponse>>
 }

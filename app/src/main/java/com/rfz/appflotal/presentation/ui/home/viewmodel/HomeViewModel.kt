@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.model.languaje.LanguageResponse
 import com.rfz.appflotal.data.repository.apputilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
+import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
@@ -34,6 +35,7 @@ class HomeViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val appUtilitiesRepository: AppUtilitiesRepositoryImpl,
     private val appStatusManagerRepository: AppStatusManagerRepository,
+    private val catalogUseCase: CatalogUseCase,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -47,6 +49,7 @@ class HomeViewModel @Inject constructor(
 
     suspend fun logout() {
         hombreCamionRepository.clearUserData()
+        catalogUseCase.clearTireReportCatalog()
         _messageOperationState.value = OperationStatus.Idle
         _uiState.value = HomeUiState()
     }
@@ -67,7 +70,11 @@ class HomeViewModel @Inject constructor(
                 val language = deferredLanguage.await()
 
                 if (user != null) {
-                    languageUseCase("Bearer ${user.fld_token}", language)
+                    languageUseCase("Bearer ${user.fld_token}", language).onSuccess { response ->
+                        // El servidor emite un token nuevo con el idioma; sin guardarlo, los catálogos llegan en el idioma anterior.
+                        hombreCamionRepository.updateToken(user.idUser, response.token)
+                        launch { catalogUseCase.refreshTireReportCatalog() }
+                    }
                     // Notificar a la API el idioma de la app
                     changeLanguage(AppLocale.currentLocale.value.language)
                     _uiState.update {
@@ -143,6 +150,7 @@ class HomeViewModel @Inject constructor(
                         idUser.idUser,
                         response.token
                     )
+                    catalogUseCase.refreshTireReportCatalog()
                 }
 
                 result

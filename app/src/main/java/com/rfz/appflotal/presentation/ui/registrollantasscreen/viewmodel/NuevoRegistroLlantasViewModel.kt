@@ -125,8 +125,8 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
             return
         }
 
-        val treadDepthValue = _uiState.value.dialogState.treadDepth.toIntOrNull()
-        val costValue = _uiState.value.dialogState.cost.toDoubleOrNull()
+        val treadDepthValue = _uiState.value.dialogState.treadDepth.trim().toIntOrNull()
+        val costValue = _uiState.value.dialogState.cost.trim().toDoubleOrNull()
 
         if (treadDepthValue == null || costValue == null || treadDepthValue <= 0 || costValue <= 0) {
             _uiState.update { it.copy(errorMessage = context.getString(R.string.error_solo_numeros_profunidad_costo)) }
@@ -153,10 +153,10 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
                 productId = currentState.selectedProduct!!.idProduct,
                 acquisitionDate = formatAcquisitionDate(currentState.acquisitionDate),
                 document = currentState.folioFactura,
-                unitCost = currentState.cost.toDouble().toInt(),
+                unitCost = costValue.toInt(),
                 dot = currentState.dot,
                 tireNumber = currentState.tireNumber,
-                treadDepth = currentState.treadDepth.toInt(),
+                treadDepth = treadDepthValue,
                 registrationDate = LocalDateTime.now().toString(),
                 isActive = true,
                 retreadDesignId = 0,

@@ -214,10 +214,10 @@ fun NuevoRegistroVehiculoScreen(
 
     LaunchedEffect(vehicleUiState.operationStatus) {
         if (vehicleUiState.operationStatus == com.rfz.appflotal.presentation.ui.utils.OperationStatus.Success) {
-            snackbarHostState.showSnackbar("Vehículo guardado exitosamente")
             showDialog = false
             viewModel.resetOperationStatus()
             userData?.let { viewModel.loadInitialData(it.fld_token) }
+            snackbarHostState.showSnackbar("Vehículo guardado exitosamente")
         } else if (vehicleUiState.operationStatus == com.rfz.appflotal.presentation.ui.utils.OperationStatus.Error) {
             errorMessage = vehicleUiState.errorMessage
             viewModel.resetOperationStatus()

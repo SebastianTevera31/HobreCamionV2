@@ -163,7 +163,7 @@ fun NuevoProductoScreen(
                 originalDesignId = selectedOriginalDesign!!.idOriginalDesign,
                 tireSizeId = selectedTireSize!!.id_tireSize,
                 loadCapacityId = selectedLoadCapacity!!.id_loadingCapacity,
-                treadDepth = treadDepth.toInt()
+                treadDepth = treadDepth.trim().toIntOrNull() ?: 0
             )
 
             userData?.let {
@@ -174,10 +174,10 @@ fun NuevoProductoScreen(
 
     LaunchedEffect(productUiState.operationStatus) {
         if (productUiState.operationStatus == com.rfz.appflotal.presentation.ui.utils.OperationStatus.Success) {
-            snackbarHostState.showSnackbar("Producto guardado exitosamente")
             showDialog = false
             viewModel.resetOperationStatus()
             userData?.let { viewModel.loadInitialData(it.fld_token, it.idUser) }
+            snackbarHostState.showSnackbar("Producto guardado exitosamente")
         } else if (productUiState.operationStatus == com.rfz.appflotal.presentation.ui.utils.OperationStatus.Error) {
             errorMessage = productUiState.errorMessage
             viewModel.resetOperationStatus()
@@ -194,13 +194,20 @@ fun NuevoProductoScreen(
     LaunchedEffect(showDialog) {
         if (showDialog && editingProduct != null) {
             isLoadingProductDetails = true
-            // Carga local simplificada para el formulario
-            val productDetails = productUiState.products.find { it.idProduct == editingProduct!!.idProduct }
-            productDetails?.let {
-                selectedOriginalDesign = originalDesigns.find { design ->
-                    design.idOriginalDesign == it.idProduct // O el campo correcto de FK
+            try {
+                userData?.let { user ->
+                    val productDetails = viewModel.getProductById(editingProduct!!.idProduct, user.fld_token)
+                    if (productDetails != null) {
+                        selectedOriginalDesign = originalDesigns.find { it.idOriginalDesign == productDetails.c_originalDesign_fk_1 }
+                        selectedTireSize = tireSizes.find { it.id_tireSize == productDetails.c_tireSize_fk_2 }
+                        selectedLoadCapacity = loadCapacities.find { it.id_loadingCapacity == productDetails.c_loadCapacity_fk_3 }
+                        treadDepth = productDetails.fld_treadDepth.toString()
+                    }
                 }
-                // ...
+            } catch (e: Exception) {
+                errorMessage = e.message
+            } finally {
+                isLoadingProductDetails = false
             }
         } else if (!showDialog) {
             selectedOriginalDesign = null
@@ -208,6 +215,7 @@ fun NuevoProductoScreen(
             selectedLoadCapacity = null
             treadDepth = ""
             editingProduct = null
+            isLoadingProductDetails = false
         }
     }
 

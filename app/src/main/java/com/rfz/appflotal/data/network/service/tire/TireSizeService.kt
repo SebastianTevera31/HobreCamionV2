@@ -14,7 +14,7 @@ import javax.inject.Inject
 class TireSizeService @Inject constructor(private val tireSizeClient: TireSizeClient) {
     suspend fun doTireSizes(id_user: Int, tok:String): Response<List<TireSizeResponse>> {
         return withContext(Dispatchers.IO) {
-            tireSizeClient.getTireSizes(id_user,tok)
+            tireSizeClient.getTireSizes(tok)
         }
     }
 }

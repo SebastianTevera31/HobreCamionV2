@@ -24,10 +24,8 @@ import com.rfz.appflotal.presentation.ui.utils.milesToKm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -45,17 +43,11 @@ class RegisterTireViewModel @Inject constructor(
     private val addAssemblyTireUseCase: AddAssemblyTireUseCase,
     private val getTasksUseCase: GetTasksUseCase,
     private val hombreCamionRepository: HombreCamionRepository,
-    observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
+    private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterTireUiState())
     val uiState = _uiState.asStateFlow()
-
-    private val odometerUnit = observeOdometerUnitUseCase().stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        UnidadOdometro.KILOMETROS
-    )
 
     fun loadData(positionTire: String) {
         _uiState.update {
@@ -79,17 +71,21 @@ class RegisterTireViewModel @Inject constructor(
             val odometer = odometerDeferred.await()
 
             if (axleResult.isSuccess) {
-                val unit = odometerUnit.value
+                val unit = observeOdometerUnitUseCase().first()
                 val odometerValue =
                     if (unit == UnidadOdometro.KILOMETROS) odometer.odometer
                     else kmToMiles(odometer.odometer.toDouble())
+                val currentOdometer = odometerValue.toInt().toString()
 
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
                         acquisitionTypes = acquisitionDeferred.await().getOrNull() ?: emptyList(),
                         products = productsDeferred.await().getOrNull() ?: emptyList(),
                         axleList = axleResult.getOrNull() ?: emptyList(),
-                        currentOdometer = odometerValue.toInt().toString(),
+                        currentOdometer = currentOdometer,
+                        odometer = currentOdometer,
+                        isOdometerValid = OdometerValidation.VALID,
+                        odometerUnit = unit,
                         screenLoadStatus = OperationStatus.Success
                     )
                 }
@@ -104,7 +100,8 @@ class RegisterTireViewModel @Inject constructor(
 
         viewModelScope.launch {
             val userData = getTasksUseCase().first { it.isNotEmpty() }[0]
-            val products = productListUseCase("Bearer ${userData.fld_token}").getOrNull() ?: return@launch
+            val products =
+                productListUseCase("Bearer ${userData.fld_token}").getOrNull() ?: return@launch
             _uiState.update { it.copy(products = products) }
         }
     }
@@ -141,9 +138,11 @@ class RegisterTireViewModel @Inject constructor(
     fun updateDot(value: String) = _uiState.update { it.copy(dot = value) }
 
     fun updateOdometer(value: String) {
-        val validation = if (value.isNotEmpty()) {
-            val currentOdometer = _uiState.value.currentOdometer.toIntOrNull() ?: 0
-            if (value.toIntOrNull() == null || value.toInt() < currentOdometer) {
+        val trimmedValue = value.trim()
+        val validation = if (trimmedValue.isNotEmpty()) {
+            val currentOdometer = _uiState.value.currentOdometer.trim().toIntOrNull() ?: 0
+            val parsedValue = trimmedValue.toIntOrNull()
+            if (parsedValue == null || parsedValue < currentOdometer) {
                 OdometerValidation.INVALID
             } else {
                 OdometerValidation.VALID
@@ -169,8 +168,8 @@ class RegisterTireViewModel @Inject constructor(
             return
         }
 
-        val costValue = state.cost.toDoubleOrNull()
-        val treadDepthValue = state.treadDepth.toIntOrNull()
+        val costValue = state.cost.trim().toDoubleOrNull()
+        val treadDepthValue = state.treadDepth.trim().toIntOrNull()
         if (costValue == null || costValue <= 0 || treadDepthValue == null || treadDepthValue <= 0) {
             _uiState.update { it.copy(errorMessage = context.getString(R.string.error_solo_numeros_profunidad_costo)) }
             return
@@ -216,9 +215,9 @@ class RegisterTireViewModel @Inject constructor(
             )
 
             val tireResult = tireCrudUseCase(bearerToken, tireDto)
-            val newTireId = tireResult.getOrNull()?.id
+            val newTireResultId = tireResult.getOrNull()?.id
 
-            if (tireResult.isFailure || newTireId == null) {
+            if (tireResult.isFailure || newTireResultId == null || newTireResultId != 200) {
                 _uiState.update {
                     it.copy(
                         operationStatus = OperationStatus.Error,
@@ -228,15 +227,19 @@ class RegisterTireViewModel @Inject constructor(
                 return@launch
             }
 
-            val odometerNumber = state.odometer.toDouble()
+            val idTire =
+                tireResult.getOrNull()?.message?.split(",")?.find { it.contains("id_tire") }
+                    ?.split(":")?.getOrNull(1)?.trim()?.toIntOrNull() ?: 0
+
+            val odometerNumber = state.odometer.trim().toDoubleOrNull() ?: 0.0
             val odometerValue =
-                if (odometerUnit.value == UnidadOdometro.KILOMETROS) odometerNumber
+                if (state.odometerUnit == UnidadOdometro.KILOMETROS) odometerNumber
                 else milesToKm(odometerNumber)
 
             val assemblyResult = addAssemblyTireUseCase(
                 AssemblyTire(
                     idAxle = state.selectedAxle.id,
-                    idTire = newTireId,
+                    idTire = idTire,
                     positionTire = state.positionTire,
                     odometer = odometerValue.roundToInt(),
                     assemblyDate = getCurrentDate(),
