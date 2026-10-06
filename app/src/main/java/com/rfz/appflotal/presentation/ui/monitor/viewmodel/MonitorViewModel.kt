@@ -27,8 +27,8 @@ import com.rfz.appflotal.domain.tpms.MonitorUnitConversionUseCase
 import com.rfz.appflotal.domain.tpms.UpdateSensorDataUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
-import com.rfz.appflotal.domain.userpreferences.SwitchOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.SwitchOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchPressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchTemperatureUnitUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
@@ -208,7 +208,7 @@ class MonitorViewModel @Inject constructor(
                             baseConfig = baseConfig,
                             showDialog = user.id_monitor == 0,
                             showSetupWizard = currentUiState.showSetupWizard ||
-                                    ((user.id_monitor == 0 || FORCE_SETUP_WIZARD) && !wizardFinished)
+                                    (user.id_monitor == 0 && !wizardFinished)
                         )
                     }
 
