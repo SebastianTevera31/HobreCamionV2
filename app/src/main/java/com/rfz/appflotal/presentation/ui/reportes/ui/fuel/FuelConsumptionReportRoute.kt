@@ -67,10 +67,12 @@ fun FuelEmissionReportScreen(
     selectedMonthYear: MonthYearSelection?,
     onMonthYearSelected: (MonthYearSelection) -> Unit,
     onBack: () -> Unit,
-    isOffline: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isOffline: Boolean = false
 ) {
-    val selectedReport = reports.firstOrNull { it.month == selectedMonthYear?.toApiFormat() }
+    val selectedReport = reports.firstOrNull {
+        MonthYearSelection.fromApiFormat(it.month) == selectedMonthYear
+    }
         ?: reports.firstOrNull()
 
     Scaffold(

@@ -69,7 +69,9 @@ fun CO2EmissionReportScreen(
     isOffline: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val selectedReport = reports.firstOrNull { it.month == selectedMonthYear?.toApiFormat() }
+    val selectedReport = reports.firstOrNull {
+        MonthYearSelection.fromApiFormat(it.month) == selectedMonthYear
+    }
         ?: reports.firstOrNull()
 
     Scaffold(

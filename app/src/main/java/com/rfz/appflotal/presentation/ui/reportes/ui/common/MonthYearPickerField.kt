@@ -36,19 +36,49 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import java.text.DateFormatSymbols
+import java.text.Normalizer
 import java.util.Calendar
 import java.util.Locale
+
+// Nombres de mes que puede devolver el endpoint según el idioma del usuario
+// ("2025 / Diciembre", "2025 / December"). No deben traducirse: solo se usan
+// para empatar con la respuesta del API.
+private val API_MONTH_NAMES = listOf(
+    listOf("enero", "january"),
+    listOf("febrero", "february"),
+    listOf("marzo", "march"),
+    listOf("abril", "april"),
+    listOf("mayo", "may"),
+    listOf("junio", "june"),
+    listOf("julio", "july"),
+    listOf("agosto", "august"),
+    listOf("septiembre", "setiembre", "september"),
+    listOf("octubre", "october"),
+    listOf("noviembre", "november"),
+    listOf("diciembre", "december")
+)
+
+private val YEAR_REGEX = Regex("""\b\d{4}\b""")
+private val WORD_REGEX = Regex("""\p{L}+""")
+
+private fun String.normalizeForMatch(): String =
+    Normalizer.normalize(this, Normalizer.Form.NFD)
+        .replace(Regex("""\p{Mn}+"""), "")
+        .lowercase(Locale.ROOT)
 
 data class MonthYearSelection(
     val month: Int,
     val year: Int
 ) {
-    fun toApiFormat(): String {
-        val monthName = DateFormatSymbols(Locale("es", "MX"))
-            .months[month - 1]
-            .replaceFirstChar { it.uppercaseChar() }
-        return "$year / $monthName"
+    companion object {
+        /** Convierte el campo "mes" del API ("2025 / Diciembre") a mes/año numéricos. */
+        fun fromApiFormat(value: String): MonthYearSelection? {
+            val year = YEAR_REGEX.find(value)?.value?.toIntOrNull() ?: return null
+            val words = WORD_REGEX.findAll(value.normalizeForMatch()).map { it.value }.toList()
+            val monthIndex = API_MONTH_NAMES.indexOfFirst { names -> words.any { it in names } }
+            if (monthIndex < 0) return null
+            return MonthYearSelection(month = monthIndex + 1, year = year)
+        }
     }
 }
 
@@ -119,12 +149,15 @@ private fun MonthYearPickerDialog(
         Calendar.getInstance().get(Calendar.YEAR)
     }
 
-    val minYear = remember(availableDates) {
-        availableDates.mapNotNull { it.take(4).toIntOrNull() }.minOrNull() ?: currentYear
+    val availableSelections = remember(availableDates) {
+        availableDates.mapNotNull { MonthYearSelection.fromApiFormat(it) }.toSet()
     }
-    val maxYear = remember(availableDates) {
-        availableDates.mapNotNull { it.take(4).toIntOrNull() }.maxOrNull() ?: currentYear
+    val availableYears = remember(availableSelections) {
+        availableSelections.map { it.year }.toSet()
     }
+
+    val minYear = availableYears.minOrNull() ?: currentYear
+    val maxYear = availableYears.maxOrNull() ?: currentYear
 
     var selectedYear by rememberSaveable(selectedMonthYear) {
         mutableIntStateOf(selectedMonthYear?.year ?: currentYear)
@@ -183,12 +216,7 @@ private fun MonthYearPickerDialog(
                     ) {
                         items(months) { month ->
                             val isAvailable = availableDates.isEmpty() ||
-                                    availableDates.contains(
-                                        MonthYearSelection(
-                                            month.number,
-                                            selectedYear
-                                        ).toApiFormat()
-                                    )
+                                    MonthYearSelection(month.number, selectedYear) in availableSelections
 
                             MonthButton(
                                 month = month,
@@ -249,7 +277,7 @@ private fun MonthYearPickerDialog(
                         items(years) { year ->
                             val isSelected = year == selectedYear
                             val isAvailable = availableDates.isEmpty() ||
-                                    availableDates.any { it.startsWith(year.toString()) }
+                                    year in availableYears
 
                             ElevatedCard(
                                 modifier = Modifier
