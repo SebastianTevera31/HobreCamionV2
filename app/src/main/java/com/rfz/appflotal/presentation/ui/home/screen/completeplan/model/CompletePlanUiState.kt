@@ -6,13 +6,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.OilBarrel
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
-import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.navigation.ServiceGraph
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
@@ -84,11 +82,6 @@ data class CompletePlanUiState(
     val alerts: List<AlertUi> = emptyList(),
     val weatherState: WeatherState? = null,
     val sections: List<SectionItem> = listOf(
-        SectionItem(
-            icon = Icons.Outlined.GpsFixed.asIcon(),
-            label = R.string.registrar_vehiculo,
-            route = NavScreens.REGISTRO_LLANTAS
-        ),
         SectionItem(
             icon = R.drawable.tire_pressure_warning.asIcon(),
             label = R.string.monitor,

@@ -6,6 +6,11 @@ import com.rfz.appflotal.presentation.ui.home.utils.MenuItem
 
 val tireMenuItems = listOf(
     MenuItem(
+        R.string.tire_register,
+        NavScreens.REGISTRO_LLANTAS,
+        R.drawable.ic_tire_register
+    ),
+    MenuItem(
         R.string.brands,
         NavScreens.MARCAS,
         R.drawable.ic_brand

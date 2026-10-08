@@ -584,38 +584,34 @@ fun DatePickerField(selectedDate: String, onDateSelected: (String) -> Unit) {
     )
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState()
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            val formatter =
-                                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                            onDateSelected(formatter.format(Date(millis)))
+        LocalizedApp {
+            val datePickerState = rememberDatePickerState()
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            datePickerState.selectedDateMillis?.let { millis ->
+                                val formatter =
+                                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                                onDateSelected(formatter.format(Date(millis)))
+                            }
+                            showDatePicker = false
                         }
+                    ) {
+                        Text(stringResource(R.string.guardar))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
                         showDatePicker = false
-                    }
-                ) {
-                    LocalizedApp {
-                        Text(
-                            stringResource(R.string.guardar)
-                        )
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showDatePicker = false
-                }) {
-                    LocalizedApp {
+                    }) {
                         Text(stringResource(R.string.cancelar))
                     }
                 }
+            ) {
+                DatePicker(state = datePickerState)
             }
-        ) {
-            DatePicker(state = datePickerState)
         }
     }
 }

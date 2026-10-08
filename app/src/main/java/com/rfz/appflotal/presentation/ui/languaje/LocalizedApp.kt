@@ -9,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.rfz.appflotal.core.util.AppLocale
 
@@ -32,6 +33,7 @@ fun LocalizedApp(content: @Composable () -> Unit) {
 
     CompositionLocalProvider(
         LocalContext provides localizedContext,
+        LocalConfiguration provides localizedContext.resources.configuration,
         content = content
     )
 }

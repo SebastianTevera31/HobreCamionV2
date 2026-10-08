@@ -21,9 +21,11 @@ import com.rfz.appflotal.domain.forum.CrudForumTopicUseCase
 import com.rfz.appflotal.domain.forum.DoForumLikeUseCase
 import com.rfz.appflotal.domain.forum.GetForumRoomWithTopicsUseCase
 import com.rfz.appflotal.domain.forum.GetForumRoomsUseCase
+import com.rfz.appflotal.domain.forum.GetForumTagsUseCase
 import com.rfz.appflotal.domain.forum.GetForumTopicByIdUseCase
 import com.rfz.appflotal.domain.forum.GetForumTopicMessagesUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
+import com.rfz.appflotal.presentation.ui.forums.components.ForumLimits
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,6 +47,7 @@ class ForumViewModel @Inject constructor(
     private val crudForumTopicUseCase: CrudForumTopicUseCase,
     private val createForumReportUseCase: CreateForumReportUseCase,
     private val crudForumCommentUseCase: CrudForumCommentUseCase,
+    private val getForumTagsUseCase: GetForumTagsUseCase,
     private val getTasksUseCase: GetTasksUseCase,
     private val wifiUseCase: WifiUseCase
 ) : ViewModel() {
@@ -240,11 +243,13 @@ class ForumViewModel @Inject constructor(
     }
 
     fun onTopicTitleChanged(title: String) {
-        _uiState.update { it.copy(topicTitle = title) }
+        _uiState.update { it.copy(topicTitle = title.take(ForumLimits.TITLE_MAX_LENGTH)) }
     }
 
     fun onTopicDescriptionChanged(description: String) {
-        _uiState.update { it.copy(topicDescription = description) }
+        _uiState.update {
+            it.copy(topicDescription = description.take(ForumLimits.TEXT_MAX_LENGTH))
+        }
     }
 
     fun onTopicColorChanged(color: String) {
@@ -255,11 +260,38 @@ class ForumViewModel @Inject constructor(
         _uiState.update { it.copy(topicTags = tags) }
     }
 
+    fun loadTags(forceRefresh: Boolean = false) {
+        val state = _uiState.value
+        if (state.tagsState is LoadState.Loading) return
+        if (state.availableTags.isNotEmpty() && !forceRefresh) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(tagsState = LoadState.Loading) }
+
+            asyncResponseHelper(
+                getForumTagsUseCase(),
+                onError = {
+                    _uiState.update { it.copy(tagsState = LoadState.Error("")) }
+                }
+            ) { tags ->
+                _uiState.update {
+                    it.copy(tagsState = LoadState.Success(Unit), availableTags = tags)
+                }
+            }
+        }
+    }
+
     fun sendTopic() {
         val title = _uiState.value.topicTitle
         val description = _uiState.value.topicDescription
         val tags = _uiState.value.topicTags.joinToString(",")
         val color = _uiState.value.topicColor
+
+        // El endpoint CrudTopic exige "tags" (un string vacío llega como null y responde 400).
+        if (tags.isBlank()) {
+            _uiState.update { it.copy(newTopicState = LoadState.Error("")) }
+            return
+        }
 
         publicationJob?.cancel()
         publicationJob = viewModelScope.launch {
@@ -468,7 +500,7 @@ class ForumViewModel @Inject constructor(
     }
 
     fun onCommentTextChanged(text: String) {
-        _uiState.update { it.copy(commentText = text) }
+        _uiState.update { it.copy(commentText = text.take(ForumLimits.TEXT_MAX_LENGTH)) }
     }
 
     fun onPhotoError(message: String) {

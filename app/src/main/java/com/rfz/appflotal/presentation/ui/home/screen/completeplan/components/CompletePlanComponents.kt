@@ -856,7 +856,7 @@ fun RoadMapPromoCardPreview() {
 @Composable
 fun SectionsGridPreview() {
     val sections = listOf(
-        SectionItem(Icons.Outlined.GpsFixed.asIcon(), R.string.registrar_vehiculo, ""),
+        SectionItem(Icons.Outlined.GpsFixed.asIcon(), R.string.registrar_ruedas, ""),
         SectionItem(Icons.Filled.WaterDrop.asIcon(), R.string.monitor, ""),
         SectionItem(Icons.Outlined.QueryStats.asIcon(), R.string.analytics, ""),
         SectionItem(Icons.AutoMirrored.Filled.Article.asIcon(), R.string.foro, ""),

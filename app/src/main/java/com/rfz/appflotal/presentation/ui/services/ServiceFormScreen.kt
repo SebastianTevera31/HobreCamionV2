@@ -41,6 +41,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.services.components.ServiceDropdownField
 import com.rfz.appflotal.presentation.ui.services.components.ServiceTextField
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
@@ -242,22 +243,24 @@ private fun ServiceDateField(
     }
 
     if (showDialog) {
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dateMillis)
-        DatePickerDialog(
-            onDismissRequest = { showDialog = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let(onDateSelected)
-                    showDialog = false
-                }) { Text(stringResource(R.string.confirmar)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.cancelar))
+        LocalizedApp {
+            val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dateMillis)
+            DatePickerDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        datePickerState.selectedDateMillis?.let(onDateSelected)
+                        showDialog = false
+                    }) { Text(stringResource(R.string.confirmar)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text(stringResource(R.string.cancelar))
+                    }
                 }
+            ) {
+                DatePicker(state = datePickerState)
             }
-        ) {
-            DatePicker(state = datePickerState)
         }
     }
 }

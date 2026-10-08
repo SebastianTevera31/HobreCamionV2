@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.alerts.screens
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,8 +17,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.RadioButtonChecked
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -203,6 +202,7 @@ fun AlertTypeFilterField(
 
 @Composable
 fun DateFilterField(
+    @StringRes label: Int,
     selectedDate: String,
     onDateSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -211,7 +211,7 @@ fun DateFilterField(
     var showDialog by remember { mutableStateOf(false) }
 
     BaseFilterField(
-        label = stringResource(R.string.fecha),
+        label = stringResource(label),
         value = selectedDate.ifEmpty { stringResource(R.string.seleccionar_fecha) },
         icon = Icons.Default.CalendarMonth,
         onClick = { showDialog = true },
@@ -266,6 +266,7 @@ fun AlertFilterComponentsPreview() {
                 onSelectAlert = {}
             )
             DateFilterField(
+                label = R.string.desde_label,
                 selectedDate = "10/08/2026",
                 onDateSelected = {}
             )

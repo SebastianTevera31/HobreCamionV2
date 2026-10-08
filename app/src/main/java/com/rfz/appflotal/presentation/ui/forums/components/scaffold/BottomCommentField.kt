@@ -38,6 +38,9 @@ import coil.compose.AsyncImage
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.components.CharacterCounter
+import com.rfz.appflotal.presentation.ui.forums.components.ForumLimits
+import com.rfz.appflotal.presentation.ui.forums.components.ScrollableTextFieldBox
 import androidx.core.net.toUri
 
 @Composable
@@ -90,29 +93,36 @@ fun BottomCommentField(
                 )
             }
 
-            OutlinedTextField(
-                value = comment,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.primary
-                ),
-                onValueChange = onCommentChange,
-                shape = RoundedCornerShape(Dimens.PaddingSmall),
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.forum_comment_placeholder),
-                        color = MaterialTheme.colorScheme.primary
+            Column(modifier = Modifier.weight(1f)) {
+                ScrollableTextFieldBox(maxHeight = 130.dp) {
+                    OutlinedTextField(
+                        value = comment,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.primary
+                        ),
+                        onValueChange = {
+                            onCommentChange(it.take(ForumLimits.TEXT_MAX_LENGTH))
+                        },
+                        shape = RoundedCornerShape(Dimens.PaddingSmall),
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.forum_comment_placeholder),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        enabled = !isLoading,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.Gray.copy(alpha = 0.3f),
+                            unfocusedContainerColor = Color.Gray.copy(alpha = 0.3f),
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            disabledContainerColor = Color.Gray.copy(alpha = 0.1f)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
                     )
-                },
-                enabled = !isLoading,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.Gray.copy(alpha = 0.3f),
-                    unfocusedContainerColor = Color.Gray.copy(alpha = 0.3f),
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
-                    disabledContainerColor = Color.Gray.copy(alpha = 0.1f)
-                ),
-                modifier = Modifier.weight(1f)
-            )
+                }
+                CharacterCounter(current = comment.length, max = ForumLimits.TEXT_MAX_LENGTH)
+            }
 
             Box(contentAlignment = Alignment.Center) {
                 IconButton(

@@ -9,18 +9,25 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.alerts.Alert
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.domain.alerts.GetAlertsUseCase
 import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
+import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertStatus
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertUi
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.asIcon
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.convertPressureValue
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.convertTemperatureValue
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -50,11 +57,29 @@ class AlertViewModel @Inject constructor(
     private val coordinatesTableUseCase: CoordinatesTableUseCase,
     private val wifiUseCase: WifiUseCase,
     private val apiTpmsUseCase: ApiTpmsUseCase,
+    observePressureUnitUseCase: ObservePressureUnitUseCase,
+    observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
 ) : ViewModel() {
     private var _uiState = MutableStateFlow(AlertUiState())
     val uiState = _uiState.asStateFlow()
 
+    // Alertas tal como llegan del API (PSI / °C); se re-mapean si cambian las unidades.
+    private var rawAlerts: List<Alert> = emptyList()
+    private var pressureUnit = UnidadPresion.PSI
+    private var temperatureUnit = UnidadTemperatura.CELCIUS
+
     init {
+        viewModelScope.launch {
+            combine(
+                observePressureUnitUseCase(),
+                observeTemperatureUnitUseCase()
+            ) { pressure, temperature -> pressure to temperature }
+                .collect { (pressure, temperature) ->
+                    pressureUnit = pressure
+                    temperatureUnit = temperature
+                    _uiState.update { it.copy(alerts = rawAlerts.toUi()) }
+                }
+        }
         getData()
         goToPage(1)
         viewModelScope.launch {
@@ -115,9 +140,10 @@ class AlertViewModel @Inject constructor(
             )
 
             result.onSuccess { alerts ->
+                rawAlerts = alerts
                 _uiState.update {
                     it.copy(
-                        alerts = alerts.map(Alert::toAlertUi),
+                        alerts = alerts.toUi(),
                         currentPage = page,
                         hasNextPage = alerts.size == PAGE_SIZE,
                         isLoading = false
@@ -144,9 +170,19 @@ class AlertViewModel @Inject constructor(
         }
         goToPage(1)
     }
+
+    private fun List<Alert>.toUi(): List<AlertUi> =
+        map { it.toAlertUi(pressureUnit, temperatureUnit) }
 }
 
-fun Alert.toAlertUi(): AlertUi {
+/**
+ * El API entrega la presión en PSI y la temperatura en °C (unidades base), por lo que se
+ * convierten a la preferencia del usuario únicamente al presentarlas.
+ */
+fun Alert.toAlertUi(
+    pressureUnit: UnidadPresion,
+    temperatureUnit: UnidadTemperatura
+): AlertUi {
     val isPressureAlert = alert == DomainAlertType.LOW_PRESSURE ||
             alert == DomainAlertType.HIGH_PRESSURE ||
             alert == DomainAlertType.INFLATE ||
@@ -169,7 +205,20 @@ fun Alert.toAlertUi(): AlertUi {
         },
         titleArgs = listOf(position),
         detailLabelRes = if (isPressureAlert) R.string.alert_label_pressure else R.string.alert_label_temp,
-        detailValue = if (isPressureAlert) "%.2f psi".format(psi) else "$temperature °C",
+        detailValue = if (isPressureAlert) {
+            "%.2f %s".format(
+                convertPressureValue(psi.toFloat(), pressureUnit),
+                pressureUnit.symbol
+            )
+        } else {
+            val value = convertTemperatureValue(temperature.toFloat(), temperatureUnit)
+            val formatted = if (temperatureUnit == UnidadTemperatura.CELCIUS) {
+                "%.0f".format(value)
+            } else {
+                "%.1f".format(value)
+            }
+            "$formatted ${temperatureUnit.symbol}"
+        },
         status = AlertStatus.CRITICA,
         date = convertDate(datedata),
     )

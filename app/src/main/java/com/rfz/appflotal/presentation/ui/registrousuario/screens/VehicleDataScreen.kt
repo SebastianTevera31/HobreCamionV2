@@ -51,7 +51,7 @@ fun VehicleDataContent(
     modifier: Modifier = Modifier
 ) {
     VehicleForm(
-        title = R.string.registrar_vehiculo,
+        title = R.string.registrar_ruedas,
         vehicleData = vehicleData,
         modifier = modifier.padding(horizontal = 40.dp),
         enableRegisterButton = true, // Controlado internamente o por estado

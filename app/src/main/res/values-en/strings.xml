@@ -108,7 +108,7 @@
     <string name="pa_s">Country</string>
     <string name="sector">Industry</string>
     <string name="seleccionar">Select %1$s</string>
-    <string name="registrar_vehiculo">Register vehicle</string>
+    <string name="registrar_ruedas">Register tires</string>
     <string name="tipo_vehiculo">Vehicle type</string>
     <string name="placas">License plate</string>
     <string name="registro">Registration</string>
@@ -499,6 +499,12 @@
     <string name="forum_tags_label">Tags</string>
     <string name="forum_new_tag_placeholder">New tag</string>
     <string name="forum_add_tag_desc">Add tag</string>
+    <string name="forum_tags_required_hint">Select or add at least one tag</string>
+    <string name="forum_suggested_tags_label">Suggested tags</string>
+    <string name="forum_tags_load_error">Suggested tags could not be loaded. You can add your own.</string>
+    <string name="forum_tags_retry">Retry</string>
+    <string name="forum_collapse_tags_desc">Hide suggested tags</string>
+    <string name="forum_expand_tags_desc">Show suggested tags</string>
     <string name="forum_message_label">Message</string>
     <string name="forum_message_placeholder">Write content here…</string>
     <string name="forum_publish_topic_button">Publish Topic</string>
@@ -744,6 +750,7 @@
     <string name="consumo_de_combustible">Fuel Consumption</string>
     <string name="emision_co2">CO2 Emission</string>
     <string name="ver_mas">See more</string>
+    <string name="ver_menos">See less</string>
     <string name="rendimiento_del_vehiculo">Vehicle performance</string>
     <string name="alertas_recientes">Recent alerts</string>
     <string name="ver_todas">See all</string>

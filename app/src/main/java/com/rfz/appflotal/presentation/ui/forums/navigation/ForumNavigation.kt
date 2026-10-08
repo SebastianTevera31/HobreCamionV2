@@ -497,6 +497,7 @@ fun NavGraphBuilder.forumsGraph(
 
             LaunchedEffect(Unit) {
                 viewModel.resetNewTopicState()
+                viewModel.loadTags()
             }
 
             ForumModuleScaffold(
@@ -507,6 +508,9 @@ fun NavGraphBuilder.forumsGraph(
                     showMenuButton = false,
                     showPublishButton = true,
                     isPublishing = state.newTopicState is LoadState.Loading,
+                    isPublishEnabled = state.topicTitle.isNotBlank() &&
+                            state.topicDescription.isNotBlank() &&
+                            state.topicTags.isNotEmpty(),
                     onBackClick = {
                         viewModel.clearPhoto()
                         navController.popBackStackSafely()
@@ -535,7 +539,10 @@ fun NavGraphBuilder.forumsGraph(
                     selectedColor = state.topicColor,
                     onColorChange = viewModel::onTopicColorChanged,
                     tags = state.topicTags,
-                    onTagsChange = viewModel::onTopicTagsChanged
+                    onTagsChange = viewModel::onTopicTagsChanged,
+                    availableTags = state.availableTags,
+                    tagsState = state.tagsState,
+                    onRetryTags = { viewModel.loadTags(forceRefresh = true) }
                 )
             }
         }

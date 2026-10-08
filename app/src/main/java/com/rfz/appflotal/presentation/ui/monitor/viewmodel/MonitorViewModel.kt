@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class SensorAlerts(@param:StringRes val message: Int) {
     HIGH_PRESSURE(R.string.presion_alta),
@@ -454,7 +455,7 @@ class MonitorViewModel @Inject constructor(
         manualSelectionJob?.cancel()
 
         manualSelectionJob = viewModelScope.launch {
-            delay(60000)
+            delay(60000.milliseconds)
             shouldReadAuto = true
         }
 

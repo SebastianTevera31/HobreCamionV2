@@ -93,7 +93,7 @@ fun VehicleForm(
 fun RegistrarDatosVehiculoPreview() {
     HombreCamionTheme {
         VehicleForm(
-            title = R.string.registrar_vehiculo,
+            title = R.string.registrar_ruedas,
             vehicleData = VehicleFormModel(),
             enableRegisterButton = true,
             modifier = Modifier

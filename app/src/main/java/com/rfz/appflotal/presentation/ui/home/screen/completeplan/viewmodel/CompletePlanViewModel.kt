@@ -7,11 +7,15 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.model.alerts.Alert
 import com.rfz.appflotal.data.model.forum.toEntity
 import com.rfz.appflotal.data.network.service.ApiResult
+import com.rfz.appflotal.data.repository.UnidadPresion
+import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.location.LocationRepository
 import com.rfz.appflotal.data.repository.weather.WeatherRepository
 import com.rfz.appflotal.domain.alerts.GetAlertsUseCase
 import com.rfz.appflotal.domain.forum.GetPostsFeedUseCase
 import com.rfz.appflotal.domain.performance.CurrentPerformanceUseCase
+import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
+import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
 import com.rfz.appflotal.presentation.ui.alerts.viewmodel.toAlertUi
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.WeatherState
@@ -20,6 +24,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -34,10 +39,34 @@ class CompletePlanViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository,
     private val getPostFeedUseCase: GetPostsFeedUseCase,
-    private val alertsUseCase: GetAlertsUseCase
+    private val alertsUseCase: GetAlertsUseCase,
+    observePressureUnitUseCase: ObservePressureUnitUseCase,
+    observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CompletePlanUiState())
     val uiState: StateFlow<CompletePlanUiState> = _uiState.asStateFlow()
+
+    // Alertas tal como llegan del API (PSI / °C); se re-mapean si cambian las unidades.
+    private var rawAlerts: List<Alert> = emptyList()
+    private var pressureUnit = UnidadPresion.PSI
+    private var temperatureUnit = UnidadTemperatura.CELCIUS
+
+    init {
+        viewModelScope.launch {
+            combine(
+                observePressureUnitUseCase(),
+                observeTemperatureUnitUseCase()
+            ) { pressure, temperature -> pressure to temperature }
+                .collect { (pressure, temperature) ->
+                    pressureUnit = pressure
+                    temperatureUnit = temperature
+                    _uiState.update { it.copy(alerts = rawAlerts.toUi()) }
+                }
+        }
+    }
+
+    private fun List<Alert>.toUi() =
+        map { it.toAlertUi(pressureUnit, temperatureUnit) }.take(2)
 
     fun getInitialData() {
         viewModelScope.launch {
@@ -64,9 +93,10 @@ class CompletePlanViewModel @Inject constructor(
         )
 
         result.onSuccess { alerts ->
+            rawAlerts = alerts
             _uiState.update {
                 it.copy(
-                    alerts = alerts.map(Alert::toAlertUi).take(2),
+                    alerts = alerts.toUi(),
                     isLoading = false
                 )
             }

@@ -89,7 +89,8 @@ fun MonthYearPickerField(
     modifier: Modifier = Modifier,
     label: String = stringResource(R.string.mes_y_ano),
     placeholder: String = stringResource(R.string.seleccionar_mes),
-    availableDates: List<String> = emptyList()
+    // null = sin restricción; lista vacía = no hay periodos con información
+    availableDates: List<String>? = null
 ) {
     var showDialog by rememberSaveable {
         mutableStateOf(false)
@@ -141,7 +142,7 @@ fun MonthYearPickerField(
 @Composable
 private fun MonthYearPickerDialog(
     selectedMonthYear: MonthYearSelection?,
-    availableDates: List<String>,
+    availableDates: List<String>?,
     onDismiss: () -> Unit,
     onMonthYearSelected: (MonthYearSelection) -> Unit
 ) {
@@ -150,7 +151,7 @@ private fun MonthYearPickerDialog(
     }
 
     val availableSelections = remember(availableDates) {
-        availableDates.mapNotNull { MonthYearSelection.fromApiFormat(it) }.toSet()
+        availableDates.orEmpty().mapNotNull { MonthYearSelection.fromApiFormat(it) }.toSet()
     }
     val availableYears = remember(availableSelections) {
         availableSelections.map { it.year }.toSet()
@@ -204,8 +205,8 @@ private fun MonthYearPickerDialog(
                             selectedYear++
                         },
                         onShowYears = { showYearPicker = true },
-                        canGoPrevious = availableDates.isEmpty() || selectedYear > minYear,
-                        canGoNext = availableDates.isEmpty() || selectedYear < maxYear
+                        canGoPrevious = availableDates == null || selectedYear > minYear,
+                        canGoNext = availableDates == null || selectedYear < maxYear
                     )
 
                     LazyVerticalGrid(
@@ -215,7 +216,7 @@ private fun MonthYearPickerDialog(
                         contentPadding = PaddingValues(vertical = 4.dp)
                     ) {
                         items(months) { month ->
-                            val isAvailable = availableDates.isEmpty() ||
+                            val isAvailable = availableDates == null ||
                                     MonthYearSelection(month.number, selectedYear) in availableSelections
 
                             MonthButton(
@@ -238,8 +239,8 @@ private fun MonthYearPickerDialog(
                     val startYear = (selectedYear / 12) * 12
                     val years = (startYear until startYear + 12).toList()
 
-                    val canGoPreviousDecade = availableDates.isEmpty() || startYear > minYear
-                    val canGoNextDecade = availableDates.isEmpty() || (startYear + 12) <= maxYear
+                    val canGoPreviousDecade = availableDates == null || startYear > minYear
+                    val canGoNextDecade = availableDates == null || (startYear + 12) <= maxYear
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -276,7 +277,7 @@ private fun MonthYearPickerDialog(
                     ) {
                         items(years) { year ->
                             val isSelected = year == selectedYear
-                            val isAvailable = availableDates.isEmpty() ||
+                            val isAvailable = availableDates == null ||
                                     year in availableYears
 
                             ElevatedCard(

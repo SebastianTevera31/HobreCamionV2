@@ -40,7 +40,10 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.forum.ForumComment
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.components.CharacterCounter
 import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
+import com.rfz.appflotal.presentation.ui.forums.components.ForumLimits
+import com.rfz.appflotal.presentation.ui.forums.components.ScrollableTextFieldBox
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
@@ -97,6 +100,7 @@ fun ReplyScreen(
                 onSave = {},
                 onSeeMore = {},
                 showOptions = false,
+                showReportOption = false,
                 secondInitial = comment.secondInitial,
                 time = comment.time
             )
@@ -180,30 +184,33 @@ fun ReplyEditor(
             )
         }
 
-        OutlinedTextField(
-            value = message,
-            onValueChange = onMessageChange,
-            enabled = !isLoading,
-            shape = RoundedCornerShape(Dimens.PaddingSmall),
-            placeholder = {
-                Text(
-                    text = stringResource(
-                        R.string.forum_comment_placeholder
+        ScrollableTextFieldBox(maxHeight = 250.dp) {
+            OutlinedTextField(
+                value = message,
+                onValueChange = { onMessageChange(it.take(ForumLimits.TEXT_MAX_LENGTH)) },
+                enabled = !isLoading,
+                shape = RoundedCornerShape(Dimens.PaddingSmall),
+                placeholder = {
+                    Text(
+                        text = stringResource(
+                            R.string.forum_comment_placeholder
+                        )
                     )
-                )
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor =
-                    MaterialTheme.colorScheme.surfaceVariant,
-                unfocusedContainerColor =
-                    MaterialTheme.colorScheme.surfaceVariant,
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 150.dp)
-        )
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor =
+                        MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor =
+                        MaterialTheme.colorScheme.surfaceVariant,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 150.dp)
+            )
+        }
+        CharacterCounter(current = message.length, max = ForumLimits.TEXT_MAX_LENGTH)
     }
 }
 

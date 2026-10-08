@@ -2,6 +2,8 @@ package com.rfz.appflotal.core.util
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.security.SecureRandom
 import java.security.spec.KeySpec
 import java.util.Base64.getEncoder
@@ -20,7 +22,7 @@ object LBEncryptionUtils {
     private const val SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA512"
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun encrypt(plainText: String): String {
+    suspend fun encrypt(plainText: String): String = withContext(Dispatchers.Default) {
         val salt = generateRandomBytes(16)
         val iv = generateRandomBytes(16)
 
@@ -44,11 +46,11 @@ object LBEncryptionUtils {
         System.arraycopy(iv, 0, result, salt.size, iv.size)
         System.arraycopy(cipherText, 0, result, salt.size + iv.size, cipherText.size)
 
-        return getEncoder().encodeToString(result)
+        getEncoder().encodeToString(result)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun decrypt(encryptedText: String): String {
+    suspend fun decrypt(encryptedText: String): String = withContext(Dispatchers.Default) {
         val decoded = java.util.Base64.getDecoder().decode(encryptedText)
 
         val salt = decoded.copyOfRange(0, 16)
@@ -70,7 +72,7 @@ object LBEncryptionUtils {
         cipher.init(Cipher.DECRYPT_MODE, key, ivSpec)
         val plainText = cipher.doFinal(cipherText)
 
-        return String(plainText, Charsets.UTF_8)
+        String(plainText, Charsets.UTF_8)
     }
 
     private fun generateRandomBytes(length: Int): ByteArray {

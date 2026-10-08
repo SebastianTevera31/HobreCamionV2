@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +32,7 @@ import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.Veh
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.components.WeatherCard
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.CompletePlanUiState
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.SectionItem
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.asIcon
 
 @Composable
 fun CompletePlanScreen(
@@ -88,8 +91,16 @@ fun CompletePlanScreen(
                     stringResource(R.string.alertas_recientes),
                     stringResource(R.string.ver_todas), onAlertsSeeAllClick
                 )
-                state.alerts.forEach { alert ->
-                    AlertCard(alert, onClick = onAlertsSeeAllClick)
+                if (state.alerts.isEmpty()) {
+                    EmptyDataCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        message = R.string.sin_alertas,
+                        icon = Icons.Outlined.CheckCircle.asIcon()
+                    )
+                } else {
+                    state.alerts.forEach { alert ->
+                        AlertCard(alert, onClick = onAlertsSeeAllClick)
+                    }
                 }
             }
         }

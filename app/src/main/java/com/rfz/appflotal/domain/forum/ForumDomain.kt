@@ -178,6 +178,23 @@ class GetLikedPostsUseCase @Inject constructor(private val forumRepository: Foru
     }
 }
 
+class GetForumTagsUseCase @Inject constructor(private val forumRepository: ForumRepository) {
+    suspend operator fun invoke(): ApiResult<List<String>> {
+        return when (val response = forumRepository.getTagList()) {
+            is ApiResult.Success -> ApiResult.Success(
+                response.data
+                    ?.map { it.fldTag.trim().uppercase() }
+                    ?.filter { it.isNotEmpty() }
+                    ?.distinct()
+                    ?: emptyList()
+            )
+
+            is ApiResult.Error -> ApiResult.Error(response.exception, response.message)
+            ApiResult.Loading -> ApiResult.Loading
+        }
+    }
+}
+
 class CreateForumReportUseCase @Inject constructor(private val forumRepository: ForumRepository) {
     suspend operator fun invoke(
         tipoElemento: Boolean,

@@ -4,8 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -66,38 +68,45 @@ fun ReportScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
         ) {
-
-            CommentCard(
-                firstInitial = comment.firstInitial,
-                user = comment.title,
-                content = comment.description,
-                imageUrl = comment.imageUrl,
-                likes = comment.likes,
-                isSaved = comment.isLiked,
-                onReply = {},
-                onSave = {},
-                onSeeMore = {},
-                showOptions = false,
-                secondInitial = comment.secondInitial,
-                time = comment.time
-            )
-
-            Text(
-                text = stringResource(R.string.forum_report_post_title),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Text(
-                text = stringResource(R.string.forum_report_reason_label),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
             ) {
+                item {
+                    CommentCard(
+                        firstInitial = comment.firstInitial,
+                        user = comment.title,
+                        content = comment.description,
+                        imageUrl = comment.imageUrl,
+                        likes = comment.likes,
+                        isSaved = comment.isLiked,
+                        onReply = {},
+                        onSave = {},
+                        onSeeMore = {},
+                        showOptions = false,
+                        showReportOption = false,
+                        secondInitial = comment.secondInitial,
+                        time = comment.time
+                    )
+
+                    Spacer(modifier = Modifier.height(Dimens.PaddingMedium))
+
+                    Text(
+                        text = stringResource(R.string.forum_report_post_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    Spacer(modifier = Modifier.height(Dimens.PaddingSmall))
+
+                    Text(
+                        text = stringResource(R.string.forum_report_reason_label),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                }
+
                 items(reportTypes) { reportType ->
                     Row(
                         modifier = Modifier

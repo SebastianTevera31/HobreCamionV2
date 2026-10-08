@@ -124,15 +124,20 @@ fun BlogContent(
             }
         }
 
-        Text(
-            text = content,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = 20.sp
-            ),
-            maxLines = if (showAllContent) Int.MAX_VALUE else 3,
-            overflow = TextOverflow.Ellipsis
+        val contentStyle = MaterialTheme.typography.bodyMedium.copy(
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 20.sp
         )
+        if (showAllContent) {
+            ExpandableText(text = content, style = contentStyle)
+        } else {
+            Text(
+                text = content,
+                style = contentStyle,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 

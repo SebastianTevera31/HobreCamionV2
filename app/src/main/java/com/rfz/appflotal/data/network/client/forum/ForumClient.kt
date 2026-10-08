@@ -7,6 +7,7 @@ import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetPostsFeedResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
 import com.rfz.appflotal.data.model.forum.LikedPostResult
+import com.rfz.appflotal.data.model.forum.TagResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
 import com.rfz.appflotal.data.model.forum.TopicResult
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
@@ -81,6 +82,11 @@ interface ForumClient {
         @Part tags: MultipartBody.Part,
         @Part registrationDate: MultipartBody.Part
     ): Response<List<TpmsResponse>>
+
+    @GET("api/Blog/GetTagList")
+    suspend fun getTagList(
+        @Header("Authorization") token: String
+    ): Response<List<TagResult>>
 
     @PUT("api/Blog/DoLike")
     suspend fun doLike(

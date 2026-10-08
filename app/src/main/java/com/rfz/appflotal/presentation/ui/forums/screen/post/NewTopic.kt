@@ -2,12 +2,14 @@ package com.rfz.appflotal.presentation.ui.forums.screen.post
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +26,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
@@ -32,11 +38,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +60,8 @@ import coil.compose.AsyncImage
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.components.CharacterCounter
+import com.rfz.appflotal.presentation.ui.forums.components.ForumLimits
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReplyEditor
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
@@ -70,7 +80,10 @@ fun NewTopicScreen(
     selectedColor: String = "#F44336",
     onColorChange: (String) -> Unit = {},
     tags: List<String> = emptyList(),
-    onTagsChange: (List<String>) -> Unit = {}
+    onTagsChange: (List<String>) -> Unit = {},
+    availableTags: List<String> = emptyList(),
+    tagsState: LoadState<Unit> = LoadState.Idle,
+    onRetryTags: () -> Unit = {}
 ) {
     val fixedColors = listOf(
         "#F44336", "#E91E63", "#9C27B0", "#673AB7",
@@ -116,9 +129,12 @@ fun NewTopicScreen(
             )
             OutlinedTextField(
                 value = title,
-                onValueChange = onTitleChange,
+                onValueChange = { onTitleChange(it.take(ForumLimits.TITLE_MAX_LENGTH)) },
                 shape = RoundedCornerShape(Dimens.PaddingSmall),
                 placeholder = { Text(stringResource(R.string.forum_title_placeholder)) },
+                supportingText = {
+                    CharacterCounter(current = title.length, max = ForumLimits.TITLE_MAX_LENGTH)
+                },
                 singleLine = true,
                 enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth()
@@ -174,10 +190,16 @@ fun NewTopicScreen(
                 )
                 IconButton(
                     onClick = {
-                        if (tagInput.isNotBlank() && !tags.contains(tagInput.trim())) {
-                            onTagsChange(tags + tagInput.trim())
-                            tagInput = ""
+                        val newTag = tagInput.trim().uppercase()
+                        if (newTag.isNotEmpty() && tags.none {
+                                it.equals(
+                                    newTag,
+                                    ignoreCase = true
+                                )
+                            }) {
+                            onTagsChange(tags + newTag)
                         }
+                        tagInput = ""
                     },
                     enabled = !isLoading && tagInput.isNotBlank(),
                     modifier = Modifier
@@ -217,6 +239,95 @@ fun NewTopicScreen(
                             )
                         }
                     )
+                }
+            }
+
+            if (tags.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.forum_tags_required_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            // Etiquetas sugeridas
+            when {
+                tagsState is LoadState.Loading -> CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
+
+                tagsState is LoadState.Error -> Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.forum_tags_load_error),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = onRetryTags, enabled = !isLoading) {
+                        Text(stringResource(R.string.forum_tags_retry))
+                    }
+                }
+
+                availableTags.isNotEmpty() -> {
+                    var suggestionsExpanded by rememberSaveable { mutableStateOf(true) }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { suggestionsExpanded = !suggestionsExpanded }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.forum_suggested_tags_label),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Icon(
+                            imageVector = if (suggestionsExpanded) {
+                                Icons.Default.KeyboardArrowUp
+                            } else {
+                                Icons.Default.KeyboardArrowDown
+                            },
+                            contentDescription = stringResource(
+                                if (suggestionsExpanded) {
+                                    R.string.forum_collapse_tags_desc
+                                } else {
+                                    R.string.forum_expand_tags_desc
+                                }
+                            ),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    AnimatedVisibility(visible = suggestionsExpanded) {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            availableTags.forEach { suggestion ->
+                                val isSelected =
+                                    tags.any { it.equals(suggestion, ignoreCase = true) }
+                                FilterChip(
+                                    selected = isSelected,
+                                    enabled = !isLoading,
+                                    onClick = {
+                                        onTagsChange(
+                                            if (isSelected) {
+                                                tags.filterNot {
+                                                    it.equals(suggestion, ignoreCase = true)
+                                                }
+                                            } else {
+                                                tags + suggestion
+                                            }
+                                        )
+                                    },
+                                    label = { Text(suggestion) }
+                                )
+                            }
+                        }
+                    }
                 }
             }
 

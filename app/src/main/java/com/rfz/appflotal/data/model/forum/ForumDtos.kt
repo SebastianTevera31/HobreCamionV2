@@ -93,6 +93,11 @@ data class CrudTopicRequest(
     @SerializedName("registrationDate") val registrationDate: String
 )
 
+data class TagResult(
+    @SerializedName("id_tag") val idTag: Int,
+    @SerializedName("fld_tag") val fldTag: String
+)
+
 data class DoLikeRequest(
     @SerializedName("likedDate") val likedDate: String,
     @SerializedName("tipoElemento") val tipoElemento: Boolean,

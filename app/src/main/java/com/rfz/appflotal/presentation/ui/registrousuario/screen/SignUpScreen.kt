@@ -162,7 +162,7 @@ fun SignUpScreen(
 
                     SignUpViews.VEHICLE_DATA_VIEW -> {
                         VehicleForm(
-                            title = R.string.registrar_vehiculo,
+                            title = R.string.registrar_ruedas,
                             vehicleData = signUpUiState.value.vehicleData,
                             modifier = Modifier.padding(horizontal = 40.dp),
                             enableRegisterButton = enableRegisterButton,

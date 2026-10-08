@@ -33,6 +33,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -118,32 +119,34 @@ fun FormDateField(
     }
 
     if (showDialog) {
-        val datePickerState = rememberDatePickerState()
+        LocalizedApp {
+            val datePickerState = rememberDatePickerState()
 
-        DatePickerDialog(
-            onDismissRequest = { showDialog = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            val sdf = SimpleDateFormat(pattern, Locale.getDefault())
-                            // El picker devuelve la fecha en UTC a medianoche
-                            sdf.timeZone = TimeZone.getTimeZone("UTC")
-                            onDateSelected(sdf.format(Date(millis)))
+            DatePickerDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            datePickerState.selectedDateMillis?.let { millis ->
+                                val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+                                // El picker devuelve la fecha en UTC a medianoche
+                                sdf.timeZone = TimeZone.getTimeZone("UTC")
+                                onDateSelected(sdf.format(Date(millis)))
+                            }
+                            showDialog = false
                         }
-                        showDialog = false
+                    ) {
+                        Text(stringResource(R.string.confirmar), color = brandColor)
                     }
-                ) {
-                    Text(stringResource(R.string.confirmar), color = brandColor)
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text(stringResource(R.string.cancelar), color = brandColor)
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.cancelar), color = brandColor)
-                }
+            ) {
+                DatePicker(state = datePickerState)
             }
-        ) {
-            DatePicker(state = datePickerState)
         }
     }
 }

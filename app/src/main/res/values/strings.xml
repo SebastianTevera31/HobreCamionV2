@@ -106,7 +106,7 @@
     <string name="pa_s">País</string>
     <string name="sector">Sector</string>
     <string name="seleccionar">Seleccionar %1$s</string>
-    <string name="registrar_vehiculo">Registrar vehículo</string>
+    <string name="registrar_ruedas">Registrar vehículo</string>
     <string name="tipo_vehiculo">Tipo de vehículo</string>
     <string name="placas">Placas</string>
     <string name="registro">Registro</string>
@@ -482,6 +482,12 @@
     <string name="forum_tags_label">Etiquetas</string>
     <string name="forum_new_tag_placeholder">Nueva etiqueta</string>
     <string name="forum_add_tag_desc">Agregar tag</string>
+    <string name="forum_tags_required_hint">Selecciona o agrega al menos una etiqueta</string>
+    <string name="forum_suggested_tags_label">Etiquetas sugeridas</string>
+    <string name="forum_tags_load_error">No se pudieron cargar las etiquetas sugeridas. Puedes agregar las tuyas.</string>
+    <string name="forum_tags_retry">Reintentar</string>
+    <string name="forum_collapse_tags_desc">Ocultar etiquetas sugeridas</string>
+    <string name="forum_expand_tags_desc">Mostrar etiquetas sugeridas</string>
     <string name="forum_message_label">Mensaje</string>
     <string name="forum_message_placeholder">Escribe el contenido aquí…</string>
     <string name="forum_publish_topic_button">Publicar Tema</string>
@@ -730,6 +736,7 @@
     <string name="consumo_de_combustible">Consumo de Combustible</string>
     <string name="emision_co2">Emisión CO2</string>
     <string name="ver_mas">Ver más</string>
+    <string name="ver_menos">Ver menos</string>
     <string name="rendimiento_del_vehiculo">Rendimiento del vehículo</string>
     <string name="alertas_recientes">Alertas recientes</string>
     <string name="ver_todas">Ver todas</string>

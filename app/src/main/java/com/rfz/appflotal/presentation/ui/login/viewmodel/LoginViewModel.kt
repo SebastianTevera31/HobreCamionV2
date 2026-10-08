@@ -22,6 +22,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -119,22 +120,26 @@ class LoginViewModel @Inject constructor(
         _uiState.value = LoginUiState.Loading
 
         Firebase.messaging.token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                _uiState.value = LoginUiState.Error(
-                    R.string.error_en_el_servidor
-                )
-                return@addOnCompleteListener
+            // El token FCM solo sirve para push; si GMS no lo entrega (p. ej. SERVICE_NOT_AVAILABLE
+            // en algunos Xiaomi) no debe impedir el login.
+            val fcmToken = if (task.isSuccessful) {
+                task.result.orEmpty()
+            } else {
+                android.util.Log.e("LoginViewModel", "FCM token fallo", task.exception)
+                ""
             }
 
-            loginRequest(task.result)
+            loginRequest(fcmToken)
         }
     }
 
 
     private fun loginRequest(fcmToken: String) {
         viewModelScope.launch {
-            val user = LBEncryptionUtils.encrypt(_email.value)
-            val pass = LBEncryptionUtils.encrypt(_password.value)
+            val userDeferred = async { LBEncryptionUtils.encrypt(_email.value) }
+            val passDeferred = async { LBEncryptionUtils.encrypt(_password.value) }
+            val user = userDeferred.await()
+            val pass = passDeferred.await()
 
             when (val result = loginUseCase.doLogin(user, pass, fcmToken)) {
                 is Result.Success -> handleLoginSuccess(result.data)

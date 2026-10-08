@@ -29,6 +29,7 @@ import com.rfz.appflotal.presentation.ui.registrousuario.screen.SignUpViews
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -215,9 +216,11 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             val email = signUpUiState.value.profileData.email
             val password = signUpUiState.value.profileData.password
+            val userDeferred = async { LBEncryptionUtils.encrypt(email) }
+            val passDeferred = async { LBEncryptionUtils.encrypt(password) }
             when (val result = loginUseCase.doLogin(
-                LBEncryptionUtils.encrypt(email),
-                LBEncryptionUtils.encrypt(password),
+                userDeferred.await(),
+                passDeferred.await(),
                 token,
             )) {
                 is Result.Success -> {

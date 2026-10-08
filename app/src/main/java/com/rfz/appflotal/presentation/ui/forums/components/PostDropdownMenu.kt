@@ -13,10 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 
 @Composable
 fun ForumDropdownMenu(onReport: () -> Unit) {
@@ -33,7 +34,11 @@ fun ForumDropdownMenu(onReport: () -> Unit) {
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.forum_report_title)) },
+                text = {
+                    LocalizedApp {
+                        Text(stringResource(R.string.forum_report_title))
+                    }
+                },
                 onClick = onReport
             )
         }

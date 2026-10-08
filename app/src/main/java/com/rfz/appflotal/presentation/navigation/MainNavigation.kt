@@ -148,12 +148,21 @@ fun NavGraphBuilder.mainNavigation(
         )
     }
 
+    composable(route = HombreCamionScreens.MAPA_VIAL_DETALLE.name) {
+        val vialStatusViewModel: VialStatusViewModel = hiltViewModel()
+        VialStatusScreen(
+            onBack = { navController.popBackStackSafely() },
+            showBackButton = true,
+            viewModel = vialStatusViewModel
+        )
+    }
+
     composable(route = HombreCamionScreens.WEATHER.name) {
         val watherViewModel: WeatherViewModel = hiltViewModel()
         WeatherRoute(
             viewModel = watherViewModel,
             onNavigateToMap = {
-                navController.navigate(HombreCamionScreens.MAPA_VIAL.name) {
+                navController.navigate(HombreCamionScreens.MAPA_VIAL_DETALLE.name) {
                     launchSingleTop = true
                 }
             },

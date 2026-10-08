@@ -26,6 +26,8 @@ data class ForumUiState(
     val topicDescription: String = "",
     val topicColor: String = "#F44336",
     val topicTags: List<String> = emptyList(),
+    val availableTags: List<String> = emptyList(),
+    val tagsState: LoadState<Unit> = LoadState.Idle,
     val isOffline: Boolean = false
 )
 

@@ -227,11 +227,13 @@ fun AlertScreen(
                                                 modifier = Modifier.weight(1f)
                                             )
                                             DateFilterField(
+                                                label = R.string.desde_label,
                                                 selectedDate = startDate,
                                                 onDateSelected = { startDate = it },
                                                 modifier = Modifier.weight(1f)
                                             )
                                             DateFilterField(
+                                                label = R.string.hasta_label,
                                                 selectedDate = endDate,
                                                 onDateSelected = { endDate = it },
                                                 modifier = Modifier.weight(1f)
@@ -252,10 +254,12 @@ fun AlertScreen(
                                                 onSelectAlert = { alert = it }
                                             )
                                             DateFilterField(
+                                                label = R.string.desde_label,
                                                 selectedDate = startDate,
                                                 onDateSelected = { startDate = it }
                                             )
                                             DateFilterField(
+                                                label = R.string.hasta_label,
                                                 selectedDate = endDate,
                                                 onDateSelected = { endDate = it }
                                             )

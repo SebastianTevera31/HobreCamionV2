@@ -10,6 +10,7 @@ import com.rfz.appflotal.data.model.forum.ForumResult
 import com.rfz.appflotal.data.model.forum.GetForumsResponse
 import com.rfz.appflotal.data.model.forum.GetTopicsResponse
 import com.rfz.appflotal.data.model.forum.LikedPostResult
+import com.rfz.appflotal.data.model.forum.TagResult
 import com.rfz.appflotal.data.model.forum.TopicMessageResult
 import com.rfz.appflotal.data.model.forum.TopicResult
 import com.rfz.appflotal.data.model.tpms.TpmsResponse
@@ -176,6 +177,13 @@ class ForumService @Inject constructor(
         return requestHelper("getLikedPosts") {
             val token = getTasksUseCase().first()[0].fld_token
             forumClient.getLikedPosts("bearer $token")
+        }
+    }
+
+    suspend fun getTagList(): ApiResult<List<TagResult>?> {
+        return requestHelper("getTagList") {
+            val token = getTasksUseCase().first()[0].fld_token
+            forumClient.getTagList("bearer $token")
         }
     }
 
