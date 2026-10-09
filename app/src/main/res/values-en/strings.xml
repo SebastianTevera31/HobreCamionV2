@@ -9,7 +9,7 @@
     <string name="tire_sizes">Tire sizes</string>
     <string name="products">Products</string>
     <string name="tire_register">Tire register</string>
-    <string name="vehicle_register">Vehicle register</string>
+    <string name="vehicle_register">Truck register</string>
     <string name="tire_change">Tire change</string>
     <string name="copyright">© %1$d Flotal Control</string>
 
@@ -27,7 +27,7 @@
 
     <string name="error_empty_email">Email is required</string>
     <string name="title_forget">Forgot your password?</string>
-    <string name="title_ingresar">Login</string>
+    <string name="title_ingresar">Log in</string>
     <string name="title_inicio">Home</string>
     <string name="content_description_logo">Logo image</string>
     <string name="content_description_icon_password">Show password</string>
@@ -49,7 +49,7 @@
     <string name="content_description_home_close">Close home screen</string>
 
     <string name="title_contentdescription">eva:pin-fill</string>
-    <string name="title_gasolinerasautorizadas">Authorized fueling stations</string>
+    <string name="title_gasolinerasautorizadas">Authorized fuel stops</string>
     <string name="title_activity_inicio">Home</string>
     <string name="title_activity_change_data">Change Data</string>
     <string name="title_otp">OTP verification</string>
@@ -61,7 +61,7 @@
     <string name="title_activity_veriy_code_device">Verify Device</string>
 
     <string name="operator">Operator</string>
-    <string name="logout">Logout</string>
+    <string name="logout">Log out</string>
     <string name="profile">Profile</string>
     <string name="logo_description">Flotal logo</string>
     <string name="only_languages_allowed">Only \'es\' and \'en\' are allowed.</string>
@@ -109,7 +109,7 @@
     <string name="sector">Industry</string>
     <string name="seleccionar">Select %1$s</string>
     <string name="registrar_ruedas">Register tires</string>
-    <string name="tipo_vehiculo">Vehicle type</string>
+    <string name="tipo_vehiculo">Truck type</string>
     <string name="placas">License plate</string>
     <string name="registro">Registration</string>
 
@@ -118,8 +118,8 @@
     <string name="signup_password_alert">Enter a password with at least 8 characters</string>
     <string name="signup_country_alert">Select a country</string>
     <string name="signup_industry_alert">Select an industry</string>
-    <string name="signup_typevehicle_alert">Specify the vehicle type</string>
-    <string name="signup_plates_alert">Enter the vehicle’s license plate</string>
+    <string name="signup_typevehicle_alert">Specify the truck type</string>
+    <string name="signup_plates_alert">Enter the truck’s license plate</string>
     <string name="signup_successfull">Account created successfully</string>
     <string name="signup_network_alert">Something went wrong while signing up</string>
     <string name="espere_un_momento">Please wait...</string>
@@ -169,7 +169,7 @@
     <string name="registro_montaje_llanta_titulo">Mount tire at %1$s</string>
     <string name="llanta_registrada_y_montada">Tire registered and mounted successfully</string>
     <string name="escanear">Search monitor</string>
-    <string name="vehiculo">Vehicle</string>
+    <string name="vehiculo">Truck</string>
     <string name="perfil">Profile</string>
     <string name="chofer">Driver</string>
 
@@ -207,7 +207,7 @@
     <string name="terminos_condiciones">Terms and conditions</string>
     <string name="aceptar_terminos_condiciones">I agree to the terms and conditions</string>
     <string name="invitacion_terminos">You can view our full Privacy Policy at:</string>
-    <string name="salir">Logout</string>
+    <string name="salir">Log out</string>
     <string name="aviso_conexion_blueotooth">Monitor data not available. Please check your connection.</string>
     <string name="main_term_text">IMPORTANT \\ CONFIDENTIAL: This message contains information from the company CENTRO CAMIONERO MONTAJES, S.A. DE C.V., located at Carretera Panamericana No. Ext. 5831, Col. Plan de Ayala, Tuxtla Gutiérrez, Chiapas, Mexico, C.P. 29020. The information is privileged, confidential, and access is restricted in accordance with applicable law.</string>
     <string name="body_terms_text">CENTRO CAMIONERO MONTAJES, S.A. DE C.V. is responsible for the processing (use) of your personal data, which will be used to respond to communications generated through this channel and to provide you with the products or services entrusted to us.</string>
@@ -270,7 +270,7 @@
     <string name="profundidad_de_piso_mm">Tread depth (mm)</string>
     <string name="requerido">Required</string>
     <string name="numero_invalido">Invalid number</string>
-    <string name="una_medidad_profundidad_mayor_0">You must fill in at least the fields at the lateral ends.</string>
+    <string name="una_medidad_profundidad_mayor_0">You must fill in at least the fields at the outer edges.</string>
 
     <string name="montaje">Mounting</string>
     <string name="error_odometro_inferior">The odometer reading cannot be lower than the current one.</string>
@@ -296,11 +296,11 @@
     <string name="error_establecer_sesion">An error occurred while establishing your session. Please try again.</string>
     <string name="valor_invalido">Invalid value</string>
     <string name="advertencia_ingreso_odometro">* The odometer reading must be greater than or equal to the last recorded value: %1$s</string>
-    <string name="error_enviar_desecho">An error occurred while sending the tire to the scrap pile</string>
+    <string name="error_enviar_desecho">An error occurred while sending the tire to scrap</string>
     <string name="reporte_de_desecho">Scrap report</string>
-    <string name="enviar_a_desecho">SEND TO SCRAP PILE</string>
-    <string name="pila_de_desecho">Scrap pile</string>
-    <string name="llanta_enviada_desecho">Tire sent to scrap pile</string>
+    <string name="enviar_a_desecho">SEND TO SCRAP</string>
+    <string name="pila_de_desecho">Scrap</string>
+    <string name="llanta_enviada_desecho">Tire sent to scrap</string>
     <string name="mover_a_almacen">Move to storage</string>
     <string name="enviar_rueda_almacen">MOVE TIRE TO STORAGE</string>
     <string name="motivo_de_reparacion">Repair reason</string>
@@ -385,13 +385,13 @@
     <string name="share_feedback">Share feedback</string>
     <string name="error_enviar_comentarios">An error occurred while sending your feedback</string>
     <string name="gracias_por_su_comentario">Thank you for your feedback</string>
-    <string name="mensaje_mantenimiento_programado">The application will undergo maintenance at %1$s hrs. Thank you for your understanding.</string>
+    <string name="mensaje_mantenimiento_programado">The application will undergo maintenance at %1$s. Thank you for your understanding.</string>
 
     <string name="notificacion_nueva">New notification</string>
     <string name="actualizacion_disponible">Update available</string>
     <string name="aviso_actualizacion">A new version is available. Please update to continue using the app.</string>
     <string name="en_mantenimiento">Under maintenance</string>
-    <string name="aviso_mantenimiento">We apologize for the inconvenience. Service will be restored at %1$s hrs.</string>
+    <string name="aviso_mantenimiento">We apologize for the inconvenience. Service will be restored at %1$s.</string>
     <string name="aviso_mantenimiento_ii">We are performing maintenance to ensure the app functions properly.</string>
     <string name="mantenimiento_programado">Scheduled Maintenance</string>
 
@@ -421,17 +421,17 @@
     <string name="error_inesperado">An unexpected error occurred. Please try again or come back later.</string>
     <string name="politicas_de_privacidad">Privacy Policy</string>
     <string name="asi_como_nuestros">, as well as our</string>
-    <string name="vial_status">Road map</string>
+    <string name="vial_status">Road conditions</string>
     <string name="ubicacion">Location</string>
     <string name="pais">Country</string>
     <string name="estado">State</string>
     <string name="ir">Go</string>
     <string name="sin_elementos">No items</string>
     <string name="vista_previa_del_mapa">Map preview</string>
-    <string name="selecciona_una_ubicacion_para_consultar_el_mapa_vial">Select a location to check the road map</string>
-    <string name="mapa_vial_con_estado">Road Map: %1$s</string>
+    <string name="selecciona_una_ubicacion_para_consultar_el_mapa_vial">Select a location to check road conditions</string>
+    <string name="mapa_vial_con_estado">Road Conditions: %1$s</string>
     <string name="selecciona_pais_estado_instruccion">Select country and state to check the map</string>
-    <string name="buscar_mapa_vial">Search road map</string>
+    <string name="buscar_mapa_vial">Search road conditions</string>
     <string name="selecciona_una_opcion">Select an option</string>
     <string name="sin_elementos_disponibles">No items available</string>
     <string name="reintentar">Retry</string>
@@ -464,6 +464,9 @@
     <string name="forum_search_placeholder">Search topic…</string>
     <string name="forum_room_topics_subtitle">Room topics</string>
     <string name="forum_search_topics_placeholder">Search topics…</string>
+    <string name="forum_search_tags_placeholder">Search by tag…</string>
+    <string name="forum_search_by_title">Title</string>
+    <string name="forum_search_by_tag">Tag</string>
     <string name="forum_add_topic_desc">Add topic</string>
     <string name="forum_new_topic_button">New topic</string>
     <string name="forum_capture_cancelled">Capture cancelled</string>
@@ -539,7 +542,7 @@
     <string name="coupon_expires">Expires on %1$s</string>
     <string name="coupon_brightness_title">Automatically set brightness to maximum</string>
     <string name="coupon_brightness_subtitle">to facilitate QR scanning</string>
-    <string name="coupon_single_use">Folio valid for single use only</string>
+    <string name="coupon_single_use">Valid for one-time use only</string>
     <string name="coupon_qr_placeholder">[QR CODE]</string>
 
     <string name="cuponera_titulo">Benefits for you</string>
@@ -579,7 +582,7 @@
     <string name="ahorras_texto">You save %1$s (%2$s%%)</string>
     <string name="sku_label">SKU: %1$s</string>
 
-    <string name="folio">Folio</string>
+    <string name="folio">Code</string>
     <string name="vigente">Valid</string>
 
     <string name="vence_el">Expires on %1$s</string>
@@ -588,13 +591,13 @@
 
     <string name="brillo_maximo_descripcion">Facilitates scanning the QR code.</string>
 
-    <string name="folio_valido_un_solo_uso">Folio valid for single use only</string>
+    <string name="folio_valido_un_solo_uso">Valid for one-time use only</string>
 
     <string name="cupon_no_disponible">Coupon unavailable</string>
 
     <string name="cupon_no_disponible_descripcion">This coupon can no longer be used for redemption.</string>
 
-    <string name="cupon_no_disponible_para_canje">This folio is not available for redemption.</string>
+    <string name="cupon_no_disponible_para_canje">This coupon is not available for redemption.</string>
     <string name="publicar">Post</string>
     <string name="Reportes">Reports</string>
     <string name="guardando_reporte">Saving report...</string>
@@ -641,7 +644,7 @@
 
     <string name="seleccione_periodo_fuel">Select a period to view fuel consumption information.</string>
     <string name="combustible_mensual">Monthly fuel</string>
-    <string name="numero_cargas">Number of loads</string>
+    <string name="numero_cargas">Number of fill-ups</string>
     <string name="rendimiento_mensual">Monthly performance</string>
     <!-- PDF Report Strings -->
     <string name="pdf_header_title">PERFORMANCE REPORT</string>
@@ -750,14 +753,15 @@
     <string name="consumo_de_combustible">Fuel Consumption</string>
     <string name="emision_co2">CO2 Emission</string>
     <string name="ver_mas">See more</string>
+    <string name="terminos_desliza_hint">Scroll to the bottom to accept</string>
     <string name="ver_menos">See less</string>
-    <string name="rendimiento_del_vehiculo">Vehicle performance</string>
+    <string name="rendimiento_del_vehiculo">Truck performance</string>
     <string name="alertas_recientes">Recent alerts</string>
     <string name="ver_todas">See all</string>
     <string name="ver_mapa">See map</string>
     <string name="secciones">Sections</string>
     <string name="ultimos_datos">LATEST DATA</string>
-    <string name="registrar">register</string>
+    <string name="registrar">Register</string>
     <string name="todas">All</string>
 
     <!-- Complete Plan -->
@@ -766,7 +770,7 @@
     <string name="plan_actual">Plan: %1$s</string>
     <string name="placas_vehiculo">License plate: %1$s</string>
     <string name="vehiculo_placa_format">%1$s · %2$s</string>
-    <string name="vehiculo_no_asignado">Vehicle not assigned</string>
+    <string name="vehiculo_no_asignado">Truck not assigned</string>
     <string name="no_datos_rendimiento">No performance data available</string>
     <string name="alerta_critica_label">CRITICAL</string>
 
@@ -838,7 +842,7 @@
     <string name="requiere_internet_badge">Requires internet</string>
 
     <!-- Maps -->
-    <string name="mapa_vial_titulo">Road Map</string>
+    <string name="mapa_vial_titulo">Road Conditions</string>
     <string name="mapa_vial_subtitulo">Check road status in real time</string>
 
     <!-- ============ Services module ============ -->
@@ -846,15 +850,15 @@
     <string name="srv_ordenes_section">Orders</string>
     <string name="srv_buscar_orden">Search order</string>
     <string name="srv_nueva_orden">New order</string>
-    <string name="srv_sin_ordenes">There are no service orders for this vehicle.</string>
+    <string name="srv_sin_ordenes">There are no service orders for this truck.</string>
     <string name="srv_error_cargar">Orders could not be loaded.</string>
     <string name="srv_requiere_internet">No connection: showing saved orders. Connect to view or edit more.</string>
 
-    <!-- Vehicle -->
-    <string name="srv_vehiculo_label">Vehicle</string>
+    <!-- Truck -->
+    <string name="srv_vehiculo_label">Truck</string>
     <string name="srv_tipo_label">Type</string>
     <string name="srv_odometro_label">Odometer</string>
-    <string name="srv_seleccionar_vehiculo">Select a vehicle</string>
+    <string name="srv_seleccionar_vehiculo">Select a truck</string>
 
     <!-- Order -->
     <string name="srv_orden_folio">Order #%1$s</string>
@@ -889,7 +893,7 @@
     <string name="srv_tipo_ocurrencia_label">Occurrence type</string>
     <string name="srv_tipo_servicio_label">Service type</string>
     <string name="srv_buscar_servicio">Search service</string>
-    <string name="srv_sin_servicios">There are no services for this vehicle.</string>
+    <string name="srv_sin_servicios">There are no services for this truck.</string>
     <string name="srv_descripcion_label">Description</string>
     <string name="srv_descripcion_placeholder">Service details (optional)</string>
     <string name="srv_agregar_servicio_btn">Add service</string>
@@ -906,6 +910,7 @@
     <string name="srv_confirmar_eliminar_orden_msg">Order #%1$s and all its services will be deleted. This action cannot be undone.</string>
     <string name="srv_confirmar_eliminar_servicio_msg">This service will be removed from the order. This action cannot be undone.</string>
     <string name="srv_eliminar_btn">Delete</string>
+    <string name="srv_error_eliminar">The service could not be deleted. Please try again.</string>
     <string name="servicios">Services</string>
     <string name="configuracion_monitor">No configuration</string>
 
