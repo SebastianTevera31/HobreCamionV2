@@ -14,6 +14,7 @@ import com.rfz.appflotal.core.util.Commons.getRelativeTime
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.forum.ForumComment
 import com.rfz.appflotal.data.model.forum.ForumTopic
+import com.rfz.appflotal.data.model.forum.parseTags
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.forum.CreateForumReportUseCase
 import com.rfz.appflotal.domain.forum.CrudForumCommentUseCase
@@ -159,19 +160,31 @@ class ForumViewModel @Inject constructor(
                 )
             }
         } else if (screenType == ForumScreenType.TOPIC) {
-            val list = if (query.isEmpty()) {
-                _uiState.value.topics
-            } else {
-                _uiState.value.topics.filter {
-                    it.title.contains(query, ignoreCase = true) ||
-                            it.description.contains(query, ignoreCase = true)
+            applyTopicFilter()
+        }
+    }
+
+    fun onTopicSearchModeChanged(mode: TopicSearchMode) {
+        _uiState.update { it.copy(topicSearchMode = mode) }
+        applyTopicFilter()
+    }
+
+    /** Filtra las publicaciones según la consulta y el criterio (título o etiqueta) vigentes. */
+    private fun applyTopicFilter() {
+        _uiState.update { state ->
+            val query = state.searchQuery.trim()
+            val filtered = when {
+                query.isEmpty() -> state.topics
+                state.topicSearchMode == TopicSearchMode.TAG -> {
+                    val tagQuery = query.removePrefix("#")
+                    state.topics.filter { topic ->
+                        topic.tags.any { it.contains(tagQuery, ignoreCase = true) }
+                    }
                 }
+
+                else -> state.topics.filter { it.title.contains(query, ignoreCase = true) }
             }
-            _uiState.update { currentUiState ->
-                currentUiState.copy(
-                    filteredTopics = list
-                )
-            }
+            state.copy(filteredTopics = filtered)
         }
     }
 
@@ -180,7 +193,8 @@ class ForumViewModel @Inject constructor(
             currentUiState.copy(
                 filteredTopics = currentUiState.topics,
                 filteredRooms = currentUiState.rooms,
-                searchQuery = ""
+                searchQuery = "",
+                topicSearchMode = TopicSearchMode.TITLE
             )
         }
     }
@@ -339,7 +353,8 @@ class ForumViewModel @Inject constructor(
                             idUser = user.idUser,
                             color = Color(color.toColorInt()),
                             isLiked = false,
-                            likes = 0
+                            likes = 0,
+                            tags = parseTags(tags)
                         )
                         val newList = state.topics + newTopic
                         state.copy(

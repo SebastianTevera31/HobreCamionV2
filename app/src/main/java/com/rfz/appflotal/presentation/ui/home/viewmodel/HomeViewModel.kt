@@ -137,7 +137,7 @@ class HomeViewModel @Inject constructor(
                     _uiState.update { it.copy(selectedLanguage = newLanguage, isLoading = false) }
 
                     // Actualiza el Locale global y guarda en SharedPreferences
-                    AppLocale.setLocale(Locale(newLanguage))
+                    AppLocale.setLocale(AppLocale.forLanguage(newLanguage))
                     context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
                         .edit()
                         .putString("app_language", newLanguage)

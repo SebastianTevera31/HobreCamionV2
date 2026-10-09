@@ -15,23 +15,27 @@ object AppLocale {
         Locale.setDefault(locale)
     }
 
+    /** Ingles siempre como en_US (formatos de fecha/numero de EUA); cualquier otro idioma tal cual. */
+    fun forLanguage(language: String): Locale =
+        if (language.startsWith("en")) Locale.US else Locale(language)
+
     fun loadSavedLocale(context: Context) {
         val prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
         val lang = prefs.getString("app_language", Locale.getDefault().language)
             ?: Locale.getDefault().language
-        _currentLocale.value = Locale(lang)
+        _currentLocale.value = forLanguage(lang)
     }
 
     private fun getInitialLocale(): Locale {
         val systemLang = Locale.getDefault().language
         return if (systemLang.contains("es")) Locale("es")
-        else Locale.ENGLISH
+        else Locale.US
     }
 
 
     fun getSystemLocale(): Locale {
         val lang = _currentLocale.value.language
         return if (lang.contains("es")) Locale("es")
-        else Locale.ENGLISH
+        else Locale.US
     }
 }

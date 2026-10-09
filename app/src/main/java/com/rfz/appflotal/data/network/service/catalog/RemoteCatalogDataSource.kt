@@ -15,15 +15,25 @@ class RemoteCatalogDataSource @Inject constructor(
     private val catalogClient: CatalogClient,
     private val getTasksUseCase: GetTasksUseCase
 ) {
+    /**
+     * Cabecera Bearer del usuario en sesión, o null si no hay sesión (p. ej. en el registro).
+     * El servidor decide el idioma de los catálogos según el token, por eso se envía siempre
+     * que exista.
+     */
+    private suspend fun bearerOrNull(): String? =
+        getTasksUseCase().first().firstOrNull()?.fld_token
+            ?.takeIf { it.isNotBlank() }
+            ?.let { "Bearer $it" }
+
     suspend fun getCountries(): ApiResult<List<GetCountriesResponse>?> {
         return requestHelper("GetCountries") {
-            catalogClient.getCountries()
+            catalogClient.getCountries(bearerOrNull())
         }
     }
 
     suspend fun getSectors(): ApiResult<List<GetSectorsResponse>?> {
         return requestHelper("GetSectors") {
-            catalogClient.getSectors()
+            catalogClient.getSectors(bearerOrNull())
         }
     }
 

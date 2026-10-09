@@ -241,6 +241,7 @@ class MonitorViewModel @Inject constructor(
                         listOfTires = localCoordinates.map { it.toTire() }
                     )
                 }
+                applyLocalAssemblyStatus()
             }
         } else {
             _monitorUiState.update { currentUiState ->
@@ -322,9 +323,17 @@ class MonitorViewModel @Inject constructor(
                 }
             }
 
+            applyLocalAssemblyStatus()
+
             // Insertar registro de ruedas en la base de datos.
             coordinatesTableUseCase.insertCoordinates(monitorId, _monitorUiState.value.listOfTires)
         }
+    }
+
+    // La lista que llega del servidor puede no incluir montajes locales aún no sincronizados,
+    // y observeAssemblyChanges() solo reacciona cuando la tabla local cambia.
+    private suspend fun applyLocalAssemblyStatus() {
+        syncAssemblyStatus(assemblyTireRepository.observeAssemblyTire().first())
     }
 
     private fun observeAssemblyChanges() {

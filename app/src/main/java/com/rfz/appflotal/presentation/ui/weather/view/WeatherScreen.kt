@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AcUnit
 import androidx.compose.material.icons.outlined.Air
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Cloud
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.outlined.CloudQueue
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material.icons.outlined.Thunderstorm
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material.icons.outlined.WbSunny
@@ -152,7 +154,7 @@ private fun EmptyWeatherContent(
                             Spacer(Modifier.width(4.dp))
 
                             Text(
-                                text = "Clima",
+                                text = stringResource(R.string.clima),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -398,7 +400,7 @@ private fun HeroSection(
                     )
 
                     Text(
-                        text = "Mapa",
+                        text = stringResource(R.string.ver_mapa),
                         style = MaterialTheme.typography.labelMedium
                     )
                 }
@@ -599,7 +601,7 @@ private fun InfoCard(
 
 @Composable
 fun LabelValue(label: String, value: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "$label ",
             style = MaterialTheme.typography.labelSmall,
@@ -619,6 +621,8 @@ fun WeatherIcon(cond: WeatherCondition, size: Dp) {
         WeatherCondition.Sunny -> Icons.Outlined.WbSunny
         WeatherCondition.Cloudy -> Icons.Outlined.Cloud
         WeatherCondition.Rainy -> Icons.Outlined.WaterDrop
+        WeatherCondition.Stormy -> Icons.Outlined.Thunderstorm
+        WeatherCondition.Snow -> Icons.Outlined.AcUnit
         else -> Icons.Outlined.CloudQueue
     }
     Icon(
@@ -630,8 +634,9 @@ fun WeatherIcon(cond: WeatherCondition, size: Dp) {
 }
 
 private fun getTodayLabel(): String {
-    val locale = AppLocale.currentLocale
-    val formatter = SimpleDateFormat("EEEE, d MMMM", locale.value)
+    val locale = AppLocale.currentLocale.value
+    val pattern = if (locale.language == "es") "EEEE, d MMMM" else "EEEE, MMMM d"
+    val formatter = SimpleDateFormat(pattern, locale)
     return formatter.format(Date()).replaceFirstChar { it.uppercase() }
 }
 

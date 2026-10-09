@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import com.rfz.appflotal.core.util.Commons.displayDatePattern
 import android.content.res.Configuration
 import android.os.LocaleList
 import androidx.compose.foundation.background
@@ -110,7 +111,7 @@ fun PositionFilterView(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> Unit) {
-    var startDate = getCurrentDate(pattern = "dd/MM/yyyy")
+    var startDate = getCurrentDate(pattern = displayDatePattern())
     var showDialog by remember { mutableStateOf(false) }
     val localeState = AppLocale.currentLocale.collectAsState()
     val locale = localeState.value
@@ -124,7 +125,7 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
     val millis = state.selectedDateMillis
     if (millis != null) {
         val date = addOneDay(Date(millis))
-        startDate = getCurrentDate(date, "dd/MM/yyyy")
+        startDate = getCurrentDate(date, displayDatePattern())
     }
 
     Column(modifier = modifier) {
@@ -160,7 +161,7 @@ fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> 
                         onSelectDate(
                             convertDate(
                                 date = startDate,
-                                initialFormat = "dd/MM/yyyy",
+                                initialFormat = displayDatePattern(),
                                 convertFormat = "yyyy-MM-dd"
                             )
                         )

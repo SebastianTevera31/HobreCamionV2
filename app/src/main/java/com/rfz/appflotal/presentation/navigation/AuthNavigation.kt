@@ -5,12 +5,14 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.ui.home.viewmodel.HomeViewModel
 import com.rfz.appflotal.presentation.ui.inicio.screen.InicioScreen
@@ -52,12 +54,15 @@ fun NavGraphBuilder.authGraph(
 
     composable(route = NavScreens.REGISTRAR_USUARIO) {
         val signUpViewModel: SignUpViewModel = hiltViewModel()
-        val homeUiState = homeViewModel.uiState.collectAsState()
         val context = navController.context
+        // En el registro aún no hay sesión: HomeViewModel.selectedLanguage solo se carga con un
+        // usuario logueado y se queda en su valor por defecto ("en"). El idioma real de la app
+        // es AppLocale.
+        val appLanguage by AppLocale.currentLocale.collectAsState()
 
         SignUpScreen(
             navController,
-            languageSelected = homeUiState.value.selectedLanguage,
+            languageSelected = appLanguage.language,
             signUpViewModel = signUpViewModel
         ) {
             val permissionsGranted = arePermissionsGranted(

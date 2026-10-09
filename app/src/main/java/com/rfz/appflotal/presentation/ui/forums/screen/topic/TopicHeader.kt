@@ -36,6 +36,7 @@ import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ExpandableText
 import com.rfz.appflotal.presentation.ui.forums.components.ForumDropdownMenu
+import com.rfz.appflotal.presentation.ui.forums.components.TagChips
 
 @Composable
 fun TopicHeader(
@@ -49,7 +50,8 @@ fun TopicHeader(
     likes: Int,
     numComments: Int,
     modifier: Modifier = Modifier,
-    imageUrl: String = ""
+    imageUrl: String = "",
+    tags: List<String> = emptyList()
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -125,6 +127,8 @@ fun TopicHeader(
                     lineHeight = 20.sp
                 )
             )
+
+            TagChips(tags = tags)
 
             // Like Action
             Row(

@@ -39,5 +39,5 @@ data class HourlyForecast(
 )
 
 enum class WeatherCondition {
-    Sunny, Cloudy, Rainy, Stormy, PartlyCloudy
+    Sunny, Cloudy, Rainy, Stormy, PartlyCloudy, Snow
 }

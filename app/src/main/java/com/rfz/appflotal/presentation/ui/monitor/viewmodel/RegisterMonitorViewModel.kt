@@ -229,11 +229,18 @@ class RegisterMonitorViewModel @Inject constructor(
     fun getMonitorConfiguration() {
         viewModelScope.launch {
             val result = getTasksUseCase().first { it.isNotEmpty() }
+            // El catálogo se descarga en paralelo al abrir el diálogo por primera vez: hay
+            // que esperarlo, o la búsqueda se hace contra una lista vacía y no preselecciona.
+            val configurations = configurationList.first { it.isNotEmpty() }
             if (result.isNotEmpty()) {
                 val values = result[0]
                 val baseNum = values.baseConfiguration.replace("BASE", "").trim()
-                val configSelected = configurationList.value.find { item ->
-                    item.tireCount == baseNum || item.rawDescription.contains(baseNum)
+                val configSelected = if (baseNum.isEmpty()) {
+                    null
+                } else {
+                    configurations.find { item ->
+                        item.tireCount == baseNum || item.rawDescription.contains(baseNum)
+                    }
                 }
 
                 _monitorConfigUiState.update { currentUiState ->

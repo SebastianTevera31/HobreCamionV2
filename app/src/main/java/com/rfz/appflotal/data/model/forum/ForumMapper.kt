@@ -32,9 +32,18 @@ fun TopicResult.toTopic(): ForumTopic {
             Color(finalColor.toColorInt())
         }.getOrDefault(Color.Transparent),
         likes = this.fldLike,
-        isLiked = this.isLiked
+        isLiked = this.isLiked,
+        tags = parseTags(this.fldTags)
     )
 }
+
+/** El API entrega las etiquetas como un solo string separado por comas ("A,B,C"). */
+fun parseTags(raw: String?): List<String> =
+    raw.orEmpty()
+        .split(",")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .distinct()
 
 fun ForumTopic.toComment(): ForumComment {
     return ForumComment(
@@ -117,7 +126,7 @@ fun LikedPostResult.toEntity(): LikedRecord? {
 
 fun PostFeedResult.toEntity() = BlogPost(
 
-    categories = this.tags.split(",").map { it.trim() },
+    categories = parseTags(this.tags),
     title = title,
     excerpt = description
 )

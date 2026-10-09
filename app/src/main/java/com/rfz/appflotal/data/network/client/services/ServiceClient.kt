@@ -9,6 +9,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ServiceClient {
     @GET("api/Service/GetServices")
@@ -21,6 +22,12 @@ interface ServiceClient {
         @Body requestBody: ServiceDetailDto,
         @Header("Authorization") token: String
     ): Response<GeneralResponse>
+
+    @GET("api/Service/DeleteService")
+    suspend fun deleteService(
+        @Header("Authorization") token: String,
+        @Query("id_service") idService: Int
+    ): Response<List<GeneralResponse>>
 
     @GET("api/Service/GetTypeService")
     suspend fun doGetServiceType(

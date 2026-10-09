@@ -31,6 +31,10 @@ data class WeatherUiState(
 
 private const val factor = 1000000.0
 
+// Mensaje tecnico (no se muestra al usuario: la UI usa un recurso de string propio).
+private const val WEATHER_ERROR = "Weather request failed"
+private const val LOCATION_ERROR = "Location unavailable"
+
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
@@ -51,53 +55,26 @@ class WeatherViewModel @Inject constructor(
             }
 
             val location = locationRepository.getLastLocation()
-            if (location != null) {
-                if (location.ciudad == null) return@launch
-                val result = weatherRepository.getLatest(
-                    lat = truncate(location.lat * factor) / factor, // Invertir
-                    lon = truncate(location.lng * factor) / factor, // Invertir
-                    locationName = location.ciudad
-                )
-                when (result) {
-                    is ApiResult.Error -> {
-                        _weatherState.update { currentUiState ->
-                            currentUiState.copy(
-                                error = result.message,
-                                screenState = LoadState.Error("Error al obtener el clima.")
-                            )
-                        }
-                    }
+            val locationName = location?.ciudad
 
-                    is ApiResult.Success -> {
-                        _weatherState.update { currentUiState ->
-                            currentUiState.copy(
-                                city = result.data,
-                                screenState = LoadState.Success(Unit)
-                            )
-                        }
-                    }
-
-                    else -> Unit
-                }
+            // Sin ubicacion o sin ciudad no se puede consultar: mostrar error en vez de quedarse cargando.
+            if (location == null || locationName == null) {
+                setError(LOCATION_ERROR)
+                return@launch
             }
-        }
-    }
 
-    fun getWeatherApi(lat: Double, lon: Double, nombreUbicacion: String) {
-        viewModelScope.launch {
-            when (val result = weatherRepository.getWeatherApi(lat, lon, nombreUbicacion)) {
-                is ApiResult.Error -> {
-                    _weatherState.update { currentUiState ->
-                        currentUiState.copy(
-                            error = result.message,
-                            screenState = LoadState.Error("Error al obtener el clima.")
-                        )
-                    }
-                }
+            val result = weatherRepository.getLatest(
+                lat = truncate(location.lat * factor) / factor, // Invertir
+                lon = truncate(location.lng * factor) / factor, // Invertir
+                locationName = locationName
+            )
+            when (result) {
+                is ApiResult.Error -> setError(result.message)
 
                 is ApiResult.Success -> {
                     _weatherState.update { currentUiState ->
                         currentUiState.copy(
+                            isLoading = false,
                             city = result.data,
                             screenState = LoadState.Success(Unit)
                         )
@@ -106,6 +83,36 @@ class WeatherViewModel @Inject constructor(
 
                 else -> Unit
             }
+        }
+    }
+
+    fun getWeatherApi(lat: Double, lon: Double, nombreUbicacion: String) {
+        viewModelScope.launch {
+            when (val result = weatherRepository.getWeatherApi(lat, lon, nombreUbicacion)) {
+                is ApiResult.Error -> setError(result.message)
+
+                is ApiResult.Success -> {
+                    _weatherState.update { currentUiState ->
+                        currentUiState.copy(
+                            isLoading = false,
+                            city = result.data,
+                            screenState = LoadState.Success(Unit)
+                        )
+                    }
+                }
+
+                else -> Unit
+            }
+        }
+    }
+
+    private fun setError(message: String?) {
+        _weatherState.update { currentUiState ->
+            currentUiState.copy(
+                isLoading = false,
+                error = message,
+                screenState = LoadState.Error(WEATHER_ERROR)
+            )
         }
     }
 }

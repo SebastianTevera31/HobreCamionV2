@@ -50,6 +50,31 @@ object Commons {
         return mac.matches(macRegex)
     }
 
+    private fun isSpanish() = AppLocale.currentLocale.value.language == "es"
+
+    /** Locale con el que se formatean fechas para mostrar (en_US para ingles). */
+    fun displayLocale(): Locale = AppLocale.forLanguage(AppLocale.currentLocale.value.language)
+
+    /** Patron de fecha solo para mostrar al usuario. NO usar para enviar datos al servidor. */
+    fun displayDatePattern(): String = if (isSpanish()) "dd/MM/yyyy" else "MM/dd/yyyy"
+
+    /** Patron de fecha y hora solo para mostrar (EUA: 12 h con AM/PM). */
+    fun displayDateTimePattern(): String =
+        if (isSpanish()) "dd/MM/yyyy HH:mm:ss" else "MM/dd/yyyy h:mm:ss a"
+
+    /** Indica si el texto ya formateado corresponde a la fecha vacia (01/01/1900) en cualquier formato. */
+    fun isVoidDate(formatted: String?): Boolean = formatted?.startsWith("01/01/1900") == true
+
+    /** Convierte una fecha dd/MM/yyyy (formato del estado/servidor) al formato de pantalla. */
+    fun toDisplayDate(ddMMyyyy: String): String {
+        if (ddMMyyyy.isBlank()) return ddMMyyyy
+        return try {
+            convertDate(ddMMyyyy, initialFormat = "dd/MM/yyyy", convertFormat = displayDatePattern())
+        } catch (e: Exception) {
+            ddMMyyyy
+        }
+    }
+
     fun getCurrentDate(
         date: Date = Date(),
         pattern: String = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
@@ -61,11 +86,11 @@ object Commons {
     fun convertDate(
         date: String,
         initialFormat: String = "yyyy-MM-dd'T'HH:mm:ss",
-        convertFormat: String = "dd/MM/yyyy HH:mm:ss"
+        convertFormat: String = displayDateTimePattern()
     ): String {
         val sdf = SimpleDateFormat(initialFormat, Locale.getDefault())
         val date = sdf.parse(date)!!
-        val outDate = SimpleDateFormat(convertFormat, Locale.getDefault())
+        val outDate = SimpleDateFormat(convertFormat, displayLocale())
 
         return outDate.format(date)
     }
@@ -112,13 +137,14 @@ object Commons {
             val months = days / 30
             val years = days / 365
 
+            val es = isSpanish()
             when {
-                seconds < 60 -> "ahora"
-                minutes < 60 -> "${minutes}min"
+                seconds < 60 -> if (es) "ahora" else "now"
+                minutes < 60 -> if (es) "${minutes}min" else "${minutes}m"
                 hours < 24 -> "${hours}h"
                 days < 30 -> "${days}d"
-                months < 12 -> "${months} meses"
-                else -> "${years} y"
+                months < 12 -> if (es) "${months} meses" else "${months} mo"
+                else -> if (es) "${years} y" else "${years}y"
             }
         } catch (e: Exception) {
             dateString

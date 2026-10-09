@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.services
 
+import com.rfz.appflotal.core.util.Commons
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -266,7 +267,7 @@ private fun ServiceDateField(
 }
 
 private fun formatDisplayDate(millis: Long): String {
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val sdf = SimpleDateFormat(Commons.displayDatePattern(), Commons.displayLocale())
     sdf.timeZone = TimeZone.getTimeZone("UTC")
     return sdf.format(Date(millis))
 }
@@ -278,6 +279,7 @@ private fun parseDateToMillis(dateStr: String): Long? {
         "yyyy-MM-dd'T'HH:mm:ss.SSS",
         "yyyy-MM-dd'T'HH:mm:ss",
         "yyyy-MM-dd",
+        Commons.displayDatePattern(),
         "dd/MM/yyyy",
         "d 'de' MMMM, yyyy",
         "MMMM d, yyyy"

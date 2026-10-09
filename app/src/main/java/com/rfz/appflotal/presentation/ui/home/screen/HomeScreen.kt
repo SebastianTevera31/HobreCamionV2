@@ -1,4 +1,5 @@
 package com.rfz.appflotal.presentation.ui.home.screen
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.presentation.navigation.isBottomBarTabRoute
 import com.rfz.appflotal.presentation.navigation.navigateAsBottomBarTab
 import com.rfz.appflotal.presentation.navigation.navigateUpSafely
@@ -141,7 +142,7 @@ fun HomeScreen(
         if (uiState.selectedLanguage == "es" || uiState.selectedLanguage == "en") {
             val result = homeViewModel.changeLanguage(uiState.selectedLanguage)
             if (result.isSuccess && result.getOrNull()?.mensaje == "Lenguaje cambiado correctamente.") {
-                val locale = Locale(uiState.selectedLanguage)
+                val locale = AppLocale.forLanguage(uiState.selectedLanguage)
                 Locale.setDefault(locale)
                 val config = Configuration(configuration)
                 config.setLocale(locale)

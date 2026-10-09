@@ -10,11 +10,16 @@ import retrofit2.http.Header
 import retrofit2.http.Query
 
 interface CatalogClient {
+    // El token (opcional) lleva el idioma del usuario; sin sesión (registro) se omite.
     @GET("api/Catalog/Country")
-    suspend fun getCountries(): Response<List<GetCountriesResponse>>
+    suspend fun getCountries(
+        @Header("Authorization") token: String? = null
+    ): Response<List<GetCountriesResponse>>
 
     @GET("api/Catalog/Sector")
-    suspend fun getSectors(): Response<List<GetSectorsResponse>?>
+    suspend fun getSectors(
+        @Header("Authorization") token: String? = null
+    ): Response<List<GetSectorsResponse>?>
 
     @GET("api/Catalog/TireInspectionReport")
     suspend fun getTireInspectionReport(@Header("Authorization") token: String): Response<List<GetTireInspectionReportResponse>?>

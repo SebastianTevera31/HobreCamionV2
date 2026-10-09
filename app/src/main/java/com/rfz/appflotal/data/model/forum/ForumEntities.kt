@@ -29,7 +29,8 @@ data class ForumTopic(
     val idUser: Int,
     val color: Color,
     val likes: Int,
-    val isLiked: Boolean
+    val isLiked: Boolean,
+    val tags: List<String> = emptyList()
 ) : ForumRecord
 
 data class ForumRoom(

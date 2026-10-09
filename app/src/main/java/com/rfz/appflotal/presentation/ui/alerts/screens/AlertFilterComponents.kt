@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.alerts.screens
 
+import com.rfz.appflotal.core.util.Commons
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -212,7 +213,7 @@ fun DateFilterField(
 
     BaseFilterField(
         label = stringResource(label),
-        value = selectedDate.ifEmpty { stringResource(R.string.seleccionar_fecha) },
+        value = Commons.toDisplayDate(selectedDate).ifEmpty { stringResource(R.string.seleccionar_fecha) },
         icon = Icons.Default.CalendarMonth,
         onClick = { showDialog = true },
         modifier = modifier

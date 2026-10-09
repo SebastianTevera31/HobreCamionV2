@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.model.services.dto.ServiceDetailDto
 import com.rfz.appflotal.domain.database.GetTasksUseCase
+import com.rfz.appflotal.domain.service.DeleteServiceUseCase
 import com.rfz.appflotal.domain.service.DoCrudServiceDetailUseCase
 import com.rfz.appflotal.domain.service.GetServicesUseCase
 import com.rfz.appflotal.domain.service.GetTypeServiceUseCase
@@ -35,6 +36,7 @@ data class ServiceUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isOffline: Boolean = false,
+    val deleteFailed: Boolean = false,
 )
 
 @HiltViewModel
@@ -43,10 +45,14 @@ class ServiceViewModel @Inject constructor(
     private val getServicesUseCase: GetServicesUseCase,
     private val getTypeServiceUseCase: GetTypeServiceUseCase,
     private val doCrudServiceDetailUseCase: DoCrudServiceDetailUseCase,
+    private val deleteServiceUseCase: DeleteServiceUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ServiceUiState())
     val uiState = _uiState.asStateFlow()
+
+    // Ids con una eliminación en curso, para ignorar toques repetidos.
+    private val deletingIds = mutableSetOf<Int>()
 
     // Vehículo dueño de los servicios; necesario para el CRUD (p_vehicle_fk_1).
     private var vehicleId: Int = 0
@@ -114,11 +120,27 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Elimina el servicio en el backend y, solo si tuvo éxito, lo quita de la lista.
+     * Si falla, el servicio se conserva y se avisa con [ServiceUiState.deleteFailed].
+     */
     fun deleteService(serviceId: Int) {
-        // TODO: eliminar en backend cuando exista el endpoint/acción.
-        // Por ahora se refleja localmente para el flujo de UI.
-        _uiState.update { state ->
-            state.copy(services = state.services.filterNot { it.id == serviceId })
+        if (!deletingIds.add(serviceId)) return
+        viewModelScope.launch {
+            deleteServiceUseCase(serviceId)
+                .onSuccess {
+                    _uiState.update { state ->
+                        state.copy(services = state.services.filterNot { it.id == serviceId })
+                    }
+                }
+                .onFailure {
+                    _uiState.update { it.copy(deleteFailed = true) }
+                }
+            deletingIds.remove(serviceId)
         }
+    }
+
+    fun clearDeleteError() {
+        _uiState.update { it.copy(deleteFailed = false) }
     }
 }

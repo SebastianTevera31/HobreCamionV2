@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.reportes.pdf
 
+import com.rfz.appflotal.core.util.Commons
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -110,7 +111,7 @@ fun createGeneralRendimientoPdf(
                 (tire?.thread ?: 0.0) - report.differenceInTreadDepth.toDouble()
             )
 
-            val dateText = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+            val dateText = SimpleDateFormat(Commons.displayDatePattern(), Commons.displayLocale()).format(Date())
 
             canvas.drawText(context.getString(R.string.pdf_header_title), margin, y, titlePaint)
             y += 20f

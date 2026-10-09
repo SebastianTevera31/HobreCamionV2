@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.alerts.screens
 
+import com.rfz.appflotal.core.util.Commons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -331,12 +332,12 @@ fun AlertScreen(
                                     ) {
                                         FilterChipSummary(
                                             label = stringResource(R.string.desde_label),
-                                            value = startDate.ifEmpty { stringResource(R.string.todas) },
+                                            value = Commons.toDisplayDate(startDate).ifEmpty { stringResource(R.string.todas) },
                                             modifier = Modifier.weight(1f)
                                         )
                                         FilterChipSummary(
                                             label = stringResource(R.string.hasta_label),
-                                            value = endDate.ifEmpty { stringResource(R.string.todas) },
+                                            value = Commons.toDisplayDate(endDate).ifEmpty { stringResource(R.string.todas) },
                                             modifier = Modifier.weight(1f)
                                         )
                                     }

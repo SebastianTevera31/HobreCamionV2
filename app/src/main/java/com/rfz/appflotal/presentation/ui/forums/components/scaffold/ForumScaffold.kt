@@ -44,7 +44,15 @@ data class ForumTopBarConfig(
 data class ForumSearchConfig(
     val value: String,
     val placeholder: String,
-    val onValueChange: (String) -> Unit
+    val onValueChange: (String) -> Unit,
+    val filters: List<ForumSearchFilter> = emptyList()
+)
+
+/** Opción de criterio de búsqueda que se muestra como chip bajo el buscador. */
+data class ForumSearchFilter(
+    val label: String,
+    val selected: Boolean,
+    val onSelect: () -> Unit
 )
 
 @Composable

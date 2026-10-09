@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.home.screen.completeplan.viewmodel
 
+import com.rfz.appflotal.core.util.Commons
 import android.R.attr.factor
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
@@ -121,7 +122,10 @@ class CompletePlanViewModel @Inject constructor(
                 stat.copy(value = newValue)
             }
             val performanceDate = if (result.calculatedAt > 0) {
-                SimpleDateFormat("dd MMM, HH:mm", Locale("es", "MX")).format(Date(result.calculatedAt))
+                SimpleDateFormat(
+                    if (Commons.displayLocale().language == "es") "dd MMM, HH:mm" else "MMM d, h:mm a",
+                    Commons.displayLocale()
+                ).format(Date(result.calculatedAt))
             } else {
                 ""
             }
@@ -185,7 +189,11 @@ class CompletePlanViewModel @Inject constructor(
             pageNumber = 1
         ).fold(
             onSuccess = {
-                val posts = it.results.map { post -> post.toEntity() }.take(2)
+                // El feed puede traer la misma publicación repetida: se deduplica por id.
+                val posts = it.results
+                    .distinctBy { post -> post.idTopic }
+                    .take(2)
+                    .map { post -> post.toEntity() }
                 _uiState.update { currentState ->
                     currentState.copy(blogPosts = posts)
                 }

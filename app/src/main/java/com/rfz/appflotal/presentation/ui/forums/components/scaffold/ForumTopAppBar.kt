@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.forums.components.scaffold
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -232,6 +235,34 @@ fun ForumTopAppBar(
                 placeholder = searchConfig.placeholder,
                 onValueChange = searchConfig.onValueChange
             )
+
+            if (searchConfig.filters.isNotEmpty()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    searchConfig.filters.forEach { filter ->
+                        FilterChip(
+                            selected = filter.selected,
+                            onClick = filter.onSelect,
+                            label = { Text(filter.label) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = Color.White.copy(alpha = 0.12f),
+                                labelColor = Color.White,
+                                selectedContainerColor = Color.White,
+                                selectedLabelColor = ForumMenuAccent
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = filter.selected,
+                                borderColor = Color.White.copy(alpha = 0.4f),
+                                selectedBorderColor = Color.White
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 }

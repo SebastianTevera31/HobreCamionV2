@@ -66,7 +66,8 @@ fun DiscussionScreen(
                         likes = topic.likes,
                         time = topic.time,
                         color = topic.color,
-                        numComments = topic.numComments
+                        numComments = topic.numComments,
+                        tags = topic.tags
                     )
                 }
             }

@@ -1,5 +1,7 @@
 package com.rfz.appflotal.domain.tpms
 
+import com.rfz.appflotal.core.util.Commons.isVoidDate
+import com.rfz.appflotal.core.util.Commons.displayDateTimePattern
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Commons.getDateObject
 import com.rfz.appflotal.core.util.Positions.findOutPosition
@@ -15,7 +17,6 @@ import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import java.time.Instant
 import java.time.LocalDateTime
@@ -77,8 +78,8 @@ class UpdateSensorDataUseCase @Inject constructor(private val sensorDataTableRep
 
         val time = if (timestamp != null) {
             val getDate = getDateObject(timestamp)
-            getCurrentDate(date = getDate, pattern = "dd/MM/yyyy HH:mm:ss")
-        } else getCurrentDate(pattern = "dd/MM/yyyy HH:mm:ss")
+            getCurrentDate(date = getDate, pattern = displayDateTimePattern())
+        } else getCurrentDate(pattern = displayDateTimePattern())
 
         val inAlert =
             getIsTireInAlert(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
@@ -102,7 +103,7 @@ class UpdateSensorDataUseCase @Inject constructor(private val sensorDataTableRep
             timestamp = time,
             batteryStatus = batteryStatus,
             flatTireStatus = flatTireStatus,
-            tireRemovingStatus = if (rawPressure.toInt() == 0 && time != VOID_DATE) SensorAlerts.REMOVAL
+            tireRemovingStatus = if (rawPressure.toInt() == 0 && !isVoidDate(time)) SensorAlerts.REMOVAL
             else SensorAlerts.NO_DATA,
             isInspectionAvailable = isInspectionAvailable
         )

@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.reportes.pdf
 
+import com.rfz.appflotal.core.util.Commons
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -110,8 +111,8 @@ fun createRendimientoPdf(
         )
 
         val dateText = SimpleDateFormat(
-            "dd/MM/yyyy",
-            Locale.getDefault()
+            Commons.displayDatePattern(),
+            Commons.displayLocale()
         ).format(Date())
 
         // Header

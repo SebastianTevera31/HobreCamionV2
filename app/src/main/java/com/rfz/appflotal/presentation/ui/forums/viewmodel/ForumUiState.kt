@@ -19,6 +19,7 @@ data class ForumUiState(
     val selectedRoom: ForumRoom? = null,
     val comments: List<ForumComment> = emptyList(),
     val searchQuery: String = "",
+    val topicSearchMode: TopicSearchMode = TopicSearchMode.TITLE,
     val photoEvidence: CameraUiState = CameraUiState.Idle,
     val commentText: String = "",
     val shouldNavigateToReply: Boolean = false,
@@ -40,6 +41,11 @@ sealed class CameraUiState {
 
 enum class RecordType(val isComment: Boolean) {
     TOPIC(false), COMMENT(true)
+}
+
+/** Criterio con el que se filtra el listado de publicaciones de un foro. */
+enum class TopicSearchMode {
+    TITLE, TAG
 }
 
 enum class ForumScreenType {

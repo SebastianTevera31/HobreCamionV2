@@ -18,6 +18,8 @@ interface ServicesRepository {
     ): Result<List<TypeServiceDto>>
 
     suspend fun getServices(): Result<List<ServiceResponseDto>?>
+
+    suspend fun deleteService(idService: Int): Result<List<GeneralResponse>>
 }
 
 class ServicesRepositoryImp @Inject constructor(
@@ -47,6 +49,13 @@ class ServicesRepositoryImp @Inject constructor(
         if (user.isEmpty()) return Result.failure(Exception("No hay usuario logueado"))
         val token = user.first().fld_token
         return remoteServiceDataSource.getServices(token)
+    }
+
+    override suspend fun deleteService(idService: Int): Result<List<GeneralResponse>> {
+        val user = getTasksUseCase().first()
+        if (user.isEmpty()) return Result.failure(Exception("No hay usuario logueado"))
+        val token = user.first().fld_token
+        return remoteServiceDataSource.deleteService(idService, token)
     }
 
 }

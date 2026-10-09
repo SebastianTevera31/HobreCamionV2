@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.components
 
+import com.rfz.appflotal.core.util.Commons
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -45,7 +46,7 @@ import java.util.TimeZone
  *
  * @param value fecha ya formateada para mostrar (cadena vacia = sin seleccion)
  * @param onDateSelected devuelve la fecha elegida formateada segun [pattern]
- * @param pattern formato de salida; por defecto "dd/MM/yyyy"
+ * @param pattern formato de salida; por defecto el formato de pantalla del idioma (MM/dd/yyyy en ingles)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,7 +56,7 @@ fun FormDateField(
     onDateSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
     isEditable: Boolean = true,
-    pattern: String = "dd/MM/yyyy",
+    pattern: String = Commons.displayDatePattern(),
     brandColor: Color = primaryLight,
     darkerGray: Color = secondaryLight
 ) {

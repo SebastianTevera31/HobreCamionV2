@@ -4,10 +4,16 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -17,19 +23,25 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -45,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.components.verticalScrollbar
 
 @Composable
 fun TerminosScreen(
@@ -61,58 +74,116 @@ fun TerminosScreen(
     val scrollState = rememberScrollState()
     var checked by remember { mutableStateOf(false) }
 
+    // Una vez que el usuario llegó al final, se mantiene habilitado aunque suba de nuevo.
+    var hasReachedEnd by remember { mutableStateOf(false) }
+    LaunchedEffect(scrollState.canScrollForward) {
+        if (!scrollState.canScrollForward) hasReachedEnd = true
+    }
+    val scrollbarColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+
     CompositionLocalProvider(LocalContentColor provides Color.Black) {
-        Column(
+        Box(
             modifier = modifier
                 .background(Color.White)
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(28.dp)
-                .verticalScroll(scrollState)
+                .verticalScrollbar(scrollState, scrollbarColor, width = 6.dp)
         ) {
-            Text(
-                stringResource(R.string.terminos_condiciones),
-                style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(
-                text = stringResource(R.string.main_term_text)
-            )
-
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(text = stringResource(R.string.body_terms_text))
-
-            Spacer(modifier = Modifier.padding(16.dp))
-            LinkText(
-                text = stringResource(R.string.politicas_de_privacidad),
-                url = "https://www.flotal.ai/aviso-de-privacidad",
-                context = context
-            )
-
-            Spacer(modifier = Modifier.padding(4.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(28.dp)
             ) {
-                Checkbox(
-                    checked = checked,
-                    onCheckedChange = { checked = it }
-                )
                 Text(
-                    stringResource(R.string.aceptar_terminos_condiciones)
+                    stringResource(R.string.terminos_condiciones),
+                    style = MaterialTheme.typography.displayLarge,
+                    fontWeight = FontWeight.Bold
                 )
+
+                Spacer(modifier = Modifier.padding(4.dp))
+                Text(
+                    text = stringResource(R.string.main_term_text)
+                )
+
+                Spacer(modifier = Modifier.padding(4.dp))
+                Text(text = stringResource(R.string.body_terms_text))
+
+                Spacer(modifier = Modifier.padding(16.dp))
+                LinkText(
+                    text = stringResource(R.string.politicas_de_privacidad),
+                    url = "https://www.flotal.ai/aviso-de-privacidad",
+                    context = context
+                )
+
+                Spacer(modifier = Modifier.padding(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = checked,
+                        onCheckedChange = { checked = it },
+                        enabled = hasReachedEnd
+                    )
+                    Text(
+                        stringResource(R.string.aceptar_terminos_condiciones)
+                    )
+                }
+
+                Spacer(modifier = Modifier.padding(12.dp))
+                Button(
+                    onClick = onGranted,
+                    enabled = checked && hasReachedEnd,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .width(200.dp)
+                        .height(60.dp)
+                ) { Text(text = stringResource(buttonText)) }
             }
 
-            Spacer(modifier = Modifier.padding(12.dp))
-            Button(
-                onClick = onGranted,
-                enabled = checked,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(60.dp)
-            ) { Text(text = stringResource(buttonText)) }
+            AnimatedVisibility(
+                visible = scrollState.canScrollForward,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                ScrollDownHint()
+            }
+        }
+    }
+}
+
+/** Aviso flotante que indica que hay más contenido y que se debe llegar hasta el final. */
+@Composable
+private fun ScrollDownHint(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(listOf(Color.Transparent, Color.White))
+            )
+            .padding(top = 24.dp, bottom = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White,
+            shadowElevation = 4.dp
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.terminos_desliza_hint),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = null
+                )
+            }
         }
     }
 }

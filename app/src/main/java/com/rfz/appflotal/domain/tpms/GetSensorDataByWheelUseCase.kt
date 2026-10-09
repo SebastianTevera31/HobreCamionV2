@@ -1,5 +1,6 @@
 package com.rfz.appflotal.domain.tpms
 
+import com.rfz.appflotal.core.util.Commons.isVoidDate
 import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
@@ -8,7 +9,6 @@ import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
 import java.time.Instant
 import java.time.LocalDateTime
@@ -95,7 +95,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             rawTemperature = rawTemp,
             timestamp = date,
             batteryStatus = batteryStatus,
-            tireRemovingStatus = if (rawPressure == 0f && date != VOID_DATE) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
+            tireRemovingStatus = if (rawPressure == 0f && !isVoidDate(date)) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
             flatTireStatus = flatTireStatus,
             isInspectionAvailable = isInspectionAvailable
         )

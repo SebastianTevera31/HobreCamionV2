@@ -36,6 +36,7 @@ import coil.compose.AsyncImage
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.ForumDropdownMenu
+import com.rfz.appflotal.presentation.ui.forums.components.TagChips
 
 @Composable
 fun ForumCard(
@@ -54,6 +55,7 @@ fun ForumCard(
     showOptions: Boolean = false,
     hideTopicInfo: Boolean = false,
     isSaved: Boolean = false,
+    tags: List<String> = emptyList(),
     onNav: () -> Unit,
     onReport: () -> Unit = {},
     onSave: () -> Unit = {}
@@ -124,6 +126,8 @@ fun ForumCard(
                 }
             }
 
+            TagChips(tags = tags, maxVisible = 3)
+
             if (isTopic && !hideTopicInfo) {
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp),
@@ -189,12 +193,20 @@ fun ForumCard(
                             color = if (isSaved) Color.Red.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(
                                 alpha = 0.5f
                             ),
-                            contentColor = if (isSaved) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
+                            contentColor = if (isSaved) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    4.dp,
+                                    Alignment.CenterHorizontally
+                                )
                             ) {
                                 Icon(
                                     imageVector = if (isSaved) Icons.Default.Favorite else Icons.Outlined.Favorite,
@@ -210,12 +222,20 @@ fun ForumCard(
 
                         Surface(
                             color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    4.dp,
+                                    Alignment.CenterHorizontally
+                                )
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.Comment,

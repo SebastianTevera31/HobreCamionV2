@@ -133,19 +133,19 @@ fun HomeTopBar(
 
             Column(horizontalAlignment = Alignment.Start) {
                 Text(
-                    text = "¡Hola, $userName!",
+                    text = stringResource(R.string.saludo_usuario, userName),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Plan: ${planType.name}",
+                    stringResource(R.string.plan_actual, planType.name),
                     style = MaterialTheme.typography.bodyMedium,
                     color = TealMid,
                     fontWeight = FontWeight.SemiBold
                 )
                 if (plates.isNotEmpty()) {
                     Text(
-                        "Placas: $plates",
+                        stringResource(R.string.placas_vehiculo, plates),
                         style = MaterialTheme.typography.bodySmall,
                         color = SubtleText,
                         fontWeight = FontWeight.Medium
@@ -423,7 +423,7 @@ fun WeatherCard(temp: String, city: String, description: String, onClick: () -> 
                 Text(city, fontWeight = FontWeight.SemiBold)
                 Text(description, color = SubtleText, style = MaterialTheme.typography.bodySmall)
             }
-            Icon(Icons.Outlined.ChevronRight, contentDescription = "Ver mapa", tint = TealDark)
+            Icon(Icons.Outlined.ChevronRight, contentDescription = stringResource(R.string.ver_mapa), tint = TealDark)
         }
     }
 }

@@ -1,10 +1,13 @@
 package com.rfz.appflotal.presentation.navigation
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -12,6 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.services.ServiceFormMode
 import com.rfz.appflotal.presentation.ui.services.ServiceFormScreen
 import com.rfz.appflotal.presentation.ui.services.ServicesScreen
@@ -35,6 +39,15 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
             val state by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) { viewModel.load() }
+
+            val context = LocalContext.current
+            val deleteErrorMessage = stringResource(R.string.srv_error_eliminar)
+            LaunchedEffect(state.deleteFailed) {
+                if (state.deleteFailed) {
+                    Toast.makeText(context, deleteErrorMessage, Toast.LENGTH_LONG).show()
+                    viewModel.clearDeleteError()
+                }
+            }
 
             ServicesScreen(
                 vehicle = state.vehicle,

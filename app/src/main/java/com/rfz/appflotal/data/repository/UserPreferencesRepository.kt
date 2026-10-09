@@ -22,7 +22,7 @@ enum class UnidadTemperatura(override val symbol: String) : UnitProvider {
 }
 
 enum class UnidadOdometro(override val symbol: String) : UnitProvider {
-    KILOMETROS("km/h"), MILLAS("mph")
+    KILOMETROS("km"), MILLAS("mi")
 }
 
 interface UserPreferencesRepository {

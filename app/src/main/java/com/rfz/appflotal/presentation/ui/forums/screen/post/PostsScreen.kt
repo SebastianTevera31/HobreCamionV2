@@ -62,7 +62,8 @@ fun TopicsScreen(
                         onReport = { onReport(topic.id, RecordType.TOPIC) },
                         color = topic.color,
                         isSaved = topic.isLiked,
-                        numLikes = topic.likes
+                        numLikes = topic.likes,
+                        tags = topic.tags
                     )
                 }
             }

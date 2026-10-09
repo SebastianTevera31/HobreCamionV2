@@ -1,11 +1,15 @@
 package com.rfz.appflotal.data.model.weather
 
 import com.google.gson.annotations.SerializedName
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.WeatherMapper
 import com.rfz.appflotal.domain.weather.City
 import com.rfz.appflotal.domain.weather.HourlyForecast
 import com.rfz.appflotal.domain.weather.WeatherCondition
 
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 data class WeatherResponse(
@@ -56,7 +60,7 @@ data class PrecipitationDetailsResponse(
     @SerializedName("precipitation_amount") val precipitationAmount: Double? = null
 )
 
-fun WeatherResponse.toDomain(name: String = "Ubicación Actual"): City {
+fun WeatherResponse.toDomain(name: String): City {
     val latest = properties?.timeseries?.firstOrNull()
     val instant = latest?.data?.instant?.details
     val next1h = latest?.data?.next1Hours
@@ -66,10 +70,11 @@ fun WeatherResponse.toDomain(name: String = "Ubicación Actual"): City {
 
     // Mapping Hourly Forecasts
     val hourlyList = properties?.timeseries?.take(24)?.map { ts ->
-        val hourTime = ts.time?.substringAfter("T")?.substringBefore(":") ?: ""
+        // El API entrega UTC: se convierte a la zona horaria del dispositivo.
+        val hourLabel = formatHourLabel(ts.time)
         val tsData = ts.data
         HourlyForecast(
-            hour = "$hourTime:00",
+            hour = hourLabel,
             cond = mapSymbolToCondition(
                 tsData?.next1Hours?.summary?.symbolCode ?: tsData?.next6Hours?.summary?.symbolCode
             ),
@@ -113,14 +118,31 @@ fun WeatherResponse.toDomain(name: String = "Ubicación Actual"): City {
 
 private fun mapSymbolToCondition(symbol: String?): WeatherCondition {
     if (symbol == null) return WeatherCondition.Sunny
+    // El orden importa: los simbolos compuestos ("rainandthunder", "lightsnowshowers") deben
+    // resolverse por el fenomeno mas severo antes que por uno mas general.
     return when {
-        symbol.contains("sun") || symbol.contains("clear") -> WeatherCondition.Sunny
+        symbol.contains("thunder") || symbol.contains("storm") -> WeatherCondition.Stormy
+        symbol.contains("snow") -> WeatherCondition.Snow
+        symbol.contains("rain") || symbol.contains("sleet") -> WeatherCondition.Rainy
+        symbol.contains("fog") -> WeatherCondition.Cloudy
         symbol.contains("partlycloudy") -> WeatherCondition.PartlyCloudy
         symbol.contains("cloud") -> WeatherCondition.Cloudy
-        symbol.contains("rain") || symbol.contains("sleet") -> WeatherCondition.Rainy
-        symbol.contains("snow") || symbol.contains("sleet") -> WeatherCondition.Rainy // Or Snow if available
-        symbol.contains("thunder") || symbol.contains("storm") -> WeatherCondition.Stormy
-        else -> WeatherCondition.Sunny
+        else -> WeatherCondition.Sunny // clearsky, fair, sun
+    }
+}
+
+private fun formatHourLabel(isoTime: String?): String {
+    if (isoTime.isNullOrBlank()) return ""
+    return try {
+        val local = Instant.parse(isoTime).atZone(ZoneId.systemDefault())
+        val formatter = if (AppLocale.currentLocale.value.language == "es") {
+            DateTimeFormatter.ofPattern("HH':00'", Locale("es"))
+        } else {
+            DateTimeFormatter.ofPattern("h a", Locale.US)
+        }
+        local.format(formatter)
+    } catch (e: Exception) {
+        ""
     }
 }
 

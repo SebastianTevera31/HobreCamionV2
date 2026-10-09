@@ -39,6 +39,7 @@ import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.BottomCommentField
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleScaffold
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
+import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchFilter
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
 import com.rfz.appflotal.presentation.ui.forums.screen.RoomsScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.post.NewTopicScreen
@@ -49,6 +50,7 @@ import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReplyScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReportScreen
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.CameraUiState
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumScreenType
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.TopicSearchMode
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
@@ -164,10 +166,32 @@ fun NavGraphBuilder.forumsGraph(
                     showMenuButton = true,
                     searchConfig = ForumSearchConfig(
                         value = state.searchQuery,
-                        placeholder = stringResource(R.string.forum_search_topics_placeholder),
+                        placeholder = stringResource(
+                            if (state.topicSearchMode == TopicSearchMode.TAG) {
+                                R.string.forum_search_tags_placeholder
+                            } else {
+                                R.string.forum_search_topics_placeholder
+                            }
+                        ),
                         onValueChange = {
                             viewModel.onSearchChanged(it, ForumScreenType.TOPIC)
-                        }
+                        },
+                        filters = listOf(
+                            ForumSearchFilter(
+                                label = stringResource(R.string.forum_search_by_title),
+                                selected = state.topicSearchMode == TopicSearchMode.TITLE,
+                                onSelect = {
+                                    viewModel.onTopicSearchModeChanged(TopicSearchMode.TITLE)
+                                }
+                            ),
+                            ForumSearchFilter(
+                                label = stringResource(R.string.forum_search_by_tag),
+                                selected = state.topicSearchMode == TopicSearchMode.TAG,
+                                onSelect = {
+                                    viewModel.onTopicSearchModeChanged(TopicSearchMode.TAG)
+                                }
+                            )
+                        )
                     ),
                     onBackClick = {
                         navController.popBackStackSafely()

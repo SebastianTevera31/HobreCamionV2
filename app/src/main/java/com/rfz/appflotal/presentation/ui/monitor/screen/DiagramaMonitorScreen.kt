@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
+import com.rfz.appflotal.core.util.Commons.isVoidDate
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.LinearEasing
@@ -307,7 +308,7 @@ fun CeldaDatosSensor(
             .clip(RoundedCornerShape(8.dp))
             .background(Color(0x402E3192))
             .padding(4.dp)
-            .height(44.dp)
+            .heightIn(min = 44.dp)
     ) {
         Image(
             painter = painterResource(img),
@@ -322,8 +323,20 @@ fun CeldaDatosSensor(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.weight(2.5f)
         ) {
-            Text(title, fontSize = 12.sp, color = Color("#3C3C3C".toColorInt()))
-            Text(value, fontSize = 16.sp, color = Color("#3C3C3C".toColorInt()))
+            Text(
+                title,
+                fontSize = 12.sp,
+                color = Color("#3C3C3C".toColorInt()),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                value,
+                fontSize = 16.sp,
+                color = Color("#3C3C3C".toColorInt()),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
         if (onClick != {}) {
             IconButton(onClick = onClick, modifier = Modifier.weight(0.8f)) {
@@ -445,7 +458,7 @@ fun PanelSensor(
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Text(
-                                text = if (!timestamp.isNullOrEmpty() && timestamp != VOID_DATE) {
+                                text = if (!timestamp.isNullOrEmpty() && !isVoidDate(timestamp)) {
                                     stringResource(
                                         R.string.actualizado,
                                         timestamp
@@ -481,9 +494,9 @@ fun PanelSensor(
                         )
 
                         CeldaDatosSensor(
-                            title = "${stringResource(R.string.presion)} ($pressureUnit)",
+                            title = stringResource(R.string.presion),
                             img = R.drawable.tire_pressure,
-                            value = pressure,
+                            value = "$pressure $pressureUnit",
                             modifier = Modifier.fillMaxWidth(),
                             onClick = onSwitchPressureUnit
                         )

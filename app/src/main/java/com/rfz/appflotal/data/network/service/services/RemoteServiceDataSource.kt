@@ -26,6 +26,15 @@ class RemoteServiceDataSource @Inject constructor(
         }
     }
 
+    suspend fun deleteService(
+        idService: Int,
+        token: String
+    ): Result<List<GeneralResponse>> {
+        return networkRequestHelper {
+            serviceClient.deleteService("Bearer $token", idService)
+        }
+    }
+
     suspend fun doGetServiceType(
         token: String
     ): Result<List<TypeServiceDto>> {
