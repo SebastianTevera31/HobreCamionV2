@@ -13,12 +13,14 @@ interface CatalogClient {
     // El token (opcional) lleva el idioma del usuario; sin sesión (registro) se omite.
     @GET("api/Catalog/Country")
     suspend fun getCountries(
-        @Header("Authorization") token: String? = null
+        @Header("Authorization") token: String? = null,
+        @Query("language") language: String?
     ): Response<List<GetCountriesResponse>>
 
     @GET("api/Catalog/Sector")
     suspend fun getSectors(
-        @Header("Authorization") token: String? = null
+        @Header("Authorization") token: String? = null,
+        @Query("language") language: String?
     ): Response<List<GetSectorsResponse>?>
 
     @GET("api/Catalog/TireInspectionReport")

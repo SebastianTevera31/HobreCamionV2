@@ -1,11 +1,12 @@
 package com.rfz.appflotal.data.repository.catalog
 
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
-import com.rfz.appflotal.data.model.tire.toEntity
-import com.rfz.appflotal.data.model.tire.toResponse
 import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
+import com.rfz.appflotal.data.model.tire.toEntity
+import com.rfz.appflotal.data.model.tire.toResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.catalog.RemoteCatalogDataSource
 import javax.inject.Inject
@@ -16,11 +17,11 @@ class CatalogRepository @Inject constructor(
 ) {
 
     suspend fun onGetCountries(): ApiResult<List<GetCountriesResponse>?> {
-        return catalogService.getCountries()
+        return catalogService.getCountries(language = AppLocale.currentLocale.value.language)
     }
 
     suspend fun onGetSectors(): ApiResult<List<GetSectorsResponse>?> {
-        return catalogService.getSectors()
+        return catalogService.getSectors(language = AppLocale.currentLocale.value.language)
     }
 
     suspend fun onGetTireReports(): ApiResult<List<GetTireInspectionReportResponse>?> {

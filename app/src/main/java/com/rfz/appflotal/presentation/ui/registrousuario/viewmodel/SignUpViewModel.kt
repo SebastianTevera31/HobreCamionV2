@@ -69,7 +69,9 @@ class SignUpViewModel @Inject constructor(
                 if (response != null) {
                     _signUpUiState.update { currentUiState ->
                         currentUiState.copy(
-                            countries = response.associate { it.idCountry to if (languageSelected == "es") it.fldNameEs else it.fldNameEN }
+                            countries = response.associate {
+                                it.idCountry to it.getName(languageSelected)
+                            }
                         )
                     }
                 }
@@ -79,7 +81,7 @@ class SignUpViewModel @Inject constructor(
                 if (response != null) {
                     _signUpUiState.update { currentUiState ->
                         currentUiState.copy(
-                            sectors = response.associate { it.idCountry to it.fldSector }
+                            sectors = response.associate { it.idSector to it.fldSector.orEmpty() }
                         )
                     }
                 }

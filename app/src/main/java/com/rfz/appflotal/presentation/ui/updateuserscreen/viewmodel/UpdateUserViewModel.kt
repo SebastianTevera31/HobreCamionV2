@@ -102,7 +102,9 @@ class UpdateUserViewModel @Inject constructor(
                 if (response != null) {
                     _updateUserUiState.update { currentUiState ->
                         currentUiState.copy(
-                            countries = response.associate { it.idCountry to if (selectedLanguage == "en") it.fldNameEN else it.fldNameEs }
+                            countries = response.associate {
+                                it.idCountry to it.getName(selectedLanguage)
+                            }
                         )
                     }
                 }
@@ -112,7 +114,7 @@ class UpdateUserViewModel @Inject constructor(
                 if (response != null) {
                     _updateUserUiState.update { currentUiState ->
                         currentUiState.copy(
-                            industries = response.associate { it.idCountry to it.fldSector },
+                            industries = response.associate { it.idSector to it.fldSector.orEmpty() },
                         )
                     }
                 }

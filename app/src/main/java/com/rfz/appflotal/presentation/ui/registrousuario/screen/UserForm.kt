@@ -135,14 +135,14 @@ fun SignUpDropDownMenu(
     title: String,
     text: String,
     onSelectedValue: (Pair<Int, String>) -> Unit,
-    values: Map<Int, String>,
+    values: Map<Int, String?>,
     modifier: Modifier = Modifier
 ) {
     var searchText by remember { mutableStateOf(text) }
     var showList by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     val filteredValues = values.filter {
-        it.value.contains(query, ignoreCase = true)
+        it.value.orEmpty().contains(query, ignoreCase = true)
     }
 
     searchText = text
@@ -199,13 +199,14 @@ fun SignUpDropDownMenu(
                                 modifier = Modifier.height(400.dp)
                             ) {
                                 items(filteredValues.toList()) { value ->
+                                    val itemText = value.second.orEmpty()
                                     Text(
-                                        text = value.second,
+                                        text = itemText,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                searchText = value.second
-                                                onSelectedValue(value)
+                                                searchText = itemText
+                                                onSelectedValue(value.first to itemText)
                                                 showList = false
                                             }
                                             .padding(16.dp)

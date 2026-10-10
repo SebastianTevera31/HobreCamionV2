@@ -25,15 +25,15 @@ class RemoteCatalogDataSource @Inject constructor(
             ?.takeIf { it.isNotBlank() }
             ?.let { "Bearer $it" }
 
-    suspend fun getCountries(): ApiResult<List<GetCountriesResponse>?> {
+    suspend fun getCountries(language: String): ApiResult<List<GetCountriesResponse>?> {
         return requestHelper("GetCountries") {
-            catalogClient.getCountries(bearerOrNull())
+            catalogClient.getCountries(bearerOrNull(), language = language)
         }
     }
 
-    suspend fun getSectors(): ApiResult<List<GetSectorsResponse>?> {
+    suspend fun getSectors(language: String): ApiResult<List<GetSectorsResponse>?> {
         return requestHelper("GetSectors") {
-            catalogClient.getSectors(bearerOrNull())
+            catalogClient.getSectors(bearerOrNull(), language = language)
         }
     }
 
