@@ -930,4 +930,5 @@
     <string name="octubre">October</string>
     <string name="noviembre">November</string>
     <string name="diciembre">December</string>
+    <string name="agregar_notas">Write observations or additional details...</string>
 </resources>

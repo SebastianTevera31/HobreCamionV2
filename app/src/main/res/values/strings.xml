@@ -913,4 +913,5 @@
     <string name="octubre">Octubre</string>
     <string name="noviembre">Noviembre</string>
     <string name="diciembre">Diciembre</string>
+    <string name="agregar_notas">Escribe observaciones o detalles adicionales...</string>
 </resources>
