@@ -11,6 +11,7 @@ data class ServiceResponseDto(
     @SerializedName("fld_vehicleNumber") val vehicleNumber: String,
     @SerializedName("fld_provider") val provider: String,
     @SerializedName("fld_date") val date: String,
+    @SerializedName("fld_notes") val notes: String? = ""
 )
 
 data class TypeServiceDto(

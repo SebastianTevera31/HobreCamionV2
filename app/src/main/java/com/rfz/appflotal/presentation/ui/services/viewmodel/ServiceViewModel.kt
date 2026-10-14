@@ -113,7 +113,8 @@ class ServiceViewModel @Inject constructor(
                 date = data.date,
                 provider = data.provider,
                 quantity = data.quantity.toIntOrNull() ?: 0,
-                vehicleId = vehicleId
+                vehicleId = vehicleId,
+                notas = data.notas,
             )
             doCrudServiceDetailUseCase(dto)
             load()

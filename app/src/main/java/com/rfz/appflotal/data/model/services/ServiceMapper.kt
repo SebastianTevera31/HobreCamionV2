@@ -15,7 +15,8 @@ fun ServiceResponseDto.toDomain(): ServiceUi {
         quantity = quantity,
         provider = provider,
         date = formatToLongDate(dateString = date, inputFormat = "yyyy-MM-dd'T'HH:mm:ss"),
-        rawDate = date
+        rawDate = date,
+        notes = notes
     )
 }
 

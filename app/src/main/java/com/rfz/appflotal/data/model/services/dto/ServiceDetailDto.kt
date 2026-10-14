@@ -11,4 +11,5 @@ data class ServiceDetailDto(
     @SerializedName("fld_provider") val provider: String,
     @SerializedName("fld_cant") val quantity: Int,
     @SerializedName("p_vehicle_fk_1") val vehicleId: Int,
+    @SerializedName("fld_notes") val notas: String,
 )

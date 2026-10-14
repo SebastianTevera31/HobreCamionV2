@@ -59,7 +59,7 @@ private val ForumMenuAccent = Color(0xFF25128C)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForumTopAppBar(
+fun ModernTopAppBar(
     config: ForumTopBarConfig,
     modifier: Modifier = Modifier
 ) {
@@ -269,9 +269,9 @@ fun ForumTopAppBar(
 
 @Preview(showBackground = true)
 @Composable
-fun ForumTopAppBarPreview() {
+fun ModernTopAppBarPreview() {
     HombreCamionTheme {
-        ForumTopAppBar(
+        ModernTopAppBar(
             config = ForumTopBarConfig(
                 title = "Foros",
                 subtitle = "Comunidad de transportistas",
@@ -283,9 +283,9 @@ fun ForumTopAppBarPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun ForumTopAppBarSearchPreview() {
+fun ModernTopAppBarSearchPreview() {
     HombreCamionTheme {
-        ForumTopAppBar(
+        ModernTopAppBar(
             config = ForumTopBarConfig(
                 title = "Buscar en el foro",
                 showBackButton = true,

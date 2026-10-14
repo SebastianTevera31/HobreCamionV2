@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.services
 
-import com.rfz.appflotal.core.util.Commons
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -22,6 +22,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -39,10 +42,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.Commons
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.forums.components.CharacterCounter
+import com.rfz.appflotal.presentation.ui.forums.components.ForumLimits
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
+import com.rfz.appflotal.presentation.ui.services.components.FieldLabel
 import com.rfz.appflotal.presentation.ui.services.components.ServiceDropdownField
 import com.rfz.appflotal.presentation.ui.services.components.ServiceTextField
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
@@ -62,7 +69,8 @@ data class ServiceFormData(
     val provider: String,      // fld_provider (lo captura el usuario)
     val price: String,         // fld_price
     val quantity: String,      // fld_cant
-    val date: String           // fld_date (ISO 8601)
+    val date: String,           // fld_date (ISO 8601)
+    val notas: String,           // fld_notes
 )
 
 /**
@@ -90,7 +98,11 @@ fun ServiceFormScreen(
     }
     var description by remember(initial) { mutableStateOf(initial?.description ?: "") }
     var provider by remember(initial) { mutableStateOf(initial?.provider ?: "") }
-    var price by remember(initial) { mutableStateOf(initial?.price?.takeIf { it > 0 }?.toString() ?: "") }
+    var price by remember(initial) {
+        mutableStateOf(
+            initial?.price?.takeIf { it > 0 }?.toString() ?: ""
+        )
+    }
     var quantity by remember(initial) {
         mutableStateOf(initial?.quantity?.takeIf { it > 0 }?.toString() ?: "")
     }
@@ -101,6 +113,7 @@ fun ServiceFormScreen(
             }
         )
     }
+    var notas by remember(initial) { mutableStateOf(initial?.notes ?: "") }
 
     val total = (price.toIntOrNull() ?: 0) * (quantity.toIntOrNull() ?: 0)
     val isValid = typeId != null && description.isNotBlank() &&
@@ -185,7 +198,40 @@ fun ServiceFormScreen(
                 enabled = false
             )
 
-            Spacer(modifier = Modifier.size(Dimens.PaddingSmall))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                FieldLabel(
+                    stringResource(R.string.notas),
+                    modifier = Modifier.align(Alignment.Start)
+                )
+                OutlinedTextField(
+                    value = notas,
+                    onValueChange = { notas = it.take(ForumLimits.TEXT_MAX_LENGTH) },
+                    shape = RoundedCornerShape(Dimens.PaddingSmall),
+                    placeholder = {
+                        Text(
+                            text = stringResource(
+                                R.string.agregar_notas
+                            )
+                        )
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor =
+                            MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor =
+                            MaterialTheme.colorScheme.surfaceVariant,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 150.dp)
+                )
+                CharacterCounter(current = notas.length, max = ForumLimits.TEXT_MAX_LENGTH)
+            }
 
             Button(
                 onClick = {
@@ -196,7 +242,8 @@ fun ServiceFormScreen(
                             provider = provider,
                             price = price,
                             quantity = quantity,
-                            date = dateMillis.toIsoDate()
+                            date = dateMillis.toIsoDate(),
+                            notas = notas,
                         )
                     )
                 },

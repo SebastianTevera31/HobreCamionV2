@@ -28,7 +28,8 @@ data class ServiceUi(
     val quantity: Int,           // fld_cant
     val provider: String = "",   // fld_provider
     val date: String = "",       // fld_date
-    val rawDate: String = ""     // fld_date original ISO
+    val rawDate: String = "",     // fld_date original ISO
+    val notes: String? = ""
 ) {
     val total: Int get() = price * quantity
 }

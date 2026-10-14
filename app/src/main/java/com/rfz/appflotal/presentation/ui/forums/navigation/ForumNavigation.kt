@@ -37,7 +37,7 @@ import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.ui.forums.components.ForumErrorView
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.BottomCommentField
-import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleScaffold
+import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ModernModuleScaffold
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchFilter
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
@@ -77,7 +77,7 @@ fun NavGraphBuilder.forumsGraph(
                 viewModel.getInitialData(forceRefresh = true)
             }
 
-            ForumModuleScaffold(
+            ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = stringResource(R.string.forum_title),
                     subtitle = stringResource(R.string.forum_subtitle),
@@ -158,7 +158,7 @@ fun NavGraphBuilder.forumsGraph(
                 viewModel.loadTopicsByRoom(args.roomId)
             }
 
-            ForumModuleScaffold(
+            ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = args.roomTitle,
                     subtitle = stringResource(R.string.forum_room_topics_subtitle),
@@ -329,7 +329,7 @@ fun NavGraphBuilder.forumsGraph(
                 viewModel.loadTopicMessages(args.topicId.toInt())
             }
 
-            ForumModuleScaffold(
+            ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = state.selectedTopic?.title ?: "Topic",
                     subtitle = state.selectedTopic?.let {
@@ -470,7 +470,7 @@ fun NavGraphBuilder.forumsGraph(
             }
 
             if (message != null) {
-                ForumModuleScaffold(
+                ModernModuleScaffold(
                     topBarConfig = ForumTopBarConfig(
                         title = stringResource(R.string.forum_report_title),
                         subtitle = stringResource(R.string.forum_report_subtitle),
@@ -524,7 +524,7 @@ fun NavGraphBuilder.forumsGraph(
                 viewModel.loadTags()
             }
 
-            ForumModuleScaffold(
+            ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = stringResource(R.string.forum_new_topic_title),
                     subtitle = args.roomTitle,
@@ -600,7 +600,7 @@ fun NavGraphBuilder.forumsGraph(
                 state.comments.find { it.id == args.id }
             }
 
-            ForumModuleScaffold(
+            ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = stringResource(R.string.forum_reply_title),
                     subtitle = state.selectedTopic?.title ?: "",
@@ -643,7 +643,7 @@ fun NavGraphBuilder.forumsGraph(
             }
         }
         composable<SavedCommentsNav> {
-            ForumModuleScaffold(
+            ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = stringResource(R.string.favorites),
                     showBackButton = true,

@@ -56,13 +56,13 @@ private fun serviceFieldColors() = OutlinedTextFieldDefaults.colors(
 )
 
 @Composable
-private fun FieldLabel(text: String) {
+fun FieldLabel(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.secondary,
         fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(start = 4.dp)
+        modifier = modifier.padding(start = 4.dp)
     )
 }
 

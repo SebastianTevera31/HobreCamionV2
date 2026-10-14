@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -25,7 +24,7 @@ import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.promotions.PromotionDetailScreen
 import com.rfz.appflotal.presentation.ui.couponbook.screen.promotions.PromotionListRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.redeem.RedeemCoupon
-import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumModuleScaffold
+import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ModernModuleScaffold
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
 import com.rfz.appflotal.presentation.ui.forums.navigation.SavedCommentsNav
@@ -69,7 +68,7 @@ fun NavGraphBuilder.couponGraph(
                 }
             }
 
-            ForumModuleScaffold(
+            ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = stringResource(R.string.cuponera),
                     showBackButton = true,
@@ -162,7 +161,7 @@ fun NavGraphBuilder.couponGraph(
                 }
             }
 
-            ForumModuleScaffold(
+            ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = if (args.areCoupons) stringResource(R.string.cupones) else stringResource(R.string.mis_vouchers),
                     showBackButton = true,
@@ -272,7 +271,7 @@ fun NavGraphBuilder.couponGraph(
                 viewModel.goToPromotionsPage(1)
             }
 
-            ForumModuleScaffold(
+            ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = stringResource(R.string.promociones_descuentos),
                     showBackButton = true,

@@ -56,7 +56,7 @@ data class ForumSearchFilter(
 )
 
 @Composable
-fun ForumModuleScaffold(
+fun ModernModuleScaffold(
     topBarConfig: ForumTopBarConfig,
     modifier: Modifier = Modifier,
     floatingActionButton: @Composable () -> Unit = {},
@@ -66,7 +66,7 @@ fun ForumModuleScaffold(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            ForumTopAppBar(
+            ModernTopAppBar(
                 config = topBarConfig
             )
         },
@@ -78,9 +78,9 @@ fun ForumModuleScaffold(
 
 @Preview(showBackground = true)
 @Composable
-fun ForumScaffoldPreview() {
+fun ModernScaffoldPreview() {
     HombreCamionTheme {
-        ForumModuleScaffold(
+        ModernModuleScaffold(
             topBarConfig = ForumTopBarConfig(
                 title = "Título del Foro",
                 subtitle = "Subtítulo del Foro",
