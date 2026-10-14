@@ -103,11 +103,15 @@ class PromotionNotifier @Inject constructor(
         return context.createConfigurationContext(configuration)
     }
 
-    /** Abre la app como el ícono del launcher: si ya está abierta, la trae al frente sin reiniciarla. */
+    /** Abre la app en "Siguiendo": si ya está abierta, reutiliza la activity (onNewIntent) sin reiniciarla. */
     private fun openAppIntent(): PendingIntent {
-        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-            ?: Intent(context, InicioActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val intent = Intent(context, InicioActivity::class.java)
+            .putExtra(InicioActivity.EXTRA_DESTINO, InicioActivity.DESTINO_FOLLOW_PROMOTIONS)
+            .addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+            )
         return PendingIntent.getActivity(
             context,
             FOLLOWED_PROMOTIONS_NOTIFICATION_ID,

@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -39,6 +40,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -65,6 +68,7 @@ import com.rfz.appflotal.data.ConsentManager
 import com.rfz.appflotal.data.repository.fcmessaging.AppNotificationState
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.fcmessaging.MaintenanceStatus
+import com.rfz.appflotal.data.repository.fcmessaging.toSafePaymentPlanType
 import com.rfz.appflotal.domain.base.BaseUseCase
 import com.rfz.appflotal.domain.brand.BrandCrudUseCase
 import com.rfz.appflotal.domain.brand.BrandListUseCase
@@ -93,6 +97,8 @@ import com.rfz.appflotal.presentation.navigation.navigateAsBottomBarTab
 import com.rfz.appflotal.presentation.navigation.operationsNavigation
 import com.rfz.appflotal.presentation.navigation.serviceGraph
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
+import com.rfz.appflotal.presentation.ui.couponbook.navigation.FollowPromotions
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.couponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.forumsGraph
@@ -130,6 +136,9 @@ class InicioActivity : ComponentActivity() {
     private val monitorViewModel: MonitorViewModel by viewModels()
     private val registerMonitorViewModel: RegisterMonitorViewModel by viewModels()
     private val updateUserViewModel: UpdateUserViewModel by viewModels()
+
+    // Destino pedido por una notificación; se consume una sola vez tras validar la sesión.
+    private var pendingDestination by mutableStateOf<String?>(null)
 
     @Inject
     lateinit var appStatusManagerRepository: AppStatusManagerRepository
@@ -206,6 +215,12 @@ class InicioActivity : ComponentActivity() {
     @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Al recrearse, el intent original aún trae el extra: se usa el estado guardado.
+        pendingDestination = if (savedInstanceState == null) {
+            takeDestination(intent)
+        } else {
+            savedInstanceState.getString(EXTRA_DESTINO)
+        }
         enableEdgeToEdge()
         // Create channel to show notifications.
         val channelId = getString(R.string.app_fcm_channel)
@@ -508,6 +523,32 @@ class InicioActivity : ComponentActivity() {
                                     }
                                 }
 
+                                // Destino de notificación: se resuelve cuando LOADING ya decidió la ruta.
+                                val currentRoute = backStackEntry?.destination?.route
+                                LaunchedEffect(pendingDestination, currentRoute, userData) {
+                                    val destination = pendingDestination ?: return@LaunchedEffect
+                                    if (currentRoute == null || currentRoute == NavScreens.LOADING) {
+                                        return@LaunchedEffect
+                                    }
+                                    pendingDestination = null
+
+                                    // Sin sesión, en onboarding o sin plan Complete se descarta.
+                                    val canOpen = destination == DESTINO_FOLLOW_PROMOTIONS &&
+                                            userData != null &&
+                                            currentRoute !in AUTH_ROUTES &&
+                                            userData.paymentPlan.toSafePaymentPlanType() == PaymentPlanType.Complete
+                                    if (canOpen) {
+                                        // Pila HOME → CouponGraph → FollowPromotions para que "atrás" funcione.
+                                        if (currentRoute != NavScreens.HOME) {
+                                            navController.navigate(NavScreens.HOME) {
+                                                popUpTo(0) { inclusive = true }
+                                            }
+                                        }
+                                        navController.navigate(CouponGraph)
+                                        navController.navigate(FollowPromotions)
+                                    }
+                                }
+
                                 NavHost(
                                     navController = navController,
                                     startDestination = NavScreens.LOADING,
@@ -612,6 +653,25 @@ class InicioActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        takeDestination(intent)?.let { pendingDestination = it }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        pendingDestination?.let { outState.putString(EXTRA_DESTINO, it) }
+    }
+
+    /** Lee y elimina el destino del intent para no repetirlo; se ignora si se abrió desde recientes. */
+    private fun takeDestination(intent: Intent): String? {
+        if ((intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) return null
+        val destination = intent.getStringExtra(EXTRA_DESTINO)
+        intent.removeExtra(EXTRA_DESTINO)
+        return destination
+    }
+
     private fun askNotificationPermission() {
         // This is only necessary for API Level > 33 (TIRAMISU)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -623,6 +683,20 @@ class InicioActivity : ComponentActivity() {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+    }
+
+    companion object {
+        const val EXTRA_DESTINO = "destino"
+        const val DESTINO_FOLLOW_PROMOTIONS = "follow_promotions"
+
+        // Rutas previas a tener sesión completa: un destino pendiente aquí se descarta.
+        private val AUTH_ROUTES = setOf(
+            NavScreens.LOGIN,
+            NavScreens.RECUPERAR_CONTRASENIA,
+            NavScreens.REGISTRAR_USUARIO,
+            NavScreens.TERMINOS,
+            NavScreens.PERMISOS
+        )
     }
 }
 

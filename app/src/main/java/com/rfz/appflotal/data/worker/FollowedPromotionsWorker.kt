@@ -70,7 +70,7 @@ fun scheduleFollowedPromotionsWorker(context: Context) {
 
     WorkManager.getInstance(context).enqueueUniquePeriodicWork(
         FOLLOWED_PROMOTIONS_PERIODIC_WORK,
-        ExistingPeriodicWorkPolicy.KEEP,
+        ExistingPeriodicWorkPolicy.UPDATE,
         dailyWorkRequest
     )
 }
