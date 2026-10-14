@@ -127,6 +127,11 @@ class CouponBookViewModel @Inject constructor(
         }
     }
 
+    /** Para promociones que no vienen de la lista paginada (p. ej. las de "Siguiendo"). */
+    fun selectPromotion(discount: StoreDiscount) {
+        _uiState.update { it.copy(selectedPromotion = discount) }
+    }
+
     fun getInitialData() {
         viewModelScope.launch {
             _uiState.update { currentUiState ->

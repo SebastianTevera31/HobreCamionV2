@@ -40,6 +40,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.Button
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
@@ -70,6 +72,7 @@ fun CouponBookRoute(
     onCouponClick: (String) -> Unit,
     onVoucherClick: (String) -> Unit,
     onPromotionClick: (String) -> Unit,
+    onSeeFollowing: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (screenStatus) {
@@ -103,6 +106,7 @@ fun CouponBookRoute(
                 onCouponClick = onCouponClick,
                 onVoucherClick = onVoucherClick,
                 onPromotionClick = onPromotionClick,
+                onSeeFollowing = onSeeFollowing,
                 modifier = modifier
             )
         }
@@ -124,7 +128,8 @@ fun CouponBookScreen(
     searchQuery: String = "",
     promotions: List<StoreDiscount> = emptyList(),
     promotionsState: LoadState<Unit> = LoadState.Idle,
-    onPromotionClick: (String) -> Unit = {}
+    onPromotionClick: (String) -> Unit = {},
+    onSeeFollowing: () -> Unit = {}
 ) {
     val isSearching = searchQuery.isNotBlank()
 
@@ -155,8 +160,22 @@ fun CouponBookScreen(
             }
         } else {
             item {
-                PromotionsInviteCard(
-                    onSeeAllPromotions = onSeeAllPromotions
+                InviteCard(
+                    title = stringResource(R.string.promociones_descuentos),
+                    description = stringResource(R.string.promociones_invitacion_descripcion),
+                    buttonText = stringResource(R.string.ver_promociones),
+                    icon = Icons.Default.LocalOffer,
+                    onClick = onSeeAllPromotions
+                )
+            }
+
+            item {
+                InviteCard(
+                    title = stringResource(R.string.siguiendo),
+                    description = stringResource(R.string.siguiendo_invitacion_descripcion),
+                    buttonText = stringResource(R.string.ver_siguiendo),
+                    icon = Icons.Default.NotificationsActive,
+                    onClick = onSeeFollowing
                 )
             }
 
@@ -362,8 +381,12 @@ private fun CouponBookHeader(
 }
 
 @Composable
-private fun PromotionsInviteCard(
-    onSeeAllPromotions: () -> Unit,
+private fun InviteCard(
+    title: String,
+    description: String,
+    buttonText: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -383,7 +406,7 @@ private fun PromotionsInviteCard(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
-                        imageVector = Icons.Default.LocalOffer,
+                        imageVector = icon,
                         contentDescription = null,
                         modifier = Modifier.size(26.dp),
                         tint = MaterialTheme.colorScheme.onSecondary
@@ -396,23 +419,23 @@ private fun PromotionsInviteCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.promociones_descuentos),
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
 
                 Text(
-                    text = stringResource(R.string.promociones_invitacion_descripcion),
+                    text = description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Button(onClick = onSeeAllPromotions) {
+                Button(onClick = onClick) {
                     Text(
-                        text = stringResource(R.string.ver_promociones),
+                        text = buttonText,
                         fontWeight = FontWeight.SemiBold
                     )
                 }

@@ -18,6 +18,8 @@ import androidx.navigation.toRoute
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.ui.couponbook.CouponBookViewModel
+import com.rfz.appflotal.presentation.ui.couponbook.screen.follow.FollowPromotionRoute
+import com.rfz.appflotal.presentation.ui.couponbook.screen.follow.FollowPromotionViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.screen.info.CouponBookInfo
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookListRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookRoute
@@ -118,6 +120,9 @@ fun NavGraphBuilder.couponGraph(
                     onPromotionClick = { productUrl ->
                         viewModel.selectPromotion(productUrl)
                         navController.navigate(PromotionDetail)
+                    },
+                    onSeeFollowing = {
+                        navController.navigate(FollowPromotions)
                     },
                     modifier = Modifier.padding(paddingValues),
                     screenStatus = state.loadingScreen,
@@ -326,6 +331,42 @@ fun NavGraphBuilder.couponGraph(
                     onBack = {
                         navController.popBackStackSafely()
                     }
+                )
+            }
+        }
+
+        composable<FollowPromotions> { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<CouponGraph>()
+                } catch (_: Exception) {
+                    backStackEntry
+                }
+            }
+
+            // El detalle de promoción lee la selección del ViewModel compartido del grafo.
+            val couponViewModel: CouponBookViewModel = hiltViewModel(parentEntry)
+            val followViewModel: FollowPromotionViewModel = hiltViewModel()
+            val state by followViewModel.uiState.collectAsState()
+
+            ModernModuleScaffold(
+                topBarConfig = ForumTopBarConfig(
+                    title = stringResource(R.string.siguiendo),
+                    showBackButton = true,
+                    showMenuButton = false,
+                    onBackClick = {
+                        navController.popBackStackSafely()
+                    }
+                )
+            ) { paddingValue ->
+                FollowPromotionRoute(
+                    viewModel = followViewModel,
+                    state = state,
+                    onPromotionClick = { discount ->
+                        couponViewModel.selectPromotion(discount)
+                        navController.navigate(PromotionDetail)
+                    },
+                    modifier = Modifier.padding(paddingValue)
                 )
             }
         }

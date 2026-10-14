@@ -4,6 +4,7 @@ import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
 import com.rfz.appflotal.data.model.catalog.StateDto
+import com.rfz.appflotal.data.model.catalog.TopTenAccessoryResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -31,4 +32,10 @@ interface CatalogClient {
         @Header("Authorization") token: String,
         @Query("id_country") countryId: Int
     ): Response<List<StateDto>>
+
+    // Sin parámetros; el token (opcional) se envía cuando hay sesión.
+    @GET("api/Catalog/TopTenAccesories")
+    suspend fun getTopTenAccessories(
+        @Header("Authorization") token: String? = null
+    ): Response<List<TopTenAccessoryResponse>>
 }

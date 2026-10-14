@@ -10,11 +10,13 @@ import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
 import com.rfz.appflotal.data.dao.DisassemblyTireDao
+import com.rfz.appflotal.data.dao.FollowedPromotionsDao
 import com.rfz.appflotal.data.dao.ForumDao
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
 import com.rfz.appflotal.data.dao.InspectionTireDao
 import com.rfz.appflotal.data.dao.PromotionsDao
 import com.rfz.appflotal.data.dao.SensorDataDao
+import com.rfz.appflotal.data.database.ALL_MIGRATIONS
 import com.rfz.appflotal.data.database.AppHombreCamionDatabase
 import dagger.Module
 import dagger.Provides
@@ -82,6 +84,11 @@ class DataBaseModule {
         return database.promotionsDao()
     }
 
+    @Provides
+    fun provideFollowedPromotionsDao(database: AppHombreCamionDatabase): FollowedPromotionsDao {
+        return database.followedPromotionsDao()
+    }
+
     @Keep
     @Provides
     @Singleton
@@ -90,6 +97,8 @@ class DataBaseModule {
             appContext,
             AppHombreCamionDatabase::class.java,
             BuildConfig.DB_NAME
-        ).fallbackToDestructiveMigration(false).build()
+        ).addMigrations(*ALL_MIGRATIONS)
+            .fallbackToDestructiveMigration(false)
+            .build()
     }
 }

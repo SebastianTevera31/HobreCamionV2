@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.network.service.catalog
 import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
+import com.rfz.appflotal.data.model.catalog.TopTenAccessoryResponse
 import com.rfz.appflotal.data.network.client.catalog.CatalogClient
 import com.rfz.appflotal.data.network.networkRequestHelper
 import com.rfz.appflotal.data.network.requestHelper
@@ -47,4 +48,9 @@ class RemoteCatalogDataSource @Inject constructor(
     suspend fun getStates(token: String, countryId: Int) = networkRequestHelper {
         catalogClient.getStates("Bearer $token", countryId)
     }
+
+    suspend fun getTopTenAccessories(): Result<List<TopTenAccessoryResponse>> =
+        networkRequestHelper {
+            catalogClient.getTopTenAccessories(bearerOrNull())
+        }
 }

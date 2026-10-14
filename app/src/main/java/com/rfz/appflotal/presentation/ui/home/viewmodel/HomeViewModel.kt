@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.model.languaje.LanguageResponse
 import com.rfz.appflotal.data.repository.apputilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
+import com.rfz.appflotal.data.repository.promotions.FollowedPromotionsRepository
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
@@ -36,6 +37,7 @@ class HomeViewModel @Inject constructor(
     private val appUtilitiesRepository: AppUtilitiesRepositoryImpl,
     private val appStatusManagerRepository: AppStatusManagerRepository,
     private val catalogUseCase: CatalogUseCase,
+    private val followedPromotionsRepository: FollowedPromotionsRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -50,6 +52,7 @@ class HomeViewModel @Inject constructor(
     suspend fun logout() {
         hombreCamionRepository.clearUserData()
         catalogUseCase.clearTireReportCatalog()
+        followedPromotionsRepository.clearAll()
         _messageOperationState.value = OperationStatus.Idle
         _uiState.value = HomeUiState()
     }

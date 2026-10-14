@@ -23,3 +23,6 @@ object PromotionList
 
 @Serializable
 object PromotionDetail
+
+@Serializable
+object FollowPromotions

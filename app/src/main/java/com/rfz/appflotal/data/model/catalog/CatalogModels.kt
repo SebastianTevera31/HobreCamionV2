@@ -48,3 +48,12 @@ data class TireInspectionItem(
 ) : CatalogItem
 
 
+
+data class TopTenAccessoryResponse(
+    @SerializedName("id_accessory") val idAccessory: Int,
+    @SerializedName("fld_vehicleType") val vehicleType: String? = null,
+    @SerializedName("fld_position") val position: Int,
+    @SerializedName("fld_name") val name: String? = null,
+    @SerializedName("fld_description") val description: String? = null,
+    @SerializedName("fld_active") val active: Boolean = false,
+)

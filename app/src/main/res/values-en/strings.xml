@@ -931,4 +931,35 @@
     <string name="noviembre">November</string>
     <string name="diciembre">December</string>
     <string name="agregar_notas">Write observations or additional details...</string>
+
+    <!-- Coupon book: Following -->
+    <string name="siguiendo">Following</string>
+    <string name="siguiendo_invitacion_descripcion">Follow accessories and we\'ll let you know when they have new deals.</string>
+    <string name="ver_siguiendo">See what I follow</string>
+    <string name="tipo_accesorio_truck">Truck</string>
+    <string name="tipo_accesorio_rv">RV</string>
+    <string name="mis_accesorios">My accessories</string>
+    <string name="accesorios_sugeridos">Suggested (Top 10)</string>
+    <string name="agregar_accesorio_hint">Type an accessory to follow</string>
+    <string name="agregar_accesorio">Add</string>
+    <string name="seguir_accesorio">Follow</string>
+    <string name="dejar_de_seguir_accesorio">Unfollow %1$s</string>
+    <string name="accesorios_seguidos_contador">%1$d of %2$d accessories followed</string>
+    <string name="sin_accesorios_seguidos">You don\'t follow any accessories in this category yet. Pick a suggested one or type your own.</string>
+    <string name="buscando_promociones">Looking for deals…</string>
+    <string name="sin_promociones_accesorio">No deals for now.</string>
+    <string name="buscar_promociones_ahora">Refresh</string>
+    <string name="todos_sugeridos_seguidos">You already follow all suggestions in this category.</string>
+    <string name="error_accesorio_corto">Type at least %1$d characters.</string>
+    <string name="error_accesorio_largo">Type at most %1$d characters.</string>
+    <string name="error_accesorio_duplicado">You already follow this accessory.</string>
+    <string name="error_limite_accesorios">You reached the limit of %1$d followed accessories.</string>
+    <string name="error_guardar_accesorio">The change couldn\'t be saved. Try again.</string>
+    <string name="error_cargar_sugeridos">Suggestions couldn\'t be loaded.</string>
+    <string name="canal_promociones_seguidas">Deals on what you follow</string>
+    <string name="notificacion_promociones_titulo">New deals on what you follow</string>
+    <plurals name="notificacion_promociones_nuevas">
+        <item quantity="one">%1$d new deal: %2$s</item>
+        <item quantity="other">%1$d new deals: %2$s</item>
+    </plurals>
 </resources>

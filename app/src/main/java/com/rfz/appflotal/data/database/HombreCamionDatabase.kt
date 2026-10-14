@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
 import com.rfz.appflotal.data.dao.DisassemblyTireDao
+import com.rfz.appflotal.data.dao.FollowedPromotionsDao
 import com.rfz.appflotal.data.dao.ForumDao
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
 import com.rfz.appflotal.data.dao.InspectionTireDao
@@ -25,6 +26,8 @@ import com.rfz.appflotal.data.model.database.InspectionCatalogEntity
 import com.rfz.appflotal.data.model.database.InspectionTireEntity
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.database.TopicEntity
+import com.rfz.appflotal.data.model.promotions.FollowedAccessoryEntity
+import com.rfz.appflotal.data.model.promotions.FollowedPromotionEntity
 import com.rfz.appflotal.data.model.promotions.PromotionEntity
 
 @Keep
@@ -34,9 +37,9 @@ import com.rfz.appflotal.data.model.promotions.PromotionEntity
         SensorDataEntity::class, AssemblyTireEntity::class, AxleEntity::class,
         DisassemblyTireEntity::class, InspectionTireEntity::class,
         InspectionCatalogEntity::class, CommentEntity::class, TopicEntity::class,
-        PromotionEntity::class
+        PromotionEntity::class, FollowedAccessoryEntity::class, FollowedPromotionEntity::class
     ],
-    version = 27,
+    version = 28,
     exportSchema = true
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {
@@ -56,4 +59,6 @@ abstract class AppHombreCamionDatabase : RoomDatabase() {
     abstract fun forumDao(): ForumDao
 
     abstract fun promotionsDao(): PromotionsDao
+
+    abstract fun followedPromotionsDao(): FollowedPromotionsDao
 }
