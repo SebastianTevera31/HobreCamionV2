@@ -28,10 +28,18 @@ interface FollowedPromotionsDao {
     @Query("DELETE FROM followed_accessory_table WHERE id = :id")
     suspend fun deleteFollowedAccessory(id: Long)
 
-    @Query("UPDATE followed_accessory_table SET initialSyncDone = 1 WHERE id = :id")
-    suspend fun markInitialSyncDone(id: Long)
+    @Query(
+        """
+        UPDATE followed_accessory_table
+        SET initialSyncDone = 1,
+            lastSyncedAt = :syncedAt,
+            firstSyncedAt = COALESCE(firstSyncedAt, :syncedAt)
+        WHERE id = :id
+        """
+    )
+    suspend fun markSynced(id: Long, syncedAt: Long)
 
-    @Query("SELECT * FROM followed_promotion_table ORDER BY followedAccessoryId ASC, position ASC")
+    @Query("SELECT * FROM followed_promotion_table ORDER BY followedAccessoryId ASC, percentOff DESC, position ASC")
     fun observeFollowedPromotions(): Flow<List<FollowedPromotionEntity>>
 
     @Query("SELECT * FROM followed_promotion_table WHERE followedAccessoryId = :followedAccessoryId")
@@ -65,12 +73,13 @@ interface FollowedPromotionsDao {
     @Transaction
     suspend fun replacePromotionsFor(
         followedAccessoryId: Long,
-        promotions: List<FollowedPromotionEntity>
+        promotions: List<FollowedPromotionEntity>,
+        syncedAt: Long
     ) {
         if (countFollowedAccessory(followedAccessoryId) == 0) return
         deletePromotionsFor(followedAccessoryId)
         insertPromotions(promotions)
-        markInitialSyncDone(followedAccessoryId)
+        markSynced(followedAccessoryId, syncedAt)
     }
 
     @Transaction

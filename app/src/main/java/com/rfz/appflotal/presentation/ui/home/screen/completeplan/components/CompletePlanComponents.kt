@@ -31,11 +31,13 @@ import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -154,28 +156,28 @@ fun HomeTopBar(
             }
         }
 
-//        Box {
-//            IconButton(
-//                onClick = onNotificationsClick,
-//                modifier = Modifier
-//                    .size(44.dp)
-//                    .clip(CircleShape)
-//                    .background(TealSoftBg)
-//            ) {
-//                Icon(
-//                    Icons.Outlined.Notifications,
-//                    contentDescription = "Notificaciones",
-//                    tint = TealDark
-//                )
-//            }
-//            Box(
-//                modifier = Modifier
-//                    .size(10.dp)
-//                    .align(Alignment.TopEnd)
-//                    .clip(CircleShape)
-//                    .background(CriticalFg)
-//            )
-//        }
+        Box {
+            IconButton(
+                onClick = onNotificationsClick,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(TealSoftBg)
+            ) {
+                Icon(
+                    Icons.Outlined.Notifications,
+                    contentDescription = "Notificaciones",
+                    tint = TealDark
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .align(Alignment.TopEnd)
+                    .clip(CircleShape)
+                    .background(CriticalFg)
+            )
+        }
     }
 }
 
@@ -423,7 +425,11 @@ fun WeatherCard(temp: String, city: String, description: String, onClick: () -> 
                 Text(city, fontWeight = FontWeight.SemiBold)
                 Text(description, color = SubtleText, style = MaterialTheme.typography.bodySmall)
             }
-            Icon(Icons.Outlined.ChevronRight, contentDescription = stringResource(R.string.ver_mapa), tint = TealDark)
+            Icon(
+                Icons.Outlined.ChevronRight,
+                contentDescription = stringResource(R.string.ver_mapa),
+                tint = TealDark
+            )
         }
     }
 }

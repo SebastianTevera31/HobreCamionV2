@@ -35,7 +35,11 @@ data class FollowedAccessoryEntity(
     val description: String?,
     val createdAt: Long,
     // false hasta la primera sincronización: lo encontrado en ella no se notifica.
-    val initialSyncDone: Boolean = false
+    val initialSyncDone: Boolean = false,
+    // Fecha de la primera búsqueda exitosa: lo visto después de ella cuenta como "Nuevo".
+    val firstSyncedAt: Long? = null,
+    // Fecha de la última búsqueda exitosa ("Actualizado hace X h").
+    val lastSyncedAt: Long? = null
 )
 
 @Entity(
@@ -65,11 +69,21 @@ data class FollowedAccessory(
     val name: String,
     val description: String?,
     val pendingFirstSync: Boolean,
-    val promotions: List<StoreDiscount>
+    val lastSyncedAt: Long?,
+    // Ordenadas por mayor descuento.
+    val promotions: List<FollowedPromotion>
+) {
+    val bestPercentOff: Double? get() = promotions.maxOfOrNull { it.discount.percentOff }
+}
+
+data class FollowedPromotion(
+    val discount: StoreDiscount,
+    val isNew: Boolean
 )
 
 /** Promoción encontrada por primera vez para un accesorio seguido; es lo que se notifica. */
 data class NewFollowedPromotion(
+    val accessoryId: Long,
     val accessoryName: String,
     val discount: StoreDiscount
 )
@@ -105,7 +119,7 @@ fun FollowedPromotionEntity.toDomain(): StoreDiscount = StoreDiscount(
     imageUrl = imageUrl
 )
 
-fun FollowedAccessoryEntity.toDomain(promotions: List<StoreDiscount>): FollowedAccessory? {
+fun FollowedAccessoryEntity.toDomain(promotions: List<FollowedPromotion>): FollowedAccessory? {
     val type = AccessoryVehicleType.fromApi(vehicleType) ?: return null
     return FollowedAccessory(
         id = id,
@@ -114,6 +128,7 @@ fun FollowedAccessoryEntity.toDomain(promotions: List<StoreDiscount>): FollowedA
         name = name,
         description = description,
         pendingFirstSync = !initialSyncDone,
+        lastSyncedAt = lastSyncedAt,
         promotions = promotions
     )
 }

@@ -26,3 +26,6 @@ object PromotionDetail
 
 @Serializable
 object FollowPromotions
+
+@Serializable
+data class FollowedAccessoryDetail(val followedAccessoryId: Long)

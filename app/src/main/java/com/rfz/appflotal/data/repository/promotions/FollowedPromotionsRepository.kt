@@ -5,6 +5,7 @@ import com.rfz.appflotal.data.model.catalog.TopTenAccessoryResponse
 import com.rfz.appflotal.data.model.promotions.AccessoryVehicleType
 import com.rfz.appflotal.data.model.promotions.FollowedAccessory
 import com.rfz.appflotal.data.model.promotions.FollowedAccessoryEntity
+import com.rfz.appflotal.data.model.promotions.FollowedPromotion
 import com.rfz.appflotal.data.model.promotions.NewFollowedPromotion
 import com.rfz.appflotal.data.model.promotions.toDomain
 import com.rfz.appflotal.data.model.promotions.toFollowedEntity
@@ -18,6 +19,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import javax.inject.Inject
@@ -42,13 +44,26 @@ class FollowedPromotionsRepository @Inject constructor(
         followedPromotionsDao.observeFollowedAccessories(),
         followedPromotionsDao.observeFollowedPromotions()
     ) { accessories, promotions ->
+        val now = System.currentTimeMillis()
         val promotionsByAccessory = promotions.groupBy { it.followedAccessoryId }
         accessories.mapNotNull { accessory ->
             accessory.toDomain(
-                promotionsByAccessory[accessory.id].orEmpty().map { it.toDomain() }
+                promotionsByAccessory[accessory.id].orEmpty().map { promotion ->
+                    FollowedPromotion(
+                        discount = promotion.toDomain(),
+                        isNew = isNewPromotion(
+                            firstSeenAt = promotion.firstSeenAt,
+                            accessoryFirstSyncedAt = accessory.firstSyncedAt,
+                            now = now
+                        )
+                    )
+                }
             )
         }
     }
+
+    fun observeFollowedAccessory(id: Long): Flow<FollowedAccessory?> =
+        observeFollowedAccessories().map { accessories -> accessories.find { it.id == id } }
 
     suspend fun follow(
         rawName: String,
@@ -136,7 +151,9 @@ class FollowedPromotionsRepository @Inject constructor(
                         position = index,
                         firstSeenAt = previousFirstSeen[discount.productUrl] ?: now
                     )
-                }
+                },
+                // Mismo instante que firstSeenAt: lo de la primera búsqueda no cuenta como "Nuevo".
+                syncedAt = now
             )
             // Una misma promoción encontrada por dos accesorios se notifica una sola vez.
             knownProductUrls += fetched.map { it.productUrl }

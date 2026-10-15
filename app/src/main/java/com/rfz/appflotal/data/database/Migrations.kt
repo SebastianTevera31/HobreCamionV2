@@ -48,4 +48,12 @@ val MIGRATION_27_28 = object : Migration(27, 28) {
     }
 }
 
-val ALL_MIGRATIONS = arrayOf(MIGRATION_27_28)
+/** Fechas de primera y última búsqueda por accesorio seguido ("Nuevo" y "Actualizado hace X h"). */
+val MIGRATION_28_29 = object : Migration(28, 29) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `followed_accessory_table` ADD COLUMN `firstSyncedAt` INTEGER")
+        db.execSQL("ALTER TABLE `followed_accessory_table` ADD COLUMN `lastSyncedAt` INTEGER")
+    }
+}
+
+val ALL_MIGRATIONS = arrayOf(MIGRATION_27_28, MIGRATION_28_29)

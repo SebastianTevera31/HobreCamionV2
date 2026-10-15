@@ -57,4 +57,45 @@ class MigrationTest {
             assertEquals(1, cursor.getInt(0))
         }
     }
+
+    @Test
+    fun migrate28To29_conservaLosSeguidosYAgregaLasFechasDeBusqueda() {
+        helper.createDatabase(testDb, 28).apply {
+            execSQL(
+                """
+                INSERT INTO followed_accessory_table (catalogAccessoryId, vehicleType, name,
+                    normalizedName, description, createdAt, initialSyncDone)
+                VALUES (1, 'TRUCK', 'Dash cam', 'dash cam', NULL, 100, 1)
+                """.trimIndent()
+            )
+            execSQL(
+                """
+                INSERT INTO followed_promotion_table (followedAccessoryId, productUrl, position,
+                    store, title, sku, regularPrice, finalPrice, percentOff, currency, imageUrl,
+                    firstSeenAt)
+                VALUES (1, 'https://store.com/a', 0, 'Store', 'Item', NULL, 100.0, 80.0, 20.0,
+                    'USD', NULL, 100)
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(testDb, 29, true, MIGRATION_28_29)
+
+        db.query(
+            "SELECT name, initialSyncDone, firstSyncedAt, lastSyncedAt FROM followed_accessory_table"
+        ).use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals("Dash cam", cursor.getString(0))
+            assertEquals(1, cursor.getInt(1))
+            // Las fechas nuevas quedan vacías hasta la siguiente búsqueda.
+            assertEquals(true, cursor.isNull(2))
+            assertEquals(true, cursor.isNull(3))
+        }
+        db.query("SELECT COUNT(*) FROM followed_promotion_table").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(1, cursor.getInt(0))
+        }
+    }
 }

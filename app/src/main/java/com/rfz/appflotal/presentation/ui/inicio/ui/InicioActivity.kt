@@ -99,6 +99,7 @@ import com.rfz.appflotal.presentation.navigation.serviceGraph
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.FollowPromotions
+import com.rfz.appflotal.presentation.ui.couponbook.navigation.FollowedAccessoryDetail
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.couponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.forumsGraph
@@ -533,12 +534,13 @@ class InicioActivity : ComponentActivity() {
                                     pendingDestination = null
 
                                     // Sin sesión, en onboarding o sin plan Complete se descarta.
-                                    val canOpen = destination == DESTINO_FOLLOW_PROMOTIONS &&
+                                    val accessoryId = parseFollowedAccessoryId(destination)
+                                    val canOpen = (destination == DESTINO_FOLLOW_PROMOTIONS || accessoryId != null) &&
                                             userData != null &&
                                             currentRoute !in AUTH_ROUTES &&
                                             userData.paymentPlan.toSafePaymentPlanType() == PaymentPlanType.Complete
                                     if (canOpen) {
-                                        // Pila HOME → CouponGraph → FollowPromotions para que "atrás" funcione.
+                                        // Pila HOME → CouponGraph → FollowPromotions (→ detalle) para que "atrás" funcione.
                                         if (currentRoute != NavScreens.HOME) {
                                             navController.navigate(NavScreens.HOME) {
                                                 popUpTo(0) { inclusive = true }
@@ -546,6 +548,7 @@ class InicioActivity : ComponentActivity() {
                                         }
                                         navController.navigate(CouponGraph)
                                         navController.navigate(FollowPromotions)
+                                        accessoryId?.let { navController.navigate(FollowedAccessoryDetail(it)) }
                                     }
                                 }
 
@@ -688,6 +691,16 @@ class InicioActivity : ComponentActivity() {
     companion object {
         const val EXTRA_DESTINO = "destino"
         const val DESTINO_FOLLOW_PROMOTIONS = "follow_promotions"
+        private const val DESTINO_FOLLOWED_ACCESSORY_PREFIX = "followed_accessory:"
+
+        /** Destino al detalle de un accesorio seguido; viaja como texto para guardarse en el estado. */
+        fun followedAccessoryDestination(accessoryId: Long): String =
+            "$DESTINO_FOLLOWED_ACCESSORY_PREFIX$accessoryId"
+
+        private fun parseFollowedAccessoryId(destination: String): Long? =
+            destination.removePrefix(DESTINO_FOLLOWED_ACCESSORY_PREFIX)
+                .takeIf { destination.startsWith(DESTINO_FOLLOWED_ACCESSORY_PREFIX) }
+                ?.toLongOrNull()
 
         // Rutas previas a tener sesión completa: un destino pendiente aquí se descarta.
         private val AUTH_ROUTES = setOf(

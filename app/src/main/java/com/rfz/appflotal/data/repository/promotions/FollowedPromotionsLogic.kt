@@ -2,9 +2,11 @@ package com.rfz.appflotal.data.repository.promotions
 
 import com.rfz.appflotal.data.model.catalog.TopTenAccessoryResponse
 import com.rfz.appflotal.data.model.promotions.AccessoryVehicleType
+import com.rfz.appflotal.data.model.promotions.FollowedAccessory
 import com.rfz.appflotal.data.model.promotions.FollowedAccessoryEntity
 import com.rfz.appflotal.data.model.promotions.NewFollowedPromotion
 import com.rfz.appflotal.data.model.promotions.StoreDiscount
+import java.net.URI
 import java.util.Locale
 
 /*
@@ -87,5 +89,156 @@ fun newPromotionsToNotify(
     return fetched
         .filter { it.productUrl !in knownProductUrls }
         .distinctBy { it.productUrl }
-        .map { NewFollowedPromotion(accessoryName = accessory.name, discount = it) }
+        .map {
+            NewFollowedPromotion(
+                accessoryId = accessory.id,
+                accessoryName = accessory.name,
+                discount = it
+            )
+        }
+}
+
+/** Una promoción se marca "Nuevo" durante este tiempo desde que se vio por primera vez. */
+const val NEW_PROMOTION_WINDOW_MILLIS = 48L * 60 * 60 * 1000
+
+/**
+ * "Nuevo": apareció después de la primera búsqueda del accesorio (lo que ya existía al
+ * seguirlo no es novedad) y hace menos de [NEW_PROMOTION_WINDOW_MILLIS].
+ */
+fun isNewPromotion(firstSeenAt: Long, accessoryFirstSyncedAt: Long?, now: Long): Boolean =
+    accessoryFirstSyncedAt != null &&
+        firstSeenAt > accessoryFirstSyncedAt &&
+        now - firstSeenAt in 0..NEW_PROMOTION_WINDOW_MILLIS
+
+// --- Pantalla principal de "Siguiendo" ---
+
+enum class FollowFilter { ALL, FOLLOWING }
+
+/** Estado que se muestra bajo el nombre de cada fila. */
+sealed interface FollowRowStatus {
+    data object NotFollowed : FollowRowStatus
+    data object Searching : FollowRowStatus
+    data object NoDeals : FollowRowStatus
+    data class Deals(val count: Int, val bestPercentOff: Int) : FollowRowStatus
+}
+
+fun followRowStatus(followed: FollowedAccessory?): FollowRowStatus = when {
+    followed == null -> FollowRowStatus.NotFollowed
+    followed.promotions.isNotEmpty() -> FollowRowStatus.Deals(
+        count = followed.promotions.size,
+        bestPercentOff = followed.bestPercentOff?.toInt() ?: 0
+    )
+
+    followed.pendingFirstSync -> FollowRowStatus.Searching
+    else -> FollowRowStatus.NoDeals
+}
+
+/**
+ * Fila de la pantalla principal. [catalogAccessory] permite seguir un sugerido;
+ * [followed] es null si aún no se sigue.
+ */
+data class FollowRow(
+    val key: String,
+    val position: Int?,
+    val name: String,
+    val catalogAccessory: TopTenAccessoryResponse?,
+    val followed: FollowedAccessory?
+) {
+    val status: FollowRowStatus get() = followRowStatus(followed)
+}
+
+data class FollowSections(
+    val topTen: List<FollowRow>,
+    val custom: List<FollowRow>
+)
+
+/**
+ * Arma las dos secciones de una pestaña.
+ * - Top 10: los sugeridos, seguidos o no. Si el catálogo no cargó, solo los ya seguidos.
+ * - Tus búsquedas: las escritas por el usuario y las del catálogo que salieron del Top 10.
+ * Con [FollowFilter.FOLLOWING] se ocultan los sugeridos que no se siguen.
+ */
+fun buildFollowSections(
+    topTen: List<TopTenAccessoryResponse>,
+    topTenLoaded: Boolean,
+    followed: List<FollowedAccessory>,
+    vehicleType: AccessoryVehicleType,
+    filter: FollowFilter
+): FollowSections {
+    val followedInTab = followed.filter { it.vehicleType == vehicleType }
+    val followedByCatalogId = followedInTab
+        .filter { it.catalogAccessoryId != null }
+        .associateBy { it.catalogAccessoryId }
+
+    val topTenRows: List<FollowRow>
+    val inTopTenIds: Set<Int>
+    if (topTenLoaded) {
+        val suggestions = suggestedAccessoriesFor(topTen, vehicleType)
+        inTopTenIds = suggestions.map { it.idAccessory }.toSet()
+        topTenRows = suggestions.map { accessory ->
+            FollowRow(
+                key = "top-${accessory.idAccessory}",
+                position = accessory.position,
+                name = accessory.name.orEmpty(),
+                catalogAccessory = accessory,
+                followed = followedByCatalogId[accessory.idAccessory]
+            )
+        }
+    } else {
+        inTopTenIds = followedByCatalogId.keys.filterNotNull().toSet()
+        topTenRows = followedByCatalogId.values.map { it.toRow() }
+    }
+
+    val customRows = followedInTab
+        .filter { it.catalogAccessoryId == null || it.catalogAccessoryId !in inTopTenIds }
+        .map { it.toRow() }
+
+    return FollowSections(
+        topTen = when (filter) {
+            FollowFilter.ALL -> topTenRows
+            FollowFilter.FOLLOWING -> topTenRows.filter { it.followed != null }
+        },
+        custom = customRows
+    )
+}
+
+private fun FollowedAccessory.toRow() = FollowRow(
+    key = "followed-$id",
+    position = null,
+    name = name,
+    catalogAccessory = null,
+    followed = this
+)
+
+// --- Notificación ---
+
+/** Accesorios que caben en una notificación agrupada; el resto se resume como "+N más". */
+const val MAX_NOTIFIED_ACCESSORIES = 3
+
+data class AccessoryNotification(
+    val accessoryId: Long,
+    val accessoryName: String,
+    val best: StoreDiscount,
+    val newCount: Int
+)
+
+/** Una entrada por accesorio con su mejor oferta nueva, ordenadas por mayor descuento. */
+fun buildAccessoryNotifications(promotions: List<NewFollowedPromotion>): List<AccessoryNotification> =
+    promotions
+        .groupBy { it.accessoryId }
+        .map { (accessoryId, items) ->
+            AccessoryNotification(
+                accessoryId = accessoryId,
+                accessoryName = items.first().accessoryName,
+                best = items.maxBy { it.discount.percentOff }.discount,
+                newCount = items.size
+            )
+        }
+        .sortedByDescending { it.best.percentOff }
+
+/** La URL del producto viene del backend: solo se abre si es http(s). */
+fun safeProductUrl(url: String?): String? {
+    val value = url?.trim().orEmpty()
+    val scheme = runCatching { URI(value).scheme }.getOrNull()?.lowercase(Locale.ROOT)
+    return value.takeIf { scheme == "https" || scheme == "http" }
 }

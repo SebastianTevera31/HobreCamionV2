@@ -20,6 +20,9 @@ import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.presentation.ui.couponbook.CouponBookViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.screen.follow.FollowPromotionRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.follow.FollowPromotionViewModel
+import com.rfz.appflotal.presentation.ui.couponbook.screen.follow.FollowedAccessoryDetailScreen
+import com.rfz.appflotal.presentation.ui.couponbook.screen.follow.FollowedAccessoryDetailUiState
+import com.rfz.appflotal.presentation.ui.couponbook.screen.follow.FollowedAccessoryDetailViewModel
 import com.rfz.appflotal.presentation.ui.couponbook.screen.info.CouponBookInfo
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookListRoute
 import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponBookRoute
@@ -335,17 +338,7 @@ fun NavGraphBuilder.couponGraph(
             }
         }
 
-        composable<FollowPromotions> { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                try {
-                    navController.getBackStackEntry<CouponGraph>()
-                } catch (_: Exception) {
-                    backStackEntry
-                }
-            }
-
-            // El detalle de promoción lee la selección del ViewModel compartido del grafo.
-            val couponViewModel: CouponBookViewModel = hiltViewModel(parentEntry)
+        composable<FollowPromotions> {
             val followViewModel: FollowPromotionViewModel = hiltViewModel()
             val state by followViewModel.uiState.collectAsState()
 
@@ -362,9 +355,61 @@ fun NavGraphBuilder.couponGraph(
                 FollowPromotionRoute(
                     viewModel = followViewModel,
                     state = state,
+                    onOpenAccessory = { id ->
+                        navController.navigate(FollowedAccessoryDetail(id))
+                    },
+                    modifier = Modifier.padding(paddingValue)
+                )
+            }
+        }
+
+        composable<FollowedAccessoryDetail> { backStackEntry ->
+            val graphEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<CouponGraph>()
+                } catch (_: Exception) {
+                    backStackEntry
+                }
+            }
+            // Dejar de seguir pasa por el ViewModel de la pantalla principal, que muestra "Deshacer".
+            val followEntry = remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry<FollowPromotions>()
+                } catch (_: Exception) {
+                    backStackEntry
+                }
+            }
+
+            // El detalle de promoción lee la selección del ViewModel compartido del grafo.
+            val couponViewModel: CouponBookViewModel = hiltViewModel(graphEntry)
+            val followViewModel: FollowPromotionViewModel = hiltViewModel(followEntry)
+            val detailViewModel: FollowedAccessoryDetailViewModel = hiltViewModel()
+            val state by detailViewModel.uiState.collectAsState()
+
+            ModernModuleScaffold(
+                topBarConfig = ForumTopBarConfig(
+                    title = (state as? FollowedAccessoryDetailUiState.Found)?.accessory?.name
+                        ?: stringResource(R.string.siguiendo),
+                    showBackButton = true,
+                    showMenuButton = false,
+                    onBackClick = {
+                        navController.popBackStackSafely()
+                    }
+                )
+            ) { paddingValue ->
+                FollowedAccessoryDetailScreen(
+                    state = state,
+                    onUnfollow = { accessory ->
+                        followViewModel.onUnfollow(accessory)
+                        navController.popBackStackSafely()
+                    },
+                    onRefresh = detailViewModel::onRefresh,
                     onPromotionClick = { discount ->
                         couponViewModel.selectPromotion(discount)
                         navController.navigate(PromotionDetail)
+                    },
+                    onBack = {
+                        navController.popBackStackSafely()
                     },
                     modifier = Modifier.padding(paddingValue)
                 )
