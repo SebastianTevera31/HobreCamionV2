@@ -921,18 +921,12 @@
     <string name="ver_siguiendo">Ver lo que sigo</string>
     <string name="tipo_accesorio_truck">Camión</string>
     <string name="tipo_accesorio_rv">RV</string>
-    <string name="mis_accesorios">Mis accesorios</string>
     <string name="accesorios_sugeridos">Sugeridos (Top 10)</string>
     <string name="agregar_accesorio_hint">Escribe un accesorio para seguir</string>
-    <string name="agregar_accesorio">Agregar</string>
     <string name="seguir_accesorio">Seguir</string>
-    <string name="dejar_de_seguir_accesorio">Dejar de seguir %1$s</string>
-    <string name="accesorios_seguidos_contador">%1$d de %2$d accesorios seguidos</string>
-    <string name="sin_accesorios_seguidos">Aún no sigues accesorios en esta categoría. Elige uno de los sugeridos o escribe el tuyo.</string>
     <string name="buscando_promociones">Buscando promociones…</string>
     <string name="sin_promociones_accesorio">Sin promociones por ahora.</string>
     <string name="buscar_promociones_ahora">Actualizar</string>
-    <string name="todos_sugeridos_seguidos">Ya sigues todos los sugeridos de esta categoría.</string>
     <string name="error_accesorio_corto">Escribe al menos %1$d caracteres.</string>
     <string name="error_accesorio_largo">Escribe máximo %1$d caracteres.</string>
     <string name="error_accesorio_duplicado">Ya sigues este accesorio.</string>
@@ -941,9 +935,49 @@
     <string name="error_cargar_sugeridos">No se pudieron cargar los sugeridos.</string>
     <string name="canal_promociones_seguidas">Promociones de lo que sigues</string>
     <string name="notificacion_promociones_titulo">Nuevas promociones en lo que sigues</string>
-    <plurals name="notificacion_promociones_nuevas">
-        <item quantity="one">%1$d promoción nueva: %2$s</item>
-        <item quantity="many">%1$d promociones nuevas: %2$s</item>
-        <item quantity="other">%1$d promociones nuevas: %2$s</item>
+    <string name="tus_busquedas">Tus búsquedas</string>
+    <string name="filtro_todos">Todos</string>
+    <string name="filtro_siguiendo">Siguiendo (%1$d)</string>
+    <string name="contador_seguidos">%1$d/%2$d seguidos</string>
+    <string name="estado_sin_seguir">Sin seguir</string>
+    <plurals name="estado_ofertas">
+        <item quantity="one">%1$d oferta · hasta -%2$d%%</item>
+        <item quantity="many">%1$d ofertas · hasta -%2$d%%</item>
+        <item quantity="other">%1$d ofertas · hasta -%2$d%%</item>
     </plurals>
+    <string name="sin_sugeridos_seguidos">Aún no sigues ningún sugerido en esta categoría.</string>
+    <string name="sin_sugeridos_categoria">No hay sugeridos para esta categoría.</string>
+    <string name="agregar_busqueda">Agregar búsqueda</string>
+    <string name="agregar_busqueda_titulo">Agregar búsqueda en %1$s</string>
+    <string name="agregar_busqueda_ayuda">De %1$d a %2$d caracteres. Te avisaremos cuando haya ofertas.</string>
+    <string name="cancelar_busqueda">Cancelar</string>
+    <string name="dejaste_de_seguir">Dejaste de seguir %1$s</string>
+    <string name="deshacer">Deshacer</string>
+    <string name="etiqueta_nuevo">Nuevo</string>
+    <string name="ordenadas_mayor_descuento">Ordenadas por mayor descuento</string>
+    <string name="actualizado_hace">Actualizado %1$s</string>
+    <string name="aun_sin_actualizar">Aún no se ha buscado</string>
+    <string name="siguiendo_accesorio">Siguiendo</string>
+    <string name="toca_para_dejar_de_seguir">Toca \"Siguiendo\" para dejar de seguirlo.</string>
+    <string name="ya_no_sigues_accesorio">Ya no sigues este accesorio.</string>
+    <string name="volver_a_siguiendo">Volver a Siguiendo</string>
+    <string name="notificacion_accesorio_titulo">%1$s · hasta %2$d%% menos</string>
+    <string name="notificacion_accesorio_texto">%1$s en %2$s: %3$s</string>
+    <plurals name="notificacion_promociones_extra">
+        <item quantity="one">+%d promoción más</item>
+        <item quantity="many">+%d promociones más</item>
+        <item quantity="other">+%d promociones más</item>
+    </plurals>
+    <plurals name="notificacion_resumen_accesorios">
+        <item quantity="one">%d accesorio con ofertas nuevas</item>
+        <item quantity="many">%d accesorios con ofertas nuevas</item>
+        <item quantity="other">%d accesorios con ofertas nuevas</item>
+    </plurals>
+    <plurals name="notificacion_accesorios_extra">
+        <item quantity="one">+%d accesorio más</item>
+        <item quantity="many">+%d accesorios más</item>
+        <item quantity="other">+%d accesorios más</item>
+    </plurals>
+    <string name="accion_ver_oferta">Ver oferta</string>
+    <string name="accion_ver_todas">Ver todas</string>
 </resources>

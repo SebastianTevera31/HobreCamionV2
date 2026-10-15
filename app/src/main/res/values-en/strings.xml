@@ -938,18 +938,12 @@
     <string name="ver_siguiendo">See what I follow</string>
     <string name="tipo_accesorio_truck">Truck</string>
     <string name="tipo_accesorio_rv">RV</string>
-    <string name="mis_accesorios">My accessories</string>
     <string name="accesorios_sugeridos">Suggested (Top 10)</string>
     <string name="agregar_accesorio_hint">Type an accessory to follow</string>
-    <string name="agregar_accesorio">Add</string>
     <string name="seguir_accesorio">Follow</string>
-    <string name="dejar_de_seguir_accesorio">Unfollow %1$s</string>
-    <string name="accesorios_seguidos_contador">%1$d of %2$d accessories followed</string>
-    <string name="sin_accesorios_seguidos">You don\'t follow any accessories in this category yet. Pick a suggested one or type your own.</string>
     <string name="buscando_promociones">Looking for deals…</string>
     <string name="sin_promociones_accesorio">No deals for now.</string>
     <string name="buscar_promociones_ahora">Refresh</string>
-    <string name="todos_sugeridos_seguidos">You already follow all suggestions in this category.</string>
     <string name="error_accesorio_corto">Type at least %1$d characters.</string>
     <string name="error_accesorio_largo">Type at most %1$d characters.</string>
     <string name="error_accesorio_duplicado">You already follow this accessory.</string>
@@ -958,8 +952,45 @@
     <string name="error_cargar_sugeridos">Suggestions couldn\'t be loaded.</string>
     <string name="canal_promociones_seguidas">Deals on what you follow</string>
     <string name="notificacion_promociones_titulo">New deals on what you follow</string>
-    <plurals name="notificacion_promociones_nuevas">
-        <item quantity="one">%1$d new deal: %2$s</item>
-        <item quantity="other">%1$d new deals: %2$s</item>
+    <string name="tus_busquedas">Your searches</string>
+    <string name="filtro_todos">All</string>
+    <string name="filtro_siguiendo">Following (%1$d)</string>
+    <string name="contador_seguidos">%1$d/%2$d followed</string>
+    <string name="estado_sin_seguir">Not followed</string>
+    <plurals name="estado_ofertas">
+        <item quantity="one">%1$d deal · up to -%2$d%%</item>
+        <item quantity="other">%1$d deals · up to -%2$d%%</item>
     </plurals>
+    <string name="sin_sugeridos_seguidos">You don\'t follow any suggestions in this category yet.</string>
+    <string name="sin_sugeridos_categoria">There are no suggestions for this category.</string>
+    <string name="agregar_busqueda">Add search</string>
+    <string name="agregar_busqueda_titulo">Add search in %1$s</string>
+    <string name="agregar_busqueda_ayuda">%1$d to %2$d characters. We\'ll let you know when there are deals.</string>
+    <string name="cancelar_busqueda">Cancel</string>
+    <string name="dejaste_de_seguir">You unfollowed %1$s</string>
+    <string name="deshacer">Undo</string>
+    <string name="etiqueta_nuevo">New</string>
+    <string name="ordenadas_mayor_descuento">Sorted by biggest discount</string>
+    <string name="actualizado_hace">Updated %1$s</string>
+    <string name="aun_sin_actualizar">Not searched yet</string>
+    <string name="siguiendo_accesorio">Following</string>
+    <string name="toca_para_dejar_de_seguir">Tap \"Following\" to unfollow it.</string>
+    <string name="ya_no_sigues_accesorio">You no longer follow this accessory.</string>
+    <string name="volver_a_siguiendo">Back to Following</string>
+    <string name="notificacion_accesorio_titulo">%1$s · up to %2$d%% off</string>
+    <string name="notificacion_accesorio_texto">%1$s at %2$s: %3$s</string>
+    <plurals name="notificacion_promociones_extra">
+        <item quantity="one">+%d more deal</item>
+        <item quantity="other">+%d more deals</item>
+    </plurals>
+    <plurals name="notificacion_resumen_accesorios">
+        <item quantity="one">%d accessory with new deals</item>
+        <item quantity="other">%d accessories with new deals</item>
+    </plurals>
+    <plurals name="notificacion_accesorios_extra">
+        <item quantity="one">+%d more accessory</item>
+        <item quantity="other">+%d more accessories</item>
+    </plurals>
+    <string name="accion_ver_oferta">View deal</string>
+    <string name="accion_ver_todas">See all</string>
 </resources>
