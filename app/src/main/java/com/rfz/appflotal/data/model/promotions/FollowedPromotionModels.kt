@@ -62,6 +62,23 @@ data class FollowedPromotionEntity(
     val firstSeenAt: Long
 )
 
+/**
+ * Producto que ya apareció en las búsquedas de un accesorio. A diferencia de
+ * [FollowedPromotionEntity] (solo los resultados de la última búsqueda), se conserva
+ * aunque el producto salga de los resultados, para no volver a notificarlo ni marcarlo
+ * "Nuevo" si regresa.
+ */
+@Entity(
+    tableName = "followed_seen_product_table",
+    primaryKeys = ["followedAccessoryId", "productUrl"]
+)
+data class FollowedSeenProductEntity(
+    val followedAccessoryId: Long,
+    val productUrl: String,
+    val firstSeenAt: Long,
+    val lastSeenAt: Long
+)
+
 data class FollowedAccessory(
     val id: Long,
     val catalogAccessoryId: Int?,

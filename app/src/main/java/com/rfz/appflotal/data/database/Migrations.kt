@@ -56,4 +56,30 @@ val MIGRATION_28_29 = object : Migration(28, 29) {
     }
 }
 
-val ALL_MIGRATIONS = arrayOf(MIGRATION_27_28, MIGRATION_28_29)
+/**
+ * Productos ya vistos por accesorio, para no volver a notificar uno que sale y regresa a los
+ * resultados. Lo que ya está en caché cuenta como visto, para que actualizar la app no lo
+ * notifique otra vez.
+ */
+val MIGRATION_29_30 = object : Migration(29, 30) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `followed_seen_product_table` (" +
+                "`followedAccessoryId` INTEGER NOT NULL, " +
+                "`productUrl` TEXT NOT NULL, " +
+                "`firstSeenAt` INTEGER NOT NULL, " +
+                "`lastSeenAt` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`followedAccessoryId`, `productUrl`))"
+        )
+        db.execSQL(
+            "INSERT OR IGNORE INTO `followed_seen_product_table` " +
+                "(`followedAccessoryId`, `productUrl`, `firstSeenAt`, `lastSeenAt`) " +
+                "SELECT p.`followedAccessoryId`, p.`productUrl`, p.`firstSeenAt`, " +
+                "COALESCE(a.`lastSyncedAt`, p.`firstSeenAt`) " +
+                "FROM `followed_promotion_table` p " +
+                "JOIN `followed_accessory_table` a ON a.`id` = p.`followedAccessoryId`"
+        )
+    }
+}
+
+val ALL_MIGRATIONS = arrayOf(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30)

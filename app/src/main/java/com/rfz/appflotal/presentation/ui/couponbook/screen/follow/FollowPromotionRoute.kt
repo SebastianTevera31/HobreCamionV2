@@ -106,7 +106,7 @@ fun FollowPromotionScreen(
     onNewAccessoryTextChanged: (String) -> Unit,
     onAddCustomAccessory: () -> Unit,
     onUndoUnfollow: () -> Unit,
-    onMessageShown: () -> Unit,
+    onMessageShown: (FollowMessage) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val tabs = AccessoryVehicleType.entries
@@ -247,7 +247,7 @@ private fun FollowMessageEffect(
     maxFollowed: Int,
     snackbarHostState: SnackbarHostState,
     onUndoUnfollow: () -> Unit,
-    onMessageShown: () -> Unit
+    onMessageShown: (FollowMessage) -> Unit
 ) {
     val text = when (message) {
         null -> null
@@ -258,16 +258,20 @@ private fun FollowMessageEffect(
     val undoLabel = stringResource(R.string.deshacer)
 
     // Se limpia al terminar: limpiarlo antes cambiaría la llave y cancelaría el snackbar.
+    // También al cancelarse (p. ej. al abrir un detalle), para no repetirlo al volver.
     LaunchedEffect(message) {
         if (message == null || text == null) return@LaunchedEffect
-        val isUnfollow = message is FollowMessage.Unfollowed
-        val result = snackbarHostState.showSnackbar(
-            message = text,
-            actionLabel = if (isUnfollow) undoLabel else null,
-            duration = SnackbarDuration.Short
-        )
-        if (isUnfollow && result == SnackbarResult.ActionPerformed) onUndoUnfollow()
-        onMessageShown()
+        try {
+            val isUnfollow = message is FollowMessage.Unfollowed
+            val result = snackbarHostState.showSnackbar(
+                message = text,
+                actionLabel = if (isUnfollow) undoLabel else null,
+                duration = SnackbarDuration.Short
+            )
+            if (isUnfollow && result == SnackbarResult.ActionPerformed) onUndoUnfollow()
+        } finally {
+            onMessageShown(message)
+        }
     }
 }
 

@@ -8,7 +8,6 @@ import com.rfz.appflotal.data.model.promotions.FollowedAccessoryEntity
 import com.rfz.appflotal.data.model.promotions.FollowedPromotion
 import com.rfz.appflotal.data.model.promotions.NewFollowedPromotion
 import com.rfz.appflotal.data.model.promotions.toDomain
-import com.rfz.appflotal.data.model.promotions.toFollowedEntity
 import com.rfz.appflotal.data.network.service.DataError
 import com.rfz.appflotal.data.network.service.catalog.RemoteCatalogDataSource
 import com.rfz.appflotal.data.network.service.promotions.RemotePromotionsDataSource
@@ -20,19 +19,26 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Llamadas simultáneas a GetDiscounts durante una sincronización. */
 private const val SYNC_CONCURRENCY = 3
 
+// Singleton: el Mutex de sincronización debe ser el mismo para todos los workers.
+@Singleton
 class FollowedPromotionsRepository @Inject constructor(
     private val remoteCatalogDataSource: RemoteCatalogDataSource,
     private val remotePromotionsDataSource: RemotePromotionsDataSource,
     private val followedPromotionsDao: FollowedPromotionsDao,
     private val getTasksUseCase: GetTasksUseCase
 ) {
+
+    private val syncMutex = Mutex()
 
     suspend fun getSuggestedAccessories(): Result<List<TopTenAccessoryResponse>> =
         remoteCatalogDataSource.getTopTenAccessories()
@@ -102,19 +108,24 @@ class FollowedPromotionsRepository @Inject constructor(
     }
 
     /**
-     * Consulta GetDiscounts por cada accesorio seguido y actualiza la caché.
+     * Consulta GetDiscounts por cada accesorio de [scope] y actualiza la caché.
      * Devuelve las promociones nuevas que se deben notificar.
      *
      * Falla solo si no se pudo consultar ningún accesorio; si fallan algunos, conservan
      * su caché anterior y se reintentan en la siguiente ejecución.
+     *
+     * Las sincronizaciones se ejecutan de una en una (la diaria y las del usuario pueden
+     * coincidir): así cada una ve lo que guardó la anterior y no se notifica dos veces lo mismo.
      */
-    suspend fun syncFollowedPromotions(): Result<List<NewFollowedPromotion>> {
+    suspend fun syncFollowedPromotions(
+        scope: FollowedSyncScope = FollowedSyncScope.All
+    ): Result<List<NewFollowedPromotion>> = syncMutex.withLock {
         val token = getTasksUseCase().first().firstOrNull()?.fld_token
             ?.takeIf { it.isNotBlank() }
-            ?: return Result.success(emptyList())
+            ?: return@withLock Result.success(emptyList())
 
-        val followed = followedPromotionsDao.getFollowedAccessories()
-        if (followed.isEmpty()) return Result.success(emptyList())
+        val followed = accessoriesToSync(followedPromotionsDao.getFollowedAccessories(), scope)
+        if (followed.isEmpty()) return@withLock Result.success(emptyList())
 
         val semaphore = Semaphore(SYNC_CONCURRENCY)
         val responses = coroutineScope {
@@ -137,30 +148,30 @@ class FollowedPromotionsRepository @Inject constructor(
 
         responses.forEach { (accessory, result) ->
             val fetched = result.getOrNull()?.result ?: return@forEach
-            val previousFirstSeen = followedPromotionsDao.getPromotionsFor(accessory.id)
-                .associate { it.productUrl to it.firstSeenAt }
+            val plan = planAccessorySync(
+                accessory = accessory,
+                fetched = fetched,
+                firstSeenByUrl = followedPromotionsDao.getSeenProductsFor(accessory.id)
+                    .associate { it.productUrl to it.firstSeenAt },
+                knownProductUrls = knownProductUrls,
+                now = now
+            )
+            toNotify += plan.toNotify
 
-            val newOnes = newPromotionsToNotify(accessory, fetched, knownProductUrls)
-            toNotify += newOnes
-
-            followedPromotionsDao.replacePromotionsFor(
+            followedPromotionsDao.applySync(
                 followedAccessoryId = accessory.id,
-                promotions = fetched.distinctBy { it.productUrl }.mapIndexed { index, discount ->
-                    discount.toFollowedEntity(
-                        followedAccessoryId = accessory.id,
-                        position = index,
-                        firstSeenAt = previousFirstSeen[discount.productUrl] ?: now
-                    )
-                },
+                promotions = plan.promotions,
+                seen = plan.seen,
                 // Mismo instante que firstSeenAt: lo de la primera búsqueda no cuenta como "Nuevo".
-                syncedAt = now
+                syncedAt = now,
+                forgetSeenBefore = now - SEEN_PRODUCT_RETENTION_MILLIS
             )
             // Una misma promoción encontrada por dos accesorios se notifica una sola vez.
-            knownProductUrls += fetched.map { it.productUrl }
+            knownProductUrls += plan.seen.map { it.productUrl }
         }
 
         val failures = responses.mapNotNull { (_, result) -> result.exceptionOrNull() }
-        return if (failures.size == responses.size) {
+        if (failures.size == responses.size) {
             Result.failure(failures.first())
         } else {
             Result.success(toNotify)

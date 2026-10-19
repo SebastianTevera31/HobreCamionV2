@@ -28,6 +28,7 @@ import com.rfz.appflotal.data.repository.promotions.buildAccessoryNotifications
 import com.rfz.appflotal.data.repository.promotions.safeProductUrl
 import com.rfz.appflotal.presentation.ui.couponbook.screen.promotions.formatPromotionPrice
 import com.rfz.appflotal.presentation.ui.inicio.ui.InicioActivity
+import com.rfz.appflotal.presentation.ui.inicio.ui.followedAccessoryDestination
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
@@ -117,7 +118,7 @@ class PromotionNotifier @Inject constructor(
         )
         val openAccessory = deepLinkIntent(
             requestCode = accessoryNotificationId(entry.accessoryId),
-            destination = InicioActivity.followedAccessoryDestination(entry.accessoryId)
+            destination = followedAccessoryDestination(entry.accessoryId)
         )
 
         val builder = NotificationCompat.Builder(context, FOLLOWED_PROMOTIONS_CHANNEL_ID)

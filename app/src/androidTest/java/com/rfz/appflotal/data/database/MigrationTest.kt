@@ -98,4 +98,46 @@ class MigrationTest {
             assertEquals(1, cursor.getInt(0))
         }
     }
+
+    @Test
+    fun migrate29To30_registraComoVistoLoQueYaEstabaEnCache() {
+        helper.createDatabase(testDb, 29).apply {
+            execSQL(
+                """
+                INSERT INTO followed_accessory_table (id, catalogAccessoryId, vehicleType, name,
+                    normalizedName, description, createdAt, initialSyncDone, firstSyncedAt,
+                    lastSyncedAt)
+                VALUES (1, 1, 'TRUCK', 'Dash cam', 'dash cam', NULL, 100, 1, 100, 500)
+                """.trimIndent()
+            )
+            execSQL(
+                """
+                INSERT INTO followed_promotion_table (followedAccessoryId, productUrl, position,
+                    store, title, sku, regularPrice, finalPrice, percentOff, currency, imageUrl,
+                    firstSeenAt)
+                VALUES (1, 'https://store.com/a', 0, 'Store', 'Item', NULL, 100.0, 80.0, 20.0,
+                    'USD', NULL, 200)
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(testDb, 30, true, MIGRATION_29_30)
+
+        db.query(
+            "SELECT followedAccessoryId, productUrl, firstSeenAt, lastSeenAt FROM followed_seen_product_table"
+        ).use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals(1, cursor.getInt(0))
+            assertEquals("https://store.com/a", cursor.getString(1))
+            assertEquals(200L, cursor.getLong(2))
+            // Última vez visto = última búsqueda del accesorio.
+            assertEquals(500L, cursor.getLong(3))
+        }
+        db.query("SELECT COUNT(*) FROM followed_promotion_table").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(1, cursor.getInt(0))
+        }
+    }
 }

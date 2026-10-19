@@ -957,6 +957,8 @@
     <string name="ordenadas_mayor_descuento">Ordenadas por mayor descuento</string>
     <string name="actualizado_hace">Actualizado %1$s</string>
     <string name="aun_sin_actualizar">Aún no se ha buscado</string>
+    <string name="busqueda_en_espera">Pendiente: se buscará en cuanto haya conexión</string>
+    <string name="error_buscar_promociones">No se pudo buscar. Intenta de nuevo.</string>
     <string name="siguiendo_accesorio">Siguiendo</string>
     <string name="toca_para_dejar_de_seguir">Toca \"Siguiendo\" para dejar de seguirlo.</string>
     <string name="ya_no_sigues_accesorio">Ya no sigues este accesorio.</string>

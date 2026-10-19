@@ -13,7 +13,7 @@ import com.rfz.appflotal.data.repository.promotions.FollowValidation
 import com.rfz.appflotal.data.repository.promotions.FollowedPromotionsRepository
 import com.rfz.appflotal.data.repository.promotions.MAX_FOLLOWED_ACCESSORIES
 import com.rfz.appflotal.data.repository.promotions.buildFollowSections
-import com.rfz.appflotal.data.worker.triggerFollowedPromotionsSync
+import com.rfz.appflotal.data.worker.triggerPendingFollowedPromotionsSync
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -67,6 +67,13 @@ data class FollowPromotionUiState(
 
     val followedInTabCount: Int
         get() = followed.count { it.vehicleType == selectedType }
+
+    /**
+     * Quita [shown] cuando terminó de mostrarse (o se canceló al salir de la pantalla).
+     * Si ya llegó otro mensaje, se conserva para que también se muestre.
+     */
+    fun withMessageShown(shown: FollowMessage): FollowPromotionUiState =
+        if (message == shown) copy(message = null) else this
 }
 
 @HiltViewModel
@@ -197,8 +204,8 @@ class FollowPromotionViewModel @Inject constructor(
         }
     }
 
-    fun onMessageShown() {
-        _uiState.update { it.copy(message = null) }
+    fun onMessageShown(shown: FollowMessage) {
+        _uiState.update { it.withMessageShown(shown) }
     }
 
     private fun showMessage(message: FollowMessage) {
@@ -226,7 +233,7 @@ class FollowPromotionViewModel @Inject constructor(
         if (validation != FollowValidation.VALID) return FollowError.Invalid(validation)
 
         // Primera búsqueda del accesorio; no notifica, solo llena la caché.
-        triggerFollowedPromotionsSync(context)
+        triggerPendingFollowedPromotionsSync(context)
         return null
     }
 }

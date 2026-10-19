@@ -144,6 +144,22 @@ class FollowedPromotionsPresentationLogicTest {
     }
 
     @Test
+    fun `busqueda propia con el nombre de un sugerido lo marca como seguido`() {
+        val sections = buildFollowSections(
+            topTen = listOf(topTen(1, 1), topTen(2, 2)),
+            topTenLoaded = true,
+            followed = listOf(followed(id = 7, name = "top 1", catalogId = null)),
+            vehicleType = AccessoryVehicleType.TRUCK,
+            filter = FollowFilter.ALL
+        )
+
+        // "top 1" es la misma búsqueda que el sugerido "Top 1": no se repite en "Tus búsquedas".
+        assertEquals(7L, sections.topTen[0].followed?.id)
+        assertNull(sections.topTen[1].followed)
+        assertTrue(sections.custom.isEmpty())
+    }
+
+    @Test
     fun `sin catalogo cargado los seguidos del catalogo siguen en top 10`() {
         val sections = buildFollowSections(
             topTen = emptyList(),

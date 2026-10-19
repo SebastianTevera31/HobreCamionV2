@@ -4,8 +4,11 @@ import com.rfz.appflotal.data.model.catalog.TopTenAccessoryResponse
 import com.rfz.appflotal.data.model.promotions.AccessoryVehicleType
 import com.rfz.appflotal.data.model.promotions.FollowedAccessory
 import com.rfz.appflotal.data.model.promotions.FollowedAccessoryEntity
+import com.rfz.appflotal.data.model.promotions.FollowedPromotionEntity
+import com.rfz.appflotal.data.model.promotions.FollowedSeenProductEntity
 import com.rfz.appflotal.data.model.promotions.NewFollowedPromotion
 import com.rfz.appflotal.data.model.promotions.StoreDiscount
+import com.rfz.appflotal.data.model.promotions.toFollowedEntity
 import java.net.URI
 import java.util.Locale
 
@@ -75,9 +78,77 @@ fun vehicleTypeForUser(userVehicleType: String?): AccessoryVehicleType {
     return if (isRv) AccessoryVehicleType.RV else AccessoryVehicleType.TRUCK
 }
 
+/** Qué accesorios consulta una sincronización. */
+sealed interface FollowedSyncScope {
+    /** Todos los seguidos; la ejecución diaria. */
+    data object All : FollowedSyncScope
+
+    /** Solo los que aún no tienen su primera búsqueda (recién seguidos). */
+    data object PendingFirstSync : FollowedSyncScope
+
+    /** Un accesorio, desde "Buscar ahora". */
+    data class Single(val followedAccessoryId: Long) : FollowedSyncScope
+}
+
+fun accessoriesToSync(
+    followed: List<FollowedAccessoryEntity>,
+    scope: FollowedSyncScope
+): List<FollowedAccessoryEntity> = when (scope) {
+    FollowedSyncScope.All -> followed
+    FollowedSyncScope.PendingFirstSync -> followed.filter { !it.initialSyncDone }
+    is FollowedSyncScope.Single -> followed.filter { it.id == scope.followedAccessoryId }
+}
+
 /**
- * Promociones a notificar para un accesorio tras sincronizarlo: las que no estaban en
- * caché ([knownProductUrls]). En su primera sincronización no se notifica nada, solo se
+ * Cuánto se recuerda un producto que dejó de aparecer en los resultados. Si regresa antes,
+ * no se notifica de nuevo; si regresa después, se trata como oferta nueva.
+ */
+const val SEEN_PRODUCT_RETENTION_MILLIS = 30L * 24 * 60 * 60 * 1000
+
+/** Lo que se guarda y se notifica tras la búsqueda de un accesorio. */
+data class AccessorySyncPlan(
+    val promotions: List<FollowedPromotionEntity>,
+    val seen: List<FollowedSeenProductEntity>,
+    val toNotify: List<NewFollowedPromotion>
+)
+
+/**
+ * [firstSeenByUrl]: productos ya vistos por este accesorio (aunque no estén en caché), para
+ * conservar su fecha y que no vuelvan a marcarse "Nuevo". [knownProductUrls]: productos vistos
+ * por cualquier accesorio, para no notificar dos veces el mismo.
+ */
+fun planAccessorySync(
+    accessory: FollowedAccessoryEntity,
+    fetched: List<StoreDiscount>,
+    firstSeenByUrl: Map<String, Long>,
+    knownProductUrls: Set<String>,
+    now: Long
+): AccessorySyncPlan {
+    val unique = fetched.distinctBy { it.productUrl }
+    val promotions = unique.mapIndexed { index, discount ->
+        discount.toFollowedEntity(
+            followedAccessoryId = accessory.id,
+            position = index,
+            firstSeenAt = firstSeenByUrl[discount.productUrl] ?: now
+        )
+    }
+    return AccessorySyncPlan(
+        promotions = promotions,
+        seen = promotions.map {
+            FollowedSeenProductEntity(
+                followedAccessoryId = accessory.id,
+                productUrl = it.productUrl,
+                firstSeenAt = it.firstSeenAt,
+                lastSeenAt = now
+            )
+        },
+        toNotify = newPromotionsToNotify(accessory, unique, knownProductUrls)
+    )
+}
+
+/**
+ * Promociones a notificar para un accesorio tras sincronizarlo: las que nunca se habían
+ * visto ([knownProductUrls]). En su primera sincronización no se notifica nada, solo se
  * guarda lo que ya existía.
  */
 fun newPromotionsToNotify(
@@ -156,6 +227,8 @@ data class FollowSections(
  * Arma las dos secciones de una pestaña.
  * - Top 10: los sugeridos, seguidos o no. Si el catálogo no cargó, solo los ya seguidos.
  * - Tus búsquedas: las escritas por el usuario y las del catálogo que salieron del Top 10.
+ * Un sugerido cuenta como seguido si se siguió desde el catálogo o si el usuario escribió
+ * el mismo nombre (son la misma búsqueda; seguirlo otra vez se rechazaría como duplicado).
  * Con [FollowFilter.FOLLOWING] se ocultan los sugeridos que no se siguen.
  */
 fun buildFollowSections(
@@ -170,27 +243,25 @@ fun buildFollowSections(
         .filter { it.catalogAccessoryId != null }
         .associateBy { it.catalogAccessoryId }
 
-    val topTenRows: List<FollowRow>
-    val inTopTenIds: Set<Int>
-    if (topTenLoaded) {
-        val suggestions = suggestedAccessoriesFor(topTen, vehicleType)
-        inTopTenIds = suggestions.map { it.idAccessory }.toSet()
-        topTenRows = suggestions.map { accessory ->
+    val topTenRows: List<FollowRow> = if (topTenLoaded) {
+        val followedByName = followedInTab.associateBy { normalizeAccessoryName(it.name) }
+        suggestedAccessoriesFor(topTen, vehicleType).map { accessory ->
             FollowRow(
                 key = "top-${accessory.idAccessory}",
                 position = accessory.position,
                 name = accessory.name.orEmpty(),
                 catalogAccessory = accessory,
                 followed = followedByCatalogId[accessory.idAccessory]
+                    ?: followedByName[normalizeAccessoryName(accessory.name.orEmpty())]
             )
         }
     } else {
-        inTopTenIds = followedByCatalogId.keys.filterNotNull().toSet()
-        topTenRows = followedByCatalogId.values.map { it.toRow() }
+        followedByCatalogId.values.map { it.toRow() }
     }
 
+    val inTopTenIds = topTenRows.mapNotNull { it.followed?.id }.toSet()
     val customRows = followedInTab
-        .filter { it.catalogAccessoryId == null || it.catalogAccessoryId !in inTopTenIds }
+        .filter { it.id !in inTopTenIds }
         .map { it.toRow() }
 
     return FollowSections(

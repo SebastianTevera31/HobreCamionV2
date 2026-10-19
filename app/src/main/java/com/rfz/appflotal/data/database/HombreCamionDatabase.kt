@@ -28,6 +28,7 @@ import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.database.TopicEntity
 import com.rfz.appflotal.data.model.promotions.FollowedAccessoryEntity
 import com.rfz.appflotal.data.model.promotions.FollowedPromotionEntity
+import com.rfz.appflotal.data.model.promotions.FollowedSeenProductEntity
 import com.rfz.appflotal.data.model.promotions.PromotionEntity
 
 @Keep
@@ -37,9 +38,10 @@ import com.rfz.appflotal.data.model.promotions.PromotionEntity
         SensorDataEntity::class, AssemblyTireEntity::class, AxleEntity::class,
         DisassemblyTireEntity::class, InspectionTireEntity::class,
         InspectionCatalogEntity::class, CommentEntity::class, TopicEntity::class,
-        PromotionEntity::class, FollowedAccessoryEntity::class, FollowedPromotionEntity::class
+        PromotionEntity::class, FollowedAccessoryEntity::class, FollowedPromotionEntity::class,
+        FollowedSeenProductEntity::class
     ],
-    version = 29,
+    version = 30,
     exportSchema = true
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {

@@ -528,18 +528,18 @@ class InicioActivity : ComponentActivity() {
                                 val currentRoute = backStackEntry?.destination?.route
                                 LaunchedEffect(pendingDestination, currentRoute, userData) {
                                     val destination = pendingDestination ?: return@LaunchedEffect
-                                    if (currentRoute == null || currentRoute == NavScreens.LOADING) {
-                                        return@LaunchedEffect
-                                    }
+                                    val action = resolveNotificationDestination(
+                                        destination = destination,
+                                        currentRoute = currentRoute,
+                                        hasUser = userData != null,
+                                        hasCompletePlan = userData?.paymentPlan
+                                            ?.toSafePaymentPlanType() == PaymentPlanType.Complete
+                                    )
+                                    // Wait: el efecto vuelve a correr cuando cambie la ruta o llegue la sesión.
+                                    if (action == NotificationDestinationAction.Wait) return@LaunchedEffect
                                     pendingDestination = null
 
-                                    // Sin sesión, en onboarding o sin plan Complete se descarta.
-                                    val accessoryId = parseFollowedAccessoryId(destination)
-                                    val canOpen = (destination == DESTINO_FOLLOW_PROMOTIONS || accessoryId != null) &&
-                                            userData != null &&
-                                            currentRoute !in AUTH_ROUTES &&
-                                            userData.paymentPlan.toSafePaymentPlanType() == PaymentPlanType.Complete
-                                    if (canOpen) {
+                                    if (action is NotificationDestinationAction.Open) {
                                         // Pila HOME → CouponGraph → FollowPromotions (→ detalle) para que "atrás" funcione.
                                         if (currentRoute != NavScreens.HOME) {
                                             navController.navigate(NavScreens.HOME) {
@@ -548,7 +548,9 @@ class InicioActivity : ComponentActivity() {
                                         }
                                         navController.navigate(CouponGraph)
                                         navController.navigate(FollowPromotions)
-                                        accessoryId?.let { navController.navigate(FollowedAccessoryDetail(it)) }
+                                        action.followedAccessoryId?.let {
+                                            navController.navigate(FollowedAccessoryDetail(it))
+                                        }
                                     }
                                 }
 
@@ -690,26 +692,8 @@ class InicioActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_DESTINO = "destino"
+        // El destino al detalle de un accesorio se arma con followedAccessoryDestination().
         const val DESTINO_FOLLOW_PROMOTIONS = "follow_promotions"
-        private const val DESTINO_FOLLOWED_ACCESSORY_PREFIX = "followed_accessory:"
-
-        /** Destino al detalle de un accesorio seguido; viaja como texto para guardarse en el estado. */
-        fun followedAccessoryDestination(accessoryId: Long): String =
-            "$DESTINO_FOLLOWED_ACCESSORY_PREFIX$accessoryId"
-
-        private fun parseFollowedAccessoryId(destination: String): Long? =
-            destination.removePrefix(DESTINO_FOLLOWED_ACCESSORY_PREFIX)
-                .takeIf { destination.startsWith(DESTINO_FOLLOWED_ACCESSORY_PREFIX) }
-                ?.toLongOrNull()
-
-        // Rutas previas a tener sesión completa: un destino pendiente aquí se descarta.
-        private val AUTH_ROUTES = setOf(
-            NavScreens.LOGIN,
-            NavScreens.RECUPERAR_CONTRASENIA,
-            NavScreens.REGISTRAR_USUARIO,
-            NavScreens.TERMINOS,
-            NavScreens.PERMISOS
-        )
     }
 }
 

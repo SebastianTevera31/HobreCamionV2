@@ -224,4 +224,91 @@ class FollowedPromotionsLogicTest {
         )
         assertTrue(result.isEmpty())
     }
+
+    // --- Plan de sincronización ---
+
+    /**
+     * Simula varias búsquedas diarias del mismo accesorio, guardando lo visto como lo hace
+     * el repositorio (tabla de vistos). Devuelve lo notificado en cada búsqueda.
+     */
+    private class SeenSimulation(private val accessoryName: String) {
+        val firstSeen = mutableMapOf<String, Long>()
+        private var synced = false
+
+        fun search(urls: List<String>, now: Long): AccessorySyncPlan {
+            val accessory = FollowedAccessoryEntity(
+                id = 1,
+                catalogAccessoryId = null,
+                vehicleType = AccessoryVehicleType.TRUCK.name,
+                name = accessoryName,
+                normalizedName = normalizeAccessoryName(accessoryName),
+                description = null,
+                createdAt = 0,
+                initialSyncDone = synced
+            )
+            val plan = planAccessorySync(
+                accessory = accessory,
+                fetched = urls.map {
+                    StoreDiscount("Store", "Item $it", null, 100.0, 80.0, 20.0, "USD", it, null)
+                },
+                firstSeenByUrl = firstSeen.toMap(),
+                knownProductUrls = firstSeen.keys.toSet(),
+                now = now
+            )
+            plan.seen.forEach { firstSeen[it.productUrl] = it.firstSeenAt }
+            synced = true
+            return plan
+        }
+    }
+
+    @Test
+    fun `producto que sale y vuelve a los resultados no se notifica otra vez`() {
+        val simulation = SeenSimulation("Dash cam")
+
+        val day1 = simulation.search(listOf("a", "b", "c", "d", "e"), now = 1_000)
+        val day2 = simulation.search(listOf("a", "b", "c", "d", "f"), now = 2_000)
+        val day3 = simulation.search(listOf("a", "b", "c", "d", "e"), now = 3_000)
+
+        assertTrue(day1.toNotify.isEmpty())
+        assertEquals(listOf("f"), day2.toNotify.map { it.discount.productUrl })
+        assertTrue(day3.toNotify.isEmpty())
+        // Conserva la fecha de la primera vez, así que tampoco vuelve a marcarse "Nuevo".
+        assertEquals(1_000L, day3.promotions.first { it.productUrl == "e" }.firstSeenAt)
+    }
+
+    @Test
+    fun `plan guarda solo los resultados actuales y registra cuando se vieron`() {
+        val plan = planAccessorySync(
+            accessory = followed("Dash cam", id = 4),
+            fetched = listOf(discount("a"), discount("b"), discount("a")),
+            firstSeenByUrl = mapOf("a" to 100L, "z" to 50L),
+            knownProductUrls = setOf("a", "z"),
+            now = 900
+        )
+
+        assertEquals(listOf("a", "b"), plan.promotions.map { it.productUrl })
+        assertEquals(listOf(0, 1), plan.promotions.map { it.position })
+        assertEquals(listOf(100L, 900L), plan.promotions.map { it.firstSeenAt })
+        assertEquals(listOf(900L, 900L), plan.seen.map { it.lastSeenAt })
+        assertTrue(plan.seen.all { it.followedAccessoryId == 4L })
+        assertEquals(listOf("b"), plan.toNotify.map { it.discount.productUrl })
+    }
+
+    @Test
+    fun `alcance de la sincronizacion elige los accesorios a consultar`() {
+        val synced = followed("Dash cam", id = 1)
+        val pending = followed("TPMS", id = 2, initialSyncDone = false)
+        val all = listOf(synced, pending)
+
+        assertEquals(listOf(1L, 2L), accessoriesToSync(all, FollowedSyncScope.All).map { it.id })
+        assertEquals(
+            listOf(2L),
+            accessoriesToSync(all, FollowedSyncScope.PendingFirstSync).map { it.id }
+        )
+        assertEquals(
+            listOf(1L),
+            accessoriesToSync(all, FollowedSyncScope.Single(1)).map { it.id }
+        )
+        assertTrue(accessoriesToSync(all, FollowedSyncScope.Single(99)).isEmpty())
+    }
 }

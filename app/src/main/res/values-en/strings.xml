@@ -973,6 +973,8 @@
     <string name="ordenadas_mayor_descuento">Sorted by biggest discount</string>
     <string name="actualizado_hace">Updated %1$s</string>
     <string name="aun_sin_actualizar">Not searched yet</string>
+    <string name="busqueda_en_espera">Pending: will search as soon as you are online</string>
+    <string name="error_buscar_promociones">Couldn\'t search. Try again.</string>
     <string name="siguiendo_accesorio">Following</string>
     <string name="toca_para_dejar_de_seguir">Tap \"Following\" to unfollow it.</string>
     <string name="ya_no_sigues_accesorio">You no longer follow this accessory.</string>

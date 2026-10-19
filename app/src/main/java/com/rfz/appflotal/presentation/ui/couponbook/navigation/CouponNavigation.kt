@@ -385,6 +385,7 @@ fun NavGraphBuilder.couponGraph(
             val followViewModel: FollowPromotionViewModel = hiltViewModel(followEntry)
             val detailViewModel: FollowedAccessoryDetailViewModel = hiltViewModel()
             val state by detailViewModel.uiState.collectAsState()
+            val refreshStatus by detailViewModel.refreshStatus.collectAsState()
 
             ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
@@ -399,6 +400,7 @@ fun NavGraphBuilder.couponGraph(
             ) { paddingValue ->
                 FollowedAccessoryDetailScreen(
                     state = state,
+                    refreshStatus = refreshStatus,
                     onUnfollow = { accessory ->
                         followViewModel.onUnfollow(accessory)
                         navController.popBackStackSafely()

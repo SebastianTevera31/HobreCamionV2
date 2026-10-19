@@ -49,7 +49,8 @@ fun FollowedAccessoryDetailScreen(
     onRefresh: () -> Unit,
     onPromotionClick: (StoreDiscount) -> Unit,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    refreshStatus: RefreshStatus = RefreshStatus.IDLE
 ) {
     Box(
         modifier = modifier
@@ -68,6 +69,7 @@ fun FollowedAccessoryDetailScreen(
 
             is FollowedAccessoryDetailUiState.Found -> AccessoryPromotions(
                 accessory = state.accessory,
+                refreshStatus = refreshStatus,
                 onUnfollow = { onUnfollow(state.accessory) },
                 onRefresh = onRefresh,
                 onPromotionClick = onPromotionClick
@@ -79,6 +81,7 @@ fun FollowedAccessoryDetailScreen(
 @Composable
 private fun AccessoryPromotions(
     accessory: FollowedAccessory,
+    refreshStatus: RefreshStatus,
     onUnfollow: () -> Unit,
     onRefresh: () -> Unit,
     onPromotionClick: (StoreDiscount) -> Unit
@@ -91,6 +94,7 @@ private fun AccessoryPromotions(
         item {
             AccessoryHeader(
                 accessory = accessory,
+                refreshStatus = refreshStatus,
                 onUnfollow = onUnfollow,
                 onRefresh = onRefresh
             )
@@ -137,9 +141,13 @@ private fun AccessoryPromotions(
 @Composable
 private fun AccessoryHeader(
     accessory: FollowedAccessory,
+    refreshStatus: RefreshStatus,
     onUnfollow: () -> Unit,
     onRefresh: () -> Unit
 ) {
+    val refreshInProgress =
+        refreshStatus == RefreshStatus.WAITING || refreshStatus == RefreshStatus.SEARCHING
+
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)) {
         accessory.description?.let { description ->
             Text(
@@ -166,18 +174,27 @@ private fun AccessoryHeader(
                     .weight(1f)
                     .padding(start = 4.dp)
             )
-            TextButton(onClick = onRefresh) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
+            TextButton(onClick = onRefresh, enabled = !refreshInProgress) {
+                if (refreshInProgress) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
                 Text(
                     text = stringResource(R.string.buscar_promociones_ahora),
                     modifier = Modifier.padding(start = 4.dp)
                 )
             }
         }
+
+        RefreshStatusText(refreshStatus)
 
         FilledTonalButton(onClick = onUnfollow) {
             Icon(
@@ -196,6 +213,22 @@ private fun AccessoryHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
+
+@Composable
+private fun RefreshStatusText(refreshStatus: RefreshStatus) {
+    val (text, color) = when (refreshStatus) {
+        RefreshStatus.IDLE -> return
+        RefreshStatus.WAITING ->
+            stringResource(R.string.busqueda_en_espera) to MaterialTheme.colorScheme.onSurfaceVariant
+
+        RefreshStatus.SEARCHING ->
+            stringResource(R.string.buscando_promociones) to MaterialTheme.colorScheme.onSurfaceVariant
+
+        RefreshStatus.FAILED ->
+            stringResource(R.string.error_buscar_promociones) to MaterialTheme.colorScheme.error
+    }
+    Text(text = text, style = MaterialTheme.typography.bodySmall, color = color)
 }
 
 @Composable
