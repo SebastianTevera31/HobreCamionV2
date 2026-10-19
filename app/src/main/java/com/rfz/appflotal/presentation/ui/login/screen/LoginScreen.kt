@@ -72,7 +72,6 @@ import com.rfz.appflotal.presentation.ui.login.viewmodel.LoginViewModel
 import com.rfz.appflotal.presentation.ui.utils.arePermissionsGranted
 import com.rfz.appflotal.presentation.ui.utils.getRequiredPermissions
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel,
