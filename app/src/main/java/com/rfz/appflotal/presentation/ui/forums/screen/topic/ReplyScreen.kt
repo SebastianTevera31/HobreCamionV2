@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.forums.screen.topic
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,8 +14,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
@@ -60,9 +63,13 @@ fun ReplyScreen(
 ) {
     val isLoading = replyStatus is LoadState.Loading
 
-    BackHandler {
-        onRemoveImage()
-        onBack()
+    // Safe check for backDispatcherOwner to prevent IllegalStateException in Compose Preview environment
+    val backDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
+    if (backDispatcherOwner != null) {
+        BackHandler {
+            onRemoveImage()
+            onBack()
+        }
     }
 
     LaunchedEffect(replyStatus) {
@@ -78,7 +85,8 @@ fun ReplyScreen(
         Column(
             modifier = Modifier
                 .padding(Dimens.PaddingMedium)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
             if (replyStatus is LoadState.Error) {
