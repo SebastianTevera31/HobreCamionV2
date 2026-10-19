@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.ads.AdView
 import com.rfz.appflotal.data.model.database.AppHCEntity
+import com.rfz.appflotal.data.repository.maintenance.MaintenanceNotificationsRepository
 import com.rfz.appflotal.data.repository.promotions.FollowedPromotionsRepository
 import com.rfz.appflotal.domain.database.DeleteTasksUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
@@ -33,6 +34,7 @@ class InicioScreenViewModel @Inject constructor(
     private val getTasksUseCase: GetTasksUseCase,
     private val deleteTasksUseCase: DeleteTasksUseCase,
     private val followedPromotionsRepository: FollowedPromotionsRepository,
+    private val maintenanceNotificationsRepository: MaintenanceNotificationsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainActivityUiState())
@@ -69,6 +71,7 @@ class InicioScreenViewModel @Inject constructor(
             try {
                 deleteTasksUseCase()
                 followedPromotionsRepository.clearAll()
+                maintenanceNotificationsRepository.clearAll()
                 _uiState.update { currentUiState ->
                     currentUiState.copy(
                         userData = null

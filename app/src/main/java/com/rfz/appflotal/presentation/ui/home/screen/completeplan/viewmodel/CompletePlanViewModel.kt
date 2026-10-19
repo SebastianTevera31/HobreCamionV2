@@ -11,6 +11,7 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.location.LocationRepository
+import com.rfz.appflotal.data.repository.maintenance.MaintenanceNotificationsRepository
 import com.rfz.appflotal.data.repository.weather.WeatherRepository
 import com.rfz.appflotal.domain.alerts.GetAlertsUseCase
 import com.rfz.appflotal.domain.forum.GetPostsFeedUseCase
@@ -41,6 +42,7 @@ class CompletePlanViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val getPostFeedUseCase: GetPostsFeedUseCase,
     private val alertsUseCase: GetAlertsUseCase,
+    private val maintenanceNotificationsRepository: MaintenanceNotificationsRepository,
     observePressureUnitUseCase: ObservePressureUnitUseCase,
     observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase
 ) : ViewModel() {
@@ -63,6 +65,11 @@ class CompletePlanViewModel @Inject constructor(
                     temperatureUnit = temperature
                     _uiState.update { it.copy(alerts = rawAlerts.toUi()) }
                 }
+        }
+        viewModelScope.launch {
+            maintenanceNotificationsRepository.observePending().collect { pending ->
+                _uiState.update { it.copy(hasPendingNotifications = pending.isNotEmpty()) }
+            }
         }
     }
 

@@ -140,4 +140,33 @@ class MigrationTest {
             assertEquals(1, cursor.getInt(0))
         }
     }
+
+    @Test
+    fun migrate30To31_conservaLaSesionYCreaLaTablaDeRecordatorios() {
+        helper.createDatabase(testDb, 30).apply {
+            execSQL(
+                """
+                INSERT INTO user (idUser, fld_name, fld_username, fld_email, fld_token, id_monitor,
+                    country, industry, vehicleType, monitorMac, baseConfiguration, idVehicle,
+                    vehiclePlates, paymentPlan, fecha, termsGranted, odometer, dateLastOdometer)
+                VALUES (7, 'Operador', 'operador', 'op@test.com', 'token-test', 0,
+                    1, 1, 'TRUCK', '', '', 1, 'ABC123', 'Complete', '', 1, 0, '')
+                """.trimIndent()
+            )
+            close()
+        }
+
+        // La validación falla si el SQL de la migración no coincide con schemas/31.json.
+        val db = helper.runMigrationsAndValidate(testDb, 31, true, MIGRATION_30_31)
+
+        db.query("SELECT fld_token FROM user").use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals("token-test", cursor.getString(0))
+        }
+        db.query("SELECT COUNT(*) FROM maintenance_notification_table").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(0, cursor.getInt(0))
+        }
+    }
 }

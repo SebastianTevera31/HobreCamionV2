@@ -995,4 +995,12 @@
     </plurals>
     <string name="accion_ver_oferta">View deal</string>
     <string name="accion_ver_todas">See all</string>
+    <!-- Maintenance reminders -->
+    <string name="canal_recordatorios_mantenimiento">Maintenance reminders</string>
+    <string name="notificacion_mantenimiento_titulo">Maintenance reminder</string>
+    <string name="notificaciones_titulo">Notifications</string>
+    <string name="notificaciones_vacio_titulo">You\'re all caught up</string>
+    <string name="notificaciones_vacio_mensaje">You have no pending reminders.</string>
+    <string name="notificacion_recibida_el">Received on %1$s</string>
+    <string name="marcar_como_enterado">Got it</string>
 </resources>

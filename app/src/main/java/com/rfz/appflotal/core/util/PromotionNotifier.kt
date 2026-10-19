@@ -1,6 +1,5 @@
 package com.rfz.appflotal.core.util
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
@@ -8,13 +7,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import coil.imageLoader
@@ -55,12 +50,11 @@ class PromotionNotifier @Inject constructor(
      * oferta. Con más de un accesorio se agrupan bajo un resumen. Devuelve false si no hay
      * permiso o están desactivadas.
      */
-    @SuppressLint("MissingPermission") // El permiso se verifica en canNotify().
+    @SuppressLint("MissingPermission") // El permiso se verifica en canPostNotifications().
     suspend fun notifyNewPromotions(promotions: List<NewFollowedPromotion>): Boolean {
-        if (promotions.isEmpty() || !canNotify()) return false
+        if (promotions.isEmpty() || !context.canPostNotifications()) return false
 
-        // En segundo plano el contexto usa el idioma del sistema; se fuerza el de la app.
-        val localized = localizedContext()
+        val localized = context.withAppLocale()
         val notificationManager = NotificationManagerCompat.from(context)
         createChannel(localized, notificationManager)
 
@@ -228,15 +222,6 @@ class PromotionNotifier @Inject constructor(
         }
     }
 
-    private fun canNotify(): Boolean {
-        val hasPermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-        return hasPermission && NotificationManagerCompat.from(context).areNotificationsEnabled()
-    }
-
     private fun createChannel(localized: Context, notificationManager: NotificationManagerCompat) {
         notificationManager.createNotificationChannel(
             NotificationChannel(
@@ -245,12 +230,6 @@ class PromotionNotifier @Inject constructor(
                 NotificationManager.IMPORTANCE_DEFAULT
             )
         )
-    }
-
-    private fun localizedContext(): Context {
-        val configuration = Configuration(context.resources.configuration)
-        configuration.setLocale(AppLocale.currentLocale.value)
-        return context.createConfigurationContext(configuration)
     }
 
     private fun accessoryNotificationId(accessoryId: Long): Int =

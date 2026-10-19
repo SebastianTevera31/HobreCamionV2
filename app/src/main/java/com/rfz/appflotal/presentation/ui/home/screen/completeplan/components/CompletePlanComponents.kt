@@ -31,11 +31,13 @@ import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -105,6 +107,7 @@ fun HomeTopBar(
     userName: String,
     planType: PaymentPlanType,
     plates: String = "",
+    hasPendingNotifications: Boolean = false,
     onNotificationsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -154,28 +157,30 @@ fun HomeTopBar(
             }
         }
 
-//        Box {
-//            IconButton(
-//                onClick = onNotificationsClick,
-//                modifier = Modifier
-//                    .size(44.dp)
-//                    .clip(CircleShape)
-//                    .background(TealSoftBg)
-//            ) {
-//                Icon(
-//                    Icons.Outlined.Notifications,
-//                    contentDescription = "Notificaciones",
-//                    tint = TealDark
-//                )
-//            }
-//            Box(
-//                modifier = Modifier
-//                    .size(10.dp)
-//                    .align(Alignment.TopEnd)
-//                    .clip(CircleShape)
-//                    .background(CriticalFg)
-//            )
-//        }
+        Box {
+            IconButton(
+                onClick = onNotificationsClick,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(TealSoftBg)
+            ) {
+                Icon(
+                    Icons.Outlined.Notifications,
+                    contentDescription = stringResource(R.string.notificaciones_titulo),
+                    tint = TealDark
+                )
+            }
+            if (hasPendingNotifications) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .align(Alignment.TopEnd)
+                        .clip(CircleShape)
+                        .background(CriticalFg)
+                )
+            }
+        }
     }
 }
 
@@ -790,6 +795,7 @@ fun HomeTopBarPreview() {
             userName = "Miguel",
             planType = PaymentPlanType.Complete,
             plates = "4521-KBX",
+            hasPendingNotifications = true,
             onNotificationsClick = {}
         )
     }

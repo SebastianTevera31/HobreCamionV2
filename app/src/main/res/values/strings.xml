@@ -982,4 +982,12 @@
     </plurals>
     <string name="accion_ver_oferta">Ver oferta</string>
     <string name="accion_ver_todas">Ver todas</string>
+    <!-- Recordatorios de mantenimiento -->
+    <string name="canal_recordatorios_mantenimiento">Recordatorios de mantenimiento</string>
+    <string name="notificacion_mantenimiento_titulo">Recordatorio de mantenimiento</string>
+    <string name="notificaciones_titulo">Notificaciones</string>
+    <string name="notificaciones_vacio_titulo">Estás al día</string>
+    <string name="notificaciones_vacio_mensaje">No tienes recordatorios pendientes.</string>
+    <string name="notificacion_recibida_el">Recibido el %1$s</string>
+    <string name="marcar_como_enterado">Marcar como enterado</string>
 </resources>

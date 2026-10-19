@@ -14,6 +14,7 @@ import com.rfz.appflotal.data.dao.FollowedPromotionsDao
 import com.rfz.appflotal.data.dao.ForumDao
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
 import com.rfz.appflotal.data.dao.InspectionTireDao
+import com.rfz.appflotal.data.dao.MaintenanceNotificationsDao
 import com.rfz.appflotal.data.dao.PromotionsDao
 import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.database.ALL_MIGRATIONS
@@ -87,6 +88,11 @@ class DataBaseModule {
     @Provides
     fun provideFollowedPromotionsDao(database: AppHombreCamionDatabase): FollowedPromotionsDao {
         return database.followedPromotionsDao()
+    }
+
+    @Provides
+    fun provideMaintenanceNotificationsDao(database: AppHombreCamionDatabase): MaintenanceNotificationsDao {
+        return database.maintenanceNotificationsDao()
     }
 
     @Keep

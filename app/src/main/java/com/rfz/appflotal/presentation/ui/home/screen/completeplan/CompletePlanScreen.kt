@@ -58,6 +58,7 @@ fun CompletePlanScreen(
                 userName = state.userName,
                 planType = state.paymentPlanType,
                 plates = state.vehiclePlate,
+                hasPendingNotifications = state.hasPendingNotifications,
                 onNotificationsClick = onNotificationsClick,
                 modifier = Modifier.padding(top = 96.dp)
             )

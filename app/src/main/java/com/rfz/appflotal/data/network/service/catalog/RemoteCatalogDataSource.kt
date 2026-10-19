@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.network.service.catalog
 import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
+import com.rfz.appflotal.data.model.catalog.MaintenanceNotificationResponse
 import com.rfz.appflotal.data.model.catalog.TopTenAccessoryResponse
 import com.rfz.appflotal.data.network.client.catalog.CatalogClient
 import com.rfz.appflotal.data.network.networkRequestHelper
@@ -48,6 +49,12 @@ class RemoteCatalogDataSource @Inject constructor(
     suspend fun getStates(token: String, countryId: Int) = networkRequestHelper {
         catalogClient.getStates("Bearer $token", countryId)
     }
+
+    /** Falla (sin tocar el catálogo local) ante error HTTP, de red o body nulo. */
+    suspend fun getMaintenanceNotifications(): Result<List<MaintenanceNotificationResponse>> =
+        networkRequestHelper {
+            catalogClient.getMaintenanceNotifications(bearerOrNull())
+        }
 
     suspend fun getTopTenAccessories(): Result<List<TopTenAccessoryResponse>> =
         networkRequestHelper {

@@ -42,7 +42,7 @@ fun CompletePlanContent(
             paymentPlanType = paymentPlan,
             isOffline = wifiStatus != NetworkStatus.Connected
         ),
-        onNotificationsClick = { /* TODO: Implement notifications logic */ },
+        onNotificationsClick = { onNavigate(HombreCamionScreens.NOTIFICATIONS.name) },
         onVehicleDetailClick = { onNavigate(ReportGraph) },
         onAlertsSeeAllClick = { onNavigate(HombreCamionScreens.ALERTS.name) },
         onSectionClick = { section -> onNavigate(section.route) },

@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.network.client.catalog
 import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
+import com.rfz.appflotal.data.model.catalog.MaintenanceNotificationResponse
 import com.rfz.appflotal.data.model.catalog.StateDto
 import com.rfz.appflotal.data.model.catalog.TopTenAccessoryResponse
 import retrofit2.Response
@@ -32,6 +33,12 @@ interface CatalogClient {
         @Header("Authorization") token: String,
         @Query("id_country") countryId: Int
     ): Response<List<StateDto>>
+
+    // Recordatorios de mantenimiento; el servidor decide el idioma del texto según el token.
+    @GET("api/Catalog/Notifications")
+    suspend fun getMaintenanceNotifications(
+        @Header("Authorization") token: String? = null
+    ): Response<List<MaintenanceNotificationResponse>>
 
     // Sin parámetros; el token (opcional) se envía cuando hay sesión.
     @GET("api/Catalog/TopTenAccesories")

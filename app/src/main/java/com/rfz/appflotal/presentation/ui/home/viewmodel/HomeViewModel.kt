@@ -9,7 +9,9 @@ import com.rfz.appflotal.data.model.languaje.LanguageResponse
 import com.rfz.appflotal.data.repository.apputilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
+import com.rfz.appflotal.data.repository.maintenance.MaintenanceNotificationsRepository
 import com.rfz.appflotal.data.repository.promotions.FollowedPromotionsRepository
+import com.rfz.appflotal.data.worker.triggerMaintenanceNotificationsSync
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
@@ -38,6 +40,7 @@ class HomeViewModel @Inject constructor(
     private val appStatusManagerRepository: AppStatusManagerRepository,
     private val catalogUseCase: CatalogUseCase,
     private val followedPromotionsRepository: FollowedPromotionsRepository,
+    private val maintenanceNotificationsRepository: MaintenanceNotificationsRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -53,6 +56,7 @@ class HomeViewModel @Inject constructor(
         hombreCamionRepository.clearUserData()
         catalogUseCase.clearTireReportCatalog()
         followedPromotionsRepository.clearAll()
+        maintenanceNotificationsRepository.clearAll()
         _messageOperationState.value = OperationStatus.Idle
         _uiState.value = HomeUiState()
     }
@@ -78,6 +82,9 @@ class HomeViewModel @Inject constructor(
                         hombreCamionRepository.updateToken(user.idUser, response.token)
                         launch { catalogUseCase.refreshTireReportCatalog() }
                     }
+                    // Tras actualizar el token, para que los recordatorios lleguen en el idioma de la app.
+                    // El worker descarta a quien no tenga plan Complete y espera red si no la hay.
+                    triggerMaintenanceNotificationsSync(context)
                     // Notificar a la API el idioma de la app
                     changeLanguage(AppLocale.currentLocale.value.language)
                     _uiState.update {

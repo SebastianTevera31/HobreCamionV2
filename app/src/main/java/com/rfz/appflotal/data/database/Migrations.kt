@@ -82,4 +82,20 @@ val MIGRATION_29_30 = object : Migration(29, 30) {
     }
 }
 
-val ALL_MIGRATIONS = arrayOf(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30)
+/** Catálogo de recordatorios de mantenimiento (api/Catalog/Notifications) y su ciclo de emisión. */
+val MIGRATION_30_31 = object : Migration(30, 31) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `maintenance_notification_table` (" +
+                "`id` INTEGER NOT NULL, " +
+                "`message` TEXT NOT NULL, " +
+                "`daysConf` INTEGER NOT NULL, " +
+                "`firstSeenAt` INTEGER NOT NULL, " +
+                "`lastNotifiedAt` INTEGER, " +
+                "`acknowledgedAt` INTEGER, " +
+                "PRIMARY KEY(`id`))"
+        )
+    }
+}
+
+val ALL_MIGRATIONS = arrayOf(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31)

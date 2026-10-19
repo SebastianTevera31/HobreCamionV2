@@ -19,6 +19,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
+import com.rfz.appflotal.presentation.ui.notifications.NotificationsRoute
 import com.rfz.appflotal.presentation.ui.registertires.RegisterTireScreen
 import com.rfz.appflotal.presentation.ui.registertires.RegisterTireViewModel
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.MenuTireScreen
@@ -175,6 +176,12 @@ fun NavGraphBuilder.mainNavigation(
     ) {
         AlertsRoute(
             onBack = { navController.popBackStackSafely() },
+        )
+    }
+
+    composable(route = HombreCamionScreens.NOTIFICATIONS.name) {
+        NotificationsRoute(
+            onBack = { navController.popBackStackSafely() }
         )
     }
 

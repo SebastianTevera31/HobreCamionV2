@@ -139,7 +139,7 @@ fun LoginScreen(
             val message = stringResource((uiState as LoginUiState.Error).message)
             ErrorDialog(message) {
                 loginViewModel.cleanLoginState()
-                loginViewModel.cleanLoginData()
+                //loginViewModel.cleanLoginData()
             }
         }
 

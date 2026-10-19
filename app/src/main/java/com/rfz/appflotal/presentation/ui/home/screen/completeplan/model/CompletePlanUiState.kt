@@ -81,6 +81,8 @@ data class CompletePlanUiState(
     ),
     val alerts: List<AlertUi> = emptyList(),
     val weatherState: WeatherState? = null,
+    // Recordatorios de mantenimiento sin "Enterado": enciende el punto de la campana.
+    val hasPendingNotifications: Boolean = false,
     val sections: List<SectionItem> = listOf(
         SectionItem(
             icon = R.drawable.tire_pressure_warning.asIcon(),

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solo en el build debug: herramientas de prueba manual que no entran al APK de release. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!--
+            Vence y emite los recordatorios de mantenimiento al momento:
+            adb shell am broadcast -n com.rfz.appflotal.debug/com.rfz.appflotal.debug.MaintenanceDebugReceiver -a com.rfz.appflotal.debug.FORCE_MAINTENANCE_DUE
+            Exportado para que adb (otro uid) pueda dispararlo; solo existe en debug.
+        -->
+        <receiver
+            android:name="com.rfz.appflotal.debug.MaintenanceDebugReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.rfz.appflotal.debug.FORCE_MAINTENANCE_DUE" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
