@@ -87,7 +87,7 @@ fun LoginScreen(
     DisposableEffect(Unit) {
         onDispose {
             loginViewModel.cleanLoginState()
-            loginViewModel.cleanLoginData()
+            //loginViewModel.cleanLoginData()
         }
     }
 
