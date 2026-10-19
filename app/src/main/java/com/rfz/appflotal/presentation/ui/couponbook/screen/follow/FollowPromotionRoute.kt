@@ -153,6 +153,27 @@ fun FollowPromotionScreen(
                 }
 
                 item {
+                    SectionTitle(
+                        text = stringResource(R.string.tus_busquedas),
+                        modifier = Modifier.padding(top = Dimens.PaddingSmall)
+                    )
+                }
+
+                if (sections.custom.isNotEmpty()) {
+                    item {
+                        RowsCard(
+                            rows = sections.custom,
+                            onFollow = onFollowSuggestion,
+                            onOpenAccessory = onOpenAccessory
+                        )
+                    }
+                }
+
+                item {
+                    AddSearchButton(onClick = onShowAddSheet)
+                }
+
+                item {
                     SectionTitle(text = stringResource(R.string.accesorios_sugeridos))
                 }
 
@@ -196,27 +217,6 @@ fun FollowPromotionScreen(
                 // Si el catálogo falló pero hay seguidos, se muestran arriba y se ofrece reintentar.
                 if (sections.topTen.isNotEmpty() && state.suggestionsState is LoadState.Error) {
                     item { SuggestionsError(onRetry = onRetrySuggestions) }
-                }
-
-                item {
-                    SectionTitle(
-                        text = stringResource(R.string.tus_busquedas),
-                        modifier = Modifier.padding(top = Dimens.PaddingSmall)
-                    )
-                }
-
-                if (sections.custom.isNotEmpty()) {
-                    item {
-                        RowsCard(
-                            rows = sections.custom,
-                            onFollow = onFollowSuggestion,
-                            onOpenAccessory = onOpenAccessory
-                        )
-                    }
-                }
-
-                item {
-                    AddSearchButton(onClick = onShowAddSheet)
                 }
             }
         }
