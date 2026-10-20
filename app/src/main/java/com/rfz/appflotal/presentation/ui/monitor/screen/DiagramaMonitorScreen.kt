@@ -410,6 +410,10 @@ fun PanelSensor(
             }
         }
 
+    // Con llanta seleccionada la tarjeta toma la altura de su contenido para que las
+    // mediciones y los botones se vean completos; la tarjeta de alertas usa el espacio restante
+    val wrapSensorCard = wheel.isNotEmpty() && !isLoading
+
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier   // aquí ya viene con height(panelDimension)
@@ -419,12 +423,12 @@ fun PanelSensor(
             colors = CardDefaults.cardColors(Color.White),
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(tirePanelWeight),
+                .then(if (wrapSensorCard) Modifier else Modifier.weight(tirePanelWeight)),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .then(if (wrapSensorCard) Modifier.fillMaxWidth() else Modifier.fillMaxSize())
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = if (wheel.isNotEmpty()) Arrangement.Top else Arrangement.Center
@@ -443,46 +447,48 @@ fun PanelSensor(
                     // Encabezado: llanta + batería
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(
+                        Text(
+                            text = pluralStringResource(R.plurals.llanta_tag, 1, wheel),
+                            color = Color("#2E3192".toColorInt()),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                text = pluralStringResource(R.plurals.llanta_tag, 1, wheel),
-                                color = Color("#2E3192".toColorInt()),
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Text(
-                                text = if (!timestamp.isNullOrEmpty() && !isVoidDate(timestamp)) {
-                                    stringResource(
-                                        R.string.actualizado,
-                                        timestamp
-                                    )
-                                } else "N/A",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 10.sp,
-                                lineHeight = 16.sp,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                        )
 
                         BatteryAlertIcon(
                             batteryStatus = batteryStatus
                         )
                     }
 
+                    // Fecha a ancho completo para evitar que se parta en 3 líneas junto a la batería
+                    Text(
+                        text = if (!timestamp.isNullOrEmpty() && !isVoidDate(timestamp)) {
+                            stringResource(
+                                R.string.actualizado,
+                                timestamp
+                            )
+                        } else "N/A",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+
+                    // weight(fill = false): solo si el contenido no cabe (p. ej. fuente del sistema muy grande)
+                    // los datos ceden espacio y hacen scroll, para que los botones no se recorten
                     Column(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .weight(1f, fill = false)
                             .padding(dimensionResource(R.dimen.thin_dimen))
-                            .heightIn(min = 110.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
                         CeldaDatosSensor(

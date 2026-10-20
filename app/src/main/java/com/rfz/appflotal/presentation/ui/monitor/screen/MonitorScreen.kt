@@ -193,7 +193,9 @@ fun MonitorScreenContent(
                                 Toast.LENGTH_LONG
                             ).show()
                         },
-                        showNavigationButton = showBackButton
+                        showNavigationButton = showBackButton,
+                        monitorMac = monitorUiState.monitorMac,
+                        signalQuality = monitorUiState.signalIntensity.first
                     ) { navigateUp() }
                 },
                 bottomBar = {

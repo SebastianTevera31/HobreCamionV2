@@ -294,6 +294,10 @@ class HombreCamionService : Service() {
         val dataUser = record.first()
         Log.d("HombreCamionService", "Iniciando Bluetooth...")
         currentMac = dataUser.monitorMac
+        if (dataUser.monitorMac.isBlank()) {
+            bluetoothUseCase.disconnect()
+            return
+        }
         bluetoothUseCase.doConnect(dataUser.monitorMac)
     }
 

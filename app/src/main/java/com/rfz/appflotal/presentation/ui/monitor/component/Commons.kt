@@ -14,18 +14,19 @@ import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
 
 @Composable
 fun MonitorMenuButton(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val buttonShape = RoundedCornerShape(12.dp)
     Button(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .shadow(
                 elevation = 8.dp,
-                shape = RoundedCornerShape(20.dp),
+                shape = buttonShape,
                 ambientColor = primaryColor.copy(alpha = 0.1f)
             ),
         elevation = ButtonDefaults.buttonElevation(12.dp),
         colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-        shape = RoundedCornerShape(12.dp)
+        shape = buttonShape
     ) {
         Text(text)
     }

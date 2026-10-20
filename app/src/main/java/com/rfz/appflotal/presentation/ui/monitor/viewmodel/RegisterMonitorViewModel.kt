@@ -14,6 +14,7 @@ import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
+import com.rfz.appflotal.presentation.ui.utils.asyncResponseHelper
 import com.rfz.appflotal.presentation.ui.utils.responseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,7 +128,8 @@ class RegisterMonitorViewModel @Inject constructor(
                 configurationSelected = configurationSelected,
                 context = context,
                 notifySuccess = true,
-                restartBleOnSuccess = mac.isNotEmpty(),
+                // Siempre: sin MAC el servicio debe cerrar la conexión del monitor anterior.
+                restartBleOnSuccess = true,
                 onResult = { _registeredMonitorState.value = it }
             )
         }
@@ -152,7 +154,7 @@ class RegisterMonitorViewModel @Inject constructor(
             idConfiguration = configurationSelected.id
         )
 
-        responseHelper(
+        asyncResponseHelper(
             response = response,
             onError = {
                 onResult(ApiResult.Error(message = context.getString(RegisterMonitorMessage.UNKNOWN_ERROR.message)))
@@ -261,15 +263,14 @@ class RegisterMonitorViewModel @Inject constructor(
         _monitorConfigUiState.value = MonitorConfigurationUiState()
     }
 
-    private fun updateMonitorDataDB(
+    // suspend: el reinicio BLE lee la MAC de la BD, así que debe esperar a que se guarde.
+    private suspend fun updateMonitorDataDB(
         idMonitor: Int,
         mac: String,
         baseConfiguration: String,
         idUser: Int
     ) {
-        viewModelScope.launch {
-            getTasksUseCase.updateMonitor(idMonitor, mac, baseConfiguration, idUser)
-        }
+        getTasksUseCase.updateMonitor(idMonitor, mac, baseConfiguration, idUser)
     }
 
     private fun showAlert(ctx: Context, message: Int? = null, strMessage: String? = null) {

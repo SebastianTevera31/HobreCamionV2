@@ -332,14 +332,17 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
             return
         }
 
+        // Sin MAC válida (p. ej. "Sin monitor") se cierra la conexión previa en vez de dejarla
+        // abierta, y se limpia lastMacAddress para que no se reconecte sola.
+        val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
+        if (!regex.matches(macAddress)) {
+            AppLog.d("BluetoothRepository", "MAC vacía o inválida, desconectando")
+            disconnect()
+            return
+        }
+
         scope.launch {
             mutex.withLock {
-                val regex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
-                if (!regex.matches(macAddress)) {
-                    AppLog.e("BluetoothRepository", "Bluetooth Address is not valid")
-                    return@withLock
-                }
-
                 lastMacAddress = macAddress
 
                 bluetoothGatt?.let {
