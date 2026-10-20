@@ -1,9 +1,9 @@
 package com.rfz.appflotal.domain.tpms
 
 import com.rfz.appflotal.core.util.Commons.isVoidDate
+import com.rfz.appflotal.core.util.Commons.convertUtcDate
 import com.rfz.appflotal.core.util.Commons.displayDateTimePattern
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
-import com.rfz.appflotal.core.util.Commons.getDateObject
 import com.rfz.appflotal.core.util.Positions.findOutPosition
 import com.rfz.appflotal.core.util.tpms.getPressure
 import com.rfz.appflotal.core.util.tpms.getTemperature
@@ -76,10 +76,8 @@ class UpdateSensorDataUseCase @Inject constructor(private val sensorDataTableRep
             }
         }
 
-        val time = if (timestamp != null) {
-            val getDate = getDateObject(timestamp)
-            getCurrentDate(date = getDate, pattern = displayDateTimePattern())
-        } else getCurrentDate(pattern = displayDateTimePattern())
+        val time = if (timestamp != null) convertUtcDate(timestamp)
+        else getCurrentDate(pattern = displayDateTimePattern())
 
         val inAlert =
             getIsTireInAlert(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)

@@ -22,7 +22,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLocale
-import com.rfz.appflotal.core.util.Commons.getCurrentDate
+import com.rfz.appflotal.core.util.Commons.getCurrentUtcDate
+import com.rfz.appflotal.core.util.Commons.parseUtcDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.core.util.tpms.getBatteryStatus
 import com.rfz.appflotal.core.util.tpms.getHighPressureStatus
@@ -62,8 +63,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -351,7 +351,7 @@ class HombreCamionService : Service() {
                         // Cambiar: Debe almancenarse el ID del Monitor
                         val monitorId = currentMonitorId
                         Log.d("HombreCamionService", "UserId: $monitorId")
-                        val timestamp = getCurrentDate()
+                        val timestamp = getCurrentUtcDate()
 
                         val sensorId =
                             decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
@@ -513,13 +513,11 @@ class HombreCamionService : Service() {
                 val monitorId = getUserUseCase().first().firstOrNull()?.id_monitor
                 try {
                     if (monitorId != null) {
-                        val cutoff = LocalDateTime.ofInstant(
-                            Instant.now(), ZoneId.systemDefault()
-                        ).minusMinutes(15) // ISO-8601 Z
+                        val cutoff = Instant.now().minus(15, ChronoUnit.MINUTES)
                         val tires = sensorDataTableRepository.getLastData(monitorId)
 
                         tires.forEach {
-                            val tireDate = LocalDateTime.parse(it.timestamp.removeSuffix("Z"))
+                            val tireDate = parseUtcDate(it.timestamp)
                             if (tireDate.isBefore(cutoff)) {
                                 sensorDataTableRepository.deactivateTireRecord(monitorId, it.tire)
                                 coordinatesTableUseCase.updateCoordinates(

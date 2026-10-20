@@ -21,7 +21,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLog
-import com.rfz.appflotal.core.util.Commons.getCurrentDate
+import com.rfz.appflotal.core.util.Commons.getCurrentUtcDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -270,7 +270,7 @@ class BluetoothRepositoryImp @Inject constructor(private val context: Context) :
                 _sensorData.update { currentState ->
                     currentState.copy(
                         dataFrame = it,
-                        timestamp = getCurrentDate()
+                        timestamp = getCurrentUtcDate()
                     )
                 }
             }

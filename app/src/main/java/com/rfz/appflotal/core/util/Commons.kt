@@ -11,11 +11,16 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -81,6 +86,47 @@ object Commons {
     ): String {
         val sdf = SimpleDateFormat(pattern, Locale.getDefault())
         return sdf.format(date)
+    }
+
+    /** Patron ISO-8601 en UTC con el que se envian/almacenan las lecturas del monitor y alertas. */
+    const val UTC_ISO_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+
+    private val utcIsoFormatter: DateTimeFormatter =
+        DateTimeFormatter.ofPattern(UTC_ISO_PATTERN, Locale.US).withZone(ZoneOffset.UTC)
+
+    /** Fecha actual (o [instant]) en UTC real, p. ej. 2026-10-20T18:30:00.000Z. */
+    fun getCurrentUtcDate(instant: Instant = Instant.now()): String =
+        utcIsoFormatter.format(instant)
+
+    /**
+     * Interpreta una fecha del servidor/BD como UTC. Si trae offset ("Z", "+00:00") se respeta;
+     * si no trae zona (p. ej. "2026-10-20T18:30:00") se asume UTC.
+     */
+    fun parseUtcDate(date: String): Instant {
+        val value = date.trim().replace(' ', 'T')
+        return try {
+            OffsetDateTime.parse(value).toInstant()
+        } catch (_: DateTimeParseException) {
+            LocalDateTime.parse(value).toInstant(ZoneOffset.UTC)
+        }
+    }
+
+    /** Normaliza una fecha UTC (con o sin zona) al formato [UTC_ISO_PATTERN]. */
+    fun toUtcIsoDate(date: String): String = getCurrentUtcDate(parseUtcDate(date))
+
+    /**
+     * Convierte una fecha UTC al huso horario del dispositivo con el formato [convertFormat].
+     * La fecha vacia (1900-01-01) no se desplaza para que [isVoidDate] la siga reconociendo.
+     */
+    fun convertUtcDate(
+        date: String,
+        convertFormat: String = displayDateTimePattern()
+    ): String {
+        val instant = parseUtcDate(date)
+        val zone = if (instant.atZone(ZoneOffset.UTC).year <= 1900) ZoneOffset.UTC
+        else ZoneId.systemDefault()
+        return DateTimeFormatter.ofPattern(convertFormat, displayLocale())
+            .format(instant.atZone(zone))
     }
 
     fun convertDate(

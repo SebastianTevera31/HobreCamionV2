@@ -1,7 +1,7 @@
 package com.rfz.appflotal.domain.tpms
 
 import com.rfz.appflotal.core.util.Commons.isVoidDate
-import com.rfz.appflotal.core.util.Commons.convertDate
+import com.rfz.appflotal.core.util.Commons.convertUtcDate
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
@@ -84,7 +84,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         }
 
         val isAssembled = assemblyTireRepository.confirmTireMounted(tireSelected)
-        val date = convertDate(data.timestamp, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        val date = convertUtcDate(data.timestamp)
 
         val newTireUiState = TireUiState(
             currentTire = data.tire,

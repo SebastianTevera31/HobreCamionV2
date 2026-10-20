@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.Commons.convertDate
+import com.rfz.appflotal.core.util.Commons.convertUtcDate
 import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.ListOfTireData
@@ -95,10 +95,10 @@ fun CurrentPositionDataView(
                             val color = if (index % 2 == 0) Color(0x402E3192) else Color.White
                             SensorDataRow(
                                 position = data.tirePosition,
-                                fecha = if (isOnSearch) convertDate(
+                                fecha = if (isOnSearch) convertUtcDate(
                                     date = data.sensorDate,
                                     convertFormat = "HH:mm:ss"
-                                ) else convertDate(data.sensorDate),
+                                ) else convertUtcDate(data.sensorDate),
                                 psi = String.format("%.2f", data.psi),
                                 temperatura = "%s $temperatureUnit".format(data.temperature.toString()),
                                 color = color

@@ -2,6 +2,8 @@ package com.rfz.appflotal.data.network.service.fgservice
 
 import android.util.Log
 import com.rfz.appflotal.core.util.Commons.convertDate
+import com.rfz.appflotal.core.util.Commons.parseUtcDate
+import com.rfz.appflotal.core.util.Commons.toUtcIsoDate
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -20,8 +22,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 class HombreCamionServiceController @Inject constructor(
     private val apiTmpsUseCase: ApiTpmsUseCase,
@@ -68,24 +69,18 @@ class HombreCamionServiceController @Inject constructor(
 
                     val inAlert = it.highPressure || it.highTemperature || it.lowPressure || it.lowBattery
 
-                    val date = convertDate(
-                        it.ultimalectura,
-                        "yyyy-MM-dd'T'HH:mm:ss",
-                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                    )
+                    // ultimalectura llega en UTC (con o sin "Z"); se guarda normalizada en UTC.
+                    val date = toUtcIsoDate(it.ultimalectura)
 
                     val lastInspection = convertDate(
                         it.ultimaInspeccion, "yyyy-MM-dd'T'HH:mm:ss",
                         "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
                     )
 
-                    val localInstance =
-                        LocalDateTime.ofInstant(
-                            Instant.now(), ZoneId.systemDefault()
-                        ).minusMinutes(15)
+                    val cutoff = Instant.now().minus(15, ChronoUnit.MINUTES)
 
-                    val storeData = LocalDateTime.parse(it.ultimalectura.removeSuffix("Z"))
-                    val isActive = it.sensorId != 0 && !storeData.isBefore(localInstance)
+                    val storeData = parseUtcDate(it.ultimalectura)
+                    val isActive = it.sensorId != 0 && !storeData.isBefore(cutoff)
 
                     sensorDataTableRepository.insertSensorData(
                         idMonitor = it.monitorId,

@@ -19,7 +19,7 @@ interface SensorDataDao {
     @Insert
     suspend fun insertSensorData(sensorData: SensorDataEntity)
 
-    @Query("SELECT * FROM sensor_data WHERE monitor_id =:monitorId AND tire =:tire AND DATE(timestamp) =:timestamp")
+    @Query("SELECT * FROM sensor_data WHERE monitor_id =:monitorId AND tire =:tire AND DATE(timestamp, 'localtime') =:timestamp")
     suspend fun getRecordByDate(
         monitorId: Int,
         tire: String,

@@ -6,7 +6,7 @@ import androidx.compose.material.icons.outlined.Thermostat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.Commons.convertDate
+import com.rfz.appflotal.core.util.Commons.convertUtcDate
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.alerts.Alert
 import com.rfz.appflotal.data.repository.UnidadPresion
@@ -220,6 +220,6 @@ fun Alert.toAlertUi(
             "$formatted ${temperatureUnit.symbol}"
         },
         status = AlertStatus.CRITICA,
-        date = convertDate(datedata),
+        date = convertUtcDate(datedata),
     )
 }
