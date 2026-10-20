@@ -28,7 +28,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.data.model.promotions.PromotionCategory
 import com.rfz.appflotal.data.model.promotions.StoreDiscount
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.Dimens
@@ -54,6 +57,8 @@ fun PromotionListRoute(
     promotions: List<StoreDiscount>,
     currentPage: Int,
     hasNextPage: Boolean,
+    selectedCategory: PromotionCategory,
+    onCategorySelected: (PromotionCategory) -> Unit,
     stores: List<String>,
     selectedStore: String,
     onStoreSelected: (String) -> Unit,
@@ -67,6 +72,11 @@ fun PromotionListRoute(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        PromotionCategoryTabs(
+            selectedCategory = selectedCategory,
+            onCategorySelected = onCategorySelected
+        )
+
         // Fuera del when para que el filtro siga visible mientras se recarga la lista.
         if (stores.size > 1) {
             PromotionStoreFilter(
@@ -113,6 +123,35 @@ fun PromotionListRoute(
             }
         }
     }
+}
+
+/** Desplazables: "Amarre de carga" no cabe junto a las otras en pantallas angostas. */
+@Composable
+private fun PromotionCategoryTabs(
+    selectedCategory: PromotionCategory,
+    onCategorySelected: (PromotionCategory) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val categories = PromotionCategory.entries
+    PrimaryScrollableTabRow(
+        selectedTabIndex = categories.indexOf(selectedCategory),
+        modifier = modifier,
+        edgePadding = Dimens.PaddingMedium
+    ) {
+        categories.forEach { category ->
+            Tab(
+                selected = category == selectedCategory,
+                onClick = { onCategorySelected(category) },
+                text = { Text(text = stringResource(category.labelRes())) }
+            )
+        }
+    }
+}
+
+internal fun PromotionCategory.labelRes(): Int = when (this) {
+    PromotionCategory.ACCESSORIES -> R.string.categoria_accesorios
+    PromotionCategory.TIRES -> R.string.categoria_llantas
+    PromotionCategory.CARGO_SECUREMENT -> R.string.categoria_amarre_carga
 }
 
 @Composable

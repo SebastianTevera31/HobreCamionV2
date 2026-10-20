@@ -169,4 +169,52 @@ class MigrationTest {
             assertEquals(0, cursor.getInt(0))
         }
     }
+
+    @Test
+    fun migrate31To32_agregaCategoriaYVaciaSoloElCacheDePromociones() {
+        helper.createDatabase(testDb, 31).apply {
+            execSQL(
+                """
+                INSERT INTO promotion_table (productUrl, position, store, title, sku,
+                    regularPrice, finalPrice, percentOff, currency, imageUrl)
+                VALUES ('https://store.com/a', 0, 'Store', 'Item', NULL, 100.0, 80.0, 20.0,
+                    'USD', NULL)
+                """.trimIndent()
+            )
+            execSQL(
+                """
+                INSERT INTO followed_accessory_table (catalogAccessoryId, vehicleType, name,
+                    normalizedName, description, createdAt, initialSyncDone)
+                VALUES (1, 'TRUCK', 'Dash cam', 'dash cam', NULL, 100, 1)
+                """.trimIndent()
+            )
+            close()
+        }
+
+        // La validación falla si el SQL de la migración no coincide con schemas/32.json.
+        val db = helper.runMigrationsAndValidate(testDb, 32, true, MIGRATION_31_32)
+
+        // El cache sin categoría se vacía; la app lo vuelve a llenar al sincronizar.
+        db.query("SELECT COUNT(*) FROM promotion_table").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(0, cursor.getInt(0))
+        }
+        db.execSQL(
+            """
+            INSERT INTO promotion_table (productUrl, position, store, title, sku, regularPrice,
+                finalPrice, percentOff, currency, imageUrl, category)
+            VALUES ('https://store.com/b', 0, 'Store', 'Item', NULL, 100.0, 80.0, 20.0, 'USD',
+                NULL, 'Llantas')
+            """.trimIndent()
+        )
+        db.query("SELECT category FROM promotion_table").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("Llantas", cursor.getString(0))
+        }
+        // Lo demás no se toca.
+        db.query("SELECT COUNT(*) FROM followed_accessory_table").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(1, cursor.getInt(0))
+        }
+    }
 }

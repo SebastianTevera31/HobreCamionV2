@@ -201,6 +201,8 @@
     <string name="sin_alertas">No alerts</string>
     <string name="bateria_baja">Low battery</string>
     <string name="sin_conexi_n">Not connected</string>
+    <string name="sin_tpms">No TPMS</string>
+    <string name="tpms_estado">TPMS · %1$s</string>
     <string name="no_registros">No records found</string>
     <string name="fuga_rapida">Fast leak</string>
     <string name="fuga_lenta">Slow leak</string>
@@ -748,6 +750,9 @@
     <string name="gustados">Liked</string>
     <string name="analytics">Analytics</string>
     <string name="promociones_descuentos">Promotions</string>
+    <string name="categoria_accesorios">Accessories</string>
+    <string name="categoria_llantas">Tires</string>
+    <string name="categoria_amarre_carga">Cargo securement</string>
     <string name="feedback_title">Your opinion matters to us</string>
     <string name="feedback_subtitle">Tell us what we can improve about the app</string>
     <string name="consumo_de_combustible">Fuel Consumption</string>

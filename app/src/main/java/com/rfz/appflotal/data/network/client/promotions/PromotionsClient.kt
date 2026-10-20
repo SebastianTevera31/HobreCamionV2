@@ -12,6 +12,8 @@ interface PromotionsService {
         @Header("Authorization") token: String,
         @Query("search") search: String = "",
         @Query("store") store: String = "",
+        // "Llantas" | "Accesorios" | "Amarre de carga"; vacío = todas.
+        @Query("category") category: String = "",
         @Query("limit") limit: Int = 10,
         @Query("pagesPerStore") pagesPerStore: Int = 20
     ): Response<DiscountsResponse>

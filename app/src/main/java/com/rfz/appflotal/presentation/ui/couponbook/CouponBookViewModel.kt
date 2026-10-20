@@ -6,6 +6,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.couponbook.Coupon
 import com.rfz.appflotal.data.model.couponbook.ValidatedVoucher
 import com.rfz.appflotal.data.model.couponbook.VoucherStatusType
+import com.rfz.appflotal.data.model.promotions.PromotionCategory
 import com.rfz.appflotal.data.model.promotions.StoreDiscount
 import com.rfz.appflotal.data.repository.couponbook.CouponBookRepository
 import com.rfz.appflotal.data.repository.promotions.PromotionsRepository
@@ -51,6 +52,13 @@ data class CouponBookUiState(
     val promotionStores: List<String> = emptyList(),
     /** Tienda que delimita la búsqueda de promociones; vacío = todas. */
     val selectedPromotionStore: String = "",
+    /** Pestaña de la lista de promociones; se conserva al volver a la lista. */
+    val selectedPromotionCategory: PromotionCategory = PromotionCategory.ACCESSORIES,
+    /**
+     * Categoría que se aplica al consultar: la pestaña en la lista de promociones, null en
+     * la búsqueda de la pantalla principal (todas las categorías).
+     */
+    val promotionCategoryFilter: PromotionCategory? = null,
     val selectedPromotion: StoreDiscount? = null,
     val promotionsState: LoadState<Unit> = LoadState.Idle,
     val promotionsPage: Int = 0,
@@ -92,10 +100,36 @@ class CouponBookViewModel @Inject constructor(
         onPromotionsSearchChanged(query)
     }
 
-    fun loadPromotionStores() {
+    /** Al entrar a la lista de promociones: filtra por la pestaña seleccionada. */
+    fun openPromotionList() {
+        _uiState.update { it.copy(promotionCategoryFilter = it.selectedPromotionCategory) }
+        loadPromotionStores()
+        // Forzado: puede venir de la búsqueda principal con otra consulta en curso.
+        loadPromotionsPage(1)
+    }
+
+    fun onPromotionCategorySelected(category: PromotionCategory) {
+        if (category == _uiState.value.promotionCategoryFilter) return
+        // Las tiendas cambian con la categoría; la elegida podría no tener nada en la nueva.
+        _uiState.update {
+            it.copy(
+                selectedPromotionCategory = category,
+                promotionCategoryFilter = category,
+                selectedPromotionStore = ""
+            )
+        }
+        loadPromotionStores()
+        loadPromotionsPage(1)
+    }
+
+    private fun loadPromotionStores() {
+        val category = _uiState.value.promotionCategoryFilter
         viewModelScope.launch {
-            promotionsRepository.getStores().onSuccess { stores ->
-                _uiState.update { it.copy(promotionStores = stores) }
+            promotionsRepository.getStores(category).onSuccess { stores ->
+                // Descarta la respuesta si mientras tanto se cambió de pestaña.
+                _uiState.update {
+                    if (it.promotionCategoryFilter == category) it.copy(promotionStores = stores) else it
+                }
             }
         }
     }
@@ -126,7 +160,8 @@ class CouponBookViewModel @Inject constructor(
                 page = page,
                 pageSize = PROMOTIONS_PAGE_SIZE,
                 search = state.promotionsSearchQuery,
-                store = state.selectedPromotionStore
+                store = state.selectedPromotionStore,
+                category = state.promotionCategoryFilter
             ).fold(
                 onSuccess = { pageResult ->
                     _uiState.update {
@@ -210,6 +245,8 @@ class CouponBookViewModel @Inject constructor(
                 searchQuery = "",
                 promotionsSearchQuery = "",
                 selectedPromotionStore = "",
+                // Pantalla principal: la búsqueda abarca todas las categorías.
+                promotionCategoryFilter = null,
                 validateState = LoadState.Idle
             )
         }

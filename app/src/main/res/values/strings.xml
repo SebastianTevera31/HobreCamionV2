@@ -199,6 +199,8 @@
     <string name="sin_alertas">Sin alertas</string>
     <string name="bateria_baja">Batería baja</string>
     <string name="sin_conexi_n">Sin conexión</string>
+    <string name="sin_tpms">Sin TPMS</string>
+    <string name="tpms_estado">TPMS · %1$s</string>
     <string name="no_registros">No se encontraron registros</string>
     <string name="fuga_rapida">Fuga rápida</string>
     <string name="fuga_lenta">Fuga lenta</string>
@@ -734,6 +736,9 @@
     <string name="gustados">Gustados</string>
     <string name="analytics">Estadísticas</string>
     <string name="promociones_descuentos">Promociones</string>
+    <string name="categoria_accesorios">Accesorios</string>
+    <string name="categoria_llantas">Llantas</string>
+    <string name="categoria_amarre_carga">Amarre de carga</string>
     <string name="feedback_title">Tu opinión nos importa</string>
     <string name="feedback_subtitle">Cuéntanos qué podemos mejorar de la aplicación</string>
     <string name="consumo_de_combustible">Consumo de Combustible</string>

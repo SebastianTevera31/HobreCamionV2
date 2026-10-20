@@ -98,4 +98,21 @@ val MIGRATION_30_31 = object : Migration(30, 31) {
     }
 }
 
-val ALL_MIGRATIONS = arrayOf(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31)
+/**
+ * Categoría de cada promoción (Accesorios, Llantas, Amarre de carga). promotion_table es
+ * solo caché: se vacía para no dejar filas sin categoría, y la app la vuelve a llenar al abrir.
+ */
+val MIGRATION_31_32 = object : Migration(31, 32) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `promotion_table` ADD COLUMN `category` TEXT")
+        db.execSQL("DELETE FROM `promotion_table`")
+    }
+}
+
+val ALL_MIGRATIONS = arrayOf(
+    MIGRATION_27_28,
+    MIGRATION_28_29,
+    MIGRATION_29_30,
+    MIGRATION_30_31,
+    MIGRATION_31_32
+)

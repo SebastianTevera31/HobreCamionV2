@@ -13,6 +13,7 @@ class RemotePromotionsDataSource @Inject constructor(
         token: String,
         search: String = "",
         store: String = "",
+        category: String = "",
         limit: Int = 10,
         pagesPerStore: Int = 20
     ): Result<DiscountsResponse> = networkRequestHelper {
@@ -20,6 +21,7 @@ class RemotePromotionsDataSource @Inject constructor(
             token = "Bearer $token",
             search = search,
             store = store,
+            category = category,
             limit = limit,
             pagesPerStore = pagesPerStore
         )
