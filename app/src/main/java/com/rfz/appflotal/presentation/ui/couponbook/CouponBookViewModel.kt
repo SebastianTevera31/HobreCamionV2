@@ -12,6 +12,7 @@ import com.rfz.appflotal.data.repository.promotions.PromotionsRepository
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,6 +48,9 @@ data class CouponBookUiState(
     val acquireState: LoadState<Unit> = LoadState.Idle,
     val promotions: List<StoreDiscount> = emptyList(),
     val promotionsSearchQuery: String = "",
+    val promotionStores: List<String> = emptyList(),
+    /** Tienda que delimita la búsqueda de promociones; vacío = todas. */
+    val selectedPromotionStore: String = "",
     val selectedPromotion: StoreDiscount? = null,
     val promotionsState: LoadState<Unit> = LoadState.Idle,
     val promotionsPage: Int = 0,
@@ -62,6 +66,7 @@ class CouponBookViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     private val _promotionsQuery = MutableStateFlow("")
+    private var promotionsJob: Job? = null
 
     init {
         observePromotionsSearch()
@@ -87,18 +92,41 @@ class CouponBookViewModel @Inject constructor(
         onPromotionsSearchChanged(query)
     }
 
+    fun loadPromotionStores() {
+        viewModelScope.launch {
+            promotionsRepository.getStores().onSuccess { stores ->
+                _uiState.update { it.copy(promotionStores = stores) }
+            }
+        }
+    }
+
+    fun onPromotionStoreSelected(store: String) {
+        if (store == _uiState.value.selectedPromotionStore) return
+        _uiState.update { it.copy(selectedPromotionStore = store) }
+        // Un cambio de filtro debe recargar aunque haya una consulta en curso,
+        // por eso no pasa por la guarda de goToPromotionsPage.
+        loadPromotionsPage(1)
+    }
+
     fun goToPromotionsPage(page: Int) {
         val state = _uiState.value
         if (state.promotionsState is LoadState.Loading || page < 1) return
         if (page > state.promotionsPage && !state.promotionsHasNextPage) return
 
-        _uiState.update { it.copy(promotionsState = LoadState.Loading) }
+        loadPromotionsPage(page)
+    }
 
-        viewModelScope.launch {
+    private fun loadPromotionsPage(page: Int) {
+        promotionsJob?.cancel()
+        _uiState.update { it.copy(promotionsState = LoadState.Loading) }
+        val state = _uiState.value
+
+        promotionsJob = viewModelScope.launch {
             promotionsRepository.getPromotionsPage(
                 page = page,
                 pageSize = PROMOTIONS_PAGE_SIZE,
-                search = state.promotionsSearchQuery
+                search = state.promotionsSearchQuery,
+                store = state.selectedPromotionStore
             ).fold(
                 onSuccess = { pageResult ->
                     _uiState.update {
@@ -181,6 +209,7 @@ class CouponBookViewModel @Inject constructor(
                 selectedFilter = CouponFilterOptions.ALL,
                 searchQuery = "",
                 promotionsSearchQuery = "",
+                selectedPromotionStore = "",
                 validateState = LoadState.Idle
             )
         }

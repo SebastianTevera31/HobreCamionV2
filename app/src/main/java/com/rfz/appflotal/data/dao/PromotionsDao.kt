@@ -13,19 +13,24 @@ interface PromotionsDao {
         """
         SELECT * FROM promotion_table
         WHERE (:search = '' OR title LIKE '%' || :search || '%' OR store LIKE '%' || :search || '%')
+          AND (:store = '' OR store = :store)
         ORDER BY position ASC
         LIMIT :limit OFFSET :offset
         """
     )
-    suspend fun getPage(search: String, limit: Int, offset: Int): List<PromotionEntity>
+    suspend fun getPage(search: String, store: String, limit: Int, offset: Int): List<PromotionEntity>
 
     @Query(
         """
         SELECT COUNT(*) FROM promotion_table
         WHERE (:search = '' OR title LIKE '%' || :search || '%' OR store LIKE '%' || :search || '%')
+          AND (:store = '' OR store = :store)
         """
     )
-    suspend fun count(search: String): Int
+    suspend fun count(search: String, store: String): Int
+
+    @Query("SELECT DISTINCT store FROM promotion_table ORDER BY store COLLATE NOCASE ASC")
+    suspend fun getStores(): List<String>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(promotions: List<PromotionEntity>)

@@ -12,11 +12,21 @@ class LocalPromotionsDataSource @Inject constructor(
     private val promotionsDao: PromotionsDao
 ) {
 
-    suspend fun getPage(search: String, limit: Int, offset: Int): Result<List<PromotionEntity>> =
+    suspend fun getPage(
+        search: String,
+        store: String,
+        limit: Int,
+        offset: Int
+    ): Result<List<PromotionEntity>> =
         withContext(Dispatchers.IO) {
             try {
                 Result.success(
-                    promotionsDao.getPage(search = search, limit = limit, offset = offset)
+                    promotionsDao.getPage(
+                        search = search,
+                        store = store,
+                        limit = limit,
+                        offset = offset
+                    )
                 )
             } catch (e: SQLiteException) {
                 Result.failure(DataError.Local(e))
@@ -25,8 +35,18 @@ class LocalPromotionsDataSource @Inject constructor(
             }
         }
 
-    suspend fun count(search: String): Int = withContext(Dispatchers.IO) {
-        promotionsDao.count(search)
+    suspend fun count(search: String, store: String): Int = withContext(Dispatchers.IO) {
+        promotionsDao.count(search, store)
+    }
+
+    suspend fun getStores(): Result<List<String>> = withContext(Dispatchers.IO) {
+        try {
+            Result.success(promotionsDao.getStores())
+        } catch (e: SQLiteException) {
+            Result.failure(DataError.Local(e))
+        } catch (_: Exception) {
+            Result.failure(DataError.Unknown())
+        }
     }
 
     suspend fun refreshAll(promotions: List<PromotionEntity>) = withContext(Dispatchers.IO) {

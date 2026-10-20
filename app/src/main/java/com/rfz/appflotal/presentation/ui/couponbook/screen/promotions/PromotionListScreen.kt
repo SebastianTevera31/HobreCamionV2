@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -37,11 +38,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.promotions.StoreDiscount
 import com.rfz.appflotal.presentation.commons.ErrorView
 import com.rfz.appflotal.presentation.theme.Dimens
+import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.couponbook.screen.main.CouponChip
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 @Composable
@@ -50,41 +54,109 @@ fun PromotionListRoute(
     promotions: List<StoreDiscount>,
     currentPage: Int,
     hasNextPage: Boolean,
+    stores: List<String>,
+    selectedStore: String,
+    onStoreSelected: (String) -> Unit,
     onPromotionClick: (String) -> Unit,
     onPageSelected: (Int) -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when (promotionsState) {
-        is LoadState.Error -> {
-            ErrorView(
-                errorMessage = promotionsState.message,
-                showRetryButton = true,
-                onRetry = onRetry
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        // Fuera del when para que el filtro siga visible mientras se recarga la lista.
+        if (stores.size > 1) {
+            PromotionStoreFilter(
+                stores = stores,
+                selectedStore = selectedStore,
+                onStoreSelected = onStoreSelected
             )
         }
 
-        LoadState.Loading -> {
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) {
+            when (promotionsState) {
+                is LoadState.Error -> {
+                    ErrorView(
+                        errorMessage = promotionsState.message,
+                        showRetryButton = true,
+                        onRetry = onRetry
+                    )
+                }
+
+                LoadState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is LoadState.Success -> {
+                    PromotionListScreen(
+                        promotions = promotions,
+                        currentPage = currentPage,
+                        hasNextPage = hasNextPage,
+                        onPromotionClick = onPromotionClick,
+                        onPageSelected = onPageSelected
+                    )
+                }
+
+                else -> Unit
             }
         }
+    }
+}
 
-        is LoadState.Success -> {
-            PromotionListScreen(
-                promotions = promotions,
-                currentPage = currentPage,
-                hasNextPage = hasNextPage,
-                onPromotionClick = onPromotionClick,
-                onPageSelected = onPageSelected,
-                modifier = modifier
-            )
+@Composable
+private fun PromotionStoreFilter(
+    stores: List<String>,
+    selectedStore: String,
+    onStoreSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = Dimens.PaddingSmall),
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall)
+    ) {
+        Text(
+            text = stringResource(R.string.filtrar_por),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = Dimens.PaddingMedium)
+        )
+
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall),
+            contentPadding = PaddingValues(horizontal = Dimens.PaddingMedium)
+        ) {
+            // "" representa "todas las tiendas", igual que el parámetro store del endpoint.
+            item(key = "all_stores") {
+                CouponChip(
+                    text = stringResource(R.string.todas),
+                    selected = selectedStore.isEmpty(),
+                    onChangeValue = { onStoreSelected("") }
+                )
+            }
+            items(items = stores, key = { store -> "store_$store" }) { store ->
+                CouponChip(
+                    text = store,
+                    selected = store == selectedStore,
+                    onChangeValue = { onStoreSelected(store) }
+                )
+            }
         }
-
-        else -> Unit
     }
 }
 
@@ -278,3 +350,41 @@ private fun PromotionListEmptyState(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun PromotionListScreenPreview() {
+    HombreCamionTheme {
+        PromotionListScreen(
+            promotions = listOf(
+                StoreDiscount(
+                    store = "Tienda Camiones",
+                    title = "Llanta 295/80R22.5 Toda Posición Heavy Duty",
+                    sku = "LL-29580225",
+                    regularPrice = 4500.0,
+                    finalPrice = 3600.0,
+                    percentOff = 20.0,
+                    currency = "MXN",
+                    productUrl = "https://example.com/product1",
+                    imageUrl = null
+                ),
+                StoreDiscount(
+                    store = "Refaccionaria Flotal",
+                    title = "Aceite Sintético para Motor Diesel 15W-40 19L",
+                    sku = "AC-15W40-19L",
+                    regularPrice = 1800.0,
+                    finalPrice = 1350.0,
+                    percentOff = 25.0,
+                    currency = "MXN",
+                    productUrl = "https://example.com/product2",
+                    imageUrl = null
+                )
+            ),
+            currentPage = 1,
+            hasNextPage = true,
+            onPromotionClick = {},
+            onPageSelected = {}
+        )
+    }
+}
+

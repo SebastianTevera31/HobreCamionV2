@@ -49,16 +49,26 @@ class PromotionsRepository @Inject constructor(
     suspend fun getPromotionsPage(
         page: Int,
         pageSize: Int,
-        search: String = ""
+        search: String = "",
+        store: String = ""
     ): Result<PromotionsPage> {
         val offset = (page - 1) * pageSize
-        return localPromotionsDataSource.getPage(search = search, limit = pageSize, offset = offset)
-            .map { entities ->
-                val total = localPromotionsDataSource.count(search)
-                PromotionsPage(
-                    items = entities.map { it.toDomain() },
-                    hasNextPage = offset + entities.size < total
-                )
-            }
+        return localPromotionsDataSource.getPage(
+            search = search,
+            store = store,
+            limit = pageSize,
+            offset = offset
+        ).map { entities ->
+            val total = localPromotionsDataSource.count(search, store)
+            PromotionsPage(
+                items = entities.map { it.toDomain() },
+                hasNextPage = offset + entities.size < total
+            )
+        }
     }
+
+    /**
+     * Tiendas presentes en el cache local, para delimitar la búsqueda por tienda.
+     */
+    suspend fun getStores(): Result<List<String>> = localPromotionsDataSource.getStores()
 }

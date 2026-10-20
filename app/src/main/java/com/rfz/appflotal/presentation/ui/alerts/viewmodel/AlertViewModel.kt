@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.rfz.appflotal.data.model.alerts.AlertType as DomainAlertType
 
-private const val PAGE_SIZE = 10
+private const val PAGE_SIZE = 1
 
 data class AlertUiState(
     val alerts: List<AlertUi> = emptyList(),

@@ -276,6 +276,7 @@ fun NavGraphBuilder.couponGraph(
             val state by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
+                viewModel.loadPromotionStores()
                 viewModel.goToPromotionsPage(1)
             }
 
@@ -301,6 +302,11 @@ fun NavGraphBuilder.couponGraph(
                     promotions = state.promotions,
                     currentPage = state.promotionsPage,
                     hasNextPage = state.promotionsHasNextPage,
+                    stores = state.promotionStores,
+                    selectedStore = state.selectedPromotionStore,
+                    onStoreSelected = { store ->
+                        viewModel.onPromotionStoreSelected(store)
+                    },
                     onPromotionClick = { productUrl ->
                         viewModel.selectPromotion(productUrl)
                         navController.navigate(PromotionDetail)
