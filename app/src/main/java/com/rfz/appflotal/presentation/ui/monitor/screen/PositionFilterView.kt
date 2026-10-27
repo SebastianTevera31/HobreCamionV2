@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
-import com.rfz.appflotal.core.util.Commons.displayDatePattern
 import android.content.res.Configuration
 import android.os.LocaleList
 import androidx.compose.foundation.background
@@ -26,7 +25,6 @@ import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,6 +52,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.Commons.addOneDay
 import com.rfz.appflotal.core.util.Commons.convertDate
+import com.rfz.appflotal.core.util.Commons.displayDatePattern
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
@@ -61,7 +60,6 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionFilterView(
     tiresList: List<MonitorTire>?,
@@ -108,7 +106,6 @@ fun PositionFilterView(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionDatePicker(modifier: Modifier = Modifier, onSelectDate: (String) -> Unit) {
     var startDate = getCurrentDate(pattern = displayDatePattern())

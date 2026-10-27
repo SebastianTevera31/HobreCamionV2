@@ -14,6 +14,7 @@ import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.tpms.ApiTpmsService
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.data.repository.database.toMonitorTireByDateResponse
+import com.rfz.appflotal.data.repository.location.LocationRepository
 import com.rfz.appflotal.data.repository.wifi.WifiRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,7 @@ class ApiTpmsRepository @Inject constructor(
     private val apiTpmsService: ApiTpmsService,
     private val wifiRepository: WifiRepository,
     private val sensorDataTableRepository: SensorDataTableRepository,
+    private val locationRepository: LocationRepository,
 ) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var _wifiState: MutableStateFlow<NetworkStatus> =
@@ -43,7 +45,11 @@ class ApiTpmsRepository @Inject constructor(
     }
 
     suspend fun doPostSensorData(sensorRequest: SensorRequest): ApiResult<List<TpmsResponse>?> {
-        return apiTpmsService.postSensorData(sensorRequest)
+        // Si no hay ubicación disponible se envían 0 en latitud y longitud
+        val (latitude, longitude) = locationRepository.getLastCoordinates() ?: (0.0 to 0.0)
+        return apiTpmsService.postSensorData(
+            sensorRequest.copy(latitude = latitude, longitude = longitude)
+        )
     }
 
     suspend fun doPostCrudMonitor(monitorRequest: CrudMonitor): ApiResult<List<TpmsResponse>?> {

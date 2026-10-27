@@ -6,7 +6,9 @@ import com.google.gson.annotations.SerializedName
 data class SensorRequest(
     @SerializedName("fld_frame") val fldFrame: String,
     @SerializedName("id_monitor_fk_1") val monitor: Int,
-    @SerializedName("fld_dateData") val fldDateData: String
+    @SerializedName("fld_dateData") val fldDateData: String,
+    @SerializedName("latitude") val latitude: Double = 0.0,
+    @SerializedName("longitude") val longitude: Double = 0.0
 )
 
 data class CrudDiagramMonitorRequest(

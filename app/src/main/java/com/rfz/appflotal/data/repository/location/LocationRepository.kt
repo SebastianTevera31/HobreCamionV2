@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.repository.location
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Address
@@ -16,6 +17,7 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.rfz.appflotal.data.model.location.LocationData
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -60,6 +62,19 @@ class LocationRepository @Inject constructor(
             lat = location.latitude,
             lng = location.longitude
         )
+    }
+
+    // Últimas coordenadas conocidas sin geocodificar. Null si no hay permiso o ubicación disponible.
+    @SuppressLint("MissingPermission")
+    suspend fun getLastCoordinates(): Pair<Double, Double>? {
+        if (!hasLocationPermission()) return null
+
+        return try {
+            fusedClient.lastLocation.await()?.let { it.latitude to it.longitude }
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            null
+        }
     }
 
     // Solicitar ubicación actual. Puede devolver una ubicación cacheada de hasta 30 s.

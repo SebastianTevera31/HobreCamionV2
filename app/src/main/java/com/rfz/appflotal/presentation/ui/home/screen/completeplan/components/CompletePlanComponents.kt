@@ -30,9 +30,11 @@ import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GpsFixed
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QueryStats
+import androidx.compose.material.icons.outlined.Thermostat
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,8 +54,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -383,6 +387,56 @@ fun AlertCard(alert: AlertUi, onClick: () -> Unit = {}) {
                 alert.detailExtra?.let {
                     Spacer(Modifier.width(4.dp))
                     Text(it, color = SubtleText, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            alert.temperatureValue?.let { temperature ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Outlined.Thermostat,
+                        contentDescription = null,
+                        tint = SubtleText,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        stringResource(R.string.alert_label_temp),
+                        color = SubtleText,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        temperature,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+            alert.location?.let { location ->
+                val uriHandler = LocalUriHandler.current
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Outlined.LocationOn,
+                        contentDescription = null,
+                        tint = SubtleText,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    if (location.mapsUrl != null) {
+                        Text(
+                            stringResource(R.string.alert_location_view_map),
+                            color = TealMid,
+                            fontWeight = FontWeight.Bold,
+                            textDecoration = TextDecoration.Underline,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.clickable { uriHandler.openUri(location.mapsUrl) }
+                        )
+                    } else {
+                        Text(
+                            stringResource(R.string.alert_location_unavailable),
+                            color = SubtleText,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
             Row {

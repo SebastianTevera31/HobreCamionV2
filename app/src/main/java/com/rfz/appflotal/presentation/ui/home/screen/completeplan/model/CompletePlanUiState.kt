@@ -42,8 +42,13 @@ data class AlertUi(
     val detailValue: String,
     val detailExtra: String? = null,
     val status: AlertStatus,
-    val date: String
+    val date: String,
+    val temperatureValue: String? = null,
+    val location: AlertLocationUi? = null
 )
+
+/** [mapsUrl] nulo indica que la alerta no trae coordenadas (0, 0). */
+data class AlertLocationUi(val mapsUrl: String?)
 
 enum class AlertStatus { CRITICA, PENDIENTE }
 

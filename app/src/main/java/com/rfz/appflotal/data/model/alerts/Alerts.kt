@@ -12,6 +12,8 @@ data class AlertDto(
     @SerializedName("fld_psi") val psi: Double,
     @SerializedName("alert") val alert: String,
     @SerializedName("fld_datedata") val datedata: String,
+    @SerializedName("latitude") val latitude: Double?,
+    @SerializedName("longitude") val longitude: Double?,
 )
 
 @Serializable
@@ -21,7 +23,9 @@ data class Alert(
     val temperature: Int,
     val psi: Double,
     val alert: AlertType,
-    val datedata: String
+    val datedata: String,
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0
 )
 
 @Serializable
@@ -46,6 +50,8 @@ fun AlertDto.toDomain(): Alert {
         temperature = temperature,
         psi = psi,
         alert = typeAlert,
-        datedata = datedata
+        datedata = datedata,
+        latitude = latitude ?: 0.0,
+        longitude = longitude ?: 0.0
     )
 }

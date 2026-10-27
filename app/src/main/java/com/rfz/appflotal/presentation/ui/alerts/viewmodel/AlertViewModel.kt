@@ -18,6 +18,7 @@ import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
+import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertLocationUi
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertStatus
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.AlertUi
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.asIcon
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 import com.rfz.appflotal.data.model.alerts.AlertType as DomainAlertType
 
@@ -189,6 +191,23 @@ fun Alert.toAlertUi(
             alert == DomainAlertType.FAST_LEAK ||
             alert == DomainAlertType.SLOW_LEAK
 
+    val temperatureText = run {
+        val value = convertTemperatureValue(temperature.toFloat(), temperatureUnit)
+        val formatted = if (temperatureUnit == UnidadTemperatura.CELCIUS) {
+            "%.0f".format(value)
+        } else {
+            "%.1f".format(value)
+        }
+        "$formatted ${temperatureUnit.symbol}"
+    }
+
+    val hasCoordinates = latitude != 0.0 || longitude != 0.0
+    val mapsUrl = if (hasCoordinates) {
+        "https://www.google.com/maps/search/?api=1&query=%.6f,%.6f".format(
+            Locale.US, latitude, longitude
+        )
+    } else null
+
     return AlertUi(
         icon = (if (isPressureAlert) Icons.Outlined.Speed else Icons.Outlined.Thermostat).asIcon(),
         titleRes = when (alert) {
@@ -211,15 +230,12 @@ fun Alert.toAlertUi(
                 pressureUnit.symbol
             )
         } else {
-            val value = convertTemperatureValue(temperature.toFloat(), temperatureUnit)
-            val formatted = if (temperatureUnit == UnidadTemperatura.CELCIUS) {
-                "%.0f".format(value)
-            } else {
-                "%.1f".format(value)
-            }
-            "$formatted ${temperatureUnit.symbol}"
+            temperatureText
         },
         status = AlertStatus.CRITICA,
         date = convertUtcDate(datedata),
+        // En alertas de temperatura el valor ya se muestra como detalle principal
+        temperatureValue = if (isPressureAlert) temperatureText else null,
+        location = AlertLocationUi(mapsUrl),
     )
 }

@@ -7,25 +7,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,10 +47,6 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewMo
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
-
-enum class PositionView {
-    RECIENTES, FILTRAR
-}
 
 @Composable
 fun MonitorScreen(
@@ -252,14 +242,9 @@ fun MonitorScreenContent(
                             )
                         } else {
                             PositionScreenContentInternal(
-                                paymentPlan = paymentPlan,
                                 pressureUnit = monitorUiState.pressureUnit.symbol,
                                 temperatureUnit = monitorUiState.temperatureUnit.symbol,
                                 positionsUiState = positionsUiState,
-                                monitorTireUiState = monitorTireUiState,
-                                listOfTires = monitorUiState.listOfTires,
-                                onGetTireDataByDate = onGetTireDataByDate,
-                                onCleanFilteredTire = onCleanFilteredTire
                             )
                         }
                     }
@@ -364,66 +349,28 @@ fun ShowMonitorRegisterDialogContent(
 
 @Composable
 private fun PositionScreenContentInternal(
-    paymentPlan: PaymentPlanType,
     pressureUnit: String,
     temperatureUnit: String,
     positionsUiState: ApiResult<List<ListOfTireData>?>,
-    monitorTireUiState: ApiResult<List<ListOfTireData>?>,
-    listOfTires: List<MonitorTire>?,
-    onGetTireDataByDate: (String, String) -> Unit,
-    onCleanFilteredTire: () -> Unit
 ) {
-    if (paymentPlan == PaymentPlanType.Complete) {
-        var positionOptionSelected by remember { mutableStateOf(PositionView.RECIENTES) }
-        Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            NavPositionMonitorScreen(
-                selectedView = positionOptionSelected,
-                tiresList = listOfTires,
-                onSensorData = onGetTireDataByDate,
-                onPositionOptionSelected = { option -> positionOptionSelected = option }
-            )
-
-            if (positionOptionSelected == PositionView.RECIENTES) {
-                RecentPositionsView(
-                    positionsUiState = positionsUiState,
-                    onClearFilteredTire = onCleanFilteredTire,
-                    pressureUnit = pressureUnit,
-                    temperatureUnit = temperatureUnit
-                )
-            } else {
-                FilteredPositionsView(
-                    monitorTireUiState = monitorTireUiState,
-                    pressureUnit = pressureUnit,
-                    temperatureUnit = temperatureUnit
-                )
-            }
-        }
-    } else {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            RecentPositionsView(
-                positionsUiState = positionsUiState,
-                onClearFilteredTire = onCleanFilteredTire,
-                pressureUnit = pressureUnit,
-                temperatureUnit = temperatureUnit
-            )
-        }
+    Column(
+        modifier = Modifier.padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        RecentPositionsView(
+            positionsUiState = positionsUiState,
+            pressureUnit = pressureUnit,
+            temperatureUnit = temperatureUnit
+        )
     }
 }
 
 @Composable
 private fun RecentPositionsView(
     positionsUiState: ApiResult<List<ListOfTireData>?>,
-    onClearFilteredTire: () -> Unit,
     pressureUnit: String,
     temperatureUnit: String
 ) {
-    onClearFilteredTire()
     when (positionsUiState) {
         is ApiResult.Error -> NoPositionDataView(R.string.no_registros)
         ApiResult.Loading -> {
@@ -446,43 +393,6 @@ private fun RecentPositionsView(
 }
 
 @Composable
-private fun FilteredPositionsView(
-    monitorTireUiState: ApiResult<List<ListOfTireData>?>,
-    pressureUnit: String,
-    temperatureUnit: String
-) {
-    when (monitorTireUiState) {
-        is ApiResult.Success -> {
-            val data: List<ListOfTireData>? =
-                monitorTireUiState.data?.sortedByDescending { it.sensorDate }
-            CurrentPositionDataView(
-                message = R.string.no_registros,
-                sensorDataList = data,
-                isOnSearch = true,
-                pressureUnit = pressureUnit,
-                temperatureUnit = temperatureUnit,
-            )
-        }
-
-        is ApiResult.Error -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 48.dp),
-            ) {
-                NoPositionDataView(R.string.error_carga_datos)
-            }
-        }
-
-        is ApiResult.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-    }
-}
-
-@Composable
 private fun LoadingView(modifier: Modifier = Modifier) {
     Card(modifier = modifier.fillMaxSize()) {
         Column(
@@ -491,63 +401,6 @@ private fun LoadingView(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxSize()
         ) {
             CircularProgressIndicator()
-        }
-    }
-}
-
-@Composable
-fun NavPositionMonitorScreen(
-    selectedView: PositionView,
-    tiresList: List<MonitorTire>?,
-    onSensorData: (String, String) -> Unit,
-    onPositionOptionSelected: (PositionView) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val showSearchRecords = selectedView == PositionView.FILTRAR
-
-    Surface(
-        shape = RoundedCornerShape(8.dp),
-        shadowElevation = 16.dp,
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 4.dp)
-            ) {
-                Button(
-                    onClick = { onPositionOptionSelected(PositionView.RECIENTES) },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (!showSearchRecords) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                    ),
-                    modifier = Modifier.weight(1f)
-                ) { Text(text = stringResource(R.string.recientes)) }
-
-                Button(
-                    onClick = { onPositionOptionSelected(PositionView.FILTRAR) },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (showSearchRecords) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                    ),
-                    modifier = Modifier.weight(1f)
-                ) { Text(text = stringResource(R.string.filtrar)) }
-            }
-
-            if (showSearchRecords && tiresList?.any { it.isActive } == true) {
-                PositionFilterView(
-                    tiresList = tiresList,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) { wheelSelected, dateSelected ->
-                    onSensorData(wheelSelected, dateSelected)
-                }
-            }
         }
     }
 }
@@ -637,6 +490,23 @@ fun ShowMonitorRegisterDialogPreview() {
             onMonitorConfiguration = {},
             onRegister = { _, _ -> },
             paymentPlan = PaymentPlanType.Complete
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PositionScreenContentInternalPreview() {
+    val mockSensorData = listOf(
+        ListOfTireData("P1", "T001", "2026-10-20T18:30:00", 32.5f, 25.0f),
+        ListOfTireData("P2", "T002", "2026-10-20T18:30:00", 30.0f, 26.0f)
+    )
+
+    HombreCamionTheme {
+        PositionScreenContentInternal(
+            pressureUnit = "PSI",
+            temperatureUnit = "°C",
+            positionsUiState = ApiResult.Success(mockSensorData),
         )
     }
 }
