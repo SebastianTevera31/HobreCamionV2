@@ -26,6 +26,9 @@ interface AppUpdateMessageRepository {
 
     suspend fun dequeueMessage(): AppUpdateMessage?
 
+    /** Quita de la cola la primera aparición de [msg], esté donde esté. */
+    suspend fun removeMessage(msg: AppUpdateMessage)
+
     suspend fun clearAll()
 }
 
@@ -66,6 +69,18 @@ class AppUpdateMessageRepositoryImpl @Inject constructor(@param:ApplicationConte
             }
         }
         return dequeuedMessage
+    }
+
+    override suspend fun removeMessage(msg: AppUpdateMessage) {
+        versionerDataStore.edit { prefs ->
+            val currentMessagesJson = prefs[APP_UPDATE_KEY] ?: return@edit
+            val currentMessages =
+                Json.decodeFromString<MutableList<AppUpdateMessage>>(currentMessagesJson)
+
+            if (currentMessages.remove(msg)) {
+                prefs[APP_UPDATE_KEY] = Json.encodeToString(currentMessages)
+            }
+        }
     }
 
     override suspend fun clearAll() {

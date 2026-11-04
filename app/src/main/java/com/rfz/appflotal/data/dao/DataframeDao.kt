@@ -9,7 +9,7 @@ import com.rfz.appflotal.data.model.database.DataframeEntity
 @Dao
 interface DataframeDao {
     @Insert(onConflict = OnConflictStrategy.NONE)
-    suspend fun insert(dataframe: DataframeEntity)
+    suspend fun insert(dataframe: DataframeEntity): Long
 
     @Query(
         "DELETE FROM dataframe WHERE (sensor_id, timestamp) NOT IN " +
@@ -19,7 +19,8 @@ interface DataframeDao {
     )
     suspend fun deleteOldRecords(monitorId: Int)
 
-    @Query("SELECT * FROM dataframe WHERE monitor_id = :monitorId AND sendStatus = 0")
+    // active = 0 marca tramas que el servidor rechazó (p. ej. "Invalid Frame"); no se reintentan
+    @Query("SELECT * FROM dataframe WHERE monitor_id = :monitorId AND sendStatus = 0 AND active = 1")
     suspend fun getUnsentRecords(monitorId: Int): List<DataframeEntity?>
 
     @Query(
@@ -32,11 +33,9 @@ interface DataframeDao {
     @Query("SELECT EXISTS (SELECT 1 FROM dataframe WHERE sensor_id = :sensorId)")
     suspend fun exist(sensorId: String): Boolean
 
-    @Query("UPDATE dataframe SET sendStatus = :sendStatus, active =:active WHERE monitor_id = :monitorId " +
-                "AND timestamp = :timestamp")
+    @Query("UPDATE dataframe SET sendStatus = :sendStatus, active =:active WHERE id_record = :idRecord")
     suspend fun setRecordStatus(
-        monitorId: Int,
-        timestamp: String,
+        idRecord: Long,
         sendStatus: Boolean,
         active: Boolean
     )

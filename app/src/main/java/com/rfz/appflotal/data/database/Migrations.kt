@@ -109,10 +109,25 @@ val MIGRATION_31_32 = object : Migration(31, 32) {
     }
 }
 
+/**
+ * Bandera del Wizard de configuración (passWizard del login) y su envío pendiente a
+ * api/PassedWizard. Una sesión abierta con monitor ya registrado se marca como completada,
+ * igual que se comportaba antes (el Wizard solo salía con id_monitor = 0); el siguiente login
+ * la reemplaza con el valor del servidor.
+ */
+val MIGRATION_32_33 = object : Migration(32, 33) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `user` ADD COLUMN `passWizard` INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE `user` ADD COLUMN `passWizardPending` INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("UPDATE `user` SET `passWizard` = 1 WHERE `id_monitor` != 0")
+    }
+}
+
 val ALL_MIGRATIONS = arrayOf(
     MIGRATION_27_28,
     MIGRATION_28_29,
     MIGRATION_29_30,
     MIGRATION_30_31,
-    MIGRATION_31_32
+    MIGRATION_31_32,
+    MIGRATION_32_33
 )

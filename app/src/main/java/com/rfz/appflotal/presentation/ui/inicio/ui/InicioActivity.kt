@@ -640,6 +640,8 @@ class InicioActivity : ComponentActivity() {
                                                 launchSingleTop = true
                                             }
                                         }
+                                        // Baja el evento sin tocar la cola (el mensaje ya se consumió).
+                                        appStatusManagerRepository.clearPlanChangeEvent()
                                     },
                                     onCleanState = { appStatusManagerRepository.cleanNotificationsState() },
                                 )
@@ -706,7 +708,11 @@ fun NotificationComponent(
 ) {
     when (inicioUiState.eventType) {
         FireCloudMessagingType.CAMBIO_DE_PLAN -> {
-            onPlanChange() // Navigation
+            // El plan ya está guardado en Room y el mensaje ya salió de la cola:
+            // solo falta navegar, una sola vez.
+            LaunchedEffect(Unit) {
+                onPlanChange()
+            }
         }
 
         FireCloudMessagingType.ACTUALIZACION -> {

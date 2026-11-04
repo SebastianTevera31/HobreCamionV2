@@ -43,7 +43,7 @@ import com.rfz.appflotal.data.model.promotions.PromotionEntity
         PromotionEntity::class, FollowedAccessoryEntity::class, FollowedPromotionEntity::class,
         FollowedSeenProductEntity::class, MaintenanceNotificationEntity::class
     ],
-    version = 32,
+    version = 33,
     exportSchema = true
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {

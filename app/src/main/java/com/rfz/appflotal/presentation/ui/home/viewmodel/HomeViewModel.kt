@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.model.languaje.LanguageResponse
 import com.rfz.appflotal.data.repository.apputilities.AppUtilitiesRepositoryImpl
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
+import com.rfz.appflotal.data.repository.fcmessaging.toSafePaymentPlanType
 import com.rfz.appflotal.data.repository.maintenance.MaintenanceNotificationsRepository
 import com.rfz.appflotal.data.repository.promotions.FollowedPromotionsRepository
 import com.rfz.appflotal.data.worker.triggerMaintenanceNotificationsSync
@@ -25,6 +26,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -50,6 +54,25 @@ class HomeViewModel @Inject constructor(
     private val _messageOperationState: MutableStateFlow<OperationStatus> =
         MutableStateFlow(OperationStatus.Idle)
     val messageOperationState = _messageOperationState.asStateFlow()
+
+    init {
+        observeUserPlan()
+    }
+
+    /**
+     * El plan sale de Room (vía AppStatusManagerRepository), así que un "Cambio de Plan"
+     * por FCM se refleja en Home sin recargar. None se ignora: solo aparece sin sesión,
+     * y logout() ya reinicia el estado.
+     */
+    private fun observeUserPlan() {
+        viewModelScope.launch {
+            appStatusManagerRepository.appState
+                .map { it.paymentPlanType }
+                .distinctUntilChanged()
+                .filter { it != PaymentPlanType.None }
+                .collect { plan -> _uiState.update { it.copy(paymentPlanType = plan) } }
+        }
+    }
 
 
     suspend fun logout() {
@@ -93,12 +116,8 @@ class HomeViewModel @Inject constructor(
                             selectedLanguage = language,
                             isLoading = false,
                             screenLoadStatus = OperationStatus.Success,
-                            paymentPlanType = PaymentPlanType.valueOf(
-                                user.paymentPlan.replace(
-                                    " ",
-                                    ""
-                                )
-                            )
+                            // valueOf lanzaba con un plan desconocido y dejaba Home en Error.
+                            paymentPlanType = user.paymentPlan.toSafePaymentPlanType()
                         )
                     }
                 }
@@ -116,11 +135,9 @@ class HomeViewModel @Inject constructor(
     private fun listenToAppStatusChanges() {
         viewModelScope.launch {
             appStatusManagerRepository.appState.collect { notificationState ->
+                // CAMBIO_DE_PLAN ya no pone Loading: nada lo regresaba a Success y Home se quedaba
+                // cargando. El plan nuevo llega por observeUserPlan().
                 when (notificationState.eventType) {
-                    FireCloudMessagingType.CAMBIO_DE_PLAN -> {
-                        _uiState.update { it.copy(screenLoadStatus = OperationStatus.Loading) }
-                    }
-
                     FireCloudMessagingType.TERMINOS -> {
                         _uiState.update { it.copy(showTermsAndConditions = true) }
                     }

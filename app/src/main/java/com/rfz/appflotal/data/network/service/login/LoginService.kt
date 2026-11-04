@@ -6,6 +6,7 @@ import com.rfz.appflotal.data.model.login.response.RegisterBody
 import com.rfz.appflotal.data.model.login.response.UpdateUserBody
 import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.client.login.LoginClient
+import com.rfz.appflotal.data.network.networkRequestHelper
 import com.rfz.appflotal.data.network.requestHelper
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.domain.database.GetTasksUseCase
@@ -43,5 +44,10 @@ class LoginService @Inject constructor(
             val token = getTasksUseCase().first()[0].fld_token
             loginClient.acceptTermsAndConditions("bearer $token")
         }
+    }
+
+    /** true si el servidor registró que el usuario completó el Wizard. */
+    suspend fun doPassedWizard(token: String) = networkRequestHelper {
+        loginClient.passedWizard("bearer $token")
     }
 }

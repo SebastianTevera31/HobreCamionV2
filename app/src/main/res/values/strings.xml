@@ -824,6 +824,8 @@
     <string name="alert_label_expires">Vence en:</string>
     <string name="alert_label_max">Máx:</string>
     <string name="alert_label_deviation">Desviación:</string>
+    <string name="alert_location_view_map">Ver ubicación</string>
+    <string name="alert_location_unavailable">Ubicación no disponible</string>
 
     <!-- Alert Status -->
     <string name="alert_status_critical">CRÍTICA</string>

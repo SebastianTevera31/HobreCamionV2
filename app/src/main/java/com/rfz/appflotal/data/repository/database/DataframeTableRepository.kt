@@ -9,9 +9,8 @@ import javax.inject.Singleton
 class DataframeTableRepository @Inject constructor(
     private val dataframeDao: DataframeDao,
 ) {
-    suspend fun insert(sensorTpmsEntity: DataframeEntity) {
+    suspend fun insert(sensorTpmsEntity: DataframeEntity): Long =
         dataframeDao.insert(sensorTpmsEntity)
-    }
 
     suspend fun deleteOldRecords(vehicleId: Int) = dataframeDao.deleteOldRecords(vehicleId)
 
@@ -24,6 +23,6 @@ class DataframeTableRepository @Inject constructor(
 
     suspend fun exist(sensorId: String): Boolean = dataframeDao.exist(sensorId)
 
-    suspend fun setRecordStatus(monitorId: Int, timestamp: String, sendStatus: Boolean, active: Boolean) =
-        dataframeDao.setRecordStatus(monitorId, timestamp, sendStatus, active)
+    suspend fun setRecordStatus(idRecord: Long, sendStatus: Boolean, active: Boolean) =
+        dataframeDao.setRecordStatus(idRecord, sendStatus, active)
 }

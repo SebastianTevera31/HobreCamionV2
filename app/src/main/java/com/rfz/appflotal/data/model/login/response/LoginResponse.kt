@@ -30,6 +30,7 @@ data class LoginResponse(
     @SerializedName("typeVehicle") val typeVehicle: String,
     @SerializedName("paymentPlan") val paymentPlan: String,
     @SerializedName("termsAndConditions") val termsGranted: Boolean,
+    @SerializedName("passWizard") val passWizard: Boolean,
     var fecha: String? = null,
     var odometer: Int? = 0,
     var dateLastOdometer: String? = ""
@@ -100,6 +101,7 @@ class AppFlotalMapper @Inject constructor() {
             industry = response.idIndustry,
             vehicleType = response.typeVehicle,
             termsGranted = response.termsGranted,
+            passWizard = response.passWizard,
             odometer = response.odometer ?: 0,
             dateLastOdometer = response.dateLastOdometer ?: ""
         )

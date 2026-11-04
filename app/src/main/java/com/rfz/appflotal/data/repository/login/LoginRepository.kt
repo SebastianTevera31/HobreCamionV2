@@ -8,11 +8,20 @@ import com.rfz.appflotal.data.model.login.response.UpdateUserBody
 import com.rfz.appflotal.data.model.message.response.GeneralResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.network.service.login.LoginService
+import com.rfz.appflotal.domain.database.GetTasksUseCase
+import kotlinx.coroutines.flow.firstOrNull
 import retrofit2.Response
 import javax.inject.Inject
 
-class LoginRepository @Inject constructor(private val loginService: LoginService) {
-    suspend fun doLogin(user: String, password: String, fcmToken: String): Response<List<LoginResponse>> {
+class LoginRepository @Inject constructor(
+    private val loginService: LoginService,
+    private val getTasksUseCase: GetTasksUseCase
+) {
+    suspend fun doLogin(
+        user: String,
+        password: String,
+        fcmToken: String
+    ): Response<List<LoginResponse>> {
         return loginService.doLogin(LoginDto(user, password, fcmToken))
     }
 
@@ -62,5 +71,11 @@ class LoginRepository @Inject constructor(private val loginService: LoginService
 
     suspend fun doAcceptTermsAndConditions(): ApiResult<List<GeneralResponse>?> {
         return loginService.doAcceptTermsAndConditions()
+    }
+
+    suspend fun doPassedWizard(): Boolean {
+        val token = getTasksUseCase().firstOrNull()?.firstOrNull()?.fld_token ?: return false
+        val result = loginService.doPassedWizard(token).getOrNull()?.id ?: return false
+        return result == 200
     }
 }

@@ -360,7 +360,7 @@ class HombreCamionService : Service() {
                         val sensorId =
                             decodeDataFrame(dataFrame, MonitorDataFrame.SENSOR_ID)
 
-                        dataframeTableUseCase.doInsert(
+                        val idRecord = dataframeTableUseCase.doInsert(
                             DataframeEntity(
                                 monitorId = monitorId,
                                 sensorId = sensorId,
@@ -408,14 +408,19 @@ class HombreCamionService : Service() {
                             )
 
                             // Enviar datos a API solo si hay alertas
-                            if (inAlert) sendDataToApi(dataFrame, timestamp, monitorId)
+                            if (inAlert) sendDataToApi(idRecord, dataFrame, timestamp, monitorId)
                         }
                     }
                 }
         }
     }
 
-    private suspend fun sendDataToApi(dataFrame: String, timestamp: String, monitorId: Int) {
+    private suspend fun sendDataToApi(
+        idRecord: Long,
+        dataFrame: String,
+        timestamp: String,
+        monitorId: Int
+    ) {
         val wifiStatus = wifiUseCase()
         Log.d("HombreCamionService", "WifiStatus: $wifiStatus")
         if (wifiStatus.value == NetworkStatus.Connected) {
@@ -426,18 +431,9 @@ class HombreCamionService : Service() {
                 getUnsentRecords(monitorId)
                 oldestTimestamp = null
             } else {
-                apiTpmsUseCase.doPostSensorData(
-                    fldFrame = dataFrame,
-                    monitorId = monitorId,
-                    fldDateData = timestamp
-                )
-
-                dataframeTableUseCase.doSetRecordStatus(
-                    monitorId = monitorId,
-                    timestamp = timestamp,
-                    sendStatus = true,
-                    active = true
-                )
+                val sent = postDataframe(idRecord, dataFrame, monitorId, timestamp)
+                // Si falló por red/servidor se recuerda para reenviar las pendientes en la siguiente alerta
+                if (!sent && oldestTimestamp.isNullOrEmpty()) oldestTimestamp = timestamp
             }
         } else if (wifiStatus.value == NetworkStatus.Disconnected && oldestTimestamp.isNullOrEmpty()) {
             oldestTimestamp = timestamp
@@ -450,29 +446,51 @@ class HombreCamionService : Service() {
         )
 
         records.forEach {
-            if (it != null) {
-                val result = apiTpmsUseCase.doPostSensorData(
-                    it.dataFrame, it.monitorId, it.timestamp
+            if (it != null) postDataframe(it.idRecord, it.dataFrame, it.monitorId, it.timestamp)
+        }
+    }
+
+    /**
+     * Envía una trama a api/Tpms/MonitorData y actualiza su estado en la tabla dataframe.
+     * El servidor responde HTTP 200 aun cuando rechaza la trama, el resultado real viene en
+     * el `id` del body (200 = guardada, 4xx = trama inválida).
+     * Regresa true si la trama quedó resuelta (enviada o rechazada) y no debe reintentarse.
+     */
+    private suspend fun postDataframe(
+        idRecord: Long,
+        dataFrame: String,
+        monitorId: Int,
+        timestamp: String
+    ): Boolean {
+        val result = apiTpmsUseCase.doPostSensorData(
+            fldFrame = dataFrame,
+            monitorId = monitorId,
+            fldDateData = timestamp
+        )
+
+        val response = (result as? ApiResult.Success)?.data?.firstOrNull()
+
+        return when {
+            response?.id == 200 -> {
+                dataframeTableUseCase.doSetRecordStatus(idRecord, sendStatus = true, active = true)
+                true
+            }
+
+            response != null && response.id in 400..499 -> {
+                Log.w(
+                    "HombreCamionService",
+                    "Trama rechazada por el servidor (${response.id}: ${response.message}): $dataFrame"
                 )
+                dataframeTableUseCase.doSetRecordStatus(idRecord, sendStatus = false, active = false)
+                true
+            }
 
-                when (result) {
-                    is ApiResult.Success -> {
-                        dataframeTableUseCase.doSetRecordStatus(
-                            it.monitorId, it.timestamp,
-                            sendStatus = true,
-                            active = true
-                        )
-                    }
-
-                    is ApiResult.Error -> {
-                        Log.d(
-                            "HombreCamionServicio",
-                            "Error al enviar datos almacenados al servidor."
-                        )
-                    }
-
-                    ApiResult.Loading -> {}
-                }
+            else -> {
+                Log.d(
+                    "HombreCamionService",
+                    "Error al enviar trama al servidor, queda pendiente: ${response ?: result}"
+                )
+                false
             }
         }
     }

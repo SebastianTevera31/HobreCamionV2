@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.repository.fcmessaging
 
+import android.util.Log
 import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.core.util.Commons.getDateFromNotification
 import com.rfz.appflotal.data.model.fcmessaging.AppUpdateMessage
@@ -48,6 +49,8 @@ fun String.toSafePaymentPlanType(): PaymentPlanType =
     } catch (_: Exception) {
         PaymentPlanType.None
     }
+
+private const val TAG = "AppStatusManager"
 
 @Singleton
 class AppStatusManagerRepository @Inject constructor(
@@ -114,12 +117,19 @@ class AppStatusManagerRepository @Inject constructor(
                                 currentEvent == FireCloudMessagingType.ACTUALIZACION
 
                         if (!isAppBusy) {
-                            _appState.update {
-                                it.copy(
-                                    eventType = FireCloudMessagingType.CAMBIO_DE_PLAN,
-                                )
+                            // El cambio de plan es un switch: aplicarlo dos veces lo deshace.
+                            // Por eso el mensaje se consume aquí mismo (no cuando la UI limpie)
+                            // y antes de alternar: si la app muere después, al reabrir no se
+                            // vuelve a aplicar. Se quita este mensaje concreto, no el de índice 0.
+                            appUpdateRepository.removeMessage(message)
+
+                            // El plan se persiste antes de emitir el evento: cuando la UI
+                            // navega a HOME, Room ya tiene el plan nuevo.
+                            if (togglePlan()) {
+                                _appState.update {
+                                    it.copy(eventType = FireCloudMessagingType.CAMBIO_DE_PLAN)
+                                }
                             }
-                            updateUserPlan()
                         }
                     }
 
@@ -202,29 +212,41 @@ class AppStatusManagerRepository @Inject constructor(
         }
     }
 
-    private fun updateUserPlan() {
-        // Procesamiento en background; no bloqueante
-        scope.launch {
-            try {
-                val userData = hombreCamionRepository.getUserData() ?: return@launch
-                val currentPlan = userData.paymentPlan.toSafePaymentPlanType()
+    /**
+     * Switch de plan (diseño del push "Cambio de Plan", que no trae plan destino):
+     * Free -> Complete; Complete o cualquier otro valor -> Free.
+     * Devuelve true si el plan quedó guardado en Room.
+     */
+    private suspend fun togglePlan(): Boolean {
+        return try {
+            val userData = hombreCamionRepository.getUserData() ?: return false
 
-                val newPlan = when (currentPlan) {
-                    PaymentPlanType.Complete -> PaymentPlanType.Free
-                    PaymentPlanType.Free -> PaymentPlanType.Complete
-                    else -> PaymentPlanType.Free // comportamiento por defecto
-                }
-
-                hombreCamionRepository.updateUserPlan(
-                    idUser = userData.idUser,
-                    plan = newPlan.name
-                )
-
-            } catch (_: Exception) {
-                // Manejo de error: registrar (o exponer al logger del proyecto)
-            } finally {
-                cleanNotificationsState()
+            val newPlan = when (userData.paymentPlan.toSafePaymentPlanType()) {
+                PaymentPlanType.Free -> PaymentPlanType.Complete
+                else -> PaymentPlanType.Free
             }
+
+            hombreCamionRepository.updateUserPlan(
+                idUser = userData.idUser,
+                plan = newPlan.name
+            )
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "No se pudo actualizar el plan", e)
+            false
+        }
+    }
+
+    /**
+     * La UI lo llama tras navegar por un cambio de plan. Solo baja el evento: el mensaje
+     * ya se consumió al aplicar el switch, y llamar a cleanNotificationsState() sacaría
+     * de la cola otro mensaje que no se ha procesado.
+     */
+    fun clearPlanChangeEvent() {
+        _appState.update {
+            if (it.eventType == FireCloudMessagingType.CAMBIO_DE_PLAN) {
+                it.copy(eventType = FireCloudMessagingType.NONE)
+            } else it
         }
     }
 

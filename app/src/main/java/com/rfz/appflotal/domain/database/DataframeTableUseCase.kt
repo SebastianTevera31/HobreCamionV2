@@ -21,8 +21,8 @@ class DataframeTableUseCase @Inject constructor(private val dataframeTableReposi
         return dataframeTableRepository.exist(sensorId)
     }
 
-    suspend fun doSetRecordStatus(monitorId: Int, timestamp: String, sendStatus: Boolean, active: Boolean) {
-        dataframeTableRepository.setRecordStatus(monitorId, timestamp, sendStatus, active)
+    suspend fun doSetRecordStatus(idRecord: Long, sendStatus: Boolean, active: Boolean) {
+        dataframeTableRepository.setRecordStatus(idRecord, sendStatus, active)
     }
 
 }

@@ -829,6 +829,8 @@
     <string name="alert_label_expires">Expires in:</string>
     <string name="alert_label_max">Max:</string>
     <string name="alert_label_deviation">Deviation:</string>
+    <string name="alert_location_view_map">View location</string>
+    <string name="alert_location_unavailable">Location not available</string>
 
     <!-- Alert Status -->
     <string name="alert_status_critical">CRITICAL</string>

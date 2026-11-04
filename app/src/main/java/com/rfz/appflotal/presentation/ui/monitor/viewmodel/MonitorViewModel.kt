@@ -21,6 +21,7 @@ import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.CoordinatesTableUseCase
 import com.rfz.appflotal.domain.database.DataframeTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
+import com.rfz.appflotal.domain.login.PassWizardUseCase
 import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
 import com.rfz.appflotal.domain.tpms.GetSensorDataByWheelUseCase
 import com.rfz.appflotal.domain.tpms.MonitorUnitConversionUseCase
@@ -79,6 +80,7 @@ class MonitorViewModel @Inject constructor(
     observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
     private val switchOdometerUnitUseCase: SwitchOdometerUnitUseCase,
     private val monitorUnitConversionUseCase: MonitorUnitConversionUseCase,
+    private val passWizardUseCase: PassWizardUseCase,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
@@ -144,14 +146,17 @@ class MonitorViewModel @Inject constructor(
 
     var shouldReadAuto = true // true = Automático, false = Manual (Bloqueado)
 
+    // Evita que el Wizard reaparezca mientras Room aún no guarda passWizard.
     private var wizardFinished = false
 
     // TODO: solo para pruebas. Fuerza el wizard aunque el usuario ya tenga monitor. Regresar a false.
     private val FORCE_SETUP_WIZARD = BuildConfig.DEBUG && false
 
+    /** Finalizar o cancelar el registro del monitor: el Wizard ya no vuelve a salir. */
     fun finishSetupWizard() {
         wizardFinished = true
         _monitorUiState.update { it.copy(showSetupWizard = false, showDialog = false) }
+        viewModelScope.launch { passWizardUseCase() }
     }
 
     init {
@@ -173,6 +178,8 @@ class MonitorViewModel @Inject constructor(
         viewModelScope.launch {
             wifiUseCase().collect { status ->
                 _wifiStatus.update { status }
+                // Reenvía un Wizard completado sin red (al abrir la app y al volver la conexión).
+                if (status == NetworkStatus.Connected) launch { passWizardUseCase.syncPending() }
             }
         }
 
@@ -208,8 +215,7 @@ class MonitorViewModel @Inject constructor(
                             monitorMac = user.monitorMac,
                             baseConfig = baseConfig,
                             showDialog = user.id_monitor == 0,
-                            showSetupWizard = currentUiState.showSetupWizard ||
-                                    (user.id_monitor == 0 && !wizardFinished)
+                            showSetupWizard = !user.passWizard && !wizardFinished
                         )
                     }
 

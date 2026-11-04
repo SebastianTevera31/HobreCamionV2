@@ -33,4 +33,8 @@ interface LoginClient {
     @PUT("api/AcceptTermsAndConditions")
     suspend fun acceptTermsAndConditions(@Header("Authorization") token: String):
             Response<List<GeneralResponse>>
+
+    /** Sin body. Solo importa el código HTTP, así que el cuerpo de la respuesta no se parsea. */
+    @POST("api/PassedWizard")
+    suspend fun passedWizard(@Header("Authorization") token: String): Response<GeneralResponse>
 }

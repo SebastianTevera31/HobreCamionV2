@@ -95,7 +95,9 @@ class HombreCamionRepository @Inject constructor(
                 country = it.country,
                 industry = it.industry,
                 vehicleType = it.vehicleType,
-                termsGranted = it.termsGranted
+                termsGranted = it.termsGranted,
+                passWizard = it.passWizard,
+                passWizardPending = it.passWizardPending
             )
         }
     }
@@ -105,6 +107,10 @@ class HombreCamionRepository @Inject constructor(
             idUser = idUser,
             flag = flag
         )
+    }
+
+    suspend fun updatePassWizard(idUser: Int, passed: Boolean, pending: Boolean) {
+        flotalDao.updatePassWizard(idUser = idUser, passed = passed, pending = pending)
     }
 
     suspend fun updateToken(idUser: Int, token: String) {

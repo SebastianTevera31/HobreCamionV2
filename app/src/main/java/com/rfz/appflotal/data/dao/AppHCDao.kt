@@ -37,6 +37,9 @@ interface AppHCDao {
     @Query("UPDATE user SET termsGranted =:flag WHERE idUser =:idUser")
     suspend fun updateTermsFlag(idUser: Int, flag: Boolean)
 
+    @Query("UPDATE user SET passWizard =:passed, passWizardPending =:pending WHERE idUser =:idUser")
+    suspend fun updatePassWizard(idUser: Int, passed: Boolean, pending: Boolean)
+
     @Query("UPDATE user SET fld_token =:token WHERE idUser =:idUser")
     suspend fun updateToken(idUser: Int, token: String)
 

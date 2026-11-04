@@ -28,6 +28,12 @@ data class AppHCEntity(
     val termsGranted: Boolean,
     val odometer: Int = 0,
     val dateLastOdometer: String = "",
+    /** El usuario ya completó el Wizard de configuración del monitor (viene del login). */
+    @ColumnInfo(defaultValue = "0")
+    val passWizard: Boolean = false,
+    /** Se completó en la app pero api/PassedWizard aún no lo confirma; se reintenta al abrir. */
+    @ColumnInfo(defaultValue = "0")
+    val passWizardPending: Boolean = false,
 )
 
 @Entity(tableName = "dataframe")
