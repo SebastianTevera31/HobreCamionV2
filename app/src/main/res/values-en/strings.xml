@@ -1010,4 +1010,30 @@
     <string name="notificaciones_vacio_mensaje">You have no pending reminders.</string>
     <string name="notificacion_recibida_el">Received on %1$s</string>
     <string name="marcar_como_enterado">Got it</string>
+
+    <!-- Fueling -->
+    <string name="fue_section_label">Fuel</string>
+    <string name="fue_title">Fuel loads</string>
+    <string name="fue_section_historial">Fueling history</string>
+    <string name="fue_nueva_carga">Add fueling</string>
+    <string name="fue_form_title">New fueling</string>
+    <string name="fue_tipo_combustible">Fuel type</string>
+    <string name="fue_seleccionar_combustible">Select a fuel</string>
+    <string name="fue_unidad">Unit</string>
+    <string name="fue_litros">Liters</string>
+    <string name="fue_galones">Gallons</string>
+    <string name="fue_cantidad">Quantity</string>
+    <string name="fue_monto">Amount</string>
+    <string name="fue_odometro">Odometer</string>
+    <string name="fue_odometro_menor">The odometer is lower than the last recorded value (%1$s).</string>
+    <string name="fue_fecha_carga">Fueling date</string>
+    <string name="fue_estacion">Station (optional)</string>
+    <string name="fue_estacion_label">Station</string>
+    <string name="fue_guardar">Save fueling</string>
+    <string name="fue_guardada">Fueling saved.</string>
+    <string name="fue_error_guardar">The fueling could not be saved. Try again.</string>
+    <string name="fue_sin_cargas">There are no fuelings recorded for this vehicle.</string>
+    <string name="fue_error_cargar">The fueling history could not be loaded.</string>
+    <string name="fue_error_catalogo">The fuel catalog could not be loaded.</string>
+    <string name="fue_requiere_internet">Offline: connect to view or add fuelings.</string>
 </resources>

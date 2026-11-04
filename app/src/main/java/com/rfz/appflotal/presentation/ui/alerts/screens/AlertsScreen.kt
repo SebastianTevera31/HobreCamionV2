@@ -419,8 +419,9 @@ fun AlertScreen(
     }
 }
 
+/** Paginador anterior / actual / siguiente. También lo usa el historial de cargas de combustible. */
 @Composable
-private fun PageNavigator(
+fun PageNavigator(
     hasData: Boolean,
     currentPage: Int,
     hasNextPage: Boolean,

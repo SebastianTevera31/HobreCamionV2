@@ -2,6 +2,7 @@ package com.rfz.appflotal.data.repository.catalog
 
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
+import com.rfz.appflotal.data.model.catalog.FuelTypeItem
 import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
@@ -51,4 +52,8 @@ class CatalogRepository @Inject constructor(
             }
         }
     }
+
+    /** Tipos de combustible, en el orden en que los entrega el servidor. */
+    suspend fun getFuelTypes(): Result<List<FuelTypeItem>> =
+        catalogService.getFuelTypes().map { list -> list.map { it.toCatalog() } }
 }

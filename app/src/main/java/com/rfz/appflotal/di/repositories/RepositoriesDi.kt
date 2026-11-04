@@ -6,6 +6,8 @@ import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepositoryImpl
 import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepository
 import com.rfz.appflotal.data.repository.fcmessaging.AppUpdateMessageRepositoryImpl
+import com.rfz.appflotal.data.repository.fueling.FuelingRepository
+import com.rfz.appflotal.data.repository.fueling.FuelingRepositoryImpl
 import com.rfz.appflotal.data.repository.repair.RepairRepository
 import com.rfz.appflotal.data.repository.repair.RepairRepositoryImpl
 import com.rfz.appflotal.data.repository.tire.TireRepository
@@ -57,4 +59,8 @@ abstract class DiRepository {
     @Binds
     @Singleton
     abstract fun bindServicesRepository(impl: ServicesRepositoryImp): ServicesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFuelingRepository(impl: FuelingRepositoryImpl): FuelingRepository
 }

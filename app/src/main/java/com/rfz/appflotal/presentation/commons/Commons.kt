@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -88,8 +89,11 @@ fun SimpleTopBar(
     modifier: Modifier = Modifier,
     showBackButton: Boolean = true,
     subTitle: String = "",
+    // Acciones a la derecha (íconos en blanco sobre el degradado); vacío por defecto.
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     TopAppBar(
+        actions = actions,
         title = {
             Column {
                 Text(

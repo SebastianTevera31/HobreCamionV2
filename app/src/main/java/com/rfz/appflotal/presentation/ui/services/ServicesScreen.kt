@@ -184,8 +184,9 @@ fun ServicesScreen(
     }
 }
 
+/** Cabecera con los datos del vehículo. También la usa el historial de cargas de combustible. */
 @Composable
-private fun VehicleHeaderCard(vehicle: VehicleHeaderUi, modifier: Modifier = Modifier) {
+fun VehicleHeaderCard(vehicle: VehicleHeaderUi, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),

@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.network.service.catalog
 
+import com.rfz.appflotal.data.model.catalog.FuelTypeResponse
 import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
@@ -59,5 +60,10 @@ class RemoteCatalogDataSource @Inject constructor(
     suspend fun getTopTenAccessories(): Result<List<TopTenAccessoryResponse>> =
         networkRequestHelper {
             catalogClient.getTopTenAccessories(bearerOrNull())
+        }
+
+    suspend fun getFuelTypes(): Result<List<FuelTypeResponse>> =
+        networkRequestHelper {
+            catalogClient.getFuelTypes(bearerOrNull())
         }
 }

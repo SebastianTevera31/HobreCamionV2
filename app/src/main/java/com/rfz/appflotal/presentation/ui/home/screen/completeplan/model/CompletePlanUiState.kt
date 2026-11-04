@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.LocalGasStation
 import androidx.compose.material.icons.outlined.OilBarrel
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -14,6 +15,7 @@ import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.presentation.navigation.ServiceGraph
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.forums.navigation.ForumsGraph
+import com.rfz.appflotal.presentation.ui.fueling.navigation.FuelingGraph
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.reportes.navigation.ReportGraph
@@ -118,6 +120,11 @@ data class CompletePlanUiState(
             icon = R.drawable.services_icon.asIcon(),
             label = R.string.servicios,
             route = ServiceGraph
+        ),
+        SectionItem(
+            icon = Icons.Outlined.LocalGasStation.asIcon(),
+            label = R.string.fue_section_label,
+            route = FuelingGraph
         )
     ),
     val blogPosts: List<BlogPost> = emptyList()

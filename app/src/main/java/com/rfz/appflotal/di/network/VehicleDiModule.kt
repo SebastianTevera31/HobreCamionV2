@@ -1,6 +1,7 @@
 package com.rfz.appflotal.di.network
 
 import com.rfz.appflotal.data.network.client.alerts.AlertsService
+import com.rfz.appflotal.data.network.client.fueling.FuelingService
 import com.rfz.appflotal.data.network.client.vehicle.VehicleService
 import dagger.Module
 import dagger.Provides
@@ -26,5 +27,15 @@ object AlertDiModule {
     @Provides
     fun provideAlertService(retrofit: Retrofit): AlertsService {
         return retrofit.create(AlertsService::class.java)
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object FuelingDiModule {
+    @Singleton
+    @Provides
+    fun provideFuelingService(retrofit: Retrofit): FuelingService {
+        return retrofit.create(FuelingService::class.java)
     }
 }

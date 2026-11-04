@@ -57,3 +57,17 @@ data class TopTenAccessoryResponse(
     @SerializedName("fld_description") val description: String? = null,
     @SerializedName("fld_active") val active: Boolean = false,
 )
+
+/** Fila de `api/Catalog/FuelType`. */
+data class FuelTypeResponse(
+    @SerializedName("id_fuelType") val idFuelType: Int,
+    @SerializedName("fuelType") val fuelType: String? = null,
+) {
+    fun toCatalog(): FuelTypeItem = FuelTypeItem(id = idFuelType, description = fuelType.orEmpty())
+}
+
+/** Tipo de combustible; [id] viaja como `fuelType` (alta) y `tipoCombustible` (historial). */
+data class FuelTypeItem(
+    override val id: Int,
+    override val description: String
+) : CatalogItem

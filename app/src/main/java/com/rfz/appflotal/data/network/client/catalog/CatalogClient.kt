@@ -1,5 +1,6 @@
 package com.rfz.appflotal.data.network.client.catalog
 
+import com.rfz.appflotal.data.model.catalog.FuelTypeResponse
 import com.rfz.appflotal.data.model.catalog.GetCountriesResponse
 import com.rfz.appflotal.data.model.catalog.GetSectorsResponse
 import com.rfz.appflotal.data.model.catalog.GetTireInspectionReportResponse
@@ -45,4 +46,10 @@ interface CatalogClient {
     suspend fun getTopTenAccessories(
         @Header("Authorization") token: String? = null
     ): Response<List<TopTenAccessoryResponse>>
+
+    // Tipos de combustible para el registro e historial de cargas.
+    @GET("api/Catalog/FuelType")
+    suspend fun getFuelTypes(
+        @Header("Authorization") token: String? = null
+    ): Response<List<FuelTypeResponse>>
 }

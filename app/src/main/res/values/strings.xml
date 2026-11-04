@@ -997,4 +997,30 @@
     <string name="notificaciones_vacio_mensaje">No tienes recordatorios pendientes.</string>
     <string name="notificacion_recibida_el">Recibido el %1$s</string>
     <string name="marcar_como_enterado">Marcar como enterado</string>
+
+    <!-- Cargas de combustible -->
+    <string name="fue_section_label">Combustible</string>
+    <string name="fue_title">Cargas de combustible</string>
+    <string name="fue_section_historial">Historial de cargas</string>
+    <string name="fue_nueva_carga">Registrar carga</string>
+    <string name="fue_form_title">Nueva carga</string>
+    <string name="fue_tipo_combustible">Tipo de combustible</string>
+    <string name="fue_seleccionar_combustible">Selecciona un combustible</string>
+    <string name="fue_unidad">Unidad</string>
+    <string name="fue_litros">Litros</string>
+    <string name="fue_galones">Galones</string>
+    <string name="fue_cantidad">Cantidad</string>
+    <string name="fue_monto">Monto</string>
+    <string name="fue_odometro">Odómetro</string>
+    <string name="fue_odometro_menor">El odómetro es menor al último registrado (%1$s).</string>
+    <string name="fue_fecha_carga">Fecha de carga</string>
+    <string name="fue_estacion">Estación (opcional)</string>
+    <string name="fue_estacion_label">Estación</string>
+    <string name="fue_guardar">Guardar carga</string>
+    <string name="fue_guardada">Carga registrada.</string>
+    <string name="fue_error_guardar">No se pudo registrar la carga. Intenta de nuevo.</string>
+    <string name="fue_sin_cargas">No hay cargas registradas para este vehículo.</string>
+    <string name="fue_error_cargar">No se pudo cargar el historial de cargas.</string>
+    <string name="fue_error_catalogo">No se pudo cargar el catálogo de combustibles.</string>
+    <string name="fue_requiere_internet">Sin conexión: conéctate para consultar o registrar cargas.</string>
 </resources>
