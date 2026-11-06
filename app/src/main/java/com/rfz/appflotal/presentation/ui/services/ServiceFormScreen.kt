@@ -1,6 +1,33 @@
 package com.rfz.appflotal.presentation.ui.services
 
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import java.io.File
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,6 +81,8 @@ import com.rfz.appflotal.presentation.ui.services.components.ServiceDropdownFiel
 import com.rfz.appflotal.presentation.ui.services.components.ServiceTextField
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
 import com.rfz.appflotal.presentation.ui.services.model.ServiceUi
+import com.rfz.appflotal.presentation.ui.services.model.toEditablePrice
+import com.rfz.appflotal.presentation.ui.services.model.toMoney
 import com.rfz.appflotal.presentation.ui.services.model.sampleServiceTypes
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -61,6 +90,9 @@ import java.util.Locale
 import java.util.TimeZone
 
 enum class ServiceFormMode { CREATE, EDIT }
+
+/** Costo unitario mientras se escribe: dígitos con hasta 2 decimales ("", "12", "12.", "12.5"). */
+private val PRICE_INPUT = Regex("""\d*(\.\d{0,2})?""")
 
 /** Estado editable del formulario de un servicio (mapea a ServiceDetailDto). */
 data class ServiceFormData(
@@ -71,6 +103,7 @@ data class ServiceFormData(
     val quantity: String,      // fld_cant
     val date: String,           // fld_date (ISO 8601)
     val notas: String,           // fld_notes
+    val image: Uri? = null,      // imagen nueva elegida; null = conservar la actual
 )
 
 /**
@@ -88,36 +121,37 @@ fun ServiceFormScreen(
     modifier: Modifier = Modifier,
     initial: ServiceUi? = null
 ) {
-    var typeName by remember(initial) { mutableStateOf(initial?.type ?: "") }
-    var typeId by remember(initial, serviceTypes) {
+    var typeName by remember(initial?.id) { mutableStateOf(initial?.type ?: "") }
+    var typeId by remember(initial?.id, serviceTypes) {
         mutableStateOf(
             serviceTypes.firstOrNull {
                 it.name.trim().equals(initial?.type?.trim(), ignoreCase = true)
             }?.id ?: serviceTypes.firstOrNull()?.id
         )
     }
-    var description by remember(initial) { mutableStateOf(initial?.description ?: "") }
-    var provider by remember(initial) { mutableStateOf(initial?.provider ?: "") }
-    var price by remember(initial) {
+    var description by remember(initial?.id) { mutableStateOf(initial?.description ?: "") }
+    var provider by remember(initial?.id) { mutableStateOf(initial?.provider ?: "") }
+    var price by remember(initial?.id) {
         mutableStateOf(
-            initial?.price?.takeIf { it > 0 }?.toString() ?: ""
+            initial?.price?.takeIf { it > 0 }?.toEditablePrice() ?: ""
         )
     }
-    var quantity by remember(initial) {
+    var quantity by remember(initial?.id) {
         mutableStateOf(initial?.quantity?.takeIf { it > 0 }?.toString() ?: "")
     }
-    var dateMillis by remember(initial) {
+    var dateMillis by remember(initial?.id) {
         mutableStateOf<Long?>(
             initial?.let { s ->
                 parseDateToMillis(s.rawDate.ifBlank { s.date })
             }
         )
     }
-    var notas by remember(initial) { mutableStateOf(initial?.notes ?: "") }
+    var notas by remember(initial?.id) { mutableStateOf(initial?.notes ?: "") }
+    var newImage by rememberSaveable(initial?.id) { mutableStateOf<Uri?>(null) }
 
-    val total = (price.toIntOrNull() ?: 0) * (quantity.toIntOrNull() ?: 0)
+    val total = (price.toDoubleOrNull() ?: 0.0) * (quantity.toIntOrNull() ?: 0)
     val isValid = typeId != null && description.isNotBlank() &&
-            (price.toIntOrNull() ?: 0) > 0 && (quantity.toIntOrNull() ?: 0) > 0 &&
+            (price.toDoubleOrNull() ?: 0.0) > 0 && (quantity.toIntOrNull() ?: 0) > 0 &&
             dateMillis != null
 
     val title = stringResource(
@@ -170,9 +204,13 @@ fun ServiceFormScreen(
                 ServiceTextField(
                     label = stringResource(R.string.srv_costo_unitario_label),
                     value = price,
-                    onValueChange = { price = it.filter { c -> c.isDigit() } },
+                    // Decimal con hasta 2 dígitos; algunos teclados escriben coma.
+                    onValueChange = { input ->
+                        val normalized = input.replace(',', '.')
+                        if (PRICE_INPUT.matches(normalized)) price = normalized
+                    },
                     prefix = "$",
-                    keyboardType = KeyboardType.Number,
+                    keyboardType = KeyboardType.Decimal,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -193,7 +231,7 @@ fun ServiceFormScreen(
 
             ServiceTextField(
                 label = stringResource(R.string.srv_total_label),
-                value = "$%,d".format(total),
+                value = total.toMoney(),
                 onValueChange = {},
                 enabled = false
             )
@@ -233,6 +271,14 @@ fun ServiceFormScreen(
                 CharacterCounter(current = notas.length, max = ForumLimits.TEXT_MAX_LENGTH)
             }
 
+            ServiceImageField(
+                editable = mode == ServiceFormMode.CREATE,
+                newImage = newImage,
+                currentImageUrl = initial?.imageUrl,
+                onImageSelected = { newImage = it },
+                onRemoveNewImage = { newImage = null }
+            )
+
             Button(
                 onClick = {
                     onSubmit(
@@ -244,6 +290,7 @@ fun ServiceFormScreen(
                             quantity = quantity,
                             date = dateMillis.toIsoDate(),
                             notas = notas,
+                            image = newImage,
                         )
                     )
                 },
@@ -263,6 +310,224 @@ fun ServiceFormScreen(
             Spacer(modifier = Modifier.navigationBarsPadding())
         }
     }
+}
+
+/**
+ * Imagen del servicio.
+ *
+ * - Alta ([editable] = true): se toma con la cámara o se elige de la galería, con
+ *   vista previa y opción de quitarla.
+ * - Detalle ([editable] = false): solo muestra la imagen registrada
+ *   ([currentImageUrl], de fld_image), sin botones. Si no tiene, o si el enlace no
+ *   se puede cargar (recurso inalcanzable, firma vencida), la sección no se muestra.
+ */
+@Composable
+private fun ServiceImageField(
+    editable: Boolean,
+    newImage: Uri?,
+    currentImageUrl: String?,
+    onImageSelected: (Uri) -> Unit,
+    onRemoveNewImage: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    var pendingCameraUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var showViewer by rememberSaveable { mutableStateOf(false) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        pendingCameraUri?.takeIf { success }?.let(onImageSelected)
+        pendingCameraUri = null
+    }
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri -> uri?.let(onImageSelected) }
+
+    // Si la URL falla al cargar se trata como si no hubiera imagen. Una URL nueva
+    // (p. ej. tras recargar la lista) se vuelve a intentar.
+    var remoteFailed by remember(currentImageUrl) { mutableStateOf(false) }
+    val remoteUrl = currentImageUrl?.takeIf { it.isNotBlank() && !remoteFailed }
+    val onRemoteError = {
+        remoteFailed = true
+        showViewer = false
+    }
+    if (!editable && newImage == null && remoteUrl == null) return
+
+    if (showViewer && remoteUrl != null) {
+        ServiceImageViewer(url = remoteUrl, onError = onRemoteError) { showViewer = false }
+    }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
+    ) {
+        FieldLabel(stringResource(R.string.srv_imagen_label))
+
+        if (newImage != null || remoteUrl != null) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                val previewModifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .clip(RoundedCornerShape(Dimens.PaddingSmall))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                if (newImage != null) {
+                    AsyncImage(
+                        model = newImage,
+                        contentDescription = stringResource(R.string.srv_imagen_label),
+                        contentScale = ContentScale.Crop,
+                        modifier = previewModifier
+                    )
+                } else if (remoteUrl != null) {
+                    RemoteServiceImage(
+                        url = remoteUrl,
+                        contentScale = ContentScale.Crop,
+                        onError = onRemoteError,
+                        modifier = previewModifier.clickable { showViewer = true }
+                    )
+                }
+                if (editable && newImage != null) {
+                    IconButton(
+                        onClick = onRemoveNewImage,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(Dimens.PaddingSmall)
+                            .size(32.dp)
+                            .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.srv_quitar_imagen),
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        if (editable) Row(horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)) {
+            OutlinedButton(
+                onClick = {
+                    val uri = createServicePhotoUri(context)
+                    pendingCameraUri = uri
+                    cameraLauncher.launch(uri)
+                },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Default.PhotoCamera, contentDescription = null)
+                Spacer(Modifier.size(Dimens.PaddingSmall))
+                Text(stringResource(R.string.srv_tomar_foto))
+            }
+            OutlinedButton(
+                onClick = {
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                Spacer(Modifier.size(Dimens.PaddingSmall))
+                Text(stringResource(R.string.srv_galeria))
+            }
+        }
+    }
+}
+
+/**
+ * Petición de Coil para una imagen de fld_image.
+ *
+ * fld_image es una URL firmada de Cloudflare R2 que cambia en cada GetServices
+ * (X-Amz-Date / X-Amz-Signature) y vence a los 15 min (X-Amz-Expires=900). Se usa
+ * como clave de caché la URL sin query (el nombre del archivo es un UUID que no
+ * cambia), así una imagen ya descargada se sirve de la caché aunque la firma venza.
+ */
+@Composable
+private fun rememberServiceImageRequest(url: String): ImageRequest {
+    val context = LocalContext.current
+    return remember(url) {
+        val cacheKey = url.substringBefore('?')
+        ImageRequest.Builder(context)
+            .data(url)
+            .memoryCacheKey(cacheKey)
+            .diskCacheKey(cacheKey)
+            .crossfade(true)
+            .build()
+    }
+}
+
+/**
+ * Imagen remota con indicador de carga. Si no se puede cargar avisa con [onError]
+ * para que quien la muestra oculte la sección (no se dibuja un estado de error).
+ */
+@Composable
+private fun RemoteServiceImage(
+    url: String,
+    contentScale: ContentScale,
+    onError: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SubcomposeAsyncImage(
+        model = rememberServiceImageRequest(url),
+        contentDescription = stringResource(R.string.srv_imagen_label),
+        contentScale = contentScale,
+        modifier = modifier,
+        loading = {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(28.dp),
+                    strokeWidth = 2.dp
+                )
+            }
+        },
+        onError = { onError() }
+    )
+}
+
+/** Visor a pantalla completa de la imagen del servicio (sin recortar). */
+@Composable
+private fun ServiceImageViewer(url: String, onError: () -> Unit, onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+        ) {
+            RemoteServiceImage(
+                url = url,
+                contentScale = ContentScale.Fit,
+                onError = onError,
+                modifier = Modifier.fillMaxSize()
+            )
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .statusBarsPadding()
+                    .padding(Dimens.PaddingSmall)
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.cerrar),
+                    tint = Color.White
+                )
+            }
+        }
+    }
+}
+
+/** Archivo temporal en caché (expuesto por el FileProvider) para la foto de la cámara. */
+private fun createServicePhotoUri(context: Context): Uri {
+    val dir = File(context.cacheDir, "service_photos").apply { mkdirs() }
+    val file = File(dir, "service_${System.currentTimeMillis()}.jpg")
+    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 }
 
 /** Campo de solo lectura que abre un selector de fecha. */

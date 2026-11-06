@@ -23,7 +23,7 @@ class GetForumRoomsUseCase @Inject constructor(private val forumRepository: Foru
     ): ApiResult<List<ForumRoom>> {
         return when (val response = forumRepository.getForums(pageNumber, title)) {
             is ApiResult.Success -> ApiResult.Success(
-                response.data?.results?.map { it.toRoom() } ?: emptyList()
+                response.data?.results?.map { it.toRoom() }?.sortedByDescending { it.id == 7 } ?: emptyList()
             )
 
             is ApiResult.Error -> ApiResult.Error(response.exception, response.message)

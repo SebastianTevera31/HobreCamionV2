@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -23,7 +22,6 @@ import androidx.compose.material.icons.outlined.DirectionsBus
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +30,19 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
+import com.rfz.appflotal.presentation.ui.services.model.toMoney
+import kotlinx.coroutines.flow.flowOf
+import androidx.paging.LoadState as PagingLoadState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,6 +59,7 @@ import com.rfz.appflotal.presentation.commons.RequiresInternetNotice
 import com.rfz.appflotal.presentation.commons.SimpleTopBar
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
+import com.rfz.appflotal.presentation.ui.alerts.screens.PageNavigator
 import com.rfz.appflotal.presentation.ui.services.components.ConfirmDeleteDialog
 import com.rfz.appflotal.presentation.ui.services.components.InfoPair
 import com.rfz.appflotal.presentation.ui.services.components.ServiceSectionHeader
@@ -67,7 +77,10 @@ import com.rfz.appflotal.presentation.ui.services.model.sampleVehicleHeader
 @Composable
 fun ServicesScreen(
     vehicle: VehicleHeaderUi?,
-    services: List<ServiceUi>,
+    // Página actual (Paging 3, ServiceViewModel.pagedServices), ya filtrada por [query].
+    services: LazyPagingItems<ServiceUi>,
+    query: String,
+    onQueryChange: (String) -> Unit,
     onBack: () -> Unit,
     onNewService: () -> Unit,
     onEditService: (Int) -> Unit,
@@ -76,17 +89,16 @@ fun ServicesScreen(
     isLoading: Boolean = false,
     errorMessage: String? = null,
     isOffline: Boolean = false,
-    onRetry: () -> Unit = {}
+    onRetry: () -> Unit = {},
+    currentPage: Int = 1,        // base 1, como PageNavigator
+    pageCount: Int = 1,
+    onPageSelected: (Int) -> Unit = {}
 ) {
-    var query by remember { mutableStateOf("") }
     var toDelete by remember { mutableStateOf<ServiceUi?>(null) }
-
-    val filtered = remember(services, query) {
-        if (query.isBlank()) services
-        else services.filter {
-            it.description.contains(query, true) || it.type.contains(query, true)
-        }
-    }
+    val isEmpty = services.itemCount == 0 &&
+            services.loadState.refresh is PagingLoadState.NotLoading
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = modifier,
@@ -95,82 +107,105 @@ fun ServicesScreen(
             SimpleTopBar(
                 title = stringResource(R.string.srv_title),
                 onBack = onBack,
-                showBackButton = true
-            )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onNewService,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.srv_form_nuevo_title)) }
+                showBackButton = true,
+                actions = {
+                    // Igual que en Combustible: la acción va en la barra superior y no
+                    // en un FAB, para no tapar el paginador. Sin conexión se oculta.
+                    if (!isOffline) {
+                        IconButton(onClick = onNewService) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(R.string.srv_form_nuevo_title),
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                }
             )
         }
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(
-                start = Dimens.PaddingMedium,
-                top = Dimens.PaddingMedium,
-                end = Dimens.PaddingMedium,
-                // Altura del FAB (56dp) + su margen (16dp) + separación
-                bottom = Dimens.PaddingMedium + 80.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(Dimens.ListItemSpacing)
+                .padding(innerPadding)
         ) {
-            if (isOffline) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(Dimens.PaddingMedium),
+                verticalArrangement = Arrangement.spacedBy(Dimens.ListItemSpacing)
+            ) {
+                if (isOffline) {
+                    item {
+                        RequiresInternetNotice(
+                            message = stringResource(R.string.srv_requiere_internet),
+                            modifier = Modifier.padding(bottom = Dimens.PaddingSmall)
+                        )
+                    }
+                }
+    
+                if (vehicle != null) {
+                    item { VehicleHeaderCard(vehicle) }
+                }
+    
                 item {
-                    RequiresInternetNotice(
-                        message = stringResource(R.string.srv_requiere_internet),
-                        modifier = Modifier.padding(bottom = Dimens.PaddingSmall)
+                    ServiceSectionHeader(
+                        icon = Icons.Outlined.Build,
+                        title = stringResource(R.string.srv_detalle_servicios_section),
+                        modifier = Modifier.padding(top = Dimens.PaddingSmall)
                     )
                 }
+    
+                item {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = onQueryChange,
+                        placeholder = { Text(stringResource(R.string.srv_buscar_servicio)) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+    
+                items(
+                    count = services.itemCount,
+                    key = services.itemKey { it.id },
+                    contentType = services.itemContentType { "service" }
+                ) { index ->
+                    // Sin placeholders el elemento siempre está cargado; el null es solo por tipo.
+                    val service = services[index] ?: return@items
+                    ServiceCard(
+                        service = service,
+                        onClick = { onEditService(service.id) },
+                        onDelete = { toDelete = service }
+                    )
+                }
+    
+                when {
+                    isLoading -> item { CenteredLoader() }
+                    errorMessage != null -> item { ErrorState(onRetry) }
+                    isEmpty -> item { EmptyState() }
+                }
             }
-
-            if (vehicle != null) {
-                item { VehicleHeaderCard(vehicle) }
-            }
-
-            item {
-                ServiceSectionHeader(
-                    icon = Icons.Outlined.Build,
-                    title = stringResource(R.string.srv_detalle_servicios_section),
-                    modifier = Modifier.padding(top = Dimens.PaddingSmall)
-                )
-            }
-
-            item {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    placeholder = { Text(stringResource(R.string.srv_buscar_servicio)) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            items(filtered, key = { it.id }) { service ->
-                ServiceCard(
-                    service = service,
-                    onClick = { onEditService(service.id) },
-                    onDelete = { toDelete = service }
-                )
-            }
-
-            when {
-                isLoading -> item { CenteredLoader() }
-                errorMessage != null -> item { ErrorState(onRetry) }
-                filtered.isEmpty() -> item { EmptyState() }
-            }
+    
+            // Fijo al pie, fuera de la lista (mismo paginador que Alertas y Combustible).
+            PageNavigator(
+                hasData = services.itemCount > 0,
+                currentPage = currentPage,
+                hasNextPage = currentPage < pageCount,
+                isLoading = isLoading,
+                onPageSelected = { page ->
+                    onPageSelected(page)
+                    // Al cambiar de página se regresa al inicio de la lista.
+                    scope.launch { listState.scrollToItem(0) }
+                }
+            )
         }
     }
 
@@ -328,12 +363,12 @@ private fun ServiceCard(
                 )
                 InfoPair(
                     label = stringResource(R.string.srv_costo_unitario_label),
-                    value = "$%,d".format(service.price),
+                    value = service.price.toMoney(),
                     modifier = Modifier.weight(1f)
                 )
                 InfoPair(
                     label = stringResource(R.string.srv_total_label),
-                    value = "$%,d".format(service.total),
+                    value = service.total.toMoney(),
                     alignment = Alignment.End,
                     valueColor = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f)
@@ -397,7 +432,9 @@ private fun ServicesScreenPreview() {
     HombreCamionTheme {
         ServicesScreen(
             vehicle = sampleVehicleHeader,
-            services = sampleServices,
+            services = flowOf(PagingData.from(sampleServices)).collectAsLazyPagingItems(),
+            query = "",
+            onQueryChange = {},
             onBack = {},
             onNewService = {},
             onEditService = {},
@@ -412,7 +449,9 @@ private fun ServicesScreenEmptyPreview() {
     HombreCamionTheme {
         ServicesScreen(
             vehicle = sampleVehicleHeader,
-            services = emptyList(),
+            services = flowOf(PagingData.empty<ServiceUi>()).collectAsLazyPagingItems(),
+            query = "",
+            onQueryChange = {},
             onBack = {},
             onNewService = {},
             onEditService = {},

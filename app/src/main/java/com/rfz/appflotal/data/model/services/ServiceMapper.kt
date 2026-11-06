@@ -16,7 +16,9 @@ fun ServiceResponseDto.toDomain(): ServiceUi {
         provider = provider,
         date = formatToLongDate(dateString = date, inputFormat = "yyyy-MM-dd'T'HH:mm:ss"),
         rawDate = date,
-        notes = notes
+        notes = notes,
+        // fld_image llega "" cuando el servicio no tiene imagen.
+        imageUrl = image?.takeIf { it.isNotBlank() }
     )
 }
 

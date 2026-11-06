@@ -24,15 +24,23 @@ data class ServiceUi(
     val id: Int,
     val type: String,            // fld_typeService (nombre)
     val description: String,     // fld_description
-    val price: Int,              // fld_price (unitario)
+    val price: Double,           // fld_price (unitario, decimal)
     val quantity: Int,           // fld_cant
     val provider: String = "",   // fld_provider
     val date: String = "",       // fld_date
     val rawDate: String = "",     // fld_date original ISO
-    val notes: String? = ""
+    val notes: String? = "",
+    val imageUrl: String? = null  // fld_image (URL); solo se muestra en el detalle
 ) {
-    val total: Int get() = price * quantity
+    val total: Double get() = price * quantity
 }
+
+/** Importe con 2 decimales y separador de miles, p. ej. "$1,234.50". */
+fun Double.toMoney(): String = "$%,.2f".format(this)
+
+/** Precio para editar: sin ceros sobrantes ("100", "123.5"). */
+fun Double.toEditablePrice(): String =
+    java.math.BigDecimal.valueOf(this).stripTrailingZeros().toPlainString()
 
 /** Ítem de catálogo para el dropdown de tipos de servicio. */
 data class CatalogItemUi(val id: Int, val name: String)
@@ -52,7 +60,7 @@ val sampleServices = listOf(
         id = 1,
         type = "Preventivo",
         description = "Balanceo de eje delantero",
-        price = 600,
+        price = 600.0,
         quantity = 1,
         date = "2023-09-15",
         provider = "Taller Mecánico S.A."
@@ -61,7 +69,7 @@ val sampleServices = listOf(
         id = 2,
         type = "Correctivo",
         description = "Renovado de dos llantas traseras",
-        price = 1200,
+        price = 1200.0,
         quantity = 2,
         date = "2023-09-20",
         provider = "Taller Mecánico S.A."
@@ -70,7 +78,7 @@ val sampleServices = listOf(
         id = 3,
         type = "Preventivo",
         description = "Alineación",
-        price = 450,
+        price = 450.0,
         quantity = 1,
         date = "2023-09-25",
         provider = "Taller Mecánico S.A."

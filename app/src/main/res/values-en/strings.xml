@@ -164,7 +164,7 @@
     <string name="monitor_configuracion_error">The available configurations could not be loaded</string>
     <string name="montaje_ruedas_titulo">Tire mounting</string>
     <string name="montaje_ruedas_descripcion">Tap a position on the diagram to register and mount a tire.</string>
-    <string name="vincular_sensor">Link sensor</string>
+    <string name="vincular_sensor">Link monitor</string>
     <string name="configuracion_no_soportada">This configuration is not supported by the app yet</string>
     <string name="registro_montaje_llanta_titulo">Mount tire at %1$s</string>
     <string name="llanta_registrada_y_montada">Tire registered and mounted successfully</string>
@@ -905,6 +905,10 @@
     <string name="srv_descripcion_placeholder">Service details (optional)</string>
     <string name="srv_agregar_servicio_btn">Add service</string>
     <string name="srv_actualizar_btn">Update</string>
+    <string name="srv_imagen_label">Image</string>
+    <string name="srv_tomar_foto">Take photo</string>
+    <string name="srv_galeria">Gallery</string>
+    <string name="srv_quitar_imagen">Remove image</string>
 
     <!-- New order -->
     <string name="srv_nueva_orden_title">New order</string>

@@ -15,6 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.services.ServiceFormMode
 import com.rfz.appflotal.presentation.ui.services.ServiceFormScreen
@@ -37,6 +38,7 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
         composable<ServiceList> { entry ->
             val viewModel = entry.sharedServiceViewModel(navController)
             val state by viewModel.uiState.collectAsState()
+            val pagedServices = viewModel.pagedServices.collectAsLazyPagingItems()
 
             LaunchedEffect(Unit) { viewModel.load() }
 
@@ -51,7 +53,12 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
 
             ServicesScreen(
                 vehicle = state.vehicle,
-                services = state.services,
+                services = pagedServices,
+                query = state.query,
+                onQueryChange = viewModel::onQueryChange,
+                currentPage = state.currentPage + 1,
+                pageCount = state.pageCount,
+                onPageSelected = viewModel::goToPage,
                 isLoading = state.isLoading,
                 errorMessage = state.errorMessage,
                 isOffline = state.isOffline,

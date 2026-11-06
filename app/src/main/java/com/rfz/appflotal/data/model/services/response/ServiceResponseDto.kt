@@ -6,12 +6,13 @@ data class ServiceResponseDto(
     @SerializedName("id_service") val idService: Int,
     @SerializedName("fld_typeService") val typeService: String,
     @SerializedName("fld_description") val description: String,
-    @SerializedName("fld_price") val price: Int,
+    @SerializedName("fld_price") val price: Double,
     @SerializedName("fld_cant") val quantity: Int,
     @SerializedName("fld_vehicleNumber") val vehicleNumber: String,
     @SerializedName("fld_provider") val provider: String,
     @SerializedName("fld_date") val date: String,
-    @SerializedName("fld_notes") val notes: String? = ""
+    @SerializedName("fld_notes") val notes: String? = "",
+    @SerializedName("fld_image") val image: String? = ""
 )
 
 data class TypeServiceDto(

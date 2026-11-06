@@ -183,7 +183,7 @@
     <string name="monitor_configuracion_error">No se pudieron cargar las configuraciones disponibles</string>
     <string name="montaje_ruedas_titulo">Montaje de llantas</string>
     <string name="montaje_ruedas_descripcion">Toca una posición del diagrama para registrar y montar una llanta.</string>
-    <string name="vincular_sensor">Vincular sensor</string>
+    <string name="vincular_sensor">Vincular monitor</string>
     <string name="configuracion_no_soportada">Esta configuración aún no es compatible con la app</string>
     <string name="registro_montaje_llanta_titulo">Montar llanta en %1$s</string>
     <string name="llanta_registrada_y_montada">Llanta registrada y montada correctamente</string>
@@ -888,6 +888,10 @@
     <string name="srv_descripcion_placeholder">Detalles del servicio (opcional)</string>
     <string name="srv_agregar_servicio_btn">Agregar servicio</string>
     <string name="srv_actualizar_btn">Actualizar</string>
+    <string name="srv_imagen_label">Imagen</string>
+    <string name="srv_tomar_foto">Tomar foto</string>
+    <string name="srv_galeria">Galería</string>
+    <string name="srv_quitar_imagen">Quitar imagen</string>
 
     <!-- Nueva orden -->
     <string name="srv_nueva_orden_title">Nueva orden</string>
