@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.vialstatus.view
 
 import android.annotation.SuppressLint
+import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
@@ -94,8 +95,6 @@ fun VialStatusScreen(
         onCountryChange = viewModel::changeCountry,
         onStateChange = viewModel::changeState,
         onSearch = viewModel::getMap,
-        onReduceScale = viewModel::reduceScale,
-        onIncreaseScale = viewModel::increaseScale,
         onCancel = viewModel::cancelOperation,
         onRetryLocation = viewModel::getCurrentLocation
     )
@@ -112,8 +111,6 @@ fun VialStatusView(
     onCountryChange: (Int) -> Unit,
     onStateChange: (Int) -> Unit,
     onSearch: () -> Unit,
-    onReduceScale: () -> Unit,
-    onIncreaseScale: () -> Unit,
     onCancel: () -> Unit,
     onRetryLocation: () -> Unit,
     modifier: Modifier = Modifier
@@ -201,7 +198,6 @@ fun VialStatusView(
                 uiState.mapUrl.isNotBlank() -> {
                     VialStatusWebView(
                         url = uiState.mapUrl,
-                        initScale = uiState.initScale,
                         onCancel = onCancel,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -226,39 +222,6 @@ fun VialStatusView(
 
             if (isLoading) {
                 CancellableLoadingDialog(onCancel = onCancel)
-            }
-
-            if (uiState.mapUrl.isNotBlank()) {
-                Column(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .align(Alignment.BottomEnd)
-                ) {
-                    IconButton(
-                        onClick = onIncreaseScale,
-                        colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.primary),
-                        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                    IconButton(
-                        onClick = onReduceScale,
-                        colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.primary),
-                        shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp),
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Remove,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
             }
 
             VialLocationMenu(
@@ -397,7 +360,6 @@ private fun EmptyMapState(
 @Composable
 fun VialStatusWebView(
     url: String,
-    initScale: Double,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -432,6 +394,12 @@ fun VialStatusWebView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
                 WebView(context).apply {
+                    // AndroidView usa WRAP_CONTENT por defecto; con eso Chromium resuelve
+                    // height:100% como 0 y sitios como 511on.ca o QuickMap se ven en blanco.
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
                     webViewClient = object : WebViewClient() {
                         override fun onPageStarted(
                             view: WebView?,
@@ -444,26 +412,6 @@ fun VialStatusWebView(
 
                         override fun onPageFinished(view: WebView, url: String) {
                             super.onPageFinished(view, url)
-
-                            // El viewport fija el ancho del contenido; el nivel de zoom se
-                            // controla con body.style.zoom, que sí re-escala tras la carga
-                            // (cambiar initial-scale del meta no re-aplica en una página ya cargada).
-                            view.evaluateJavascript(
-                                """
-                            (function() {
-                                var meta = document.querySelector('meta[name="viewport"]');
-                                if (!meta) {
-                                    meta = document.createElement('meta');
-                                    meta.name = 'viewport';
-                                    document.head.appendChild(meta);
-                                }
-                                meta.content = 'width=700, initial-scale=1.0, minimum-scale=0.1, maximum-scale=5.0';
-                                if (document.body) { document.body.style.zoom = '${initScale}'; }
-                            })();
-                            """.trimIndent(),
-                                null
-                            )
-
                             canGoBack = view.canGoBack()
                             isLoadingPage = false
                         }
@@ -497,20 +445,42 @@ fun VialStatusWebView(
                     view.loadUrl(url)
                     loadedUrl = url
                 }
-
-                // Actualizar la escala sin recargar la página completa.
-                view.evaluateJavascript(
-                    """
-                (function() {
-                    if (document.body) { document.body.style.zoom = '${initScale}'; }
-                })();
-                """.trimIndent(),
-                    null
-                )
-
                 canGoBack = view.canGoBack()
             }
         )
+
+        // Zoom nativo del WebView: escala la vista sin alterar el layout de la página,
+        // así el sitio conserva su viewport responsivo ajustado al ancho real del dispositivo.
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+                .align(Alignment.BottomEnd)
+        ) {
+            IconButton(
+                onClick = { webView?.zoomIn() },
+                colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+            IconButton(
+                onClick = { webView?.zoomOut() },
+                colors = IconButtonDefaults.iconButtonColors(MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp),
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
 
         if (isLoadingPage) {
             CancellableLoadingDialog(onCancel = {
@@ -585,8 +555,6 @@ fun VialStatusCancelledPreview() {
             onCountryChange = {},
             onStateChange = {},
             onSearch = {},
-            onReduceScale = {},
-            onIncreaseScale = {},
             onCancel = {},
             onRetryLocation = {}
         )
@@ -603,8 +571,6 @@ fun VialStatusScreenPreview() {
             onCountryChange = {},
             onStateChange = {},
             onSearch = {},
-            onReduceScale = {},
-            onIncreaseScale = {},
             onCancel = {},
             onRetryLocation = {}
         )
@@ -622,8 +588,6 @@ fun VialStatusWithMenuPreview() {
                 onCountryChange = {},
                 onStateChange = {},
                 onSearch = {},
-                onReduceScale = {},
-                onIncreaseScale = {},
                 onCancel = {},
                 onRetryLocation = {}
             )

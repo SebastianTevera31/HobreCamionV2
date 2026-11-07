@@ -102,7 +102,11 @@ fun AssemblyTireScreen(
         validateOdometer = { viewModel.validateOdometer(it) },
         updateTire = { viewModel.updateTireField(it) },
         onError = {
-            Toast.makeText(context, assemblyError, Toast.LENGTH_SHORT)
+            // Si el servidor rechazó el montaje, se muestra el motivo que envió.
+            val serverMessage = uiState.value.errorMessage
+            val message = context.getString(assemblyError) +
+                    if (serverMessage.isNullOrBlank()) "" else "\n$serverMessage"
+            Toast.makeText(context, message, Toast.LENGTH_LONG)
                 .show()
             viewModel.restartOperationStatus()
         },

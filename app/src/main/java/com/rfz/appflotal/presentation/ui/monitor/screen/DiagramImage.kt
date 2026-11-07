@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,9 +31,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -68,6 +73,7 @@ fun DiagramImage(
     sizeDp: Dp = 200.dp,
     showAssemblyStatus: Boolean = false,
     scrollable: Boolean = true,
+    showEditBadge: Boolean = false,
 ) {
     val hotspots = tires.map {
         val hotspot = Hotspot.fromPixelCenter(
@@ -106,6 +112,7 @@ fun DiagramImage(
         onHotspotClick = onHotspotClick,
         sizeDp = sizeDp,
         scrollable = scrollable,
+        showEditBadge = showEditBadge,
         modifier = defaultModifier.then(modifier)
     )
 }
@@ -120,8 +127,10 @@ fun ImageWithHotspotsProportional(
     onHotspotClick: (String) -> Unit = {},
     sizeDp: Dp = 200.dp,
     scrollable: Boolean = true,
+    showEditBadge: Boolean = false,
 ) {
     val textMeasurer = rememberTextMeasurer()
+    val editPainter = rememberVectorPainter(Icons.Filled.Edit)
     val scrollState = rememberScrollState()
     val isVertical = orientation == DiagramOrientation.VERTICAL
 
@@ -222,6 +231,31 @@ fun ImageWithHotspotsProportional(
                     val textX = rect.left + (rect.width - layout.size.width) / 2f
                     val textY = rect.top + (rect.height - layout.size.height) / 2f
                     drawText(layout, topLeft = Offset(textX, textY), color = h.bubbleText)
+
+                    // Insignia de edición en las llantas montadas (esquina superior derecha)
+                    if (showEditBadge && h.isAssembled) {
+                        val badgeRadius = 9.dp.toPx()
+                        val badgeCenter = Offset(rect.right - 2.dp.toPx(), rect.top + 2.dp.toPx())
+                        drawCircle(Color.White, radius = badgeRadius, center = badgeCenter)
+                        drawCircle(
+                            color = Color(0xFF2E7D32),
+                            radius = badgeRadius,
+                            center = badgeCenter,
+                            style = Stroke(width = 1.dp.toPx())
+                        )
+                        val iconSize = 12.dp.toPx()
+                        translate(
+                            left = badgeCenter.x - iconSize / 2f,
+                            top = badgeCenter.y - iconSize / 2f
+                        ) {
+                            with(editPainter) {
+                                draw(
+                                    size = Size(iconSize, iconSize),
+                                    colorFilter = ColorFilter.tint(Color(0xFF2E7D32))
+                                )
+                            }
+                        }
+                    }
 
                     // Guardamos bounds
                     bubbleBounds[h.id] = rect

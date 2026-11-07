@@ -6,6 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rfz.appflotal.core.util.screens.HombreCamionScreens
 import com.rfz.appflotal.data.NetworkStatus
@@ -24,6 +26,9 @@ fun CompletePlanContent(
     vehicleType: String,
     wifiStatus: NetworkStatus,
     modifier: Modifier = Modifier,
+    // El main se dibuja bajo la barra superior del Scaffold; el indicador de recarga
+    // se desplaza esta distancia para quedar visible.
+    indicatorTopPadding: Dp = 0.dp,
     onShowMonitorDialog: (Boolean) -> Unit,
     onNavigate: (route: Any) -> Unit,
     viewModel: CompletePlanViewModel = hiltViewModel()
@@ -48,7 +53,9 @@ fun CompletePlanContent(
         onSectionClick = { section -> onNavigate(section.route) },
         onBlogSeeAllClick = { onNavigate(ForumsGraph) },
         onMapClick = { onNavigate(HombreCamionScreens.MAPA_VIAL.name) },
-        onWeatherClick = { onNavigate(HombreCamionScreens.WEATHER.name) }
+        onWeatherClick = { onNavigate(HombreCamionScreens.WEATHER.name) },
+        onRefresh = viewModel::refresh,
+        indicatorTopPadding = indicatorTopPadding
     )
 }
 

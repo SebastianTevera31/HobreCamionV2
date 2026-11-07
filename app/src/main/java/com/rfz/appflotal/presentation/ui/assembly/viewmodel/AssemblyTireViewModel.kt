@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
+import com.rfz.appflotal.data.repository.assembly.AssemblyRejectedException
 import com.rfz.appflotal.data.model.tire.toTire
 import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
@@ -131,11 +132,14 @@ class AssemblyTireViewModel @Inject constructor(
                 )
             )
 
-            launch {
-                hombreCamionRepository.updateOdometer(
-                    odometerValue.roundToInt(),
-                    getCurrentDate()
-                )
+            // El odómetro solo se actualiza si el montaje quedó registrado.
+            if (result.isSuccess) {
+                launch {
+                    hombreCamionRepository.updateOdometer(
+                        odometerValue.roundToInt(),
+                        getCurrentDate()
+                    )
+                }
             }
 
             _uiState.update { currentUiState ->
@@ -145,7 +149,9 @@ class AssemblyTireViewModel @Inject constructor(
                             OperationStatus.Success
                         },
                         onFailure = { OperationStatus.Error }
-                    )
+                    ),
+                    errorMessage = (result.exceptionOrNull() as? AssemblyRejectedException)
+                        ?.message
                 )
             }
         }
@@ -175,7 +181,8 @@ class AssemblyTireViewModel @Inject constructor(
     fun restartOperationStatus() {
         _uiState.update { currentUiState ->
             currentUiState.copy(
-                operationStatus = null
+                operationStatus = null,
+                errorMessage = null
             )
         }
     }

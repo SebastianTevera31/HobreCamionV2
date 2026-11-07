@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,11 +20,14 @@ import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.RecordType
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopicsScreen(
     topics: List<ForumTopic>,
     modifier: Modifier = Modifier,
     loadState: LoadState<Any> = LoadState.Idle,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     onTopicClick: (ForumTopic) -> Unit,
     onReport: (topicId: Int, type: RecordType) -> Unit,
     onSaved: (id: Int) -> Unit
@@ -34,37 +39,43 @@ fun TopicsScreen(
         if (loadState is LoadState.Loading) {
             ForumShimmerList()
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = Dimens.PaddingSmall,
-                    top = Dimens.PaddingSmall,
-                    end = Dimens.PaddingSmall,
-                    // Altura del FAB (56dp) + su margen (16dp) + separación
-                    bottom = Dimens.PaddingSmall + 80.dp
-                ),
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                modifier = Modifier.fillMaxSize()
             ) {
-                items(topics) { topic ->
-                    ForumCard(
-                        title = topic.title,
-                        content = topic.description,
-                        imageUrl = topic.imageUrl,
-                        modifier = Modifier.padding(Dimens.PaddingSmall),
-                        numComments = topic.numComments,
-                        isTopic = true,
-                        showOptions = true,
-                        onNav = { onTopicClick(topic) },
-                        onSave = { onSaved(topic.id) },
-                        author = topic.author,
-                        time = topic.time,
-                        firstInitial = topic.author.take(1).uppercase(),
-                        secondInitial = "",
-                        onReport = { onReport(topic.id, RecordType.TOPIC) },
-                        color = topic.color,
-                        isSaved = topic.isLiked,
-                        numLikes = topic.likes,
-                        tags = topic.tags
-                    )
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = Dimens.PaddingSmall,
+                        top = Dimens.PaddingSmall,
+                        end = Dimens.PaddingSmall,
+                        // Altura del FAB (56dp) + su margen (16dp) + separación
+                        bottom = Dimens.PaddingSmall + 80.dp
+                    ),
+                ) {
+                    items(topics) { topic ->
+                        ForumCard(
+                            title = topic.title,
+                            content = topic.description,
+                            imageUrl = topic.imageUrl,
+                            modifier = Modifier.padding(Dimens.PaddingSmall),
+                            numComments = topic.numComments,
+                            isTopic = true,
+                            showOptions = true,
+                            onNav = { onTopicClick(topic) },
+                            onSave = { onSaved(topic.id) },
+                            author = topic.author,
+                            time = topic.time,
+                            firstInitial = topic.author.take(1).uppercase(),
+                            secondInitial = "",
+                            onReport = { onReport(topic.id, RecordType.TOPIC) },
+                            color = topic.color,
+                            isSaved = topic.isLiked,
+                            numLikes = topic.likes,
+                            tags = topic.tags
+                        )
+                    }
                 }
             }
         }

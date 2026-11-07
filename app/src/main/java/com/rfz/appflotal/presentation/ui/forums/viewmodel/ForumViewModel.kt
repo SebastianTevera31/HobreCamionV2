@@ -90,24 +90,49 @@ class ForumViewModel @Inject constructor(
         val id = roomId.toIntOrNull() ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(screenState = LoadState.Loading) }
+            fetchTopics(
+                roomId = id,
+                onError = { _uiState.update { it.copy(screenState = LoadState.Error("")) } }
+            )
+        }
+    }
 
-            val response = getForumRoomWithTopicsUseCase(id)
-            asyncResponseHelper(
-                response,
-                onError = {
-                    _uiState.update { it.copy(screenState = LoadState.Error("")) }
-                }
-            ) { result ->
-                val (currentRoom, topics) = result
-                _uiState.update {
-                    it.copy(
-                        screenState = LoadState.Success(Unit),
-                        selectedRoom = currentRoom ?: it.rooms.find { f -> f.id == id },
-                        topics = topics,
-                        filteredTopics = topics
-                    )
-                }
+    /**
+     * Recarga las publicaciones de la sala sin pasar por el shimmer: la lista sigue
+     * visible y, si falla, se conserva la que ya estaba.
+     */
+    fun refreshTopics(roomId: String) {
+        val id = roomId.toIntOrNull() ?: return
+        if (_uiState.value.isRefreshingTopics) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isRefreshingTopics = true) }
+            try {
+                fetchTopics(
+                    roomId = id,
+                    onError = { _uiState.update { it.copy(refreshTopicsFailed = true) } }
+                )
+            } finally {
+                _uiState.update { it.copy(isRefreshingTopics = false) }
             }
+        }
+    }
+
+    fun onRefreshTopicsErrorShown() {
+        _uiState.update { it.copy(refreshTopicsFailed = false) }
+    }
+
+    private suspend fun fetchTopics(roomId: Int, onError: () -> Unit) {
+        asyncResponseHelper(getForumRoomWithTopicsUseCase(roomId), onError = onError) { result ->
+            val (currentRoom, topics) = result
+            _uiState.update {
+                it.copy(
+                    screenState = LoadState.Success(Unit),
+                    selectedRoom = currentRoom ?: it.rooms.find { f -> f.id == roomId },
+                    topics = topics
+                )
+            }
+            // Respeta la búsqueda activa (sin consulta, la lista filtrada es la completa).
+            applyTopicFilter()
         }
     }
 

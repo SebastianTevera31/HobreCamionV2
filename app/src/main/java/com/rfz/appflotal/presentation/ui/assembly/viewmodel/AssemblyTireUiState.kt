@@ -22,5 +22,7 @@ data class AssemblyTireUiState(
     val axleList: List<Axle> = emptyList(),
     val screenLoadStatus: OperationStatus = OperationStatus.Loading,
     val operationStatus: OperationStatus? = null,
-    val odometerUnit: UnidadOdometro = UnidadOdometro.KILOMETROS
+    val odometerUnit: UnidadOdometro = UnidadOdometro.KILOMETROS,
+    /** Motivo que envió el servidor al rechazar el montaje, si lo hubo. */
+    val errorMessage: String? = null
 )

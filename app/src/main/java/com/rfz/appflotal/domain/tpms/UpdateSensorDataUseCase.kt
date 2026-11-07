@@ -9,12 +9,12 @@ import com.rfz.appflotal.core.util.tpms.getPressure
 import com.rfz.appflotal.core.util.tpms.getTemperature
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
+import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
@@ -25,17 +25,25 @@ import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
-class UpdateSensorDataUseCase @Inject constructor(private val sensorDataTableRepository: SensorDataTableRepository) {
+class UpdateSensorDataUseCase @Inject constructor(
+    private val sensorDataTableRepository: SensorDataTableRepository,
+    private val assemblyTireRepository: AssemblyTireRepository
+) {
 
+    /**
+     * [position] (vacía si la lectura no se asignó a ninguna llanta) e [inAlert] son el delta
+     * que el llamador aplica sobre su lista de llantas actual; no se devuelve la lista completa
+     * para no pisar cambios concurrentes (p. ej. montajes).
+     */
     data class Result(
         val newTireUiState: TireUiState,
-        val updatedTireList: List<MonitorTire>
+        val position: String,
+        val inAlert: Boolean
     )
 
     suspend operator fun invoke(
         monitorId: Int,
         dataFrame: String,
-        currentTires: List<MonitorTire>,
         timestamp: String? = null,
         tempUnit: UnidadTemperatura,
         pressureUnit: UnidadPresion
@@ -82,14 +90,8 @@ class UpdateSensorDataUseCase @Inject constructor(private val sensorDataTableRep
         val inAlert =
             getIsTireInAlert(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
 
-        val newList = currentTires.map { tireData ->
-            if (tireData.sensorPosition == realTire) tireData.copy(
-                inAlert = inAlert,
-                isActive = true,
-            ) else tireData
-        }
-
-        val isAssembled = newList.find { it.sensorPosition == realTire }?.isAssembled == true
+        val isAssembled =
+            realTire.isNotEmpty() && assemblyTireRepository.confirmTireMounted(realTire)
 
         val newTireState = TireUiState(
             currentTire = realTire,
@@ -108,7 +110,8 @@ class UpdateSensorDataUseCase @Inject constructor(private val sensorDataTableRep
 
         return Result(
             newTireUiState = newTireState,
-            updatedTireList = newList
+            position = realTire,
+            inAlert = inAlert
         )
     }
 }

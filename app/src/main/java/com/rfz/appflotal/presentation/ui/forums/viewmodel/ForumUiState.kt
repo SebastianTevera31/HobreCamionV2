@@ -29,7 +29,11 @@ data class ForumUiState(
     val topicTags: List<String> = emptyList(),
     val availableTags: List<String> = emptyList(),
     val tagsState: LoadState<Unit> = LoadState.Idle,
-    val isOffline: Boolean = false
+    val isOffline: Boolean = false,
+    // Pull-to-refresh del listado de publicaciones: no reemplaza la lista por el shimmer.
+    val isRefreshingTopics: Boolean = false,
+    // Se enciende si la recarga falla; la UI lo muestra una vez y lo consume.
+    val refreshTopicsFailed: Boolean = false
 )
 
 sealed class CameraUiState {

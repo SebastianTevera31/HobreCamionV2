@@ -63,6 +63,7 @@ import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorSetupWizard
 import com.rfz.appflotal.presentation.ui.monitor.screen.ShowMonitorRegisterDialog
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
+import com.rfz.appflotal.presentation.ui.mountedtire.navigation.EditMountedTireRoute
 import com.rfz.appflotal.presentation.ui.registrousuario.screen.TerminosScreen
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
 import kotlinx.coroutines.CoroutineScope
@@ -266,11 +267,17 @@ fun HomeScreen(
                                         launchSingleTop = true
                                     }
                                 },
+                                onEditTireClick = { position ->
+                                    navController.navigate(EditMountedTireRoute(position)) {
+                                        launchSingleTop = true
+                                    }
+                                },
                                 onLinkedSensor = { monitorViewModel.initMonitorData() },
                                 onSwitchTemperature = { monitorViewModel.switchTemperatureUnit() },
                                 onSwitchPressure = { monitorViewModel.switchPressureUnit() },
                                 onSwitchOdometer = { monitorViewModel.switchOdometerUnit() },
                                 onFinish = { monitorViewModel.finishSetupWizard() },
+                                onCancelWithoutConfiguration = { onLogout() },
                                 modifier = Modifier.padding(innerPadding)
                             )
                         }
@@ -287,11 +294,14 @@ fun HomeScreen(
                         }
                     }
 
-                    if (monitorUiState.showView && monitorUiState.showDialog &&
-                        (paymentPlan != PaymentPlanType.Complete || monitorUiState.monitorId != 0)
-                    ) {
+                    // Mientras el wizard del plan Complete está activo, él muestra su propio
+                    // diálogo. Fuera del wizard, sin monitor el diálogo es obligatorio en todos
+                    // los planes (la única salida es cerrar sesión).
+                    val isWizardActive =
+                        paymentPlan == PaymentPlanType.Complete && monitorUiState.showSetupWizard
+                    if (monitorUiState.showView && monitorUiState.showDialog && !isWizardActive) {
                         val buttonCancelText =
-                            if (paymentPlan == PaymentPlanType.Complete || monitorUiState.monitorId != 0) {
+                            if (monitorUiState.monitorId != 0) {
                                 stringResource(R.string.cerrar)
                             } else stringResource(R.string.logout)
 
@@ -300,7 +310,7 @@ fun HomeScreen(
                             cancelButtonText = buttonCancelText,
                             registerMonitorViewModel = registerMonitorViewModel,
                             onDialogCancel = {
-                                if (paymentPlan == PaymentPlanType.Complete || monitorUiState.monitorId != 0) {
+                                if (monitorUiState.monitorId != 0) {
                                     monitorViewModel.showMonitorDialog(false)
                                 } else {
                                     onLogout()

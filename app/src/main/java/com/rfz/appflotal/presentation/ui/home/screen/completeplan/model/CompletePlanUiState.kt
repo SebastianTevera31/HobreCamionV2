@@ -64,6 +64,7 @@ data class BlogPost(
 
 data class CompletePlanUiState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
     val currentScreen: BottomNavItems = BottomNavItems.HOME,
     val userName: String = "",

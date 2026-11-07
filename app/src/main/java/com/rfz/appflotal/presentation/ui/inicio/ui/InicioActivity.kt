@@ -97,6 +97,7 @@ import com.rfz.appflotal.presentation.navigation.navigateAsBottomBarTab
 import com.rfz.appflotal.presentation.navigation.operationsNavigation
 import com.rfz.appflotal.presentation.navigation.serviceGraph
 import com.rfz.appflotal.presentation.ui.fueling.navigation.fuelingGraph
+import com.rfz.appflotal.presentation.ui.mountedtire.navigation.editMountedTireScreen
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.CouponGraph
 import com.rfz.appflotal.presentation.ui.couponbook.navigation.FollowPromotions
@@ -627,6 +628,7 @@ class InicioActivity : ComponentActivity() {
                                     reportGraph(navController)
                                     serviceGraph(navController)
                                     fuelingGraph(navController)
+                                    editMountedTireScreen(navController)
                                 }
 
                                 NotificationComponent(

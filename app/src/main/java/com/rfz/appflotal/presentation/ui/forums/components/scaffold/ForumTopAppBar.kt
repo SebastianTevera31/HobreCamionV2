@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -130,6 +131,28 @@ fun ModernTopAppBar(
                 }
             },
             actions = {
+                config.onRefreshClick?.let { onRefresh ->
+                    IconButton(
+                        onClick = onRefresh,
+                        // Deshabilitado mientras recarga para no disparar dos recargas a la vez.
+                        enabled = !config.isRefreshing
+                    ) {
+                        if (config.isRefreshing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.recargar),
+                                tint = Color.White
+                            )
+                        }
+                    }
+                }
+
                 if (config.showMenuButton) {
                     Column {
                         IconButton(

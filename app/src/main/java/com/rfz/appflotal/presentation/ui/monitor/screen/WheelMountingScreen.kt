@@ -1,6 +1,7 @@
 package com.rfz.appflotal.presentation.ui.monitor.screen
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,11 +17,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Sensors
+import androidx.compose.material.icons.outlined.SensorsOff
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -47,6 +53,7 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 
 private val MountedColor = Color(0xFF2E7D32)
+private val UnlinkedColor = Color(0xFFB26A00)
 
 @Composable
 fun WheelMountingScreen(
@@ -56,9 +63,11 @@ fun WheelMountingScreen(
     tires: List<MonitorTire>,
     image: Bitmap?,
     imageDimens: Pair<Int, Int>,
+    monitorMac: String,
     onMountTireClick: (position: String) -> Unit,
+    onEditTireClick: (position: String) -> Unit,
     onDefineConfigClick: () -> Unit,
-    onLinkSensorClick: () -> Unit,
+    onConfigureMonitorClick: () -> Unit,
     onFinishClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -79,32 +88,16 @@ fun WheelMountingScreen(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         bottomBar = {
-            Surface(shadowElevation = 8.dp) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (hasConfiguration) {
-                        OutlinedButton(
-                            onClick = onLinkSensorClick,
-                            enabled = !isSensorLinked,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                stringResource(
-                                    if (isSensorLinked) R.string.sensor_vinculado else R.string.vincular_sensor
-                                )
-                            )
-                        }
-                    }
+            // Sin configuración no se puede finalizar: el usuario está obligado a definirla.
+            if (hasConfiguration) {
+                Surface(shadowElevation = 8.dp) {
                     Button(
                         onClick = onFinishClick,
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
                         Text(stringResource(R.string.finalizar))
                     }
@@ -161,6 +154,13 @@ fun WheelMountingScreen(
                 ) { CircularProgressIndicator() }
 
                 else -> {
+                    MonitorStatusCard(
+                        isSensorLinked = isSensorLinked,
+                        monitorMac = monitorMac,
+                        baseConfigLabel = baseConfigLabel,
+                        onClick = onConfigureMonitorClick
+                    )
+
                     ProgressCard(
                         mounted = tires.count { it.isAssembled },
                         total = tires.size
@@ -187,14 +187,103 @@ fun WheelMountingScreen(
                                 orientation = DiagramOrientation.VERTICAL,
                                 onHotspotClick = { position ->
                                     val tire = tires.find { it.sensorPosition == position }
-                                    if (tire?.isAssembled != true) pendingPosition = position
+                                    if (tire?.isAssembled == true) onEditTireClick(position)
+                                    else pendingPosition = position
                                 },
                                 sizeDp = maxWidth,
                                 showAssemblyStatus = true,
-                                scrollable = false
+                                scrollable = false,
+                                showEditBadge = true
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Estado del monitor dentro del wizard. Deja claro que el usuario puede vincular su
+ * monitor o reconfigurarlo (MAC y configuración) en cualquier momento.
+ */
+@Composable
+private fun MonitorStatusCard(
+    isSensorLinked: Boolean,
+    monitorMac: String,
+    baseConfigLabel: String?,
+    onClick: () -> Unit,
+) {
+    val accent = if (isSensorLinked) MaterialTheme.colorScheme.primary else UnlinkedColor
+    val subtitle = buildString {
+        append(if (isSensorLinked) monitorMac else stringResource(R.string.monitor_sin_vincular))
+        if (baseConfigLabel != null) append(" · $baseConfigLabel")
+    }
+
+    Card(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, accent.copy(alpha = 0.5f)),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(accent.copy(alpha = 0.12f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (isSensorLinked) Icons.Outlined.Sensors else Icons.Outlined.SensorsOff,
+                    contentDescription = null,
+                    tint = accent
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.monitor_tpms_titulo),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                if (isSensorLinked) MountedColor else Color(0xFF9E9E9E),
+                                CircleShape
+                            )
+                    )
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            if (isSensorLinked) {
+                OutlinedButton(onClick = onClick, shape = RoundedCornerShape(12.dp)) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.reconfigurar),
+                        modifier = Modifier.padding(start = 6.dp)
+                    )
+                }
+            } else {
+                Button(onClick = onClick, shape = RoundedCornerShape(12.dp)) {
+                    Text(stringResource(R.string.vincular_sensor))
                 }
             }
         }
@@ -323,13 +412,15 @@ fun WheelMountingScreenPreview() {
         WheelMountingScreen(
             hasConfiguration = true,
             baseConfigLabel = "BASE 6",
-            isSensorLinked = false,
+            isSensorLinked = true,
             tires = sampleTires,
             image = createBitmap(600, 300),
             imageDimens = Pair(600, 300),
+            monitorMac = "AA:BB:CC:DD:EE:FF",
             onMountTireClick = {},
+            onEditTireClick = {},
             onDefineConfigClick = {},
-            onLinkSensorClick = {},
+            onConfigureMonitorClick = {},
             onFinishClick = {}
         )
     }

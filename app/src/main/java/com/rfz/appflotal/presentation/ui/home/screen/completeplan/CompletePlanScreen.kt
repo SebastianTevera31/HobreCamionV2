@@ -4,16 +4,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +41,7 @@ import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.Complete
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.SectionItem
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.asIcon
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompletePlanScreen(
     onNotificationsClick: () -> Unit,
@@ -44,117 +52,137 @@ fun CompletePlanScreen(
     onSectionClick: (SectionItem) -> Unit,
     onBlogSeeAllClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onRefresh: () -> Unit = {},
+    indicatorTopPadding: Dp = 0.dp,
     state: CompletePlanUiState = CompletePlanUiState()
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-        item {
-            Spacer(Modifier.height(8.dp))
-            HomeTopBar(
-                userName = state.userName,
-                planType = state.paymentPlanType,
-                plates = state.vehiclePlate,
-                hasPendingNotifications = state.hasPendingNotifications,
-                onNotificationsClick = onNotificationsClick,
-                modifier = Modifier.padding(top = 96.dp)
+    val pullToRefreshState = rememberPullToRefreshState()
+    PullToRefreshBox(
+        isRefreshing = state.isRefreshing,
+        onRefresh = onRefresh,
+        state = pullToRefreshState,
+        modifier = modifier.fillMaxWidth(),
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullToRefreshState,
+                isRefreshing = state.isRefreshing,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = indicatorTopPadding)
             )
         }
-
-        if (state.isOffline) {
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
             item {
-                NoInternetCard(message = stringResource(R.string.sin_internet_home))
-            }
-        }
-
-        item {
-            Column {
-                SectionHeader(
-                    stringResource(R.string.rendimiento_del_vehiculo),
-                    stringResource(R.string.ver_mas),
-                    onVehicleDetailClick
-                )
-                VehiclePerformanceCard(
-                    state.vehicleType,
-                    state.vehiclePlate,
-                    state.stats,
-                    updatedAtLabel = state.performanceDate
+                Spacer(Modifier.height(8.dp))
+                HomeTopBar(
+                    userName = state.userName,
+                    planType = state.paymentPlanType,
+                    plates = state.vehiclePlate,
+                    hasPendingNotifications = state.hasPendingNotifications,
+                    onNotificationsClick = onNotificationsClick,
+                    modifier = Modifier.padding(top = 96.dp),
+                    isRefreshing = state.isRefreshing,
+                    onRefreshClick = onRefresh
                 )
             }
-        }
 
-        item {
-            Column {
-                SectionHeader(
-                    stringResource(R.string.alertas_recientes),
-                    stringResource(R.string.ver_todas), onAlertsSeeAllClick
-                )
-                if (state.alerts.isEmpty()) {
-                    EmptyDataCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        message = R.string.sin_alertas,
-                        icon = Icons.Outlined.CheckCircle.asIcon()
-                    )
-                } else {
-                    state.alerts.forEach { alert ->
-                        AlertCard(alert, onClick = onAlertsSeeAllClick)
-                    }
+            if (state.isOffline) {
+                item {
+                    NoInternetCard(message = stringResource(R.string.sin_internet_home))
                 }
             }
-        }
 
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SectionHeader(stringResource(R.string.clima))
-                if (state.weatherState == null) {
-                    EmptyDataCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        message = R.string.sin_datos
-                    )
-                } else {
-                    WeatherCard(
-                        state.weatherState.weatherTemp,
-                        state.weatherState.weatherCity,
-                        stringResource(state.weatherState.weatherDesc),
-                        onWeatherClick
-                    )
-                }
-                RoadMapPromoCard(onClick = onMapClick)
-            }
-        }
-
-        item {
-            Column {
-                Text(
-                    stringResource(R.string.secciones),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.padding(8.dp))
-                SectionsGrid(state.sections, onSectionClick)
-            }
-        }
-
-        item {
-            Column {
-                if (!state.blogPosts.isEmpty()) {
+            item {
+                Column {
                     SectionHeader(
-                        stringResource(R.string.foro),
-                        stringResource(R.string.ver_todas),
-                        onBlogSeeAllClick
+                        stringResource(R.string.rendimiento_del_vehiculo),
+                        stringResource(R.string.ver_mas),
+                        onVehicleDetailClick
                     )
-                    state.blogPosts.forEach { post ->
-                        BlogPostCard(post, onClick = onBlogSeeAllClick)
+                    VehiclePerformanceCard(
+                        state.vehicleType,
+                        state.vehiclePlate,
+                        state.stats,
+                        updatedAtLabel = state.performanceDate
+                    )
+                }
+            }
+
+            item {
+                Column {
+                    SectionHeader(
+                        stringResource(R.string.alertas_recientes),
+                        stringResource(R.string.ver_todas), onAlertsSeeAllClick
+                    )
+                    if (state.alerts.isEmpty()) {
+                        EmptyDataCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            message = R.string.sin_alertas,
+                            icon = Icons.Outlined.CheckCircle.asIcon()
+                        )
+                    } else {
+                        state.alerts.forEach { alert ->
+                            AlertCard(alert, onClick = onAlertsSeeAllClick)
+                        }
                     }
                 }
             }
-        }
 
-        item {
-            SeeAllPill(stringResource(R.string.ver_todos), onBlogSeeAllClick)
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SectionHeader(stringResource(R.string.clima))
+                    if (state.weatherState == null) {
+                        EmptyDataCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            message = R.string.sin_datos
+                        )
+                    } else {
+                        WeatherCard(
+                            state.weatherState.weatherTemp,
+                            state.weatherState.weatherCity,
+                            stringResource(state.weatherState.weatherDesc),
+                            onWeatherClick
+                        )
+                    }
+                    RoadMapPromoCard(onClick = onMapClick)
+                }
+            }
+
+            item {
+                Column {
+                    Text(
+                        stringResource(R.string.secciones),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    SectionsGrid(state.sections, onSectionClick)
+                }
+            }
+
+            item {
+                Column {
+                    if (!state.blogPosts.isEmpty()) {
+                        SectionHeader(
+                            stringResource(R.string.foro),
+                            stringResource(R.string.ver_todas),
+                            onBlogSeeAllClick
+                        )
+                        state.blogPosts.forEach { post ->
+                            BlogPostCard(post, onClick = onBlogSeeAllClick)
+                        }
+                    }
+                }
+            }
+
+            item {
+                SeeAllPill(stringResource(R.string.ver_todos), onBlogSeeAllClick)
+            }
         }
     }
 }

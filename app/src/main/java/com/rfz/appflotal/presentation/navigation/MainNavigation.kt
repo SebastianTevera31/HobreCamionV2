@@ -19,6 +19,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.screen.MonitorScreen
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
+import com.rfz.appflotal.presentation.ui.mountedtire.navigation.EditMountedTireRoute
 import com.rfz.appflotal.presentation.ui.notifications.NotificationsRoute
 import com.rfz.appflotal.presentation.ui.registertires.RegisterTireScreen
 import com.rfz.appflotal.presentation.ui.registertires.RegisterTireViewModel
@@ -110,6 +111,11 @@ fun NavGraphBuilder.mainNavigation(
             },
             onMountTireClick = { position ->
                 navController.navigate("${NavScreens.REGISTRO_MONTAJE}/$position") {
+                    launchSingleTop = true
+                }
+            },
+            onEditTireClick = { position ->
+                navController.navigate(EditMountedTireRoute(position)) {
                     launchSingleTop = true
                 }
             })

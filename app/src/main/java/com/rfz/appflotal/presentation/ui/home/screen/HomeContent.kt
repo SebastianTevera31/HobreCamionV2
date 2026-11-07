@@ -57,6 +57,7 @@ fun HomeContent(
                 },
                 onNavigate = onNavigate,
                 modifier = modifier,
+                indicatorTopPadding = paddingValues.calculateTopPadding(),
             )
         }
 

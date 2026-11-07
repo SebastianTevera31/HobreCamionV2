@@ -23,8 +23,10 @@ fun MonitorSetupWizard(
     registerMonitorViewModel: RegisterMonitorViewModel,
     paymentPlan: PaymentPlanType,
     onMountTireClick: (position: String) -> Unit,
+    onEditTireClick: (position: String) -> Unit,
     onLinkedSensor: () -> Unit,
     onFinish: () -> Unit,
+    onCancelWithoutConfiguration: () -> Unit,
     onSwitchTemperature: () -> Unit,
     onSwitchPressure: () -> Unit,
     onSwitchOdometer: () -> Unit,
@@ -36,19 +38,24 @@ fun MonitorSetupWizard(
     MonitorSetupWizardContent(
         monitorUiState = monitorUiState,
         onMountTireClick = onMountTireClick,
+        onEditTireClick = onEditTireClick,
         onFinish = onFinish,
         onSwitchTemperature = onSwitchTemperature,
         onSwitchPressure = onSwitchPressure,
         onSwitchOdometer = onSwitchOdometer,
         modifier = modifier,
         dialogContent = { onDismiss ->
+            // La configuración es obligatoria: sin ella el wizard no se puede cerrar ni
+            // finalizar, igual que en los demás planes (la única salida es cerrar sesión).
             ShowMonitorRegisterDialog(
                 monitorId = monitorUiState.monitorId,
-                cancelButtonText = stringResource(R.string.cerrar),
+                cancelButtonText = stringResource(
+                    if (hasConfiguration) R.string.cerrar else R.string.logout
+                ),
                 registerMonitorViewModel = registerMonitorViewModel,
                 onDialogCancel = {
                     onDismiss()
-                    if (!hasConfiguration) onFinish()
+                    if (!hasConfiguration) onCancelWithoutConfiguration()
                 },
                 onSuccessRegister = { _ ->
                     onDismiss()
@@ -67,6 +74,7 @@ fun MonitorSetupWizardContent(
     onMountTireClick: (position: String) -> Unit,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
+    onEditTireClick: (position: String) -> Unit = {},
     onSwitchTemperature: () -> Unit = {},
     onSwitchPressure: () -> Unit = {},
     onSwitchOdometer: () -> Unit = {},
@@ -97,9 +105,11 @@ fun MonitorSetupWizardContent(
         tires = monitorUiState.listOfTires,
         image = monitorUiState.imageBitmap,
         imageDimens = monitorUiState.imageDimen,
+        monitorMac = monitorUiState.monitorMac,
         onMountTireClick = onMountTireClick,
+        onEditTireClick = onEditTireClick,
         onDefineConfigClick = { showDialog = true },
-        onLinkSensorClick = { showDialog = true },
+        onConfigureMonitorClick = { showDialog = true },
         onFinishClick = onFinish,
         modifier = modifier
     )

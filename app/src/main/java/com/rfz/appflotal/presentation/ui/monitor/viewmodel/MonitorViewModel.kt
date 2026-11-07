@@ -9,7 +9,6 @@ import com.rfz.appflotal.BuildConfig
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons.getBitmapFromDrawable
 import com.rfz.appflotal.data.NetworkStatus
-import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
@@ -41,9 +40,14 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -85,7 +89,26 @@ class MonitorViewModel @Inject constructor(
 ) : ViewModel() {
     private var _monitorUiState: MutableStateFlow<MonitorUiState> =
         MutableStateFlow(MonitorUiState())
-    val monitorUiState = _monitorUiState.asStateFlow()
+
+    /**
+     * Posiciones montadas según la tabla local de montajes: es la fuente de verdad de
+     * `isAssembled`. `null` mientras Room no ha emitido, para no marcar todo como desmontado.
+     */
+    private val assembledPositions: StateFlow<Set<String>?> =
+        flow { emitAll(assemblyTireRepository.observeAssemblyTire()) }
+            .map { list -> list.map { it.positionTire.normalizePosition() }.toSet() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /**
+     * `isAssembled` se deriva de [assembledPositions] al exponer el estado, de modo que ninguna
+     * escritura concurrente de `listOfTires` (Bluetooth, servidor) pueda dejarlo desactualizado.
+     * Dentro del ViewModel se lee y escribe siempre [_monitorUiState].
+     */
+    val monitorUiState: StateFlow<MonitorUiState> =
+        combine(_monitorUiState, assembledPositions) { state, assembled ->
+            if (assembled == null) state
+            else state.copy(listOfTires = state.listOfTires.withAssembly(assembled))
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, _monitorUiState.value)
 
     private val temperatureUnit = observeTemperatureUnitUseCase().stateIn(
         viewModelScope,
@@ -121,8 +144,9 @@ class MonitorViewModel @Inject constructor(
     val tireUiState = combine(
         _tireUiState,
         pressureUnit,
-        temperatureUnit
-    ) { state, pUnit, tUnit ->
+        temperatureUnit,
+        assembledPositions
+    ) { state, pUnit, tUnit, assembled ->
         val converted = monitorUnitConversionUseCase(
             state.rawTemperature,
             tUnit,
@@ -131,7 +155,9 @@ class MonitorViewModel @Inject constructor(
         )
         state.copy(
             pressure = state.pressure.copy(first = converted.pressure),
-            temperature = state.temperature.copy(first = converted.temperature)
+            temperature = state.temperature.copy(first = converted.temperature),
+            isAssembled = assembled?.let { state.currentTire.normalizePosition() in it }
+                ?: state.isAssembled
         )
     }.stateIn(
         viewModelScope,
@@ -286,7 +312,7 @@ class MonitorViewModel @Inject constructor(
 
     private fun mapTires() {
         viewModelScope.launch {
-            val uiState = monitorUiState.value
+            val uiState = _monitorUiState.value
             val monitorId = uiState.monitorId
 
             val sensorDataDeferred = async { apiTpmsUseCase.doGetDiagramMonitor(monitorId) }
@@ -339,37 +365,42 @@ class MonitorViewModel @Inject constructor(
     // La lista que llega del servidor puede no incluir montajes locales aún no sincronizados,
     // y observeAssemblyChanges() solo reacciona cuando la tabla local cambia.
     private suspend fun applyLocalAssemblyStatus() {
-        syncAssemblyStatus(assemblyTireRepository.observeAssemblyTire().first())
+        syncAssemblyStatus(assembledPositions.filterNotNull().first())
     }
 
     private fun observeAssemblyChanges() {
         viewModelScope.launch {
-            assemblyTireRepository.observeAssemblyTire().collect { assembledTires ->
-                syncAssemblyStatus(assembledTires)
+            assembledPositions.filterNotNull().collect { assembled ->
+                syncAssemblyStatus(assembled)
             }
         }
     }
 
-    private fun syncAssemblyStatus(assembledTires: List<AssemblyTire>) {
-        val assembledPositions = assembledTires.map { it.positionTire.trim().uppercase() }.toSet()
-        val monitorId = _monitorUiState.value.monitorId
+    // La UI ya deriva isAssembled de assembledPositions; esto mantiene alineados la lista interna
+    // y la caché de coordenadas (usada sin red y por otras pantallas).
+    private fun syncAssemblyStatus(assembled: Set<String>) {
+        var changedTires: List<MonitorTire> = emptyList()
 
+        // La lambda de update puede reintentarse: debe ser pura, sin efectos secundarios.
         _monitorUiState.update { state ->
-            val updatedList = state.listOfTires.map { tire ->
-                val isNowAssembled = tire.sensorPosition.trim().uppercase() in assembledPositions
-
-                if (tire.isAssembled != isNowAssembled && monitorId != 0) {
-                    viewModelScope.launch {
-                        coordinatesTableUseCase.updateAssemblyStatus(
-                            monitorId = monitorId,
-                            tire = tire.sensorPosition,
-                            isAssembled = isNowAssembled
-                        )
-                    }
-                }
-                tire.copy(isAssembled = isNowAssembled)
+            changedTires = state.listOfTires.filter {
+                it.isAssembled != (it.sensorPosition.normalizePosition() in assembled)
             }
-            state.copy(listOfTires = updatedList)
+            if (changedTires.isEmpty()) state
+            else state.copy(listOfTires = state.listOfTires.withAssembly(assembled))
+        }
+
+        val monitorId = _monitorUiState.value.monitorId
+        if (monitorId != 0 && changedTires.isNotEmpty()) {
+            viewModelScope.launch {
+                changedTires.forEach { tire ->
+                    coordinatesTableUseCase.updateAssemblyStatus(
+                        monitorId = monitorId,
+                        tire = tire.sensorPosition,
+                        isAssembled = !tire.isAssembled
+                    )
+                }
+            }
         }
 
         val currentTire = _tireUiState.value.currentTire
@@ -381,7 +412,7 @@ class MonitorViewModel @Inject constructor(
     private fun readBluetoothData() {
         viewModelScope.launch {
             bluetoothUseCase().collect { data ->
-                val monitorId = monitorUiState.value.monitorId
+                val monitorId = _monitorUiState.value.monitorId
                 if (monitorId != 0) {
                     val rssi = data.rssi
                     val bluetoothSignalQuality = data.bluetoothSignalQuality
@@ -440,13 +471,12 @@ class MonitorViewModel @Inject constructor(
         val result = updateSensorDataUseCase(
             monitorId = _monitorUiState.value.monitorId,
             dataFrame = dataFrame,
-            currentTires = _monitorUiState.value.listOfTires,
             timestamp = timestamp,
             tempUnit = _monitorUiState.value.temperatureUnit,
             pressureUnit = _monitorUiState.value.pressureUnit
         )
 
-        _monitorUiState.update { it.copy(listOfTires = result.updatedTireList) }
+        updateTire(result.position) { it.copy(inAlert = result.inAlert, isActive = true) }
         val currentSelected = _tireUiState.value.currentTire
         if (shouldReadAuto || result.newTireUiState.currentTire == currentSelected) {
             _tireUiState.update { currentState ->
@@ -483,7 +513,6 @@ class MonitorViewModel @Inject constructor(
             val result = getSensorDataByWheelUseCase(
                 monitorId = monitorUiState.monitorId,
                 tireSelected = tireSelected,
-                currentTires = monitorUiState.listOfTires,
                 tempUnit = monitorUiState.temperatureUnit,
                 pressureUnit = monitorUiState.pressureUnit
             )
@@ -496,12 +525,23 @@ class MonitorViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
-                _monitorUiState.update { currentState ->
-                    currentState.copy(listOfTires = result.updatedTireList)
-                }
+                updateTire(tireSelected) { it.copy(inAlert = result.inAlert) }
             } else {
                 _tireUiState.update { it.copy(isLoading = false) }
             }
+        }
+    }
+
+    /**
+     * Modifica una sola llanta sobre el estado vigente. Nunca reemplazar `listOfTires` con una
+     * lista calculada antes de un punto de suspensión: pisaría cambios concurrentes.
+     */
+    private fun updateTire(position: String, transform: (MonitorTire) -> MonitorTire) {
+        if (position.isBlank()) return
+        _monitorUiState.update { state ->
+            state.copy(listOfTires = state.listOfTires.map { tire ->
+                if (tire.sensorPosition == position) transform(tire) else tire
+            })
         }
     }
 
@@ -515,7 +555,7 @@ class MonitorViewModel @Inject constructor(
 
     fun getLastedSensorData() {
         viewModelScope.launch {
-            val uiState = monitorUiState.value
+            val uiState = _monitorUiState.value
             val tires = uiState.listOfTires.associateBy { it.sensorPosition }
 
             _positionsUiState.update { ApiResult.Loading }
@@ -554,7 +594,7 @@ class MonitorViewModel @Inject constructor(
         viewModelScope.launch {
             _filteredTiresUiState.update { ApiResult.Loading }
             val tireData = apiTpmsUseCase.doGetMonitorTireByDate(
-                monitorUiState.value.monitorId,
+                _monitorUiState.value.monitorId,
                 position,
                 date
             )
@@ -638,3 +678,11 @@ class MonitorViewModel @Inject constructor(
         }
     }
 }
+
+private fun String.normalizePosition(): String = trim().uppercase()
+
+private fun List<MonitorTire>.withAssembly(assembledPositions: Set<String>): List<MonitorTire> =
+    map { tire ->
+        val isAssembled = tire.sensorPosition.normalizePosition() in assembledPositions
+        if (tire.isAssembled == isAssembled) tire else tire.copy(isAssembled = isAssembled)
+    }

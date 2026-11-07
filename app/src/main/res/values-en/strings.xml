@@ -163,8 +163,18 @@
     <string name="monitor_configuracion_descripcion">Select your unit\'s tire configuration to continue.</string>
     <string name="monitor_configuracion_error">The available configurations could not be loaded</string>
     <string name="montaje_ruedas_titulo">Tire mounting</string>
-    <string name="montaje_ruedas_descripcion">Tap a position on the diagram to register and mount a tire.</string>
+    <string name="montaje_ruedas_descripcion">Tap an empty position to mount a tire, or a mounted one to edit its record.</string>
     <string name="vincular_sensor">Link monitor</string>
+    <string name="monitor_tpms_titulo">TPMS monitor</string>
+    <string name="monitor_sin_vincular">Not linked</string>
+    <string name="reconfigurar">Reconfigure</string>
+    <string name="editar_llanta_posicion">Edit tire · %1$s</string>
+    <string name="editar_llanta_ayuda">Only the tire record changes; the mounting stays the same.</string>
+    <string name="montada_en_eje">Mounted on %1$s</string>
+    <string name="guardar_cambios">Save changes</string>
+    <string name="llanta_actualizada">Tire updated</string>
+    <string name="error_editar_llanta">Couldn\'t update the tire. Try again.</string>
+    <string name="error_cargar_llanta">Couldn\'t load the tire details. Check your connection and try again.</string>
     <string name="configuracion_no_soportada">This configuration is not supported by the app yet</string>
     <string name="registro_montaje_llanta_titulo">Mount tire at %1$s</string>
     <string name="llanta_registrada_y_montada">Tire registered and mounted successfully</string>
@@ -763,6 +773,7 @@
     <string name="rendimiento_del_vehiculo">Truck performance</string>
     <string name="alertas_recientes">Recent alerts</string>
     <string name="ver_todas">See all</string>
+    <string name="recargar">Refresh</string>
     <string name="ver_mapa">See map</string>
     <string name="secciones">Sections</string>
     <string name="ultimos_datos">LATEST DATA</string>

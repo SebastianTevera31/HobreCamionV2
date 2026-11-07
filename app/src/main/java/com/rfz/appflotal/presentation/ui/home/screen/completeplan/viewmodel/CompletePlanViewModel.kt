@@ -23,6 +23,8 @@ import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.Complete
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.model.WeatherState
 import com.rfz.appflotal.presentation.ui.home.screen.completeplan.utils.BottomNavItems
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -77,11 +79,40 @@ class CompletePlanViewModel @Inject constructor(
         map { it.toAlertUi(pressureUnit, temperatureUnit) }.take(2)
 
     fun getInitialData() {
+        viewModelScope.launch { loadHomeData() }
+    }
+
+    /** Recarga manual (pull-to-refresh) de todas las secciones del main. */
+    fun refresh() {
+        if (_uiState.value.isRefreshing) return
         viewModelScope.launch {
-            getCurrentPerformance()
-            getCurrentWeather()
-            getPostsFeed()
-            getCurrentAlerts()
+            _uiState.update { it.copy(isRefreshing = true) }
+            try {
+                loadHomeData()
+            } finally {
+                _uiState.update { it.copy(isRefreshing = false) }
+            }
+        }
+    }
+
+    /**
+     * Consulta las secciones en paralelo. Cada una se aísla para que el fallo de una
+     * no cancele a las demás.
+     */
+    private suspend fun loadHomeData() = coroutineScope {
+        launch { runSafely { getCurrentPerformance() } }
+        launch { runSafely { getCurrentWeather() } }
+        launch { runSafely { getPostsFeed() } }
+        launch { runSafely { getCurrentAlerts() } }
+    }
+
+    private suspend fun runSafely(block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // Cada sección conserva los datos previos si su consulta falla.
         }
     }
 

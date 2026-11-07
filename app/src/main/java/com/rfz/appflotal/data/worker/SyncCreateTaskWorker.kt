@@ -1,6 +1,7 @@
 package com.rfz.appflotal.data.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -23,6 +24,7 @@ import com.rfz.appflotal.data.network.service.disassembly.LocalDisassemblyDataSo
 import com.rfz.appflotal.data.network.service.disassembly.RemoteDisassemblyTireDataSource
 import com.rfz.appflotal.data.network.service.tire.InspectionTireCrudService
 import com.rfz.appflotal.data.network.service.tire.LocalInspectionDataSource
+import com.rfz.appflotal.data.repository.assembly.ASSEMBLY_SUCCESS_ID
 import com.rfz.appflotal.data.repository.promotions.PromotionsRepository
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import dagger.assisted.Assisted
@@ -43,14 +45,36 @@ class SyncCreateAssemblyTireWorker @AssistedInject constructor(
 
         return try {
             val record = local.getAssemblyTire(position).getOrNull() ?: return Result.failure()
-            val result =
-                remote.pushAssemblyTire(token, record.toDto().copy(idMonitor = record.idMonitor))
-                    .getOrNull()
+            val pushResult = remote.pushAssemblyTire(token, record.toDto())
 
-            if (result?.get(0)?.id == 200) Result.success() else Result.retry()
+            // Sin red / error de transporte: se reintenta más tarde.
+            if (pushResult.isFailure) return Result.retry()
+
+            val response = pushResult.getOrNull()?.firstOrNull()
+            if (response?.id == ASSEMBLY_SUCCESS_ID) return Result.success()
+
+            // HTTP 200 con id != 200: el servidor rechazó el montaje y reintentar no lo arregla.
+            // Si un envío anterior sí llegó (p. ej. se perdió la respuesta), el servidor ya lo
+            // tiene y el montaje local se conserva; si no, se quita para no mostrarlo montado.
+            val mountedOnServer = remote.fetchMountedTire(token, record.idMonitor)
+                .getOrNull()
+                ?.any { it.positionTire == record.positionTire && it.tireId == record.idTire }
+                ?: return Result.retry()
+
+            if (mountedOnServer) {
+                Result.success()
+            } else {
+                Log.w(TAG, "Montaje en $position rechazado: ${response?.message}")
+                local.deleteAssemblyTire(position)
+                Result.failure()
+            }
         } catch (e: Exception) {
             Result.retry()
         }
+    }
+
+    private companion object {
+        const val TAG = "SyncCreateAssembly"
     }
 }
 

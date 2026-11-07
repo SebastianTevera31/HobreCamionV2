@@ -158,6 +158,17 @@ fun NavGraphBuilder.forumsGraph(
                 viewModel.loadTopicsByRoom(args.roomId)
             }
 
+            val context = LocalContext.current
+            val refreshErrorMessage = stringResource(
+                if (state.isOffline) R.string.foro_sin_internet else R.string.error_carga_datos
+            )
+            LaunchedEffect(state.refreshTopicsFailed) {
+                if (state.refreshTopicsFailed) {
+                    Toast.makeText(context, refreshErrorMessage, Toast.LENGTH_SHORT).show()
+                    viewModel.onRefreshTopicsErrorShown()
+                }
+            }
+
             ModernModuleScaffold(
                 topBarConfig = ForumTopBarConfig(
                     title = args.roomTitle,
@@ -200,7 +211,12 @@ fun NavGraphBuilder.forumsGraph(
                         navController.navigate(SavedCommentsNav) {
                             launchSingleTop = true
                         }
-                    }
+                    },
+                    // Solo con la lista cargada; en carga inicial o error ya hay shimmer/Reintentar.
+                    onRefreshClick = if (state.screenState is LoadState.Success) {
+                        { viewModel.refreshTopics(args.roomId) }
+                    } else null,
+                    isRefreshing = state.isRefreshingTopics
                 ),
                 floatingActionButton = {
                     FloatingActionButton(onClick = {
@@ -240,6 +256,8 @@ fun NavGraphBuilder.forumsGraph(
                         TopicsScreen(
                             topics = state.filteredTopics,
                             loadState = state.screenState,
+                            isRefreshing = state.isRefreshingTopics,
+                            onRefresh = { viewModel.refreshTopics(args.roomId) },
                             onTopicClick = { topic ->
                                 navController.navigate(
                                     TopicDiscussion(

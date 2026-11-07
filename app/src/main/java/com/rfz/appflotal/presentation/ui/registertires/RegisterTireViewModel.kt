@@ -9,6 +9,7 @@ import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
 import com.rfz.appflotal.data.repository.UnidadOdometro
+import com.rfz.appflotal.data.repository.assembly.AssemblyRejectedException
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.assembly.AddAssemblyTireUseCase
@@ -45,6 +46,9 @@ class RegisterTireViewModel @Inject constructor(
     private val hombreCamionRepository: HombreCamionRepository,
     private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
 ) : ViewModel() {
+
+    /** Llanta ya creada en el servidor cuyo montaje aún no se acepta (para no duplicarla al reintentar). */
+    private var createdTireId: Int? = null
 
     private val _uiState = MutableStateFlow(RegisterTireUiState())
     val uiState = _uiState.asStateFlow()
@@ -193,43 +197,10 @@ class RegisterTireViewModel @Inject constructor(
         _uiState.update { it.copy(operationStatus = OperationStatus.Loading) }
 
         viewModelScope.launch {
-            val userData = getTasksUseCase().first { it.isNotEmpty() }[0]
-            val bearerToken = "Bearer ${userData.fld_token}"
-
-            val tireDto = TireCrudDto(
-                idTire = 0,
-                typeAcquisitionId = state.selectedAcquisitionType.idAcquisitionType,
-                providerId = 0,
-                productId = state.selectedProduct.idProduct,
-                acquisitionDate = formatAcquisitionDate(state.acquisitionDate),
-                document = state.folioFactura,
-                unitCost = costValue.toInt(),
-                dot = state.dot,
-                tireNumber = state.tireNumber,
-                treadDepth = treadDepthValue,
-                registrationDate = LocalDateTime.now().toString(),
-                isActive = true,
-                retreadDesignId = 0,
-                destination = 2,
-                lifecycle = 0
-            )
-
-            val tireResult = tireCrudUseCase(bearerToken, tireDto)
-            val newTireResultId = tireResult.getOrNull()?.id
-
-            if (tireResult.isFailure || newTireResultId == null || newTireResultId != 200) {
-                _uiState.update {
-                    it.copy(
-                        operationStatus = OperationStatus.Error,
-                        errorMessage = tireResult.exceptionOrNull()?.message
-                    )
-                }
-                return@launch
-            }
-
-            val idTire =
-                tireResult.getOrNull()?.message?.split(",")?.find { it.contains("id_tire") }
-                    ?.split(":")?.getOrNull(1)?.trim()?.toIntOrNull() ?: 0
+            // Si un intento anterior ya creó la llanta pero el montaje fue rechazado, solo se
+            // reintenta el montaje para no registrar la llanta dos veces.
+            val idTire = createdTireId ?: createTire(state, costValue, treadDepthValue) ?: return@launch
+            createdTireId = idTire
 
             val odometerNumber = state.odometer.trim().toDoubleOrNull() ?: 0.0
             val odometerValue =
@@ -247,16 +218,71 @@ class RegisterTireViewModel @Inject constructor(
                 )
             )
 
-            launch {
-                hombreCamionRepository.updateOdometer(odometerValue.roundToInt(), getCurrentDate())
+            if (assemblyResult.isFailure) {
+                val serverMessage =
+                    (assemblyResult.exceptionOrNull() as? AssemblyRejectedException)?.message
+                _uiState.update {
+                    it.copy(
+                        operationStatus = OperationStatus.Error,
+                        errorMessage = context.getString(R.string.error_montaje) +
+                                if (serverMessage.isNullOrBlank()) "" else "\n$serverMessage"
+                    )
+                }
+                return@launch
             }
 
+            createdTireId = null
+            hombreCamionRepository.updateOdometer(odometerValue.roundToInt(), getCurrentDate())
+            _uiState.update { it.copy(operationStatus = OperationStatus.Success) }
+        }
+    }
+
+    /** Registra la llanta con api/Tire/CrudTire; devuelve su id o null si falló. */
+    private suspend fun createTire(
+        state: RegisterTireUiState,
+        costValue: Double,
+        treadDepthValue: Int,
+    ): Int? {
+        val acquisitionType = state.selectedAcquisitionType ?: return null
+        val product = state.selectedProduct ?: return null
+        val userData = getTasksUseCase().first { it.isNotEmpty() }[0]
+
+        val tireDto = TireCrudDto(
+            idTire = 0,
+            typeAcquisitionId = acquisitionType.idAcquisitionType,
+            providerId = 0,
+            productId = product.idProduct,
+            acquisitionDate = formatAcquisitionDate(state.acquisitionDate),
+            document = state.folioFactura,
+            unitCost = costValue.toInt(),
+            dot = state.dot,
+            tireNumber = state.tireNumber,
+            treadDepth = treadDepthValue,
+            registrationDate = LocalDateTime.now().toString(),
+            isActive = true,
+            retreadDesignId = 0,
+            destination = 2,
+            lifecycle = 0
+        )
+
+        val tireResult = tireCrudUseCase("Bearer ${userData.fld_token}", tireDto)
+        val response = tireResult.getOrNull()
+        val idTire = response
+            ?.takeIf { it.id == 200 }
+            ?.message?.split(",")?.find { it.contains("id_tire") }
+            ?.split(":")?.getOrNull(1)?.trim()?.toIntOrNull()
+
+        if (idTire == null || idTire == 0) {
             _uiState.update {
                 it.copy(
-                    operationStatus = if (assemblyResult.isSuccess) OperationStatus.Success else OperationStatus.Error
+                    operationStatus = OperationStatus.Error,
+                    // HTTP 200 con id != 200 trae el motivo en message.
+                    errorMessage = tireResult.exceptionOrNull()?.message ?: response?.message
                 )
             }
+            return null
         }
+        return idTire
     }
 
     private fun formatAcquisitionDate(date: String): String {

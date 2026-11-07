@@ -93,11 +93,14 @@ fun RegisterTireScreen(
             }
 
             OperationStatus.Error -> {
-                Toast.makeText(
-                    context,
-                    uiState.errorMessage ?: context.getString(R.string.error_desconocido),
-                    Toast.LENGTH_LONG
-                ).show()
+                // Si hay errorMessage lo muestra el efecto de abajo; aquí solo el genérico.
+                if (uiState.errorMessage == null) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.error_desconocido),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
                 viewModel.restartOperationStatus()
             }
 

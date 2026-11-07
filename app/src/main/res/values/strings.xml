@@ -182,8 +182,18 @@
     <string name="monitor_configuracion_descripcion">Selecciona la configuración de llantas de tu unidad para continuar.</string>
     <string name="monitor_configuracion_error">No se pudieron cargar las configuraciones disponibles</string>
     <string name="montaje_ruedas_titulo">Montaje de llantas</string>
-    <string name="montaje_ruedas_descripcion">Toca una posición del diagrama para registrar y montar una llanta.</string>
+    <string name="montaje_ruedas_descripcion">Toca una posición vacía para montar una llanta, o una montada para editar su ficha.</string>
     <string name="vincular_sensor">Vincular monitor</string>
+    <string name="monitor_tpms_titulo">Monitor TPMS</string>
+    <string name="monitor_sin_vincular">Sin vincular</string>
+    <string name="reconfigurar">Reconfigurar</string>
+    <string name="editar_llanta_posicion">Editar llanta · %1$s</string>
+    <string name="editar_llanta_ayuda">Solo se modifica la ficha de la llanta; el montaje no cambia.</string>
+    <string name="montada_en_eje">Montada en %1$s</string>
+    <string name="guardar_cambios">Guardar cambios</string>
+    <string name="llanta_actualizada">Llanta actualizada</string>
+    <string name="error_editar_llanta">No se pudo actualizar la llanta. Inténtalo de nuevo.</string>
+    <string name="error_cargar_llanta">No se pudo cargar la información de la llanta. Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="configuracion_no_soportada">Esta configuración aún no es compatible con la app</string>
     <string name="registro_montaje_llanta_titulo">Montar llanta en %1$s</string>
     <string name="llanta_registrada_y_montada">Llanta registrada y montada correctamente</string>
@@ -749,6 +759,7 @@
     <string name="rendimiento_del_vehiculo">Rendimiento del vehículo</string>
     <string name="alertas_recientes">Alertas recientes</string>
     <string name="ver_todas">Ver todas</string>
+    <string name="recargar">Recargar</string>
     <string name="ver_mapa">Ver mapa</string>
     <string name="secciones">Secciones</string>
     <string name="ultimos_datos">ÚLTIMOS DATOS</string>

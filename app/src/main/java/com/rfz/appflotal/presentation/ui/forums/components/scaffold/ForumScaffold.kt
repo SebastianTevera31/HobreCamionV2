@@ -39,6 +39,9 @@ data class ForumTopBarConfig(
     val onMenuClick: (() -> Unit)? = null,
     val onPublishClick: (() -> Unit)? = null,
     val onCancelClick: (() -> Unit)? = null,
+    // Botón de recargar: solo aparece si se proporciona la acción.
+    val onRefreshClick: (() -> Unit)? = null,
+    val isRefreshing: Boolean = false,
 )
 
 data class ForumSearchConfig(

@@ -61,6 +61,7 @@ fun MonitorScreen(
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
     showBackButton: Boolean = true,
+    onEditTireClick: (position: String) -> Unit = {},
 ) {
     val monitorUiState by monitorViewModel.monitorUiState.collectAsState()
     val positionsUiState by monitorViewModel.positionsUiState.collectAsState()
@@ -105,18 +106,21 @@ fun MonitorScreen(
                     registerMonitorViewModel = registerMonitorViewModel,
                     paymentPlan = paymentPlan,
                     onMountTireClick = onMountTireClick,
+                    onEditTireClick = onEditTireClick,
                     onLinkedSensor = { monitorViewModel.initMonitorData() },
                     onFinish = { monitorViewModel.finishSetupWizard() },
+                    // Sin configuración se regresa al Home, donde la única salida es cerrar sesión.
+                    onCancelWithoutConfiguration = { onDialogCancel(0) },
                     onSwitchTemperature = { monitorViewModel.switchTemperatureUnit() },
                     onSwitchPressure = { monitorViewModel.switchPressureUnit() },
                     onSwitchOdometer = { monitorViewModel.switchOdometerUnit() },
                 )
             }
         } else null,
+        // El slot solo se pinta cuando el wizard no está activo; sin monitor el diálogo es
+        // obligatorio en todos los planes.
         registerDialogSlot = {
-            if (monitorUiState.showDialog &&
-                (paymentPlan != PaymentPlanType.Complete || monitorUiState.monitorId != 0)
-            ) {
+            if (monitorUiState.showDialog) {
                 ShowMonitorRegisterDialog(
                     monitorId = monitorUiState.monitorId,
                     cancelButtonText = buttonCancelText,

@@ -6,7 +6,6 @@ import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
@@ -22,15 +21,18 @@ class GetSensorDataByWheelUseCase @Inject constructor(
     private val assemblyTireRepository: AssemblyTireRepository
 ) {
 
+    /**
+     * [inAlert] es el delta que el llamador aplica sobre su lista de llantas actual; no se
+     * devuelve la lista completa para no pisar cambios concurrentes (p. ej. montajes).
+     */
     data class Result(
         val newTireUiState: TireUiState,
-        val updatedTireList: List<MonitorTire>
+        val inAlert: Boolean
     )
 
     suspend operator fun invoke(
         monitorId: Int,
         tireSelected: String,
-        currentTires: List<MonitorTire>,
         tempUnit: UnidadTemperatura,
         pressureUnit: UnidadPresion
     ): Result? {
@@ -59,10 +61,6 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             batteryStatus = batteryStatus,
             flatTireStatus = flatTireStatus,
         )
-
-        val updatedTireList = currentTires.map { tire ->
-            if (tire.sensorPosition == tireSelected) tire.copy(inAlert = inAlert) else tire
-        }
 
         val lastInspection = data.lastInspection
         val isInspectionAvailable = if (lastInspection.isNullOrEmpty()) true else {
@@ -102,7 +100,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
 
         return Result(
             newTireUiState = newTireUiState,
-            updatedTireList = updatedTireList
+            inAlert = inAlert
         )
     }
 }
