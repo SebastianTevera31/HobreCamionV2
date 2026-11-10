@@ -4,6 +4,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -267,6 +268,36 @@ class MigrationTest {
             cursor.moveToFirst()
             assertEquals(0, cursor.getInt(0))
             assertEquals(0, cursor.getInt(1))
+        }
+    }
+
+    @Test
+    fun migrate33To34_conservaElCicloDeLosRecordatoriosSinReferenciaDeOdometro() {
+        helper.createDatabase(testDb, 33).apply {
+            execSQL(
+                """
+                INSERT INTO maintenance_notification_table (id, message, daysConf, firstSeenAt,
+                    lastNotifiedAt, acknowledgedAt)
+                VALUES (2, 'Alinear ruedas', 240, 100, 200, 300)
+                """.trimIndent()
+            )
+            close()
+        }
+
+        // La validación falla si el SQL de la migración no coincide con schemas/34.json.
+        val db = helper.runMigrationsAndValidate(testDb, 34, true, MIGRATION_33_34)
+
+        db.query(
+            "SELECT firstSeenAt, lastNotifiedAt, acknowledgedAt, baselineOdometerKm " +
+                "FROM maintenance_notification_table"
+        ).use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals(100L, cursor.getLong(0))
+            assertEquals(200L, cursor.getLong(1))
+            assertEquals(300L, cursor.getLong(2))
+            // Sin referencia: se toma del primer odómetro válido en la siguiente evaluación.
+            assertTrue(cursor.isNull(3))
         }
     }
 }

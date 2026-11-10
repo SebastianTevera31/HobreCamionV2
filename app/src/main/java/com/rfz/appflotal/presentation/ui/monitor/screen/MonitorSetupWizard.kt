@@ -63,6 +63,8 @@ fun MonitorSetupWizard(
                 },
                 context = context,
                 paymentPlan = paymentPlan,
+                // Solo en el wizard se elige cuántas llantas del diagrama se usan.
+                showTireCountSelector = true,
             )
         }
     )
@@ -126,8 +128,22 @@ fun MonitorSetupWizardPreview() {
         monitorId = 1,
         baseConfig = BaseConfig.BASE6,
         listOfTires = listOf(
-            MonitorTire("P1", inAlert = false, isAssembled = true, isActive = true, xPosition = 100, yPosition = 100),
-            MonitorTire("P2", inAlert = false, isAssembled = false, isActive = true, xPosition = 300, yPosition = 100)
+            MonitorTire(
+                "P1",
+                inAlert = false,
+                isAssembled = true,
+                isActive = true,
+                xPosition = 100,
+                yPosition = 100
+            ),
+            MonitorTire(
+                "P2",
+                inAlert = false,
+                isAssembled = false,
+                isActive = true,
+                xPosition = 300,
+                yPosition = 100
+            )
         ),
         monitorMac = "AA:BB:CC:DD:EE:FF"
     )

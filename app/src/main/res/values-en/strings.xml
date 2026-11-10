@@ -44,6 +44,9 @@
     <string name="title_recover">Don’t worry! Please enter the email address associated with your account.</string>
     <string name="title_buttoninicio">Home</string>
     <string name="llantas_number">%1$s tires</string>
+    <string name="llantas_a_utilizar">How many tires will you use?</string>
+    <string name="de_llantas_del_diagrama">of %1$d tires in the diagram</string>
+    <string name="quitar_llanta">Remove tire</string>
 
     <string name="title_enviar">Send</string>
     <string name="content_description_home_close">Close home screen</string>

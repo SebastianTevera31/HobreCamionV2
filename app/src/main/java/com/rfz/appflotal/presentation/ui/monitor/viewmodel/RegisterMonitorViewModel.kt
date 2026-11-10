@@ -35,7 +35,10 @@ data class ConfigurationItem(
     val id: Int,
     val rawDescription: String,
     val tireCount: String
-)
+) {
+    /** Ruedas totales del diagrama; 0 si la descripción no trae número. */
+    val maxTires: Int get() = Regex("\\d+").find(tireCount)?.value?.toIntOrNull() ?: 0
+}
 
 data class MonitorConfigurationUiState(
     val mac: String = "",
@@ -107,7 +110,8 @@ class RegisterMonitorViewModel @Inject constructor(
         idMonitor: Int = 0,
         mac: String,
         configurationSelected: ConfigurationItem?,
-        context: Context
+        context: Context,
+        numTires: Int? = null
     ) {
         _registeredMonitorState.value = ApiResult.Loading
 
@@ -126,6 +130,8 @@ class RegisterMonitorViewModel @Inject constructor(
                 idMonitor = idMonitor,
                 mac = mac,
                 configurationSelected = configurationSelected,
+                // Sin selector (fuera del wizard) se envía 0.
+                numTires = resolveNumTires(numTires, configurationSelected),
                 context = context,
                 notifySuccess = true,
                 // Siempre: sin MAC el servicio debe cerrar la conexión del monitor anterior.
@@ -139,6 +145,7 @@ class RegisterMonitorViewModel @Inject constructor(
         idMonitor: Int,
         mac: String,
         configurationSelected: ConfigurationItem,
+        numTires: Int,
         context: Context,
         notifySuccess: Boolean,
         restartBleOnSuccess: Boolean,
@@ -151,7 +158,8 @@ class RegisterMonitorViewModel @Inject constructor(
             fldMac = mac,
             fldDate = getCurrentDate(),
             idVehicle = userData.idVehicle,
-            idConfiguration = configurationSelected.id
+            idConfiguration = configurationSelected.id,
+            numTires = numTires
         )
 
         asyncResponseHelper(
@@ -199,6 +207,12 @@ class RegisterMonitorViewModel @Inject constructor(
                 onResult(ApiResult.Error(message = context.getString(RegisterMonitorMessage.UNKNOWN_ERROR.message)))
             }
         }
+    }
+
+    private fun resolveNumTires(requested: Int?, configuration: ConfigurationItem): Int {
+        if (requested == null) return 0
+        val max = configuration.maxTires
+        return if (max > 0) requested.coerceIn(1, max) else requested
     }
 
     fun updateMonitorConfiguration(config: ConfigurationItem?) {

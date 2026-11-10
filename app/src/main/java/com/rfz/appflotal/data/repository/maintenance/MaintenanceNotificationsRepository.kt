@@ -4,7 +4,9 @@ import com.rfz.appflotal.core.util.MaintenanceNotifier
 import com.rfz.appflotal.data.dao.MaintenanceNotificationsDao
 import com.rfz.appflotal.data.model.catalog.MaintenanceNotification
 import com.rfz.appflotal.data.network.service.catalog.RemoteCatalogDataSource
+import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.fcmessaging.toSafePaymentPlanType
+import com.rfz.appflotal.data.repository.vehicle.VehicleRepository
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +18,9 @@ class MaintenanceNotificationsRepository @Inject constructor(
     private val remoteCatalogDataSource: RemoteCatalogDataSource,
     private val maintenanceNotificationsDao: MaintenanceNotificationsDao,
     private val maintenanceNotifier: MaintenanceNotifier,
-    private val getTasksUseCase: GetTasksUseCase
+    private val getTasksUseCase: GetTasksUseCase,
+    private val vehicleRepository: VehicleRepository,
+    private val hombreCamionRepository: HombreCamionRepository
 ) {
 
     /** Solo un usuario con sesión y plan Complete consulta el endpoint y recibe recordatorios. */
@@ -41,8 +45,23 @@ class MaintenanceNotificationsRepository @Inject constructor(
      * permiso; sin permiso igual quedan pendientes en la bandeja.
      */
     suspend fun emitDueNotifications() {
-        val due = maintenanceNotificationsDao.takeDue(System.currentTimeMillis())
+        val odometerKm = getTasksUseCase().first().firstOrNull()?.odometer
+        val due = maintenanceNotificationsDao.takeDue(System.currentTimeMillis(), odometerKm)
         maintenanceNotifier.notify(pendingMaintenanceNotifications(due))
+    }
+
+    /**
+     * Trae el último odómetro registrado en el servidor (p. ej. desde combustible o la web) y lo
+     * guarda si es mayor al local; uno menor no pisa una captura offline más reciente. Si la
+     * consulta falla se conserva el local.
+     */
+    suspend fun refreshOdometer() {
+        val user = getTasksUseCase().first().firstOrNull() ?: return
+        if (user.fld_token.isBlank()) return
+        val remote = vehicleRepository.getLastOdometer(user.fld_token) ?: return
+        if (remote.lastOdometer > user.odometer) {
+            hombreCamionRepository.updateOdometer(remote.lastOdometer, remote.dateOdometer)
+        }
     }
 
     fun observePending(): Flow<List<MaintenanceNotification>> =

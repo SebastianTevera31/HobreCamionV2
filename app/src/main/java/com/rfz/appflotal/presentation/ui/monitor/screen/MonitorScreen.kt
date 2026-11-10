@@ -26,8 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.network.service.ApiResult
@@ -131,6 +131,8 @@ fun MonitorScreen(
                     },
                     context = context,
                     paymentPlan = paymentPlan,
+                    // Fuera del wizard no se elige el número de llantas; se envía numTires = 0.
+                    showTireCountSelector = false,
                 )
             }
         },
@@ -267,6 +269,7 @@ fun ShowMonitorRegisterDialog(
     onSuccessRegister: (mac: Int) -> Unit,
     context: Context,
     paymentPlan: PaymentPlanType,
+    showTireCountSelector: Boolean,
 ) {
     val configurationsUiState by registerMonitorViewModel.configurationList.collectAsState()
     val registerMonitorStatus by registerMonitorViewModel.registeredMonitorState.collectAsState()
@@ -305,15 +308,17 @@ fun ShowMonitorRegisterDialog(
         onMonitorConfiguration = { config ->
             registerMonitorViewModel.updateMonitorConfiguration(config)
         },
-        onRegister = { mac, configuration ->
+        onRegister = { mac, configuration, numTires ->
             registerMonitorViewModel.registerMonitor(
                 idMonitor = monitorId,
                 mac = mac,
                 configurationSelected = configuration,
-                context = context
+                context = context,
+                numTires = numTires
             )
         },
-        paymentPlan = paymentPlan
+        paymentPlan = paymentPlan,
+        showTireCountSelector = showTireCountSelector
     )
 }
 
@@ -328,9 +333,10 @@ fun ShowMonitorRegisterDialogContent(
     onSuccessRegister: (mac: Int) -> Unit,
     onError: () -> Unit,
     onMonitorConfiguration: (ConfigurationItem?) -> Unit,
-    onRegister: (String, ConfigurationItem?) -> Unit,
+    onRegister: (mac: String, configuration: ConfigurationItem?, numTires: Int?) -> Unit,
     paymentPlan: PaymentPlanType,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showTireCountSelector: Boolean
 ) {
     MonitorRegisterDialog(
         macValue = monitorConfigUiState.mac,
@@ -338,6 +344,7 @@ fun ShowMonitorRegisterDialogContent(
         registerMonitorStatus = registerMonitorStatus,
         isScanning = monitorConfigUiState.isScanning,
         showCloseButton = true,
+        showTireCountSelector = showTireCountSelector,
         onScan = onScan,
         configurations = configurations,
         onCloseButton = onDialogCancel,
@@ -413,10 +420,38 @@ private fun LoadingView(modifier: Modifier = Modifier) {
 @Composable
 fun MonitorScreenPreview() {
     val sampleTires = listOf(
-        MonitorTire("P1", inAlert = false, isAssembled = true, isActive = true, xPosition = 100, yPosition = 100),
-        MonitorTire("P2", inAlert = true, isAssembled = true, isActive = true, xPosition = 200, yPosition = 100),
-        MonitorTire("P3", inAlert = false, isAssembled = false, isActive = true, xPosition = 300, yPosition = 100),
-        MonitorTire("P4", inAlert = false, isAssembled = true, isActive = false, xPosition = 400, yPosition = 100)
+        MonitorTire(
+            "P1",
+            inAlert = false,
+            isAssembled = true,
+            isActive = true,
+            xPosition = 100,
+            yPosition = 100
+        ),
+        MonitorTire(
+            "P2",
+            inAlert = true,
+            isAssembled = true,
+            isActive = true,
+            xPosition = 200,
+            yPosition = 100
+        ),
+        MonitorTire(
+            "P3",
+            inAlert = false,
+            isAssembled = false,
+            isActive = true,
+            xPosition = 300,
+            yPosition = 100
+        ),
+        MonitorTire(
+            "P4",
+            inAlert = false,
+            isAssembled = true,
+            isActive = false,
+            xPosition = 400,
+            yPosition = 100
+        )
     )
 
     val monitorUiState = MonitorUiState(
@@ -492,8 +527,9 @@ fun ShowMonitorRegisterDialogPreview() {
             onSuccessRegister = {},
             onError = {},
             onMonitorConfiguration = {},
-            onRegister = { _, _ -> },
-            paymentPlan = PaymentPlanType.Complete
+            onRegister = { _, _, _ -> },
+            paymentPlan = PaymentPlanType.Complete,
+            showTireCountSelector = false
         )
     }
 }

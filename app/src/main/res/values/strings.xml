@@ -775,6 +775,9 @@
     <string name="todas">Todas</string>
 
     <string name="llantas_number">%1$s llantas</string>
+    <string name="llantas_a_utilizar">¿Cuántas llantas vas a utilizar?</string>
+    <string name="de_llantas_del_diagrama">de %1$d llantas del diagrama</string>
+    <string name="quitar_llanta">Quitar llanta</string>
     <!-- Complete Plan -->
     <string name="content_description_notificaciones">Notificaciones</string>
     <string name="saludo_usuario">¡Hola, %1$s!</string>

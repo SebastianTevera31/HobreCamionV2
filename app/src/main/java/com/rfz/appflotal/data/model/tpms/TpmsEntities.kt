@@ -25,6 +25,7 @@ data class CrudMonitor(
     @SerializedName("fld_date") val fldDate: String,
     @SerializedName("id_vehicle_fk_2") val idVehicle: Int,
     @SerializedName("id_configuration_fk_3") val idConfiguration: Int,
+    @SerializedName("numTires") val numTires: Int,
 )
 
 data class TpmsResponse(val id: Int, val message: String)

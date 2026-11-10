@@ -27,10 +27,11 @@ class ApiTpmsUseCase @Inject constructor(private val apiTpmsRepository: ApiTpmsR
         fldMac: String,
         fldDate: String,
         idVehicle: Int,
-        idConfiguration: Int
+        idConfiguration: Int,
+        numTires: Int
     ): ApiResult<List<TpmsResponse>?> {
         return apiTpmsRepository.doPostCrudMonitor(
-            CrudMonitor(idMonitor, fldMac, fldDate, idVehicle, idConfiguration)
+            CrudMonitor(idMonitor, fldMac, fldDate, idVehicle, idConfiguration, numTires)
         )
     }
 

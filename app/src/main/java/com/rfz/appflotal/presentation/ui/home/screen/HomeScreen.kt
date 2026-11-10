@@ -1,8 +1,4 @@
 package com.rfz.appflotal.presentation.ui.home.screen
-import com.rfz.appflotal.core.util.AppLocale
-import com.rfz.appflotal.presentation.navigation.isBottomBarTabRoute
-import com.rfz.appflotal.presentation.navigation.navigateAsBottomBarTab
-import com.rfz.appflotal.presentation.navigation.navigateUpSafely
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -50,9 +46,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.network.service.HombreCamionService
 import com.rfz.appflotal.presentation.commons.ErrorView
+import com.rfz.appflotal.presentation.navigation.isBottomBarTabRoute
+import com.rfz.appflotal.presentation.navigation.navigateAsBottomBarTab
+import com.rfz.appflotal.presentation.navigation.navigateUpSafely
 import com.rfz.appflotal.presentation.theme.onPrimaryLight
 import com.rfz.appflotal.presentation.theme.primaryLight
 import com.rfz.appflotal.presentation.theme.secondaryLight
@@ -321,6 +321,8 @@ fun HomeScreen(
                             },
                             context = context,
                             paymentPlan = paymentPlan,
+                            // Fuera del wizard no se elige el número de llantas; se envía numTires = 0.
+                            showTireCountSelector = false,
                         )
                     }
                 }
@@ -336,10 +338,10 @@ fun ElegantMenuCard(
     title: String,
     iconRes: Int,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     primaryColor: Color = primaryLight,
     secondaryColor: Color = secondaryLight,
     cardBackground: Color = Color.White,
-    modifier: Modifier = Modifier
 ) {
     val highlightColor = onPrimaryLight
 

@@ -6,7 +6,7 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import com.rfz.appflotal.data.model.catalog.MaintenanceNotificationEntity
 import com.rfz.appflotal.data.model.catalog.MaintenanceNotificationResponse
-import com.rfz.appflotal.data.repository.maintenance.dueMaintenanceNotifications
+import com.rfz.appflotal.data.repository.maintenance.evaluateMaintenanceNotifications
 import com.rfz.appflotal.data.repository.maintenance.mergeMaintenanceCatalog
 import kotlinx.coroutines.flow.Flow
 
@@ -24,9 +24,6 @@ interface MaintenanceNotificationsDao {
 
     @Query("DELETE FROM maintenance_notification_table WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<Int>)
-
-    @Query("UPDATE maintenance_notification_table SET lastNotifiedAt = :notifiedAt WHERE id IN (:ids)")
-    suspend fun markNotified(ids: List<Int>, notifiedAt: Long)
 
     @Query("UPDATE maintenance_notification_table SET acknowledgedAt = :acknowledgedAt WHERE id = :id")
     suspend fun acknowledge(id: Int, acknowledgedAt: Long)
@@ -50,13 +47,14 @@ interface MaintenanceNotificationsDao {
     }
 
     /**
-     * Registra como emitidos los recordatorios vencidos y los devuelve. En una transacción para
-     * que dos ejecuciones simultáneas no emitan el mismo recordatorio dos veces.
+     * Registra como emitidos los recordatorios vencidos (por días o por kilometraje con
+     * [odometerKm]) y los devuelve. En una transacción para que dos ejecuciones simultáneas no
+     * emitan el mismo recordatorio dos veces.
      */
     @Transaction
-    suspend fun takeDue(now: Long): List<MaintenanceNotificationEntity> {
-        val due = dueMaintenanceNotifications(getAll(), now)
-        if (due.isNotEmpty()) markNotified(due.map { it.id }, now)
-        return due.map { it.copy(lastNotifiedAt = now) }
+    suspend fun takeDue(now: Long, odometerKm: Int?): List<MaintenanceNotificationEntity> {
+        val evaluation = evaluateMaintenanceNotifications(getAll(), now, odometerKm)
+        if (evaluation.updated.isNotEmpty()) upsert(evaluation.updated)
+        return evaluation.emitted
     }
 }

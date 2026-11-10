@@ -11,7 +11,6 @@ import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.fcmessaging.toSafePaymentPlanType
 import com.rfz.appflotal.data.repository.maintenance.MaintenanceNotificationsRepository
-import com.rfz.appflotal.data.repository.promotions.FollowedPromotionsRepository
 import com.rfz.appflotal.data.worker.triggerMaintenanceNotificationsSync
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
@@ -32,7 +31,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,7 +41,6 @@ class HomeViewModel @Inject constructor(
     private val appUtilitiesRepository: AppUtilitiesRepositoryImpl,
     private val appStatusManagerRepository: AppStatusManagerRepository,
     private val catalogUseCase: CatalogUseCase,
-    private val followedPromotionsRepository: FollowedPromotionsRepository,
     private val maintenanceNotificationsRepository: MaintenanceNotificationsRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -77,8 +74,6 @@ class HomeViewModel @Inject constructor(
 
     suspend fun logout() {
         hombreCamionRepository.clearUserData()
-        catalogUseCase.clearTireReportCatalog()
-        followedPromotionsRepository.clearAll()
         maintenanceNotificationsRepository.clearAll()
         _messageOperationState.value = OperationStatus.Idle
         _uiState.value = HomeUiState()

@@ -6,7 +6,10 @@ import android.content.Intent
 import android.util.Log
 import com.rfz.appflotal.data.dao.MaintenanceNotificationsDao
 import com.rfz.appflotal.data.model.catalog.MaintenanceNotificationResponse
+import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.maintenance.MaintenanceNotificationsRepository
+import com.rfz.appflotal.data.repository.maintenance.kmConfFor
+import com.rfz.appflotal.data.repository.maintenance.validOdometerKm
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -18,6 +21,7 @@ import java.util.concurrent.TimeUnit
 
 private const val TAG = "MaintenanceDebug"
 private const val ACTION_FORCE_DUE = "com.rfz.appflotal.debug.FORCE_MAINTENANCE_DUE"
+private const val EXTRA_BY_KM = "byKm"
 
 // Ejemplos de api/Catalog/Notifications, para cuando aún no se ha descargado el catálogo.
 private val SAMPLE_CATALOG = listOf(
@@ -38,12 +42,17 @@ private val SAMPLE_CATALOG = listOf(
 interface MaintenanceDebugEntryPoint {
     fun maintenanceNotificationsDao(): MaintenanceNotificationsDao
     fun maintenanceNotificationsRepository(): MaintenanceNotificationsRepository
+    fun hombreCamionRepository(): HombreCamionRepository
 }
 
 /**
  * Solo debug: adelanta el ciclo de todos los recordatorios para que venzan ahora y corre la
  * emisión real (bandeja, punto de la campana y push). Con el catálogo vacío inserta antes los
  * ejemplos del endpoint. No valida el plan del usuario.
+ *
+ * Con `--ez byKm true` solo vence la regla de kilometraje (alineación): reinicia el ciclo de
+ * días y pone el odómetro de referencia un límite por debajo del odómetro actual. Requiere un
+ * odómetro capturado.
  */
 class MaintenanceDebugReceiver : BroadcastReceiver() {
 
@@ -64,12 +73,29 @@ class MaintenanceDebugReceiver : BroadcastReceiver() {
                     dao.applyCatalog(SAMPLE_CATALOG, now)
                     Log.i(TAG, "Catálogo vacío: se insertaron ${SAMPLE_CATALOG.size} ejemplos")
                 }
-                val overdue = dao.getAll().map {
-                    it.copy(
-                        firstSeenAt = now - TimeUnit.DAYS.toMillis(it.daysConf.toLong()),
-                        lastNotifiedAt = null,
-                        acknowledgedAt = null
-                    )
+                val overdue = if (intent.getBooleanExtra(EXTRA_BY_KM, false)) {
+                    val odometerKm = validOdometerKm(entryPoint.hombreCamionRepository().getOdometer().odometer)
+                    if (odometerKm == null) {
+                        Log.w(TAG, "Sin odómetro capturado: no se puede probar la regla de kilometraje")
+                        return@launch
+                    }
+                    dao.getAll().mapNotNull { notification ->
+                        val kmConf = kmConfFor(notification.id) ?: return@mapNotNull null
+                        notification.copy(
+                            firstSeenAt = now,
+                            lastNotifiedAt = null,
+                            acknowledgedAt = null,
+                            baselineOdometerKm = odometerKm - kmConf
+                        )
+                    }
+                } else {
+                    dao.getAll().map {
+                        it.copy(
+                            firstSeenAt = now - TimeUnit.DAYS.toMillis(it.daysConf.toLong()),
+                            lastNotifiedAt = null,
+                            acknowledgedAt = null
+                        )
+                    }
                 }
                 dao.upsert(overdue)
 

@@ -9,14 +9,16 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.dao.AppHCDao
+import com.rfz.appflotal.data.database.AppHombreCamionDatabase
 import com.rfz.appflotal.data.model.OdometerData
 import com.rfz.appflotal.data.model.database.AppHCEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
-
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,6 +28,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 @Singleton
 class HombreCamionRepository @Inject constructor(
     private val flotalDao: AppHCDao,
+    private val database: AppHombreCamionDatabase,
     @param:ApplicationContext private val context: Context
 ) {
 
@@ -33,8 +36,12 @@ class HombreCamionRepository @Inject constructor(
         return flotalDao.getPaymentPlan(userId)
     }
 
+    suspend fun clearAllLocalData() = withContext(Dispatchers.IO) {
+        database.clearAllTables()
+    }
+
     suspend fun clearUserData() {
-        flotalDao.deleteAllFlotalSoft()
+        clearAllLocalData()
         val data = AppLocale.getSystemLocale()
         saveSelectedLanguage(data.language)
     }
@@ -146,7 +153,7 @@ class HombreCamionRepository @Inject constructor(
     }
 
     suspend fun deleteAllTasks() {
-        flotalDao.deleteAllFlotalSoft()
+        clearAllLocalData()
     }
 
     suspend fun getOdometer(): OdometerData {

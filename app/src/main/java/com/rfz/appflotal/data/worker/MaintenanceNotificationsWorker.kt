@@ -28,7 +28,7 @@ private const val KEY_SYNC_CATALOG = "syncCatalog"
 
 /**
  * Emite los recordatorios de mantenimiento vencidos. El trabajo diario solo evalúa la base
- * local; el de arranque de la app además sincroniza antes el catálogo con el endpoint.
+ * local; el de arranque de la app además actualiza antes el odómetro y el catálogo con el servidor.
  * Sin sesión o sin plan Complete termina sin hacer nada.
  */
 @HiltWorker
@@ -42,6 +42,8 @@ class MaintenanceNotificationsWorker @AssistedInject constructor(
         if (!maintenanceNotificationsRepository.isEnabledForUser()) return Result.success()
 
         val syncError = if (inputData.getBoolean(KEY_SYNC_CATALOG, false)) {
+            // Odómetro al día antes de evaluar la regla de kilometraje (alineación).
+            maintenanceNotificationsRepository.refreshOdometer()
             maintenanceNotificationsRepository.syncCatalog().exceptionOrNull()
         } else {
             null

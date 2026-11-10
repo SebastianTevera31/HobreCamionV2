@@ -64,7 +64,7 @@ class MaintenanceNotificationsDaoTest {
     @Test
     fun applyCatalog_conservaElCicloDeLosConocidos() = runBlocking {
         dao.applyCatalog(listOf(response(1)), now = 0)
-        dao.markNotified(listOf(1), notifiedAt = 30 * day)
+        dao.takeDue(now = 30 * day, odometerKm = null)
 
         dao.applyCatalog(listOf(response(1, days = 45)), now = 40 * day)
 
@@ -78,8 +78,8 @@ class MaintenanceNotificationsDaoTest {
     fun takeDue_registraLaEmisionUnaSolaVez() = runBlocking {
         dao.applyCatalog(listOf(response(1, days = 30), response(2, days = 240)), now = 0)
 
-        val first = dao.takeDue(now = 30 * day)
-        val second = dao.takeDue(now = 30 * day + 1)
+        val first = dao.takeDue(now = 30 * day, odometerKm = null)
+        val second = dao.takeDue(now = 30 * day + 1, odometerKm = null)
 
         assertEquals(listOf(1), first.map { it.id })
         assertEquals(30 * day, first.single().lastNotifiedAt)
@@ -90,10 +90,39 @@ class MaintenanceNotificationsDaoTest {
     @Test
     fun acknowledge_noMueveElSiguienteVencimiento() = runBlocking {
         dao.applyCatalog(listOf(response(1, days = 30)), now = 0)
-        dao.takeDue(now = 30 * day)
+        dao.takeDue(now = 30 * day, odometerKm = null)
         dao.acknowledge(1, acknowledgedAt = 45 * day)
 
-        assertTrue(dao.takeDue(now = 59 * day).isEmpty())
-        assertEquals(listOf(1), dao.takeDue(now = 60 * day).map { it.id })
+        assertTrue(dao.takeDue(now = 59 * day, odometerKm = null).isEmpty())
+        assertEquals(listOf(1), dao.takeDue(now = 60 * day, odometerKm = null).map { it.id })
+    }
+
+    @Test
+    fun takeDue_alineacionVencePorKmYReiniciaLaReferencia() = runBlocking {
+        dao.applyCatalog(listOf(response(1, days = 30), response(2, days = 240)), now = 0)
+
+        // Primer odómetro: solo fija la referencia de la alineación.
+        assertTrue(dao.takeDue(now = day, odometerKm = 100_000).isEmpty())
+        assertEquals(100_000, dao.getAll().first { it.id == 2 }.baselineOdometerKm)
+        assertNull(dao.getAll().first { it.id == 1 }.baselineOdometerKm)
+
+        // 120,000 km después, antes de los 30 y de los 240 días: solo vence la alineación.
+        val due = dao.takeDue(now = 10 * day, odometerKm = 220_000)
+
+        assertEquals(listOf(2), due.map { it.id })
+        val stored = dao.getAll().first { it.id == 2 }
+        assertEquals(10 * day, stored.lastNotifiedAt)
+        assertEquals(220_000, stored.baselineOdometerKm)
+        assertTrue(dao.takeDue(now = 10 * day + 1, odometerKm = 220_000).isEmpty())
+    }
+
+    @Test
+    fun applyCatalog_conservaLaReferenciaDeOdometro() = runBlocking {
+        dao.applyCatalog(listOf(response(2, days = 240)), now = 0)
+        dao.takeDue(now = day, odometerKm = 100_000)
+
+        dao.applyCatalog(listOf(response(2, days = 240)), now = 5 * day)
+
+        assertEquals(100_000, dao.getAll().single().baselineOdometerKm)
     }
 }
