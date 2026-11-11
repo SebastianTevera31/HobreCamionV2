@@ -80,9 +80,8 @@ import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasUiState
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.TireDialogState
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.rfz.appflotal.presentation.ui.utils.datePickerMillisToIsoDate
+import com.rfz.appflotal.presentation.ui.utils.isoDateToDatePickerMillis
 
 @Composable
 fun NuevoRegistroLlantasScreen(
@@ -388,6 +387,9 @@ private fun TireDialog(
         if (uiState.dialogState.tireNumber.trim().length > 15) stringResource(R.string.numero_llanta_excedio_caracteres) else ""
 
     val currentLanguage = AppLocale.currentLocale.collectAsState().value.language
+    val canEditAcquisitionData = uiState.dialogState.canEditAcquisitionData
+    // Mientras llega la ficha no se edita nada: lo capturado se perdería al cargarla.
+    val canEditIdentification = !uiState.isLoadingDialogData
     AddItemDialog(
         title = if (uiState.isEditing) stringResource(R.string.editar_llanta) else stringResource(R.string.nueva_llanta),
         content = {
@@ -395,8 +397,17 @@ private fun TireDialog(
                 onShowMessage()
             }
 
+            if (uiState.isEditing && !canEditAcquisitionData && !uiState.isLoadingDialogData) {
+                Text(
+                    text = stringResource(R.string.editar_llanta_datos_bloqueados),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             FieldSpinner(
                 label = stringResource(R.string.tipo_de_adquisici_n),
+                enabled = canEditAcquisitionData,
                 selectedValue = (if (currentLanguage == "es") uiState.dialogState.selectedAcquisitionType?.description
                 else uiState.dialogState.selectedAcquisitionType?.enDescription) ?: "",
                 values = uiState.acquisitionTypes.map {
@@ -415,6 +426,7 @@ private fun TireDialog(
 
             FieldSpinner(
                 label = stringResource(R.string.products),
+                enabled = canEditAcquisitionData,
                 selectedValue = uiState.dialogState.selectedProduct?.descriptionProduct
                     ?: "",
                 values = uiState.products.map { it.descriptionProduct },
@@ -432,7 +444,10 @@ private fun TireDialog(
                 }
             )
 
-            DatePickerField(uiState.dialogState.acquisitionDate) { date ->
+            DatePickerField(
+                selectedDate = uiState.dialogState.acquisitionDate,
+                enabled = canEditAcquisitionData
+            ) { date ->
                 onDialogFieldChange {
                     it.copy(
                         acquisitionDate = date
@@ -442,31 +457,37 @@ private fun TireDialog(
 
             DialogTextField(
                 label = stringResource(R.string.folio_factura),
-                value = uiState.dialogState.folioFactura
+                value = uiState.dialogState.folioFactura,
+                isEditable = canEditIdentification
             ) { value -> onDialogFieldChange { it.copy(folioFactura = value) } }
 
             DialogTextField(
                 label = stringResource(R.string.costo),
                 value = uiState.dialogState.cost,
-                keyboardType = KeyboardType.NumberPassword
+                keyboardType = KeyboardType.NumberPassword,
+                isEditable = canEditAcquisitionData
             ) { value -> onDialogFieldChange { it.copy(cost = value.filter { c -> c.isDigit() || c == '.' }) } }
 
             DialogTextField(
                 label = stringResource(R.string.profundidad),
                 value = uiState.dialogState.treadDepth,
                 keyboardType = KeyboardType.NumberPassword,
-                isEditable = false
+                // Se precarga con la del producto y se ajusta por llanta (el backend la
+                // prioriza sobre inspección y modelo, así que no afecta a otras llantas).
+                isEditable = canEditAcquisitionData
             ) { value -> onDialogFieldChange { it.copy(treadDepth = value.filter { c -> c.isDigit() }) } }
 
             DialogTextField(
                 label = stringResource(R.string.numero_de_llanta),
                 value = uiState.dialogState.tireNumber,
+                isEditable = canEditIdentification,
                 warningMessage = tireNumber
             ) { value -> onDialogFieldChange { it.copy(tireNumber = value) } }
 
             DialogTextField(
                 label = stringResource(R.string.dot),
                 value = uiState.dialogState.dot,
+                isEditable = canEditIdentification,
                 warningMessage = dotWarning
             ) { value -> onDialogFieldChange { it.copy(dot = value) } }
         },
@@ -513,6 +534,7 @@ private fun FieldSpinner(
     label: String,
     selectedValue: String,
     values: List<String>,
+    enabled: Boolean = true,
     onValueSelected: (String) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -523,13 +545,14 @@ private fun FieldSpinner(
             .padding(vertical = 8.dp)
     ) {
         ExposedDropdownMenuBox(
-            expanded = isExpanded,
-            onExpandedChange = { isExpanded = !isExpanded }
+            expanded = isExpanded && enabled,
+            onExpandedChange = { if (enabled) isExpanded = !isExpanded }
         ) {
             OutlinedTextField(
                 value = selectedValue,
                 onValueChange = {}, // No-op
                 readOnly = true,
+                enabled = enabled,
                 label = { Text(label) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                 modifier = Modifier
@@ -542,7 +565,7 @@ private fun FieldSpinner(
                 )
             )
             ExposedDropdownMenu(
-                expanded = isExpanded,
+                expanded = isExpanded && enabled,
                 onDismissRequest = { isExpanded = false }
             ) {
                 values.forEach { value ->
@@ -561,7 +584,11 @@ private fun FieldSpinner(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerField(selectedDate: String, onDateSelected: (String) -> Unit) {
+fun DatePickerField(
+    selectedDate: String,
+    enabled: Boolean = true,
+    onDateSelected: (String) -> Unit,
+) {
     var showDatePicker by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
@@ -569,12 +596,16 @@ fun DatePickerField(selectedDate: String, onDateSelected: (String) -> Unit) {
         value = selectedDate.substringBefore('T'),
         onValueChange = {}, // No-op
         readOnly = true,
+        enabled = enabled,
         label = { Text(stringResource(R.string.fecha_de_adquisicion)) },
         trailingIcon = {
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = stringResource(R.string.seleccionar_fecha),
-                modifier = Modifier.clickable { showDatePicker = true; focusManager.clearFocus() }
+                modifier = Modifier.clickable(enabled = enabled) {
+                    showDatePicker = true
+                    focusManager.clearFocus()
+                }
             )
         },
         shape = RoundedCornerShape(12.dp),
@@ -583,18 +614,20 @@ fun DatePickerField(selectedDate: String, onDateSelected: (String) -> Unit) {
             .padding(vertical = 4.dp)
     )
 
-    if (showDatePicker) {
+    if (showDatePicker && enabled) {
         LocalizedApp {
-            val datePickerState = rememberDatePickerState()
+            // El DatePicker usa la medianoche UTC del día; convertirlo con la zona del
+            // dispositivo daba el día anterior (ver DatePickerDates).
+            val datePickerState = rememberDatePickerState(
+                initialSelectedDateMillis = isoDateToDatePickerMillis(selectedDate)
+            )
             DatePickerDialog(
                 onDismissRequest = { showDatePicker = false },
                 confirmButton = {
                     TextButton(
                         onClick = {
                             datePickerState.selectedDateMillis?.let { millis ->
-                                val formatter =
-                                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                                onDateSelected(formatter.format(Date(millis)))
+                                onDateSelected(datePickerMillisToIsoDate(millis))
                             }
                             showDatePicker = false
                         }

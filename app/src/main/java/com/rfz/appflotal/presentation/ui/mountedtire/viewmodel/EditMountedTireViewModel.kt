@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
-import com.rfz.appflotal.data.model.tire.response.TirexIdResponse
+import com.rfz.appflotal.data.model.tire.response.TireIdResponse
 import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.assembly.GetAssemblyTireUseCase
@@ -33,11 +33,6 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-/**
- * Edición de la ficha de una llanta ya montada. Toma el id de la llanta del montaje local
- * de la posición y la actualiza con api/Tire/CrudTire (id_tire != 0). No desmonta ni
- * modifica el montaje (eje, odómetro y fecha se muestran solo como referencia).
- */
 @HiltViewModel
 class EditMountedTireViewModel @Inject constructor(
     private val getAssemblyTireUseCase: GetAssemblyTireUseCase,
@@ -54,7 +49,7 @@ class EditMountedTireViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     /** Ficha original: conserva los campos que esta pantalla no edita (proveedor, destino, vida…). */
-    private var originalTire: TirexIdResponse? = null
+    private var originalTire: TireIdResponse? = null
 
     fun load(position: String) {
         val current = _uiState.value
@@ -145,6 +140,10 @@ class EditMountedTireViewModel @Inject constructor(
     fun updateCost(value: String) =
         _uiState.update { it.copy(cost = value.filter { c -> c.isDigit() || c == '.' }) }
 
+    /** Se precarga con la del producto y se puede ajustar a mano (solo enteros). */
+    fun updateTreadDepth(value: String) =
+        _uiState.update { it.copy(treadDepth = value.filter { c -> c.isDigit() }) }
+
     fun updateTireNumber(value: String) = _uiState.update { it.copy(tireNumber = value) }
 
     fun updateDot(value: String) = _uiState.update { it.copy(dot = value) }
@@ -166,7 +165,7 @@ class EditMountedTireViewModel @Inject constructor(
         }
 
         val cost = state.cost.trim().toDoubleOrNull()
-        val treadDepth = state.treadDepth.trim().toIntOrNull()
+        val treadDepth = state.treadDepth.trim().toDoubleOrNull()
         if (cost == null || cost <= 0 || treadDepth == null || treadDepth <= 0) {
             _uiState.update { it.copy(errorRes = R.string.error_solo_numeros_profunidad_costo) }
             return
@@ -195,7 +194,10 @@ class EditMountedTireViewModel @Inject constructor(
 
             val result = tireCrudUseCase("Bearer ${token()}", dto)
             val response = result.getOrNull()
-            Log.d(TAG, "CrudTire request=$dto response=$response error=${result.exceptionOrNull()?.message}")
+            Log.d(
+                TAG,
+                "CrudTire request=$dto response=$response error=${result.exceptionOrNull()?.message}"
+            )
 
             // El API responde HTTP 200 aun cuando no aplica el cambio; el resultado real viene
             // en el cuerpo (id = 200 si se guardó), igual que en el alta de RegisterTire.

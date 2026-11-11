@@ -318,7 +318,8 @@ fun ShowMonitorRegisterDialog(
             )
         },
         paymentPlan = paymentPlan,
-        showTireCountSelector = showTireCountSelector
+        showTireCountSelector = showTireCountSelector,
+        isFirstConfiguration = monitorId == 0
     )
 }
 
@@ -336,7 +337,8 @@ fun ShowMonitorRegisterDialogContent(
     onRegister: (mac: String, configuration: ConfigurationItem?, numTires: Int?) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
-    showTireCountSelector: Boolean
+    showTireCountSelector: Boolean,
+    isFirstConfiguration: Boolean = false
 ) {
     MonitorRegisterDialog(
         macValue = monitorConfigUiState.mac,
@@ -345,6 +347,8 @@ fun ShowMonitorRegisterDialogContent(
         isScanning = monitorConfigUiState.isScanning,
         showCloseButton = true,
         showTireCountSelector = showTireCountSelector,
+        isFirstConfiguration = isFirstConfiguration,
+        savedConfiguration = monitorConfigUiState.savedConfiguration,
         onScan = onScan,
         configurations = configurations,
         onCloseButton = onDialogCancel,

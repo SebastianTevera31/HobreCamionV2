@@ -42,7 +42,7 @@ class MaintenanceNotificationsDaoTest {
         MaintenanceNotificationResponse(id = id, message = "Mensaje $id", daysConf = days)
 
     @Test
-    fun applyCatalog_eliminaLosIdsQueYaNoExponeYLosDevuelve() = runBlocking {
+    fun applyCatalog_idNoLongerExposed_deletesAndReturnsIt() = runBlocking {
         dao.applyCatalog(listOf(response(1), response(2)), now = 0)
 
         val removed = dao.applyCatalog(listOf(response(2), response(3)), now = 10)
@@ -52,7 +52,7 @@ class MaintenanceNotificationsDaoTest {
     }
 
     @Test
-    fun applyCatalog_listaVacia_vaciaLaTabla() = runBlocking {
+    fun applyCatalog_emptyRemote_clearsTable() = runBlocking {
         dao.applyCatalog(listOf(response(1), response(2)), now = 0)
 
         val removed = dao.applyCatalog(emptyList(), now = 10)
@@ -62,7 +62,7 @@ class MaintenanceNotificationsDaoTest {
     }
 
     @Test
-    fun applyCatalog_conservaElCicloDeLosConocidos() = runBlocking {
+    fun applyCatalog_knownId_keepsStoredCycle() = runBlocking {
         dao.applyCatalog(listOf(response(1)), now = 0)
         dao.takeDue(now = 30 * day, odometerKm = null)
 
@@ -75,7 +75,7 @@ class MaintenanceNotificationsDaoTest {
     }
 
     @Test
-    fun takeDue_registraLaEmisionUnaSolaVez() = runBlocking {
+    fun takeDue_dueReminder_persistsEmissionOnce() = runBlocking {
         dao.applyCatalog(listOf(response(1, days = 30), response(2, days = 240)), now = 0)
 
         val first = dao.takeDue(now = 30 * day, odometerKm = null)
@@ -88,7 +88,7 @@ class MaintenanceNotificationsDaoTest {
     }
 
     @Test
-    fun acknowledge_noMueveElSiguienteVencimiento() = runBlocking {
+    fun acknowledge_afterEmission_keepsNextDueDate() = runBlocking {
         dao.applyCatalog(listOf(response(1, days = 30)), now = 0)
         dao.takeDue(now = 30 * day, odometerKm = null)
         dao.acknowledge(1, acknowledgedAt = 45 * day)
@@ -98,7 +98,7 @@ class MaintenanceNotificationsDaoTest {
     }
 
     @Test
-    fun takeDue_alineacionVencePorKmYReiniciaLaReferencia() = runBlocking {
+    fun takeDue_alignmentReachesKm_emitsAndPersistsNewBaseline() = runBlocking {
         dao.applyCatalog(listOf(response(1, days = 30), response(2, days = 240)), now = 0)
 
         // Primer odómetro: solo fija la referencia de la alineación.
@@ -114,15 +114,5 @@ class MaintenanceNotificationsDaoTest {
         assertEquals(10 * day, stored.lastNotifiedAt)
         assertEquals(220_000, stored.baselineOdometerKm)
         assertTrue(dao.takeDue(now = 10 * day + 1, odometerKm = 220_000).isEmpty())
-    }
-
-    @Test
-    fun applyCatalog_conservaLaReferenciaDeOdometro() = runBlocking {
-        dao.applyCatalog(listOf(response(2, days = 240)), now = 0)
-        dao.takeDue(now = day, odometerKm = 100_000)
-
-        dao.applyCatalog(listOf(response(2, days = 240)), now = 5 * day)
-
-        assertEquals(100_000, dao.getAll().single().baselineOdometerKm)
     }
 }

@@ -11,9 +11,11 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.ads.AdView
 import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.repository.maintenance.MaintenanceNotificationsRepository
+import com.rfz.appflotal.data.worker.cancelOnDemandPromotionsSyncs
 import com.rfz.appflotal.domain.database.DeleteTasksUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -33,6 +35,7 @@ class InicioScreenViewModel @Inject constructor(
     private val getTasksUseCase: GetTasksUseCase,
     private val deleteTasksUseCase: DeleteTasksUseCase,
     private val maintenanceNotificationsRepository: MaintenanceNotificationsRepository,
+    @param:ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainActivityUiState())
@@ -67,6 +70,7 @@ class InicioScreenViewModel @Inject constructor(
     fun deleteUserData() {
         viewModelScope.launch {
             try {
+                cancelOnDemandPromotionsSyncs(appContext)
                 // Borra todas las tablas de Room (ver HombreCamionRepository.clearAllLocalData).
                 deleteTasksUseCase()
                 maintenanceNotificationsRepository.clearAll()

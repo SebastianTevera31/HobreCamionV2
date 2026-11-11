@@ -7,15 +7,18 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.data.model.acquisitiontype.response.AcquisitionTypeResponse
 import com.rfz.appflotal.data.model.product.response.ProductResponse
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
+import com.rfz.appflotal.data.model.tire.response.TireIdResponse
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.product.ProductListUseCase
 import com.rfz.appflotal.domain.tire.TireCrudUseCase
+import com.rfz.appflotal.domain.tire.TireEditPolicy
 import com.rfz.appflotal.domain.tire.TireGetUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,6 +57,13 @@ data class TireDialogState(
     val treadDepth: String = "",
     val tireNumber: String = "",
     val dot: String = "",
+    /** Ficha original de la llanta en edición: conserva los campos que el diálogo no edita. */
+    val originalTire: TireIdResponse? = null,
+    /**
+     * Tipo de adquisición, producto, fecha, costo y profundidad editables (ver [TireEditPolicy]).
+     * Siempre true en el alta.
+     */
+    val canEditAcquisitionData: Boolean = true,
 )
 
 @HiltViewModel
@@ -71,11 +81,19 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
 
     private var token: String? = null
 
+    /** El usuario no ha completado el Wizard (passWizard = false). */
+    private var isWizardActive: Boolean = false
+
+    /** Carga de catálogos; la edición la espera para poder seleccionar tipo y producto. */
+    private var comboJob: Job? = null
+
     fun loadData() {
         viewModelScope.launch {
-            token = getTasksUseCase().first().firstOrNull()?.fld_token
+            val user = getTasksUseCase().first().firstOrNull()
+            token = user?.fld_token
+            isWizardActive = user?.passWizard == false
             loadTires()
-            loadComboData()
+            comboJob = loadComboData()
         }
     }
 
@@ -104,7 +122,14 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
     }
 
     fun onEditTireClicked(tire: TireListResponse) {
-        _uiState.update { it.copy(isDialogShown = true, isEditing = true) }
+        _uiState.update {
+            it.copy(
+                isDialogShown = true,
+                isEditing = true,
+                // Bloqueado hasta conocer la ficha para no mostrar campos editables de más.
+                dialogState = TireDialogState(canEditAcquisitionData = false)
+            )
+        }
         loadTireDetails(tire.idTire)
     }
 
@@ -120,15 +145,28 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
         _uiState.update { it.copy(isSending = true) }
 
         val currentState = _uiState.value.dialogState
-        if (isDialogStateInvalid(currentState)) {
+        // Datos de adquisición bloqueados: se reenvían los de la ficha original sin validarlos.
+        val lockedTire = currentState.originalTire
+            ?.takeIf { _uiState.value.isEditing && !currentState.canEditAcquisitionData }
+        if (_uiState.value.isEditing && !currentState.canEditAcquisitionData && lockedTire == null) {
+            // La ficha aún no carga (o falló): no se envía nada para no pisar datos.
+            _uiState.update { it.copy(isSending = false) }
+            return
+        }
+
+        if (isDialogStateInvalid(currentState, lockedTire != null)) {
             _uiState.update { it.copy(errorMessage = context.getString(R.string.Campos_requeridos_por_completar)) }
             return
         }
 
-        val treadDepthValue = _uiState.value.dialogState.treadDepth.trim().toIntOrNull()
-        val costValue = _uiState.value.dialogState.cost.trim().toDoubleOrNull()
+        val treadDepthValue = lockedTire?.treadDepth
+            ?: _uiState.value.dialogState.treadDepth.trim().toDoubleOrNull()
+        val costValue = lockedTire?.unitCost?.toDouble()
+            ?: _uiState.value.dialogState.cost.trim().toDoubleOrNull()
 
-        if (treadDepthValue == null || costValue == null || treadDepthValue <= 0 || costValue <= 0) {
+        if (lockedTire == null &&
+            (treadDepthValue == null || costValue == null || treadDepthValue <= 0 || costValue <= 0)
+        ) {
             _uiState.update { it.copy(errorMessage = context.getString(R.string.error_solo_numeros_profunidad_costo)) }
             return
         }
@@ -148,15 +186,17 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
             val bearerToken = "Bearer ${token ?: ""}"
             val tireDto = TireCrudDto(
                 idTire = if (_uiState.value.isEditing) currentState.id else 0,
-                typeAcquisitionId = currentState.selectedAcquisitionType!!.idAcquisitionType,
+                typeAcquisitionId = lockedTire?.typeAcquisitionId
+                    ?: currentState.selectedAcquisitionType!!.idAcquisitionType,
                 providerId = 0,
-                productId = currentState.selectedProduct!!.idProduct,
-                acquisitionDate = formatAcquisitionDate(currentState.acquisitionDate),
+                productId = lockedTire?.productId ?: currentState.selectedProduct!!.idProduct,
+                acquisitionDate = lockedTire?.acquisitionDate
+                    ?: formatAcquisitionDate(currentState.acquisitionDate),
                 document = currentState.folioFactura,
-                unitCost = costValue.toInt(),
+                unitCost = costValue?.toInt() ?: 0,
                 dot = currentState.dot,
                 tireNumber = currentState.tireNumber,
-                treadDepth = treadDepthValue,
+                treadDepth = treadDepthValue ?: 0.0,
                 registrationDate = LocalDateTime.now().toString(),
                 isActive = true,
                 retreadDesignId = 0,
@@ -200,7 +240,7 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
         }
     }
 
-    private fun loadComboData() {
+    private fun loadComboData(): Job =
         viewModelScope.launch {
             val bearerToken = "Bearer ${token ?: ""}"
             try {
@@ -217,12 +257,12 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
                 _uiState.update { it.copy(errorMessage = "Error cargando datos de combos: ${e.message}") }
             }
         }
-    }
 
     private fun loadTireDetails(tireId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingDialogData = true) }
             try {
+                comboJob?.join()
                 val result = tireGetUseCase(tireId)
                 if (result.isSuccess) {
                     result.getOrNull()?.firstOrNull()?.let { details ->
@@ -237,7 +277,12 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
                                     treadDepth = details.treadDepth.toString(),
                                     tireNumber = details.tireNumber,
                                     dot = details.dot,
-                                    folioFactura = details.document
+                                    folioFactura = details.document,
+                                    originalTire = details,
+                                    canEditAcquisitionData = TireEditPolicy.canEditAcquisitionData(
+                                        isWizardActive = isWizardActive,
+                                        hasInspection = details.hasInspection
+                                    )
                                 )
                             )
                         }
@@ -264,9 +309,14 @@ class NuevoRegistroLlantasViewModel @Inject constructor(
         _uiState.update { it.copy(displayedTires = filtered) }
     }
 
-    private fun isDialogStateInvalid(state: TireDialogState): Boolean {
+    private fun isDialogStateInvalid(
+        state: TireDialogState,
+        isAcquisitionLocked: Boolean
+    ): Boolean {
+        if (state.tireNumber.isBlank()) return true
+        if (isAcquisitionLocked) return false
         return state.selectedAcquisitionType == null || state.selectedProduct == null ||
-                state.acquisitionDate.isBlank() || state.cost.isBlank() || state.tireNumber.isBlank()
+                state.acquisitionDate.isBlank() || state.cost.isBlank()
     }
 
     private fun formatAcquisitionDate(date: String): String {

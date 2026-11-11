@@ -26,11 +26,12 @@ import com.rfz.appflotal.data.network.service.tire.InspectionTireCrudService
 import com.rfz.appflotal.data.network.service.tire.LocalInspectionDataSource
 import com.rfz.appflotal.data.repository.assembly.ASSEMBLY_SUCCESS_ID
 import com.rfz.appflotal.data.repository.promotions.PromotionsRepository
-import com.rfz.appflotal.domain.database.GetTasksUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
+
+/** Sincronizaciones de promociones bajo demanda (no las diarias), para cancelarlas al cerrar sesión. */
+internal const val PROMOTIONS_ON_DEMAND_TAG = "PromotionsOnDemandSync"
 
 @HiltWorker
 class SyncCreateAssemblyTireWorker @AssistedInject constructor(
@@ -144,19 +145,12 @@ class SyncInspectionTireWorker @AssistedInject constructor(
 class SyncDailyPromotionsWorker @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    private val promotionsRepository: PromotionsRepository,
-    private val getTasksUseCase: GetTasksUseCase
+    private val promotionsRepository: PromotionsRepository
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
-        // 1. Verificar si hay una sesión activa (obteniendo el usuario de la DB local)
-        val users = getTasksUseCase().first()
-        if (users.isEmpty() || users[0].fld_token.isEmpty()) {
-            // Si no hay sesión, terminamos con éxito para que se reintente en la siguiente ventana programada
-            return Result.success()
-        }
-
         return try {
-            // 2. Consumir el endpoint y reemplazar el cache local (el repositorio ya maneja el token internamente)
+            // Sin sesión activa de plan Complete el repositorio termina con éxito sin tocar la red,
+            // y el trabajo espera a la siguiente ventana programada.
             val result = promotionsRepository.syncDiscounts()
 
             if (result.isSuccess) {
@@ -205,6 +199,7 @@ fun triggerPromotionsSync(context: Context) {
 
     val syncRequest = OneTimeWorkRequestBuilder<SyncDailyPromotionsWorker>()
         .setConstraints(constraints)
+        .addTag(PROMOTIONS_ON_DEMAND_TAG)
         .build()
 
     WorkManager.getInstance(context).enqueueUniqueWork(
@@ -212,4 +207,13 @@ fun triggerPromotionsSync(context: Context) {
         ExistingWorkPolicy.REPLACE,
         syncRequest
     )
+}
+
+/**
+ * Al cerrar sesión: cancela las sincronizaciones de promociones pendientes o en curso (aborta la
+ * llamada a GetDiscounts que esté en vuelo). Los trabajos diarios siguen programados, pero sin
+ * sesión Complete terminan sin tocar la red, y uno en curso se detiene antes de su siguiente llamada.
+ */
+fun cancelOnDemandPromotionsSyncs(context: Context) {
+    WorkManager.getInstance(context).cancelAllWorkByTag(PROMOTIONS_ON_DEMAND_TAG)
 }

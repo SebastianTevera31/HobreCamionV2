@@ -137,6 +137,10 @@ class RegisterTireViewModel @Inject constructor(
 
     fun updateFolioFactura(value: String) = _uiState.update { it.copy(folioFactura = value) }
 
+    /** Se precarga con la del producto y se puede ajustar a mano (solo enteros). */
+    fun updateTreadDepth(value: String) =
+        _uiState.update { it.copy(treadDepth = value.filter { c -> c.isDigit() }) }
+
     fun updateTireNumber(value: String) = _uiState.update { it.copy(tireNumber = value) }
 
     fun updateDot(value: String) = _uiState.update { it.copy(dot = value) }
@@ -173,7 +177,7 @@ class RegisterTireViewModel @Inject constructor(
         }
 
         val costValue = state.cost.trim().toDoubleOrNull()
-        val treadDepthValue = state.treadDepth.trim().toIntOrNull()
+        val treadDepthValue = state.treadDepth.trim().toDoubleOrNull()
         if (costValue == null || costValue <= 0 || treadDepthValue == null || treadDepthValue <= 0) {
             _uiState.update { it.copy(errorMessage = context.getString(R.string.error_solo_numeros_profunidad_costo)) }
             return
@@ -241,7 +245,7 @@ class RegisterTireViewModel @Inject constructor(
     private suspend fun createTire(
         state: RegisterTireUiState,
         costValue: Double,
-        treadDepthValue: Int,
+        treadDepthValue: Double,
     ): Int? {
         val acquisitionType = state.selectedAcquisitionType ?: return null
         val product = state.selectedProduct ?: return null

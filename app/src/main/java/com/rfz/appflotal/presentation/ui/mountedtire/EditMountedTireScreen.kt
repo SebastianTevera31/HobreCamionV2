@@ -74,6 +74,7 @@ fun EditMountedTireScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val errorMessageText = uiState.errorRes?.let { stringResource(it) }
 
     LaunchedEffect(position) { viewModel.load(position) }
 
@@ -86,10 +87,10 @@ fun EditMountedTireScreen(
     }
 
     LaunchedEffect(uiState.errorRes, uiState.errorMessage) {
-        val res = uiState.errorRes ?: return@LaunchedEffect
+        val text = errorMessageText ?: return@LaunchedEffect
         val detail = uiState.errorMessage
-        val text = context.getString(res) + if (detail.isNullOrBlank()) "" else "\n$detail"
-        Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+        val fullText = text + if (detail.isNullOrBlank()) "" else "\n$detail"
+        Toast.makeText(context, fullText, Toast.LENGTH_LONG).show()
         viewModel.clearError()
     }
 
@@ -103,6 +104,7 @@ fun EditMountedTireScreen(
         onAcquisitionDateChange = viewModel::updateAcquisitionDate,
         onFolioFacturaChange = viewModel::updateFolioFactura,
         onCostChange = viewModel::updateCost,
+        onTreadDepthChange = viewModel::updateTreadDepth,
         onTireNumberChange = viewModel::updateTireNumber,
         onDotChange = viewModel::updateDot,
         modifier = modifier
@@ -121,6 +123,7 @@ private fun EditMountedTireContent(
     onAcquisitionDateChange: (String) -> Unit,
     onFolioFacturaChange: (String) -> Unit,
     onCostChange: (String) -> Unit,
+    onTreadDepthChange: (String) -> Unit,
     onTireNumberChange: (String) -> Unit,
     onDotChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -240,9 +243,8 @@ private fun EditMountedTireContent(
                 DialogTextField(
                     label = stringResource(R.string.profundidad),
                     value = uiState.treadDepth,
-                    keyboardType = KeyboardType.NumberPassword,
-                    isEditable = false
-                ) { }
+                    keyboardType = KeyboardType.NumberPassword
+                ) { value -> onTreadDepthChange(value) }
 
                 DialogTextField(
                     label = stringResource(R.string.numero_de_llanta),
@@ -293,6 +295,13 @@ private fun EditMountedTireContent(
 /** Resumen del montaje: es solo referencia, esta pantalla no lo modifica. */
 @Composable
 private fun MountSummaryCard(position: String, summary: MountedTireSummary) {
+    val axleDescription = summary.axleDescription
+    val axleText = if (axleDescription != null) {
+        stringResource(R.string.montada_en_eje, axleDescription)
+    } else {
+        stringResource(R.string.leyenda_montada)
+    }
+
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -313,9 +322,7 @@ private fun MountSummaryCard(position: String, summary: MountedTireSummary) {
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = summary.axleDescription
-                        ?.let { stringResource(R.string.montada_en_eje, it) }
-                        ?: stringResource(R.string.leyenda_montada),
+                    text = axleText,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -368,6 +375,7 @@ private fun EditMountedTireContentPreview() {
             onAcquisitionDateChange = {},
             onFolioFacturaChange = {},
             onCostChange = {},
+            onTreadDepthChange = {},
             onTireNumberChange = {},
             onDotChange = {}
         )

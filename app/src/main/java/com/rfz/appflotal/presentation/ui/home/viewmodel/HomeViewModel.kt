@@ -11,6 +11,7 @@ import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.fcmessaging.AppStatusManagerRepository
 import com.rfz.appflotal.data.repository.fcmessaging.toSafePaymentPlanType
 import com.rfz.appflotal.data.repository.maintenance.MaintenanceNotificationsRepository
+import com.rfz.appflotal.data.worker.cancelOnDemandPromotionsSyncs
 import com.rfz.appflotal.data.worker.triggerMaintenanceNotificationsSync
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
@@ -73,6 +74,7 @@ class HomeViewModel @Inject constructor(
 
 
     suspend fun logout() {
+        cancelOnDemandPromotionsSyncs(context)
         hombreCamionRepository.clearUserData()
         maintenanceNotificationsRepository.clearAll()
         _messageOperationState.value = OperationStatus.Idle

@@ -58,34 +58,37 @@ class FollowedPromotionsPresentationLogicTest {
         active = true
     )
 
+    private fun sections(
+        topTen: List<TopTenAccessoryResponse>,
+        followed: List<FollowedAccessory>,
+        topTenLoaded: Boolean = true,
+        filter: FollowFilter = FollowFilter.ALL
+    ) = buildFollowSections(topTen, topTenLoaded, followed, AccessoryVehicleType.TRUCK, filter)
+
     // --- "Nuevo" ---
 
     @Test
-    fun `lo encontrado en la primera busqueda no es nuevo`() {
+    fun isNewPromotion_foundInFirstSync_returnsFalse() {
         assertFalse(isNewPromotion(firstSeenAt = 1_000, accessoryFirstSyncedAt = 1_000, now = 2_000))
     }
 
     @Test
-    fun `lo encontrado despues de la primera busqueda y reciente es nuevo`() {
-        assertTrue(isNewPromotion(firstSeenAt = 10 * hour, accessoryFirstSyncedAt = hour, now = 20 * hour))
-    }
-
-    @Test
-    fun `deja de ser nuevo despues de la ventana`() {
+    fun isNewPromotion_foundAfterFirstSync_isNewOnlyWithinWindow() {
         val firstSeen = 10 * hour
+
         assertTrue(isNewPromotion(firstSeen, hour, now = firstSeen + NEW_PROMOTION_WINDOW_MILLIS))
         assertFalse(isNewPromotion(firstSeen, hour, now = firstSeen + NEW_PROMOTION_WINDOW_MILLIS + 1))
     }
 
     @Test
-    fun `sin primera busqueda registrada nada es nuevo`() {
+    fun isNewPromotion_noFirstSyncRecorded_returnsFalse() {
         assertFalse(isNewPromotion(firstSeenAt = 10 * hour, accessoryFirstSyncedAt = null, now = 11 * hour))
     }
 
     // --- Estado de la fila ---
 
     @Test
-    fun `estado de fila segun seguimiento y promociones`() {
+    fun followRowStatus_eachFollowState_returnsMatchingStatus() {
         assertEquals(FollowRowStatus.NotFollowed, followRowStatus(null))
         assertEquals(FollowRowStatus.Searching, followRowStatus(followed(1, pendingFirstSync = true)))
         assertEquals(FollowRowStatus.NoDeals, followRowStatus(followed(1)))
@@ -98,88 +101,75 @@ class FollowedPromotionsPresentationLogicTest {
     // --- Secciones ---
 
     @Test
-    fun `top 10 cargado muestra todos los sugeridos y marca los seguidos`() {
-        val sections = buildFollowSections(
+    fun buildFollowSections_topTenLoaded_showsSuggestionsAndMarksFollowed() {
+        val result = sections(
             topTen = listOf(topTen(2, 2), topTen(1, 1), topTen(11, 1, type = "RV")),
-            topTenLoaded = true,
-            followed = listOf(followed(id = 7, catalogId = 1)),
-            vehicleType = AccessoryVehicleType.TRUCK,
-            filter = FollowFilter.ALL
+            followed = listOf(followed(id = 7, catalogId = 1))
         )
 
-        assertEquals(listOf(1, 2), sections.topTen.map { it.position })
-        assertEquals(7L, sections.topTen[0].followed?.id)
-        assertNull(sections.topTen[1].followed)
-        assertTrue(sections.custom.isEmpty())
+        assertEquals(listOf(1, 2), result.topTen.map { it.position })
+        assertEquals(7L, result.topTen[0].followed?.id)
+        assertNull(result.topTen[1].followed)
+        assertTrue(result.custom.isEmpty())
     }
 
     @Test
-    fun `filtro siguiendo oculta los sugeridos no seguidos`() {
-        val sections = buildFollowSections(
+    fun buildFollowSections_followingFilter_hidesUnfollowedSuggestions() {
+        val result = sections(
             topTen = listOf(topTen(1, 1), topTen(2, 2)),
-            topTenLoaded = true,
             followed = listOf(followed(id = 7, catalogId = 2)),
-            vehicleType = AccessoryVehicleType.TRUCK,
             filter = FollowFilter.FOLLOWING
         )
 
-        assertEquals(listOf(2), sections.topTen.map { it.position })
+        assertEquals(listOf(2), result.topTen.map { it.position })
     }
 
     @Test
-    fun `busquedas propias y sugeridos que salieron del top 10 van a tus busquedas`() {
-        val sections = buildFollowSections(
+    fun buildFollowSections_customOrOutOfTopTen_goesToCustomSection() {
+        val result = sections(
             topTen = listOf(topTen(1, 1)),
-            topTenLoaded = true,
             followed = listOf(
                 followed(id = 7, name = "Cobija", catalogId = null),
                 followed(id = 8, name = "Viejo top", catalogId = 99),
                 followed(id = 9, name = "De RV", type = AccessoryVehicleType.RV)
-            ),
-            vehicleType = AccessoryVehicleType.TRUCK,
-            filter = FollowFilter.ALL
+            )
         )
 
-        assertEquals(listOf("Cobija", "Viejo top"), sections.custom.map { it.name })
+        assertEquals(listOf("Cobija", "Viejo top"), result.custom.map { it.name })
     }
 
     @Test
-    fun `busqueda propia con el nombre de un sugerido lo marca como seguido`() {
-        val sections = buildFollowSections(
+    fun buildFollowSections_customNameMatchesSuggestion_marksSuggestionAsFollowed() {
+        val result = sections(
             topTen = listOf(topTen(1, 1), topTen(2, 2)),
-            topTenLoaded = true,
-            followed = listOf(followed(id = 7, name = "top 1", catalogId = null)),
-            vehicleType = AccessoryVehicleType.TRUCK,
-            filter = FollowFilter.ALL
+            followed = listOf(followed(id = 7, name = "top 1", catalogId = null))
         )
 
         // "top 1" es la misma búsqueda que el sugerido "Top 1": no se repite en "Tus búsquedas".
-        assertEquals(7L, sections.topTen[0].followed?.id)
-        assertNull(sections.topTen[1].followed)
-        assertTrue(sections.custom.isEmpty())
+        assertEquals(7L, result.topTen[0].followed?.id)
+        assertNull(result.topTen[1].followed)
+        assertTrue(result.custom.isEmpty())
     }
 
     @Test
-    fun `sin catalogo cargado los seguidos del catalogo siguen en top 10`() {
-        val sections = buildFollowSections(
+    fun buildFollowSections_topTenNotLoaded_keepsCatalogFollowedInTopTen() {
+        val result = sections(
             topTen = emptyList(),
             topTenLoaded = false,
             followed = listOf(
                 followed(id = 7, name = "Dash cam", catalogId = 1),
                 followed(id = 8, name = "Cobija", catalogId = null)
-            ),
-            vehicleType = AccessoryVehicleType.TRUCK,
-            filter = FollowFilter.ALL
+            )
         )
 
-        assertEquals(listOf("Dash cam"), sections.topTen.map { it.name })
-        assertEquals(listOf("Cobija"), sections.custom.map { it.name })
+        assertEquals(listOf("Dash cam"), result.topTen.map { it.name })
+        assertEquals(listOf("Cobija"), result.custom.map { it.name })
     }
 
     // --- Notificación ---
 
     @Test
-    fun `notificacion agrupa por accesorio con su mejor oferta, ordenado por descuento`() {
+    fun buildAccessoryNotifications_severalAccessories_groupsWithBestDealSortedByDiscount() {
         val entries = buildAccessoryNotifications(
             listOf(
                 NewFollowedPromotion(1, "Dash cam", discount("a", 10.0)),
@@ -197,7 +187,7 @@ class FollowedPromotionsPresentationLogicTest {
     // --- URL segura ---
 
     @Test
-    fun `solo se aceptan urls http y https`() {
+    fun safeProductUrl_nonHttpScheme_returnsNull() {
         assertEquals("https://store.com/x", safeProductUrl(" https://store.com/x "))
         assertEquals("http://store.com/x", safeProductUrl("http://store.com/x"))
         assertNull(safeProductUrl("javascript:alert(1)"))

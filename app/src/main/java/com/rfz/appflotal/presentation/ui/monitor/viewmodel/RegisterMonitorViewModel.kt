@@ -43,7 +43,9 @@ data class ConfigurationItem(
 data class MonitorConfigurationUiState(
     val mac: String = "",
     val configurationSelected: ConfigurationItem? = null,
-    val isScanning: Boolean = false
+    val isScanning: Boolean = false,
+    /** Configuración que el monitor ya tiene guardada (null si aún no hay monitor). */
+    val savedConfiguration: ConfigurationItem? = null
 )
 
 @HiltViewModel
@@ -262,7 +264,8 @@ class RegisterMonitorViewModel @Inject constructor(
                 _monitorConfigUiState.update { currentUiState ->
                     currentUiState.copy(
                         mac = values.monitorMac,
-                        configurationSelected = configSelected
+                        configurationSelected = configSelected,
+                        savedConfiguration = configSelected
                     )
                 }
             }

@@ -47,6 +47,11 @@
     <string name="llantas_a_utilizar">How many tires will you use?</string>
     <string name="de_llantas_del_diagrama">of %1$d tires in the diagram</string>
     <string name="quitar_llanta">Remove tire</string>
+    <plurals name="aviso_montaje_automatico">
+        <item quantity="one">When you confirm, %1$d tire will be mounted automatically. This only happens on this first setup.</item>
+        <item quantity="other">When you confirm, %1$d tires will be mounted automatically. This only happens on this first setup.</item>
+    </plurals>
+    <string name="aviso_cambio_configuracion">Tires already mounted stay in place, but the new positions in this configuration won\'t be mounted automatically. You can mount them from the diagram.</string>
 
     <string name="title_enviar">Send</string>
     <string name="content_description_home_close">Close home screen</string>
@@ -173,6 +178,7 @@
     <string name="reconfigurar">Reconfigure</string>
     <string name="editar_llanta_posicion">Edit tire · %1$s</string>
     <string name="editar_llanta_ayuda">Only the tire record changes; the mounting stays the same.</string>
+    <string name="editar_llanta_datos_bloqueados">This tire already has inspections, so its acquisition data can no longer be changed. You can edit the tire number, DOT and invoice number.</string>
     <string name="montada_en_eje">Mounted on %1$s</string>
     <string name="guardar_cambios">Save changes</string>
     <string name="llanta_actualizada">Tire updated</string>

@@ -35,7 +35,7 @@ private const val SCOPE_SINGLE = "single"
 
 /**
  * Busca promociones de los accesorios que sigue el usuario y le notifica las nuevas.
- * Sin sesión o sin accesorios por consultar termina sin tocar la red.
+ * Sin sesión de plan Complete o sin accesorios por consultar termina sin tocar la red.
  */
 @HiltWorker
 class FollowedPromotionsWorker @AssistedInject constructor(
@@ -107,6 +107,7 @@ fun triggerPendingFollowedPromotionsSync(context: Context) {
     val syncRequest = OneTimeWorkRequestBuilder<FollowedPromotionsWorker>()
         .setConstraints(followedPromotionsConstraints())
         .setInputData(workDataOf(KEY_SCOPE to SCOPE_PENDING))
+        .addTag(PROMOTIONS_ON_DEMAND_TAG)
         .build()
 
     WorkManager.getInstance(context).enqueueUniqueWork(
@@ -133,6 +134,7 @@ fun triggerFollowedAccessoryRefresh(context: Context, followedAccessoryId: Long)
                 KEY_ACCESSORY_ID to followedAccessoryId
             )
         )
+        .addTag(PROMOTIONS_ON_DEMAND_TAG)
         .build()
 
     WorkManager.getInstance(context).enqueueUniqueWork(

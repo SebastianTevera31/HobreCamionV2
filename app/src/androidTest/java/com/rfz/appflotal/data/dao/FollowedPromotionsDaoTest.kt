@@ -76,7 +76,7 @@ class FollowedPromotionsDaoTest {
         )
 
     @Test
-    fun loQueSaleDeLosResultadosSigueComoVistoHastaVencer() = runBlocking {
+    fun applySync_productLeavesResults_staysKnownUntilRetentionCutoff() = runBlocking {
         val id = follow("Dash cam")
 
         sync(id, listOf("a", "e"), now = 1_000, forgetBefore = 0)
@@ -92,7 +92,7 @@ class FollowedPromotionsDaoTest {
     }
 
     @Test
-    fun noGuardaNadaSiSeDejoDeSeguirDuranteLaBusqueda() = runBlocking {
+    fun applySync_unfollowedDuringSearch_savesNothing() = runBlocking {
         val id = follow("Dash cam")
         dao.unfollow(id)
 
@@ -103,7 +103,7 @@ class FollowedPromotionsDaoTest {
     }
 
     @Test
-    fun dejarDeSeguirBorraLoVistoDeEseAccesorio() = runBlocking {
+    fun unfollow_accessoryWithSeenProducts_deletesOnlyItsSeenProducts() = runBlocking {
         val dashCam = follow("Dash cam")
         val tpms = follow("TPMS")
         sync(dashCam, listOf("a"), now = 1_000, forgetBefore = 0)

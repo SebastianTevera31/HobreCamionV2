@@ -116,12 +116,14 @@ class FollowedPromotionsRepository @Inject constructor(
      *
      * Las sincronizaciones se ejecutan de una en una (la diaria y las del usuario pueden
      * coincidir): así cada una ve lo que guardó la anterior y no se notifica dos veces lo mismo.
+     *
+     * Solo con sesión activa de plan Complete. Si la sesión termina a la mitad, no se hacen
+     * más llamadas ni se escribe la caché.
      */
     suspend fun syncFollowedPromotions(
         scope: FollowedSyncScope = FollowedSyncScope.All
     ): Result<List<NewFollowedPromotion>> = syncMutex.withLock {
-        val token = getTasksUseCase().first().firstOrNull()?.fld_token
-            ?.takeIf { it.isNotBlank() }
+        val token = getTasksUseCase.completeSessionToken()
             ?: return@withLock Result.success(emptyList())
 
         val followed = accessoriesToSync(followedPromotionsDao.getFollowedAccessories(), scope)
@@ -131,8 +133,10 @@ class FollowedPromotionsRepository @Inject constructor(
         val responses = coroutineScope {
             followed.map { accessory ->
                 async {
-                    accessory to semaphore.withPermit {
-                        remotePromotionsDataSource.getDiscounts(
+                    semaphore.withPermit {
+                        // La espera por el permiso puede abarcar un logout.
+                        if (!getTasksUseCase.isSameCompleteSession(token)) return@withPermit null
+                        accessory to remotePromotionsDataSource.getDiscounts(
                             token = token,
                             search = accessory.name,
                             limit = RESULTS_PER_FOLLOWED_ACCESSORY
@@ -141,12 +145,17 @@ class FollowedPromotionsRepository @Inject constructor(
                 }
             }.awaitAll()
         }
+        if (!getTasksUseCase.isSameCompleteSession(token)) {
+            return@withLock Result.success(emptyList())
+        }
+        // Con la sesión intacta ninguna llamada se omitió.
+        val fetchedResponses = responses.filterNotNull()
 
         val knownProductUrls = followedPromotionsDao.getKnownProductUrls().toMutableSet()
         val toNotify = mutableListOf<NewFollowedPromotion>()
         val now = System.currentTimeMillis()
 
-        responses.forEach { (accessory, result) ->
+        fetchedResponses.forEach { (accessory, result) ->
             val fetched = result.getOrNull()?.result ?: return@forEach
             val plan = planAccessorySync(
                 accessory = accessory,
@@ -170,8 +179,8 @@ class FollowedPromotionsRepository @Inject constructor(
             knownProductUrls += plan.seen.map { it.productUrl }
         }
 
-        val failures = responses.mapNotNull { (_, result) -> result.exceptionOrNull() }
-        if (failures.size == responses.size) {
+        val failures = fetchedResponses.mapNotNull { (_, result) -> result.exceptionOrNull() }
+        if (failures.isNotEmpty() && failures.size == fetchedResponses.size) {
             Result.failure(failures.first())
         } else {
             Result.success(toNotify)

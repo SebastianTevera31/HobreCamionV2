@@ -126,6 +126,7 @@ fun RegisterTireScreen(
         onAcquisitionDateChange = viewModel::updateAcquisitionDate,
         onFolioFacturaChange = viewModel::updateFolioFactura,
         onCostChange = viewModel::updateCost,
+        onTreadDepthChange = viewModel::updateTreadDepth,
         onTireNumberChange = viewModel::updateTireNumber,
         onDotChange = viewModel::updateDot,
         onOdometerChange = viewModel::updateOdometer,
@@ -147,6 +148,7 @@ private fun RegisterTireScreenContent(
     onAcquisitionDateChange: (String) -> Unit,
     onFolioFacturaChange: (String) -> Unit,
     onCostChange: (String) -> Unit,
+    onTreadDepthChange: (String) -> Unit,
     onTireNumberChange: (String) -> Unit,
     onDotChange: (String) -> Unit,
     onOdometerChange: (String) -> Unit,
@@ -309,9 +311,8 @@ private fun RegisterTireScreenContent(
                 DialogTextField(
                     label = stringResource(R.string.profundidad),
                     value = uiState.treadDepth,
-                    keyboardType = KeyboardType.NumberPassword,
-                    isEditable = false
-                ) { }
+                    keyboardType = KeyboardType.NumberPassword
+                ) { value -> onTreadDepthChange(value) }
 
                 DialogTextField(
                     label = stringResource(R.string.numero_de_llanta),
@@ -371,6 +372,7 @@ fun RegisterTireScreenPreview() {
             onAcquisitionDateChange = {},
             onFolioFacturaChange = {},
             onCostChange = {},
+            onTreadDepthChange = {},
             onTireNumberChange = {},
             onDotChange = {},
             onOdometerChange = {},

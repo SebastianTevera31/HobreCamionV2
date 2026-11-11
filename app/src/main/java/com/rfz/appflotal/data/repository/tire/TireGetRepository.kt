@@ -1,6 +1,6 @@
 package com.rfz.appflotal.data.repository.tire
 
-import com.rfz.appflotal.data.model.tire.response.TirexIdResponse
+import com.rfz.appflotal.data.model.tire.response.TireIdResponse
 import com.rfz.appflotal.data.network.service.tire.TireGetService
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import kotlinx.coroutines.flow.first
@@ -12,10 +12,10 @@ class TireGetRepository @Inject constructor(
     private val getTasksUseCase: GetTasksUseCase
 ) {
 
-    suspend fun doTireGet(id_tire: Int): Result<List<TirexIdResponse>> {
+    suspend fun doTireGet(idTire: Int): Result<List<TireIdResponse>> {
         return try {
             val token = getTasksUseCase().first().first().fld_token
-            val response = tireGetService.doTireGet(id_tire, token)
+            val response = tireGetService.doTireGet(idTire, token)
             if (response.isSuccessful) {
 
                 response.body()?.let {

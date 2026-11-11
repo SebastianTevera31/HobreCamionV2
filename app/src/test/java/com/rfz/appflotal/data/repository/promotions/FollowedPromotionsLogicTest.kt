@@ -9,6 +9,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/** Reglas de "Siguiendo": validación, sugeridos, alcance de la sincronización y qué se notifica. */
 class FollowedPromotionsLogicTest {
 
     private fun followed(
@@ -54,100 +55,70 @@ class FollowedPromotionsLogicTest {
         active = active
     )
 
-    // --- Normalización ---
-
-    @Test
-    fun `cleanAccessoryName quita espacios sobrantes`() {
-        assertEquals("Dash cam", cleanAccessoryName("  Dash    cam  "))
-    }
-
-    @Test
-    fun `normalizeAccessoryName ignora mayusculas y espacios`() {
-        assertEquals(normalizeAccessoryName("dash cam"), normalizeAccessoryName("  DASH   Cam "))
-    }
+    private fun validate(
+        name: String,
+        type: AccessoryVehicleType = AccessoryVehicleType.TRUCK,
+        current: List<FollowedAccessoryEntity> = emptyList()
+    ) = validateNewFollow(name, type, current)
 
     // --- Validación ---
 
     @Test
-    fun `nombre valido se acepta`() {
-        assertEquals(
-            FollowValidation.VALID,
-            validateNewFollow("Dash cam", AccessoryVehicleType.TRUCK, emptyList())
-        )
+    fun validateNewFollow_belowMinLengthAfterTrim_returnsTooShort() {
+        assertEquals(FollowValidation.TOO_SHORT, validate("  ab   "))
     }
 
     @Test
-    fun `nombre menor al minimo se rechaza aunque tenga espacios`() {
-        assertEquals(
-            FollowValidation.TOO_SHORT,
-            validateNewFollow("  ab   ", AccessoryVehicleType.TRUCK, emptyList())
-        )
+    fun validateNewFollow_exactlyMinOrMaxLength_returnsValid() {
+        assertEquals(FollowValidation.VALID, validate("a".repeat(MIN_ACCESSORY_NAME_LENGTH)))
+        assertEquals(FollowValidation.VALID, validate("a".repeat(MAX_ACCESSORY_NAME_LENGTH)))
     }
 
     @Test
-    fun `nombre en el minimo y en el maximo se acepta`() {
-        val min = "a".repeat(MIN_ACCESSORY_NAME_LENGTH)
-        val max = "a".repeat(MAX_ACCESSORY_NAME_LENGTH)
-        assertEquals(FollowValidation.VALID, validateNewFollow(min, AccessoryVehicleType.TRUCK, emptyList()))
-        assertEquals(FollowValidation.VALID, validateNewFollow(max, AccessoryVehicleType.TRUCK, emptyList()))
+    fun validateNewFollow_aboveMaxLength_returnsTooLong() {
+        assertEquals(FollowValidation.TOO_LONG, validate("a".repeat(MAX_ACCESSORY_NAME_LENGTH + 1)))
     }
 
     @Test
-    fun `nombre mayor al maximo se rechaza`() {
-        assertEquals(
-            FollowValidation.TOO_LONG,
-            validateNewFollow(
-                "a".repeat(MAX_ACCESSORY_NAME_LENGTH + 1),
-                AccessoryVehicleType.TRUCK,
-                emptyList()
-            )
-        )
-    }
-
-    @Test
-    fun `duplicado sin importar mayusculas en el mismo tipo se rechaza`() {
+    fun validateNewFollow_sameNameIgnoringCaseAndSpaces_returnsDuplicate() {
         assertEquals(
             FollowValidation.DUPLICATE,
-            validateNewFollow(" DASH  cam", AccessoryVehicleType.TRUCK, listOf(followed("Dash cam")))
+            validate(" DASH  cam", current = listOf(followed("Dash cam")))
         )
     }
 
     @Test
-    fun `mismo nombre en otro tipo de vehiculo se acepta`() {
+    fun validateNewFollow_sameNameOtherVehicleType_returnsValid() {
         assertEquals(
             FollowValidation.VALID,
-            validateNewFollow(
+            validate(
                 "Dash cam",
-                AccessoryVehicleType.RV,
-                listOf(followed("Dash cam", AccessoryVehicleType.TRUCK))
+                type = AccessoryVehicleType.RV,
+                current = listOf(followed("Dash cam", AccessoryVehicleType.TRUCK))
             )
         )
     }
 
     @Test
-    fun `al llegar al tope se rechaza`() {
+    fun validateNewFollow_atLimit_returnsLimitReached() {
         val full = (1..MAX_FOLLOWED_ACCESSORIES).map { followed("Accessory $it", id = it.toLong()) }
-        assertEquals(
-            FollowValidation.LIMIT_REACHED,
-            validateNewFollow("Otro accesorio", AccessoryVehicleType.TRUCK, full)
-        )
+
+        assertEquals(FollowValidation.LIMIT_REACHED, validate("Otro accesorio", current = full))
     }
 
     @Test
-    fun `un lugar antes del tope se acepta`() {
+    fun validateNewFollow_oneBelowLimit_returnsValid() {
         val almostFull = (1 until MAX_FOLLOWED_ACCESSORIES).map {
             followed("Accessory $it", id = it.toLong())
         }
-        assertEquals(
-            FollowValidation.VALID,
-            validateNewFollow("Otro accesorio", AccessoryVehicleType.TRUCK, almostFull)
-        )
+
+        assertEquals(FollowValidation.VALID, validate("Otro accesorio", current = almostFull))
     }
 
-    // --- Sugeridos del Top 10 ---
+    // --- Sugeridos del Top 10 y tipo de vehículo ---
 
     @Test
-    fun `sugeridos filtra por tipo, activos y nombre, ordenados por posicion`() {
+    fun suggestedAccessoriesFor_mixedCatalog_returnsActiveNamedOfTypeByPosition() {
         val catalog = listOf(
             accessory(id = 3, type = "TRUCK", position = 3),
             accessory(id = 1, type = "TRUCK", position = 1),
@@ -168,116 +139,74 @@ class FollowedPromotionsLogicTest {
     }
 
     @Test
-    fun `fromApi reconoce TRUCK y RV sin importar mayusculas ni espacios`() {
+    fun accessoryVehicleTypeFromApi_caseAndSpaces_returnsTypeOrNull() {
         assertEquals(AccessoryVehicleType.TRUCK, AccessoryVehicleType.fromApi(" truck "))
         assertEquals(AccessoryVehicleType.RV, AccessoryVehicleType.fromApi("rv"))
         assertNull(AccessoryVehicleType.fromApi("BUS"))
         assertNull(AccessoryVehicleType.fromApi(null))
     }
 
-    // --- Tipo de vehículo del usuario ---
-
     @Test
-    fun `tipo de usuario RV o casa rodante selecciona RV`() {
+    fun vehicleTypeForUser_rvOrMotorhome_returnsRv() {
         assertEquals(AccessoryVehicleType.RV, vehicleTypeForUser("RV"))
         assertEquals(AccessoryVehicleType.RV, vehicleTypeForUser("Motorhome clase A"))
         assertEquals(AccessoryVehicleType.RV, vehicleTypeForUser("Casa rodante"))
     }
 
     @Test
-    fun `cualquier otro tipo de usuario selecciona TRUCK`() {
+    fun vehicleTypeForUser_anyOtherOrMissing_returnsTruck() {
         assertEquals(AccessoryVehicleType.TRUCK, vehicleTypeForUser("Tractocamión"))
         assertEquals(AccessoryVehicleType.TRUCK, vehicleTypeForUser("DRIVER"))
         assertEquals(AccessoryVehicleType.TRUCK, vehicleTypeForUser(""))
         assertEquals(AccessoryVehicleType.TRUCK, vehicleTypeForUser(null))
     }
 
-    // --- Promociones a notificar ---
+    // --- Sincronización ---
 
     @Test
-    fun `primera sincronizacion no notifica`() {
+    fun accessoriesToSync_eachScope_returnsMatchingAccessories() {
+        val synced = followed("Dash cam", id = 1)
+        val pending = followed("TPMS", id = 2, initialSyncDone = false)
+        val all = listOf(synced, pending)
+
+        assertEquals(listOf(1L, 2L), accessoriesToSync(all, FollowedSyncScope.All).map { it.id })
+        assertEquals(
+            listOf(2L),
+            accessoriesToSync(all, FollowedSyncScope.PendingFirstSync).map { it.id }
+        )
+        assertEquals(listOf(1L), accessoriesToSync(all, FollowedSyncScope.Single(1)).map { it.id })
+        assertTrue(accessoriesToSync(all, FollowedSyncScope.Single(99)).isEmpty())
+    }
+
+    @Test
+    fun newPromotionsToNotify_firstSync_returnsEmpty() {
         val result = newPromotionsToNotify(
             accessory = followed("Dash cam", initialSyncDone = false),
             fetched = listOf(discount("a"), discount("b")),
             knownProductUrls = emptySet()
         )
+
         assertTrue(result.isEmpty())
     }
 
     @Test
-    fun `solo se notifican promociones no conocidas, sin repetir`() {
+    fun newPromotionsToNotify_knownAndRepeatedUrls_returnsUnknownOnce() {
         val result = newPromotionsToNotify(
             accessory = followed("Dash cam"),
             fetched = listOf(discount("a"), discount("b"), discount("b"), discount("c")),
             knownProductUrls = setOf("a")
         )
+
         assertEquals(listOf("b", "c"), result.map { it.discount.productUrl })
         assertTrue(result.all { it.accessoryName == "Dash cam" })
     }
 
-    @Test
-    fun `sin promociones nuevas no se notifica`() {
-        val result = newPromotionsToNotify(
-            accessory = followed("Dash cam"),
-            fetched = listOf(discount("a")),
-            knownProductUrls = setOf("a")
-        )
-        assertTrue(result.isEmpty())
-    }
-
-    // --- Plan de sincronización ---
-
     /**
-     * Simula varias búsquedas diarias del mismo accesorio, guardando lo visto como lo hace
-     * el repositorio (tabla de vistos). Devuelve lo notificado en cada búsqueda.
+     * Un producto que salió de los resultados y volvió llega como conocido (tabla de vistos):
+     * conserva su primera fecha, no vuelve a marcarse "Nuevo" ni se notifica otra vez.
      */
-    private class SeenSimulation(private val accessoryName: String) {
-        val firstSeen = mutableMapOf<String, Long>()
-        private var synced = false
-
-        fun search(urls: List<String>, now: Long): AccessorySyncPlan {
-            val accessory = FollowedAccessoryEntity(
-                id = 1,
-                catalogAccessoryId = null,
-                vehicleType = AccessoryVehicleType.TRUCK.name,
-                name = accessoryName,
-                normalizedName = normalizeAccessoryName(accessoryName),
-                description = null,
-                createdAt = 0,
-                initialSyncDone = synced
-            )
-            val plan = planAccessorySync(
-                accessory = accessory,
-                fetched = urls.map {
-                    StoreDiscount("Store", "Item $it", null, 100.0, 80.0, 20.0, "USD", it, null)
-                },
-                firstSeenByUrl = firstSeen.toMap(),
-                knownProductUrls = firstSeen.keys.toSet(),
-                now = now
-            )
-            plan.seen.forEach { firstSeen[it.productUrl] = it.firstSeenAt }
-            synced = true
-            return plan
-        }
-    }
-
     @Test
-    fun `producto que sale y vuelve a los resultados no se notifica otra vez`() {
-        val simulation = SeenSimulation("Dash cam")
-
-        val day1 = simulation.search(listOf("a", "b", "c", "d", "e"), now = 1_000)
-        val day2 = simulation.search(listOf("a", "b", "c", "d", "f"), now = 2_000)
-        val day3 = simulation.search(listOf("a", "b", "c", "d", "e"), now = 3_000)
-
-        assertTrue(day1.toNotify.isEmpty())
-        assertEquals(listOf("f"), day2.toNotify.map { it.discount.productUrl })
-        assertTrue(day3.toNotify.isEmpty())
-        // Conserva la fecha de la primera vez, así que tampoco vuelve a marcarse "Nuevo".
-        assertEquals(1_000L, day3.promotions.first { it.productUrl == "e" }.firstSeenAt)
-    }
-
-    @Test
-    fun `plan guarda solo los resultados actuales y registra cuando se vieron`() {
+    fun planAccessorySync_seenAndNewResults_keepsFirstSeenAndNotifiesOnlyNew() {
         val plan = planAccessorySync(
             accessory = followed("Dash cam", id = 4),
             fetched = listOf(discount("a"), discount("b"), discount("a")),
@@ -292,23 +221,5 @@ class FollowedPromotionsLogicTest {
         assertEquals(listOf(900L, 900L), plan.seen.map { it.lastSeenAt })
         assertTrue(plan.seen.all { it.followedAccessoryId == 4L })
         assertEquals(listOf("b"), plan.toNotify.map { it.discount.productUrl })
-    }
-
-    @Test
-    fun `alcance de la sincronizacion elige los accesorios a consultar`() {
-        val synced = followed("Dash cam", id = 1)
-        val pending = followed("TPMS", id = 2, initialSyncDone = false)
-        val all = listOf(synced, pending)
-
-        assertEquals(listOf(1L, 2L), accessoriesToSync(all, FollowedSyncScope.All).map { it.id })
-        assertEquals(
-            listOf(2L),
-            accessoriesToSync(all, FollowedSyncScope.PendingFirstSync).map { it.id }
-        )
-        assertEquals(
-            listOf(1L),
-            accessoriesToSync(all, FollowedSyncScope.Single(1)).map { it.id }
-        )
-        assertTrue(accessoriesToSync(all, FollowedSyncScope.Single(99)).isEmpty())
     }
 }

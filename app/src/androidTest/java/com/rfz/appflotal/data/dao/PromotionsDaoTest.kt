@@ -59,7 +59,7 @@ class PromotionsDaoTest {
         )
 
     @Test
-    fun paginaYConteoSoloDeLaCategoria() = runBlocking {
+    fun getPageAndCount_category_returnsOnlyThatCategory() = runBlocking {
         val page = dao.getPage(search = "", store = "", category = "Accesorios", limit = 10, offset = 0)
 
         assertEquals(listOf("a1", "a2"), page.map { it.productUrl })
@@ -68,12 +68,12 @@ class PromotionsDaoTest {
     }
 
     @Test
-    fun sinCategoriaIncluyeTodas() = runBlocking {
+    fun count_emptyCategory_includesAll() = runBlocking {
         assertEquals(4, dao.count(search = "", store = "", category = ""))
     }
 
     @Test
-    fun categoriaSeCombinaConTiendaYBusqueda() = runBlocking {
+    fun getPageAndCount_categoryWithStoreAndSearch_combinesFilters() = runBlocking {
         assertEquals(
             listOf("c1"),
             dao.getPage(search = "", store = "Amazon", category = "Amarre de carga", limit = 10, offset = 0)
@@ -84,7 +84,7 @@ class PromotionsDaoTest {
     }
 
     @Test
-    fun tiendasSoloDeLaCategoria() = runBlocking {
+    fun getStores_category_returnsOnlyItsStores() = runBlocking {
         assertEquals(listOf("Amazon", "Walmart"), dao.getStores(category = "Accesorios"))
         assertEquals(listOf("Llantera"), dao.getStores(category = "Llantas"))
         assertEquals(listOf("Amazon", "Llantera", "Walmart"), dao.getStores(category = ""))

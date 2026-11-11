@@ -7,7 +7,6 @@ import com.rfz.appflotal.data.model.promotions.toDomain
 import com.rfz.appflotal.data.network.service.promotions.LocalPromotionsDataSource
 import com.rfz.appflotal.data.network.service.promotions.RemotePromotionsDataSource
 import com.rfz.appflotal.domain.database.GetTasksUseCase
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 data class PromotionsPage(
@@ -28,13 +27,17 @@ class PromotionsRepository @Inject constructor(
      * Una llamada por categoría asegura resultados en cada pestaña ([limit] por categoría).
      * Las llamadas van una tras otra para no cargar al backend, que consulta cada tienda.
      * Si falla alguna, se conserva el cache anterior completo y el worker reintenta.
+     *
+     * Solo con sesión activa de plan Complete; sin ella termina sin tocar la red. Si la sesión
+     * termina a la mitad, se detiene sin escribir el cache (logout ya lo vació).
      */
     suspend fun syncDiscounts(
         limit: Int = 50,
         pagesPerStore: Int = 20
     ): Result<Unit> {
-        val token = getTasksUseCase().first().first().fld_token
+        val token = getTasksUseCase.completeSessionToken() ?: return Result.success(Unit)
         val resultsByCategory = PromotionCategory.entries.map { category ->
+            if (!getTasksUseCase.isSameCompleteSession(token)) return Result.success(Unit)
             val response = remotePromotionsDataSource.getDiscounts(
                 token = token,
                 category = category.apiValue,
@@ -43,6 +46,7 @@ class PromotionsRepository @Inject constructor(
             ).getOrElse { return Result.failure(it) }
             category to response.result
         }
+        if (!getTasksUseCase.isSameCompleteSession(token)) return Result.success(Unit)
         localPromotionsDataSource.refreshAll(categorizedPromotionEntities(resultsByCategory))
         return Result.success(Unit)
     }

@@ -25,8 +25,10 @@ class FuelingModelsTest {
             lon = lon
         )
 
+    // --- Paginación ---
+
     @Test
-    fun `primera pagina de 15 registros tiene siguiente`() {
+    fun historyToDomain_firstPageBelowTotal_hasNextPage() {
         val response = FuelingHistoryResponse(List(10) { record() }, total = 15, page = 1, pageSize = 10)
 
         val page = response.toDomain(requestedPage = 1, requestedPageSize = 10)
@@ -36,14 +38,14 @@ class FuelingModelsTest {
     }
 
     @Test
-    fun `ultima pagina no tiene siguiente`() {
+    fun historyToDomain_lastPage_hasNoNextPage() {
         val response = FuelingHistoryResponse(List(5) { record() }, total = 15, page = 2, pageSize = 10)
 
         assertFalse(response.toDomain(requestedPage = 2, requestedPageSize = 10).hasNextPage)
     }
 
     @Test
-    fun `pagina vacia no tiene siguiente aunque el total sea mayor`() {
+    fun historyToDomain_emptyPageWithoutPaging_usesRequestedPageAndStops() {
         val response = FuelingHistoryResponse(emptyList(), total = 15, page = 0, pageSize = 0)
 
         val page = response.toDomain(requestedPage = 1, requestedPageSize = 10)
@@ -52,8 +54,10 @@ class FuelingModelsTest {
         assertFalse(page.hasNextPage)
     }
 
+    // --- Registro ---
+
     @Test
-    fun `estacion N_A y coordenadas 0,0 se tratan como ausentes`() {
+    fun recordToDomain_placeholderStationAndZeroCoordinates_treatedAsMissing() {
         val fueling = record(station = "N/A").toDomain()
 
         assertEquals("", fueling.station)
@@ -61,8 +65,10 @@ class FuelingModelsTest {
         assertTrue(record(station = "Pemex", lat = 19.4, lon = -99.1).toDomain().hasCoordinates)
     }
 
+    // --- Contrato JSON del servidor (nombres de campo fld_* / id_*) ---
+
     @Test
-    fun `parsea la respuesta del historial`() {
+    fun historyJson_serverResponse_mapsFields() {
         val json = """
             {"data":[{"fld_fuelingDate":"2026-01-10T10:52:47.337","vehicle":"XXX001 - QWERTYUIOP",
             "units":"40.00 L.","fuelType":"Diésel(Gasóleo)","amount":"$0.00","fld_station":"N/A",
@@ -78,7 +84,7 @@ class FuelingModelsTest {
     }
 
     @Test
-    fun `parsea el catalogo de combustibles`() {
+    fun fuelTypeJson_serverCatalog_mapsIdAndDescription() {
         val json = """[{"id_fuelType":1,"fuelType":"Diésel(Gasóleo)"},{"id_fuelType":2,"fuelType":"Gasolina"}]"""
 
         val items = gson.fromJson(json, Array<FuelTypeResponse>::class.java).map { it.toCatalog() }

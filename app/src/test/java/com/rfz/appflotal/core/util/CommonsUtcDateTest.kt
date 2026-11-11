@@ -23,14 +23,16 @@ class CommonsUtcDateTest {
     fun tearDown() = TimeZone.setDefault(originalZone)
 
     @Test
-    fun `emite la hora en UTC real`() {
+    fun getCurrentUtcDate_localZoneNotUtc_returnsUtcIsoDate() {
         val instant = Instant.parse("2026-10-20T18:30:15.123Z")
+
         assertEquals("2026-10-20T18:30:15.123Z", Commons.getCurrentUtcDate(instant))
     }
 
     @Test
-    fun `interpreta como UTC fechas con y sin zona`() {
+    fun parseUtcDate_withOrWithoutZone_returnsSameInstant() {
         val expected = Instant.parse("2026-10-20T18:30:00Z")
+
         assertEquals(expected, Commons.parseUtcDate("2026-10-20T18:30:00"))
         assertEquals(expected, Commons.parseUtcDate("2026-10-20T18:30:00.000Z"))
         assertEquals(expected, Commons.parseUtcDate("2026-10-20 18:30:00"))
@@ -38,12 +40,12 @@ class CommonsUtcDateTest {
     }
 
     @Test
-    fun `normaliza la fecha del servidor al formato UTC`() {
+    fun toUtcIsoDate_serverDateWithoutZone_returnsUtcIsoDate() {
         assertEquals("2026-10-20T18:30:00.000Z", Commons.toUtcIsoDate("2026-10-20T18:30:00"))
     }
 
     @Test
-    fun `muestra la fecha UTC en hora local`() {
+    fun convertUtcDate_utcDate_returnsLocalTime() {
         assertEquals(
             "2026-10-20 12:30",
             Commons.convertUtcDate("2026-10-20T18:30:00.000Z", "yyyy-MM-dd HH:mm")
@@ -51,8 +53,9 @@ class CommonsUtcDateTest {
     }
 
     @Test
-    fun `la fecha vacia no se desplaza de zona`() {
+    fun convertUtcDate_voidDate_isNotShiftedAndStaysVoid() {
         val formatted = Commons.convertUtcDate("1900-01-01T00:00:00", "dd/MM/yyyy HH:mm:ss")
+
         assertEquals("01/01/1900 00:00:00", formatted)
         assertTrue(Commons.isVoidDate(formatted))
     }

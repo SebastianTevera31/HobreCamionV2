@@ -189,6 +189,7 @@
     <string name="reconfigurar">Reconfigurar</string>
     <string name="editar_llanta_posicion">Editar llanta · %1$s</string>
     <string name="editar_llanta_ayuda">Solo se modifica la ficha de la llanta; el montaje no cambia.</string>
+    <string name="editar_llanta_datos_bloqueados">Esta llanta ya tiene inspecciones, por lo que sus datos de adquisición no se pueden modificar. Puedes editar número de llanta, DOT y folio de factura.</string>
     <string name="montada_en_eje">Montada en %1$s</string>
     <string name="guardar_cambios">Guardar cambios</string>
     <string name="llanta_actualizada">Llanta actualizada</string>
@@ -778,6 +779,12 @@
     <string name="llantas_a_utilizar">¿Cuántas llantas vas a utilizar?</string>
     <string name="de_llantas_del_diagrama">de %1$d llantas del diagrama</string>
     <string name="quitar_llanta">Quitar llanta</string>
+    <plurals name="aviso_montaje_automatico">
+        <item quantity="one">Al confirmar se montará %1$d llanta automáticamente. Solo ocurre en esta primera configuración.</item>
+        <item quantity="many">Al confirmar se montarán %1$d llantas automáticamente. Solo ocurre en esta primera configuración.</item>
+        <item quantity="other">Al confirmar se montarán %1$d llantas automáticamente. Solo ocurre en esta primera configuración.</item>
+    </plurals>
+    <string name="aviso_cambio_configuracion">Las llantas ya montadas se conservan, pero las posiciones nuevas de esta configuración no se montarán automáticamente. Podrás montarlas desde el diagrama.</string>
     <!-- Complete Plan -->
     <string name="content_description_notificaciones">Notificaciones</string>
     <string name="saludo_usuario">¡Hola, %1$s!</string>

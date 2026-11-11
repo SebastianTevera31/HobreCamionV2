@@ -11,29 +11,25 @@ class FollowScreensStateTest {
     // --- "Buscar ahora" ---
 
     @Test
-    fun `en cola se muestra en espera y en ejecucion buscando`() {
+    fun refreshStatusFor_workInProgressOrFinished_mapsToVisibleStatus() {
         assertEquals(RefreshStatus.WAITING, refreshStatusFor(WorkInfo.State.ENQUEUED, true))
         assertEquals(RefreshStatus.WAITING, refreshStatusFor(WorkInfo.State.BLOCKED, true))
         assertEquals(RefreshStatus.SEARCHING, refreshStatusFor(WorkInfo.State.RUNNING, true))
-    }
-
-    @Test
-    fun `falla solo se muestra si se pidio en esta visita`() {
-        assertEquals(RefreshStatus.FAILED, refreshStatusFor(WorkInfo.State.FAILED, true))
-        assertEquals(RefreshStatus.IDLE, refreshStatusFor(WorkInfo.State.FAILED, false))
-    }
-
-    @Test
-    fun `terminada o sin busqueda no muestra estado`() {
         assertEquals(RefreshStatus.IDLE, refreshStatusFor(WorkInfo.State.SUCCEEDED, true))
         assertEquals(RefreshStatus.IDLE, refreshStatusFor(WorkInfo.State.CANCELLED, true))
         assertEquals(RefreshStatus.IDLE, refreshStatusFor(null, false))
     }
 
+    @Test
+    fun refreshStatusFor_failed_showsOnlyIfRequestedThisVisit() {
+        assertEquals(RefreshStatus.FAILED, refreshStatusFor(WorkInfo.State.FAILED, true))
+        assertEquals(RefreshStatus.IDLE, refreshStatusFor(WorkInfo.State.FAILED, false))
+    }
+
     // --- Mensajes ---
 
     @Test
-    fun `al terminar de mostrarse el mensaje se quita`() {
+    fun withMessageShown_currentMessage_clearsIt() {
         val shown = FollowMessage.Unfollowed("Dash cam")
         val state = FollowPromotionUiState(message = shown)
 
@@ -41,7 +37,7 @@ class FollowScreensStateTest {
     }
 
     @Test
-    fun `un mensaje que llego despues no se borra al terminar el anterior`() {
+    fun withMessageShown_newerMessageArrived_keepsNewer() {
         val previous = FollowMessage.Unfollowed("Dash cam")
         val newer = FollowMessage.Error(FollowError.SaveFailed)
         val state = FollowPromotionUiState(message = newer)

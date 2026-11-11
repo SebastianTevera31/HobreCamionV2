@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -41,10 +44,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -77,6 +83,9 @@ fun MonitorRegisterDialog(
     showCloseButton: Boolean = false,
     // Lo decide quien invoca el diálogo: solo el wizard lo muestra; oculto se envía numTires = 0.
     showTireCountSelector: Boolean = false,
+    // El servidor solo monta llantas automáticamente al guardar la primera configuración.
+    isFirstConfiguration: Boolean = true,
+    savedConfiguration: ConfigurationItem? = null,
     monitorSelected: ConfigurationItem? = null,
     macValue: String = "",
     closeText: String,
@@ -93,7 +102,13 @@ fun MonitorRegisterDialog(
     // Cada cambio de configuración arranca con el diagrama completo.
     val maxTires = configurationSelected?.maxTires ?: 0
     var numTires by remember(configurationSelected) { mutableIntStateOf(maxTires) }
-    val canChooseNumTires = showTireCountSelector && canChooseNoTpms && maxTires > 0
+    // Al reconfigurar el número de llantas ya no tiene efecto (no se montan automáticamente).
+    val canChooseNumTires =
+        showTireCountSelector && isFirstConfiguration && canChooseNoTpms && maxTires > 0
+    val isConfigurationChanged = !isFirstConfiguration &&
+            savedConfiguration != null &&
+            configurationSelected != null &&
+            configurationSelected?.id != savedConfiguration.id
     var hasTpms by remember { mutableStateOf(true) }
 
     val currentMacAddress = if (isScanning) {
@@ -161,6 +176,26 @@ fun MonitorRegisterDialog(
                             value = numTires,
                             max = maxTires,
                             onValueChange = { numTires = it }
+                        )
+
+                        ConfigurationNote(
+                            text = pluralStringResource(
+                                R.plurals.aviso_montaje_automatico,
+                                numTires,
+                                numTires
+                            ),
+                            icon = Icons.Outlined.Info,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+
+                    if (isConfigurationChanged) {
+                        ConfigurationNote(
+                            text = stringResource(R.string.aviso_cambio_configuracion),
+                            icon = Icons.Outlined.WarningAmber,
+                            containerColor = Color(0xFFFFF3E0),
+                            contentColor = Color(0xFF8A4B00)
                         )
                     }
 
@@ -266,6 +301,38 @@ fun MonitorRegisterDialog(
                 }
             }
         }
+    }
+}
+
+/** Aviso dentro del diálogo sobre qué pasará con las llantas al confirmar. */
+@Composable
+private fun ConfigurationNote(
+    text: String,
+    icon: ImageVector,
+    containerColor: Color,
+    contentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(containerColor)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.size(20.dp)
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = contentColor
+        )
     }
 }
 
