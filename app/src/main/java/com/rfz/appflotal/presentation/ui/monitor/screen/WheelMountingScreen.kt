@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.SensorsOff
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -42,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -73,6 +75,13 @@ fun WheelMountingScreen(
 ) {
     var pendingPosition by remember { mutableStateOf<String?>(null) }
 
+    // Solo se puede finalizar con todas las posiciones montadas. La primera configuración las
+    // monta el servidor; al cambiar de configuración las posiciones nuevas se montan a mano.
+    val isDiagramReady = hasConfiguration && baseConfigLabel != null && image != null
+    val totalTires = tires.size
+    val pendingTires = tires.count { !it.isAssembled }
+    val canFinish = isDiagramReady && totalTires > 0 && pendingTires == 0
+
     pendingPosition?.let { position ->
         MountConfirmDialog(
             position = position,
@@ -91,15 +100,43 @@ fun WheelMountingScreen(
             // Sin configuración no se puede finalizar: el usuario está obligado a definirla.
             if (hasConfiguration) {
                 Surface(shadowElevation = 8.dp) {
-                    Button(
-                        onClick = onFinishClick,
-                        shape = RoundedCornerShape(12.dp),
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .navigationBarsPadding()
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(stringResource(R.string.finalizar))
+                        if (isDiagramReady && totalTires > 0 && pendingTires > 0) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.WarningAmber,
+                                    contentDescription = null,
+                                    tint = UnlinkedColor,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = pluralStringResource(
+                                        R.plurals.faltan_llantas_por_montar,
+                                        pendingTires,
+                                        pendingTires
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = UnlinkedColor
+                                )
+                            }
+                        }
+                        Button(
+                            onClick = onFinishClick,
+                            enabled = canFinish,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.finalizar))
+                        }
                     }
                 }
             }
@@ -139,12 +176,21 @@ fun WheelMountingScreen(
                     }
                 }
 
-                baseConfigLabel == null -> Text(
-                    text = stringResource(R.string.configuracion_no_soportada),
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(24.dp)
-                )
+                // Error: la tarjeta de monitor sigue visible para poder reconfigurar.
+                baseConfigLabel == null -> {
+                    MonitorStatusCard(
+                        isSensorLinked = isSensorLinked,
+                        monitorMac = monitorMac,
+                        baseConfigLabel = null,
+                        onClick = onConfigureMonitorClick
+                    )
+                    Text(
+                        text = stringResource(R.string.configuracion_no_soportada),
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(24.dp)
+                    )
+                }
 
                 image == null -> Box(
                     modifier = Modifier
@@ -152,6 +198,21 @@ fun WheelMountingScreen(
                         .padding(48.dp),
                     contentAlignment = Alignment.Center
                 ) { CircularProgressIndicator() }
+
+                totalTires == 0 -> {
+                    MonitorStatusCard(
+                        isSensorLinked = isSensorLinked,
+                        monitorMac = monitorMac,
+                        baseConfigLabel = baseConfigLabel,
+                        onClick = onConfigureMonitorClick
+                    )
+                    Text(
+                        text = stringResource(R.string.error_cargar_posiciones),
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(24.dp)
+                    )
+                }
 
                 else -> {
                     MonitorStatusCard(

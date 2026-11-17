@@ -1,6 +1,5 @@
 package com.rfz.appflotal.presentation.ui.forums.screen.topic
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,7 +21,6 @@ import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.forums.components.CommentCard
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.RecordType
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DiscussionScreen(
     topic: ForumTopic,
@@ -109,7 +107,8 @@ fun DiscussionScreenPreview() {
         idUser = 1,
         color = MaterialTheme.colorScheme.primary,
         likes = 0,
-        isLiked = true
+        isLiked = true,
+        canReply = true
     )
 
     val sampleComments = listOf(
@@ -123,7 +122,7 @@ fun DiscussionScreenPreview() {
             secondInitial = "",
             time = "",
             isLiked = false,
-            idUser = 1
+            idUser = 1,
         ),
         ForumComment(
             id = 1,

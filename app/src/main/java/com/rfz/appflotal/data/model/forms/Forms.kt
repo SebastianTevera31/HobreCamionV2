@@ -10,5 +10,6 @@ data class ProfileFormModel(
 
 data class VehicleFormModel(
     val vehicleType: String = "",
-    val plates: String = ""
+    val plates: String = "",
+    val odometer: String = ""
 )

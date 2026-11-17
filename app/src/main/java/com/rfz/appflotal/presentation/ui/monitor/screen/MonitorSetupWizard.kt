@@ -64,7 +64,7 @@ fun MonitorSetupWizard(
                 context = context,
                 paymentPlan = paymentPlan,
                 // Solo en el wizard se elige cuántas llantas del diagrama se usan.
-                showTireCountSelector = true,
+                mountAllTires = true,
             )
         }
     )

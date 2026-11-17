@@ -78,7 +78,9 @@ fun ServiceTextField(
     singleLine: Boolean = true,
     minLines: Int = 1,
     prefix: String? = null,
-    enabled: Boolean = true
+    suffix: String? = null,
+    enabled: Boolean = true,
+    isError: Boolean = false
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -91,6 +93,8 @@ fun ServiceTextField(
             enabled = enabled,
             placeholder = { Text(placeholder) },
             prefix = prefix?.let { { Text(it) } },
+            suffix = suffix?.let { { Text(it) } },
+            isError = isError,
             singleLine = singleLine,
             minLines = minLines,
             shape = FieldShape,
@@ -271,6 +275,62 @@ private fun ServiceComponentsPreview() {
                 onValueChange = {},
                 prefix = "$",
                 keyboardType = KeyboardType.Number
+            )
+        }
+    }
+}
+
+/** Odómetro capturado menor al vigente: el formulario no se puede guardar. */
+fun isOdometerBelowCurrent(value: Int?, currentOdometer: Int): Boolean =
+    value != null && currentOdometer > 0 && value < currentOdometer
+
+/**
+ * Campo de odómetro (km) compartido por Combustible y Servicios.
+ *
+ * - Editable ([readOnlyNote] = null): no acepta un valor menor a [currentOdometer]; abajo
+ *   muestra la ayuda con el odómetro vigente, o el error si se escribe uno menor.
+ * - Solo lectura ([readOnlyNote] != null): deshabilitado, con la nota debajo (p. ej. al
+ *   editar un servicio, para no alterar la trazabilidad).
+ */
+@Composable
+fun OdometerField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    currentOdometer: Int,
+    modifier: Modifier = Modifier,
+    readOnlyNote: String? = null
+) {
+    val readOnly = readOnlyNote != null
+    val belowCurrent = !readOnly && isOdometerBelowCurrent(value.toIntOrNull(), currentOdometer)
+
+    Column(modifier = modifier) {
+        ServiceTextField(
+            label = label,
+            value = value,
+            onValueChange = { onValueChange(it.filter { c -> c.isDigit() }.take(9)) },
+            keyboardType = KeyboardType.Number,
+            suffix = "km",
+            enabled = !readOnly,
+            isError = belowCurrent
+        )
+        val (text, isError) = when {
+            readOnly -> readOnlyNote to false
+            belowCurrent -> stringResource(R.string.error_odometro_inferior) to true
+            currentOdometer > 0 -> stringResource(
+                R.string.odometro_actual_ayuda,
+                "%,d".format(currentOdometer),
+                "km"
+            ) to false
+            else -> null to false
+        }
+        if (text != null) {
+            Text(
+                text = text,
+                color = if (isError) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
             )
         }
     }

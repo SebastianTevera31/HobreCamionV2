@@ -30,7 +30,8 @@ data class ServiceUi(
     val date: String = "",       // fld_date
     val rawDate: String = "",     // fld_date original ISO
     val notes: String? = "",
-    val imageUrl: String? = null  // fld_image (URL); solo se muestra en el detalle
+    val imageUrl: String? = null, // fld_image (URL); solo se muestra en el detalle
+    val odometer: Int? = null     // fld_odometer; null si GetServices no lo devuelve
 ) {
     val total: Double get() = price * quantity
 }

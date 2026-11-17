@@ -1,9 +1,9 @@
 package com.rfz.appflotal.data.model.services.dto
 
-import okhttp3.MediaType.Companion.toMediaType
+import com.rfz.appflotal.data.network.multipart.toDecimalPart
+import com.rfz.appflotal.data.network.multipart.toTextPart
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 
 /** Nombre de la parte de imagen que espera api/Service/CrudService. */
 const val SERVICE_IMAGE_PART = "fld_image"
@@ -18,6 +18,7 @@ data class ServiceDetailMultipart(
     val provider: RequestBody,
     val quantity: RequestBody,
     val vehicleId: RequestBody,
+    val odometer: RequestBody,
     val notes: RequestBody,
     val image: MultipartBody.Part?
 )
@@ -27,14 +28,12 @@ fun ServiceDetailDto.toMultipart(image: MultipartBody.Part?): ServiceDetailMulti
         idService = idService.toTextPart(),
         description = description.toTextPart(),
         idServiceType = idServiceType.toTextPart(),
-        price = java.math.BigDecimal.valueOf(price).toPlainString().toTextPart(),
+        price = price.toDecimalPart(),
         date = date.toTextPart(),
         provider = provider.toTextPart(),
         quantity = quantity.toTextPart(),
         vehicleId = vehicleId.toTextPart(),
+        odometer = odometer.toTextPart(),
         notes = notas.toTextPart(),
         image = image
     )
-
-private fun Any.toTextPart(): RequestBody =
-    toString().toRequestBody("text/plain".toMediaType())

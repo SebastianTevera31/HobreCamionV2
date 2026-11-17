@@ -13,7 +13,8 @@ data class ForumResult(
     @SerializedName("fld_description") val fldDescription: String,
     @SerializedName("fld_registrationDate") val fldRegistrationDate: String,
     @SerializedName("fld_image") val fldImage: String,
-    @SerializedName("fld_color") val fldColor: String
+    @SerializedName("fld_color") val fldColor: String,
+    @SerializedName("fld_usersCanPost") val usersCanPost: Boolean
 )
 
 data class GetTopicsResponse(
@@ -57,7 +58,8 @@ data class TopicResult(
     @SerializedName("id_user") val idUser: Int,
     @SerializedName("fld_userName") val fldUserName: String,
     @SerializedName("fld_edited") val fldEdited: Boolean,
-    @SerializedName("isLiked") val isLiked: Boolean
+    @SerializedName("isLiked") val isLiked: Boolean,
+    @SerializedName("fld_usersCanReply") val usersCanReply: Boolean
 )
 
 data class TopicMessageResult(

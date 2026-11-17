@@ -59,19 +59,22 @@ fun RoomsScreenPreview() {
             id = 1,
             title = "Cómo cambiar una llanta",
             description = "En este tutorial aprenderás los pasos básicos para cambiar una llanta de forma segura.",
-            imageUrl = ""
+            imageUrl = "",
+            usersCanPost = true
         ),
         ForumRoom(
             id = 2,
             title = "Mantenimiento preventivo",
             description = "La importancia de revisar los frenos y el aceite regularmente para evitar averías mayores.",
-            imageUrl = ""
+            imageUrl = "",
+            usersCanPost = true
         ),
         ForumRoom(
             id = 3,
             title = "Rutas recomendadas",
             description = "Descubre las mejores rutas para transportistas este verano, con paradas seguras y buenos servicios.",
-            imageUrl = ""
+            imageUrl = "",
+            usersCanPost = true
         )
     )
     HombreCamionTheme {

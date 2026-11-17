@@ -9,11 +9,6 @@ import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeParseException
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 class GetSensorDataByWheelUseCase @Inject constructor(
@@ -62,25 +57,6 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             flatTireStatus = flatTireStatus,
         )
 
-        val lastInspection = data.lastInspection
-        val isInspectionAvailable = if (lastInspection.isNullOrEmpty()) true else {
-            try {
-                val lastInspection = Instant.parse(lastInspection)
-                val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
-                lastInspection.isBefore(oneDayAgo)
-            } catch (_: DateTimeParseException) {
-                try {
-                    val lastInspection = LocalDateTime.parse(lastInspection)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                    val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
-                    lastInspection.isBefore(oneDayAgo)
-                } catch (_: Exception) {
-                    true
-                }
-            }
-        }
-
         val isAssembled = assemblyTireRepository.confirmTireMounted(tireSelected)
         val date = convertUtcDate(data.timestamp)
 
@@ -94,8 +70,8 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             timestamp = date,
             batteryStatus = batteryStatus,
             tireRemovingStatus = if (rawPressure == 0f && !isVoidDate(date)) SensorAlerts.REMOVAL else SensorAlerts.NO_DATA,
-            flatTireStatus = flatTireStatus,
-            isInspectionAvailable = isInspectionAvailable
+            flatTireStatus = flatTireStatus
+            // isInspectionAvailable lo deriva MonitorViewModel.tireUiState de sensor_data.
         )
 
         return Result(

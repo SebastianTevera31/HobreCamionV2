@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
@@ -30,22 +31,26 @@ import com.rfz.appflotal.data.model.forms.VehicleFormModel
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.components.FormTextField
 
+private const val MAX_ODOMETER_DIGITS = 9
+
 @Composable
 fun VehicleForm(
     @StringRes title: Int,
     vehicleData: VehicleFormModel,
     enableRegisterButton: Boolean,
     modifier: Modifier = Modifier,
-    onBack: (vehicleType: String, plates: String) -> Unit,
-    onRegister: (vehicleType: String, plates: String) -> Unit,
+    onBack: (vehicleType: String, plates: String, odometer: String) -> Unit,
+    onRegister: (vehicleType: String, plates: String, odometer: String) -> Unit,
 ) {
     var vehicleType by remember { mutableStateOf("") }
     var plates by remember { mutableStateOf("") }
+    var odometer by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         vehicleType = vehicleData.vehicleType
         plates = vehicleData.plates
+        odometer = vehicleData.odometer
     }
 
     Column(
@@ -67,19 +72,28 @@ fun VehicleForm(
 
         FormTextField(title = R.string.placas, value = plates, onValueChange = { plates = it })
 
+        FormTextField(
+            title = R.string.odometro,
+            value = odometer,
+            keyboardType = KeyboardType.Number,
+            onValueChange = { input ->
+                odometer = input.filter { it.isDigit() }.take(MAX_ODOMETER_DIGITS)
+            }
+        )
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = { onBack(vehicleType, plates) },
+                onClick = { onBack(vehicleType, plates, odometer) },
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.tertiary),
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.weight(1f)
             ) { Text(text = stringResource(R.string.regresar)) }
 
             Button(
-                onClick = { onRegister(vehicleType, plates) },
+                onClick = { onRegister(vehicleType, plates, odometer) },
                 shape = MaterialTheme.shapes.medium,
                 enabled = enableRegisterButton,
                 modifier = Modifier.weight(1f)
@@ -99,8 +113,8 @@ fun RegistrarDatosVehiculoPreview() {
             modifier = Modifier
                 .safeContentPadding()
                 .fillMaxSize(),
-            onBack = { _, _ -> },
-            { _, _ -> },
+            onBack = { _, _, _ -> },
+            { _, _, _ -> },
         )
     }
 }

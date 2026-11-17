@@ -11,7 +11,8 @@ fun ForumResult.toRoom(): ForumRoom {
         id = this.idForum,
         title = this.fldTitle,
         description = this.fldDescription,
-        imageUrl = this.fldImage
+        imageUrl = this.fldImage,
+        usersCanPost = this.usersCanPost
     )
 }
 
@@ -33,7 +34,8 @@ fun TopicResult.toTopic(): ForumTopic {
         }.getOrDefault(Color.Transparent),
         likes = this.fldLike,
         isLiked = this.isLiked,
-        tags = parseTags(this.fldTags)
+        tags = parseTags(this.fldTags),
+        canReply = this.usersCanReply
     )
 }
 

@@ -25,38 +25,9 @@ class SensorDataTableRepository @Inject constructor(
                 sensorData.observeLastRecords(idMonitor)
             }
 
-    suspend fun insertSensorData(
-        idMonitor: Int,
-        tire: String,
-        tireNumber: String,
-        timestamp: String,
-        temperature: Int,
-        pressure: Int,
-        highTemperatureAlert: Boolean,
-        highPressureAlert: Boolean,
-        lowPressureAlert: Boolean,
-        lowBatteryAlert: Boolean,
-        punctureAlert: Boolean,
-        active: Boolean,
-        lastInspection: String?
-    ) {
-        sensorData.insertSensorData(
-            SensorDataEntity(
-                idMonitor = idMonitor,
-                tire = tire,
-                tireNumber = tireNumber,
-                timestamp = timestamp,
-                temperature = temperature,
-                pressure = pressure,
-                active = active,
-                highTemperatureAlert = highTemperatureAlert,
-                highPressureAlert = highPressureAlert,
-                lowPressureAlert = lowPressureAlert,
-                lowBatteryAlert = lowBatteryAlert,
-                punctureAlert = punctureAlert,
-                lastInspection = lastInspection
-            )
-        )
+    /** Reemplaza (atómicamente) los registros del monitor; uno por llanta. */
+    suspend fun replaceMonitorData(monitorId: Int, records: List<SensorDataEntity>) {
+        sensorData.replaceMonitorData(monitorId, records.distinctBy { it.tire })
     }
 
     suspend fun getDataByDate(
@@ -88,7 +59,6 @@ class SensorDataTableRepository @Inject constructor(
         )
     }
 
-    suspend fun deleteMonitorData(monitorId: Int) = sensorData.deleteMonitorData(monitorId)
 
     suspend fun updateTireRecord(tire: String, temperature: Int, pressure: Int) {
         val idMonitor = getTasksUseCase.invoke().first()[0].id_monitor

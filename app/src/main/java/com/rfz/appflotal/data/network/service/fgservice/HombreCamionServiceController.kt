@@ -5,6 +5,7 @@ import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.parseUtcDate
 import com.rfz.appflotal.core.util.Commons.toUtcIsoDate
 import com.rfz.appflotal.data.NetworkStatus
+import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.tpms.DiagramMonitorResponse
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
@@ -37,13 +38,12 @@ class HombreCamionServiceController @Inject constructor(
 
     fun getDataApi() {
         serviceScope.launch {
-            val userData = getTasksUseCase().first()
-            if (userData.isNotEmpty()) {
-                val monitorId = userData[0].id_monitor
-                wifiUseCase().collect { state ->
-                    if (state == NetworkStatus.Connected) {
-                        processMonitorData(monitorId)
-                    }
+            wifiUseCase().collect { state ->
+                if (state == NetworkStatus.Connected) {
+                    // Se lee en cada sincronización: el monitor puede registrarse (wizard)
+                    // después de que arrancó el servicio, y antes quedaba con id_monitor 0.
+                    val monitorId = getTasksUseCase().first().firstOrNull()?.id_monitor
+                    if (monitorId != null && monitorId != 0) processMonitorData(monitorId)
                 }
             }
         }
@@ -51,7 +51,6 @@ class HombreCamionServiceController @Inject constructor(
 
     private suspend fun processMonitorData(monitorId: Int) {
         val response = apiTmpsUseCase.doGetDiagramMonitor(monitorId)
-        sensorDataTableRepository.deleteMonitorData(monitorId)
         handleMonitorResponse(response, monitorId)
     }
 
@@ -64,6 +63,7 @@ class HombreCamionServiceController @Inject constructor(
             onError = { Log.e("HBServiceController", "Error al traer datos del monitor") },
         ) { data ->
             withContext(Dispatchers.IO) {
+                val records = mutableListOf<SensorDataEntity>()
                 data?.forEach {
                     val tire = it.sensorPosition
 
@@ -82,30 +82,31 @@ class HombreCamionServiceController @Inject constructor(
                     val storeData = parseUtcDate(it.ultimalectura)
                     val isActive = it.sensorId != 0 && !storeData.isBefore(cutoff)
 
-                    sensorDataTableRepository.insertSensorData(
+                    records += SensorDataEntity(
                         idMonitor = it.monitorId,
                         tire = tire,
                         tireNumber = "",
                         timestamp = date,
                         temperature = it.temperature.toInt(),
                         pressure = it.psi.toInt(),
+                        active = isActive,
                         highTemperatureAlert = it.highTemperature,
                         highPressureAlert = it.highPressure,
                         lowPressureAlert = it.lowPressure,
                         lowBatteryAlert = it.lowBattery,
                         punctureAlert = it.puncture,
-                        active = isActive,
                         lastInspection = lastInspection
                     )
 
                     // Actualiza el estado de alerta y disponibilidad de las ruedas
                     coordinatesTableUseCase.updateCoordinates(
-                        monitorId,
-                        tire,
-                        inAlert,
-                        isActive
+                        monitorId = monitorId,
+                        tire = tire,
+                        isActive = isActive,
+                        isAlert = inAlert
                     )
                 }
+                sensorDataTableRepository.replaceMonitorData(monitorId, records)
             }
         }
     }

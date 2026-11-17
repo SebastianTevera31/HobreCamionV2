@@ -322,7 +322,7 @@ fun HomeScreen(
                             context = context,
                             paymentPlan = paymentPlan,
                             // Fuera del wizard no se elige el número de llantas; se envía numTires = 0.
-                            showTireCountSelector = false,
+                            mountAllTires = false,
                         )
                     }
                 }

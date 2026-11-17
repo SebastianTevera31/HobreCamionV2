@@ -9,6 +9,7 @@ import androidx.paging.cachedIn
 import com.rfz.appflotal.data.model.services.dto.ServiceDetailDto
 import com.rfz.appflotal.data.repository.services.ServicesPagingSource
 import com.rfz.appflotal.domain.database.GetTasksUseCase
+import com.rfz.appflotal.domain.odometer.UpdateOdometerUseCase
 import com.rfz.appflotal.domain.service.DeleteServiceUseCase
 import com.rfz.appflotal.domain.service.DoCrudServiceDetailUseCase
 import com.rfz.appflotal.domain.service.GetServicesUseCase
@@ -19,7 +20,9 @@ import com.rfz.appflotal.presentation.ui.services.model.ServiceUi
 import com.rfz.appflotal.presentation.ui.services.model.VehicleHeaderUi
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.toVehicleData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,12 +44,16 @@ import javax.inject.Inject
  */
 data class ServiceUiState(
     val vehicle: VehicleHeaderUi? = null,
+    val lastOdometer: Int = 0,          // último odómetro del vehículo (valor inicial del formulario)
     val services: List<ServiceUi> = emptyList(),
     val serviceTypes: List<CatalogItemUi> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isOffline: Boolean = false,
     val deleteFailed: Boolean = false,
+    val isSaving: Boolean = false,      // guardado en curso (formulario bloqueado)
+    val saveSucceeded: Boolean = false, // evento: el backend confirmó el guardado
+    val saveFailed: Boolean = false,    // evento: el guardado falló
     val query: String = "",
     val page: Int = 0,           // página pedida (base 0); usar [currentPage]
 ) {
@@ -79,16 +86,44 @@ class ServiceViewModel @Inject constructor(
     private val getTypeServiceUseCase: GetTypeServiceUseCase,
     private val doCrudServiceDetailUseCase: DoCrudServiceDetailUseCase,
     private val deleteServiceUseCase: DeleteServiceUseCase,
+    private val updateOdometerUseCase: UpdateOdometerUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ServiceUiState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        observeOdometer()
+    }
+
+    /**
+     * Observa el odómetro vigente en Room: cambia al dar de alta un servicio (o desde otros
+     * módulos y el worker de mantenimiento) y el formulario siempre inicia con él.
+     */
+    private fun observeOdometer() {
+        viewModelScope.launch {
+            runCatching {
+                getTasksUseCase().collect { users ->
+                    val odometer = users.firstOrNull()?.odometer ?: return@collect
+                    _uiState.update { state ->
+                        state.copy(
+                            lastOdometer = odometer,
+                            vehicle = state.vehicle?.copy(odometer = odometer.toString())
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     // Ids con una eliminación en curso, para ignorar toques repetidos.
     private val deletingIds = mutableSetOf<Int>()
 
     // Vehículo dueño de los servicios; necesario para el CRUD (p_vehicle_fk_1).
     private var vehicleId: Int = 0
+
+    // Carga en curso (o la última); null = aún no se ha cargado nunca.
+    private var loadJob: Job? = null
 
     /**
      * Página actual de la lista (Paging 3). Se reconstruye al cambiar los servicios,
@@ -125,9 +160,22 @@ class ServiceViewModel @Inject constructor(
         _uiState.update { it.copy(page = (page - 1).coerceIn(0, it.pageCount - 1)) }
     }
 
+    /**
+     * Carga inicial del módulo: solo la primera vez que se muestra la lista. Las
+     * recargas posteriores (tras guardar, reintentar) pasan por [load].
+     */
+    fun loadIfNeeded() {
+        if (loadJob == null) load()
+    }
+
+    /**
+     * (Re)carga vehículo, servicios y tipos. Si ya hay una carga en curso se cancela y
+     * se reinicia, para que la respuesta siempre refleje el estado más reciente del
+     * backend (p. ej. una carga lanzada antes de que terminara un guardado).
+     */
     fun load() {
-        if (_uiState.value.isLoading) return
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
                 val driverData = getTasksUseCase().first()[0]
@@ -146,12 +194,15 @@ class ServiceViewModel @Inject constructor(
                             description = vehicleData.typeVehicle,
                             odometer = driverData.odometer.toString()
                         ),
+                        lastOdometer = driverData.odometer,
                         services = services?.sortedByDescending { service -> service.id }
                             ?: emptyList(),
                         serviceTypes = types ?: emptyList(),
                         isLoading = false
                     )
                 }
+            } catch (e: CancellationException) {
+                throw e // la reemplazó una carga más nueva; no tocar el estado
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }
@@ -160,8 +211,17 @@ class ServiceViewModel @Inject constructor(
 
     fun retry() = load()
 
-    /** Alta (serviceId == null) o edición (serviceId != null) de un servicio. */
+    /**
+     * Alta (serviceId == null) o edición (serviceId != null) de un servicio.
+     *
+     * El formulario se queda abierto mientras [ServiceUiState.isSaving]; al terminar
+     * emite [ServiceUiState.saveSucceeded] (el formulario regresa a la lista, que ya
+     * se está recargando) o [ServiceUiState.saveFailed] (el usuario sigue en el
+     * formulario con sus datos para reintentar).
+     */
     fun saveService(serviceId: Int?, data: ServiceFormData) {
+        if (_uiState.value.isSaving) return
+        _uiState.update { it.copy(isSaving = true, saveSucceeded = false, saveFailed = false) }
         viewModelScope.launch {
             if (vehicleId == 0) {
                 runCatching {
@@ -180,12 +240,28 @@ class ServiceViewModel @Inject constructor(
                 provider = data.provider,
                 quantity = data.quantity.toIntOrNull() ?: 0,
                 vehicleId = vehicleId,
+                odometer = data.odometer.toIntOrNull() ?: 0,
                 notas = data.notas,
                 image = data.image,
             )
-            doCrudServiceDetailUseCase(dto)
-            load()
+            // null = el backend no confirmó el guardado (error de red/HTTP).
+            if (doCrudServiceDetailUseCase(dto) != null) {
+                // Solo el alta captura odómetro: al editar es de solo lectura (trazabilidad).
+                if (serviceId == null) runCatching { updateOdometerUseCase(dto.odometer) }
+                _uiState.update { it.copy(isSaving = false, saveSucceeded = true) }
+                load()
+            } else {
+                _uiState.update { it.copy(isSaving = false, saveFailed = true) }
+            }
         }
+    }
+
+    fun consumeSaveSucceeded() {
+        _uiState.update { it.copy(saveSucceeded = false) }
+    }
+
+    fun clearSaveError() {
+        _uiState.update { it.copy(saveFailed = false) }
     }
 
     /**

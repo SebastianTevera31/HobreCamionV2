@@ -1,8 +1,15 @@
 package com.rfz.appflotal.data.model.fueling
 
+import android.net.Uri
 import com.google.gson.annotations.SerializedName
 
-/** Body de `api/Vehicle/insertFueling`. El vehículo lo resuelve el servidor por el token. */
+/** Nombre de la parte con la foto del ticket que espera api/Vehicle/insertFueling. */
+const val FUELING_TICKET_PART = "fld_imageTicket"
+
+/**
+ * Campos de `api/Vehicle/insertFueling`. Viajan como query; la foto del ticket va
+ * aparte en el body multipart. El vehículo lo resuelve el servidor por el token.
+ */
 data class InsertFuelingDto(
     @SerializedName("fuelType") val fuelType: Int,
     @SerializedName("fuelUnits") val fuelUnits: Double,
@@ -13,8 +20,11 @@ data class InsertFuelingDto(
     @SerializedName("fuelingDate") val fuelingDate: String,
     @SerializedName("station") val station: String,
     @SerializedName("lat") val lat: Double,
-    @SerializedName("lon") val lon: Double
+    @SerializedName("lon") val lon: Double,
+    // Nivel del tanque tras la carga: 25, 50, 75 o 100.
+    @SerializedName("fld_percentage") val percentage: Int
 )
+
 
 /** Respuesta paginada de `api/Vehicle/getFuelingHistory`. */
 data class FuelingHistoryResponse(
@@ -67,7 +77,9 @@ data class NewFueling(
     val amount: Double,
     val odometer: Int,
     val fuelingDate: String,
-    val station: String
+    val station: String,
+    val tankPercentage: Int,   // 25, 50, 75 o 100
+    val ticket: Uri            // foto del ticket (obligatoria)
 )
 
 fun FuelingRecordDto.toDomain() = FuelingRecord(
@@ -108,5 +120,6 @@ fun NewFueling.toDto(lat: Double, lon: Double) = InsertFuelingDto(
     fuelingDate = fuelingDate,
     station = station.trim(),
     lat = lat,
-    lon = lon
+    lon = lon,
+    percentage = tankPercentage
 )

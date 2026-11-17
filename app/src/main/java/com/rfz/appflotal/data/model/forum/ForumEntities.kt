@@ -30,14 +30,16 @@ data class ForumTopic(
     val color: Color,
     val likes: Int,
     val isLiked: Boolean,
-    val tags: List<String> = emptyList()
+    val tags: List<String> = emptyList(),
+    val canReply: Boolean
 ) : ForumRecord
 
 data class ForumRoom(
     override val id: Int,
     override val title: String,
     override val description: String,
-    override val imageUrl: String
+    override val imageUrl: String,
+    val usersCanPost: Boolean
 ) : ForumRecord
 
 data class LikedRecord(

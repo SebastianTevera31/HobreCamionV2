@@ -101,7 +101,8 @@ class SignUpViewModel @Inject constructor(
                     idCountry = _signUpUiState.value.profileData.country!!.first,
                     idSector = _signUpUiState.value.profileData.industry!!.first,
                     typeVehicle = _signUpUiState.value.vehicleData.vehicleType,
-                    plates = _signUpUiState.value.vehicleData.plates
+                    plates = _signUpUiState.value.vehicleData.plates,
+                    odometer = _signUpUiState.value.vehicleData.odometer.toIntOrNull() ?: 0
                 )
             } else networkAlert()
         }
@@ -161,12 +162,13 @@ class SignUpViewModel @Inject constructor(
         return SignUpAlerts.DATAREGISTER_SUCCESSFULY
     }
 
-    fun chargeVehicleData(typeVehicle: String, plates: String): SignUpAlerts {
+    fun chargeVehicleData(typeVehicle: String, plates: String, odometer: String): SignUpAlerts {
         _signUpUiState.update { currentUiState ->
             currentUiState.copy(
                 vehicleData = VehicleFormModel(
                     vehicleType = typeVehicle.trim(),
-                    plates = plates.trim()
+                    plates = plates.trim(),
+                    odometer = odometer.trim()
                 )
             )
         }
@@ -176,6 +178,9 @@ class SignUpViewModel @Inject constructor(
 
         if (plates.isEmpty())
             return SignUpAlerts.PLATES_ALERT
+
+        if (odometer.isBlank() || odometer.trim().toIntOrNull() == null)
+            return SignUpAlerts.ODOMETER_ALERT
 
         return SignUpAlerts.DATAREGISTER_SUCCESSFULY
     }

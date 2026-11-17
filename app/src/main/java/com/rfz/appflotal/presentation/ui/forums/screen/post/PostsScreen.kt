@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -20,7 +19,6 @@ import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.RecordType
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopicsScreen(
     topics: List<ForumTopic>,
@@ -98,6 +96,7 @@ fun TopicsScreenPreview() {
             color = MaterialTheme.colorScheme.primary,
             isLiked = false,
             likes = 12,
+            canReply = true
         ),
         ForumTopic(
             id = 2,
@@ -110,7 +109,8 @@ fun TopicsScreenPreview() {
             idUser = 2,
             color = MaterialTheme.colorScheme.primary,
             isLiked = true,
-            likes = 8
+            likes = 8,
+            canReply = true
         ),
         ForumTopic(
             id = 3,
@@ -123,7 +123,8 @@ fun TopicsScreenPreview() {
             idUser = 3,
             color = MaterialTheme.colorScheme.primary,
             isLiked = false,
-            likes = 0
+            likes = 0,
+            canReply = true
         )
     )
     HombreCamionTheme {

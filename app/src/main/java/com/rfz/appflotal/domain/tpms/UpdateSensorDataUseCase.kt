@@ -14,19 +14,12 @@ import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
-import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeParseException
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 class UpdateSensorDataUseCase @Inject constructor(
-    private val sensorDataTableRepository: SensorDataTableRepository,
     private val assemblyTireRepository: AssemblyTireRepository
 ) {
 
@@ -42,7 +35,6 @@ class UpdateSensorDataUseCase @Inject constructor(
     )
 
     suspend operator fun invoke(
-        monitorId: Int,
         dataFrame: String,
         timestamp: String? = null,
         tempUnit: UnidadTemperatura,
@@ -61,28 +53,6 @@ class UpdateSensorDataUseCase @Inject constructor(
         val realTire = if (rawPressure.toInt() != 0 || rawTemp.toInt() != 0) {
             findOutPosition("P${tire}")
         } else ""
-
-        val data =
-            sensorDataTableRepository.getLastDataByTire(monitorId, realTire)
-
-        val lastInspection = data?.lastInspection
-        val isInspectionAvailable = if (lastInspection.isNullOrEmpty()) true else {
-            try {
-                val lastInspection = Instant.parse(lastInspection)
-                val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
-                lastInspection.isBefore(oneDayAgo)
-            } catch (_: DateTimeParseException) {
-                try {
-                    val lastInspection = LocalDateTime.parse(lastInspection)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                    val oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS)
-                    lastInspection.isBefore(oneDayAgo)
-                } catch (_: Exception) {
-                    true
-                }
-            }
-        }
 
         val time = if (timestamp != null) convertUtcDate(timestamp)
         else getCurrentDate(pattern = displayDateTimePattern())
@@ -104,8 +74,8 @@ class UpdateSensorDataUseCase @Inject constructor(
             batteryStatus = batteryStatus,
             flatTireStatus = flatTireStatus,
             tireRemovingStatus = if (rawPressure.toInt() == 0 && !isVoidDate(time)) SensorAlerts.REMOVAL
-            else SensorAlerts.NO_DATA,
-            isInspectionAvailable = isInspectionAvailable
+            else SensorAlerts.NO_DATA
+            // isInspectionAvailable lo deriva MonitorViewModel.tireUiState de sensor_data.
         )
 
         return Result(

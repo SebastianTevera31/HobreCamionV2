@@ -18,7 +18,8 @@ fun ServiceResponseDto.toDomain(): ServiceUi {
         rawDate = date,
         notes = notes,
         // fld_image llega "" cuando el servicio no tiene imagen.
-        imageUrl = image?.takeIf { it.isNotBlank() }
+        imageUrl = image?.takeIf { it.isNotBlank() },
+        odometer = odometer?.takeIf { it > 0 }
     )
 }
 

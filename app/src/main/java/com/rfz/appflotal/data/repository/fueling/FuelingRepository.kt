@@ -39,7 +39,7 @@ class FuelingRepositoryImpl @Inject constructor(
         val token = token() ?: return Result.failure(Exception("No hay usuario logueado"))
         // Sin permiso o sin ubicación disponible se envía (0, 0): el historial la trata como "sin ubicación".
         val (lat, lon) = locationRepository.getLastCoordinates() ?: (0.0 to 0.0)
-        return remoteFuelingDataSource.insertFueling(token, fueling.toDto(lat, lon))
+        return remoteFuelingDataSource.insertFueling(token, fueling.toDto(lat, lon), fueling.ticket)
     }
 
     override suspend fun getFuelingHistory(

@@ -25,6 +25,7 @@ import com.rfz.appflotal.domain.tpms.ApiTpmsUseCase
 import com.rfz.appflotal.domain.tpms.GetSensorDataByWheelUseCase
 import com.rfz.appflotal.domain.tpms.MonitorUnitConversionUseCase
 import com.rfz.appflotal.domain.tpms.UpdateSensorDataUseCase
+import com.rfz.appflotal.domain.tpms.isInspectionAvailable
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
@@ -100,6 +101,18 @@ class MonitorViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /**
+     * `ultimainspeccion` por posición según sensor_data (la llena la sincronización del
+     * diagrama y la actualiza cada inspección registrada). Una posición sin registro no
+     * aparece en el mapa: no hay inspección conocida.
+     */
+    private val lastInspectionByPosition: StateFlow<Map<String, String?>> =
+        flow { emitAll(sensorDataTableRepository.observeLastRecords()) }
+            .map { records ->
+                records.associate { it.tire.normalizePosition() to it.lastInspection }
+            }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    /**
      * `isAssembled` se deriva de [assembledPositions] al exponer el estado, de modo que ninguna
      * escritura concurrente de `listOfTires` (Bluetooth, servidor) pueda dejarlo desactualizado.
      * Dentro del ViewModel se lee y escribe siempre [_monitorUiState].
@@ -140,24 +153,32 @@ class MonitorViewModel @Inject constructor(
 
     private var manualSelectionJob: Job? = null
 
-    // Estado para la UI con valores convertidos dinámicamente
+    /**
+     * Estado de la llanta seleccionada para la UI. Unidades, `isAssembled` (tabla local de
+     * montajes) e `isInspectionAvailable` (montajes + `ultimainspeccion` de sensor_data) se
+     * derivan aquí, de modo que los botones del panel siempre reflejan las tablas aunque la
+     * llanta no tenga lecturas o se registre una inspección/montaje con el panel abierto.
+     */
     val tireUiState = combine(
         _tireUiState,
         pressureUnit,
         temperatureUnit,
-        assembledPositions
-    ) { state, pUnit, tUnit, assembled ->
+        assembledPositions,
+        lastInspectionByPosition
+    ) { state, pUnit, tUnit, assembled, lastInspections ->
         val converted = monitorUnitConversionUseCase(
             state.rawTemperature,
             tUnit,
             state.rawPressure,
             pUnit
         )
+        val position = state.currentTire.normalizePosition()
         state.copy(
             pressure = state.pressure.copy(first = converted.pressure),
             temperature = state.temperature.copy(first = converted.temperature),
-            isAssembled = assembled?.let { state.currentTire.normalizePosition() in it }
-                ?: state.isAssembled
+            isAssembled = assembled?.let { position in it } ?: state.isAssembled,
+            isInspectionAvailable = position.isNotEmpty() &&
+                    isInspectionAvailable(lastInspections[position])
         )
     }.stateIn(
         viewModelScope,
@@ -262,7 +283,7 @@ class MonitorViewModel @Inject constructor(
         val uiState = _monitorUiState
         if (uiState.value.monitorId != 0) {
             if (_wifiStatus.value == NetworkStatus.Connected) {
-                coordinatesTableUseCase.deleteCoordinates(uiState.value.monitorId)
+                // La caché de coordenadas se reemplaza atómicamente al final de mapTires().
                 assemblyTireRepository.refreshMountedTires()
                 mapTires()
             } else {
@@ -326,7 +347,9 @@ class MonitorViewModel @Inject constructor(
                     val tireByPos =
                         tireInfo.orEmpty().associateBy { it.sensorPosition.trim().uppercase() }
 
-                    val tires = coords.orEmpty().map { info ->
+                    // Una llanta por posición: la lista alimenta un LazyVerticalGrid con
+                    // key = sensorPosition, que truena si se repite.
+                    val tires = coords.orEmpty().distinctBy { it.position }.map { info ->
                         val c = tireByPos[info.position]
                         MonitorTire(
                             sensorPosition = c?.sensorPosition ?: info.position,
@@ -357,8 +380,11 @@ class MonitorViewModel @Inject constructor(
 
             applyLocalAssemblyStatus()
 
-            // Insertar registro de ruedas en la base de datos.
-            coordinatesTableUseCase.insertCoordinates(monitorId, _monitorUiState.value.listOfTires)
+            // Guardar las ruedas como caché sin red; sin llantas no se toca la caché anterior.
+            val tiresToCache = _monitorUiState.value.listOfTires
+            if (tiresToCache.isNotEmpty()) {
+                coordinatesTableUseCase.replaceCoordinates(monitorId, tiresToCache)
+            }
         }
     }
 
@@ -469,7 +495,6 @@ class MonitorViewModel @Inject constructor(
 
     private suspend fun updateSensorData(dataFrame: String, timestamp: String? = null) {
         val result = updateSensorDataUseCase(
-            monitorId = _monitorUiState.value.monitorId,
             dataFrame = dataFrame,
             timestamp = timestamp,
             tempUnit = _monitorUiState.value.temperatureUnit,
@@ -483,9 +508,6 @@ class MonitorViewModel @Inject constructor(
                 result.newTireUiState.copy(
                     rawPressure = result.newTireUiState.pressure.first,
                     rawTemperature = result.newTireUiState.temperature.first,
-                    isInspectionAvailable = if (result.newTireUiState.currentTire == currentState.currentTire) {
-                        currentState.isInspectionAvailable
-                    } else result.newTireUiState.isInspectionAvailable,
                     currentTire = if (result.newTireUiState.currentTire == "") currentState.currentTire else result.newTireUiState.currentTire,
                     isLoading = false
                 )
@@ -527,7 +549,11 @@ class MonitorViewModel @Inject constructor(
                 }
                 updateTire(tireSelected) { it.copy(inAlert = result.inAlert) }
             } else {
-                _tireUiState.update { it.copy(isLoading = false) }
+                // Sin registro en sensor_data (p. ej. ruedas recién montadas en el wizard,
+                // antes de sincronizar el diagrama): no hay lecturas. Se limpia el estado para
+                // no heredar las de la rueda anterior; isAssembled e isInspectionAvailable los
+                // deriva tireUiState.
+                _tireUiState.update { TireUiState(currentTire = tireSelected) }
             }
         }
     }

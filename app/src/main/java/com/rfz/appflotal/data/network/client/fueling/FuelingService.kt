@@ -1,21 +1,32 @@
 package com.rfz.appflotal.data.network.client.fueling
 
 import com.rfz.appflotal.data.model.fueling.FuelingHistoryResponse
-import com.rfz.appflotal.data.model.fueling.InsertFuelingDto
+import okhttp3.MultipartBody
 import retrofit2.Response
-import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface FuelingService {
 
-    // El body de la respuesta no se usa: basta con el código HTTP para confirmar el alta.
+    @Multipart
     @POST("api/Vehicle/insertFueling")
     suspend fun insertFueling(
         @Header("Authorization") token: String,
-        @Body request: InsertFuelingDto
+        @Query("fuelType") fuelType: Int,
+        @Query("fuelUnits") fuelUnits: Double,
+        @Query("isLiter") isLiter: Boolean,
+        @Query("amount") amount: Double,
+        @Query("odometer") odometer: Int,
+        @Query("fuelingDate") fuelingDate: String,
+        @Query("station") station: String,
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
+        @Query("fld_percentage") percentage: Int,
+        @Part fld_imageTicket: MultipartBody.Part
     ): Response<Unit>
 
     /** Los filtros nulos no se envían. [start] es la página (1 = primera). */

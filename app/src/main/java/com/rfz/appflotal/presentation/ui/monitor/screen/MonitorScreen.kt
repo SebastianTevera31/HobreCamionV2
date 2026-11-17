@@ -132,7 +132,7 @@ fun MonitorScreen(
                     context = context,
                     paymentPlan = paymentPlan,
                     // Fuera del wizard no se elige el número de llantas; se envía numTires = 0.
-                    showTireCountSelector = false,
+                    mountAllTires = false,
                 )
             }
         },
@@ -269,7 +269,7 @@ fun ShowMonitorRegisterDialog(
     onSuccessRegister: (mac: Int) -> Unit,
     context: Context,
     paymentPlan: PaymentPlanType,
-    showTireCountSelector: Boolean,
+    mountAllTires: Boolean,
 ) {
     val configurationsUiState by registerMonitorViewModel.configurationList.collectAsState()
     val registerMonitorStatus by registerMonitorViewModel.registeredMonitorState.collectAsState()
@@ -318,7 +318,7 @@ fun ShowMonitorRegisterDialog(
             )
         },
         paymentPlan = paymentPlan,
-        showTireCountSelector = showTireCountSelector,
+        mountAllTires = mountAllTires,
         isFirstConfiguration = monitorId == 0
     )
 }
@@ -337,7 +337,7 @@ fun ShowMonitorRegisterDialogContent(
     onRegister: (mac: String, configuration: ConfigurationItem?, numTires: Int?) -> Unit,
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
-    showTireCountSelector: Boolean,
+    mountAllTires: Boolean,
     isFirstConfiguration: Boolean = false
 ) {
     MonitorRegisterDialog(
@@ -346,7 +346,7 @@ fun ShowMonitorRegisterDialogContent(
         registerMonitorStatus = registerMonitorStatus,
         isScanning = monitorConfigUiState.isScanning,
         showCloseButton = true,
-        showTireCountSelector = showTireCountSelector,
+        mountAllTires = mountAllTires,
         isFirstConfiguration = isFirstConfiguration,
         savedConfiguration = monitorConfigUiState.savedConfiguration,
         onScan = onScan,
@@ -533,7 +533,7 @@ fun ShowMonitorRegisterDialogPreview() {
             onMonitorConfiguration = {},
             onRegister = { _, _, _ -> },
             paymentPlan = PaymentPlanType.Complete,
-            showTireCountSelector = false
+            mountAllTires = false
         )
     }
 }

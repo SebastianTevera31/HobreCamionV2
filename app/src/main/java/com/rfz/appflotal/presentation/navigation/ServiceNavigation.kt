@@ -40,7 +40,9 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
             val state by viewModel.uiState.collectAsState()
             val pagedServices = viewModel.pagedServices.collectAsLazyPagingItems()
 
-            LaunchedEffect(Unit) { viewModel.load() }
+            // Solo la primera vez: al volver del formulario, saveService() ya recarga
+            // cuando el backend confirma el guardado.
+            LaunchedEffect(Unit) { viewModel.loadIfNeeded() }
 
             val context = LocalContext.current
             val deleteErrorMessage = stringResource(R.string.srv_error_eliminar)
@@ -81,15 +83,37 @@ fun NavGraphBuilder.serviceGraph(navController: NavHostController) {
             val mode =
                 if (args.serviceId == null) ServiceFormMode.CREATE else ServiceFormMode.EDIT
 
+            // El usuario se queda en el formulario hasta que el backend responda:
+            // si guarda, regresa a la lista (que ya se recarga); si falla, se avisa y
+            // conserva lo capturado para reintentar.
+            LaunchedEffect(state.saveSucceeded) {
+                if (state.saveSucceeded) {
+                    viewModel.consumeSaveSucceeded()
+                    // popBackStack directo (no "Safely"): es un evento, no un toque, y
+                    // debe cerrarse aunque la app esté en segundo plano.
+                    if (navController.currentBackStackEntry?.id == entry.id) {
+                        navController.popBackStack()
+                    }
+                }
+            }
+
+            val context = LocalContext.current
+            val saveErrorMessage = stringResource(R.string.srv_error_guardar)
+            LaunchedEffect(state.saveFailed) {
+                if (state.saveFailed) {
+                    Toast.makeText(context, saveErrorMessage, Toast.LENGTH_LONG).show()
+                    viewModel.clearSaveError()
+                }
+            }
+
             ServiceFormScreen(
                 mode = mode,
                 serviceTypes = state.serviceTypes,
                 initial = args.serviceId?.let { viewModel.serviceById(it) },
+                lastOdometer = state.lastOdometer,
+                isSaving = state.isSaving,
                 onBack = { navController.popBackStackSafely() },
-                onSubmit = { data ->
-                    viewModel.saveService(args.serviceId, data)
-                    navController.popBackStackSafely()
-                }
+                onSubmit = { data -> viewModel.saveService(args.serviceId, data) }
             )
         }
     }

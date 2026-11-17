@@ -28,12 +28,12 @@ fun VehicleDataScreen(
 
     VehicleDataContent(
         vehicleData = uiState.vehicleData,
-        onBack = { vehicleType, plates ->
-            viewModel.chargeVehicleData(typeVehicle = vehicleType, plates = plates)
+        onBack = { vehicleType, plates, odometer ->
+            viewModel.chargeVehicleData(typeVehicle = vehicleType, plates = plates, odometer = odometer)
             navController.popBackStack()
         },
-        onRegister = { vehicleType, plates ->
-            val message = viewModel.chargeVehicleData(typeVehicle = vehicleType, plates = plates)
+        onRegister = { vehicleType, plates, odometer ->
+            val message = viewModel.chargeVehicleData(typeVehicle = vehicleType, plates = plates, odometer = odometer)
             if (message == SignUpAlerts.DATAREGISTER_SUCCESSFULY) {
                 onNext()
             } else {
@@ -46,8 +46,8 @@ fun VehicleDataScreen(
 @Composable
 fun VehicleDataContent(
     vehicleData: VehicleFormModel,
-    onBack: (vehicleType: String, plates: String) -> Unit,
-    onRegister: (vehicleType: String, plates: String) -> Unit,
+    onBack: (vehicleType: String, plates: String, odometer: String) -> Unit,
+    onRegister: (vehicleType: String, plates: String, odometer: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     VehicleForm(
@@ -67,10 +67,11 @@ fun VehicleDataScreenPreview() {
         VehicleDataContent(
             vehicleData = VehicleFormModel(
                 vehicleType = "Camión",
-                plates = "ABC-123"
+                plates = "ABC-123",
+                odometer = "125000"
             ),
-            onBack = { _, _ -> },
-            onRegister = { _, _ -> }
+            onBack = { _, _, _ -> },
+            onRegister = { _, _, _ -> }
         )
     }
 }

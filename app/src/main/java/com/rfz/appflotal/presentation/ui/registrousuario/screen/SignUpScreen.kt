@@ -166,18 +166,20 @@ fun SignUpScreen(
                             vehicleData = signUpUiState.value.vehicleData,
                             modifier = Modifier.padding(horizontal = 40.dp),
                             enableRegisterButton = enableRegisterButton,
-                            onBack = { vehicleType, plates ->
+                            onBack = { vehicleType, plates, odometer ->
                                 signUpViewModel.chargeVehicleData(
                                     typeVehicle = vehicleType,
-                                    plates = plates
+                                    plates = plates,
+                                    odometer = odometer
                                 )
                                 signUpViewModel.changeScreen(SignUpViews.USER_DATA_VIEW)
                                 isNextScreen = false
                             }
-                        ) { vehicleType, plates ->
+                        ) { vehicleType, plates, odometer ->
                             val message = signUpViewModel.chargeVehicleData(
                                 typeVehicle = vehicleType,
-                                plates = plates
+                                plates = plates,
+                                odometer = odometer
                             )
 
                             if (message == SignUpAlerts.DATAREGISTER_SUCCESSFULY) {

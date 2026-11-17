@@ -3,6 +3,7 @@ package com.rfz.appflotal.data.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -18,6 +19,19 @@ interface SensorDataDao {
 
     @Insert
     suspend fun insertSensorData(sensorData: SensorDataEntity)
+
+    @Insert
+    suspend fun insertSensorData(sensorData: List<SensorDataEntity>)
+
+    /**
+     * Sustituye los registros del monitor en una sola transacción, para que dos
+     * sincronizaciones intercaladas no dejen llantas duplicadas.
+     */
+    @Transaction
+    suspend fun replaceMonitorData(monitorId: Int, sensorData: List<SensorDataEntity>) {
+        deleteMonitorData(monitorId)
+        insertSensorData(sensorData)
+    }
 
     @Query("SELECT * FROM sensor_data WHERE monitor_id =:monitorId AND tire =:tire AND DATE(timestamp, 'localtime') =:timestamp")
     suspend fun getRecordByDate(

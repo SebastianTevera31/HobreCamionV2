@@ -67,6 +67,7 @@ data class RegisterBody(
     @SerializedName("id_sector") val idSector: Int,
     @SerializedName("typeVehicle") val typeVehicle: String,
     @SerializedName("plates") val plates: String,
+    @SerializedName("initialOdometer0") val odometer: Int,
     @SerializedName("termsAndConditions") val termsGranted: Boolean,
     @SerializedName("registerDate") val registerDate: String,
 )

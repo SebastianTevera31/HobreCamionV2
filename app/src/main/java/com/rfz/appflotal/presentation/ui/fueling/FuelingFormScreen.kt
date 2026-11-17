@@ -1,6 +1,12 @@
 package com.rfz.appflotal.presentation.ui.fueling
 
+import android.net.Uri
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.unit.sp
+import com.rfz.appflotal.presentation.commons.ImagePickerField
+import com.rfz.appflotal.presentation.ui.fueling.model.TankLevel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +61,8 @@ import com.rfz.appflotal.presentation.ui.fueling.model.FuelingFormData
 import com.rfz.appflotal.presentation.ui.fueling.model.sampleFuelTypes
 import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.services.components.FieldLabel
+import com.rfz.appflotal.presentation.ui.services.components.OdometerField
+import com.rfz.appflotal.presentation.ui.services.components.isOdometerBelowCurrent
 import com.rfz.appflotal.presentation.ui.services.components.ServiceDropdownField
 import com.rfz.appflotal.presentation.ui.services.components.ServiceTextField
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
@@ -91,13 +99,17 @@ fun FuelingFormScreen(
     }
     var station by rememberSaveable { mutableStateOf("") }
     var dateMillis by rememberSaveable { mutableStateOf(todayUtcMillis()) }
+    var tankLevel by rememberSaveable { mutableStateOf<TankLevel?>(null) }
+    var ticket by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val fuelTypeName = fuelTypes.firstOrNull { it.id == fuelTypeId }?.name.orEmpty()
     val odometerValue = odometer.toIntOrNull()
     val isValid = fuelTypeId != null &&
             (units.toDoubleOrNull() ?: 0.0) > 0.0 &&
             (amount.toDoubleOrNull() ?: -1.0) >= 0.0 &&
-            odometerValue != null && odometerValue > 0
+            odometerValue != null && odometerValue > 0 &&
+            !isOdometerBelowCurrent(odometerValue, lastOdometer) &&
+            tankLevel != null && ticket != null
 
     Scaffold(
         modifier = modifier,
@@ -171,20 +183,14 @@ fun FuelingFormScreen(
                 )
             }
 
-            ServiceTextField(
+            OdometerField(
                 label = stringResource(R.string.fue_odometro),
                 value = odometer,
-                onValueChange = { odometer = it.filter { c -> c.isDigit() }.take(9) },
-                keyboardType = KeyboardType.Number
+                onValueChange = { odometer = it },
+                currentOdometer = lastOdometer
             )
-            if (odometerValue != null && lastOdometer > 0 && odometerValue < lastOdometer) {
-                Text(
-                    text = stringResource(R.string.fue_odometro_menor, "%,d".format(lastOdometer)),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-            }
+
+            TankLevelSelector(selected = tankLevel, onSelect = { tankLevel = it })
 
             FuelingDateField(
                 label = stringResource(R.string.fue_fecha_carga),
@@ -198,9 +204,30 @@ fun FuelingFormScreen(
                 onValueChange = { station = it.take(STATION_MAX_LENGTH) }
             )
 
+            Column {
+                ImagePickerField(
+                    label = stringResource(R.string.fue_ticket_label),
+                    editable = true,
+                    newImage = ticket,
+                    onImageSelected = { ticket = it },
+                    onRemoveNewImage = { ticket = null },
+                    photoPrefix = "ticket"
+                )
+                if (ticket == null) {
+                    Text(
+                        text = stringResource(R.string.fue_ticket_requerido),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                    )
+                }
+            }
+
             Button(
                 onClick = {
                     val typeId = fuelTypeId ?: return@Button
+                    val level = tankLevel ?: return@Button
+                    val ticketUri = ticket ?: return@Button
                     onSubmit(
                         FuelingFormData(
                             fuelTypeId = typeId,
@@ -209,7 +236,9 @@ fun FuelingFormScreen(
                             amount = amount.ifBlank { "0" },
                             odometer = odometer,
                             dateMillis = dateMillis,
-                            station = station
+                            station = station,
+                            tankPercentage = level.percentage,
+                            ticket = ticketUri
                         )
                     )
                 },
@@ -258,6 +287,71 @@ private fun VolumeUnitSelector(isLiter: Boolean, onChange: (Boolean) -> Unit) {
                 Text(label)
             }
         }
+    }
+}
+
+/**
+ * Nivel del tanque tras la carga (obligatorio): botones rápidos ¼ ½ ¾ Lleno y una barra
+ * ilustrativa. Viaja como `fld_percentage` (25, 50, 75 o 100). Sin selección la barra
+ * queda vacía.
+ */
+@Composable
+private fun TankLevelSelector(selected: TankLevel?, onSelect: (TankLevel) -> Unit) {
+    val fullLabel = stringResource(R.string.fue_tanque_lleno)
+    val progress by animateFloatAsState(
+        targetValue = (selected?.percentage ?: 0) / 100f,
+        label = "tankLevel"
+    )
+
+    Column(verticalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraSmall)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FieldLabel(stringResource(R.string.fue_nivel_tanque), modifier = Modifier.weight(1f))
+            if (selected != null) {
+                Text(
+                    text = "${selected.percentage} %",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            TankLevel.entries.forEachIndexed { index, level ->
+                SegmentedButton(
+                    selected = selected == level,
+                    onClick = { onSelect(level) },
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = TankLevel.entries.size
+                    ),
+                    // Sin palomita: con 4 opciones angostas le quita espacio al texto.
+                    icon = {}
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(level.fraction ?: fullLabel, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "${level.percentage} %",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Dimens.PaddingExtraSmall)
+                .height(8.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            drawStopIndicator = {}
+        )
     }
 }
 

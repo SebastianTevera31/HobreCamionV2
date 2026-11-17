@@ -33,6 +33,7 @@ class LoginRepository @Inject constructor(
         idSector: Int,
         typeVehicle: String,
         plates: String,
+        odometer: Int,
         termsGranted: Boolean,
         registerDate: String
     ): ApiResult<List<GeneralResponse>?> {
@@ -45,6 +46,7 @@ class LoginRepository @Inject constructor(
                 idSector = idSector,
                 typeVehicle = typeVehicle,
                 plates = plates,
+                odometer = odometer,
                 termsGranted = termsGranted,
                 registerDate = registerDate
             )

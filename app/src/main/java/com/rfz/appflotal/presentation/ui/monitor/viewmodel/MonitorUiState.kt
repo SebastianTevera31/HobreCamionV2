@@ -46,6 +46,7 @@ data class TireUiState(
     val flatTireStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val tireRemovingStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val isAssembled: Boolean = false,
+    /** Derivado en MonitorViewModel.tireUiState; no asignarlo en otro lugar. */
     val isInspectionAvailable: Boolean = false,
     val isLoading:Boolean = false
 )

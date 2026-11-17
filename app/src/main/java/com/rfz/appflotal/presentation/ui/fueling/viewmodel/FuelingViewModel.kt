@@ -11,6 +11,7 @@ import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.fueling.GetFuelTypesUseCase
 import com.rfz.appflotal.domain.fueling.GetFuelingHistoryUseCase
 import com.rfz.appflotal.domain.fueling.InsertFuelingUseCase
+import com.rfz.appflotal.domain.odometer.UpdateOdometerUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.fueling.model.FuelingFormData
 import com.rfz.appflotal.presentation.ui.fueling.model.FuelingSaveState
@@ -69,6 +70,7 @@ class FuelingViewModel @Inject constructor(
     private val getFuelTypesUseCase: GetFuelTypesUseCase,
     private val getFuelingHistoryUseCase: GetFuelingHistoryUseCase,
     private val insertFuelingUseCase: InsertFuelingUseCase,
+    private val updateOdometerUseCase: UpdateOdometerUseCase,
     private val wifiUseCase: WifiUseCase,
 ) : ViewModel() {
 
@@ -86,20 +88,27 @@ class FuelingViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Observa al usuario en Room: el odómetro vigente cambia al guardar una carga (o desde
+     * otros módulos y el worker de mantenimiento) y el formulario siempre inicia con él.
+     */
     private fun loadVehicle() {
         viewModelScope.launch {
-            val driverData = runCatching { getTasksUseCase().first().firstOrNull() }.getOrNull()
-                ?: return@launch
-            val vehicleData = driverData.toVehicleData()
-            _uiState.update {
-                it.copy(
-                    vehicle = VehicleHeaderUi(
-                        economicNumber = vehicleData.plates,
-                        description = vehicleData.typeVehicle,
-                        odometer = driverData.odometer.toString()
-                    ),
-                    lastOdometer = driverData.odometer
-                )
+            runCatching {
+                getTasksUseCase().collect { users ->
+                    val driverData = users.firstOrNull() ?: return@collect
+                    val vehicleData = driverData.toVehicleData()
+                    _uiState.update {
+                        it.copy(
+                            vehicle = VehicleHeaderUi(
+                                economicNumber = vehicleData.plates,
+                                description = vehicleData.typeVehicle,
+                                odometer = driverData.odometer.toString()
+                            ),
+                            lastOdometer = driverData.odometer
+                        )
+                    }
+                }
             }
         }
     }
@@ -179,10 +188,14 @@ class FuelingViewModel @Inject constructor(
                 amount = data.amount.toDoubleOrNull() ?: 0.0,
                 odometer = data.odometer.toIntOrNull() ?: 0,
                 fuelingDate = data.dateMillis.toFuelingDate(),
-                station = data.station
+                station = data.station,
+                tankPercentage = data.tankPercentage,
+                ticket = data.ticket
             )
             insertFuelingUseCase(fueling)
                 .onSuccess {
+                    // Confirmada la carga, su odómetro pasa a ser el vigente.
+                    runCatching { updateOdometerUseCase(fueling.odometer) }
                     _uiState.update { it.copy(saveState = FuelingSaveState.Saved) }
                     // La nueva carga es la más reciente: se vuelve a la primera página.
                     _uiState.update { it.copy(currentPage = 0, hasNextPage = true) }

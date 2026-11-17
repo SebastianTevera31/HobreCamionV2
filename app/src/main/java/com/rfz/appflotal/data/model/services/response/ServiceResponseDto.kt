@@ -12,7 +12,9 @@ data class ServiceResponseDto(
     @SerializedName("fld_provider") val provider: String,
     @SerializedName("fld_date") val date: String,
     @SerializedName("fld_notes") val notes: String? = "",
-    @SerializedName("fld_image") val image: String? = ""
+    @SerializedName("fld_image") val image: String? = "",
+    // Puede no venir: GetServices no documenta si lo devuelve.
+    @SerializedName("fld_odometer") val odometer: Int? = null
 )
 
 data class TypeServiceDto(

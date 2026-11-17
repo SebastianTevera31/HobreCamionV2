@@ -12,6 +12,7 @@ object ForumRooms
 data class RoomTopics(
     val roomId: String,
     val roomTitle: String,
+    val canPost: Boolean
 )
 
 @Serializable
@@ -19,7 +20,8 @@ data class TopicDiscussion(
     val roomId: String,
     val topicId: String,
     val topicTitle: String,
-    val selectedComment: String = "0"
+    val selectedComment: String = "0",
+    val canReply: Boolean
 )
 
 @Serializable

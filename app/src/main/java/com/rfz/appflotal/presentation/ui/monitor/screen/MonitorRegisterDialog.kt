@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Button
@@ -30,13 +28,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -81,8 +77,9 @@ fun MonitorRegisterDialog(
     paymentPlan: PaymentPlanType,
     modifier: Modifier = Modifier,
     showCloseButton: Boolean = false,
-    // Lo decide quien invoca el diálogo: solo el wizard lo muestra; oculto se envía numTires = 0.
-    showTireCountSelector: Boolean = false,
+    // Solo el wizard lo activa: en la primera configuración se envía el total de llantas del
+    // diagrama para que el servidor las monte todas; en otro caso se envía numTires = 0.
+    mountAllTires: Boolean = false,
     // El servidor solo monta llantas automáticamente al guardar la primera configuración.
     isFirstConfiguration: Boolean = true,
     savedConfiguration: ConfigurationItem? = null,
@@ -99,12 +96,9 @@ fun MonitorRegisterDialog(
     var configurationSelected by remember(monitorSelected) { mutableStateOf(monitorSelected) }
 
     val canChooseNoTpms = paymentPlan == PaymentPlanType.Complete
-    // Cada cambio de configuración arranca con el diagrama completo.
     val maxTires = configurationSelected?.maxTires ?: 0
-    var numTires by remember(configurationSelected) { mutableIntStateOf(maxTires) }
-    // Al reconfigurar el número de llantas ya no tiene efecto (no se montan automáticamente).
-    val canChooseNumTires =
-        showTireCountSelector && isFirstConfiguration && canChooseNoTpms && maxTires > 0
+    // Al reconfigurar el servidor ya no monta llantas, así que no se envía el total.
+    val sendsAllTires = mountAllTires && isFirstConfiguration && canChooseNoTpms && maxTires > 0
     val isConfigurationChanged = !isFirstConfiguration &&
             savedConfiguration != null &&
             configurationSelected != null &&
@@ -171,18 +165,12 @@ fun MonitorRegisterDialog(
                         onMonitorConfiguration(it)
                     }
 
-                    if (canChooseNumTires) {
-                        TireCountStepper(
-                            value = numTires,
-                            max = maxTires,
-                            onValueChange = { numTires = it }
-                        )
-
+                    if (sendsAllTires) {
                         ConfigurationNote(
                             text = pluralStringResource(
                                 R.plurals.aviso_montaje_automatico,
-                                numTires,
-                                numTires
+                                maxTires,
+                                maxTires
                             ),
                             icon = Icons.Outlined.Info,
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -278,11 +266,11 @@ fun MonitorRegisterDialog(
                         Button(
                             onClick = {
                                 val macToSend =
-                                    if (canChooseNoTpms && !hasTpms) "" else currentMacAddress
+                                    if (canChooseNoTpms && !hasTpms) "No Monitor" else currentMacAddress
                                 onContinueButton(
                                     macToSend,
                                     configurationSelected,
-                                    if (canChooseNumTires) numTires else null
+                                    if (sendsAllTires) maxTires else null
                                 )
                             },
                             enabled = canContinue,
@@ -332,75 +320,6 @@ private fun ConfigurationNote(
             text = text,
             style = MaterialTheme.typography.bodySmall,
             color = contentColor
-        )
-    }
-}
-
-/**
- * Ruedas del diagrama que realmente se van a ocupar (1..[max]). El backend genera las ruedas
- * default a partir de este número, p. ej. un monitor de 22 ruedas usado solo con 10.
- */
-@Composable
-fun TireCountStepper(
-    value: Int,
-    max: Int,
-    onValueChange: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.llantas_a_utilizar),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .border(width = 1.dp, color = primaryLight, RoundedCornerShape(12.dp))
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = { onValueChange(value - 1) },
-                enabled = value > 1
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Remove,
-                    contentDescription = stringResource(R.string.quitar_llanta)
-                )
-            }
-
-            Text(
-                text = value.toString(),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f)
-            )
-
-            IconButton(
-                onClick = { onValueChange(value + 1) },
-                enabled = value < max
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.agregar_llanta)
-                )
-            }
-        }
-
-        Text(
-            text = stringResource(R.string.de_llantas_del_diagrama, max),
-            style = MaterialTheme.typography.bodySmall,
-            color = secondaryLight
         )
     }
 }
@@ -498,7 +417,7 @@ fun MonitorRegisterDialogPreview() {
             onSuccessRegister = {},
             paymentPlan = PaymentPlanType.Complete,
             showCloseButton = true,
-            showTireCountSelector = true,
+            mountAllTires = true,
             monitorSelected = ConfigurationItem(1, "TALON 10", "10"),
             macValue = "AA:BB:CC:DD:EE:FF",
             closeText = "Cerrar",

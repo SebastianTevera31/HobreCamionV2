@@ -31,9 +31,10 @@ interface ServiceClient {
         @Part("fld_provider") provider: RequestBody,
         @Part("fld_cant") quantity: RequestBody,
         @Part("p_vehicle_fk_1") vehicleId: RequestBody,
+        @Part("fld_odometer") odometer: RequestBody,
         @Part("fld_notes") notes: RequestBody,
         @Part image: MultipartBody.Part?
-    ): Response<GeneralResponse>
+    ): Response<List<GeneralResponse>>
 
     @GET("api/Service/DeleteService")
     suspend fun deleteService(

@@ -6,16 +6,13 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import jakarta.inject.Inject
 
 class CoordinatesTableUseCase @Inject constructor(private val coordinatesTableRepository: CoordinatesTableRepository) {
-    suspend fun insertCoordinates(monitorId: Int, listCoordinates: List<MonitorTire>) {
-        coordinatesTableRepository.insertCoordinates(monitorId, listCoordinates)
+    suspend fun replaceCoordinates(monitorId: Int, listCoordinates: List<MonitorTire>) {
+        coordinatesTableRepository.replaceCoordinates(monitorId, listCoordinates)
     }
 
     suspend fun getCoordinates(monitorId: Int): List<CoordinatesEntity> {
         return coordinatesTableRepository.getCoordinates(monitorId)
     }
-
-    suspend fun deleteCoordinates(monitorId: Int) =
-        coordinatesTableRepository.deleteCoordinates(monitorId)
 
     suspend fun updateCoordinates(
         monitorId: Int,

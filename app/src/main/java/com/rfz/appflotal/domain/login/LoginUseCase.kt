@@ -48,7 +48,8 @@ class LoginUseCase @Inject constructor(
         idCountry: Int,
         idSector: Int,
         typeVehicle: String,
-        plates: String
+        plates: String,
+        odometer: Int
     ): ApiResult<List<GeneralResponse>?> {
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches())
             return ApiResult.Error(message = "Introduzca un correo valido")
@@ -64,6 +65,7 @@ class LoginUseCase @Inject constructor(
             idSector,
             typeVehicle,
             plates,
+            odometer,
             true,
             getCurrentDate()
         )

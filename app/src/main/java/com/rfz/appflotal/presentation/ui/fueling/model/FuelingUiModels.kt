@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.fueling.model
 
+import android.net.Uri
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
 
 /**
@@ -27,8 +28,18 @@ data class FuelingFormData(
     val amount: String,
     val odometer: String,
     val dateMillis: Long,      // medianoche UTC del día elegido (DatePicker)
-    val station: String
+    val station: String,
+    val tankPercentage: Int,   // 25, 50, 75 o 100 (fld_percentage)
+    val ticket: Uri            // foto del ticket (fld_imageTicket)
 )
+
+/** Opciones del nivel del tanque: porcentaje que viaja y fracción que se muestra. */
+enum class TankLevel(val percentage: Int, val fraction: String?) {
+    Quarter(25, "¼"),
+    Half(50, "½"),
+    ThreeQuarters(75, "¾"),
+    Full(100, null) // se muestra con el texto "Lleno"
+}
 
 /** Estado del guardado de una carga; la navegación reacciona a [Saved]. */
 enum class FuelingSaveState { Idle, Saving, Saved, Failed }

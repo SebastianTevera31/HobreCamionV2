@@ -138,7 +138,7 @@ class ForumViewModel @Inject constructor(
 
     fun loadTopicMessages(topicId: Int) {
         viewModelScope.launch {
-            _uiState.update { it.copy(screenState = LoadState.Loading) }
+            _uiState.update { it.copy(screenState = LoadState.Loading, selectedTopic = null) }
             val topicResponse = getForumTopicByIdUseCase(topicId)
             val response = getForumTopicMessagesUseCase(topicId)
 
@@ -379,7 +379,8 @@ class ForumViewModel @Inject constructor(
                             color = Color(color.toColorInt()),
                             isLiked = false,
                             likes = 0,
-                            tags = parseTags(tags)
+                            tags = parseTags(tags),
+                            canReply = true
                         )
                         val newList = state.topics + newTopic
                         state.copy(

@@ -1,5 +1,4 @@
 package com.rfz.appflotal.presentation.ui.forums.navigation
-import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -33,14 +32,15 @@ import androidx.navigation.toRoute
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.screens.NavScreens
 import com.rfz.appflotal.data.model.forum.toComment
+import com.rfz.appflotal.presentation.navigation.popBackStackSafely
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.ui.forums.components.ForumErrorView
 import com.rfz.appflotal.presentation.ui.forums.components.ForumShimmerList
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.BottomCommentField
-import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ModernModuleScaffold
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchConfig
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumSearchFilter
 import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ForumTopBarConfig
+import com.rfz.appflotal.presentation.ui.forums.components.scaffold.ModernModuleScaffold
 import com.rfz.appflotal.presentation.ui.forums.screen.RoomsScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.post.NewTopicScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.post.TopicsScreen
@@ -50,8 +50,8 @@ import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReplyScreen
 import com.rfz.appflotal.presentation.ui.forums.screen.topic.ReportScreen
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.CameraUiState
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumScreenType
-import com.rfz.appflotal.presentation.ui.forums.viewmodel.TopicSearchMode
 import com.rfz.appflotal.presentation.ui.forums.viewmodel.ForumViewModel
+import com.rfz.appflotal.presentation.ui.forums.viewmodel.TopicSearchMode
 import com.rfz.appflotal.presentation.ui.utils.LoadState
 
 fun NavGraphBuilder.forumsGraph(
@@ -115,7 +115,8 @@ fun NavGraphBuilder.forumsGraph(
                                 navController.navigate(
                                     RoomTopics(
                                         roomId = room.id.toString(),
-                                        roomTitle = room.title
+                                        roomTitle = room.title,
+                                        canPost = room.usersCanPost
                                     )
                                 )
                             },
@@ -219,6 +220,7 @@ fun NavGraphBuilder.forumsGraph(
                     isRefreshing = state.isRefreshingTopics
                 ),
                 floatingActionButton = {
+                    if (!args.canPost) return@ModernModuleScaffold
                     FloatingActionButton(onClick = {
                         navController.navigate(
                             NewTopicNav(
@@ -263,7 +265,8 @@ fun NavGraphBuilder.forumsGraph(
                                     TopicDiscussion(
                                         roomId = args.roomId,
                                         topicId = topic.id.toString(),
-                                        topicTitle = topic.title
+                                        topicTitle = topic.title,
+                                        canReply = topic.canReply
                                     )
                                 )
                             },
@@ -364,6 +367,8 @@ fun NavGraphBuilder.forumsGraph(
                     onMenuClick = {}
                 ),
                 bottomBar = {
+                    val canReply = state.selectedTopic?.canReply ?: args.canReply
+                    if (!canReply) return@ModernModuleScaffold
                     Surface(
                         modifier = Modifier.navigationBarsPadding(),
                         tonalElevation = Dimens.PaddingExtraSmall,
@@ -679,7 +684,8 @@ fun NavGraphBuilder.forumsGraph(
                                 roomId = "",
                                 topicId = idTopic.toString(),
                                 topicTitle = title,
-                                selectedComment = idComment.toString()
+                                selectedComment = idComment.toString(),
+                                canReply = false
                             )
                         )
                     }

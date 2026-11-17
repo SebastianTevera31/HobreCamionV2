@@ -6,17 +6,21 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import jakarta.inject.Inject
 
 class CoordinatesTableRepository @Inject constructor(private val coordinatesDao: CoordinatesDao) {
-    suspend fun insertCoordinates(monitorId: Int, coordinatesList: List<MonitorTire>) {
-        coordinatesList.forEach { coords ->
-            coordinatesDao.insertCoordinates(coords.toEntity(monitorId))
-        }
+    /** Reemplaza (atómicamente) las coordenadas guardadas del monitor; una fila por posición. */
+    suspend fun replaceCoordinates(monitorId: Int, coordinatesList: List<MonitorTire>) {
+        coordinatesDao.replaceCoordinates(
+            monitorId,
+            coordinatesList.distinctBy { it.sensorPosition }.map { it.toEntity(monitorId) }
+        )
     }
 
+    /**
+     * Una fila por posición. Instalaciones anteriores pueden tener la tabla duplicada (se
+     * corrige en la siguiente carga con red); mientras tanto no debe llegar repetida a la UI.
+     */
     suspend fun getCoordinates(monitorId: Int): List<CoordinatesEntity> {
-        return coordinatesDao.getCoordinates(monitorId)
+        return coordinatesDao.getCoordinates(monitorId).distinctBy { it.idPosition }
     }
-
-    suspend fun deleteCoordinates(monitorId: Int) = coordinatesDao.deleteCoordinates(monitorId)
 
     suspend fun updateCoordinates(
         monitorId: Int,

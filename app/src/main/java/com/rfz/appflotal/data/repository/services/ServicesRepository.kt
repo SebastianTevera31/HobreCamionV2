@@ -12,7 +12,7 @@ import javax.inject.Inject
 interface ServicesRepository {
     suspend fun doCrudServiceDetail(
         requestBody: ServiceDetailDto,
-    ): Result<GeneralResponse>
+    ): Result<List<GeneralResponse>>
 
     suspend fun doGetServiceType(
     ): Result<List<TypeServiceDto>>
@@ -29,7 +29,7 @@ class ServicesRepositoryImp @Inject constructor(
 
     override suspend fun doCrudServiceDetail(
         requestBody: ServiceDetailDto
-    ): Result<GeneralResponse> {
+    ): Result<List<GeneralResponse>> {
         val user = getTasksUseCase().first()
         if (user.isEmpty()) return Result.failure(Exception("No hay usuario logueado"))
         val token = user.first().fld_token
