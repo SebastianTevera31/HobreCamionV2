@@ -11,7 +11,8 @@ import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
-import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
+import com.rfz.appflotal.data.model.sincronizacion.fueRegistrada
+import com.rfz.appflotal.domain.sincronizacion.InspeccionarLlantaUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
@@ -42,7 +43,7 @@ import kotlin.math.roundToInt
 @HiltViewModel
 class InspectionViewModel @Inject constructor(
     private val catalogUseCase: CatalogUseCase,
-    private val inspectionTireCrudUseCase: InspectionTireCrudUseCase,
+    private val inspeccionarLlanta: InspeccionarLlantaUseCase,
     private val sensorDataTableRepository: SensorDataTableRepository,
     private val hombreCamionRepository: HombreCamionRepository,
     private val observeTemperatureUnitUseCase: ObserveTemperatureUnitUseCase,
@@ -183,8 +184,8 @@ class InspectionViewModel @Inject constructor(
             (values.adjustedPressure * 14.5038).toInt()
         } else values.adjustedPressure
 
-        val result = inspectionTireCrudUseCase(
-            requestBody = InspectionTireDto(
+        val result = inspeccionarLlanta(
+            InspectionTireDto(
                 positionTire = positionTire,
                 treadDepth = values.treadDepth1,
                 treadDepth2 = values.treadDepth2,
@@ -199,7 +200,7 @@ class InspectionViewModel @Inject constructor(
             )
         )
 
-        if (result.isSuccess) {
+        if (result.fueRegistrada()) {
             // Registrar registro de odometro
             hombreCamionRepository.updateOdometer(
                 odometerValue.roundToInt(),

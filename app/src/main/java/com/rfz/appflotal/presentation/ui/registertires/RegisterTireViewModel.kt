@@ -9,10 +9,11 @@ import com.rfz.appflotal.data.model.CatalogItem
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
 import com.rfz.appflotal.data.repository.UnidadOdometro
-import com.rfz.appflotal.data.repository.assembly.AssemblyRejectedException
+import com.rfz.appflotal.data.model.sincronizacion.fueRegistrada
+import com.rfz.appflotal.data.model.sincronizacion.mensajeRechazo
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
-import com.rfz.appflotal.domain.assembly.AddAssemblyTireUseCase
+import com.rfz.appflotal.domain.sincronizacion.MontarLlantaUseCase
 import com.rfz.appflotal.domain.axle.GetAxlesUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.product.ProductListUseCase
@@ -41,7 +42,7 @@ class RegisterTireViewModel @Inject constructor(
     private val acquisitionTypeUseCase: AcquisitionTypeUseCase,
     private val productListUseCase: ProductListUseCase,
     private val getAxleUseCase: GetAxlesUseCase,
-    private val addAssemblyTireUseCase: AddAssemblyTireUseCase,
+    private val montarLlantaUseCase: MontarLlantaUseCase,
     private val getTasksUseCase: GetTasksUseCase,
     private val hombreCamionRepository: HombreCamionRepository,
     private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
@@ -211,7 +212,7 @@ class RegisterTireViewModel @Inject constructor(
                 if (state.odometerUnit == UnidadOdometro.KILOMETROS) odometerNumber
                 else milesToKm(odometerNumber)
 
-            val assemblyResult = addAssemblyTireUseCase(
+            val assemblyResult = montarLlantaUseCase(
                 AssemblyTire(
                     idAxle = state.selectedAxle.id,
                     idTire = idTire,
@@ -222,9 +223,8 @@ class RegisterTireViewModel @Inject constructor(
                 )
             )
 
-            if (assemblyResult.isFailure) {
-                val serverMessage =
-                    (assemblyResult.exceptionOrNull() as? AssemblyRejectedException)?.message
+            if (!assemblyResult.fueRegistrada()) {
+                val serverMessage = assemblyResult.mensajeRechazo()
                 _uiState.update {
                     it.copy(
                         operationStatus = OperationStatus.Error,

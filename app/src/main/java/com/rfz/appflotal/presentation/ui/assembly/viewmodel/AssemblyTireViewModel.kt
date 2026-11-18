@@ -4,11 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
-import com.rfz.appflotal.data.repository.assembly.AssemblyRejectedException
+import com.rfz.appflotal.data.model.sincronizacion.fueRegistrada
+import com.rfz.appflotal.data.model.sincronizacion.mensajeRechazo
 import com.rfz.appflotal.data.model.tire.toTire
 import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
-import com.rfz.appflotal.domain.assembly.AddAssemblyTireUseCase
+import com.rfz.appflotal.domain.sincronizacion.MontarLlantaUseCase
 import com.rfz.appflotal.domain.axle.GetAxlesUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
@@ -30,7 +31,7 @@ import kotlin.math.roundToInt
 @HiltViewModel
 class AssemblyTireViewModel @Inject constructor(
     private val tireUseCase: TireListUsecase,
-    private val addAssemblyTire: AddAssemblyTireUseCase,
+    private val montarLlanta: MontarLlantaUseCase,
     private val getAxleUseCase: GetAxlesUseCase,
     private val hombreCamionRepository: HombreCamionRepository,
     private val observeOdometerUnitUseCase: ObserveOdometerUnitUseCase,
@@ -121,8 +122,8 @@ class AssemblyTireViewModel @Inject constructor(
 
         viewModelScope.launch {
             val uiState = _uiState.value
-            val result = addAssemblyTire(
-                assemblyTire = AssemblyTire(
+            val result = montarLlanta(
+                AssemblyTire(
                     idAxle = idAxle,
                     idTire = idTire,
                     positionTire = uiState.positionTire,
@@ -132,8 +133,9 @@ class AssemblyTireViewModel @Inject constructor(
                 )
             )
 
-            // El odómetro solo se actualiza si el montaje quedó registrado.
-            if (result.isSuccess) {
+            // El odómetro solo se actualiza si el montaje quedó registrado (enviado o en cola).
+            val registrado = result.fueRegistrada()
+            if (registrado) {
                 launch {
                     hombreCamionRepository.updateOdometer(
                         odometerValue.roundToInt(),
@@ -144,14 +146,9 @@ class AssemblyTireViewModel @Inject constructor(
 
             _uiState.update { currentUiState ->
                 currentUiState.copy(
-                    operationStatus = result.fold(
-                        onSuccess = {
-                            OperationStatus.Success
-                        },
-                        onFailure = { OperationStatus.Error }
-                    ),
-                    errorMessage = (result.exceptionOrNull() as? AssemblyRejectedException)
-                        ?.message
+                    operationStatus =
+                        if (registrado) OperationStatus.Success else OperationStatus.Error,
+                    errorMessage = result.mensajeRechazo()
                 )
             }
         }

@@ -20,4 +20,7 @@ interface AssemblyTireDao {
 
     @Query("DELETE FROM assembly_tire_table WHERE positionTire =:position")
     suspend fun deleteAssemblyTire(position: String)
+
+    @Query("DELETE FROM assembly_tire_table WHERE positionTire NOT IN (:conservar)")
+    suspend fun eliminarExcepto(conservar: List<String>)
 }

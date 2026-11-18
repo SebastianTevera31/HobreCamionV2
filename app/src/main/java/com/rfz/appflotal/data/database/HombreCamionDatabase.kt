@@ -8,11 +8,10 @@ import com.rfz.appflotal.data.dao.AssemblyTireDao
 import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
-import com.rfz.appflotal.data.dao.DisassemblyTireDao
+import com.rfz.appflotal.data.dao.OperacionPendienteDao
 import com.rfz.appflotal.data.dao.FollowedPromotionsDao
 import com.rfz.appflotal.data.dao.ForumDao
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
-import com.rfz.appflotal.data.dao.InspectionTireDao
 import com.rfz.appflotal.data.dao.MaintenanceNotificationsDao
 import com.rfz.appflotal.data.dao.PromotionsDao
 import com.rfz.appflotal.data.dao.SensorDataDao
@@ -23,27 +22,26 @@ import com.rfz.appflotal.data.model.database.AppHCEntity
 import com.rfz.appflotal.data.model.database.CommentEntity
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.data.model.database.DataframeEntity
-import com.rfz.appflotal.data.model.database.DisassemblyTireEntity
 import com.rfz.appflotal.data.model.database.InspectionCatalogEntity
-import com.rfz.appflotal.data.model.database.InspectionTireEntity
 import com.rfz.appflotal.data.model.database.SensorDataEntity
 import com.rfz.appflotal.data.model.database.TopicEntity
 import com.rfz.appflotal.data.model.promotions.FollowedAccessoryEntity
 import com.rfz.appflotal.data.model.promotions.FollowedPromotionEntity
 import com.rfz.appflotal.data.model.promotions.FollowedSeenProductEntity
 import com.rfz.appflotal.data.model.promotions.PromotionEntity
+import com.rfz.appflotal.data.model.sincronizacion.OperacionPendienteEntity
 
 @Keep
 @Database(
     entities = [
         AppHCEntity::class, DataframeEntity::class, CoordinatesEntity::class,
         SensorDataEntity::class, AssemblyTireEntity::class, AxleEntity::class,
-        DisassemblyTireEntity::class, InspectionTireEntity::class,
+        OperacionPendienteEntity::class,
         InspectionCatalogEntity::class, CommentEntity::class, TopicEntity::class,
         PromotionEntity::class, FollowedAccessoryEntity::class, FollowedPromotionEntity::class,
         FollowedSeenProductEntity::class, MaintenanceNotificationEntity::class
     ],
-    version = 34,
+    version = 35,
     exportSchema = true
 )
 abstract class AppHombreCamionDatabase : RoomDatabase() {
@@ -54,8 +52,7 @@ abstract class AppHombreCamionDatabase : RoomDatabase() {
     abstract fun sensorDataDao(): SensorDataDao
 
     abstract fun assemblyTireDao(): AssemblyTireDao
-    abstract fun disassemblyTireDao(): DisassemblyTireDao
-    abstract fun inspectionTireDao(): InspectionTireDao
+    abstract fun operacionPendienteDao(): OperacionPendienteDao
     abstract fun inspectionCatalogDao(): InspectionCatalogDao
 
     abstract fun axleDao(): AxleDao

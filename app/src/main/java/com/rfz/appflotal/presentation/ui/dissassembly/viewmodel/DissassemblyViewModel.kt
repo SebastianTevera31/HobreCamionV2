@@ -13,12 +13,12 @@ import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.database.HombreCamionRepository
 import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
-import com.rfz.appflotal.data.repository.disassembly.SetDisassemblyTireUseCase
+import com.rfz.appflotal.data.model.sincronizacion.fueRegistrada
 import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.destination.DestinationUseCase
 import com.rfz.appflotal.domain.disassembly.DisassemblyCauseUseCase
-import com.rfz.appflotal.domain.tire.InspectionTireCrudUseCase
+import com.rfz.appflotal.domain.sincronizacion.DesmontarLlantaUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
@@ -49,9 +49,8 @@ class DisassemblyViewModel @Inject constructor(
     private val tireUseCase: TireListUsecase,
     private val getDestinationUseCase: DestinationUseCase,
     private val disassemblyCauseUseCase: DisassemblyCauseUseCase,
-    private val setDisassemblyTireUseCase: SetDisassemblyTireUseCase,
+    private val desmontarLlanta: DesmontarLlantaUseCase,
     private val assemblyTireRepository: AssemblyTireRepository,
-    private val inspectionTireCrudUseCase: InspectionTireCrudUseCase,
     private val catalogUseCase: CatalogUseCase,
     private val hombreCamionRepository: HombreCamionRepository,
     private val sensorDataTableRepository: SensorDataTableRepository,
@@ -190,49 +189,38 @@ class DisassemblyViewModel @Inject constructor(
     fun dismountTire(causeId: Int, destinationId: Int) = viewModelScope.launch {
         val lastOdometerMeasurement = getCurrentDate()
 
-        // Publicamos camibios
-        val inspectionResult = uploadInspection(lastOdometerMeasurement)
+        val inspeccion = buildInspection(lastOdometerMeasurement)
 
         val odometer = uiState.value.inspectionForm.odometer
         val odometerValue =
             if (_uiState.value.odometerUnit == UnidadOdometro.KILOMETROS) odometer.toDouble()
             else milesToKm(odometer.toDouble())
 
-        if (inspectionResult) {
-//            val odometer = getTasksUseCase().first()[0].odometer
-            val result = setDisassemblyTireUseCase(
-                DisassemblyTire(
-                    disassemblyCause = causeId,
-                    destination = destinationId,
-                    dateOperation = getCurrentDate(),
-                    positionTire = uiState.value.positionTire,
-                    odometer = odometerValue.roundToInt()
-                )
+        // Inspección y desmontaje se registran juntos: o quedan los dos o ninguno.
+        val registrado = inspeccion != null && desmontarLlanta(
+            inspeccion,
+            DisassemblyTire(
+                disassemblyCause = causeId,
+                destination = destinationId,
+                dateOperation = getCurrentDate(),
+                positionTire = uiState.value.positionTire,
+                odometer = odometerValue.roundToInt()
             )
+        ).fueRegistrada()
 
-            _uiState.update { currentUiState ->
-                currentUiState.copy(
-                    operationStatus = result.fold(
-                        onSuccess = {
-                            // Registrar registro de odometro
-                            launch {
-                                hombreCamionRepository.updateOdometer(
-                                    odometerValue.roundToInt(),
-                                    lastOdometerMeasurement
-                                )
-                            }
-                            OperationStatus.Success
-                        },
-                        onFailure = { OperationStatus.Error }
-                    )
-                )
-            }
-        } else {
-            _uiState.update { currentUiState ->
-                currentUiState.copy(
-                    operationStatus = OperationStatus.Error
-                )
-            }
+        if (registrado && inspeccion != null) {
+            sensorDataTableRepository.updateTireRecord(
+                tire = inspeccion.positionTire,
+                temperature = inspeccion.temperatureInspected,
+                pressure = inspeccion.pressureInspected
+            )
+            hombreCamionRepository.updateOdometer(odometerValue.roundToInt(), lastOdometerMeasurement)
+        }
+
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                operationStatus = if (registrado) OperationStatus.Success else OperationStatus.Error
+            )
         }
     }
 
@@ -253,7 +241,8 @@ class DisassemblyViewModel @Inject constructor(
         }
     }
 
-    private suspend fun uploadInspection(lastOdometerMeasurement: String): Boolean {
+    /** null si al formulario le falta la llanta o el reporte. */
+    private fun buildInspection(lastOdometerMeasurement: String): InspectionTireDto? {
         val uiState = _uiState.value
 
         val pressure = if (_uiState.value.pressureUnit == UnidadPresion.BAR) {
@@ -278,34 +267,22 @@ class DisassemblyViewModel @Inject constructor(
             if (_uiState.value.odometerUnit == UnidadOdometro.KILOMETROS) uiState.lastOdometer.toDouble()
             else milesToKm(uiState.inspectionForm.odometer.toDouble())
 
-        if (uiState.tire?.id == null) return false
-        if (uiState.inspectionForm.reportId.isNullOrEmpty()) return false
+        if (uiState.tire?.id == null) return null
+        if (uiState.inspectionForm.reportId.isNullOrEmpty()) return null
 
-        val result = inspectionTireCrudUseCase(
-            requestBody = InspectionTireDto(
-                positionTire = uiState.positionTire,
-                treadDepth = uiState.inspectionForm.treadDepth1,
-                treadDepth2 = uiState.inspectionForm.treadDepth2,
-                treadDepth3 = uiState.inspectionForm.treadDepth3,
-                treadDepth4 = uiState.inspectionForm.treadDepth4,
-                tireInspectionReportId = uiState.inspectionForm.reportId.toInt(), // 3 = Enviar a "desechar"
-                pressureInspected = pressure.toInt(),
-                dateInspection = lastOdometerMeasurement,
-                odometer = odometerValue.roundToInt(),
-                temperatureInspected = temperature.toInt(),
-                pressureAdjusted = pressureAdjusted.toInt()
-            )
+        return InspectionTireDto(
+            positionTire = uiState.positionTire,
+            treadDepth = uiState.inspectionForm.treadDepth1,
+            treadDepth2 = uiState.inspectionForm.treadDepth2,
+            treadDepth3 = uiState.inspectionForm.treadDepth3,
+            treadDepth4 = uiState.inspectionForm.treadDepth4,
+            tireInspectionReportId = uiState.inspectionForm.reportId.toInt(), // 3 = Enviar a "desechar"
+            pressureInspected = pressure.toInt(),
+            dateInspection = lastOdometerMeasurement,
+            odometer = odometerValue.roundToInt(),
+            temperatureInspected = temperature.toInt(),
+            pressureAdjusted = pressureAdjusted.toInt()
         )
-
-        return if (result.isSuccess) {
-            hombreCamionRepository.updateOdometer(odometerValue.toInt(), lastOdometerMeasurement)
-            sensorDataTableRepository.updateTireRecord(
-                tire = uiState.positionTire,
-                temperature = temperature.toInt(),
-                pressure = pressure.toInt()
-            )
-            result.isSuccess
-        } else false
     }
 
     fun restartOperationStatus() {

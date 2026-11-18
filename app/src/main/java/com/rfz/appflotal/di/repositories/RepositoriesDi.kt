@@ -18,6 +18,10 @@ import com.rfz.appflotal.data.repository.weather.WeatherRepository
 import com.rfz.appflotal.data.repository.weather.WeatherRepositoryImpl
 import com.rfz.appflotal.data.repository.services.ServicesRepository
 import com.rfz.appflotal.data.repository.services.ServicesRepositoryImp
+import com.rfz.appflotal.data.repository.sincronizacion.ColaSincronizacionRepository
+import com.rfz.appflotal.data.repository.sincronizacion.ColaSincronizacionRepositoryImpl
+import com.rfz.appflotal.data.repository.sincronizacion.OperacionesLlantaRepository
+import com.rfz.appflotal.data.repository.sincronizacion.OperacionesLlantaRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -63,4 +67,16 @@ abstract class DiRepository {
     @Binds
     @Singleton
     abstract fun bindFuelingRepository(impl: FuelingRepositoryImpl): FuelingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindOperacionesLlantaRepository(
+        impl: OperacionesLlantaRepositoryImpl
+    ): OperacionesLlantaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindColaSincronizacionRepository(
+        impl: ColaSincronizacionRepositoryImpl
+    ): ColaSincronizacionRepository
 }

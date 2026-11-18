@@ -253,4 +253,70 @@ class MigrationTest {
             assertTrue(cursor.isNull(3))
         }
     }
+
+    private fun SupportSQLiteDatabase.insertPendientesV34() {
+        execSQL(
+            """
+            INSERT INTO disassembly_tire_table (positionTire, disassemblyCause, destination,
+                dateOperation, odometer, updatedAt)
+            VALUES ('P3', 4, 2, '2026-11-18T10:05:00.000Z', 1500, 200)
+            """.trimIndent()
+        )
+        execSQL(
+            """
+            INSERT INTO inspection_tire_table (positionTire, treadDepth, treadDepth2, treadDepth3,
+                treadDepth4, tireInspectionReportId, pressureInspected, dateInspection, odometer,
+                temperatureInspected, pressureAdjusted, updatedAt)
+            VALUES ('P3', 10.5, 10.0, 9.5, 9.0, 1, 110, '2026-11-18T10:05:00.000Z', 1500, 38, 105, 200)
+            """.trimIndent()
+        )
+    }
+
+    private fun SupportSQLiteDatabase.existeTabla(nombre: String): Boolean =
+        query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = '$nombre'")
+            .use { it.count > 0 }
+
+    @Test
+    fun migrate34To35_pendientesConSesion_pasanALaColaEnOrden() {
+        helper.createDatabase(testDb, 34).apply {
+            insertUser(idMonitor = 9)
+            insertPendientesV34()
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(testDb, 35, true, MIGRATION_34_35)
+
+        db.query(
+            "SELECT tipo, posicion, idUsuario, idMonitor, estado, payload " +
+                "FROM operacion_pendiente ORDER BY id"
+        ).use { cursor ->
+            assertEquals(2, cursor.count)
+            // Misma hora: la inspección va antes que el desmontaje, como se capturaron.
+            cursor.moveToFirst()
+            assertEquals("INSPECCION", cursor.getString(0))
+            assertTrue(cursor.getString(5).contains("\"c_tireInspectionReport_fk_4\":1"))
+            cursor.moveToNext()
+            assertEquals("DESMONTAJE", cursor.getString(0))
+            assertEquals("P3", cursor.getString(1))
+            assertEquals(7, cursor.getInt(2))
+            assertEquals(9, cursor.getInt(3))
+            assertEquals("PENDIENTE", cursor.getString(4))
+            assertTrue(cursor.getString(5).contains("\"c_disassemblyCauses_fk_1\":4"))
+        }
+        assertTrue(!db.existeTabla("disassembly_tire_table"))
+        assertTrue(!db.existeTabla("inspection_tire_table"))
+    }
+
+    @Test
+    fun migrate34To35_sinSesion_quitaTablasViejasConColaVacia() {
+        helper.createDatabase(testDb, 34).apply {
+            insertPendientesV34()
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(testDb, 35, true, MIGRATION_34_35)
+
+        assertEquals(0, db.count("operacion_pendiente"))
+        assertTrue(!db.existeTabla("inspection_tire_table"))
+    }
 }

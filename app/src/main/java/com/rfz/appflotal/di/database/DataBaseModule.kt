@@ -9,11 +9,10 @@ import com.rfz.appflotal.data.dao.AssemblyTireDao
 import com.rfz.appflotal.data.dao.AxleDao
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.dao.DataframeDao
-import com.rfz.appflotal.data.dao.DisassemblyTireDao
+import com.rfz.appflotal.data.dao.OperacionPendienteDao
 import com.rfz.appflotal.data.dao.FollowedPromotionsDao
 import com.rfz.appflotal.data.dao.ForumDao
 import com.rfz.appflotal.data.dao.InspectionCatalogDao
-import com.rfz.appflotal.data.dao.InspectionTireDao
 import com.rfz.appflotal.data.dao.MaintenanceNotificationsDao
 import com.rfz.appflotal.data.dao.PromotionsDao
 import com.rfz.appflotal.data.dao.SensorDataDao
@@ -56,13 +55,8 @@ class DataBaseModule {
     }
 
     @Provides
-    fun provideDisassemblyTireDao(hombreCamionDatabase: AppHombreCamionDatabase): DisassemblyTireDao {
-        return hombreCamionDatabase.disassemblyTireDao()
-    }
-
-    @Provides
-    fun provideInspectionTireDao(hombreCamionDatabase: AppHombreCamionDatabase): InspectionTireDao {
-        return hombreCamionDatabase.inspectionTireDao()
+    fun provideOperacionPendienteDao(hombreCamionDatabase: AppHombreCamionDatabase): OperacionPendienteDao {
+        return hombreCamionDatabase.operacionPendienteDao()
     }
 
     @Provides
