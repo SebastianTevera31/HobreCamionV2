@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.rfz.appflotal.data.model.catalog.FuelTypeResponse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -81,6 +82,34 @@ class FuelingModelsTest {
         assertEquals(15, response.total)
         assertEquals("40.00 L.", first.units)
         assertEquals(1200, first.odometer)
+        // Cargas antiguas: sin fld_percentage ni fld_imageTicket.
+        assertEquals(0, first.tankPercentage)
+        assertNull(first.ticketUrl)
+    }
+
+    @Test
+    fun historyJson_withTicketAndPercentage_mapsFields() {
+        val json = """
+            {"data":[{"fld_fuelingDate":"2026-11-17T22:29:01.47","vehicle":"HC - HC",
+            "units":"100.00 L.","fuelType":"Gasolina","amount":"$1350.00","fld_station":"Dgg",
+            "fld_odometer":12001,"fld_lat":16.765572,"fld_lon":-93.190428,"fld_percentage":100,
+            "fld_imageTicket":"https://cdn.example.com/cdabff01.jpg?X-Amz-Signature=abc"}],
+            "total":21,"page":1,"pageSize":10}
+        """.trimIndent()
+
+        val first = gson.fromJson(json, FuelingHistoryResponse::class.java).data!!.first().toDomain()
+
+        assertEquals(100, first.tankPercentage)
+        assertEquals("https://cdn.example.com/cdabff01.jpg?X-Amz-Signature=abc", first.ticketUrl)
+    }
+
+    @Test
+    fun recordToDomain_ticketAsBareFileName_treatedAsMissing() {
+        // Un nombre de archivo sin URL no se puede descargar.
+        val dto = record().copy(imageTicket = "cdabff01-a189-4e04-8632-b63d21cd53ea.jpg")
+
+        assertNull(dto.toDomain().ticketUrl)
+        assertNull(record().copy(imageTicket = "  ").toDomain().ticketUrl)
     }
 
     @Test

@@ -54,7 +54,9 @@ fun NavGraphBuilder.fuelingGraph(navController: NavHostController) {
                     viewModel.applyFilter(start, end, fuelTypeId)
                 },
                 onPageSelected = { page -> viewModel.goToPage(page) },
-                onRetry = { viewModel.retry() }
+                onRetry = { viewModel.retry() },
+                expandedIndex = state.expandedIndex,
+                onToggleExpanded = { index -> viewModel.toggleExpanded(index) }
             )
         }
 

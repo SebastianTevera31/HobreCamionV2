@@ -17,8 +17,14 @@ data class FuelingUi(
     val amount: String,        // formateado por el servidor, p. ej. "$0.00"
     val station: String,       // vacío si no se capturó
     val odometer: String,      // con separador de miles
-    val mapsUrl: String?       // null si la carga no trae coordenadas (0, 0)
-)
+    val mapsUrl: String?,      // null si la carga no trae coordenadas (0, 0)
+    val vehicle: String = "",  // "placas - descripción", como llega del servidor
+    val tankLevel: TankLevel? = null, // null si la carga no capturó el nivel
+    val ticketUrl: String? = null     // null si no hay foto del ticket
+) {
+    /** Hay algo que mostrar al expandir la tarjeta. */
+    val hasDetails: Boolean get() = vehicle.isNotBlank() || tankLevel != null || ticketUrl != null
+}
 
 /** Datos capturados en el formulario; los numéricos llegan como texto ya filtrado. */
 data class FuelingFormData(
@@ -38,7 +44,13 @@ enum class TankLevel(val percentage: Int, val fraction: String?) {
     Quarter(25, "¼"),
     Half(50, "½"),
     ThreeQuarters(75, "¾"),
-    Full(100, null) // se muestra con el texto "Lleno"
+    Full(100, null); // se muestra con el texto "Lleno"
+
+    companion object {
+        /** Nivel de un fld_percentage; null para 0 (no capturado) u otros valores. */
+        fun fromPercentage(percentage: Int): TankLevel? =
+            entries.firstOrNull { it.percentage == percentage }
+    }
 }
 
 /** Estado del guardado de una carga; la navegación reacciona a [Saved]. */
@@ -62,7 +74,10 @@ val sampleFuelings = listOf(
         amount = "$980.00",
         station = "Pemex Av. Juárez",
         odometer = "1,200",
-        mapsUrl = "https://www.google.com/maps/search/?api=1&query=19.4,-99.1"
+        mapsUrl = "https://www.google.com/maps/search/?api=1&query=19.4,-99.1",
+        vehicle = "XXX001 - QWERTYUIOP",
+        tankLevel = TankLevel.Full,
+        ticketUrl = "https://example.com/ticket.jpg"
     ),
     FuelingUi(
         date = "08/01/2026 10:52:47",

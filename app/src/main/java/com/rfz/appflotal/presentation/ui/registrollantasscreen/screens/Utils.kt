@@ -39,5 +39,15 @@ val tireMenuItems = listOf(
         R.string.products,
         NavScreens.PRODUCTOS,
         R.drawable.ic_products
+    ),
+    MenuItem(
+        title = R.string.mover_a_almacen,
+        route = NavScreens.REPARARRENOVAR,
+        iconRes = R.drawable.ingreso_llantas
+    ),
+    MenuItem(
+        title = R.string.cambio_de_destino,
+        route = NavScreens.CAMBIO_DESTINO,
+        iconRes = R.drawable.cambiar_destino
     )
 )

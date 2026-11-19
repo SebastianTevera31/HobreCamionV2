@@ -23,46 +23,58 @@ class ProcesarColaUseCase @Inject constructor(
 
     suspend operator fun invoke(): ResultadoProcesamiento {
         if (!candado.tryLock()) return ResultadoProcesamiento.EN_CURSO
+        cola.iniciarProceso()
+        // Si algo falla a medias, se trata como error de conexión: el worker reintenta.
+        var resultado = ResultadoProcesamiento.REINTENTAR
         try {
-            var huboCambios = false
-            while (true) {
-                val operacion = cola.siguienteParaEnviar() ?: break
-                val id = operacion.id
-
-                // Quedó a medias (se cerró la app o se perdió la respuesta): pudo haber llegado.
-                if (operacion.estado == EstadoOperacion.ENVIANDO && cola.yaAplicada(id) == true) {
-                    cola.marcarAceptada(id)
-                    huboCambios = true
-                    continue
-                }
-
-                cola.marcarEnviando(id)
-                when (val resultado = cola.enviar(id)) {
-                    ResultadoEnvio.Aceptada -> cola.marcarAceptada(id)
-
-                    is ResultadoEnvio.Rechazada ->
-                        if (cola.yaAplicada(id) == true) cola.marcarAceptada(id)
-                        else cola.marcarRechazada(id, resultado.mensaje)
-
-                    // Se queda en ENVIANDO: el servidor pudo recibirla antes de cortarse la conexión.
-                    ResultadoEnvio.ErrorConexion -> {
-                        cola.registrarFalloConexion(id)
-                        return ResultadoProcesamiento.REINTENTAR
-                    }
-
-                    ResultadoEnvio.SesionVencida -> {
-                        cola.restablecerPendiente(id)
-                        return ResultadoProcesamiento.SESION_VENCIDA
-                    }
-                }
-                huboCambios = true
-            }
-
-            // Lo que se mostró antes de enviar puede no coincidir con lo que aceptó el servidor.
-            if (huboCambios) runCatching { montajes.refreshMountedTires() }
-            return ResultadoProcesamiento.COMPLETA
+            resultado = recorrerCola()
+            return resultado
         } finally {
+            cola.terminarProceso(resultado)
             candado.unlock()
         }
+    }
+
+    private suspend fun recorrerCola(): ResultadoProcesamiento {
+        var huboCambios = false
+        while (true) {
+            val operacion = cola.siguienteParaEnviar() ?: break
+            val id = operacion.id
+
+            // Quedó a medias (se cerró la app o se perdió la respuesta): pudo haber llegado.
+            if (operacion.estado == EstadoOperacion.ENVIANDO && cola.yaAplicada(id) == true) {
+                cola.marcarAceptada(id)
+                huboCambios = true
+                continue
+            }
+
+            cola.marcarEnviando(id)
+            when (val resultado = cola.enviar(id)) {
+                ResultadoEnvio.Aceptada -> cola.marcarAceptada(id)
+
+                is ResultadoEnvio.Rechazada ->
+                    if (cola.yaAplicada(id) == true) cola.marcarAceptada(id)
+                    else cola.marcarRechazada(id, resultado.mensaje)
+
+                // Se queda en ENVIANDO: el servidor pudo recibirla antes de cortarse la conexión.
+                ResultadoEnvio.ErrorConexion -> {
+                    cola.registrarFalloConexion(id)
+                    return ResultadoProcesamiento.REINTENTAR
+                }
+
+                ResultadoEnvio.SesionVencida -> {
+                    cola.restablecerPendiente(id)
+                    return ResultadoProcesamiento.SESION_VENCIDA
+                }
+            }
+            huboCambios = true
+        }
+
+        if (huboCambios) {
+            cola.registrarSincronizacion(System.currentTimeMillis())
+            // Lo que se mostró antes de enviar puede no coincidir con lo que aceptó el servidor.
+            runCatching { montajes.refreshMountedTires() }
+        }
+        return ResultadoProcesamiento.COMPLETA
     }
 }

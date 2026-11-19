@@ -49,6 +49,7 @@ import com.rfz.appflotal.presentation.ui.services.model.sampleVehicleHeader
  * Historial de cargas de combustible del vehículo (solo lectura, paginado en servidor).
  *  - Filtros por rango de fechas y tipo de combustible.
  *  - Acción "Registrar carga" (+) en la barra superior; no usa FAB para no tapar el paginador.
+ *  - Al tocar una carga se expande con su detalle (una a la vez, [expandedIndex]).
  *  - Estados vacío / carga / error / offline.
  */
 @Composable
@@ -69,7 +70,9 @@ fun FuelingHistoryScreen(
     isLoading: Boolean = false,
     errorMessage: String? = null,
     isOffline: Boolean = false,
-    onRetry: () -> Unit = {}
+    onRetry: () -> Unit = {},
+    expandedIndex: Int? = null,
+    onToggleExpanded: (Int) -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier,
@@ -138,8 +141,12 @@ fun FuelingHistoryScreen(
                 }
 
                 // El historial no trae id: la posición en la página basta como llave.
-                itemsIndexed(fuelings, key = { index, _ -> "$currentPage-$index" }) { _, fueling ->
-                    FuelingCard(fueling)
+                itemsIndexed(fuelings, key = { index, _ -> "$currentPage-$index" }) { index, fueling ->
+                    FuelingCard(
+                        fueling = fueling,
+                        expanded = expandedIndex == index,
+                        onToggle = { onToggleExpanded(index) }
+                    )
                 }
 
                 when {

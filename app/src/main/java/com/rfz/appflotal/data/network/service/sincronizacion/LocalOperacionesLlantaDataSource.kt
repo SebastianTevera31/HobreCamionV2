@@ -66,6 +66,10 @@ class LocalOperacionesLlantaDataSource @Inject constructor(
 
     suspend fun obtener(id: Long) = withContext(io) { operacionDao.obtener(id) }
 
+    fun observar(idUsuario: Int) = operacionDao.observar(idUsuario)
+
+    suspend fun reintentar(id: Long) = withContext(io) { operacionDao.reintentar(id) }
+
     suspend fun marcarEnviando(id: Long) = withContext(io) { operacionDao.marcarEnviando(id) }
 
     suspend fun restablecerPendiente(id: Long) = withContext(io) {

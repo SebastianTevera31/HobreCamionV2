@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sinc_titulo">Sincronización</string>
+    <string name="sinc_todo_sincronizado">Todo está sincronizado</string>
+    <string name="sinc_sin_conexion">Sin conexión</string>
+    <string name="sinc_con_conexion">Con conexión</string>
+    <string name="sinc_enviando">Enviando…</string>
+    <string name="sinc_sesion_vencida">Sesión vencida: no se pueden enviar las operaciones</string>
+    <string name="sinc_ultima">Última sincronización: %1$s</string>
+    <string name="sinc_nunca">Aún no se ha sincronizado</string>
+    <string name="sinc_sincronizar_ahora">Sincronizar ahora</string>
+    <string name="sinc_requieren_atencion">REQUIEREN ATENCIÓN (%1$d)</string>
+    <string name="sinc_en_cola">EN COLA (%1$d)</string>
+    <string name="sinc_error_carga">No se pudo leer la cola de sincronización.</string>
+    <string name="sinc_reintentar">Reintentar</string>
+    <string name="sinc_descartar">Descartar</string>
+    <string name="sinc_cancelar">Cancelar</string>
+    <string name="sinc_ver_detalle">Ver detalle</string>
+    <string name="sinc_sin_motivo">El servidor no indicó el motivo.</string>
+    <string name="sinc_descartar_titulo">¿Descartar %1$s en %2$s?</string>
+    <string name="sinc_descartar_mensaje">Se restaurará lo que tiene el servidor. No se puede deshacer.</string>
+    <string name="sinc_operacion_descartada">Operación descartada</string>
+    <string name="sinc_se_enviara_despues">No se pudo enviar ahora; se intentará al recuperar la conexión</string>
+    <string name="sinc_accion_fallida">No se pudo completar la acción</string>
+
+    <string name="sinc_tipo_montaje">Montaje</string>
+    <string name="sinc_tipo_desmontaje">Desmontaje</string>
+    <string name="sinc_tipo_inspeccion">Inspección</string>
+    <string name="sinc_tipo_desmontaje_inspeccion">Desmontaje + inspección</string>
+
+    <string name="sinc_fila_enviando">Enviando</string>
+    <string name="sinc_fila_pendiente">Pendiente</string>
+    <string name="sinc_fila_en_espera">En espera</string>
+    <string name="sinc_fila_detalle">%1$s · %2$s · %3$s</string>
+
+    <string name="sinc_pendiente_montaje">Montaje sin enviar</string>
+    <string name="sinc_pendiente_desmontaje">Desmontaje sin enviar</string>
+    <string name="sinc_pendiente_inspeccion">Inspección sin enviar</string>
+    <string name="sinc_rechazo_montaje">Montaje rechazado</string>
+    <string name="sinc_rechazo_desmontaje">Desmontaje rechazado</string>
+    <string name="sinc_rechazo_inspeccion">Inspección rechazada</string>
+
+    <plurals name="sinc_desc_pendientes">
+        <item quantity="one">%d operación pendiente de sincronizar</item>
+        <item quantity="other">%d operaciones pendientes de sincronizar</item>
+    </plurals>
+    <plurals name="sinc_desc_rechazos">
+        <item quantity="one">%d operación requiere atención</item>
+        <item quantity="other">%d operaciones requieren atención</item>
+    </plurals>
+    <plurals name="sinc_por_enviar">
+        <item quantity="one">%d por enviar</item>
+        <item quantity="other">%d por enviar</item>
+    </plurals>
+    <string name="sinc_cierre_mensaje">Se quedarán en este teléfono y se enviarán cuando vuelvas a entrar con esta misma cuenta.</string>
+    <string name="sinc_cierre_salir">Salir</string>
+    <plurals name="sinc_cierre_titulo">
+        <item quantity="one">%d operación sin enviar</item>
+        <item quantity="other">%d operaciones sin enviar</item>
+    </plurals>
+    <plurals name="sinc_banner_rechazos">
+        <item quantity="one">%d operación fue rechazada. Toca para revisarla.</item>
+        <item quantity="other">%d operaciones fueron rechazadas. Toca para revisarlas.</item>
+    </plurals>
+</resources>

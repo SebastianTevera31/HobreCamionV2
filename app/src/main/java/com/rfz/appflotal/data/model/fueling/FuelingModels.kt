@@ -44,7 +44,11 @@ data class FuelingRecordDto(
     @SerializedName("fld_station") val station: String? = null,
     @SerializedName("fld_odometer") val odometer: Int = 0,
     @SerializedName("fld_lat") val lat: Double = 0.0,
-    @SerializedName("fld_lon") val lon: Double = 0.0
+    @SerializedName("fld_lon") val lon: Double = 0.0,
+    // Nivel del tanque tras la carga (25/50/75/100); 0 en cargas que no lo capturaron.
+    @SerializedName("fld_percentage") val percentage: Int = 0,
+    // Foto del ticket; no viene en cargas sin ticket.
+    @SerializedName("fld_imageTicket") val imageTicket: String? = null
 )
 
 /** Carga de combustible tal como la usa la app (sin formato de pantalla). */
@@ -57,7 +61,9 @@ data class FuelingRecord(
     val station: String,
     val odometer: Int,
     val lat: Double,
-    val lon: Double
+    val lon: Double,
+    val tankPercentage: Int,   // 0 = no capturado
+    val ticketUrl: String?     // null si no hay foto del ticket descargable
 ) {
     val hasCoordinates: Boolean get() = lat != 0.0 || lon != 0.0
 }
@@ -92,7 +98,11 @@ fun FuelingRecordDto.toDomain() = FuelingRecord(
     station = station?.takeUnless { it.isBlank() || it.equals("N/A", ignoreCase = true) }.orEmpty(),
     odometer = odometer,
     lat = lat,
-    lon = lon
+    lon = lon,
+    tankPercentage = percentage,
+    // Solo sirve una URL completa (firmada, como fld_image en servicios): un nombre de
+    // archivo suelto no se puede descargar y se trata como si no hubiera ticket.
+    ticketUrl = imageTicket?.trim()?.takeIf { it.startsWith("http", ignoreCase = true) }
 )
 
 /**

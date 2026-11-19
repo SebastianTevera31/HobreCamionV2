@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.rfz.appflotal.data.model.sincronizacion.OperacionPendienteEntity
+import kotlinx.coroutines.flow.Flow
 
 /** Una operación es enviable si no tiene error y ninguna anterior de su posición lo tiene. */
 private const val ENVIABLE = """
@@ -20,6 +21,13 @@ interface OperacionPendienteDao {
     @Insert
     suspend fun insertar(operacion: OperacionPendienteEntity): Long
 
+    @Insert
+    suspend fun insertarTodas(operaciones: List<OperacionPendienteEntity>)
+
+    /** De todos los usuarios: para conservarlas al cerrar sesión. */
+    @Query("SELECT * FROM operacion_pendiente ORDER BY id")
+    suspend fun todas(): List<OperacionPendienteEntity>
+
     @Query("SELECT * FROM operacion_pendiente AS o WHERE $ENVIABLE ORDER BY o.id LIMIT 1")
     suspend fun siguienteParaEnviar(idUsuario: Int): OperacionPendienteEntity?
 
@@ -28,6 +36,15 @@ interface OperacionPendienteDao {
 
     @Query("SELECT * FROM operacion_pendiente WHERE id = :id")
     suspend fun obtener(id: Long): OperacionPendienteEntity?
+
+    @Query("SELECT * FROM operacion_pendiente WHERE idUsuario = :idUsuario ORDER BY id")
+    fun observar(idUsuario: Int): Flow<List<OperacionPendienteEntity>>
+
+    @Query(
+        "UPDATE operacion_pendiente SET estado = 'PENDIENTE', ultimoError = NULL " +
+            "WHERE id = :id AND estado = 'CON_ERROR'"
+    )
+    suspend fun reintentar(id: Long)
 
     @Query("UPDATE operacion_pendiente SET estado = 'ENVIANDO' WHERE id = :id")
     suspend fun marcarEnviando(id: Long)

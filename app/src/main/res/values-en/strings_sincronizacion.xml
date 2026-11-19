@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sinc_titulo">Sync</string>
+    <string name="sinc_todo_sincronizado">Everything is synced</string>
+    <string name="sinc_sin_conexion">Offline</string>
+    <string name="sinc_con_conexion">Online</string>
+    <string name="sinc_enviando">Sending…</string>
+    <string name="sinc_sesion_vencida">Session expired: operations cannot be sent</string>
+    <string name="sinc_ultima">Last sync: %1$s</string>
+    <string name="sinc_nunca">Not synced yet</string>
+    <string name="sinc_sincronizar_ahora">Sync now</string>
+    <string name="sinc_requieren_atencion">NEED ATTENTION (%1$d)</string>
+    <string name="sinc_en_cola">QUEUED (%1$d)</string>
+    <string name="sinc_error_carga">The sync queue could not be read.</string>
+    <string name="sinc_reintentar">Retry</string>
+    <string name="sinc_descartar">Discard</string>
+    <string name="sinc_cancelar">Cancel</string>
+    <string name="sinc_ver_detalle">View details</string>
+    <string name="sinc_sin_motivo">The server did not give a reason.</string>
+    <string name="sinc_descartar_titulo">Discard %1$s on %2$s?</string>
+    <string name="sinc_descartar_mensaje">The server\'s data will be restored. This cannot be undone.</string>
+    <string name="sinc_operacion_descartada">Operation discarded</string>
+    <string name="sinc_se_enviara_despues">Could not send now; it will be retried when back online</string>
+    <string name="sinc_accion_fallida">The action could not be completed</string>
+
+    <string name="sinc_tipo_montaje">Mounting</string>
+    <string name="sinc_tipo_desmontaje">Dismounting</string>
+    <string name="sinc_tipo_inspeccion">Inspection</string>
+    <string name="sinc_tipo_desmontaje_inspeccion">Dismounting + inspection</string>
+
+    <string name="sinc_fila_enviando">Sending</string>
+    <string name="sinc_fila_pendiente">Pending</string>
+    <string name="sinc_fila_en_espera">Waiting</string>
+    <string name="sinc_fila_detalle">%1$s · %2$s · %3$s</string>
+
+    <string name="sinc_pendiente_montaje">Mounting not sent</string>
+    <string name="sinc_pendiente_desmontaje">Dismounting not sent</string>
+    <string name="sinc_pendiente_inspeccion">Inspection not sent</string>
+    <string name="sinc_rechazo_montaje">Mounting rejected</string>
+    <string name="sinc_rechazo_desmontaje">Dismounting rejected</string>
+    <string name="sinc_rechazo_inspeccion">Inspection rejected</string>
+
+    <plurals name="sinc_desc_pendientes">
+        <item quantity="one">%d operation waiting to sync</item>
+        <item quantity="other">%d operations waiting to sync</item>
+    </plurals>
+    <plurals name="sinc_desc_rechazos">
+        <item quantity="one">%d operation needs attention</item>
+        <item quantity="other">%d operations need attention</item>
+    </plurals>
+    <plurals name="sinc_por_enviar">
+        <item quantity="one">%d to send</item>
+        <item quantity="other">%d to send</item>
+    </plurals>
+    <string name="sinc_cierre_mensaje">They will stay on this phone and be sent when you sign in again with this same account.</string>
+    <string name="sinc_cierre_salir">Sign out</string>
+    <plurals name="sinc_cierre_titulo">
+        <item quantity="one">%d operation not sent</item>
+        <item quantity="other">%d operations not sent</item>
+    </plurals>
+    <plurals name="sinc_banner_rechazos">
+        <item quantity="one">%d operation was rejected. Tap to review it.</item>
+        <item quantity="other">%d operations were rejected. Tap to review them.</item>
+    </plurals>
+</resources>

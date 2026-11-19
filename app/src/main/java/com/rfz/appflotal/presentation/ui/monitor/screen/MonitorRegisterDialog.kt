@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Dialog
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.Commons.hasLinkedMonitor
 import com.rfz.appflotal.core.util.Commons.isValidMacAddress
 import com.rfz.appflotal.data.network.service.ApiResult
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
@@ -105,10 +106,19 @@ fun MonitorRegisterDialog(
             configurationSelected?.id != savedConfiguration.id
     var hasTpms by remember { mutableStateOf(true) }
 
+    // Al reabrir, respetar lo guardado: "sin monitor" se guarda como "No Monitor" (no es
+    // una MAC). macValue llega del ViewModel después de la primera composición.
+    LaunchedEffect(macValue) {
+        if (canChooseNoTpms && macValue.isNotBlank() && !hasLinkedMonitor(macValue)) {
+            hasTpms = false
+        }
+    }
+
     val currentMacAddress = if (isScanning) {
         stringResource(R.string.escaneando)
     } else {
-        macValue.ifEmpty { stringResource(R.string.mac_no_disponible) }
+        // "No Monitor" no es una MAC: si el usuario cambia a "Sí", que vea "no disponible".
+        macValue.takeIf { hasLinkedMonitor(it) } ?: stringResource(R.string.mac_no_disponible)
     }
 
     val isMacAddressValid = remember(currentMacAddress) { isValidMacAddress(currentMacAddress) }

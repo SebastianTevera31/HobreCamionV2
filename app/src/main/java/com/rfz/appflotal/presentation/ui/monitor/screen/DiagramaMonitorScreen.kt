@@ -70,6 +70,7 @@ import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.component.MonitorMenuButton
+import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.AvisoLlantaUi
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
@@ -91,7 +92,9 @@ fun DiagramaMonitorScreen(
     onSwitchTempUnit: () -> Unit,
     onSwitchPressureUnit: () -> Unit,
     tires: List<MonitorTire>?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    avisosSincronizacion: Map<String, AvisoLlantaUi> = emptyMap(),
+    onVerSincronizacion: () -> Unit = {},
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
@@ -114,7 +117,8 @@ fun DiagramaMonitorScreen(
                     image = image,
                     tireSelected = tireSelected,
                     width = imageDimens.first,
-                    height = imageDimens.second
+                    height = imageDimens.second,
+                    insigniasSincronizacion = avisosSincronizacion.mapValues { it.value.conError }
                 )
                 isLoading = false
             }
@@ -172,7 +176,9 @@ fun DiagramaMonitorScreen(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
-                    isLoading = tireUiState.isLoading
+                    isLoading = tireUiState.isLoading,
+                    avisoSincronizacion = avisosSincronizacion[tireUiState.currentTire],
+                    onVerSincronizacion = onVerSincronizacion
                 )
 
                 PanelLlantas(
@@ -365,275 +371,6 @@ fun CeldaAlerta(wheel: String, alertMessage: String, modifier: Modifier = Modifi
 }
 
 @Composable
-fun PanelSensor(
-    paymentPlan: PaymentPlanType,
-    isAssembled: Boolean,
-    isInspectionAvailable: Boolean,
-    wheel: String,
-    temperature: String,
-    pressureUnit: String,
-    pressure: String,
-    timestamp: String?,
-    temperatureStatus: SensorAlerts,
-    pressureStatus: SensorAlerts,
-    flatTireStatus: SensorAlerts,
-    tireRemovingStatus: SensorAlerts,
-    batteryStatus: SensorAlerts,
-    onInspectClick: () -> Unit,
-    onAssemblyClick: () -> Unit,
-    onSwitchTempUnit: () -> Unit,
-    onSwitchPressureUnit: () -> Unit,
-    onDisassemblyClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
-) {
-    val (tirePanelWeight, alertPanelWeight) =
-        if (paymentPlan == PaymentPlanType.Complete) 0.65f to 0.35f
-        else 1f to 1f
-
-
-    val activeAlerts =
-        remember(temperatureStatus, pressureStatus, flatTireStatus, tireRemovingStatus) {
-            buildList {
-                if (temperatureStatus == SensorAlerts.HIGH_TEMPERATURE) {
-                    add(temperatureStatus)
-                }
-                if (pressureStatus != SensorAlerts.NO_DATA) {
-                    add(pressureStatus)
-                }
-                if (flatTireStatus != SensorAlerts.NO_DATA) {
-                    add(flatTireStatus)
-                }
-                if (tireRemovingStatus != SensorAlerts.NO_DATA) {
-                    add(tireRemovingStatus)
-                }
-            }
-        }
-
-    // Con llanta seleccionada la tarjeta toma la altura de su contenido para que las
-    // mediciones y los botones se vean completos; la tarjeta de alertas usa el espacio restante
-    val wrapSensorCard = wheel.isNotEmpty() && !isLoading
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier   // aquí ya viene con height(panelDimension)
-    ) {
-        // TARJETA SUPERIOR: DATOS DEL SENSOR
-        Card(
-            colors = CardDefaults.cardColors(Color.White),
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(if (wrapSensorCard) Modifier else Modifier.weight(tirePanelWeight)),
-            elevation = CardDefaults.cardElevation(8.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .then(if (wrapSensorCard) Modifier.fillMaxWidth() else Modifier.fillMaxSize())
-                    .padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = if (wheel.isNotEmpty()) Arrangement.Top else Arrangement.Center
-            ) {
-                if (isLoading) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 3.dp
-                        )
-                    }
-                } else if (wheel.isNotEmpty()) {
-                    // Encabezado: llanta + batería
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = pluralStringResource(R.plurals.llanta_tag, 1, wheel),
-                            color = Color("#2E3192".toColorInt()),
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        BatteryAlertIcon(
-                            batteryStatus = batteryStatus
-                        )
-                    }
-
-                    // Fecha a ancho completo para evitar que se parta en 3 líneas junto a la batería
-                    Text(
-                        text = if (!timestamp.isNullOrEmpty() && !isVoidDate(timestamp)) {
-                            stringResource(
-                                R.string.actualizado,
-                                timestamp
-                            )
-                        } else "N/A",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp,
-                        lineHeight = 14.sp,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-
-                    // weight(fill = false): solo si el contenido no cabe (p. ej. fuente del sistema muy grande)
-                    // los datos ceden espacio y hacen scroll, para que los botones no se recorten
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f, fill = false)
-                            .padding(dimensionResource(R.dimen.thin_dimen))
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        CeldaDatosSensor(
-                            title = stringResource(R.string.temperatura),
-                            img = R.drawable.temperature__1_,
-                            value = temperature,
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = onSwitchTempUnit
-                        )
-
-                        CeldaDatosSensor(
-                            title = stringResource(R.string.presion),
-                            img = R.drawable.tire_pressure,
-                            value = "$pressure $pressureUnit",
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = onSwitchPressureUnit
-                        )
-                    }
-
-                    if (paymentPlan == PaymentPlanType.Complete) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            if (isAssembled) {
-                                if (isInspectionAvailable) {
-                                    MonitorMenuButton(
-                                        text = stringResource(R.string.inspeccionar),
-                                        onClick = onInspectClick
-                                    )
-                                }
-                                MonitorMenuButton(
-                                    text = stringResource(R.string.desmontar),
-                                    onClick = { onDisassemblyClick() }
-                                )
-                            } else {
-                                MonitorMenuButton(
-                                    text = stringResource(R.string.montar),
-                                    onClick = onAssemblyClick
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    Text(
-                        text = stringResource(R.string.seleccione_una_llanta),
-                        color = Color("#2E3192".toColorInt()),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(
-                            dimensionResource(R.dimen.medium_dimen)
-                        )
-                    )
-                }
-            }
-        }
-
-        // TARJETA INFERIOR: ALERTAS
-        Card(
-            colors = CardDefaults.cardColors(Color.White),
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(alertPanelWeight),
-            elevation = CardDefaults.cardElevation(8.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                if (wheel.isNotEmpty()) {
-                    if (activeAlerts.isNotEmpty()) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            val tireRemovingAlert = activeAlerts.find { it == SensorAlerts.REMOVAL }
-
-                            Text(
-                                text = stringResource(R.string.alertas_activas),
-                                color = Color("#2E3192".toColorInt()),
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            if (tireRemovingAlert != null) {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(Color.Red)
-                                ) {
-                                    CeldaAlerta(
-                                        wheel,
-                                        stringResource(tireRemovingAlert.message),
-                                    )
-                                }
-                            } else {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(rememberScrollState())
-                                ) {
-                                    activeAlerts.forEach { alerts ->
-                                        CeldaAlerta(wheel, stringResource(alerts.message))
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        Text(
-                            text = stringResource(R.string.sin_alertas),
-                            color = Color("#2E3192".toColorInt()),
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(
-                                dimensionResource(R.dimen.medium_dimen)
-                            )
-                        )
-                    }
-                } else {
-                    Text(
-                        text = stringResource(R.string.sin_alertas),
-                        color = Color("#2E3192".toColorInt()),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(
-                            dimensionResource(R.dimen.medium_dimen)
-                        )
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun BatteryAlertIcon(batteryStatus: SensorAlerts, modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition()
     val alpha by infiniteTransition.animateFloat(
@@ -655,37 +392,6 @@ fun BatteryAlertIcon(batteryStatus: SensorAlerts, modifier: Modifier = Modifier)
             .size(dimensionResource(R.dimen.huge_dimen))
             .alpha(if (isAlert) alpha else 1f)
     )
-}
-
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun PanelSensorViewPreview() {
-    HombreCamionTheme {
-        PanelSensor(
-            paymentPlan = PaymentPlanType.Complete,
-            wheel = "P1",
-            temperature = "40 C",
-            pressureUnit = "PSI",
-            pressure = "3",
-            timestamp = VOID_DATE,
-            isInspectionAvailable = false,
-            isAssembled = true,
-            temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
-            pressureStatus = SensorAlerts.LOW_PRESSURE,
-            batteryStatus = SensorAlerts.NO_DATA,
-            flatTireStatus = SensorAlerts.NO_DATA,
-            tireRemovingStatus = SensorAlerts.REMOVAL,
-            onInspectClick = {},
-            onAssemblyClick = {},
-            onSwitchTempUnit = {},
-            onSwitchPressureUnit = {},
-            onDisassemblyClick = {},
-            modifier = Modifier
-                .safeDrawingPadding()
-                .height(460.dp)
-                .padding(bottom = dimensionResource(R.dimen.small_dimen))
-        )
-    }
 }
 
 @Composable
@@ -731,36 +437,6 @@ fun PanelLlantasPreview() {
             tireSelected = "P1",
             updateSelectedTire = {},
             getSensorData = {}
-        )
-    }
-}
-
-@Composable
-@Preview(showBackground = true)
-fun PanelSensorPreview() {
-    HombreCamionTheme {
-        PanelSensor(
-            paymentPlan = PaymentPlanType.Complete,
-            isAssembled = true,
-            isInspectionAvailable = true,
-            wheel = "P2",
-            temperature = "32 °C",
-            pressureUnit = "PSI",
-            pressure = "110",
-            timestamp = "12/05/2024 10:30",
-            temperatureStatus = SensorAlerts.NO_DATA,
-            pressureStatus = SensorAlerts.NO_DATA,
-            flatTireStatus = SensorAlerts.NO_DATA,
-            tireRemovingStatus = SensorAlerts.NO_DATA,
-            batteryStatus = SensorAlerts.NO_DATA,
-            onInspectClick = {},
-            onAssemblyClick = {},
-            onSwitchTempUnit = {},
-            onSwitchPressureUnit = {},
-            onDisassemblyClick = {},
-            modifier = Modifier
-                .height(460.dp)
-                .padding(8.dp)
         )
     }
 }

@@ -773,7 +773,7 @@
     <string name="mapa_vial_titulo">Mapa vial</string>
     <string name="mapa_vial_subtitulo">Consulta el estado de las vías en tiempo real</string>
     <string name="requiere_internet_badge">Requiere internet</string>
-    <string name="registrar">registrar</string>
+    <string name="registrar">Registrar</string>
     <string name="todas">Todas</string>
 
     <string name="llantas_number">%1$s llantas</string>

@@ -55,6 +55,13 @@ object Commons {
         return mac.matches(macRegex)
     }
 
+    /**
+     * ¿El usuario tiene un monitor TPMS vinculado? Solo si la MAC guardada es una MAC real:
+     * quien elige "sin monitor" (plan Complete) guarda el texto "No Monitor", y una MAC
+     * vacía tampoco cuenta. Usar esto, no `isBlank()`, para decidir estado/banner/conexión.
+     */
+    fun hasLinkedMonitor(mac: String): Boolean = isValidMacAddress(mac.trim())
+
     private fun isSpanish() = AppLocale.currentLocale.value.language == "es"
 
     /** Locale con el que se formatean fechas para mostrar (en_US para ingles). */

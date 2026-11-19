@@ -33,6 +33,37 @@ class ProcesarColaUseCaseTest {
     }
 
     @Test
+    fun invoke_conEnvios_registraLaHoraDeSincronizacion() = runBlocking {
+        cola.agregar(1, "P3")
+
+        procesarCola()
+
+        assertTrue(cola.ultimaSincronizacion != null)
+        assertEquals(listOf(ResultadoProcesamiento.COMPLETA), cola.resultadosProceso)
+    }
+
+    @Test
+    fun invoke_errorConexion_noRegistraSincronizacion() = runBlocking {
+        cola.agregar(1, "P3")
+        cola.respuestas[1] = ResultadoEnvio.ErrorConexion
+
+        procesarCola()
+
+        assertNull(cola.ultimaSincronizacion)
+        assertEquals(listOf(ResultadoProcesamiento.REINTENTAR), cola.resultadosProceso)
+    }
+
+    @Test
+    fun reintentar_operacionRechazada_laVuelveAEnviar() = runBlocking {
+        cola.agregar(1, "P3", estado = EstadoOperacion.CON_ERROR)
+        val reintentar = ReintentarOperacionUseCase(cola, SincronizarAhoraUseCase(procesarCola, cola))
+
+        assertEquals(ResultadoProcesamiento.COMPLETA, reintentar(1))
+        assertEquals(listOf(1L), cola.enviadas)
+        assertNull(cola.obtener(1))
+    }
+
+    @Test
     fun invoke_errorConexion_detieneLaColaYLaDejaEnviando() = runBlocking {
         cola.agregar(1, "P3")
         cola.agregar(2, "P5")

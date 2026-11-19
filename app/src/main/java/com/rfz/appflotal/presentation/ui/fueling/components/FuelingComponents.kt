@@ -1,5 +1,6 @@
 package com.rfz.appflotal.presentation.ui.fueling.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,12 +18,14 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.outlined.LocalGasStation
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.Commons
+import com.rfz.appflotal.presentation.commons.ImagePickerField
 import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.alerts.screens.BaseFilterField
@@ -55,15 +59,37 @@ import com.rfz.appflotal.presentation.ui.fueling.model.sampleFuelings
 import com.rfz.appflotal.presentation.ui.services.components.InfoPair
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
 
-/** Tarjeta de una carga del historial (solo lectura). */
+/**
+ * Tarjeta de una carga del historial (solo lectura). Al tocarla se expande con el detalle
+ * (vehículo, nivel del tanque y foto del ticket); si la carga no trae nada de eso no se expande.
+ * Stateless: quien la usa decide cuál está expandida.
+ */
 @Composable
-fun FuelingCard(fueling: FuelingUi, modifier: Modifier = Modifier) {
+fun FuelingCard(
+    fueling: FuelingUi,
+    modifier: Modifier = Modifier,
+    expanded: Boolean = false,
+    onToggle: () -> Unit = {}
+) {
     val uriHandler = LocalUriHandler.current
+    val expandable = fueling.hasDetails
 
     Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        onClick = onToggle,
+        enabled = expandable,
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize(),
+        // Sin detalle la tarjeta queda deshabilitada, pero debe verse igual.
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+            disabledContainerColor = Color.White,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            disabledElevation = 2.dp
+        ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(Dimens.PaddingMedium)) {
@@ -86,6 +112,24 @@ fun FuelingCard(fueling: FuelingUi, modifier: Modifier = Modifier) {
                         text = fueling.date,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+                if (fueling.ticketUrl != null) {
+                    Icon(
+                        imageVector = Icons.Outlined.Receipt,
+                        contentDescription = stringResource(R.string.fue_ticket_label),
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                if (expandable) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = stringResource(
+                            if (expanded) R.string.colapsar else R.string.expandir
+                        ),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = Dimens.PaddingSmall)
                     )
                 }
             }
@@ -132,6 +176,10 @@ fun FuelingCard(fueling: FuelingUi, modifier: Modifier = Modifier) {
                 )
             }
 
+            if (expanded && expandable) {
+                FuelingCardDetails(fueling)
+            }
+
             fueling.mapsUrl?.let { url ->
                 Spacer(modifier = Modifier.size(Dimens.PaddingSmall))
                 Row(
@@ -154,6 +202,47 @@ fun FuelingCard(fueling: FuelingUi, modifier: Modifier = Modifier) {
                 }
             }
         }
+    }
+}
+
+/** Parte expandida de [FuelingCard]: vehículo, nivel del tanque y foto del ticket. */
+@Composable
+private fun FuelingCardDetails(fueling: FuelingUi) {
+    Column(
+        modifier = Modifier.padding(top = Dimens.PaddingMedium),
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+    ) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        if (fueling.vehicle.isNotBlank() || fueling.tankLevel != null) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                if (fueling.vehicle.isNotBlank()) {
+                    InfoPair(
+                        label = stringResource(R.string.vehiculo),
+                        value = fueling.vehicle,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                fueling.tankLevel?.let { level ->
+                    InfoPair(
+                        label = stringResource(R.string.fue_nivel_tanque),
+                        value = level.fraction ?: stringResource(R.string.fue_tanque_lleno),
+                        alignment = Alignment.End,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
+        // Solo lectura: muestra la foto, abre el visor al tocarla y se oculta si no carga.
+        ImagePickerField(
+            label = stringResource(R.string.fue_ticket_label),
+            editable = false,
+            newImage = null,
+            onImageSelected = {},
+            onRemoveNewImage = {},
+            currentImageUrl = fueling.ticketUrl
+        )
     }
 }
 
@@ -349,7 +438,9 @@ fun FuelingFilterCard(
 private fun FuelingCardPreview() {
     HombreCamionTheme {
         Column(verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)) {
-            sampleFuelings.forEach { FuelingCard(it) }
+            sampleFuelings.forEachIndexed { index, fueling ->
+                FuelingCard(fueling, expanded = index == 0)
+            }
         }
     }
 }

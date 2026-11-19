@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.Commons.hasLinkedMonitor
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.theme.primaryLight
@@ -35,11 +36,12 @@ import com.rfz.appflotal.presentation.theme.primaryLight
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MonitorTopBar(
-    showNavigationButton: Boolean = true,
     showDialog: () -> Unit,
     modifier: Modifier = Modifier,
+    showNavigationButton: Boolean = true,
     monitorMac: String = "",
     signalQuality: BluetoothSignalQuality = BluetoothSignalQuality.Desconocida,
+    accionSincronizacion: @Composable () -> Unit = {},
     popBackStack: () -> Unit
 ) {
     TopAppBar(
@@ -47,7 +49,7 @@ fun MonitorTopBar(
             containerColor = primaryLight, // Color de fondo
             titleContentColor = Color.White // Color del título
         ),
-        title = { Text("Monitor") },
+        title = { Text("Monitor", style = MaterialTheme.typography.bodyMedium) },
         navigationIcon = {
             if (showNavigationButton) {
                 IconButton(onClick = { popBackStack() }) {
@@ -61,6 +63,7 @@ fun MonitorTopBar(
         },
         actions = {
             TpmsStatusChip(monitorMac = monitorMac, signalQuality = signalQuality)
+            accionSincronizacion()
             IconButton(onClick = showDialog) {
                 Icon(
                     painter = painterResource(R.drawable.macconfig),
@@ -85,7 +88,7 @@ private fun TpmsStatusChip(
     modifier: Modifier = Modifier
 ) {
     val (dotColor, text) = when {
-        monitorMac.isBlank() -> Color(0xFF9E9E9E) to stringResource(R.string.sin_tpms)
+        !hasLinkedMonitor(monitorMac) -> Color(0xFF9E9E9E) to stringResource(R.string.sin_tpms)
         signalQuality == BluetoothSignalQuality.Desconocida ->
             Color(0xFFFFB300) to stringResource(
                 R.string.tpms_estado,

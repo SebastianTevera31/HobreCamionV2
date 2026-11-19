@@ -16,6 +16,7 @@ import com.rfz.appflotal.domain.wifi.WifiUseCase
 import com.rfz.appflotal.presentation.ui.fueling.model.FuelingFormData
 import com.rfz.appflotal.presentation.ui.fueling.model.FuelingSaveState
 import com.rfz.appflotal.presentation.ui.fueling.model.FuelingUi
+import com.rfz.appflotal.presentation.ui.fueling.model.TankLevel
 import com.rfz.appflotal.presentation.ui.services.model.CatalogItemUi
 import com.rfz.appflotal.presentation.ui.services.model.VehicleHeaderUi
 import com.rfz.appflotal.presentation.ui.updateuserscreen.viewmodel.toVehicleData
@@ -46,6 +47,8 @@ data class FuelingUiState(
     val fuelTypesFailed: Boolean = false,
     val fuelings: List<FuelingUi> = emptyList(),
     val currentPage: Int = 0, // 0 = todavía no se cargó ninguna página
+    // Posición en la página de la carga expandida (una a la vez); null = ninguna.
+    val expandedIndex: Int? = null,
     val hasNextPage: Boolean = true,
     val total: Int = 0,
     // Filtros aplicados: fechas en dd/MM/yyyy ("" = sin límite); tipo null = todos.
@@ -145,6 +148,7 @@ class FuelingViewModel @Inject constructor(
                     it.copy(
                         fuelings = result.items.map { record -> record.toUi() },
                         currentPage = result.page,
+                        expandedIndex = null,
                         hasNextPage = result.hasNextPage,
                         total = result.total,
                         isLoading = false
@@ -162,6 +166,13 @@ class FuelingViewModel @Inject constructor(
     }
 
     fun retry() = goToPage(_uiState.value.currentPage.coerceAtLeast(1))
+
+    /** Expande la carga en [index] (cerrando la anterior) o la cierra si ya estaba abierta. */
+    fun toggleExpanded(index: Int) {
+        _uiState.update {
+            it.copy(expandedIndex = if (it.expandedIndex == index) null else index)
+        }
+    }
 
     fun applyFilter(startDate: String, endDate: String, fuelTypeId: Int?) {
         _uiState.update {
@@ -227,7 +238,10 @@ private fun FuelingRecord.toUi(): FuelingUi {
         amount = amount,
         station = station,
         odometer = "%,d".format(odometer),
-        mapsUrl = mapsUrl
+        mapsUrl = mapsUrl,
+        vehicle = vehicle,
+        tankLevel = TankLevel.fromPercentage(tankPercentage),
+        ticketUrl = ticketUrl
     )
 }
 

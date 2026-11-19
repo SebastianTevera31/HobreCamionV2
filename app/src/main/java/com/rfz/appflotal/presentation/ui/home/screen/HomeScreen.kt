@@ -71,6 +71,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.rfz.appflotal.presentation.ui.home.cierresesion.components.AvisoCierreSesionRoute
+import com.rfz.appflotal.presentation.ui.home.cierresesion.viewmodel.AvisoCierreSesionViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +87,7 @@ fun HomeScreen(
     onAssemblyClick: (tire: String) -> Unit,
     onDisassemblyClick: (tire: String, temp: Float, pressure: Float) -> Unit,
     monitorViewModel: MonitorViewModel,
+    avisoCierreViewModel: AvisoCierreSesionViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
@@ -122,6 +126,9 @@ fun HomeScreen(
             }
         }
     }
+
+    // Los botones de salir pasan por el aviso; el cierre real ocurre cuando el aviso lo confirma.
+    AvisoCierreSesionRoute(viewModel = avisoCierreViewModel, onCerrarSesion = { onLogout() })
 
     LaunchedEffect(Unit) {
         homeViewModel.loadInitialData()
@@ -179,7 +186,7 @@ fun HomeScreen(
                                 homeViewModel.changeLanguage(code)
                             }
                         },
-                        onLogout = { onLogout() },
+                        onLogout = { avisoCierreViewModel.solicitarCierre() },
                         onShare = {
                             homeViewModel.cleanOperationStatus()
                             navController.navigate(NavScreens.COMENTARIOS) {
@@ -277,7 +284,7 @@ fun HomeScreen(
                                 onSwitchPressure = { monitorViewModel.switchPressureUnit() },
                                 onSwitchOdometer = { monitorViewModel.switchOdometerUnit() },
                                 onFinish = { monitorViewModel.finishSetupWizard() },
-                                onCancelWithoutConfiguration = { onLogout() },
+                                onCancelWithoutConfiguration = { avisoCierreViewModel.solicitarCierre() },
                                 modifier = Modifier.padding(innerPadding)
                             )
                         }
@@ -313,7 +320,7 @@ fun HomeScreen(
                                 if (monitorUiState.monitorId != 0) {
                                     monitorViewModel.showMonitorDialog(false)
                                 } else {
-                                    onLogout()
+                                    avisoCierreViewModel.solicitarCierre()
                                 }
                             },
                             onSuccessRegister = { _ ->

@@ -2,14 +2,17 @@ package com.rfz.appflotal.domain.sincronizacion
 
 import com.rfz.appflotal.data.model.assembly.AssemblyTire
 import com.rfz.appflotal.data.model.assembly.AssemblyTireResponse
+import com.rfz.appflotal.data.model.sincronizacion.EstadoEnvio
 import com.rfz.appflotal.data.model.sincronizacion.EstadoOperacion
 import com.rfz.appflotal.data.model.sincronizacion.OperacionPendiente
 import com.rfz.appflotal.data.model.sincronizacion.ResultadoEnvio
+import com.rfz.appflotal.data.model.sincronizacion.ResultadoProcesamiento
 import com.rfz.appflotal.data.model.sincronizacion.TipoOperacion
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.sincronizacion.ColaSincronizacionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 
 /** Cola en memoria con la misma regla de bloqueo por posición que el DAO. */
 class FakeColaSincronizacion : ColaSincronizacionRepository {
@@ -68,6 +71,25 @@ class FakeColaSincronizacion : ColaSincronizacionRepository {
 
     override fun programarEnvio() {
         programaciones++
+    }
+
+    var ultimaSincronizacion: Long? = null
+    val resultadosProceso = mutableListOf<ResultadoProcesamiento>()
+
+    override suspend fun reintentar(id: Long) = cambiar(id) {
+        if (it.estado == EstadoOperacion.CON_ERROR) it.copy(estado = EstadoOperacion.PENDIENTE, ultimoError = null)
+        else it
+    }
+
+    override fun observarOperaciones(): Flow<List<OperacionPendiente>> = flowOf(operaciones.toList())
+    override fun observarEstadoEnvio(): Flow<EstadoEnvio> = flowOf(EstadoEnvio(ultimaSincronizacion = ultimaSincronizacion))
+    override fun iniciarProceso() = Unit
+    override fun terminarProceso(resultado: ResultadoProcesamiento) {
+        resultadosProceso += resultado
+    }
+
+    override suspend fun registrarSincronizacion(momento: Long) {
+        ultimaSincronizacion = momento
     }
 
     private fun cambiar(id: Long, cambio: (OperacionPendiente) -> OperacionPendiente) {

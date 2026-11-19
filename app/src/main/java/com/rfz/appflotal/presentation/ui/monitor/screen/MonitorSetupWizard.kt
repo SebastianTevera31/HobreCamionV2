@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.rfz.appflotal.R
+import com.rfz.appflotal.core.util.Commons.hasLinkedMonitor
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.BaseConfig
@@ -103,7 +104,7 @@ fun MonitorSetupWizardContent(
     WheelMountingScreen(
         hasConfiguration = hasConfiguration,
         baseConfigLabel = monitorUiState.baseConfig?.let { "BASE ${it.base}" },
-        isSensorLinked = monitorUiState.monitorMac.isNotBlank(),
+        isSensorLinked = hasLinkedMonitor(monitorUiState.monitorMac),
         tires = monitorUiState.listOfTires,
         image = monitorUiState.imageBitmap,
         imageDimens = monitorUiState.imageDimen,

@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -74,6 +76,8 @@ fun DiagramImage(
     showAssemblyStatus: Boolean = false,
     scrollable: Boolean = true,
     showEditBadge: Boolean = false,
+    /** Posición → true si tiene una operación rechazada, false si solo tiene pendientes. */
+    insigniasSincronizacion: Map<String, Boolean> = emptyMap(),
 ) {
     val hotspots = tires.map {
         val hotspot = Hotspot.fromPixelCenter(
@@ -113,6 +117,7 @@ fun DiagramImage(
         sizeDp = sizeDp,
         scrollable = scrollable,
         showEditBadge = showEditBadge,
+        insigniasSincronizacion = insigniasSincronizacion,
         modifier = defaultModifier.then(modifier)
     )
 }
@@ -128,9 +133,12 @@ fun ImageWithHotspotsProportional(
     sizeDp: Dp = 200.dp,
     scrollable: Boolean = true,
     showEditBadge: Boolean = false,
+    insigniasSincronizacion: Map<String, Boolean> = emptyMap(),
 ) {
     val textMeasurer = rememberTextMeasurer()
     val editPainter = rememberVectorPainter(Icons.Filled.Edit)
+    val pendientePainter = rememberVectorPainter(Icons.Filled.ArrowUpward)
+    val errorPainter = rememberVectorPainter(Icons.Filled.PriorityHigh)
     val scrollState = rememberScrollState()
     val isVertical = orientation == DiagramOrientation.VERTICAL
 
@@ -252,6 +260,27 @@ fun ImageWithHotspotsProportional(
                                 draw(
                                     size = Size(iconSize, iconSize),
                                     colorFilter = ColorFilter.tint(Color(0xFF2E7D32))
+                                )
+                            }
+                        }
+                    }
+
+                    // Insignia de sincronización (esquina superior izquierda; la derecha es de edición)
+                    insigniasSincronizacion[h.id]?.let { conError ->
+                        val radio = 9.dp.toPx()
+                        val centro = Offset(rect.left + 2.dp.toPx(), rect.top + 2.dp.toPx())
+                        drawCircle(Color.White, radius = radio, center = centro)
+                        drawCircle(
+                            color = if (conError) Color(0xFFC62828) else Color(0xFFFFB300),
+                            radius = radio - 1.dp.toPx(),
+                            center = centro
+                        )
+                        val lado = 12.dp.toPx()
+                        translate(left = centro.x - lado / 2f, top = centro.y - lado / 2f) {
+                            with(if (conError) errorPainter else pendientePainter) {
+                                draw(
+                                    size = Size(lado, lado),
+                                    colorFilter = ColorFilter.tint(if (conError) Color.White else Color.Black)
                                 )
                             }
                         }

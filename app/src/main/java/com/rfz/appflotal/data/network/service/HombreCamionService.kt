@@ -23,6 +23,7 @@ import androidx.core.content.PermissionChecker
 import com.rfz.appflotal.R
 import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.core.util.Commons.getCurrentUtcDate
+import com.rfz.appflotal.core.util.Commons.hasLinkedMonitor
 import com.rfz.appflotal.core.util.Commons.parseUtcDate
 import com.rfz.appflotal.core.util.Commons.validateBluetoothConnectivity
 import com.rfz.appflotal.core.util.tpms.getBatteryStatus
@@ -294,7 +295,8 @@ class HombreCamionService : Service() {
         val dataUser = record.first()
         Log.d("HombreCamionService", "Iniciando Bluetooth...")
         currentMac = dataUser.monitorMac
-        if (dataUser.monitorMac.isBlank()) {
+        // "Sin monitor" se guarda como "No Monitor": solo se conecta a una MAC real.
+        if (!hasLinkedMonitor(dataUser.monitorMac)) {
             bluetoothUseCase.disconnect()
             return
         }

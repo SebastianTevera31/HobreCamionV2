@@ -54,6 +54,28 @@ fun OperacionPendienteEntity.toDomain() = OperacionPendiente(
     creadoEn = creadoEn
 )
 
+/** Cómo va el envío de la cola; procesando y sesionVencida solo viven en memoria. */
+data class EstadoEnvio(
+    val procesando: Boolean = false,
+    val sesionVencida: Boolean = false,
+    val ultimaSincronizacion: Long? = null,
+)
+
+data class EstadoSincronizacion(
+    val operaciones: List<OperacionPendiente>,
+    /** Pendientes que esperan porque una anterior de su posición fue rechazada. */
+    val bloqueadas: Set<Long>,
+    val envio: EstadoEnvio,
+)
+
+/** Misma regla que el DAO: un CON_ERROR detiene las operaciones posteriores de su posición. */
+fun operacionesBloqueadas(operaciones: List<OperacionPendiente>): Set<Long> =
+    operaciones.filter { op ->
+        op.estado != EstadoOperacion.CON_ERROR && operaciones.any {
+            it.posicion == op.posicion && it.estado == EstadoOperacion.CON_ERROR && it.id < op.id
+        }
+    }.map { it.id }.toSet()
+
 /** Respuesta de un envío al servidor. */
 sealed interface ResultadoEnvio {
     data object Aceptada : ResultadoEnvio

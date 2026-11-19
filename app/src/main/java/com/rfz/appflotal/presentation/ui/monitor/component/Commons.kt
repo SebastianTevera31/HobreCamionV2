@@ -13,10 +13,16 @@ import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.presentation.ui.home.utils.primaryColor
 
 @Composable
-fun MonitorMenuButton(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun MonitorMenuButton(
+    text: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
     val buttonShape = RoundedCornerShape(12.dp)
     Button(
         onClick = onClick,
+        enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
             .shadow(

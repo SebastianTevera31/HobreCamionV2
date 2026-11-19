@@ -36,8 +36,15 @@ class HombreCamionRepository @Inject constructor(
         return flotalDao.getPaymentPlan(userId)
     }
 
+    /**
+     * Borra todo menos la cola de operaciones sin enviar: va filtrada por usuario y se envía si
+     * vuelve a entrar la misma cuenta. clearAllTables no puede ir dentro de withTransaction.
+     */
     suspend fun clearAllLocalData() = withContext(Dispatchers.IO) {
+        val operacionDao = database.operacionPendienteDao()
+        val sinEnviar = operacionDao.todas()
         database.clearAllTables()
+        if (sinEnviar.isNotEmpty()) operacionDao.insertarTodas(sinEnviar)
     }
 
     suspend fun clearUserData() {

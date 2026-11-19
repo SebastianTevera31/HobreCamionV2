@@ -22,7 +22,7 @@ interface FuelingService {
         @Query("amount") amount: Double,
         @Query("odometer") odometer: Int,
         @Query("fuelingDate") fuelingDate: String,
-        @Query("station") station: String,
+        @Query("station") station: String? = null,
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
         @Query("fld_percentage") percentage: Int,

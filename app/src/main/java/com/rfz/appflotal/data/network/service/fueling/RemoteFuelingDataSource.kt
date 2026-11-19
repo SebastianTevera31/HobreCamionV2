@@ -34,7 +34,7 @@ class RemoteFuelingDataSource @Inject constructor(
                 amount = request.amount,
                 odometer = request.odometer,
                 fuelingDate = request.fuelingDate,
-                station = request.station,
+                station = request.station.takeIf { it.isNotBlank() },
                 lat = request.lat,
                 lon = request.lon,
                 percentage = request.percentage,
