@@ -18,6 +18,7 @@ import com.rfz.appflotal.domain.catalog.CatalogUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
 import com.rfz.appflotal.domain.destination.DestinationUseCase
 import com.rfz.appflotal.domain.disassembly.DisassemblyCauseUseCase
+import com.rfz.appflotal.domain.sincronizacion.ConsultarOperacionesDelDiaUseCase
 import com.rfz.appflotal.domain.sincronizacion.DesmontarLlantaUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
@@ -50,6 +51,7 @@ class DisassemblyViewModel @Inject constructor(
     private val getDestinationUseCase: DestinationUseCase,
     private val disassemblyCauseUseCase: DisassemblyCauseUseCase,
     private val desmontarLlanta: DesmontarLlantaUseCase,
+    private val consultarOperacionesDelDia: ConsultarOperacionesDelDiaUseCase,
     private val assemblyTireRepository: AssemblyTireRepository,
     private val catalogUseCase: CatalogUseCase,
     private val hombreCamionRepository: HombreCamionRepository,
@@ -86,6 +88,7 @@ class DisassemblyViewModel @Inject constructor(
             val tireReportDeferred = async { catalogUseCase.onGetTireReport() }
             val lastOdometerDeferred = async { hombreCamionRepository.getOdometer() }
             val tireReportTypeCatalogDeferred = async { catalogUseCase.onGetTireReport() }
+            val operacionesDelDiaDeferred = async { consultarOperacionesDelDia(tirePosition) }
 
             val destinations = getDestinationDeferred.await()
             val tire = getMountedTireDeferred.await()
@@ -94,6 +97,7 @@ class DisassemblyViewModel @Inject constructor(
             val tireReportList = tireReportDeferred.await()
             val lastOdometer = lastOdometerDeferred.await()
             val tireReportType = tireReportTypeCatalogDeferred.await()
+            val inspeccionOmitida = operacionesDelDiaDeferred.await().bloqueoInspeccion
 
             val temperatureUnit = observeTemperatureUnitUseCase().first()
             val pressureUnit = observePressureUnitUseCase().first()
@@ -160,7 +164,12 @@ class DisassemblyViewModel @Inject constructor(
                             temperatureUnit = temperatureUnit,
                             inspectionList = inspectionReportList.map { it.toCatalog() },
                             pressureUnit = pressureUnit,
-                            odometerUnit = odometerUnit
+                            odometerUnit = odometerUnit,
+                            inspeccionOmitida = inspeccionOmitida,
+                            odometroRegistradoKm = lastOdometer.odometer,
+                            // Con inspección o montaje de hoy no se vuelve a pedir la inspección.
+                            navigationScreen = if (inspeccionOmitida == null) NavigationScreen.INSPECTION
+                            else NavigationScreen.DISASSEMBLY
                         )
                     }
                 } else {
@@ -188,23 +197,29 @@ class DisassemblyViewModel @Inject constructor(
 
     fun dismountTire(causeId: Int, destinationId: Int) = viewModelScope.launch {
         val lastOdometerMeasurement = getCurrentDate()
+        val sinInspeccion = uiState.value.inspeccionOmitida != null
 
-        val inspeccion = buildInspection(lastOdometerMeasurement)
+        val inspeccion = if (sinInspeccion) null else buildInspection(lastOdometerMeasurement)
 
-        val odometer = uiState.value.inspectionForm.odometer
-        val odometerValue =
-            if (_uiState.value.odometerUnit == UnidadOdometro.KILOMETROS) odometer.toDouble()
-            else milesToKm(odometer.toDouble())
+        // Sin inspección se usa el odómetro guardado, el que dejó la inspección de hoy.
+        val odometerKm = if (sinInspeccion) uiState.value.odometroRegistradoKm
+        else {
+            val odometer = uiState.value.inspectionForm.odometer
+            val odometerValue =
+                if (_uiState.value.odometerUnit == UnidadOdometro.KILOMETROS) odometer.toDouble()
+                else milesToKm(odometer.toDouble())
+            odometerValue.roundToInt()
+        }
 
         // Inspección y desmontaje se registran juntos: o quedan los dos o ninguno.
-        val registrado = inspeccion != null && desmontarLlanta(
+        val registrado = (sinInspeccion || inspeccion != null) && desmontarLlanta(
             inspeccion,
             DisassemblyTire(
                 disassemblyCause = causeId,
                 destination = destinationId,
                 dateOperation = getCurrentDate(),
                 positionTire = uiState.value.positionTire,
-                odometer = odometerValue.roundToInt()
+                odometer = odometerKm
             )
         ).fueRegistrada()
 
@@ -214,7 +229,7 @@ class DisassemblyViewModel @Inject constructor(
                 temperature = inspeccion.temperatureInspected,
                 pressure = inspeccion.pressureInspected
             )
-            hombreCamionRepository.updateOdometer(odometerValue.roundToInt(), lastOdometerMeasurement)
+            hombreCamionRepository.updateOdometer(odometerKm, lastOdometerMeasurement)
         }
 
         _uiState.update { currentUiState ->

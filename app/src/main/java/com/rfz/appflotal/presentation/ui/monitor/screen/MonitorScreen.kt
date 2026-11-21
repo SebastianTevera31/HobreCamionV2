@@ -398,8 +398,7 @@ fun MonitorScreenPreview() {
         pressure = Pair(32.5f, SensorAlerts.NO_DATA),
         temperature = Pair(25.0f, SensorAlerts.NO_DATA),
         timestamp = VOID_DATE,
-        isAssembled = true,
-        isInspectionAvailable = true
+        isAssembled = true
     )
 
     val mockSensorData = listOf(

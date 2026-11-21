@@ -297,6 +297,11 @@
     <string name="ninguno">Ninguno</string>
     <string name="montaje_exitoso">Rueda montada con éxito</string>
     <string name="desmontaje_exitoso">Desmontaje exitoso</string>
+    <string name="inspeccion_bloqueada_inspeccionada_hoy">Inspeccionada hoy</string>
+    <string name="inspeccion_bloqueada_montada_hoy">Montada hoy</string>
+    <string name="desmontaje_inspeccion_de_hoy">La inspección de hoy ya está registrada; no se vuelve a pedir</string>
+    <string name="desmontaje_montada_hoy">Llanta montada hoy: se desmonta sin inspección</string>
+    <string name="odometro_registrado">Odómetro: %1$d %2$s</string>
     <string name="error_montaje">Ocurrió un error al realizar el montaje</string>
     <string name="error_desmontaje">Ocurrió un error al intentar desmontar la llanta</string>
     <string name="motivo_de_desmontaje">Motivo de desmontaje</string>

@@ -100,7 +100,7 @@ fun DiagramaMonitorScreen(
     var tireSelected by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
     val panelDimension = if (paymentPlan == PaymentPlanType.Complete)
-        if (tireUiState.isAssembled && tireUiState.isInspectionAvailable) 460.dp
+        if (tireUiState.isAssembled) 460.dp
         else 380.dp
     else 400.dp
 
@@ -146,7 +146,7 @@ fun DiagramaMonitorScreen(
                     paymentPlan = paymentPlan,
                     isAssembled = tireUiState.isAssembled,
                     wheel = tireUiState.currentTire,
-                    isInspectionAvailable = tireUiState.isInspectionAvailable,
+                    bloqueoInspeccion = tireUiState.bloqueoInspeccion,
                     temperature = "${tireUiState.temperature.first} $temperatureUnit",
                     pressureUnit = pressureUnit,
                     pressure = "${tireUiState.pressure.first}",

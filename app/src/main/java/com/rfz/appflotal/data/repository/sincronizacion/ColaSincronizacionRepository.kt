@@ -88,7 +88,7 @@ class ColaSincronizacionRepositoryImpl @Inject constructor(
             .yaAplicada(usuario.fld_token, operacion.idMonitor, operacion.payload)
     }
 
-    override suspend fun marcarAceptada(id: Long) = local.eliminar(id)
+    override suspend fun marcarAceptada(id: Long) = local.eliminarAceptada(id)
 
     override suspend fun marcarRechazada(id: Long, mensaje: String?) =
         local.marcarRechazada(id, mensaje)

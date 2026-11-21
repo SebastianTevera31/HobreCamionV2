@@ -22,8 +22,9 @@ class DesmontarLlantaUseCase @Inject constructor(
     private val operaciones: OperacionesLlantaRepository,
     private val enviar: EnviarOperacionesUseCase,
 ) {
+    /** [inspeccion] es null cuando hoy ya hubo una o la llanta se montó hoy. */
     suspend operator fun invoke(
-        inspeccion: InspectionTireDto,
+        inspeccion: InspectionTireDto?,
         desmontaje: DisassemblyTire
     ): Result<ResultadoOperacion> =
         runCatching { enviar(operaciones.registrarDesmontaje(inspeccion, desmontaje)) }

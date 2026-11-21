@@ -2,6 +2,7 @@ package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
 import com.rfz.appflotal.data.model.tpms.SensorAlerts
 import com.rfz.appflotal.domain.monitor.LlantaDiagrama
+import com.rfz.appflotal.domain.sincronizacion.BloqueoInspeccion
 import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
@@ -45,8 +46,8 @@ data class TireUiState(
     val flatTireStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val tireRemovingStatus: SensorAlerts = SensorAlerts.NO_DATA,
     val isAssembled: Boolean = false,
-    /** Derivado en MonitorViewModel.tireUiState; no asignarlo en otro lugar. */
-    val isInspectionAvailable: Boolean = false,
+    /** Por qué hoy no se puede inspeccionar; null si se puede. Lo deriva MonitorViewModel.tireUiState. */
+    val bloqueoInspeccion: BloqueoInspeccion? = null,
     val isLoading:Boolean = false
 )
 

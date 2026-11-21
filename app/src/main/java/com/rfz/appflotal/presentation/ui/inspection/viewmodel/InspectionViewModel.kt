@@ -2,7 +2,6 @@ package com.rfz.appflotal.presentation.ui.inspection.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.core.util.Commons.convertDate
 import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
 import com.rfz.appflotal.data.repository.UnidadOdometro
@@ -206,14 +205,7 @@ class InspectionViewModel @Inject constructor(
                 odometerValue.roundToInt(),
                 lastOdometerMeasurement
             )
-            sensorDataTableRepository.updateLastInspection(
-                tire = positionTire,
-                lastInspection = convertDate(
-                    date = lastOdometerMeasurement,
-                    initialFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                    convertFormat = "yyyy-MM-dd'T'HH:mm:ss",
-                )
-            )
+            // La fecha de última inspección la guarda la cola cuando el servidor la acepta.
             sensorDataTableRepository.updateTireRecord(
                 tire = positionTire,
                 temperature = temperatureValue.toInt(),

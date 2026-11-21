@@ -8,7 +8,6 @@ import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
-import com.rfz.appflotal.data.repository.database.SensorDataTableRepository
 import com.rfz.appflotal.domain.bluetooth.BluetoothUseCase
 import com.rfz.appflotal.domain.database.DataframeTableUseCase
 import com.rfz.appflotal.domain.database.GetTasksUseCase
@@ -17,10 +16,11 @@ import com.rfz.appflotal.domain.monitor.CargarDiagramaUseCase
 import com.rfz.appflotal.domain.monitor.normalizarPosicion
 import com.rfz.appflotal.domain.monitor.ObservarLlantasActivasUseCase
 import com.rfz.appflotal.domain.monitor.ObservarPosicionesMontadasUseCase
+import com.rfz.appflotal.domain.sincronizacion.ObservarOperacionesDelDiaUseCase
+import com.rfz.appflotal.domain.sincronizacion.OperacionesDelDia
 import com.rfz.appflotal.domain.tpms.GetSensorDataByWheelUseCase
 import com.rfz.appflotal.domain.tpms.MonitorUnitConversionUseCase
 import com.rfz.appflotal.domain.tpms.UpdateSensorDataUseCase
-import com.rfz.appflotal.domain.tpms.isInspectionAvailable
 import com.rfz.appflotal.domain.userpreferences.ObserveOdometerUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObservePressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.ObserveTemperatureUnitUseCase
@@ -51,7 +51,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class MonitorViewModel @Inject constructor(
     private val bluetoothUseCase: BluetoothUseCase,
     private val dataframeTableUseCase: DataframeTableUseCase,
-    private val sensorDataTableRepository: SensorDataTableRepository,
+    observarOperacionesDelDia: ObservarOperacionesDelDiaUseCase,
     private val getTasksUseCase: GetTasksUseCase,
     private val wifiUseCase: WifiUseCase,
     private val updateSensorDataUseCase: UpdateSensorDataUseCase,
@@ -78,17 +78,9 @@ class MonitorViewModel @Inject constructor(
     private val assembledPositions: StateFlow<Set<String>?> =
         observarPosicionesMontadas().stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    /**
-     * `ultimainspeccion` por posición según sensor_data (la llena la sincronización del
-     * diagrama y la actualiza cada inspección registrada). Una posición sin registro no
-     * aparece en el mapa: no hay inspección conocida.
-     */
-    private val lastInspectionByPosition: StateFlow<Map<String, String?>> =
-        flow { emitAll(sensorDataTableRepository.observeLastRecords()) }
-            .map { records ->
-                records.associate { it.tire.normalizarPosicion() to it.lastInspection }
-            }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+    /** Inspecciones y montajes de hoy por posición; una posición ausente no tiene nada hoy. */
+    private val operacionesDelDia: StateFlow<Map<String, OperacionesDelDia>> =
+        observarOperacionesDelDia().stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
     /**
      * `isAssembled` se deriva de [assembledPositions] al exponer el estado, de modo que ninguna
@@ -125,17 +117,17 @@ class MonitorViewModel @Inject constructor(
 
     /**
      * Estado de la llanta seleccionada para la UI. Unidades, `isAssembled` (tabla local de
-     * montajes) e `isInspectionAvailable` (montajes + `ultimainspeccion` de sensor_data) se
-     * derivan aquí, de modo que los botones del panel siempre reflejan las tablas aunque la
-     * llanta no tenga lecturas o se registre una inspección/montaje con el panel abierto.
+     * montajes) y `bloqueoInspeccion` (operaciones de hoy) se derivan aquí, de modo que los
+     * botones del panel siempre reflejan las tablas aunque la llanta no tenga lecturas o se
+     * registre una inspección/montaje con el panel abierto.
      */
     val tireUiState = combine(
         _tireUiState,
         pressureUnit,
         temperatureUnit,
         assembledPositions,
-        lastInspectionByPosition
-    ) { state, pUnit, tUnit, assembled, lastInspections ->
+        operacionesDelDia
+    ) { state, pUnit, tUnit, assembled, delDia ->
         val converted = monitorUnitConversionUseCase(
             state.rawTemperature,
             tUnit,
@@ -147,8 +139,7 @@ class MonitorViewModel @Inject constructor(
             pressure = state.pressure.copy(first = converted.pressure),
             temperature = state.temperature.copy(first = converted.temperature),
             isAssembled = assembled?.let { position in it } ?: state.isAssembled,
-            isInspectionAvailable = position.isNotEmpty() &&
-                    isInspectionAvailable(lastInspections[position])
+            bloqueoInspeccion = delDia[position]?.bloqueoInspeccion
         )
     }.stateIn(
         viewModelScope,
@@ -414,7 +405,7 @@ class MonitorViewModel @Inject constructor(
             } else {
                 // Sin registro en sensor_data (p. ej. ruedas recién montadas en el wizard,
                 // antes de sincronizar el diagrama): no hay lecturas. Se limpia el estado para
-                // no heredar las de la rueda anterior; isAssembled e isInspectionAvailable los
+                // no heredar las de la rueda anterior; isAssembled y bloqueoInspeccion los
                 // deriva tireUiState.
                 _tireUiState.update { TireUiState(currentTire = tireSelected) }
             }

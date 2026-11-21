@@ -69,7 +69,9 @@ import androidx.core.graphics.toColorInt
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.domain.sincronizacion.BloqueoInspeccion
 import com.rfz.appflotal.presentation.ui.monitor.component.MonitorMenuButton
+import com.rfz.appflotal.presentation.ui.monitor.component.MotivoBloqueoInspeccion
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.components.AvisoSincronizacionLlanta
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.AvisoLlantaUi
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
@@ -82,7 +84,7 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 fun PanelSensor(
     paymentPlan: PaymentPlanType,
     isAssembled: Boolean,
-    isInspectionAvailable: Boolean,
+    bloqueoInspeccion: BloqueoInspeccion?,
     wheel: String,
     temperature: String,
     pressureUnit: String,
@@ -240,7 +242,9 @@ fun PanelSensor(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             if (isAssembled) {
-                                if (isInspectionAvailable) {
+                                if (bloqueoInspeccion != null) {
+                                    MotivoBloqueoInspeccion(bloqueoInspeccion)
+                                } else {
                                     MonitorMenuButton(
                                         text = stringResource(R.string.inspeccionar),
                                         enabled = operacionesHabilitadas,
@@ -373,7 +377,7 @@ fun PanelSensorViewPreview() {
             pressureUnit = "PSI",
             pressure = "3",
             timestamp = VOID_DATE,
-            isInspectionAvailable = false,
+            bloqueoInspeccion = BloqueoInspeccion.INSPECCIONADA_HOY,
             isAssembled = true,
             temperatureStatus = SensorAlerts.HIGH_TEMPERATURE,
             pressureStatus = SensorAlerts.LOW_PRESSURE,
@@ -400,7 +404,7 @@ fun PanelSensorPreview() {
         PanelSensor(
             paymentPlan = PaymentPlanType.Complete,
             isAssembled = true,
-            isInspectionAvailable = true,
+            bloqueoInspeccion = null,
             wheel = "P2",
             temperature = "32 °C",
             pressureUnit = "PSI",

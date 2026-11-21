@@ -23,14 +23,20 @@ fun MonitorMenuButton(
     Button(
         onClick = onClick,
         enabled = enabled,
+        // El fondo deshabilitado es translúcido: con sombra se transparenta un rectángulo blanco.
         modifier = modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 8.dp,
-                shape = buttonShape,
-                ambientColor = primaryColor.copy(alpha = 0.1f)
+            .then(
+                if (enabled) Modifier.shadow(
+                    elevation = 8.dp,
+                    shape = buttonShape,
+                    ambientColor = primaryColor.copy(alpha = 0.1f)
+                ) else Modifier
             ),
-        elevation = ButtonDefaults.buttonElevation(12.dp),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 12.dp,
+            disabledElevation = 0.dp
+        ),
         colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
         shape = buttonShape
     ) {

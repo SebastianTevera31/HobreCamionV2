@@ -310,6 +310,11 @@
     <string name="ninguno">None</string>
     <string name="montaje_exitoso">Tire mounted successfully</string>
     <string name="desmontaje_exitoso">Tire dismounted successfully</string>
+    <string name="inspeccion_bloqueada_inspeccionada_hoy">Inspected today</string>
+    <string name="inspeccion_bloqueada_montada_hoy">Mounted today</string>
+    <string name="desmontaje_inspeccion_de_hoy">Today\'s inspection is already recorded; it is not requested again</string>
+    <string name="desmontaje_montada_hoy">Tire mounted today: dismounted without inspection</string>
+    <string name="odometro_registrado">Odometer: %1$d %2$s</string>
     <string name="error_montaje">An error occurred while performing the mounting</string>
     <string name="error_desmontaje">An error occurred while trying to dismount the tire</string>
     <string name="motivo_de_desmontaje">Reason for dismounting</string>

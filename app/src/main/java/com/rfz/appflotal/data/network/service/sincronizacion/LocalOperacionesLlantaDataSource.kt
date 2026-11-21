@@ -3,9 +3,13 @@ package com.rfz.appflotal.data.network.service.sincronizacion
 import androidx.room.withTransaction
 import com.rfz.appflotal.data.dao.AssemblyTireDao
 import com.rfz.appflotal.data.dao.OperacionPendienteDao
+import com.rfz.appflotal.data.dao.SensorDataDao
 import com.rfz.appflotal.data.database.AppHombreCamionDatabase
 import com.rfz.appflotal.data.model.assembly.AssemblyTireEntity
 import com.rfz.appflotal.data.model.sincronizacion.OperacionPendienteEntity
+import com.rfz.appflotal.data.model.sincronizacion.TipoOperacion
+import com.rfz.appflotal.data.model.sincronizacion.gsonPayload
+import com.rfz.appflotal.data.model.tire.dto.InspectionTireDto
 import com.rfz.appflotal.di.dispatchers.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -16,6 +20,7 @@ class LocalOperacionesLlantaDataSource @Inject constructor(
     private val baseDatos: AppHombreCamionDatabase,
     private val operacionDao: OperacionPendienteDao,
     private val montajeDao: AssemblyTireDao,
+    private val sensorDao: SensorDataDao,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
     suspend fun registrarMontaje(
@@ -82,7 +87,22 @@ class LocalOperacionesLlantaDataSource @Inject constructor(
 
     suspend fun sumarIntento(id: Long) = withContext(io) { operacionDao.sumarIntento(id) }
 
-    suspend fun eliminar(id: Long) = withContext(io) { operacionDao.eliminar(id) }
+    /**
+     * Una inspección cuenta para la regla de una al día cuando el servidor la acepta; mientras
+     * espera la cubre la cola, y si la rechaza no deja rastro.
+     */
+    suspend fun eliminarAceptada(id: Long) = withContext(io) {
+        baseDatos.withTransaction {
+            val operacion = operacionDao.obtener(id)
+            if (operacion?.tipo == TipoOperacion.INSPECCION) {
+                val inspeccion = gsonPayload.fromJson(operacion.payload, InspectionTireDto::class.java)
+                sensorDao.updateLastInspection(
+                    operacion.idMonitor, operacion.posicion, inspeccion.dateInspection
+                )
+            }
+            operacionDao.eliminar(id)
+        }
+    }
 
     suspend fun eliminarConGrupo(id: Long) = withContext(io) { operacionDao.eliminarConGrupo(id) }
 }

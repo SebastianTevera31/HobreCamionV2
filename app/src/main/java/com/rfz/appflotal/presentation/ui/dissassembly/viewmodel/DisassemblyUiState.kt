@@ -8,6 +8,7 @@ import com.rfz.appflotal.data.model.tire.Tire
 import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
 import com.rfz.appflotal.data.repository.UnidadTemperatura
+import com.rfz.appflotal.domain.sincronizacion.BloqueoInspeccion
 import com.rfz.appflotal.presentation.ui.dissassembly.screen.NavigationScreen
 import com.rfz.appflotal.presentation.ui.inspection.viewmodel.InspectionUi
 import com.rfz.appflotal.presentation.ui.utils.OperationStatus
@@ -29,5 +30,8 @@ data class DisassemblyUiState(
     val inspectionForm: InspectionUi = InspectionUi(),
     val temperatureUnit: UnidadTemperatura = UnidadTemperatura.CELCIUS,
     val pressureUnit: UnidadPresion = UnidadPresion.PSI,
-    val odometerUnit: UnidadOdometro = UnidadOdometro.KILOMETROS
+    val odometerUnit: UnidadOdometro = UnidadOdometro.KILOMETROS,
+    /** Motivo por el que este desmontaje no pide inspección; null si la pide. */
+    val inspeccionOmitida: BloqueoInspeccion? = null,
+    val odometroRegistradoKm: Int = 0
 )

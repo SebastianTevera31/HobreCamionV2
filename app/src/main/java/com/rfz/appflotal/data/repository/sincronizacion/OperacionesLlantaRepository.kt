@@ -20,7 +20,7 @@ import javax.inject.Inject
 interface OperacionesLlantaRepository {
     /** Devuelve los ids de las operaciones encoladas. */
     suspend fun registrarMontaje(montaje: AssemblyTire): List<Long>
-    suspend fun registrarDesmontaje(inspeccion: InspectionTireDto, desmontaje: DisassemblyTire): List<Long>
+    suspend fun registrarDesmontaje(inspeccion: InspectionTireDto?, desmontaje: DisassemblyTire): List<Long>
     suspend fun registrarInspeccion(inspeccion: InspectionTireDto): List<Long>
 
     /** Puente con SyncCreateAssemblyTireWorker: encola un montaje guardado por la versión anterior. */
@@ -39,16 +39,19 @@ class OperacionesLlantaRepositoryImpl @Inject constructor(
         return listOf(local.registrarMontaje(entidad, operacion))
     }
 
-    /** La inspección va primero: el servidor la registra sobre la llanta todavía montada. */
+    /**
+     * La inspección va primero: el servidor la registra sobre la llanta todavía montada. Sin
+     * inspección (ya hubo una hoy o la llanta se montó hoy) se encola solo el desmontaje.
+     */
     override suspend fun registrarDesmontaje(
-        inspeccion: InspectionTireDto,
+        inspeccion: InspectionTireDto?,
         desmontaje: DisassemblyTire
     ): List<Long> {
         val usuario = sesion()
         val grupo = UUID.randomUUID().toString()
         val posicion = desmontaje.positionTire
-        val operaciones = listOf(
-            nuevaOperacion(TipoOperacion.INSPECCION, posicion, inspeccion, usuario, grupo),
+        val operaciones = listOfNotNull(
+            inspeccion?.let { nuevaOperacion(TipoOperacion.INSPECCION, posicion, it, usuario, grupo) },
             nuevaOperacion(TipoOperacion.DESMONTAJE, posicion, desmontaje.toDto(), usuario, grupo)
         )
         return local.registrarDesmontaje(posicion, operaciones)

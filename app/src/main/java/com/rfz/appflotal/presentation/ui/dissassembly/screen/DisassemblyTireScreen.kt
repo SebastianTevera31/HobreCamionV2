@@ -41,6 +41,7 @@ import com.rfz.appflotal.presentation.ui.components.LoadingDialog
 import com.rfz.appflotal.presentation.ui.components.CatalogDropdown
 import com.rfz.appflotal.presentation.ui.components.CompleteFormButton
 import com.rfz.appflotal.presentation.ui.components.TireInfoCard
+import com.rfz.appflotal.presentation.ui.dissassembly.components.AvisoInspeccionOmitida
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyUiState
 import com.rfz.appflotal.presentation.ui.dissassembly.viewmodel.DisassemblyViewModel
 import com.rfz.appflotal.presentation.ui.inspection.components.InspectionContent
@@ -106,13 +107,15 @@ fun DisassemblyTireScreen(
         form = form,
         uiState = uiState.value,
         onBack = {
-            when (uiState.value.navigationScreen) {
-                NavigationScreen.DISASSEMBLY -> {
+            // Sin paso de inspección no hay a dónde regresar dentro de la pantalla.
+            val regresarAInspeccion = uiState.value.inspeccionOmitida == null &&
+                uiState.value.navigationScreen == NavigationScreen.DISASSEMBLY
+            when {
+                regresarAInspeccion -> {
                     viewModel.updateNavigation(NavigationScreen.INSPECTION)
-
                 }
 
-                NavigationScreen.INSPECTION -> {
+                else -> {
                     viewModel.cleanUiState()
                     onBack()
                 }
@@ -329,6 +332,13 @@ fun DisassemblyTireContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
     ) {
+        uiState.inspeccionOmitida?.let { motivo ->
+            AvisoInspeccionOmitida(
+                motivo = motivo,
+                odometro = uiState.lastOdometer,
+                unidadOdometro = uiState.odometerUnit.symbol
+            )
+        }
         TireInfoCard(
             uiState.tire, modifier = Modifier.height(140.dp)
         )
