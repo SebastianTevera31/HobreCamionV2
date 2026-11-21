@@ -73,7 +73,8 @@ import com.rfz.appflotal.presentation.ui.monitor.component.MonitorMenuButton
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.components.AvisoSincronizacionLlanta
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.AvisoLlantaUi
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
+import com.rfz.appflotal.data.model.tpms.SensorAlerts
+import com.rfz.appflotal.presentation.ui.monitor.viewmodel.message
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 

@@ -48,7 +48,7 @@ import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
+import com.rfz.appflotal.data.model.tpms.SensorAlerts
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.VOID_DATE
 
@@ -156,7 +156,7 @@ fun MonitorScreenContent(
                                 tireUiState = tireUiState,
                                 temperatureUnit = monitorUiState.temperatureUnit.symbol,
                                 pressureUnit = monitorUiState.pressureUnit.symbol,
-                                image = monitorUiState.imageBitmap,
+                                image = rememberImagenDiagrama(monitorUiState.imagenDiagrama),
                                 updateSelectedTire = onUpdateSelectedTire,
                                 getSensorData = onGetSensorDataByWheel,
                                 tires = monitorUiState.listOfTires,
@@ -389,7 +389,7 @@ fun MonitorScreenPreview() {
         temperatureUnit = UnidadTemperatura.CELCIUS,
         pressureUnit = UnidadPresion.PSI,
         signalIntensity = Pair(BluetoothSignalQuality.Excelente, "Excelente"),
-        imageBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
+        imagenDiagrama = R.drawable.base6,
         imageDimen = Pair(100, 100)
     )
 

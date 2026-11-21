@@ -7,16 +7,12 @@ import com.rfz.appflotal.core.util.Commons.getCurrentDate
 import com.rfz.appflotal.core.util.Positions.findOutPosition
 import com.rfz.appflotal.core.util.tpms.getPressure
 import com.rfz.appflotal.core.util.tpms.getTemperature
-import com.rfz.appflotal.data.repository.UnidadPresion
-import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.bluetooth.MonitorDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.SensorAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeAlertDataFrame
 import com.rfz.appflotal.data.repository.bluetooth.decodeDataFrame
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.TireUiState
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.getIsTireInAlert
+import com.rfz.appflotal.data.model.tpms.SensorAlerts
 import javax.inject.Inject
 
 class UpdateSensorDataUseCase @Inject constructor(
@@ -29,7 +25,7 @@ class UpdateSensorDataUseCase @Inject constructor(
      * para no pisar cambios concurrentes (p. ej. montajes).
      */
     data class Result(
-        val newTireUiState: TireUiState,
+        val lectura: LecturaLlanta,
         val position: String,
         val inAlert: Boolean
     )
@@ -37,8 +33,6 @@ class UpdateSensorDataUseCase @Inject constructor(
     suspend operator fun invoke(
         dataFrame: String,
         timestamp: String? = null,
-        tempUnit: UnidadTemperatura,
-        pressureUnit: UnidadPresion
     ): Result {
         val rawTemp = getTemperature(dataFrame)
         val rawPressure = getPressure(dataFrame)
@@ -57,31 +51,25 @@ class UpdateSensorDataUseCase @Inject constructor(
         val time = if (timestamp != null) convertUtcDate(timestamp)
         else getCurrentDate(pattern = displayDateTimePattern())
 
-        val inAlert =
-            getIsTireInAlert(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
+        val inAlert = estaEnAlerta(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
 
         val isAssembled =
             realTire.isNotEmpty() && assemblyTireRepository.confirmTireMounted(realTire)
 
-        val newTireState = TireUiState(
-            currentTire = realTire,
-            isAssembled = isAssembled,
-            pressure = Pair(rawPressure, pressureStatus),
-            rawPressure = rawPressure,
-            temperature = Pair(rawTemp, temperatureStatus),
-            rawTemperature = rawTemp,
-            timestamp = time,
-            batteryStatus = batteryStatus,
-            flatTireStatus = flatTireStatus,
-            tireRemovingStatus = if (rawPressure.toInt() == 0 && !isVoidDate(time)) SensorAlerts.REMOVAL
+        val lectura = LecturaLlanta(
+            posicion = realTire,
+            montada = isAssembled,
+            presionPsi = rawPressure,
+            alertaPresion = pressureStatus,
+            temperaturaC = rawTemp,
+            alertaTemperatura = temperatureStatus,
+            fecha = time,
+            bateria = batteryStatus,
+            pinchazo = flatTireStatus,
+            extraccion = if (rawPressure.toInt() == 0 && !isVoidDate(time)) SensorAlerts.REMOVAL
             else SensorAlerts.NO_DATA
-            // isInspectionAvailable lo deriva MonitorViewModel.tireUiState de sensor_data.
         )
 
-        return Result(
-            newTireUiState = newTireState,
-            position = realTire,
-            inAlert = inAlert
-        )
+        return Result(lectura = lectura, position = realTire, inAlert = inAlert)
     }
 }

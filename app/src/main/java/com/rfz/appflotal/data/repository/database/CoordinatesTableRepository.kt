@@ -2,18 +2,10 @@ package com.rfz.appflotal.data.repository.database
 
 import com.rfz.appflotal.data.dao.CoordinatesDao
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import jakarta.inject.Inject
 
+/** Caché de coordenadas del monitor; la llena DiagramaMonitorRepository al cargar con red. */
 class CoordinatesTableRepository @Inject constructor(private val coordinatesDao: CoordinatesDao) {
-    /** Reemplaza (atómicamente) las coordenadas guardadas del monitor; una fila por posición. */
-    suspend fun replaceCoordinates(monitorId: Int, coordinatesList: List<MonitorTire>) {
-        coordinatesDao.replaceCoordinates(
-            monitorId,
-            coordinatesList.distinctBy { it.sensorPosition }.map { it.toEntity(monitorId) }
-        )
-    }
-
     /**
      * Una fila por posición. Instalaciones anteriores pueden tener la tabla duplicada (se
      * corrige en la siguiente carga con red); mientras tanto no debe llegar repetida a la UI.
@@ -32,27 +24,5 @@ class CoordinatesTableRepository @Inject constructor(private val coordinatesDao:
         tire = tire,
         isActive = isActive,
         isAlert = isAlert
-    )
-
-    suspend fun updateAssemblyStatus(
-        monitorId: Int,
-        tire: String,
-        isAssembled: Boolean
-    ) = coordinatesDao.updateAssemblyStatus(
-        monitorId = monitorId,
-        tire = tire,
-        isAssembled = isAssembled
-    )
-}
-
-fun MonitorTire.toEntity(monitorId: Int): CoordinatesEntity {
-    return CoordinatesEntity(
-        monitorId = monitorId,
-        idPosition = sensorPosition,
-        isAssembled = isAssembled,
-        inAlert = inAlert,
-        isActive = isActive,
-        xPosition = xPosition,
-        yPosition = yPosition,
     )
 }

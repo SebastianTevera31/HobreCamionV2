@@ -1,6 +1,6 @@
 package com.rfz.appflotal.data.repository.bluetooth
 
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.SensorAlerts
+import com.rfz.appflotal.data.model.tpms.SensorAlerts
 import java.math.MathContext
 import java.util.Locale
 

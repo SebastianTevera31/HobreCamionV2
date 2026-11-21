@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rfz.appflotal.R
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.components.HojaSincronizacionRoute
+import com.rfz.appflotal.presentation.ui.monitor.posiciones.viewmodel.PosicionesViewModel
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.viewmodel.EstadoSincronizacionViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorViewModel
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.RegisterMonitorViewModel
@@ -31,11 +32,11 @@ fun MonitorScreen(
     showBackButton: Boolean = true,
     onEditTireClick: (position: String) -> Unit = {},
     sincronizacionViewModel: EstadoSincronizacionViewModel = hiltViewModel(),
+    posicionesViewModel: PosicionesViewModel = hiltViewModel(),
 ) {
     val sincronizacion by sincronizacionViewModel.uiState.collectAsStateWithLifecycle()
+    val posiciones by posicionesViewModel.uiState.collectAsStateWithLifecycle()
     val monitorUiState by monitorViewModel.monitorUiState.collectAsState()
-    val positionsUiState by monitorViewModel.positionsUiState.collectAsState()
-    val monitorTireUiState by monitorViewModel.filteredTiresUiState.collectAsState()
     val tireUiState by monitorViewModel.tireUiState.collectAsState()
     val wifiStatus by monitorViewModel.wifiStatus.collectAsState()
 
@@ -51,8 +52,8 @@ fun MonitorScreen(
 
     MonitorScreenContent(
         monitorUiState = monitorUiState,
-        positionsUiState = positionsUiState,
-        monitorTireUiState = monitorTireUiState,
+        positionsUiState = posiciones.ultimas,
+        monitorTireUiState = posiciones.historial,
         tireUiState = tireUiState,
         wifiStatus = wifiStatus,
         paymentPlan = paymentPlan,
@@ -62,13 +63,13 @@ fun MonitorScreen(
         onAssemblyClick = onAssemblyClick,
         onDisassemblyClick = onDisassemblyClick,
         onShowMonitorDialog = { show -> monitorViewModel.showMonitorDialog(show) },
-        onGetLastedSensorData = { monitorViewModel.getLastedSensorData() },
+        onGetLastedSensorData = posicionesViewModel::cargarUltimas,
         onUpdateSelectedTire = { tire -> monitorViewModel.updateSelectedTire(tire) },
         onGetSensorDataByWheel = { wheel -> monitorViewModel.getSensorDataByWheel(wheel) },
         onSwitchPressureUnit = { monitorViewModel.switchPressureUnit() },
         onSwitchTempUnit = { monitorViewModel.switchTemperatureUnit() },
-        onGetTireDataByDate = { pos, date -> monitorViewModel.getTireDataByDate(pos, date) },
-        onCleanFilteredTire = { monitorViewModel.cleanFilteredTire() },
+        onGetTireDataByDate = posicionesViewModel::cargarHistorial,
+        onCleanFilteredTire = posicionesViewModel::limpiarHistorial,
         setupWizardSlot = if (paymentPlan == PaymentPlanType.Complete) {
             {
                 MonitorSetupWizard(

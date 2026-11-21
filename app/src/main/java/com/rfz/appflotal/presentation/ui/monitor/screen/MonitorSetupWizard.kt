@@ -106,7 +106,7 @@ fun MonitorSetupWizardContent(
         baseConfigLabel = monitorUiState.baseConfig?.let { "BASE ${it.base}" },
         isSensorLinked = hasLinkedMonitor(monitorUiState.monitorMac),
         tires = monitorUiState.listOfTires,
-        image = monitorUiState.imageBitmap,
+        image = rememberImagenDiagrama(monitorUiState.imagenDiagrama),
         imageDimens = monitorUiState.imageDimen,
         monitorMac = monitorUiState.monitorMac,
         onMountTireClick = onMountTireClick,

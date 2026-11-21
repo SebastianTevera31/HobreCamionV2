@@ -1,9 +1,7 @@
 package com.rfz.appflotal.presentation.ui.monitor.viewmodel
 
-import android.graphics.Bitmap
-import com.rfz.appflotal.data.model.database.CoordinatesEntity
-import com.rfz.appflotal.data.model.database.SensorDataEntity
-import com.rfz.appflotal.data.model.tpms.MonitorTireByDateResponse
+import com.rfz.appflotal.data.model.tpms.SensorAlerts
+import com.rfz.appflotal.domain.monitor.LlantaDiagrama
 import com.rfz.appflotal.data.model.tpms.PositionCoordinatesResponse
 import com.rfz.appflotal.data.repository.UnidadOdometro
 import com.rfz.appflotal.data.repository.UnidadPresion
@@ -20,7 +18,8 @@ data class MonitorUiState(
         BluetoothSignalQuality.Desconocida,
         ""),
     val imageDimen: Pair<Int, Int> = Pair(0, 0),
-    val imageBitmap: Bitmap? = null,
+    /** Recurso de la imagen del diagrama; la UI lo decodifica. */
+    val imagenDiagrama: Int? = null,
     val chassisImageUrl: String = "",
     val listOfTires: List<MonitorTire> = emptyList(),
     val coordinateList: List<PositionCoordinatesResponse>? = emptyList(),
@@ -60,35 +59,14 @@ data class MonitorTire(
     val yPosition: Int,
 )
 
-fun CoordinatesEntity.toTire(): MonitorTire {
-    return MonitorTire(
-        sensorPosition = idPosition,
-        isAssembled = isAssembled,
-        inAlert = inAlert,
-        isActive = isActive,
-        xPosition = xPosition,
-        yPosition = yPosition
-    )
-}
-
-fun SensorDataEntity.toTireData(): ListOfTireData {
-    return ListOfTireData(
-        tirePosition = tire,
-        tireNumber = tireNumber,
-        sensorDate = timestamp,
-        psi = pressure.toFloat(),
-        temperature = temperature.toFloat()
-    )
-}
-
-fun MonitorTireByDateResponse.toTireData(): ListOfTireData =
-    ListOfTireData(
-        tirePosition = tirePosition,
-        tireNumber = tireNumber,
-        sensorDate = sensorDate,
-        psi = psi.toFloat(),
-        temperature = temperature.toFloat()
-    )
+fun LlantaDiagrama.aMonitorTire(): MonitorTire = MonitorTire(
+    sensorPosition = posicion,
+    isAssembled = montada,
+    inAlert = enAlerta,
+    isActive = activa,
+    xPosition = x,
+    yPosition = y
+)
 
 data class ListOfTireData(
     val tirePosition: String,

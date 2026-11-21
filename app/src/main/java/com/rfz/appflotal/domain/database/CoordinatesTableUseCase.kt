@@ -2,14 +2,9 @@ package com.rfz.appflotal.domain.database
 
 import com.rfz.appflotal.data.model.database.CoordinatesEntity
 import com.rfz.appflotal.data.repository.database.CoordinatesTableRepository
-import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import jakarta.inject.Inject
 
 class CoordinatesTableUseCase @Inject constructor(private val coordinatesTableRepository: CoordinatesTableRepository) {
-    suspend fun replaceCoordinates(monitorId: Int, listCoordinates: List<MonitorTire>) {
-        coordinatesTableRepository.replaceCoordinates(monitorId, listCoordinates)
-    }
-
     suspend fun getCoordinates(monitorId: Int): List<CoordinatesEntity> {
         return coordinatesTableRepository.getCoordinates(monitorId)
     }
@@ -26,14 +21,4 @@ class CoordinatesTableUseCase @Inject constructor(private val coordinatesTableRe
             isActive = isActive,
             isAlert = isAlert
         )
-
-    suspend fun updateAssemblyStatus(
-        monitorId: Int,
-        tire: String,
-        isAssembled: Boolean
-    ) = coordinatesTableRepository.updateAssemblyStatus(
-        monitorId = monitorId,
-        tire = tire,
-        isAssembled = isAssembled
-    )
 }

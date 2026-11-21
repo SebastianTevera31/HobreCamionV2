@@ -74,6 +74,8 @@ import java.util.Locale
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rfz.appflotal.presentation.ui.home.cierresesion.components.AvisoCierreSesionRoute
 import com.rfz.appflotal.presentation.ui.home.cierresesion.viewmodel.AvisoCierreSesionViewModel
+import com.rfz.appflotal.presentation.ui.monitor.posiciones.viewmodel.PosicionesViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,6 +90,7 @@ fun HomeScreen(
     onDisassemblyClick: (tire: String, temp: Float, pressure: Float) -> Unit,
     monitorViewModel: MonitorViewModel,
     avisoCierreViewModel: AvisoCierreSesionViewModel = hiltViewModel(),
+    posicionesViewModel: PosicionesViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
@@ -135,8 +138,7 @@ fun HomeScreen(
         registerMonitorViewModel.stopScan()
     }
     val monitorUiState by monitorViewModel.monitorUiState.collectAsState()
-    val positionsUiState by monitorViewModel.positionsUiState.collectAsState()
-    val monitorTireUiState by monitorViewModel.filteredTiresUiState.collectAsState()
+    val posiciones by posicionesViewModel.uiState.collectAsStateWithLifecycle()
     val tireUiState by monitorViewModel.tireUiState.collectAsState()
 
     LaunchedEffect(monitorUiState.monitorId) {
@@ -239,7 +241,7 @@ fun HomeScreen(
                         onInspectClick = onInspectClick,
                         onAssemblyClick = onAssemblyClick,
                         onDisassemblyClick = onDisassemblyClick,
-                        onGetLastedSensorData = { monitorViewModel.getLastedSensorData() },
+                        onGetLastedSensorData = posicionesViewModel::cargarUltimas,
                         onUpdateSelectedTire = { tire -> monitorViewModel.updateSelectedTire(tire) },
                         onGetSensorDataByWheel = { wheel ->
                             monitorViewModel.getSensorDataByWheel(
@@ -248,19 +250,14 @@ fun HomeScreen(
                         },
                         onSwitchPressureUnit = { monitorViewModel.switchPressureUnit() },
                         onSwitchTempUnit = { monitorViewModel.switchTemperatureUnit() },
-                        onGetTireDataByDate = { pos, date ->
-                            monitorViewModel.getTireDataByDate(
-                                pos,
-                                date
-                            )
-                        },
-                        onCleanFilteredTire = { monitorViewModel.cleanFilteredTire() },
+                        onGetTireDataByDate = posicionesViewModel::cargarHistorial,
+                        onCleanFilteredTire = posicionesViewModel::limpiarHistorial,
                         uiState = monitorUiState,
-                        positionUiState = positionsUiState,
+                        positionUiState = posiciones.ultimas,
                         onBack = {
                             navController.navigateUpSafely()
                         },
-                        monitorTireUiState = monitorTireUiState,
+                        monitorTireUiState = posiciones.historial,
                         tireUiState = tireUiState,
                         paddingValues = innerPadding,
                         modifier = Modifier.padding(innerPadding),
