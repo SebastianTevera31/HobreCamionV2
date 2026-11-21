@@ -11,12 +11,17 @@ class LecturaLlantaTest {
 
     @Test
     fun estaEnAlerta_sinAlertas_devuelveFalso() {
-        assertFalse(estaEnAlerta(SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.NO_DATA))
+        assertFalse(estaEnAlerta(SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.NO_DATA))
     }
 
     @Test
     fun estaEnAlerta_soloBateriaBaja_devuelveVerdadero() {
-        assertTrue(estaEnAlerta(SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.LOW_BATTERY, SensorAlerts.NO_DATA))
+        assertTrue(estaEnAlerta(SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.LOW_BATTERY, SensorAlerts.NO_DATA, SensorAlerts.NO_DATA))
+    }
+
+    @Test
+    fun estaEnAlerta_soloExtraccion_devuelveVerdadero() {
+        assertTrue(estaEnAlerta(SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.NO_DATA, SensorAlerts.REMOVAL))
     }
 
     @Test

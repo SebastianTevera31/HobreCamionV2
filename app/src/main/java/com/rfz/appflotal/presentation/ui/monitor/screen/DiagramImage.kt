@@ -16,7 +16,21 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.foundation.background
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.ui.monitor.component.FondoAlerta
+import com.rfz.appflotal.presentation.ui.monitor.component.TextoAlerta
 import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -78,6 +92,8 @@ fun DiagramImage(
     showEditBadge: Boolean = false,
     /** Posición → true si tiene una operación rechazada, false si solo tiene pendientes. */
     insigniasSincronizacion: Map<String, Boolean> = emptyMap(),
+    /** Alertas sin ver: si quedan fuera de la vista, una franja roja indica de qué lado. */
+    posicionesConAviso: Set<String> = emptySet(),
 ) {
     val hotspots = tires.map {
         val hotspot = Hotspot.fromPixelCenter(
@@ -118,6 +134,7 @@ fun DiagramImage(
         scrollable = scrollable,
         showEditBadge = showEditBadge,
         insigniasSincronizacion = insigniasSincronizacion,
+        posicionesConAviso = posicionesConAviso,
         modifier = defaultModifier.then(modifier)
     )
 }
@@ -134,6 +151,7 @@ fun ImageWithHotspotsProportional(
     scrollable: Boolean = true,
     showEditBadge: Boolean = false,
     insigniasSincronizacion: Map<String, Boolean> = emptyMap(),
+    posicionesConAviso: Set<String> = emptySet(),
 ) {
     val textMeasurer = rememberTextMeasurer()
     val editPainter = rememberVectorPainter(Icons.Filled.Edit)
@@ -158,8 +176,22 @@ fun ImageWithHotspotsProportional(
         scrollState.animateScrollTo((pos - viewportSizePx / 2).coerceAtLeast(0))
     }
 
+    // Se calcula con los centros de las burbujas para no depender de lo que dibuja el Canvas.
+    val contenidoPx = with(LocalDensity.current) { (if (isVertical) imageHeightDp else imageWidthDp).toPx() }
+    val alertaFuera by remember(hotspots, posicionesConAviso, contenidoPx, viewportSizePx) {
+        derivedStateOf {
+            if (posicionesConAviso.isEmpty() || scrollState.maxValue == 0) return@derivedStateOf false to false
+            val inicio = scrollState.value
+            val centros = hotspots.filter { it.id in posicionesConAviso }
+                .map { (if (isVertical) it.center01.y else it.center01.x) * contenidoPx }
+            centros.any { it < inicio } to centros.any { it > inicio + viewportSizePx }
+        }
+    }
+
+    Box(modifier = modifier) {
     Box(
-        modifier = modifier
+        modifier = Modifier
+            .fillMaxSize()
             .onSizeChanged { viewportSizePx = if (isVertical) it.height else it.width }
             .let {
                 when {
@@ -296,6 +328,40 @@ fun ImageWithHotspotsProportional(
                 }
             }
         }
+    }
+    if (alertaFuera.first) {
+        FranjaAlertaFuera(
+            isVertical, alInicio = true,
+            Modifier.align(if (isVertical) Alignment.TopCenter else Alignment.CenterStart)
+        )
+    }
+    if (alertaFuera.second) {
+        FranjaAlertaFuera(
+            isVertical, alInicio = false,
+            Modifier.align(if (isVertical) Alignment.BottomCenter else Alignment.CenterEnd)
+        )
+    }
+    }
+}
+
+/** Borde rojo con flecha del lado del diagrama donde quedó una alerta sin ver. */
+@Composable
+private fun FranjaAlertaFuera(isVertical: Boolean, alInicio: Boolean, modifier: Modifier = Modifier) {
+    val icono = when {
+        isVertical && alInicio -> Icons.Filled.ExpandLess
+        isVertical -> Icons.Filled.ExpandMore
+        alInicio -> Icons.Filled.ChevronLeft
+        else -> Icons.Filled.ChevronRight
+    }
+    val descripcion = stringResource(R.string.monitor_alerta_fuera_de_vista)
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .then(if (isVertical) Modifier.fillMaxWidth().height(22.dp) else Modifier.fillMaxHeight().width(22.dp))
+            .background(FondoAlerta.copy(alpha = 0.95f))
+            .semantics { contentDescription = descripcion }
+    ) {
+        Icon(icono, contentDescription = null, tint = TextoAlerta)
     }
 }
 

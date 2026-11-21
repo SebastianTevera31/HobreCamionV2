@@ -1073,4 +1073,9 @@
     <string name="fue_error_cargar">The fueling history could not be loaded.</string>
     <string name="fue_error_catalogo">The fuel catalog could not be loaded.</string>
     <string name="fue_requiere_internet">Offline: connect to view or add fuelings.</string>
+    <string name="monitor_aviso_alerta">Alert on %1$s · %2$s</string>
+    <string name="monitor_aviso_alerta_mas">Alert on %1$s · %2$s · and %3$d more</string>
+    <string name="monitor_ver_alerta">View</string>
+    <string name="monitor_llanta_en_alerta">%1$s in alert</string>
+    <string name="monitor_alerta_fuera_de_vista">There is an alert out of view</string>
 </resources>

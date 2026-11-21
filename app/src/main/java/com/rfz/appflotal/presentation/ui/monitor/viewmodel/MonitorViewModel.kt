@@ -29,8 +29,6 @@ import com.rfz.appflotal.domain.userpreferences.SwitchPressureUnitUseCase
 import com.rfz.appflotal.domain.userpreferences.SwitchTemperatureUnitUseCase
 import com.rfz.appflotal.domain.wifi.WifiUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +43,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class MonitorViewModel @Inject constructor(
@@ -113,7 +110,11 @@ class MonitorViewModel @Inject constructor(
 
     private val _tireUiState = MutableStateFlow(TireUiState())
 
-    private var manualSelectionJob: Job? = null
+    private val selector = SelectorLlanta(viewModelScope) { posicionMostrada, cambio ->
+        // Si al soltarse saltó a una alerta que no se había visto, se cargan sus datos.
+        if (cambio && posicionMostrada != null) fetchSensorDataInternal(posicionMostrada)
+        publicarAviso()
+    }
 
     /**
      * Estado de la llanta seleccionada para la UI. Unidades, `isAssembled` (tabla local de
@@ -151,8 +152,6 @@ class MonitorViewModel @Inject constructor(
         MutableStateFlow(NetworkStatus.Connected)
 
     val wifiStatus = _wifiStatus.asStateFlow()
-
-    var shouldReadAuto = true // true = Automático, false = Manual (Bloqueado)
 
     // Evita que el Wizard reaparezca mientras Room aún no guarda passWizard.
     private var wizardFinished = false
@@ -198,8 +197,9 @@ class MonitorViewModel @Inject constructor(
     }
 
     fun initMonitorData() {
-        // Only set showView to false if we actually have to wait for something
-        shouldReadAuto = true
+        // Al entrar al Monitor el panel vuelve a seguir las tramas.
+        selector.volverAAutomatico(conservarPosicion = true)
+        publicarAviso()
 
         viewModelScope.launch {
             try {
@@ -358,6 +358,7 @@ class MonitorViewModel @Inject constructor(
                 val isCurrentActive = activeTireMap[currentSelected] ?: true
                 if (!isCurrentActive) {
                     _tireUiState.update { TireUiState() }
+                    selector.olvidarPosicion()
                 }
             }
         }
@@ -367,29 +368,27 @@ class MonitorViewModel @Inject constructor(
         val result = updateSensorDataUseCase(dataFrame = dataFrame, timestamp = timestamp)
 
         updateTire(result.position) { it.copy(inAlert = result.inAlert, isActive = true) }
-        val currentSelected = _tireUiState.value.currentTire
-        if (shouldReadAuto || result.position == currentSelected) {
-            _tireUiState.update { currentState ->
-                result.lectura.aTireUiState().copy(
-                    currentTire = result.position.ifEmpty { currentState.currentTire },
-                    isLoading = false
-                )
-            }
+        if (selector.recibir(result.position, result.lectura)) {
+            _tireUiState.update { result.lectura.aTireUiState().copy(isLoading = false) }
         }
+        publicarAviso()
     }
 
+    /** El usuario toca una llanta (o "Ver" en el aviso): queda fija un tiempo. */
     fun getSensorDataByWheel(tireSelected: String) {
-        shouldReadAuto = false
+        selector.tocar(tireSelected)
         _tireUiState.update { it.copy(currentTire = tireSelected, isLoading = true) }
-
-        manualSelectionJob?.cancel()
-
-        manualSelectionJob = viewModelScope.launch {
-            delay(60000.milliseconds)
-            shouldReadAuto = true
-        }
-
         fetchSensorDataInternal(tireSelected)
+        publicarAviso()
+    }
+
+    /** Abre la alerta sin ver más reciente del aviso. */
+    fun verAlerta() {
+        getSensorDataByWheel(selector.alertaSinVerMasReciente() ?: return)
+    }
+
+    private fun publicarAviso() {
+        _monitorUiState.update { it.copy(avisoAlerta = selector.aviso()) }
     }
 
     private fun fetchSensorDataInternal(tireSelected: String) {
@@ -430,6 +429,11 @@ class MonitorViewModel @Inject constructor(
             currentUiState.copy(
                 currentTire = selectedTire
             )
+        }
+        // Tocar otra vez la llanta fijada la suelta: el panel vuelve a seguir las tramas.
+        if (selectedTire.isEmpty()) {
+            selector.volverAAutomatico(conservarPosicion = false)
+            publicarAviso()
         }
     }
 

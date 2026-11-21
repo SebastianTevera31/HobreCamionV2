@@ -252,6 +252,7 @@ fun HomeScreen(
                         onSwitchTempUnit = { monitorViewModel.switchTemperatureUnit() },
                         onGetTireDataByDate = posicionesViewModel::cargarHistorial,
                         onCleanFilteredTire = posicionesViewModel::limpiarHistorial,
+                        onVerAlerta = monitorViewModel::verAlerta,
                         uiState = monitorUiState,
                         positionUiState = posiciones.ultimas,
                         onBack = {

@@ -109,6 +109,7 @@ fun MonitorScreen(
         },
         sincronizacion = sincronizacion,
         onVerSincronizacion = sincronizacionViewModel::mostrarHoja,
+        onVerAlerta = monitorViewModel::verAlerta,
         modifier = modifier
     )
 

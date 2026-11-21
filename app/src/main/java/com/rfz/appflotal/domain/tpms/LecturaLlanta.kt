@@ -16,12 +16,15 @@ data class LecturaLlanta(
     val extraccion: SensorAlerts,
 )
 
+/** Pinta la llanta de rojo en el diagrama y en la lista. */
 fun estaEnAlerta(
     alertaTemperatura: SensorAlerts,
     alertaPresion: SensorAlerts,
     bateria: SensorAlerts,
-    pinchazo: SensorAlerts
+    pinchazo: SensorAlerts,
+    extraccion: SensorAlerts,
 ): Boolean = alertaTemperatura != SensorAlerts.NO_DATA ||
     alertaPresion != SensorAlerts.NO_DATA ||
     bateria != SensorAlerts.NO_DATA ||
-    pinchazo != SensorAlerts.NO_DATA
+    pinchazo != SensorAlerts.NO_DATA ||
+    extraccion != SensorAlerts.NO_DATA

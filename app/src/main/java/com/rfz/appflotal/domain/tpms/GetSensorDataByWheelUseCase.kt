@@ -41,15 +41,19 @@ class GetSensorDataByWheelUseCase @Inject constructor(
         val rawTemp = data.temperature.toFloat()
         val rawPressure = data.pressure.toFloat()
 
+        val date = convertUtcDate(data.timestamp)
+        val removalStatus = if (rawPressure == 0f && !isVoidDate(date)) SensorAlerts.REMOVAL
+        else SensorAlerts.NO_DATA
+
         val inAlert = estaEnAlerta(
             alertaTemperatura = temperatureStatus,
             alertaPresion = pressureStatus,
             bateria = batteryStatus,
             pinchazo = flatTireStatus,
+            extraccion = removalStatus,
         )
 
         val isAssembled = assemblyTireRepository.confirmTireMounted(tireSelected)
-        val date = convertUtcDate(data.timestamp)
 
         val lectura = LecturaLlanta(
             posicion = data.tire,
@@ -61,8 +65,7 @@ class GetSensorDataByWheelUseCase @Inject constructor(
             fecha = date,
             bateria = batteryStatus,
             pinchazo = flatTireStatus,
-            extraccion = if (rawPressure == 0f && !isVoidDate(date)) SensorAlerts.REMOVAL
-            else SensorAlerts.NO_DATA
+            extraccion = removalStatus
         )
 
         return Result(lectura = lectura, inAlert = inAlert)

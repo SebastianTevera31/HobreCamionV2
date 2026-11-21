@@ -31,7 +31,18 @@ data class MonitorUiState(
     val isBluetoothOn: Boolean = false,
     val temperatureUnit: UnidadTemperatura = UnidadTemperatura.CELCIUS,
     val pressureUnit: UnidadPresion = UnidadPresion.PSI,
-    val odometerUnit: UnidadOdometro = UnidadOdometro.KILOMETROS
+    val odometerUnit: UnidadOdometro = UnidadOdometro.KILOMETROS,
+    /** Alertas que llegaron con otra llanta fijada; null si no hay o el panel está en automático. */
+    val avisoAlerta: AvisoAlertaUi? = null,
+)
+
+data class AvisoAlertaUi(
+    /** La alerta sin ver más reciente: la que abre "Ver". */
+    val posicion: String,
+    val alerta: SensorAlerts,
+    /** Cuántas alertas más hay sin ver además de [posicion]. */
+    val adicionales: Int,
+    val posiciones: Set<String>,
 )
 
 data class TireUiState(

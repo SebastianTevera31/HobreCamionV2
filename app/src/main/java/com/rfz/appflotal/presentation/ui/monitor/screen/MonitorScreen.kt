@@ -37,6 +37,7 @@ import com.rfz.appflotal.data.repository.UnidadTemperatura
 import com.rfz.appflotal.data.repository.bluetooth.BluetoothSignalQuality
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
+import com.rfz.appflotal.presentation.ui.monitor.component.AvisoAlertaLlanta
 import com.rfz.appflotal.presentation.ui.monitor.component.WarningSnackBanner
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.components.BannerSincronizacion
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.components.IndicadorSincronizacionBoton
@@ -78,6 +79,7 @@ fun MonitorScreenContent(
     registerDialogSlot: @Composable () -> Unit = {},
     sincronizacion: EstadoSincronizacionUiState = EstadoSincronizacionUiState(),
     onVerSincronizacion: () -> Unit = {},
+    onVerAlerta: () -> Unit = {},
 ) {
     val context = LocalContext.current
     var selectedOption by rememberSaveable { mutableStateOf(MonitorScreenViews.DIAGRAMA) }
@@ -150,6 +152,7 @@ fun MonitorScreenContent(
                             )
                         }
                         BannerSincronizacion(uiState = sincronizacion, onClick = onVerSincronizacion)
+                        AvisoAlertaLlanta(aviso = monitorUiState.avisoAlerta, onVer = onVerAlerta)
                         if (selectedOption == MonitorScreenViews.DIAGRAMA) {
                             DiagramaMonitorScreen(
                                 paymentPlan = paymentPlan,
@@ -168,6 +171,8 @@ fun MonitorScreenContent(
                                 onSwitchTempUnit = onSwitchTempUnit,
                                 modifier = Modifier.padding(8.dp),
                                 avisosSincronizacion = sincronizacion.porPosicion,
+                                posicionesConAviso = monitorUiState.avisoAlerta?.posiciones.orEmpty(),
+                                onVerAlerta = onVerAlerta,
                                 onVerSincronizacion = onVerSincronizacion
                             )
                         } else {

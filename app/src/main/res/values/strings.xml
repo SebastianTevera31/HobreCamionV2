@@ -1062,4 +1062,9 @@
     <string name="fue_error_cargar">No se pudo cargar el historial de cargas.</string>
     <string name="fue_error_catalogo">No se pudo cargar el catálogo de combustibles.</string>
     <string name="fue_requiere_internet">Sin conexión: conéctate para consultar o registrar cargas.</string>
+    <string name="monitor_aviso_alerta">Alerta en %1$s · %2$s</string>
+    <string name="monitor_aviso_alerta_mas">Alerta en %1$s · %2$s · y %3$d más</string>
+    <string name="monitor_ver_alerta">Ver</string>
+    <string name="monitor_llanta_en_alerta">%1$s en alerta</string>
+    <string name="monitor_alerta_fuera_de_vista">Hay una alerta fuera de la vista</string>
 </resources>

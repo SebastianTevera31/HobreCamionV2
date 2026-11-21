@@ -30,6 +30,7 @@ fun HomeContent(
     onDisassemblyClick: (tire: String, temperature: Float, pressure: Float) -> Unit,
     onGetTireDataByDate: (position: String, date: String) -> Unit,
     onCleanFilteredTire: () -> Unit,
+    onVerAlerta: () -> Unit = {},
     onSwitchPressureUnit: () -> Unit,
     onSwitchTempUnit: () -> Unit,
     onGetLastedSensorData: () -> Unit,
@@ -95,6 +96,7 @@ fun HomeContent(
                     onGetTireDataByDate(position, date)
                 },
                 onCleanFilteredTire = onCleanFilteredTire,
+                onVerAlerta = onVerAlerta,
                 modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
             )
         }

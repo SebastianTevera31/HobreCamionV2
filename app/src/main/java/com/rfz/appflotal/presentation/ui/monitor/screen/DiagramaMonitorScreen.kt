@@ -27,7 +27,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.derivedStateOf
+import com.rfz.appflotal.presentation.ui.monitor.component.TextoAlerta
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -95,6 +100,9 @@ fun DiagramaMonitorScreen(
     modifier: Modifier = Modifier,
     avisosSincronizacion: Map<String, AvisoLlantaUi> = emptyMap(),
     onVerSincronizacion: () -> Unit = {},
+    /** Alertas sin ver mientras hay una llanta fijada. */
+    posicionesConAviso: Set<String> = emptySet(),
+    onVerAlerta: () -> Unit = {},
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var tireSelected by remember { mutableStateOf("") }
@@ -118,7 +126,8 @@ fun DiagramaMonitorScreen(
                     tireSelected = tireSelected,
                     width = imageDimens.first,
                     height = imageDimens.second,
-                    insigniasSincronizacion = avisosSincronizacion.mapValues { it.value.conError }
+                    insigniasSincronizacion = avisosSincronizacion.mapValues { it.value.conError },
+                    posicionesConAviso = posicionesConAviso
                 )
                 isLoading = false
             }
@@ -188,7 +197,9 @@ fun DiagramaMonitorScreen(
                     getSensorData = getSensorData,
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxHeight()
+                        .fillMaxHeight(),
+                    posicionesConAviso = posicionesConAviso,
+                    onVerAlerta = onVerAlerta
                 )
             }
         }
@@ -202,7 +213,15 @@ fun PanelLlantas(
     updateSelectedTire: (String) -> Unit,
     modifier: Modifier = Modifier,
     getSensorData: (String) -> Unit,
+    posicionesConAviso: Set<String> = emptySet(),
+    onVerAlerta: () -> Unit = {},
 ) {
+    val gridState = rememberLazyGridState()
+    // En unidades grandes la lista también tiene scroll: se avisa si la alerta quedó fuera.
+    val alertaFuera by remember(posicionesConAviso, tiresList) {
+        derivedStateOf { alertaFueraDeLista(gridState, tiresList.orEmpty(), posicionesConAviso) }
+    }
+
     Card(
         colors = CardDefaults.cardColors(Color.White),
         modifier = modifier,
@@ -237,9 +256,11 @@ fun PanelLlantas(
 
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
+                        state = gridState,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
-                            .fillMaxSize()
+                            .weight(1f)
+                            .fillMaxWidth()
                     ) {
                         items(items = tiresList, key = { tire -> tire.sensorPosition }) {
                             val colorStatus =
@@ -277,6 +298,20 @@ fun PanelLlantas(
                                 )
                             }
                         }
+                    }
+
+                    alertaFuera?.let { (posicion, abajo) ->
+                        Text(
+                            text = stringResource(R.string.monitor_llanta_en_alerta, posicion) +
+                                if (abajo) " ↓" else " ↑",
+                            color = TextoAlerta,
+                            style = MaterialTheme.typography.labelMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(onClick = onVerAlerta)
+                                .padding(top = 6.dp)
+                        )
                     }
                 }
             }
@@ -439,4 +474,19 @@ fun PanelLlantasPreview() {
             getSensorData = {}
         )
     }
+}
+
+/** Posición con alerta sin ver que no está visible en la lista, y si quedó abajo (true) o arriba. */
+private fun alertaFueraDeLista(
+    gridState: LazyGridState,
+    llantas: List<MonitorTire>,
+    posicionesConAviso: Set<String>,
+): Pair<String, Boolean>? {
+    if (posicionesConAviso.isEmpty()) return null
+    val visibles = gridState.layoutInfo.visibleItemsInfo
+    if (visibles.isEmpty()) return null
+    val claves = visibles.map { it.key }.toSet()
+    val indice = llantas.indexOfFirst { it.sensorPosition in posicionesConAviso && it.sensorPosition !in claves }
+    if (indice < 0) return null
+    return llantas[indice].sensorPosition to (indice > visibles.last().index)
 }

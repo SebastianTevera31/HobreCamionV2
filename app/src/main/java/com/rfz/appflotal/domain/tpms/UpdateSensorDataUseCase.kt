@@ -51,7 +51,12 @@ class UpdateSensorDataUseCase @Inject constructor(
         val time = if (timestamp != null) convertUtcDate(timestamp)
         else getCurrentDate(pattern = displayDateTimePattern())
 
-        val inAlert = estaEnAlerta(temperatureStatus, pressureStatus, batteryStatus, flatTireStatus)
+        val removalStatus = if (rawPressure.toInt() == 0 && !isVoidDate(time)) SensorAlerts.REMOVAL
+        else SensorAlerts.NO_DATA
+
+        val inAlert = estaEnAlerta(
+            temperatureStatus, pressureStatus, batteryStatus, flatTireStatus, removalStatus
+        )
 
         val isAssembled =
             realTire.isNotEmpty() && assemblyTireRepository.confirmTireMounted(realTire)
@@ -66,8 +71,7 @@ class UpdateSensorDataUseCase @Inject constructor(
             fecha = time,
             bateria = batteryStatus,
             pinchazo = flatTireStatus,
-            extraccion = if (rawPressure.toInt() == 0 && !isVoidDate(time)) SensorAlerts.REMOVAL
-            else SensorAlerts.NO_DATA
+            extraccion = removalStatus
         )
 
         return Result(lectura = lectura, position = realTire, inAlert = inAlert)
