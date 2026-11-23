@@ -13,7 +13,7 @@ import com.rfz.appflotal.data.repository.fcmessaging.toSafePaymentPlanType
 import com.rfz.appflotal.data.repository.maintenance.MaintenanceNotificationsRepository
 import com.rfz.appflotal.data.worker.cancelOnDemandPromotionsSyncs
 import com.rfz.appflotal.data.worker.triggerMaintenanceNotificationsSync
-import com.rfz.appflotal.domain.catalog.CatalogUseCase
+import com.rfz.appflotal.domain.catalogo.ActualizarDatosOfflineUseCase
 import com.rfz.appflotal.domain.languaje.LanguajeUseCase
 import com.rfz.appflotal.domain.login.LoginUseCase
 import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
@@ -41,7 +41,7 @@ class HomeViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val appUtilitiesRepository: AppUtilitiesRepositoryImpl,
     private val appStatusManagerRepository: AppStatusManagerRepository,
-    private val catalogUseCase: CatalogUseCase,
+    private val actualizarDatosOffline: ActualizarDatosOfflineUseCase,
     private val maintenanceNotificationsRepository: MaintenanceNotificationsRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -100,7 +100,7 @@ class HomeViewModel @Inject constructor(
                     languageUseCase("Bearer ${user.fld_token}", language).onSuccess { response ->
                         // El servidor emite un token nuevo con el idioma; sin guardarlo, los catálogos llegan en el idioma anterior.
                         hombreCamionRepository.updateToken(user.idUser, response.token)
-                        launch { catalogUseCase.refreshTireReportCatalog() }
+                        launch { actualizarDatosOffline() }
                     }
                     // Tras actualizar el token, para que los recordatorios lleguen en el idioma de la app.
                     // El worker descarta a quien no tenga plan Complete y espera red si no la hay.
@@ -174,7 +174,7 @@ class HomeViewModel @Inject constructor(
                         idUser.idUser,
                         response.token
                     )
-                    catalogUseCase.refreshTireReportCatalog()
+                    actualizarDatosOffline()
                 }
 
                 result

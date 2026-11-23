@@ -3,7 +3,6 @@ package com.rfz.appflotal.presentation.ui.monitor.sincronizacion.components
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
 import com.rfz.appflotal.R
-import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.AvisoLlantaUi
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.EfectoSincronizacion
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.EstadoFilaSincronizacion
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.TipoFilaSincronizacion
@@ -27,16 +26,6 @@ internal fun EstadoFilaSincronizacion.etiqueta(): Int = when (this) {
     EstadoFilaSincronizacion.ENVIANDO -> R.string.sinc_fila_enviando
     EstadoFilaSincronizacion.EN_ESPERA -> R.string.sinc_fila_en_espera
     else -> R.string.sinc_fila_pendiente
-}
-
-@StringRes
-internal fun AvisoLlantaUi.titulo(): Int = when (tipo) {
-    TipoFilaSincronizacion.MONTAJE ->
-        if (conError) R.string.sinc_rechazo_montaje else R.string.sinc_pendiente_montaje
-    TipoFilaSincronizacion.INSPECCION ->
-        if (conError) R.string.sinc_rechazo_inspeccion else R.string.sinc_pendiente_inspeccion
-    TipoFilaSincronizacion.DESMONTAJE, TipoFilaSincronizacion.DESMONTAJE_CON_INSPECCION ->
-        if (conError) R.string.sinc_rechazo_desmontaje else R.string.sinc_pendiente_desmontaje
 }
 
 @StringRes

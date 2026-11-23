@@ -109,3 +109,12 @@ class FakeMontajes : AssemblyTireRepository {
         return Result.success(emptyList())
     }
 }
+
+class FakeInventario : com.rfz.appflotal.data.repository.tire.InventarioLlantasRepository {
+    var actualizaciones = 0
+
+    override suspend fun actualizar(): Boolean {
+        actualizaciones++
+        return true
+    }
+}

@@ -106,6 +106,13 @@ fun DisassemblyTireScreen(
     DisassemblyTireView(
         form = form,
         uiState = uiState.value,
+        onRetry = {
+            viewModel.loadData(
+                tirePosition = positionTire,
+                initialPressure = initialPressure.toInt(),
+                initialTemperature = initialTemperature.toInt()
+            )
+        },
         onBack = {
             // Sin paso de inspección no hay a dónde regresar dentro de la pantalla.
             val regresarAInspeccion = uiState.value.inspeccionOmitida == null &&
@@ -147,6 +154,7 @@ fun DisassemblyTireView(
     onDismount: (causeId: Int, destinationId: Int) -> Unit,
     onInspectionFinish: (form: InspectionUi) -> Unit,
     onError: suspend () -> Unit,
+    onRetry: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var causesSelected: CatalogItem? by remember { mutableStateOf(null) }
@@ -260,7 +268,10 @@ fun DisassemblyTireView(
                 ErrorView(
                     modifier
                         .safeContentPadding()
-                        .padding(innerPadding)
+                        .padding(innerPadding),
+                    errorMessage = R.string.sinc_sin_datos_operar,
+                    showRetryButton = true,
+                    onRetry = onRetry
                 )
             }
 

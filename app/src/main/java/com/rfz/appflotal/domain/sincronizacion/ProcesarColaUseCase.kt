@@ -5,6 +5,7 @@ import com.rfz.appflotal.data.model.sincronizacion.ResultadoEnvio
 import com.rfz.appflotal.data.model.sincronizacion.ResultadoProcesamiento
 import com.rfz.appflotal.data.repository.assembly.AssemblyTireRepository
 import com.rfz.appflotal.data.repository.sincronizacion.ColaSincronizacionRepository
+import com.rfz.appflotal.data.repository.tire.InventarioLlantasRepository
 import kotlinx.coroutines.sync.Mutex
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,6 +18,7 @@ import javax.inject.Singleton
 class ProcesarColaUseCase @Inject constructor(
     private val cola: ColaSincronizacionRepository,
     private val montajes: AssemblyTireRepository,
+    private val inventario: InventarioLlantasRepository,
 ) {
     // Worker y pantalla comparten la cola; el que llega segundo no espera, el que corre toma lo nuevo.
     private val candado = Mutex()
@@ -74,6 +76,8 @@ class ProcesarColaUseCase @Inject constructor(
             cola.registrarSincronizacion(System.currentTimeMillis())
             // Lo que se mostró antes de enviar puede no coincidir con lo que aceptó el servidor.
             runCatching { montajes.refreshMountedTires() }
+            // Tras montar o desmontar cambia el stock: se refresca para trabajar sin red después.
+            runCatching { inventario.actualizar() }
         }
         return ResultadoProcesamiento.COMPLETA
     }

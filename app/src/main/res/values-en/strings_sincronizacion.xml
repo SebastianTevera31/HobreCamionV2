@@ -62,4 +62,18 @@
         <item quantity="one">%d operation was rejected. Tap to review it.</item>
         <item quantity="other">%d operations were rejected. Tap to review them.</item>
     </plurals>
+    <string name="sinc_datos_offline">DATA FOR WORKING OFFLINE</string>
+    <string name="sinc_datos_detalle">Tires, destinations and causes</string>
+    <string name="sinc_datos_actualizados">Updated %1$s</string>
+    <string name="sinc_datos_vacios">No data saved yet</string>
+    <string name="sinc_datos_descargando">Downloading…</string>
+    <string name="sinc_datos_error">Couldn\'t update; the saved data is used</string>
+    <string name="sinc_actualizar">Update</string>
+    <string name="sinc_sin_datos_operar">There\'s no data saved to work offline. Connect once to download it.</string>
+    <string name="sinc_llanta_titulo">Tire %1$s</string>
+    <string name="sinc_llanta_pendiente">It will be sent as soon as there\'s a connection</string>
+    <string name="sinc_llanta_en_espera">Waiting for an earlier rejection on this tire to be resolved</string>
+    <string name="sinc_ver_sincronizacion">View sync</string>
+    <string name="sinc_cerrar">Close</string>
+    <string name="sinc_desc_icono_llanta">Operations not sent for this tire</string>
 </resources>

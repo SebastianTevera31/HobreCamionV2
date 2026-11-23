@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfz.appflotal.data.NetworkStatus
 import com.rfz.appflotal.data.model.sincronizacion.ResultadoProcesamiento
+import com.rfz.appflotal.domain.catalogo.ActualizarDatosOfflineUseCase
+import com.rfz.appflotal.domain.catalogo.ObservarDatosOfflineUseCase
 import com.rfz.appflotal.domain.sincronizacion.DescartarOperacionUseCase
 import com.rfz.appflotal.domain.sincronizacion.ObservarEstadoSincronizacionUseCase
 import com.rfz.appflotal.domain.sincronizacion.ReintentarOperacionUseCase
@@ -36,6 +38,8 @@ class EstadoSincronizacionViewModel @Inject constructor(
     private val sincronizarAhoraUseCase: SincronizarAhoraUseCase,
     private val reintentarOperacion: ReintentarOperacionUseCase,
     private val descartarOperacion: DescartarOperacionUseCase,
+    private val observarDatosOffline: ObservarDatosOfflineUseCase,
+    private val actualizarDatosOfflineUseCase: ActualizarDatosOfflineUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EstadoSincronizacionUiState())
@@ -48,6 +52,25 @@ class EstadoSincronizacionViewModel @Inject constructor(
 
     init {
         observar()
+        viewModelScope.launch {
+            observarDatosOffline()
+                .catch { /* Sin la fecha de descarga la hoja sigue funcionando. */ }
+                .collect { fecha ->
+                    _uiState.update { it.copy(datosOffline = it.datosOffline.copy(actualizadoEn = fecha)) }
+                }
+        }
+    }
+
+    /** Descarga de nuevo los catálogos para trabajar sin conexión. */
+    fun actualizarDatosOffline() {
+        if (_uiState.value.datosOffline.actualizando) return
+        _uiState.update { it.copy(datosOffline = it.datosOffline.copy(actualizando = true, error = false)) }
+        viewModelScope.launch {
+            val completo = runCatching { actualizarDatosOfflineUseCase() }.getOrDefault(false)
+            _uiState.update {
+                it.copy(datosOffline = it.datosOffline.copy(actualizando = false, error = !completo))
+            }
+        }
     }
 
     fun observar() {

@@ -2,6 +2,7 @@ package com.rfz.appflotal.data.model.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import org.joda.time.DateTime
 import java.sql.Date
@@ -36,7 +37,10 @@ data class AppHCEntity(
     val passWizardPending: Boolean = false,
 )
 
-@Entity(tableName = "dataframe")
+@Entity(
+    tableName = "dataframe",
+    indices = [Index(value = ["monitor_id", "sensor_id", "timestamp"])]
+)
 data class DataframeEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id_record")
@@ -123,33 +127,3 @@ data class SensorDataUpdate(
     val active: Boolean
 )
 
-@Entity(tableName = "inspection_catalog")
-data class InspectionCatalogEntity(
-    @PrimaryKey val idTireInspectionReport: Int,
-    val description: String,
-    val isActive: Boolean = true
-)
-
-@Entity(tableName = "tire")
-data class TireEntity(
-    @PrimaryKey
-    val id_tire: Int,
-    val fld_provider: String,
-    val fld_size: String,
-    val fld_brand: String,
-    val fld_model: String,
-    val fld_loadingCapacity: String,
-    val fld_destination: String,
-    val fld_typeAcquisition: String,
-    val fld_lastMountedPosition: String,
-    val fld_descriptionLastRenovatedDesign: String,
-    val fld_lastMountedPositionDate: String,
-    val fld_vehicleNumber: Int,
-    val fld_dateEventAssembly: Date,
-    val fld_dateEventA: DateTime,
-    val fld_treadDepthAssembly: Double,
-    val fld_odometerAssembly: Int,
-    val fld_typeVehicle: String,
-    val axleID: Int,
-    val tirePosition: Int
-)

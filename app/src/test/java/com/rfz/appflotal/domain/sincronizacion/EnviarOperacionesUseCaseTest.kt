@@ -13,7 +13,7 @@ class EnviarOperacionesUseCaseTest {
     private val cola = FakeColaSincronizacion()
     private val montajes = FakeMontajes()
     private val enviar = EnviarOperacionesUseCase(
-        procesarCola = ProcesarColaUseCase(cola, montajes),
+        procesarCola = ProcesarColaUseCase(cola, montajes, FakeInventario()),
         cola = cola,
         descartar = DescartarOperacionUseCase(cola, montajes)
     )

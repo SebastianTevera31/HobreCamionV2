@@ -319,4 +319,35 @@ class MigrationTest {
         assertEquals(0, db.count("operacion_pendiente"))
         assertTrue(!db.existeTabla("inspection_tire_table"))
     }
+
+    @Test
+    fun migrate35To36_catalogoDeInspeccion_pasaACatalogoYCreaElIndiceDeTramas() {
+        helper.createDatabase(testDb, 35).apply {
+            insertUser(idMonitor = 9)
+            execSQL(
+                "INSERT INTO inspection_catalog (idTireInspectionReport, description, isActive) " +
+                    "VALUES (27, 'Desgaste irregular', 1)"
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(testDb, 36, true, MIGRATION_35_36)
+
+        db.query("SELECT tipo, id, descripcion, descripcionEn, activo FROM catalogo").use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals("REPORTE_INSPECCION", cursor.getString(0))
+            assertEquals(27, cursor.getInt(1))
+            assertEquals("Desgaste irregular", cursor.getString(2))
+            assertTrue(cursor.isNull(3))
+            assertEquals(1, cursor.getInt(4))
+        }
+        assertTrue(!db.existeTabla("inspection_catalog"))
+        assertEquals(0, db.count("llanta"))
+        assertEquals("token-test", db.storedToken())
+        db.query(
+            "SELECT 1 FROM sqlite_master WHERE type = 'index' " +
+                "AND name = 'index_dataframe_monitor_id_sensor_id_timestamp'"
+        ).use { assertEquals(1, it.count) }
+    }
 }

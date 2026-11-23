@@ -26,7 +26,7 @@ class GetCpkReportUseCase @Inject constructor(
                         idTire = tireDto.idTire,
                         positionTire = report.tireNumber,
                         odometer = tireDto.odometerAssembly,
-                        assemblyDate = tireDto.dateEventAssembly,
+                        assemblyDate = tireDto.dateEventAssembly.orEmpty(),
                         updatedAt = System.currentTimeMillis()
                     )
                 }

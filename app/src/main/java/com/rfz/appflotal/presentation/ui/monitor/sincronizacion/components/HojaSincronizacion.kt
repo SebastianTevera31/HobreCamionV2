@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfz.appflotal.R
+import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.CargaSincronizacion
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.EstadoFilaSincronizacion
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.EstadoSincronizacionUiState
@@ -69,7 +70,8 @@ fun HojaSincronizacionRoute(
             onSincronizarAhora = viewModel::sincronizarAhora,
             onReintentar = viewModel::reintentar,
             onDescartar = viewModel::pedirDescartar,
-            onRecargar = viewModel::observar
+            onRecargar = viewModel::observar,
+            onActualizarDatos = viewModel::actualizarDatosOffline
         )
     }
     uiState.porDescartar?.let { fila ->
@@ -90,18 +92,22 @@ private fun HojaSincronizacion(
     onReintentar: (FilaSincronizacionUi) -> Unit,
     onDescartar: (FilaSincronizacionUi) -> Unit,
     onRecargar: () -> Unit,
+    onActualizarDatos: () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onCerrar,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ) {
-        HojaSincronizacionContent(
-            uiState = uiState,
-            onSincronizarAhora = onSincronizarAhora,
-            onReintentar = onReintentar,
-            onDescartar = onDescartar,
-            onRecargar = onRecargar
-        )
+        LocalizedApp {
+            HojaSincronizacionContent(
+                uiState = uiState,
+                onSincronizarAhora = onSincronizarAhora,
+                onReintentar = onReintentar,
+                onDescartar = onDescartar,
+                onRecargar = onRecargar,
+                onActualizarDatos = onActualizarDatos
+            )
+        }
     }
 }
 
@@ -113,6 +119,7 @@ fun HojaSincronizacionContent(
     onDescartar: (FilaSincronizacionUi) -> Unit,
     onRecargar: () -> Unit,
     modifier: Modifier = Modifier,
+    onActualizarDatos: () -> Unit = {},
 ) {
     val hayOperaciones = uiState.enCola.isNotEmpty() || uiState.requierenAtencion.isNotEmpty()
     Column(
@@ -139,7 +146,8 @@ fun HojaSincronizacionContent(
             Text(stringResource(R.string.sinc_sincronizar_ahora))
         }
 
-        val enviando = uiState.sincronizando || uiState.indicador == IndicadorSincronizacion.ENVIANDO
+        val enviando =
+            uiState.sincronizando || uiState.indicador == IndicadorSincronizacion.ENVIANDO
         if (enviando || uiState.carga == CargaSincronizacion.CARGANDO) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         } else {
@@ -152,6 +160,11 @@ fun HojaSincronizacionContent(
             !hayOperaciones -> EstadoVacio()
             else -> ListaOperaciones(uiState, onReintentar, onDescartar)
         }
+        SeccionDatosOffline(
+            datos = uiState.datosOffline,
+            conConexion = uiState.conConexion,
+            onActualizar = onActualizarDatos
+        )
     }
 }
 
@@ -161,18 +174,26 @@ private fun LineaEstado(uiState: EstadoSincronizacionUiState) {
     val (color, texto) = when {
         uiState.sesionVencida && porEnviar > 0 ->
             RojoSincronizacion to stringResource(R.string.sinc_sesion_vencida)
+
         !uiState.conConexion -> AmbarSincronizacion to stringResource(R.string.sinc_sin_conexion)
         uiState.indicador == IndicadorSincronizacion.ENVIANDO ->
             Color(0xFF4CAF50) to stringResource(R.string.sinc_enviando)
+
         else -> Color(0xFF4CAF50) to stringResource(R.string.sinc_con_conexion)
     }
-    val detalle = if (porEnviar > 0) " · " + pluralStringResource(R.plurals.sinc_por_enviar, porEnviar, porEnviar) else ""
+    val detalle = if (porEnviar > 0) " · " + pluralStringResource(
+        R.plurals.sinc_por_enviar,
+        porEnviar,
+        porEnviar
+    ) else ""
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.padding(top = 4.dp)
     ) {
-        Box(Modifier.size(8.dp).background(color, CircleShape))
+        Box(Modifier
+            .size(8.dp)
+            .background(color, CircleShape))
         Text(texto + detalle, style = MaterialTheme.typography.bodyMedium)
     }
 }
@@ -188,7 +209,14 @@ private fun ListaOperaciones(
         modifier = Modifier.heightIn(max = 420.dp)
     ) {
         if (uiState.requierenAtencion.isNotEmpty()) {
-            item { Encabezado(stringResource(R.string.sinc_requieren_atencion, uiState.requierenAtencion.size)) }
+            item {
+                Encabezado(
+                    stringResource(
+                        R.string.sinc_requieren_atencion,
+                        uiState.requierenAtencion.size
+                    )
+                )
+            }
             items(uiState.requierenAtencion, key = { "error-${it.id}" }) { fila ->
                 FilaRechazada(
                     fila = fila,
@@ -266,9 +294,30 @@ private fun FilaEsqueleto() {
 }
 
 private val filasEjemplo = listOf(
-    FilaSincronizacionUi(1, TipoFilaSincronizacion.DESMONTAJE_CON_INSPECCION, "P3", 0, EstadoFilaSincronizacion.ENVIANDO, null),
-    FilaSincronizacionUi(3, TipoFilaSincronizacion.MONTAJE, "P3", 0, EstadoFilaSincronizacion.PENDIENTE, null),
-    FilaSincronizacionUi(5, TipoFilaSincronizacion.MONTAJE, "P5", 0, EstadoFilaSincronizacion.EN_ESPERA, null),
+    FilaSincronizacionUi(
+        1,
+        TipoFilaSincronizacion.DESMONTAJE_CON_INSPECCION,
+        "P3",
+        0,
+        EstadoFilaSincronizacion.ENVIANDO,
+        null
+    ),
+    FilaSincronizacionUi(
+        3,
+        TipoFilaSincronizacion.MONTAJE,
+        "P3",
+        0,
+        EstadoFilaSincronizacion.PENDIENTE,
+        null
+    ),
+    FilaSincronizacionUi(
+        5,
+        TipoFilaSincronizacion.MONTAJE,
+        "P5",
+        0,
+        EstadoFilaSincronizacion.EN_ESPERA,
+        null
+    ),
 )
 
 @Preview(showBackground = true)
@@ -280,7 +329,14 @@ private fun HojaSincronizacionListaPreview() {
             indicador = IndicadorSincronizacion.REQUIERE_ATENCION,
             conConexion = false,
             requierenAtencion = listOf(
-                FilaSincronizacionUi(4, TipoFilaSincronizacion.DESMONTAJE, "P5", 0, EstadoFilaSincronizacion.CON_ERROR, null)
+                FilaSincronizacionUi(
+                    4,
+                    TipoFilaSincronizacion.DESMONTAJE,
+                    "P5",
+                    0,
+                    EstadoFilaSincronizacion.CON_ERROR,
+                    null
+                )
             ),
             enCola = filasEjemplo
         ),
@@ -292,7 +348,10 @@ private fun HojaSincronizacionListaPreview() {
 @Composable
 private fun HojaSincronizacionVaciaPreview() {
     HojaSincronizacionContent(
-        uiState = EstadoSincronizacionUiState(carga = CargaSincronizacion.LISTA, ultimaSincronizacion = 0),
+        uiState = EstadoSincronizacionUiState(
+            carga = CargaSincronizacion.LISTA,
+            ultimaSincronizacion = 0
+        ),
         onSincronizarAhora = {}, onReintentar = {}, onDescartar = {}, onRecargar = {}
     )
 }

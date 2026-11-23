@@ -11,13 +11,16 @@ interface DataframeDao {
     @Insert(onConflict = OnConflictStrategy.NONE)
     suspend fun insert(dataframe: DataframeEntity): Long
 
-    @Query(
-        "DELETE FROM dataframe WHERE (sensor_id, timestamp) NOT IN " +
-                "(SELECT sensor_id, MAX(timestamp) FROM dataframe WHERE monitor_id = :monitorId " +
-                "GROUP BY sensor_id) " +
-                "AND monitor_id = :monitorId"
-    )
-    suspend fun deleteOldRecords(monitorId: Int)
+    /**
+     * Tramas que ya no se van a enviar (aceptadas o rechazadas por el servidor) anteriores a
+     * [corte]. Las fechas son ISO-8601 en UTC, así que se comparan como texto.
+     */
+    @Query("DELETE FROM dataframe WHERE (sendStatus = 1 OR active = 0) AND timestamp < :corte")
+    suspend fun borrarResueltasAntesDe(corte: String): Int
+
+    /** Tramas que siguen pendientes de enviar, anteriores a [corte]. */
+    @Query("DELETE FROM dataframe WHERE sendStatus = 0 AND active = 1 AND timestamp < :corte")
+    suspend fun borrarPendientesAntesDe(corte: String): Int
 
     // active = 0 marca tramas que el servidor rechazó (p. ej. "Invalid Frame"); no se reintentan
     @Query("SELECT * FROM dataframe WHERE monitor_id = :monitorId AND sendStatus = 0 AND active = 1")

@@ -62,4 +62,18 @@
         <item quantity="one">%d operación fue rechazada. Toca para revisarla.</item>
         <item quantity="other">%d operaciones fueron rechazadas. Toca para revisarlas.</item>
     </plurals>
+    <string name="sinc_datos_offline">DATOS PARA TRABAJAR SIN CONEXIÓN</string>
+    <string name="sinc_datos_detalle">Llantas, destinos y causas</string>
+    <string name="sinc_datos_actualizados">Actualizados %1$s</string>
+    <string name="sinc_datos_vacios">Aún no hay datos guardados</string>
+    <string name="sinc_datos_descargando">Descargando…</string>
+    <string name="sinc_datos_error">No se pudieron actualizar; se usan los guardados</string>
+    <string name="sinc_actualizar">Actualizar</string>
+    <string name="sinc_sin_datos_operar">No hay datos guardados para trabajar sin conexión. Conéctate una vez para descargarlos.</string>
+    <string name="sinc_llanta_titulo">Llanta %1$s</string>
+    <string name="sinc_llanta_pendiente">Se enviará en cuanto haya conexión</string>
+    <string name="sinc_llanta_en_espera">Espera a que se resuelva un rechazo anterior en esta llanta</string>
+    <string name="sinc_ver_sincronizacion">Ver sincronización</string>
+    <string name="sinc_cerrar">Cerrar</string>
+    <string name="sinc_desc_icono_llanta">Operaciones sin enviar en esta llanta</string>
 </resources>

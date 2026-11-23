@@ -12,7 +12,7 @@ import com.rfz.appflotal.data.dao.DataframeDao
 import com.rfz.appflotal.data.dao.OperacionPendienteDao
 import com.rfz.appflotal.data.dao.FollowedPromotionsDao
 import com.rfz.appflotal.data.dao.ForumDao
-import com.rfz.appflotal.data.dao.InspectionCatalogDao
+import com.rfz.appflotal.data.dao.CatalogoDao
 import com.rfz.appflotal.data.dao.MaintenanceNotificationsDao
 import com.rfz.appflotal.data.dao.PromotionsDao
 import com.rfz.appflotal.data.dao.SensorDataDao
@@ -65,8 +65,8 @@ class DataBaseModule {
     }
 
     @Provides
-    fun provideInspectionCatalogDao(database: AppHombreCamionDatabase): InspectionCatalogDao {
-        return database.inspectionCatalogDao()
+    fun provideCatalogoDao(database: AppHombreCamionDatabase): CatalogoDao {
+        return database.catalogoDao()
     }
 
     @Provides

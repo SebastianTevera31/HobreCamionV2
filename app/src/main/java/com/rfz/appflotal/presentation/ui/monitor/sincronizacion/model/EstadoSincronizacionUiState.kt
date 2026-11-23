@@ -28,6 +28,16 @@ data class AvisoLlantaUi(
     val tipo: TipoFilaSincronizacion,
     val conError: Boolean,
     val mensaje: String?,
+    /** Todo lo pendiente de esa posición, para el diálogo del panel. */
+    val filas: List<FilaSincronizacionUi> = emptyList(),
+)
+
+/** Catálogos guardados para montar, desmontar e inspeccionar sin conexión. */
+data class DatosOfflineUi(
+    /** La descarga más antigua de los catálogos; null si falta alguno. */
+    val actualizadoEn: Long? = null,
+    val actualizando: Boolean = false,
+    val error: Boolean = false,
 )
 
 data class EstadoSincronizacionUiState(
@@ -42,6 +52,7 @@ data class EstadoSincronizacionUiState(
     val hojaVisible: Boolean = false,
     val porDescartar: FilaSincronizacionUi? = null,
     val sincronizando: Boolean = false,
+    val datosOffline: DatosOfflineUi = DatosOfflineUi(),
 ) {
     /** Número del icono: los rechazos si hay que actuar; si no, lo que falta por enviar. */
     val cantidadIndicador: Int
@@ -79,7 +90,12 @@ fun EstadoSincronizacionUiState.conEstado(
             // Un rechazo pesa más que lo pendiente; si no hay, se muestra lo primero que se enviará.
             val fila = filasPosicion.firstOrNull { it.estado == EstadoFilaSincronizacion.CON_ERROR }
                 ?: filasPosicion.first()
-            AvisoLlantaUi(fila.tipo, fila.estado == EstadoFilaSincronizacion.CON_ERROR, fila.mensaje)
+            AvisoLlantaUi(
+                tipo = fila.tipo,
+                conError = fila.estado == EstadoFilaSincronizacion.CON_ERROR,
+                mensaje = fila.mensaje,
+                filas = filasPosicion
+            )
         },
         // Si la operación por descartar ya no existe (se envió o se descartó), se cierra el diálogo.
         porDescartar = porDescartar?.takeIf { pendiente -> filas.any { it.id == pendiente.id } }

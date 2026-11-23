@@ -72,7 +72,7 @@ import com.rfz.appflotal.presentation.ui.inicio.ui.PaymentPlanType
 import com.rfz.appflotal.domain.sincronizacion.BloqueoInspeccion
 import com.rfz.appflotal.presentation.ui.monitor.component.MonitorMenuButton
 import com.rfz.appflotal.presentation.ui.monitor.component.MotivoBloqueoInspeccion
-import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.components.AvisoSincronizacionLlanta
+import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.components.IndicadorSincronizacionLlanta
 import com.rfz.appflotal.presentation.ui.monitor.sincronizacion.model.AvisoLlantaUi
 import com.rfz.appflotal.presentation.ui.monitor.viewmodel.MonitorTire
 import com.rfz.appflotal.data.model.tpms.SensorAlerts
@@ -177,6 +177,14 @@ fun PanelSensor(
                             modifier = Modifier.weight(1f)
                         )
 
+                        if (avisoSincronizacion != null) {
+                            IndicadorSincronizacionLlanta(
+                                posicion = wheel,
+                                aviso = avisoSincronizacion,
+                                onVerSincronizacion = onVerSincronizacion
+                            )
+                        }
+
                         BatteryAlertIcon(
                             batteryStatus = batteryStatus
                         )
@@ -200,14 +208,6 @@ fun PanelSensor(
                             .fillMaxWidth()
                             .padding(bottom = 8.dp)
                     )
-
-                    if (avisoSincronizacion != null) {
-                        AvisoSincronizacionLlanta(
-                            aviso = avisoSincronizacion,
-                            onVerDetalle = onVerSincronizacion,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
 
                     // weight(fill = false): solo si el contenido no cabe (p. ej. fuente del sistema muy grande)
                     // los datos ceden espacio y hacen scroll, para que los botones no se recorten

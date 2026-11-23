@@ -13,7 +13,7 @@ class ProcesarColaUseCaseTest {
 
     private val cola = FakeColaSincronizacion()
     private val montajes = FakeMontajes()
-    private val procesarCola = ProcesarColaUseCase(cola, montajes)
+    private val procesarCola = ProcesarColaUseCase(cola, montajes, FakeInventario())
 
     @Test
     fun invoke_colaVacia_completaSinReconciliar() = runBlocking {

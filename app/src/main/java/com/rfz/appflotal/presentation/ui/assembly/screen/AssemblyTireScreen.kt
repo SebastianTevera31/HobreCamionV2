@@ -100,6 +100,7 @@ fun AssemblyTireScreen(
         modifier = modifier,
         uiState = uiState.value,
         validateOdometer = { viewModel.validateOdometer(it) },
+        onRetry = { viewModel.loadDataList(positionTire) },
         updateTire = { viewModel.updateTireField(it) },
         onError = {
             // Si el servidor rechazó el montaje, se muestra el motivo que envió.
@@ -132,6 +133,7 @@ fun AssemblyTireView(
     updateTire: (Int?) -> Unit,
     onBack: () -> Unit,
     onError: suspend () -> Unit,
+    onRetry: () -> Unit = {},
     modifier: Modifier = Modifier,
     onAssembly: (odometer: String, idAxle: Int, idTire: Int) -> Unit
 ) {
@@ -206,7 +208,12 @@ fun AssemblyTireView(
     ) { innerPadding ->
         when (uiState.screenLoadStatus) {
             OperationStatus.Error -> {
-                ErrorView(modifier = Modifier.padding(innerPadding))
+                ErrorView(
+                    modifier = Modifier.padding(innerPadding),
+                    errorMessage = R.string.sinc_sin_datos_operar,
+                    showRetryButton = true,
+                    onRetry = onRetry
+                )
             }
 
             OperationStatus.Loading -> {

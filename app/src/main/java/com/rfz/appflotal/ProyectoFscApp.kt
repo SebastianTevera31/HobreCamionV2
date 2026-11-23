@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.rfz.appflotal.core.util.AppLocale
+import com.rfz.appflotal.data.worker.programarLimpiezaTramas
 import com.rfz.appflotal.data.worker.scheduleFollowedPromotionsWorker
 import com.rfz.appflotal.data.worker.scheduleMaintenanceNotificationsWorker
 import com.rfz.appflotal.data.worker.schedulePromotionsWorker
@@ -29,6 +30,7 @@ class ProyectoFscApp() : Application(), Configuration.Provider {
         scheduleFollowedPromotionsWorker(this)
         // Solo evalúa la base local; el catálogo se sincroniza al abrir el inicio (HomeViewModel).
         scheduleMaintenanceNotificationsWorker(this)
+        programarLimpiezaTramas(this)
     }
 
 
