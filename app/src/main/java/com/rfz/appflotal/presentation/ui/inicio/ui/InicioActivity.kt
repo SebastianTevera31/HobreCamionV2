@@ -28,10 +28,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
@@ -423,19 +420,11 @@ class InicioActivity : ComponentActivity() {
                                 }
                             }
 
-                            // HomeBottomBar ya aplica navigationBarsPadding(); se consume
-                            // ese inset aquí para que los Scaffold/NavigationBar de las
-                            // pantallas no lo vuelvan a sumar sobre la barra.
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .then(
-                                        if (showBottomBar) {
-                                            Modifier.consumeWindowInsets(WindowInsets.navigationBars)
-                                        } else {
-                                            Modifier
-                                        }
-                                    )
+                            // Barra inferior y teclado se descuentan una sola vez para todas las pantallas.
+                            AreaNavegacion(
+                                barraInferior = if (showBottomBar) {
+                                    { HomeBottomBar(selected = selectedNavItem, onItemClick = onBottomNavItemClick) }
+                                } else null
                             ) {
                                 NetworkConfig.imei =
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -648,13 +637,6 @@ class InicioActivity : ComponentActivity() {
                                         appStatusManagerRepository.clearPlanChangeEvent()
                                     },
                                     onCleanState = { appStatusManagerRepository.cleanNotificationsState() },
-                                )
-                            }
-
-                            if (showBottomBar && selectedNavItem != null) {
-                                HomeBottomBar(
-                                    selected = selectedNavItem,
-                                    onItemClick = onBottomNavItemClick
                                 )
                             }
                         }

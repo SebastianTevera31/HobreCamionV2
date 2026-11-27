@@ -23,7 +23,7 @@ import com.rfz.appflotal.presentation.ui.originaldesign.OriginalScreen
 import com.rfz.appflotal.presentation.ui.productoscreen.NuevoProductoScreen
 import com.rfz.appflotal.presentation.ui.productoscreen.ProductViewModel
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.NuevoRegistroLlantasScreen
-import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.screens.FormularioLlantaRoute
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.NuevoRegistroVehiculoScreen
 import com.rfz.appflotal.presentation.ui.registrovehiculosscreen.VehicleViewModel
 import com.rfz.appflotal.presentation.ui.retreatedesign.screens.RetreatedDesignScreen
@@ -103,10 +103,24 @@ fun NavGraphBuilder.catalogGraph(
     }
 
     composable(NavScreens.REGISTRO_LLANTAS) {
-        val nuevoRegistroLllantasViewModel: NuevoRegistroLlantasViewModel = hiltViewModel()
         NuevoRegistroLlantasScreen(
-            navController = navController,
-            viewModel = nuevoRegistroLllantasViewModel
+            onBackClick = { navController.popBackStackSafely() },
+            onNuevaLlanta = { navController.navigate(RutaFormularioLlanta()) },
+            onEditarLlanta = { idLlanta -> navController.navigate(RutaFormularioLlanta(idLlanta)) }
+        )
+    }
+
+    composable<RutaFormularioLlanta> { entry ->
+        FormularioLlantaRoute(
+            onBackClick = { navController.popBackStackSafely() },
+            onGuardada = {
+                // Es un evento, no un toque: se cierra aunque la pantalla no esté RESUMED.
+                if (navController.currentBackStackEntry?.id == entry.id) {
+                    navController.previousBackStackEntry?.savedStateHandle?.set(LLANTA_GUARDADA, true)
+                    navController.popBackStack()
+                }
+            },
+            onCrearProducto = { navController.navigate(NavScreens.NUEVO_PRODUCTO) }
         )
     }
 

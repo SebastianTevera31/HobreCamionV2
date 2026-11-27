@@ -1,13 +1,10 @@
 package com.rfz.appflotal.presentation.ui.registrollantasscreen.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,91 +17,79 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rfz.appflotal.R
-import com.rfz.appflotal.core.util.AppLocale
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
-import com.rfz.appflotal.presentation.navigation.popBackStackSafely
+import com.rfz.appflotal.presentation.theme.Dimens
 import com.rfz.appflotal.presentation.theme.HombreCamionTheme
-import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.AddItemDialog
-import com.rfz.appflotal.presentation.ui.commonscreens.listmanager.screen.ItemDialog
-import com.rfz.appflotal.presentation.ui.languaje.LocalizedApp
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.components.EstadoErrorCarga
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.components.EstadoListaVacia
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.components.EstadoSinResultados
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.components.TarjetaLlanta
+import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.EventoListaLlantas
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasUiState
 import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.NuevoRegistroLlantasViewModel
-import com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel.TireDialogState
-import com.rfz.appflotal.presentation.ui.utils.datePickerMillisToIsoDate
-import com.rfz.appflotal.presentation.ui.utils.isoDateToDatePickerMillis
 
 @Composable
 fun NuevoRegistroLlantasScreen(
-    navController: NavController,
+    onBackClick: () -> Unit,
+    onNuevaLlanta: () -> Unit,
+    onEditarLlanta: (Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: NuevoRegistroLlantasViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val mensajeGuardada = stringResource(R.string.rl_llanta_guardada)
 
-    LaunchedEffect(Unit) {
-        viewModel.loadData()
+    LaunchedEffect(viewModel) {
+        viewModel.eventos.collect { evento ->
+            when (evento) {
+                EventoListaLlantas.LlantaGuardada -> snackbarHostState.showSnackbar(mensajeGuardada)
+            }
+        }
     }
 
     NuevoRegistroLlantasContent(
         uiState = uiState,
-        onBackClick = { navController.popBackStackSafely() },
+        snackbarHostState = snackbarHostState,
+        onBackClick = onBackClick,
         onClearQuery = viewModel::onClearQuery,
         onSearchQueryChanged = viewModel::onSearchQueryChanged,
-        onAddNewTireClicked = viewModel::onAddNewTireClicked,
-        onEditTireClicked = viewModel::onEditTireClicked,
-        onDialogFieldChange = viewModel::onDialogFieldChange,
-        onSaveTire = viewModel::saveTire,
-        onDismissDialog = viewModel::onDismissDialog,
+        onNuevaLlanta = onNuevaLlanta,
+        onEditarLlanta = onEditarLlanta,
+        onReintentar = viewModel::onReintentar,
         modifier = modifier
     )
 }
@@ -116,15 +101,12 @@ fun NuevoRegistroLlantasContent(
     onBackClick: () -> Unit,
     onClearQuery: () -> Unit,
     onSearchQueryChanged: (String) -> Unit,
-    onAddNewTireClicked: () -> Unit,
-    onEditTireClicked: (TireListResponse) -> Unit,
+    onNuevaLlanta: () -> Unit,
+    onEditarLlanta: (Int) -> Unit,
+    onReintentar: () -> Unit,
     modifier: Modifier = Modifier,
-    onDialogFieldChange: (((TireDialogState) -> TireDialogState)) -> Unit = {},
-    onSaveTire: () -> Unit = {},
-    onDismissDialog: () -> Unit = {},
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-    val context = LocalContext.current
-
     Scaffold(
         topBar = {
             Column {
@@ -192,51 +174,37 @@ fun NuevoRegistroLlantasContent(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddNewTireClicked,
-                modifier = Modifier.shadow(elevation = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.agregar_llanta),
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+            ExtendedFloatingActionButton(
+                onClick = onNuevaLlanta,
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text(stringResource(R.string.agregar_llanta)) }
+            )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = modifier
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            if (uiState.isLoading && uiState.tires.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        val contenidoModifier = Modifier.padding(paddingValues)
+        when {
+            uiState.isLoading && uiState.tires.isEmpty() ->
+                Box(contenidoModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-            } else {
-                TireList(
-                    tires = uiState.displayedTires,
-                    onEdit = onEditTireClicked,
-                    modifier = Modifier
-                )
-            }
-        }
 
-        if (uiState.isDialogShown) {
-            TireDialog(
-                uiState = uiState,
-                onDialogFieldChange = onDialogFieldChange,
-                onSaveTire = onSaveTire,
-                onDismissDialog = onDismissDialog,
-                onShowMessage = {
-                    if (uiState.isSending) {
-                        uiState.errorMessage?.let {
-                            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                        }
-                    }
-                }
+            uiState.errorCarga && uiState.tires.isEmpty() -> EstadoErrorCarga(
+                mensaje = stringResource(R.string.rl_error_cargar_lista),
+                onReintentar = onReintentar,
+                modifier = contenidoModifier
+            )
+
+            uiState.tires.isEmpty() -> EstadoListaVacia(onRegistrar = onNuevaLlanta, modifier = contenidoModifier)
+
+            uiState.displayedTires.isEmpty() ->
+                EstadoSinResultados(busqueda = uiState.searchQuery, modifier = contenidoModifier)
+
+            else -> TireList(
+                tires = uiState.displayedTires,
+                onEditar = onEditarLlanta,
+                modifier = contenidoModifier
             )
         }
     }
@@ -273,7 +241,7 @@ private fun SearchBar(
         },
         placeholder = {
             Text(
-                "${stringResource(R.string.buscar)}...",
+                stringResource(R.string.rl_buscar_llantas),
                 color = Color.White
             )
         },
@@ -301,350 +269,29 @@ private fun SearchBar(
 @Composable
 private fun TireList(
     tires: List<TireListResponse>,
-    onEdit: (TireListResponse) -> Unit,
+    onEditar: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (tires.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.no_se_encontraron_llantas))
-        }
-    } else {
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = modifier.fillMaxSize()
-        ) {
-            items(tires) { tire ->
-                TireItem(tire = tire, onEdit = { onEdit(tire) })
-            }
-        }
-    }
-}
-
-@Composable
-private fun TireItem(tire: TireListResponse, onEdit: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(16.dp),
-                spotColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
-            ),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    // Espacio inferior para que el botón flotante no tape la última tarjeta.
+    LazyColumn(
+        contentPadding = PaddingValues(
+            start = Dimens.PaddingMedium,
+            end = Dimens.PaddingMedium,
+            top = Dimens.PaddingMedium,
+            bottom = 88.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(Dimens.ListItemSpacing),
+        modifier = modifier.fillMaxSize()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = tire.brand, style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(stringResource(R.string.modelo, tire.model), fontSize = 16.sp)
-                Text(stringResource(R.string.tama_o, tire.size), fontSize = 16.sp)
-                Text(stringResource(R.string.adquisici_n, tire.typeAcquisition), fontSize = 16.sp)
-                Text(stringResource(R.string.id, tire.idTire), fontSize = 12.sp)
-            }
-            IconButton(onClick = onEdit) {
-                Icon(
-                    Icons.Default.Edit,
-                    contentDescription = stringResource(R.string.editar_elemento)
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TireDialog(
-    uiState: NuevoRegistroLlantasUiState,
-    onDialogFieldChange: (((TireDialogState) -> TireDialogState)) -> Unit,
-    onSaveTire: () -> Unit,
-    onDismissDialog: () -> Unit,
-    onShowMessage: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val acquisitionType = uiState.dialogState.selectedAcquisitionType?.idAcquisitionType
-        ?: 0
-
-    val dotWarning =
-        if (uiState.dialogState.dot.trim().length > 10) stringResource(R.string.dot_excedio_caracteres) else ""
-
-    val tireNumber =
-        if (uiState.dialogState.tireNumber.trim().length > 15) stringResource(R.string.numero_llanta_excedio_caracteres) else ""
-
-    val currentLanguage = AppLocale.currentLocale.collectAsState().value.language
-    val canEditAcquisitionData = uiState.dialogState.canEditAcquisitionData
-    // Mientras llega la ficha no se edita nada: lo capturado se perdería al cargarla.
-    val canEditIdentification = !uiState.isLoadingDialogData
-    AddItemDialog(
-        title = if (uiState.isEditing) stringResource(R.string.editar_llanta) else stringResource(R.string.nueva_llanta),
-        content = {
-            LaunchedEffect(uiState.errorMessage) {
-                onShowMessage()
-            }
-
-            if (uiState.isEditing && !canEditAcquisitionData && !uiState.isLoadingDialogData) {
-                Text(
-                    text = stringResource(R.string.editar_llanta_datos_bloqueados),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            FieldSpinner(
-                label = stringResource(R.string.tipo_de_adquisici_n),
-                enabled = canEditAcquisitionData,
-                selectedValue = (if (currentLanguage == "es") uiState.dialogState.selectedAcquisitionType?.description
-                else uiState.dialogState.selectedAcquisitionType?.enDescription) ?: "",
-                values = uiState.acquisitionTypes.map {
-                    if (currentLanguage == "es") it.description
-                    else it.enDescription
-                },
-                onValueSelected = { selected ->
-                    onDialogFieldChange { state ->
-                        state.copy(selectedAcquisitionType = uiState.acquisitionTypes.find {
-                            (if (currentLanguage == "es") it.description
-                            else it.enDescription) == selected
-                        })
-                    }
-                }
+        items(tires, key = { it.idTire }) { tire ->
+            TarjetaLlanta(
+                marca = tire.brand,
+                modelo = tire.model,
+                medida = tire.size,
+                tipoAdquisicion = tire.typeAcquisition,
+                idLlanta = tire.idTire,
+                onClick = { onEditar(tire.idTire) }
             )
-
-            FieldSpinner(
-                label = stringResource(R.string.products),
-                enabled = canEditAcquisitionData,
-                selectedValue = uiState.dialogState.selectedProduct?.descriptionProduct
-                    ?: "",
-                values = uiState.products.map { it.descriptionProduct },
-                onValueSelected = { selected ->
-                    onDialogFieldChange {
-                        it.copy(
-                            selectedProduct = uiState.products.find { p ->
-                                p.descriptionProduct == selected
-                            },
-                            treadDepth = uiState.products.find { p ->
-                                p.descriptionProduct == selected
-                            }?.treadDepth.toString()
-                        )
-                    }
-                }
-            )
-
-            DatePickerField(
-                selectedDate = uiState.dialogState.acquisitionDate,
-                enabled = canEditAcquisitionData
-            ) { date ->
-                onDialogFieldChange {
-                    it.copy(
-                        acquisitionDate = date
-                    )
-                }
-            }
-
-            DialogTextField(
-                label = stringResource(R.string.folio_factura),
-                value = uiState.dialogState.folioFactura,
-                isEditable = canEditIdentification
-            ) { value -> onDialogFieldChange { it.copy(folioFactura = value) } }
-
-            DialogTextField(
-                label = stringResource(R.string.costo),
-                value = uiState.dialogState.cost,
-                keyboardType = KeyboardType.NumberPassword,
-                isEditable = canEditAcquisitionData
-            ) { value -> onDialogFieldChange { it.copy(cost = value.filter { c -> c.isDigit() || c == '.' }) } }
-
-            DialogTextField(
-                label = stringResource(R.string.profundidad),
-                value = uiState.dialogState.treadDepth,
-                keyboardType = KeyboardType.NumberPassword,
-                // Se precarga con la del producto y se ajusta por llanta (el backend la
-                // prioriza sobre inspección y modelo, así que no afecta a otras llantas).
-                isEditable = canEditAcquisitionData
-            ) { value -> onDialogFieldChange { it.copy(treadDepth = value.filter { c -> c.isDigit() }) } }
-
-            DialogTextField(
-                label = stringResource(R.string.numero_de_llanta),
-                value = uiState.dialogState.tireNumber,
-                isEditable = canEditIdentification,
-                warningMessage = tireNumber
-            ) { value -> onDialogFieldChange { it.copy(tireNumber = value) } }
-
-            DialogTextField(
-                label = stringResource(R.string.dot),
-                value = uiState.dialogState.dot,
-                isEditable = canEditIdentification,
-                warningMessage = dotWarning
-            ) { value -> onDialogFieldChange { it.copy(dot = value) } }
-        },
-        onConfirm = onSaveTire,
-        onDismiss = onDismissDialog,
-        isEntryValid = true,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun DialogTextField(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    isEditable: Boolean = true,
-    warningMessage: String = "",
-    keyboardType: KeyboardType = KeyboardType.Text,
-    onValueChange: (String) -> Unit,
-) {
-    Column {
-        ItemDialog(
-            label = label,
-            value = value,
-            isEmpty = false,
-            isEditable = isEditable,
-            onValueChange = onValueChange,
-            modifier = modifier,
-            keyboardType = keyboardType
-        )
-        if (warningMessage.isNotEmpty()) {
-            Text(
-                text = warningMessage,
-                color = Color.Red,
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FieldSpinner(
-    label: String,
-    selectedValue: String,
-    values: List<String>,
-    enabled: Boolean = true,
-    onValueSelected: (String) -> Unit
-) {
-    var isExpanded by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        ExposedDropdownMenuBox(
-            expanded = isExpanded && enabled,
-            onExpandedChange = { if (enabled) isExpanded = !isExpanded }
-        ) {
-            OutlinedTextField(
-                value = selectedValue,
-                onValueChange = {}, // No-op
-                readOnly = true,
-                enabled = enabled,
-                label = { Text(label) },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                shape = RoundedCornerShape(14.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.Gray
-                )
-            )
-            ExposedDropdownMenu(
-                expanded = isExpanded && enabled,
-                onDismissRequest = { isExpanded = false }
-            ) {
-                values.forEach { value ->
-                    DropdownMenuItem(
-                        text = { Text(value) },
-                        onClick = {
-                            onValueSelected(value)
-                            isExpanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DatePickerField(
-    selectedDate: String,
-    enabled: Boolean = true,
-    onDateSelected: (String) -> Unit,
-) {
-    var showDatePicker by remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
-
-    OutlinedTextField(
-        value = selectedDate.substringBefore('T'),
-        onValueChange = {}, // No-op
-        readOnly = true,
-        enabled = enabled,
-        label = { Text(stringResource(R.string.fecha_de_adquisicion)) },
-        trailingIcon = {
-            Icon(
-                imageVector = Icons.Default.DateRange,
-                contentDescription = stringResource(R.string.seleccionar_fecha),
-                modifier = Modifier.clickable(enabled = enabled) {
-                    showDatePicker = true
-                    focusManager.clearFocus()
-                }
-            )
-        },
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    )
-
-    if (showDatePicker && enabled) {
-        LocalizedApp {
-            // El DatePicker usa la medianoche UTC del día; convertirlo con la zona del
-            // dispositivo daba el día anterior (ver DatePickerDates).
-            val datePickerState = rememberDatePickerState(
-                initialSelectedDateMillis = isoDateToDatePickerMillis(selectedDate)
-            )
-            DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            datePickerState.selectedDateMillis?.let { millis ->
-                                onDateSelected(datePickerMillisToIsoDate(millis))
-                            }
-                            showDatePicker = false
-                        }
-                    ) {
-                        Text(stringResource(R.string.guardar))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        showDatePicker = false
-                    }) {
-                        Text(stringResource(R.string.cancelar))
-                    }
-                }
-            ) {
-                DatePicker(state = datePickerState)
-            }
         }
     }
 }
@@ -692,23 +339,19 @@ fun NuevoRegistroLlantasScreenPreview() {
             typeVehicle = "Camión"
         )
     )
-    val sampleUiState = NuevoRegistroLlantasUiState(
-        tires = sampleTires,
-        displayedTires = sampleTires,
-        isLoading = false
-    )
-
     HombreCamionTheme {
         NuevoRegistroLlantasContent(
-            uiState = sampleUiState,
+            uiState = NuevoRegistroLlantasUiState(
+                tires = sampleTires,
+                displayedTires = sampleTires,
+                isLoading = false
+            ),
             onBackClick = {},
             onClearQuery = {},
             onSearchQueryChanged = {},
-            onAddNewTireClicked = {},
-            onEditTireClicked = {},
-            onDialogFieldChange = {},
-            onSaveTire = {},
-            onDismissDialog = {}
+            onNuevaLlanta = {},
+            onEditarLlanta = {},
+            onReintentar = {}
         )
     }
 }

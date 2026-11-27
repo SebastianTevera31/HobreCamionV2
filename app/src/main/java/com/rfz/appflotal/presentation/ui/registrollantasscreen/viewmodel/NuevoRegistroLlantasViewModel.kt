@@ -1,330 +1,91 @@
 package com.rfz.appflotal.presentation.ui.registrollantasscreen.viewmodel
 
-import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rfz.appflotal.R
-import com.rfz.appflotal.data.model.acquisitiontype.response.AcquisitionTypeResponse
-import com.rfz.appflotal.data.model.product.response.ProductResponse
-import com.rfz.appflotal.data.model.tire.dto.TireCrudDto
-import com.rfz.appflotal.data.model.tire.response.TireIdResponse
 import com.rfz.appflotal.data.model.tire.response.TireListResponse
-import com.rfz.appflotal.domain.acquisitiontype.AcquisitionTypeUseCase
-import com.rfz.appflotal.domain.database.GetTasksUseCase
-import com.rfz.appflotal.domain.product.ProductListUseCase
-import com.rfz.appflotal.domain.tire.TireCrudUseCase
-import com.rfz.appflotal.domain.tire.TireEditPolicy
-import com.rfz.appflotal.domain.tire.TireGetUseCase
 import com.rfz.appflotal.domain.tire.TireListUsecase
+import com.rfz.appflotal.presentation.navigation.LLANTA_GUARDADA
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class NuevoRegistroLlantasUiState(
     val tires: List<TireListResponse> = emptyList(),
     val displayedTires: List<TireListResponse> = emptyList(),
     val isLoading: Boolean = true,
-    val errorMessage: String? = null,
+    val errorCarga: Boolean = false,
     val searchQuery: String = "",
-    val isDialogShown: Boolean = false,
-    val isEditing: Boolean = false,
-    val isSending: Boolean = false,
-    val isLoadingDialogData: Boolean = false,
-    // Combo box lists
-    val acquisitionTypes: List<AcquisitionTypeResponse> = emptyList(),
-    val products: List<ProductResponse> = emptyList(),
-    // Dialog fields state
-    val dialogState: TireDialogState = TireDialogState()
 )
 
-data class TireDialogState(
-    val id: Int = 0,
-    val selectedAcquisitionType: AcquisitionTypeResponse? = null,
-    val selectedProduct: ProductResponse? = null,
-    val acquisitionDate: String = "",
-    val cost: String = "",
-    val folioFactura: String = "",
-    val treadDepth: String = "",
-    val tireNumber: String = "",
-    val dot: String = "",
-    /** Ficha original de la llanta en edición: conserva los campos que el diálogo no edita. */
-    val originalTire: TireIdResponse? = null,
-    /**
-     * Tipo de adquisición, producto, fecha, costo y profundidad editables (ver [TireEditPolicy]).
-     * Siempre true en el alta.
-     */
-    val canEditAcquisitionData: Boolean = true,
-)
+sealed interface EventoListaLlantas {
+    data object LlantaGuardada : EventoListaLlantas
+}
 
 @HiltViewModel
 class NuevoRegistroLlantasViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val tireListUsecase: TireListUsecase,
-    private val tireGetUseCase: TireGetUseCase,
-    private val tireCrudUseCase: TireCrudUseCase,
-    private val acquisitionTypeUseCase: AcquisitionTypeUseCase,
-    private val productListUseCase: ProductListUseCase,
-    private val getTasksUseCase: GetTasksUseCase,
-    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NuevoRegistroLlantasUiState())
     val uiState: StateFlow<NuevoRegistroLlantasUiState> = _uiState.asStateFlow()
 
-    private var token: String? = null
+    private val _eventos = Channel<EventoListaLlantas>(Channel.BUFFERED)
+    val eventos: Flow<EventoListaLlantas> = _eventos.receiveAsFlow()
 
-    /** El usuario no ha completado el Wizard (passWizard = false). */
-    private var isWizardActive: Boolean = false
-
-    /** Carga de catálogos; la edición la espera para poder seleccionar tipo y producto. */
-    private var comboJob: Job? = null
-
-    fun loadData() {
+    init {
+        loadTires()
+        // El formulario deja la bandera en esta entrada de navegación al guardar.
         viewModelScope.launch {
-            val user = getTasksUseCase().first().firstOrNull()
-            token = user?.fld_token
-            isWizardActive = user?.passWizard == false
-            loadTires()
-            comboJob = loadComboData()
+            savedStateHandle.getStateFlow(LLANTA_GUARDADA, false).filter { it }.collect {
+                savedStateHandle[LLANTA_GUARDADA] = false
+                _eventos.send(EventoListaLlantas.LlantaGuardada)
+                loadTires()
+            }
         }
     }
+
+    fun onReintentar() = loadTires()
 
     fun onSearchQueryChanged(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
         applyFilter()
     }
 
-    fun onClearQuery() {
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
-                searchQuery = "",
-                displayedTires = currentUiState.tires
-            )
-        }
-    }
-
-    fun onAddNewTireClicked() {
-        _uiState.update {
-            it.copy(
-                isDialogShown = true,
-                isEditing = false,
-                dialogState = TireDialogState(acquisitionDate = LocalDateTime.now().toString())
-            )
-        }
-    }
-
-    fun onEditTireClicked(tire: TireListResponse) {
-        _uiState.update {
-            it.copy(
-                isDialogShown = true,
-                isEditing = true,
-                // Bloqueado hasta conocer la ficha para no mostrar campos editables de más.
-                dialogState = TireDialogState(canEditAcquisitionData = false)
-            )
-        }
-        loadTireDetails(tire.idTire)
-    }
-
-    fun onDismissDialog() {
-        _uiState.update { it.copy(isDialogShown = false) }
-    }
-
-    fun onDialogFieldChange(update: (TireDialogState) -> TireDialogState) {
-        _uiState.update { it.copy(dialogState = update(it.dialogState)) }
-    }
-
-    fun saveTire() {
-        _uiState.update { it.copy(isSending = true) }
-
-        val currentState = _uiState.value.dialogState
-        // Datos de adquisición bloqueados: se reenvían los de la ficha original sin validarlos.
-        val lockedTire = currentState.originalTire
-            ?.takeIf { _uiState.value.isEditing && !currentState.canEditAcquisitionData }
-        if (_uiState.value.isEditing && !currentState.canEditAcquisitionData && lockedTire == null) {
-            // La ficha aún no carga (o falló): no se envía nada para no pisar datos.
-            _uiState.update { it.copy(isSending = false) }
-            return
-        }
-
-        if (isDialogStateInvalid(currentState, lockedTire != null)) {
-            _uiState.update { it.copy(errorMessage = context.getString(R.string.Campos_requeridos_por_completar)) }
-            return
-        }
-
-        val treadDepthValue = lockedTire?.treadDepth
-            ?: _uiState.value.dialogState.treadDepth.trim().toDoubleOrNull()
-        val costValue = lockedTire?.unitCost?.toDouble()
-            ?: _uiState.value.dialogState.cost.trim().toDoubleOrNull()
-
-        if (lockedTire == null &&
-            (treadDepthValue == null || costValue == null || treadDepthValue <= 0 || costValue <= 0)
-        ) {
-            _uiState.update { it.copy(errorMessage = context.getString(R.string.error_solo_numeros_profunidad_costo)) }
-            return
-        }
-
-        if (_uiState.value.dialogState.dot.trim().length > 10) {
-            _uiState.update { it.copy(errorMessage = context.getString(R.string.dot_excedio_caracteres)) }
-            return
-        }
-
-        if (_uiState.value.dialogState.tireNumber.trim().length > 15) {
-            _uiState.update { it.copy(errorMessage = context.getString(R.string.numero_llanta_excedio_caracteres)) }
-            return
-        }
-
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            val bearerToken = "Bearer ${token ?: ""}"
-            val tireDto = TireCrudDto(
-                idTire = if (_uiState.value.isEditing) currentState.id else 0,
-                typeAcquisitionId = lockedTire?.typeAcquisitionId
-                    ?: currentState.selectedAcquisitionType!!.idAcquisitionType,
-                providerId = 0,
-                productId = lockedTire?.productId ?: currentState.selectedProduct!!.idProduct,
-                acquisitionDate = lockedTire?.acquisitionDate
-                    ?: formatAcquisitionDate(currentState.acquisitionDate),
-                document = currentState.folioFactura,
-                unitCost = costValue?.toInt() ?: 0,
-                dot = currentState.dot,
-                tireNumber = currentState.tireNumber,
-                treadDepth = treadDepthValue ?: 0.0,
-                registrationDate = LocalDateTime.now().toString(),
-                isActive = true,
-                retreadDesignId = 0,
-                destination = 2,
-                lifecycle = 0,
-            )
-
-            try {
-                val result = tireCrudUseCase(bearerToken, tireDto)
-                if (result.isSuccess) {
-                    onDismissDialog()
-                    loadTires()
-                } else {
-                    _uiState.update { it.copy(errorMessage = result.exceptionOrNull()?.message) }
-                }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message) }
-            } finally {
-                _uiState.update { it.copy(isLoading = false) }
-                _uiState.update { it.copy(isSending = false) }
-            }
-        }
-    }
+    fun onClearQuery() = onSearchQueryChanged("")
 
     private fun loadTires() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            try {
-                val result = tireListUsecase()
-                if (result.isSuccess) {
-                    val tires = result.getOrNull() ?: emptyList()
-                    _uiState.update { it.copy(tires = tires, displayedTires = tires) }
-                } else {
-                    _uiState.update { it.copy(errorMessage = result.exceptionOrNull()?.message) }
-                }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message) }
-            } finally {
-                _uiState.update { it.copy(isLoading = false) }
+            _uiState.update { it.copy(isLoading = true, errorCarga = false) }
+            val result = runCatching { tireListUsecase().getOrThrow() }
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    tires = result.getOrNull() ?: it.tires,
+                    errorCarga = result.isFailure,
+                )
             }
-        }
-    }
-
-    private fun loadComboData(): Job =
-        viewModelScope.launch {
-            val bearerToken = "Bearer ${token ?: ""}"
-            try {
-                val acqTypes = acquisitionTypeUseCase(bearerToken).getOrNull()
-                val products = productListUseCase(bearerToken).getOrNull() ?: emptyList()
-
-                _uiState.update {
-                    it.copy(
-                        acquisitionTypes = acqTypes ?: emptyList(),
-                        products = products
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = "Error cargando datos de combos: ${e.message}") }
-            }
-        }
-
-    private fun loadTireDetails(tireId: Int) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingDialogData = true) }
-            try {
-                comboJob?.join()
-                val result = tireGetUseCase(tireId)
-                if (result.isSuccess) {
-                    result.getOrNull()?.firstOrNull()?.let { details ->
-                        _uiState.update {
-                            it.copy(
-                                dialogState = TireDialogState(
-                                    id = details.idTire,
-                                    selectedAcquisitionType = it.acquisitionTypes.find { type -> type.idAcquisitionType == details.typeAcquisitionId },
-                                    selectedProduct = it.products.find { p -> p.idProduct == details.productId },
-                                    acquisitionDate = details.acquisitionDate,
-                                    cost = details.unitCost.toString(),
-                                    treadDepth = details.treadDepth.toString(),
-                                    tireNumber = details.tireNumber,
-                                    dot = details.dot,
-                                    folioFactura = details.document,
-                                    originalTire = details,
-                                    canEditAcquisitionData = TireEditPolicy.canEditAcquisitionData(
-                                        isWizardActive = isWizardActive,
-                                        hasInspection = details.hasInspection
-                                    )
-                                )
-                            )
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = "Error cargando detalles: ${e.message}") }
-            } finally {
-                _uiState.update { it.copy(isLoadingDialogData = false) }
-            }
+            applyFilter()
         }
     }
 
     private fun applyFilter() {
-        val state = _uiState.value
-        val filtered = if (state.searchQuery.isBlank()) {
-            state.tires
-        } else {
-            state.tires.filter { tire ->
-                tire.typeAcquisition.contains(state.searchQuery, ignoreCase = true) ||
-                        tire.brand.contains(state.searchQuery, ignoreCase = true)
-            }
-        }
-        _uiState.update { it.copy(displayedTires = filtered) }
-    }
-
-    private fun isDialogStateInvalid(
-        state: TireDialogState,
-        isAcquisitionLocked: Boolean
-    ): Boolean {
-        if (state.tireNumber.isBlank()) return true
-        if (isAcquisitionLocked) return false
-        return state.selectedAcquisitionType == null || state.selectedProduct == null ||
-                state.acquisitionDate.isBlank() || state.cost.isBlank()
-    }
-
-    private fun formatAcquisitionDate(date: String): String {
-        return try {
-            val dateOnly = LocalDate.parse(date.substringBefore('T'), DateTimeFormatter.ISO_DATE)
-            dateOnly.atStartOfDay().toString()
-        } catch (_: Exception) {
-            LocalDateTime.now().toString()
+        val query = _uiState.value.searchQuery.trim()
+        _uiState.update { state ->
+            state.copy(
+                displayedTires = if (query.isEmpty()) state.tires else state.tires.filter { tire ->
+                    listOf(tire.brand, tire.model, tire.size, tire.typeAcquisition, tire.idTire.toString())
+                        .any { it.contains(query, ignoreCase = true) }
+                }
+            )
         }
     }
 }
